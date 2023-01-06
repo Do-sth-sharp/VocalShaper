@@ -56,3 +56,7 @@ cmake-build-*/**
 
 # Resources
 *.aps
+
+# Directory Links
+app/RemixIcon/**
+app/lua/luce/**

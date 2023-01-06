@@ -1,3 +1,6 @@
 [submodule "LUCE-cpp"]
 	path = LUCE-cpp
 	url = https://github.com/FangCunWuChang/LUCE-cpp.git
+[submodule "RemixIcon"]
+	path = RemixIcon
+	url = https://github.com/Remix-Design/RemixIcon.git
