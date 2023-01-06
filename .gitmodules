@@ -1,0 +1,3 @@
+[submodule "LUCE-cpp"]
+	path = LUCE-cpp
+	url = https://github.com/FangCunWuChang/LUCE-cpp.git

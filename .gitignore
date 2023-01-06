@@ -1,0 +1,58 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# MSVC temps
+*.exp
+*.ilk
+*.pdb
+*.manifest
+*.ipdb
+*.iobj
+
+# GCC/CLang temps
+*.s
+*.i
+
+# Others
+.vs/**
+.vscode/**
+.idea/**
+
+# Build caches
+[Oo]ut/**
+[Bb]uild/**
+[Ii]nstall/**
+cmake-build-*/**
+
+# Resources
+*.aps
