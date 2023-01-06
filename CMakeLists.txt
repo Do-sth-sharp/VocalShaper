@@ -16,7 +16,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")#MSVCä
 
 add_subdirectory (LUCE-cpp)
 
-file (GLOB_RECURSE VOCALSHAPER_SRC "./src/*.cpp")
+file (GLOB_RECURSE VOCALSHAPER_SRC "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC})
 target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1")
 target_link_libraries (VocalShaper PRIVATE libLUCE)
