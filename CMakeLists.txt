@@ -23,16 +23,3 @@ target_link_libraries (VocalShaper PRIVATE libLUCE)
 add_dependencies (VocalShaper libLUCE)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
-
-add_custom_command (TARGET VocalShaper POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:libJUCE> $<TARGET_FILE_DIR:VocalShaper>
-)
-add_custom_command (TARGET VocalShaper POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:libLua> $<TARGET_FILE_DIR:VocalShaper>
-)
-add_custom_command (TARGET VocalShaper POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    $<TARGET_FILE:libLUCE> $<TARGET_FILE_DIR:VocalShaper>
-)

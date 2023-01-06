@@ -13,6 +13,8 @@ luce.initialise = function(commandLineParameters)
 	luce.FlowStyle.setButtonAdsorbTopIcon("./RemixIcon/Design/layout-top-2-line.svg")
 	luce.FlowStyle.setButtonAdsorbBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg")
 
+	luce.FlowWindow.setIcon("./rc/logo.png")
+
 	local mainWindow = luce.FlowWindow.new()
 end
 
