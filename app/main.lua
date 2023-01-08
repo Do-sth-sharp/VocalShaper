@@ -8,8 +8,10 @@ luce.initialise = function(commandLineParameters)
 	ui = require("ui.themes." .. conf.theme)
 
 	require("ui.FlowStyle")
-
 	updateFlowColor()
+
+	require("ui.MenuStyle")
+	updateMenuColor()
 
 	luce.Desktop.getInstance():getDefaultLookAndFeel():setColour(
 			luce.ResizableWindow.ColourIds.backgroundColourId, ui.color.themeColorB2)
