@@ -1,0 +1,3 @@
+﻿return {
+	theme = "Colorful"
+}
