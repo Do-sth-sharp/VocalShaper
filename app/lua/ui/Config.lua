@@ -1,3 +1,4 @@
 ﻿return {
-	theme = "Colorful"
+	theme = "Colorful",
+	layout = "Default"
 }

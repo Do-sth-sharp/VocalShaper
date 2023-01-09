@@ -29,15 +29,20 @@ luce.initialise = function(commandLineParameters)
 
 	luce.FlowWindow.setIcon("./rc/logo.png")
 
-	local mainWindow = luce.FlowWindow.new()
-	mainWindow:setFullScreen(true)
+	startMenu = luce.FlowComponent.new("StartMenu")
+	toolBar = luce.FlowComponent.new("ToolBar")
+	resourceView = luce.FlowComponent.new("Resource")
+	patternView = luce.FlowComponent.new("Pattern")
+	trackView = luce.FlowComponent.new("Track")
 
-	comp1 = luce.FlowComponent.new("comp1")
-	mainWindow:openComponent(comp1)
-	comp2 = luce.FlowComponent.new("comp2")
-	mainWindow:openComponent(comp2)
-	comp3 = luce.FlowComponent.new("comp3")
-	mainWindow:openComponent(comp3)
+	autoLayout("./ui/layouts/" .. conf.layout .. ".json",
+		toolBar, resourceView, patternView, trackView)
+
+	local windowNum = luce.FlowWindow.getWindowNum()
+	if windowNum > 0 then
+		local mainWindow = luce.FlowWindow.getWindow(0)
+		mainWindow:setFullScreen(true)
+	end
 end
 
 luce.shutdown = function()

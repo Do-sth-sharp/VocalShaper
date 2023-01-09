@@ -14,3 +14,8 @@
 	luce.FlowStyle.setButtonIconBackgroundColor(ui.color.themeColorD4)
 	luce.FlowStyle.setAdsorbColor(ui.color.themeColorE3)
 end
+
+function autoLayout(filePath, ...)
+	local list = {...}
+	luce.FlowWindow.autoLayout(filePath, list)
+end

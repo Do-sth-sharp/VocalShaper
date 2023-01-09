@@ -1,0 +1,3 @@
+﻿StartMenu = {}
+
+return StartMenu

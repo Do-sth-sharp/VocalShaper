@@ -1,0 +1,30 @@
+﻿{
+	"window": [
+		{
+			"grid": {
+				"vertical": true,
+				"size": [ 0.1, 0.9 ],
+				"unit": [
+					{
+						"vertical": false,
+						"id": [ 0 ]
+					},
+					{
+						"vertical": false,
+						"size": [ 0.2, 0.8 ],
+						"unit": [
+							{
+								"vertical": false,
+								"id": [ 1, 2 ]
+							},
+							{
+								"vertical": true,
+								"id": [ 3 ]
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}
