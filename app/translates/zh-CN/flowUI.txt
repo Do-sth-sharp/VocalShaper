@@ -1,0 +1,11 @@
+﻿language: Chinese
+countries: cn
+ 
+"Window" = "窗口"
+
+"Release" = "释放"
+"Release Container" = "释放容器"
+"Vertical" = "垂直"
+"Windows" = "窗口"
+
+"New Window" = "新窗口"

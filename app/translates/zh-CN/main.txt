@@ -1,0 +1,8 @@
+﻿language: Chinese
+countries: cn
+ 
+"StartMenu" = "开始菜单"
+"ToolBar" = "工具栏"
+"Resource" = "资源"
+"Pattern" = "样式"
+"Track" = "轨道"

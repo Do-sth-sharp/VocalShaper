@@ -29,13 +29,17 @@ luce.initialise = function(commandLineParameters)
 
 	luce.FlowWindow.setIcon("./rc/logo.png")
 
+	luce.LocalisedStrings.loadData("./translates/" .. conf.language .. "/")
+	luce.Desktop.getInstance():getDefaultLookAndFeel():setDefaultSansSerifTypeface(
+		"./fonts/" .. conf.font .. ".ttf")
+
 	startMenu = luce.FlowComponent.new("StartMenu")
 	toolBar = luce.FlowComponent.new("ToolBar")
 	resourceView = luce.FlowComponent.new("Resource")
 	patternView = luce.FlowComponent.new("Pattern")
 	trackView = luce.FlowComponent.new("Track")
 
-	autoLayout("./ui/layouts/" .. conf.layout .. ".json",
+	autoLayout("./layouts/" .. conf.layout .. ".json",
 		toolBar, resourceView, patternView, trackView)
 
 	local windowNum = luce.FlowWindow.getWindowNum()
