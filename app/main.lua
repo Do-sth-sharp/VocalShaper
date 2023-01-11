@@ -1,6 +1,7 @@
 ﻿require "luce.Debug"
 require "luce.Colours"
 require "luce.FlowComponent"
+require "luce.FlowWindow"
 require "luce.ResizableWindow"
 
 luce.initialise = function(commandLineParameters)
@@ -39,7 +40,7 @@ luce.initialise = function(commandLineParameters)
 	patternView = luce.FlowComponent.new("Pattern")
 	trackView = luce.FlowComponent.new("Track")
 
-	autoLayout("./layouts/" .. conf.layout .. ".json",
+	luce.FlowWindow.layout("./layouts/" .. conf.layout .. ".json",
 		toolBar, resourceView, patternView, trackView)
 
 	local windowNum = luce.FlowWindow.getWindowNum()
