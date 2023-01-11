@@ -29,6 +29,7 @@ luce.initialise = function(commandLineParameters)
 	luce.FlowStyle.setButtonAdsorbBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg")
 
 	luce.FlowWindow.setIcon("./rc/logo.png")
+	luce.FlowWindow.setOpenGL(true)
 
 	luce.LocalisedStrings.loadData("./translates/" .. conf.language .. "/")
 	luce.Desktop.getInstance():getDefaultLookAndFeel():setDefaultSansSerifTypeface(
