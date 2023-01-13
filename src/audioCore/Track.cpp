@@ -9,7 +9,7 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->setChannelLayoutOfBus(true, 0, type);
 	this->setChannelLayoutOfBus(false, 0, type);
 
-	/** The main audio io node of the track */
+	/** The Main Audio IO Node Of The Track */
 	this->audioInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode));

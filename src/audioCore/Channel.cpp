@@ -6,7 +6,7 @@ Channel::Channel(const juce::AudioChannelSet& type)
 	this->setChannelLayoutOfBus(true, 0, type);
 	this->setChannelLayoutOfBus(false, 0, type);
 
-	/** The main midi io node of the channel */
+	/** The Main MIDI IO Node Of The Channel */
 	this->midiInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
@@ -14,7 +14,7 @@ Channel::Channel(const juce::AudioChannelSet& type)
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
-	/** The main audio io node of the channel */
+	/** The Main Audio Output Node Of The Channel */
 	this->audioOutputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode));

@@ -1,7 +1,7 @@
 ﻿#include "Mixer.h"
 
 Mixer::Mixer() {
-	/** The main audio io node of the mixer */
+	/** The Main Audio IO Node Of The Mixer */
 	this->audioInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode));
