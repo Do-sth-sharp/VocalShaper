@@ -16,8 +16,13 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->audioOutputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode));
-}
 
+	/** The Main MIDI Input Node Of The Track */
+	this->midiInputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
+}
+                                  
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Prepare Gain And Panner */
 	this->gainAndPanner.prepare(juce::dsp::ProcessSpec(

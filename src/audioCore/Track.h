@@ -9,6 +9,7 @@ public:
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
+	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 	juce::AudioChannelSet audioChannels;
 
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Panner<float>> gainAndPanner;
