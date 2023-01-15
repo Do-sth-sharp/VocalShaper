@@ -15,7 +15,7 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 	juce::AudioChannelSet audioChannels;
 
-	juce::Array<juce::AudioProcessorGraph::Node::Ptr> pluginList;
+	juce::Array<juce::AudioProcessorGraph::Node::Ptr> pluginNodeList;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDock)
 };

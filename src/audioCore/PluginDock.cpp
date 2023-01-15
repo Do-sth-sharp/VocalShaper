@@ -19,7 +19,7 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
 
-	/** Link The Audio Input And Output Node */
+	/** Connect The Audio Input And Output Node */
 	int mainBusChannels = this->getMainBusNumInputChannels();
 	for (int i = 0; i < mainBusChannels; i++) {
 		this->addConnection(
@@ -31,27 +31,26 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
 	if (ptrNode) {
+		/** Limit Index */
+		if (index < 0 || index > this->pluginNodeList.size()) {
+			index = this->pluginNodeList.size();
+		}
+
 		/** Connect Node To The Audio Bus */
 		{
 			/** Find Hot Spot Nodes */
 			juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
-			if (index >= 0 && index <= this->pluginList.size()) {
-				if (index == 0) {
-					lastNode = this->audioInputNode;
-				}
-				else {
-					lastNode = this->pluginList.getUnchecked(index - 1);
-				}
-				if (index == this->pluginList.size()) {
-					nextNode = this->audioOutputNode;
-				}
-				else {
-					nextNode = this->pluginList.getUnchecked(index);
-				}
+			if (index == 0) {
+				lastNode = this->audioInputNode;
 			}
 			else {
-				lastNode = (this->pluginList.size() > 0) ? this->pluginList.getLast() : this->audioInputNode;
+				lastNode = this->pluginNodeList.getUnchecked(index - 1);
+			}
+			if (index == this->pluginNodeList.size()) {
 				nextNode = this->audioOutputNode;
+			}
+			else {
+				nextNode = this->pluginNodeList.getUnchecked(index);
 			}
 
 			/** Get Main Bus */
@@ -77,12 +76,7 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 			{ {this->midiInputNode->nodeID, this->midiChannelIndex},{ptrNode->nodeID, this->midiChannelIndex} });
 
 		/** Add Node To The Plugin List */
-		if (index >= 0 && index <= this->pluginList.size()) {
-			this->pluginList.insert(index, ptrNode);
-		}
-		else {
-			this->pluginList.add(ptrNode);
-		}
+		this->pluginNodeList.insert(index, ptrNode);
 	}
 	else {
 		jassertfalse;
@@ -90,10 +84,11 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 }
 
 void PluginDock::removePlugin(int index) {
-	if (index < 0 || index >= this->pluginList.size()) { return; }
+	/** Limit Index */
+	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
 
 	/** Get The Node Ptr Then Remove From The List */
-	auto ptrNode = this->pluginList.removeAndReturn(index);
+	auto ptrNode = this->pluginNodeList.removeAndReturn(index);
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
@@ -106,13 +101,13 @@ void PluginDock::removePlugin(int index) {
 			lastNode = this->audioInputNode;
 		}
 		else {
-			lastNode = this->pluginList.getUnchecked(index - 1);
+			lastNode = this->pluginNodeList.getUnchecked(index - 1);
 		}
-		if (index == this->pluginList.size()) {
+		if (index == this->pluginNodeList.size()) {
 			nextNode = this->audioOutputNode;
 		}
 		else {
-			nextNode = this->pluginList.getUnchecked(index);
+			nextNode = this->pluginNodeList.getUnchecked(index);
 		}
 
 		/** Get Main Bus */

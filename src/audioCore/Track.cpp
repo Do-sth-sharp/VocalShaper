@@ -1,4 +1,5 @@
 ﻿#include "Track.h"
+#include "PluginDock.h"
 
 /** To Fix Symbol Export Error Of juce::dsp::Panner<float> */
 #include <juce_dsp/processors/juce_Panner.cpp>
@@ -21,11 +22,31 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->midiInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
+
+	/** The Plugin Dock Node Of The Track */
+	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(type));
+
+	/** Connect Plugin Dock Node To IO Node */
+	int mainBusChannels = this->getMainBusNumInputChannels();
+	for (int i = 0; i < mainBusChannels; i++) {
+		this->addConnection(
+			{ {this->audioInputNode->nodeID, i},{this->pluginDockNode->nodeID, i} });
+		this->addConnection(
+			{ {this->pluginDockNode->nodeID, i},{this->audioOutputNode->nodeID, i} });
+	}
+	this->addConnection(
+		{ {this->midiInputNode->nodeID, this->midiChannelIndex},{this->pluginDockNode->nodeID, this->midiChannelIndex} });
 }
                                   
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Prepare Gain And Panner */
 	this->gainAndPanner.prepare(juce::dsp::ProcessSpec(
+		sampleRate, maximumExpectedSamplesPerBlock,
+		this->getMainBusNumInputChannels()
+	));
+
+	/** Prepare Slider */
+	this->slider.prepare(juce::dsp::ProcessSpec(
 		sampleRate, maximumExpectedSamplesPerBlock,
 		this->getMainBusNumInputChannels()
 	));
@@ -42,4 +63,12 @@ void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& mid
 
 	/** Process Current Graph */
 	this->AudioProcessorGraph::processBlock(buffer, midiMessages);
+
+	/** Process Mute */
+	if (this->isMute) {
+		block.fill(0);
+	}
+
+	/** Process Slider */
+	this->slider.process(juce::dsp::ProcessContextReplacing<float>(block));
 }

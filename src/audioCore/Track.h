@@ -12,7 +12,11 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 	juce::AudioChannelSet audioChannels;
 
+	juce::AudioProcessorGraph::Node::Ptr pluginDockNode;
+
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Panner<float>> gainAndPanner;
+	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> slider;
+	bool isMute = false;
 
 private:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
