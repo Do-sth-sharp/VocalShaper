@@ -7,6 +7,7 @@ public:
 	AudioCore();
 
 private:
+	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
 	juce::AudioProcessorGraph::Node::Ptr sequencer;
 	juce::AudioProcessorGraph::Node::Ptr mixer;

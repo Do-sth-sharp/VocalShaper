@@ -23,7 +23,7 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 	int mainBusChannels = this->getMainBusNumInputChannels();
 	for (int i = 0; i < mainBusChannels; i++) {
 		this->addConnection(
-			{ {this->audioInputNode->nodeID, i},{this->audioOutputNode->nodeID, i} });
+			{ {this->audioInputNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
 	}
 }
 
@@ -59,21 +59,21 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 			/** Remove Connection Between Hot Spot Nodes */
 			for (int i = 0; i < mainBusChannels; i++) {
 				this->removeConnection(
-					{ {lastNode->nodeID, i},{nextNode->nodeID, i} });
+					{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
 			}
 
 			/** Add Connection To Hot Spot Nodes */
 			for (int i = 0; i < mainBusChannels; i++) {
 				this->addConnection(
-					{ {lastNode->nodeID, i},{ptrNode->nodeID, i} });
+					{ {lastNode->nodeID, i}, {ptrNode->nodeID, i} });
 				this->addConnection(
-					{ {ptrNode->nodeID, i},{nextNode->nodeID, i} });
+					{ {ptrNode->nodeID, i}, {nextNode->nodeID, i} });
 			}
 		}
 
 		/** Connect Node To MIDI Input */
 		this->addConnection(
-			{ {this->midiInputNode->nodeID, this->midiChannelIndex},{ptrNode->nodeID, this->midiChannelIndex} });
+			{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptrNode->nodeID, this->midiChannelIndex} });
 
 		/** Add Node To The Plugin List */
 		this->pluginNodeList.insert(index, ptrNode);
@@ -116,7 +116,7 @@ void PluginDock::removePlugin(int index) {
 		/** Add Connection Between Hot Spot Nodes */
 		for (int i = 0; i < mainBusChannels; i++) {
 			this->addConnection(
-				{ {lastNode->nodeID, i},{nextNode->nodeID, i} });
+				{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
 		}
 	}
 }

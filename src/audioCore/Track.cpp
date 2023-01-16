@@ -30,12 +30,12 @@ Track::Track(const juce::AudioChannelSet& type)
 	int mainBusChannels = this->getMainBusNumInputChannels();
 	for (int i = 0; i < mainBusChannels; i++) {
 		this->addConnection(
-			{ {this->audioInputNode->nodeID, i},{this->pluginDockNode->nodeID, i} });
+			{ {this->audioInputNode->nodeID, i}, {this->pluginDockNode->nodeID, i} });
 		this->addConnection(
-			{ {this->pluginDockNode->nodeID, i},{this->audioOutputNode->nodeID, i} });
+			{ {this->pluginDockNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
 	}
 	this->addConnection(
-		{ {this->midiInputNode->nodeID, this->midiChannelIndex},{this->pluginDockNode->nodeID, this->midiChannelIndex} });
+		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->pluginDockNode->nodeID, this->midiChannelIndex} });
 }
                                   
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {

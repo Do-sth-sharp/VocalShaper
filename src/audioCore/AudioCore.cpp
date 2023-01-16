@@ -3,6 +3,9 @@
 #include "Mixer.h"
 
 AudioCore::AudioCore() {
+	/** Main Audio Device Manager */
+	this->audioDeviceManager = std::make_unique<juce::AudioDeviceManager>();
+
 	/** Main Audio Graph Of The Audio Core */
 	this->mainAudioGraph = std::make_unique<juce::AudioProcessorGraph>();
 
