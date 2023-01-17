@@ -37,6 +37,59 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->addConnection(
 		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->pluginDockNode->nodeID, this->midiChannelIndex} });
 }
+
+void Track::addAdditionalAudioBus() {
+	/** Prepare Bus Layout */
+	auto layout = this->getBusesLayout();
+	layout.inputBuses.add(this->audioChannels);
+
+	/** Set Bus Layout Of Current Graph */
+	this->setBusesLayout(layout);
+
+	/** Set Bus Layout Of Input Node */
+	juce::AudioProcessorGraph::BusesLayout inputLayout = layout;
+	inputLayout.outputBuses = inputLayout.inputBuses;
+	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+	/** Set Bus Layout Of Plugin Dock Node */
+	auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
+	if (ptrPluginDock) {
+		ptrPluginDock->addAdditionalAudioBus();
+	}
+
+	/** Connect Bus To Plugin Dock */
+	int channelNum = this->getTotalNumInputChannels();
+	for (int i = channelNum - this->audioChannels.size(); i < channelNum; i++) {
+		this->addConnection({ {this->audioInputNode->nodeID, i},
+			{this->pluginDockNode->nodeID, i} });
+	}
+}
+
+void Track::removeAdditionalAudioBus() {
+	/** Check Has Additional Bus */
+	auto layout = this->getBusesLayout();
+	if (layout.inputBuses.size() > 1) {
+		/** Prepare Bus Layout */
+		layout.inputBuses.removeLast();
+
+		/** Set Bus Layout Of Current Graph */
+		this->setBusesLayout(layout);
+
+		/** Set Bus Layout Of Input Node */
+		juce::AudioProcessorGraph::BusesLayout inputLayout = layout;
+		inputLayout.outputBuses = inputLayout.inputBuses;
+		this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+		/** Set Bus Layout Of Plugin Dock Node */
+		auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
+		if (ptrPluginDock) {
+			ptrPluginDock->removeAdditionalAudioBus();
+		}
+
+		/** Auto Remove Connection */
+		this->removeIllegalConnections();
+	}
+}
                                   
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Prepare Gain And Panner */

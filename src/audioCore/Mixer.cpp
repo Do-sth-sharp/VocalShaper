@@ -3,6 +3,10 @@
 #include "Utils.h"
 
 Mixer::Mixer() {
+	/** Set Channel Layout */
+	this->setChannelLayoutOfBus(true, 0, juce::AudioChannelSet::stereo());
+	this->setChannelLayoutOfBus(false, 0, juce::AudioChannelSet::stereo());
+
 	/** The Main Audio IO Node Of The Mixer */
 	this->audioInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
@@ -25,20 +29,22 @@ Mixer::Mixer() {
 	}
 }
 
-void Mixer::insertTrack(int index, const juce::AudioChannelSet& type) {
+void Mixer::insertTrack(int index) {
 	/** Limit Index */
 	if (index == 0) { index = -1; }
 
 	/** Add Node */
-	auto ptrNode = this->insertTrackInternal(index, type);
+	auto ptrNode = this->insertTrackInternal(index, juce::AudioChannelSet::stereo());
 	if (ptrNode) {
 		/** Get Main Bus */
 		int mainBusChannels = this->getMainBusNumInputChannels();
 
 		/** Link Node To Master Track */
 		for (int i = 0; i < mainBusChannels; i++) {
-			this->addConnection(
-				{ {ptrNode->nodeID, i}, {this->trackNodeList.getFirst()->nodeID, i} });
+			juce::AudioProcessorGraph::Connection connection =
+			{ {ptrNode->nodeID, i}, {this->trackNodeList.getFirst()->nodeID, i} };
+			this->addConnection(connection);
+			this->trackAudioSendConnectionList.add(connection);
 		}
 	}
 }
@@ -118,6 +124,47 @@ void Mixer::removeTrackAudioOutput(int trackIndex) {
 		});
 }
 
+void Mixer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {
+	/** Set Layout Of Main Graph */
+	this->setBusesLayout(busLayout);
+
+	/** Set Layout Of Input Node */
+	juce::AudioProcessorGraph::BusesLayout inputLayout = busLayout;
+	inputLayout.outputBuses = inputLayout.inputBuses;
+	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+	/** Set Layout Of Output Node */
+	juce::AudioProcessorGraph::BusesLayout outputLayout = busLayout;
+	outputLayout.inputBuses = outputLayout.outputBuses;
+	this->audioOutputNode->getProcessor()->setBusesLayout(outputLayout);
+
+	/** Auto Remove Connections */
+	this->removeIllegalInputConnections();
+	this->removeIllegalOutputConnections();
+}
+
+void Mixer::removeIllegalInputConnections() {
+	this->trackAudioInputConnectionList.removeIf(
+		[this](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
+				this->removeConnection(element);
+				return true;
+			}
+		return false;
+		});
+}
+
+void Mixer::removeIllegalOutputConnections() {
+	this->trackAudioOutputConnectionList.removeIf(
+		[this](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.channelIndex >= this->getTotalNumOutputChannels()) {
+				this->removeConnection(element);
+				return true;
+			}
+		return false;
+		});
+}
+
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
 	auto ptrNode = this->addNode(std::make_unique<Track>(type));
@@ -129,6 +176,11 @@ juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const
 
 		/** Add Node To List */
 		this->trackNodeList.insert(index, ptrNode);
+
+		/** Connect Track Node To MIDI Input */
+		this->addConnection(
+			{ {this->midiInputNode->nodeID, this->midiChannelIndex},
+			{ptrNode->nodeID, this->midiChannelIndex} });
 	}
 	else {
 		jassertfalse;
@@ -140,6 +192,10 @@ juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const
 juce::AudioProcessorGraph::Node::Ptr Mixer::removeTrackInternal(int index) {
 	/** Limit Index */
 	if (index < 0 || index > this->trackNodeList.size()) { return juce::AudioProcessorGraph::Node::Ptr(); }
+
+	/** Remove Input And Output Connections */
+	this->removeTrackAudioInput(index);
+	this->removeTrackAudioOutput(index);
 
 	/** Get The Node Ptr Then Remove From The List */
 	auto ptrNode = this->trackNodeList.removeAndReturn(index);

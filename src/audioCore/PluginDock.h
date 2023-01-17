@@ -10,6 +10,9 @@ public:
 	void insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
 	void removePlugin(int index);
 
+	void addAdditionalAudioBus();
+	void removeAdditionalAudioBus();
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;

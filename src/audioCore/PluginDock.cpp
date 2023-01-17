@@ -120,3 +120,37 @@ void PluginDock::removePlugin(int index) {
 		}
 	}
 }
+
+void PluginDock::addAdditionalAudioBus() {
+	/** Prepare Bus Layout */
+	auto layout = this->getBusesLayout();
+	layout.inputBuses.add(this->audioChannels);
+
+	/** Set Bus Layout Of Current Graph */
+	this->setBusesLayout(layout);
+
+	/** Set Bus Layout Of Input Node */
+	juce::AudioProcessorGraph::BusesLayout inputLayout = layout;
+	inputLayout.outputBuses = inputLayout.inputBuses;
+	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+}
+
+void PluginDock::removeAdditionalAudioBus() {
+	/** Check Has Additional Bus */
+	auto layout = this->getBusesLayout();
+	if (layout.inputBuses.size() > 1) {
+		/** Prepare Bus Layout */
+		layout.inputBuses.removeLast();
+
+		/** Set Bus Layout Of Current Graph */
+		this->setBusesLayout(layout);
+
+		/** Set Bus Layout Of Input Node */
+		juce::AudioProcessorGraph::BusesLayout inputLayout = layout;
+		inputLayout.outputBuses = inputLayout.inputBuses;
+		this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+		/** Auto Remove Connection */
+		this->removeIllegalConnections();
+	}
+}

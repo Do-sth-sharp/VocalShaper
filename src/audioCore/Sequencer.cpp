@@ -9,7 +9,10 @@ Sequencer::Sequencer() {
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
-	/** The Main Audio Output Node Of The Sequencer */
+	/** The Main Audio IO Node Of The Sequencer */
+	this->audioInputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode));
 	this->audioOutputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode));

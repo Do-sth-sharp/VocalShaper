@@ -6,7 +6,7 @@ class Mixer final : public juce::AudioProcessorGraph {
 public:
 	Mixer();
 
-	void insertTrack(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	void insertTrack(int index = -1);
 	void removeTrack(int index);
 
 	void setTrackAudioInput(int trackIndex, int busIndex);
@@ -14,12 +14,18 @@ public:
 	void removeTrackAudioInput(int trackIndex);
 	void removeTrackAudioOutput(int trackIndex);
 
+	void setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout);
+
+	void removeIllegalInputConnections();
+	void removeIllegalOutputConnections();
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackNodeList;
 
+	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioSendConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioInputConnectionList, trackAudioOutputConnectionList;
 
 	juce::AudioProcessorGraph::Node::Ptr insertTrackInternal(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());

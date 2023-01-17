@@ -7,6 +7,9 @@ public:
 	Track() = delete;
 	Track(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
+	void addAdditionalAudioBus();
+	void removeAdditionalAudioBus();
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
