@@ -36,16 +36,8 @@ void Mixer::insertTrack(int index) {
 	/** Add Node */
 	auto ptrNode = this->insertTrackInternal(index, juce::AudioChannelSet::stereo());
 	if (ptrNode) {
-		/** Get Main Bus */
-		int mainBusChannels = this->getMainBusNumInputChannels();
-
 		/** Link Node To Master Track */
-		for (int i = 0; i < mainBusChannels; i++) {
-			juce::AudioProcessorGraph::Connection connection =
-			{ {ptrNode->nodeID, i}, {this->trackNodeList.getFirst()->nodeID, i} };
-			this->addConnection(connection);
-			this->trackAudioSendConnectionList.add(connection);
-		}
+		this->setTrackSend(index, 0);
 	}
 }
 void Mixer::removeTrack(int index) {
@@ -163,6 +155,41 @@ void Mixer::removeIllegalOutputConnections() {
 			}
 		return false;
 		});
+}
+
+void Mixer::setTrackSend(int trackIndex, int dstTrackIndex) {
+	/** Track Can't Send To Itself */
+	if (trackIndex == dstTrackIndex) { jassertfalse; return; }
+
+	/** Check Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+	if (dstTrackIndex < 0 || dstTrackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+	auto dstNodeID = this->trackNodeList.getUnchecked(dstTrackIndex)->nodeID;
+
+	/** Remove Current Send */
+	this->trackAudioSendConnectionList.removeIf(
+		[this, nodeID]
+		(const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+		return false;
+		});
+
+	/** Get Main Bus */
+	int mainBusChannels = this->getMainBusNumInputChannels();
+
+	/** Link Node To Dst Track */
+	for (int i = 0; i < mainBusChannels; i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {nodeID, i}, {dstNodeID, i} };
+		this->addConnection(connection);
+		this->trackAudioSendConnectionList.add(connection);
+	}
 }
 
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {

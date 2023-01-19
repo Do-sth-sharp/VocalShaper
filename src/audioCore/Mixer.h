@@ -19,6 +19,8 @@ public:
 	void removeIllegalInputConnections();
 	void removeIllegalOutputConnections();
 
+	void setTrackSend(int trackIndex, int dstTrackIndex);
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
