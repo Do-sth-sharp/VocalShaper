@@ -192,6 +192,76 @@ void Mixer::setTrackSend(int trackIndex, int dstTrackIndex) {
 	}
 }
 
+void Mixer::addTrackSideLink(int trackIndex, int dstTrackIndex, int dstBus) {
+	/** Track Can't Side Link To Itself */
+	if (trackIndex == dstTrackIndex) { jassertfalse; return; }
+
+	/** Check Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+	if (dstTrackIndex < 0 || dstTrackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Check Bus Index */
+	if (dstBus <= 0) { jassertfalse; return; }
+
+	/** Remove Current Side Link */
+	this->removeTrackSideLink(trackIndex, dstTrackIndex);
+
+	/** Get Node */
+	auto node = this->trackNodeList.getUnchecked(trackIndex);
+	auto dstNode = this->trackNodeList.getUnchecked(dstTrackIndex);
+
+	/** Add Bus While Dst Bus Isn't Exists */
+	while (dstNode->getProcessor()->getBusCount(true) <= dstBus) {
+		auto ptrTrack = dynamic_cast<Track*>(dstNode->getProcessor());
+		if (ptrTrack) {
+			ptrTrack->addAdditionalAudioBus();
+		}
+		else {
+			jassertfalse;
+			return;
+		}
+	}
+
+	/** Get Main Bus */
+	int mainBusChannels = this->getMainBusNumInputChannels();
+
+	/** Get Dst Bus */
+	auto dstBusChannels
+		= utils::getChannelIndexAndNumOfBus(dstNode->getProcessor(), dstBus, true);
+
+	/** Link Node To Dst Track */
+	for (int i = 0; i < mainBusChannels; i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {node->nodeID, i}, {dstNode->nodeID, std::get<0>(dstBusChannels) + i}};
+		this->addConnection(connection);
+		this->trackAudioSendConnectionList.add(connection);
+	}
+}
+
+void Mixer::removeTrackSideLink(int trackIndex, int dstTrackIndex) {
+	/** Track Can't Side Link To Itself */
+	if (trackIndex == dstTrackIndex) { jassertfalse; return; }
+
+	/** Check Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+	if (dstTrackIndex < 0 || dstTrackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+	auto dstNodeID = this->trackNodeList.getUnchecked(dstTrackIndex)->nodeID;
+
+	/** Remove Connection */
+	this->trackAudioOutputConnectionList.removeIf(
+		[this, nodeID, dstNodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID &&
+				element.destination.nodeID == dstNodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+		return false;
+		});
+}
+
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
 	auto ptrNode = this->addNode(std::make_unique<Track>(type));

@@ -20,6 +20,8 @@ public:
 	void removeIllegalOutputConnections();
 
 	void setTrackSend(int trackIndex, int dstTrackIndex);
+	void addTrackSideLink(int trackIndex, int dstTrackIndex, int dstBus);
+	void removeTrackSideLink(int trackIndex, int dstTrackIndex);
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
@@ -28,6 +30,7 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackNodeList;
 
 	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioSendConnectionList;
+	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioSideLinkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioInputConnectionList, trackAudioOutputConnectionList;
 
 	juce::AudioProcessorGraph::Node::Ptr insertTrackInternal(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
