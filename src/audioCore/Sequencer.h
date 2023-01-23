@@ -6,6 +6,11 @@ class Sequencer final : public juce::AudioProcessorGraph {
 public:
 	Sequencer();
 
+	void insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	void removeSource(int index);
+	void insertInstrment(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	void removeInstrment(int index);
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
