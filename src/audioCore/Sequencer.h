@@ -11,6 +11,19 @@ public:
 	void insertInstrment(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
 	void removeInstrment(int index);
 
+	void setMIDIInputConnection(int sourceIndex);
+	void removeMIDIInputConnection(int sourceIndex);
+	void setAudioInputConnection(int sourceIndex, int busIndex);
+	void removeAudioInputConnection(int sourceIndex);
+	void addMIDIInstrumentConnection(int sourceIndex, int instrIndex);
+	void removeMIDIInstrumentConnection(int sourceIndex, int instrIndex);
+	void setMIDISendConnection(int sourceIndex);
+	void removeMIDISendConnection(int sourceIndex);
+	void setAudioSendConnection(int sourceIndex, int busIndex);
+	void removeAudioSendConnection(int sourceIndex);
+	void setAudioOutputConnection(int instrIndex, int busIndex);
+	void removeAudioOutputConnection(int instrIndex);
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

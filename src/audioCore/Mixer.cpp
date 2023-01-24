@@ -142,7 +142,7 @@ void Mixer::removeIllegalInputConnections() {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 }
 
@@ -153,7 +153,7 @@ void Mixer::removeIllegalOutputConnections() {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 }
 
@@ -177,7 +177,7 @@ void Mixer::setTrackSend(int trackIndex, int dstTrackIndex) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Get Main Bus */
@@ -258,7 +258,7 @@ void Mixer::removeTrackSideLink(int trackIndex, int dstTrackIndex) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 }
 

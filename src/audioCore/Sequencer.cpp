@@ -1,4 +1,5 @@
 ﻿#include "Sequencer.h"
+#include "Utils.h"
 
 Sequencer::Sequencer() {
 	/** The Main MIDI IO Node Of The Sequencer */
@@ -49,7 +50,7 @@ void Sequencer::removeSource(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove Audio Input Connection */
@@ -59,7 +60,7 @@ void Sequencer::removeSource(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove MIDI Instrument Connection */
@@ -69,7 +70,7 @@ void Sequencer::removeSource(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove MIDI Send Connection */
@@ -79,7 +80,7 @@ void Sequencer::removeSource(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove Audio Send Connection */
@@ -89,7 +90,7 @@ void Sequencer::removeSource(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove Node From Graph */
@@ -127,7 +128,7 @@ void Sequencer::removeInstrment(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove Audio Output Connection */
@@ -137,9 +138,247 @@ void Sequencer::removeInstrment(int index) {
 				this->removeConnection(element);
 				return true;
 			}
-		return false;
+			return false;
 		});
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
+}
+
+void Sequencer::setMIDIInputConnection(int sourceIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+
+	/** Remove Current Connection */
+	this->removeMIDIInputConnection(sourceIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Add Connection */
+	juce::AudioProcessorGraph::Connection connection =
+		{ {this->midiInputNode->nodeID, this->midiChannelIndex},
+		{nodeID, this->midiChannelIndex} };
+	this->addConnection(connection);
+	this->midiInputConnectionList.add(connection);
+}
+
+void Sequencer::removeMIDIInputConnection(int sourceIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Remove Connection */
+	this->midiInputConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
+void Sequencer::setAudioInputConnection(int sourceIndex, int busIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+	if (busIndex < 0 || busIndex >= this->getBusCount(true)) { return; }
+
+	/** Remove Current Connection */
+	this->removeAudioInputConnection(sourceIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Get Bus */
+	auto busChannels = utils::getChannelIndexAndNumOfBus(this, busIndex, true);
+
+	/** Link Bus */
+	for (int i = 0; i < std::get<1>(busChannels); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {this->audioInputNode->nodeID, std::get<0>(busChannels) + i},
+		 {nodeID, i} };
+		this->addConnection(connection);
+		this->audioInputConnectionList.add(connection);
+	}
+}
+
+void Sequencer::removeAudioInputConnection(int sourceIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Remove Connection */
+	this->audioInputConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
+void Sequencer::addMIDIInstrumentConnection(int sourceIndex, int instrIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
+
+	/** Remove Current Connection */
+	this->removeMIDIInstrumentConnection(sourceIndex, instrIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+	auto dstNodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Add Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, this->midiChannelIndex}, {dstNodeID, this->midiChannelIndex} };
+	this->addConnection(connection);
+	this->midiInstrumentConnectionList.add(connection);
+}
+
+void Sequencer::removeMIDIInstrumentConnection(int sourceIndex, int instrIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+	auto dstNodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Remove Connection */
+	this->midiInputConnectionList.removeIf(
+		[this, nodeID, dstNodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID &&
+				element.destination.nodeID == dstNodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
+void Sequencer::setMIDISendConnection(int sourceIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+
+	/** Remove Current Connection */
+	this->removeMIDISendConnection(sourceIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Add Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, this->midiChannelIndex},
+	{this->midiOutputNode->nodeID, this->midiChannelIndex} };
+	this->addConnection(connection);
+	this->midiSendConnectionList.add(connection);
+}
+
+void Sequencer::removeMIDISendConnection(int sourceIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Remove Connection */
+	this->midiSendConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
+void Sequencer::setAudioSendConnection(int sourceIndex, int busIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+	if (busIndex < 0 || busIndex >= this->getBusCount(false)) { return; }
+
+	/** Remove Current Connection */
+	this->removeAudioSendConnection(sourceIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Get Bus */
+	auto busChannels = utils::getChannelIndexAndNumOfBus(this, busIndex, false);
+
+	/** Link Bus */
+	for (int i = 0; i < std::get<1>(busChannels); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+			{ {nodeID, i},
+			{this->audioOutputNode->nodeID, std::get<0>(busChannels) + i} };
+		this->addConnection(connection);
+		this->audioSendConnectionList.add(connection);
+	}
+}
+
+void Sequencer::removeAudioSendConnection(int sourceIndex) {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Remove Connection */
+	this->audioSendConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
+void Sequencer::setAudioOutputConnection(int instrIndex, int busIndex) {
+	/** Limit Index */
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
+	if (busIndex < 0 || busIndex >= this->getBusCount(false)) { return; }
+
+	/** Remove Current Connection */
+	this->removeAudioOutputConnection(instrIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Get Bus */
+	auto busChannels = utils::getChannelIndexAndNumOfBus(this, busIndex, false);
+
+	/** Link Bus */
+	for (int i = 0; i < std::get<1>(busChannels); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {nodeID, i},
+		{this->audioOutputNode->nodeID, std::get<0>(busChannels) + i} };
+		this->addConnection(connection);
+		this->audioOutputConnectionList.add(connection);
+	}
+}
+
+void Sequencer::removeAudioOutputConnection(int instrIndex) {
+	/** Limit Index */
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Remove Connection */
+	this->audioOutputConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
 }
