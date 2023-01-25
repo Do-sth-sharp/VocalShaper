@@ -24,6 +24,12 @@ public:
 	void setAudioOutputConnection(int instrIndex, int busIndex);
 	void removeAudioOutputConnection(int instrIndex);
 
+	void setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout);
+
+	void removeIllegalAudioInputConnections();
+	void removeIllegalAudioSendConnections();
+	void removeIllegalAudioOutputConnections();
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
