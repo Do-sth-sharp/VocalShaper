@@ -262,6 +262,20 @@ void Mixer::removeTrackSideLink(int trackIndex, int dstTrackIndex) {
 		});
 }
 
+void Mixer::setOutputChannels(const juce::Array<juce::AudioChannelSet>& channels) {
+	auto currentBusLayout = this->getBusesLayout();
+	currentBusLayout.outputBuses = channels;
+	this->setAudioLayout(currentBusLayout);
+}
+
+void Mixer::addSequencerBus() {
+	/** TODO Add Sequencer Bus Before Audio Input Device Channel */
+}
+
+void Mixer::removeSequencerBus() {
+	/** TODO Remove Sequencer Bus */
+}
+
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
 	auto ptrNode = this->addNode(std::make_unique<Track>(type));

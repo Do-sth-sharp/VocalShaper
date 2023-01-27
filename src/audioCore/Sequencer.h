@@ -30,6 +30,11 @@ public:
 	void removeIllegalAudioSendConnections();
 	void removeIllegalAudioOutputConnections();
 
+	void setInputChannels(const juce::Array<juce::AudioChannelSet>& channels);
+
+	void addOutputBus();
+	void removeOutputBus();
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

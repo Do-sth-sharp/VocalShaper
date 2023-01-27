@@ -23,6 +23,11 @@ public:
 	void addTrackSideLink(int trackIndex, int dstTrackIndex, int dstBus);
 	void removeTrackSideLink(int trackIndex, int dstTrackIndex);
 
+	void setOutputChannels(const juce::Array<juce::AudioChannelSet>& channels);
+
+	void addSequencerBus();
+	void removeSequencerBus();
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
@@ -35,6 +40,8 @@ private:
 
 	juce::AudioProcessorGraph::Node::Ptr insertTrackInternal(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	juce::AudioProcessorGraph::Node::Ptr removeTrackInternal(int index);
+
+	int sequencerBusNum = 0;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Mixer)
 };

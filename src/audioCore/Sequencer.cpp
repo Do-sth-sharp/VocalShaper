@@ -435,3 +435,23 @@ void Sequencer::removeIllegalAudioOutputConnections() {
 			return false;
 		});
 }
+
+void Sequencer::setInputChannels(const juce::Array<juce::AudioChannelSet>& channels) {
+	auto currentBusLayout = this->getBusesLayout();
+	currentBusLayout.inputBuses = channels;
+	this->setAudioLayout(currentBusLayout);
+}
+
+void Sequencer::addOutputBus() {
+	auto currentBusLayout = this->getBusesLayout();
+	currentBusLayout.outputBuses.add(juce::AudioChannelSet::stereo());
+	this->setAudioLayout(currentBusLayout);
+}
+
+void Sequencer::removeOutputBus() {
+	auto currentBusLayout = this->getBusesLayout();
+	if (currentBusLayout.outputBuses.size() > 0) {
+		currentBusLayout.outputBuses.removeLast();
+		this->setAudioLayout(currentBusLayout);
+	}
+}
