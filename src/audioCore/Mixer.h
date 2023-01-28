@@ -9,7 +9,8 @@ public:
 	void insertTrack(int index = -1);
 	void removeTrack(int index);
 
-	void setTrackAudioInput(int trackIndex, int busIndex);
+	void setTrackAudioInputFromSequencer(int trackIndex, int busIndex);
+	void setTrackAudioInputFromDevice(int trackIndex, int busIndex);
 	void setTrackAudioOutput(int trackIndex, int busIndex);
 	void removeTrackAudioInput(int trackIndex);
 	void removeTrackAudioOutput(int trackIndex);
@@ -28,15 +29,18 @@ public:
 	void addSequencerBus();
 	void removeSequencerBus();
 
+	void setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& channels);
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackNodeList;
 
+	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioInputFromSequencerConnectionList, trackAudioInputFromDeviceConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioSendConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioSideLinkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioInputConnectionList, trackAudioOutputConnectionList;
+	juce::Array<juce::AudioProcessorGraph::Connection> trackAudioOutputConnectionList;
 
 	juce::AudioProcessorGraph::Node::Ptr insertTrackInternal(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	juce::AudioProcessorGraph::Node::Ptr removeTrackInternal(int index);

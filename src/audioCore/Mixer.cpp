@@ -46,8 +46,9 @@ void Mixer::removeTrack(int index) {
 	}
 }
 
-void Mixer::setTrackAudioInput(int trackIndex, int busIndex) {
+void Mixer::setTrackAudioInputFromSequencer(int trackIndex, int busIndex) {
 	if (trackIndex < 0 || trackIndex > this->trackNodeList.size()) { return; }
+	if (busIndex < 0 || busIndex >= this->sequencerBusNum) { return; }
 
 	/** Remove Track Connections */
 	this->removeTrackAudioInput(trackIndex);
@@ -61,7 +62,27 @@ void Mixer::setTrackAudioInput(int trackIndex, int busIndex) {
 		{ {this->audioInputNode->nodeID, std::get<0>(busChannels) + i},
 		 {this->trackNodeList.getUnchecked(trackIndex)->nodeID, i} };
 		this->addConnection(connection);
-		this->trackAudioInputConnectionList.add(connection);
+		this->trackAudioInputFromSequencerConnectionList.add(connection);
+	}
+}
+
+void Mixer::setTrackAudioInputFromDevice(int trackIndex, int busIndex) {
+	if (trackIndex < 0 || trackIndex > this->trackNodeList.size()) { return; }
+	if (busIndex < 0 || busIndex >= this->getTotalNumInputChannels() - this->sequencerBusNum) { return; }
+
+	/** Remove Track Connections */
+	this->removeTrackAudioInput(trackIndex);
+
+	/** Get Bus */
+	auto busChannels = utils::getChannelIndexAndNumOfBus(this, this->sequencerBusNum + busIndex, true);
+
+	/** Link Bus */
+	for (int i = 0; i < std::get<1>(busChannels); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {this->audioInputNode->nodeID, std::get<0>(busChannels) + i},
+		 {this->trackNodeList.getUnchecked(trackIndex)->nodeID, i} };
+		this->addConnection(connection);
+		this->trackAudioInputFromDeviceConnectionList.add(connection);
 	}
 }
 
@@ -90,7 +111,15 @@ void Mixer::removeTrackAudioInput(int trackIndex) {
 	auto trackNodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
 	auto inputNodeID = this->audioInputNode->nodeID;
 
-	this->trackAudioInputConnectionList.removeIf(
+	this->trackAudioInputFromSequencerConnectionList.removeIf(
+		[this, trackNodeID, inputNodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == inputNodeID && element.destination.nodeID == trackNodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+	this->trackAudioInputFromDeviceConnectionList.removeIf(
 		[this, trackNodeID, inputNodeID](const juce::AudioProcessorGraph::Connection& element) {
 			if (element.source.nodeID == inputNodeID && element.destination.nodeID == trackNodeID) {
 				this->removeConnection(element);
@@ -106,7 +135,7 @@ void Mixer::removeTrackAudioOutput(int trackIndex) {
 	auto trackNodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
 	auto outputNodeID = this->audioOutputNode->nodeID;
 
-	this->trackAudioInputConnectionList.removeIf(
+	this->trackAudioOutputConnectionList.removeIf(
 		[this, trackNodeID, outputNodeID](const juce::AudioProcessorGraph::Connection& element) {
 			if (element.source.nodeID == trackNodeID && element.destination.nodeID == outputNodeID) {
 				this->removeConnection(element);
@@ -136,7 +165,15 @@ void Mixer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayo
 }
 
 void Mixer::removeIllegalInputConnections() {
-	this->trackAudioInputConnectionList.removeIf(
+	this->trackAudioInputFromSequencerConnectionList.removeIf(
+		[this](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+	this->trackAudioInputFromDeviceConnectionList.removeIf(
 		[this](const juce::AudioProcessorGraph::Connection& element) {
 			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
 				this->removeConnection(element);
@@ -269,11 +306,85 @@ void Mixer::setOutputChannels(const juce::Array<juce::AudioChannelSet>& channels
 }
 
 void Mixer::addSequencerBus() {
-	/** TODO Add Sequencer Bus Before Audio Input Device Channel */
+	/** Increase Sequencer Bus Num */
+	this->sequencerBusNum++;
+
+	/** Add Sequencer Bus Before Audio Input Device Channel */
+	auto currentBusLayout = this->getBusesLayout();
+	currentBusLayout.inputBuses.insert(
+		this->sequencerBusNum - 1,
+		juce::AudioChannelSet::stereo());
+
+	/** Copy Track Input Bus Connection From Device */
+	juce::Array<juce::AudioProcessorGraph::Connection> connectionTemp =
+		this->trackAudioInputFromDeviceConnectionList;
+
+	/** Remove All Input Buses Connection From Device */
+	for (auto& i : this->trackAudioInputFromDeviceConnectionList) {
+		this->removeConnection(i);
+	}
+	this->trackAudioInputFromDeviceConnectionList.clear();
+
+	/** Set Audio Bus Layout */
+	this->setAudioLayout(currentBusLayout);
+
+	/** Recovery Input Buses Connection From Device */
+	for (auto& i : connectionTemp) {
+		i.source.channelIndex += 2;
+		this->addConnection(i);
+		this->trackAudioInputFromDeviceConnectionList.add(i);
+	}
 }
 
 void Mixer::removeSequencerBus() {
-	/** TODO Remove Sequencer Bus */
+	/** Remove Sequencer Bus */
+	if (this->sequencerBusNum > 0) {
+		/** Decrease Sequencer Bus Num */
+		this->sequencerBusNum--;
+
+		/** Remove Sequencer Bus Before Audio Input Device Channel */
+		auto currentBusLayout = this->getBusesLayout();
+		currentBusLayout.outputBuses.remove(this->sequencerBusNum);
+
+		/** Copy Track Input Bus Connection From Device */
+		juce::Array<juce::AudioProcessorGraph::Connection> connectionTemp =
+			this->trackAudioInputFromDeviceConnectionList;
+
+		/** Remove All Input Buses Connection From Device */
+		for (auto& i : this->trackAudioInputFromDeviceConnectionList) {
+			this->removeConnection(i);
+		}
+		this->trackAudioInputFromDeviceConnectionList.clear();
+
+		/** Set Audio Bus Layout */
+		this->setAudioLayout(currentBusLayout);
+
+		/** Recovery Input Buses Connection From Device */
+		for (auto& i : connectionTemp) {
+			i.source.channelIndex -= 2;
+			this->addConnection(i);
+			this->trackAudioInputFromDeviceConnectionList.add(i);
+		}
+	}
+}
+
+void Mixer::setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& channels) {
+	/** Get Current Bus Layout */
+	auto currentBusLayout = this->getBusesLayout();
+
+	/** Get Sequencer Channel Num */
+	auto lastSquencerBusChannels
+		= utils::getChannelIndexAndNumOfBus(this, this->sequencerBusNum - 1, true);
+	int seqChannelNum = std::get<0>(lastSquencerBusChannels) + std::get<1>(lastSquencerBusChannels);
+
+	/** Remove Device Channels */
+	currentBusLayout.inputBuses.resize(seqChannelNum);
+
+	/** Add New Device Channels */
+	currentBusLayout.inputBuses.addArray(channels);
+
+	/** Set Audio Bus Layout */
+	this->setAudioLayout(currentBusLayout);
 }
 
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {
