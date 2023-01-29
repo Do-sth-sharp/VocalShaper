@@ -6,7 +6,7 @@ class MainGraph final : public juce::AudioProcessorGraph {
 public:
 	MainGraph();
 
-	void setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout);
+	void setAudioLayout(int inputChannelNum, int outputChannelNum);
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr sequencer;

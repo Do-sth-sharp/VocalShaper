@@ -32,7 +32,12 @@ MainGraph::MainGraph() {
 		{this->mixer->nodeID, this->midiChannelIndex} });
 }
 
-void MainGraph::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {
+void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
+	/** Create Buses Layout */
+	juce::AudioProcessorGraph::BusesLayout busLayout;
+	busLayout.inputBuses.add(juce::AudioChannelSet::discreteChannels(inputChannelNum));
+	busLayout.outputBuses.add(juce::AudioChannelSet::discreteChannels(outputChannelNum));
+
 	/** Set Layout Of Main Graph */
 	this->setBusesLayout(busLayout);
 
@@ -60,9 +65,7 @@ void MainGraph::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& bus
 	/** Link Audio Channels Of Sequencer And Mixer */
 	this->removeIllegalConnections();
 
-	int inputChannelsNum = busLayout.inputBuses.size();
-	int outputChannelsNum = busLayout.outputBuses.size();
-	for (int i = 0; i < inputChannelsNum; i++) {
+	for (int i = 0; i < inputChannelNum; i++) {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i},
 			{this->sequencer->nodeID, i} });
@@ -70,7 +73,7 @@ void MainGraph::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& bus
 			{ {this->audioInputNode->nodeID, i},
 			{this->mixer->nodeID, i} });
 	}
-	for (int i = 0; i < outputChannelsNum; i++) {
+	for (int i = 0; i < outputChannelNum; i++) {
 		this->addConnection(
 			{ {this->mixer->nodeID, i},
 			{this->audioOutputNode->nodeID, i} });

@@ -13,16 +13,16 @@ public:
 
 	void setMIDIInputConnection(int sourceIndex);
 	void removeMIDIInputConnection(int sourceIndex);
-	void setAudioInputConnection(int sourceIndex, int busIndex);
-	void removeAudioInputConnection(int sourceIndex);
+	void setAudioInputConnection(int sourceIndex, int srcChannel, int dstChannel);
+	void removeAudioInputConnection(int sourceIndex, int srcChannel, int dstChannel);
 	void addMIDIInstrumentConnection(int sourceIndex, int instrIndex);
 	void removeMIDIInstrumentConnection(int sourceIndex, int instrIndex);
 	void setMIDISendConnection(int sourceIndex);
 	void removeMIDISendConnection(int sourceIndex);
-	void setAudioSendConnection(int sourceIndex, int busIndex);
-	void removeAudioSendConnection(int sourceIndex);
-	void setAudioOutputConnection(int instrIndex, int busIndex);
-	void removeAudioOutputConnection(int instrIndex);
+	void setAudioSendConnection(int sourceIndex, int srcChannel, int dstChannel);
+	void removeAudioSendConnection(int sourceIndex, int srcChannel, int dstChannel);
+	void setAudioOutputConnection(int instrIndex, int srcChannel, int dstChannel);
+	void removeAudioOutputConnection(int instrIndex, int srcChannel, int dstChannel);
 
 	void setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout);
 
@@ -32,7 +32,7 @@ public:
 
 	void setInputChannels(const juce::Array<juce::AudioChannelSet>& channels);
 
-	void addOutputBus();
+	void addOutputBus(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeOutputBus();
 
 private:
