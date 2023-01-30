@@ -9,12 +9,19 @@ public:
 	void insertTrack(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeTrack(int index);
 
+	int getTrackNum() const;
+	juce::AudioProcessor* getTrackProcessor(int index) const;
+
 	void setTrackAudioInputFromSequencer(int trackIndex, int srcChannel, int dstChannel);
 	void setTrackAudioInputFromDevice(int trackIndex, int srcChannel, int dstChannel);
 	void setTrackAudioOutput(int trackIndex, int srcChannel, int dstChannel);
 	void removeTrackAudioInputFromSequencer(int trackIndex, int srcChannel, int dstChannel);
 	void removeTrackAudioInputFromDevice(int trackIndex, int srcChannel, int dstChannel);
 	void removeTrackAudioOutput(int trackIndex, int srcChannel, int dstChannel);
+
+	bool isTrackAudioInputFromSequencer(int trackIndex, int srcChannel, int dstChannel) const;
+	bool isTrackAudioInputFromDevice(int trackIndex, int srcChannel, int dstChannel) const;
+	bool isTrackAudioOutput(int trackIndex, int srcChannel, int dstChannel) const;
 
 	void setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout);
 
@@ -24,10 +31,14 @@ public:
 	void setTrackSend(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
 	void removeTrackSend(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
 
+	bool isTrackSend(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) const;
+
 	void setOutputChannels(const juce::Array<juce::AudioChannelSet>& channels);
 
 	void addSequencerBus(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeSequencerBus();
+
+	int getSequencerBusNum() const;
 
 	void setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& channels);
 

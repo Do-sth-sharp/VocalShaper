@@ -97,7 +97,7 @@ void Sequencer::removeSource(int index) {
 	this->removeNode(ptrNode->nodeID);
 }
 
-void Sequencer::insertInstrment(std::unique_ptr<juce::AudioProcessor> processor, int index) {
+void Sequencer::insertInstrument(std::unique_ptr<juce::AudioProcessor> processor, int index) {
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
 	if (ptrNode) {
@@ -114,7 +114,7 @@ void Sequencer::insertInstrment(std::unique_ptr<juce::AudioProcessor> processor,
 	}
 }
 
-void Sequencer::removeInstrment(int index) {
+void Sequencer::removeInstrument(int index) {
 	/** Limit Index */
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return; }
 
@@ -143,6 +143,24 @@ void Sequencer::removeInstrment(int index) {
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
+}
+
+int Sequencer::getSourceNum() const {
+	return this->audioSourceNodeList.size();
+}
+
+juce::AudioProcessor* Sequencer::getSourceProcessor(int index) const {
+	if (index < 0 || index >= this->audioSourceNodeList.size()) { return nullptr; }
+	return this->audioSourceNodeList.getUnchecked(index)->getProcessor();
+}
+
+int Sequencer::getInstrumentNum() const {
+	return this->instrumentNodeList.size();
+}
+
+juce::AudioProcessor* Sequencer::getInstrumentProcessor(int index) const {
+	if (index < 0 || index >= this->instrumentNodeList.size()) { return nullptr; }
+	return this->instrumentNodeList.getUnchecked(index)->getProcessor();
 }
 
 void Sequencer::setMIDIInputConnection(int sourceIndex) {
@@ -363,6 +381,86 @@ void Sequencer::removeAudioOutputConnection(int instrIndex, int srcChannel, int 
 	{ {nodeID, srcChannel}, {this->audioOutputNode->nodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioOutputConnectionList.removeAllInstancesOf(connection);
+}
+
+bool Sequencer::isMIDIInputConnected(int sourceIndex) const {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {nodeID, this->midiChannelIndex} };
+	return this->midiInputConnectionList.contains(connection);
+}
+
+bool Sequencer::isAudioInputConnected(int sourceIndex, int srcChannel, int dstChannel) const {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
+	return this->audioInputConnectionList.contains(connection);
+}
+
+bool Sequencer::isMIDIInstrumentConnected(int sourceIndex, int instrIndex) const {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+	auto dstNodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, this->midiChannelIndex}, {dstNodeID, this->midiChannelIndex} };
+	return this->midiInputConnectionList.contains(connection);
+}
+
+bool Sequencer::isMIDISendConnected(int sourceIndex) const {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, this->midiChannelIndex}, {this->midiOutputNode->nodeID, this->midiChannelIndex} };
+	return this->midiSendConnectionList.contains(connection);
+}
+
+bool Sequencer::isAudioSendConnected(int sourceIndex, int srcChannel, int dstChannel) const {
+	/** Limit Index */
+	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, srcChannel}, {this->audioOutputNode->nodeID, dstChannel} };
+	return this->audioSendConnectionList.contains(connection);
+}
+
+bool Sequencer::isAudioOutputConnected(int instrIndex, int srcChannel, int dstChannel) const {
+	/** Limit Index */
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Remove Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, srcChannel}, {this->audioOutputNode->nodeID, dstChannel} };
+	return this->audioOutputConnectionList.contains(connection);
 }
 
 void Sequencer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {

@@ -8,8 +8,13 @@ public:
 
 	void insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
 	void removeSource(int index);
-	void insertInstrment(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
-	void removeInstrment(int index);
+	void insertInstrument(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	void removeInstrument(int index);
+
+	int getSourceNum() const;
+	juce::AudioProcessor* getSourceProcessor(int index) const;
+	int getInstrumentNum() const;
+	juce::AudioProcessor* getInstrumentProcessor(int index) const;
 
 	void setMIDIInputConnection(int sourceIndex);
 	void removeMIDIInputConnection(int sourceIndex);
@@ -23,6 +28,13 @@ public:
 	void removeAudioSendConnection(int sourceIndex, int srcChannel, int dstChannel);
 	void setAudioOutputConnection(int instrIndex, int srcChannel, int dstChannel);
 	void removeAudioOutputConnection(int instrIndex, int srcChannel, int dstChannel);
+
+	bool isMIDIInputConnected(int sourceIndex) const;
+	bool isAudioInputConnected(int sourceIndex, int srcChannel, int dstChannel) const;
+	bool isMIDIInstrumentConnected(int sourceIndex, int instrIndex) const;
+	bool isMIDISendConnected(int sourceIndex) const;
+	bool isAudioSendConnected(int sourceIndex, int srcChannel, int dstChannel) const;
+	bool isAudioOutputConnected(int instrIndex, int srcChannel, int dstChannel) const;
 
 	void setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout);
 
