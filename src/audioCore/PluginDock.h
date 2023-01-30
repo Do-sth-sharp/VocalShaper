@@ -7,10 +7,22 @@ public:
 	PluginDock() = delete;
 	PluginDock(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
+	/**
+	 * @brief	Insert a plugin onto the plugin dock.
+	 */
 	void insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	/**
+	 * @brief	Remove a plugin from the plugin dock.
+	 */
 	void removePlugin(int index);
 
+	/**
+	 * @brief	Add an audio input bus onto the plugin dock.
+	 */
 	void addAdditionalAudioBus();
+	/**
+	 * @brief	Remove the last audio input bus from the plugin dock.
+	 */
 	void removeAdditionalAudioBus();
 
 private:

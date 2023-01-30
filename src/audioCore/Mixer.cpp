@@ -160,55 +160,6 @@ bool Mixer::isTrackAudioOutput(int trackIndex, int srcChannel, int dstChannel) c
 	return this->trackAudioOutputConnectionList.contains(connection);
 }
 
-void Mixer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {
-	/** Set Layout Of Main Graph */
-	this->setBusesLayout(busLayout);
-
-	/** Set Layout Of Input Node */
-	juce::AudioProcessorGraph::BusesLayout inputLayout = busLayout;
-	inputLayout.outputBuses = inputLayout.inputBuses;
-	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
-
-	/** Set Layout Of Output Node */
-	juce::AudioProcessorGraph::BusesLayout outputLayout = busLayout;
-	outputLayout.inputBuses = outputLayout.outputBuses;
-	this->audioOutputNode->getProcessor()->setBusesLayout(outputLayout);
-
-	/** Auto Remove Connections */
-	this->removeIllegalInputConnections();
-	this->removeIllegalOutputConnections();
-}
-
-void Mixer::removeIllegalInputConnections() {
-	this->trackAudioInputFromSequencerConnectionList.removeIf(
-		[this](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
-	this->trackAudioInputFromDeviceConnectionList.removeIf(
-		[this](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
-}
-
-void Mixer::removeIllegalOutputConnections() {
-	this->trackAudioOutputConnectionList.removeIf(
-		[this](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.destination.channelIndex >= this->getTotalNumOutputChannels()) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
-}
-
 void Mixer::setTrackSend(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) {
 	/** Track Can't Send To Itself */
 	if (trackIndex == dstTrackIndex) { jassertfalse; return; }
@@ -434,4 +385,53 @@ juce::AudioProcessorGraph::Node::Ptr Mixer::removeTrackInternal(int index) {
 	this->removeNode(nodeID);
 
 	return ptrNode;
+}
+
+void Mixer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {
+	/** Set Layout Of Main Graph */
+	this->setBusesLayout(busLayout);
+
+	/** Set Layout Of Input Node */
+	juce::AudioProcessorGraph::BusesLayout inputLayout = busLayout;
+	inputLayout.outputBuses = inputLayout.inputBuses;
+	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+	/** Set Layout Of Output Node */
+	juce::AudioProcessorGraph::BusesLayout outputLayout = busLayout;
+	outputLayout.inputBuses = outputLayout.outputBuses;
+	this->audioOutputNode->getProcessor()->setBusesLayout(outputLayout);
+
+	/** Auto Remove Connections */
+	this->removeIllegalInputConnections();
+	this->removeIllegalOutputConnections();
+}
+
+void Mixer::removeIllegalInputConnections() {
+	this->trackAudioInputFromSequencerConnectionList.removeIf(
+		[this](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
+				this->removeConnection(element);
+				return true;
+			}
+	return false;
+		});
+	this->trackAudioInputFromDeviceConnectionList.removeIf(
+		[this](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
+				this->removeConnection(element);
+				return true;
+			}
+	return false;
+		});
+}
+
+void Mixer::removeIllegalOutputConnections() {
+	this->trackAudioOutputConnectionList.removeIf(
+		[this](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.channelIndex >= this->getTotalNumOutputChannels()) {
+				this->removeConnection(element);
+				return true;
+			}
+	return false;
+		});
 }

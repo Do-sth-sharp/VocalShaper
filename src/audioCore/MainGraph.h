@@ -6,6 +6,9 @@ class MainGraph final : public juce::AudioProcessorGraph {
 public:
 	MainGraph();
 
+	/**
+	 * @brief	Set the input and output channel number of current audio device.
+	 */
 	void setAudioLayout(int inputChannelNum, int outputChannelNum);
 
 private:

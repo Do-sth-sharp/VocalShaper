@@ -463,6 +463,26 @@ bool Sequencer::isAudioOutputConnected(int instrIndex, int srcChannel, int dstCh
 	return this->audioOutputConnectionList.contains(connection);
 }
 
+void Sequencer::setInputChannels(const juce::Array<juce::AudioChannelSet>& channels) {
+	auto currentBusLayout = this->getBusesLayout();
+	currentBusLayout.inputBuses = channels;
+	this->setAudioLayout(currentBusLayout);
+}
+
+void Sequencer::addOutputBus(const juce::AudioChannelSet& type) {
+	auto currentBusLayout = this->getBusesLayout();
+	currentBusLayout.outputBuses.add(type);
+	this->setAudioLayout(currentBusLayout);
+}
+
+void Sequencer::removeOutputBus() {
+	auto currentBusLayout = this->getBusesLayout();
+	if (currentBusLayout.outputBuses.size() > 0) {
+		currentBusLayout.outputBuses.removeLast();
+		this->setAudioLayout(currentBusLayout);
+	}
+}
+
 void Sequencer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {
 	/** Set Layout Of Main Graph */
 	this->setBusesLayout(busLayout);
@@ -514,24 +534,4 @@ void Sequencer::removeIllegalAudioOutputConnections() {
 			}
 			return false;
 		});
-}
-
-void Sequencer::setInputChannels(const juce::Array<juce::AudioChannelSet>& channels) {
-	auto currentBusLayout = this->getBusesLayout();
-	currentBusLayout.inputBuses = channels;
-	this->setAudioLayout(currentBusLayout);
-}
-
-void Sequencer::addOutputBus(const juce::AudioChannelSet& type) {
-	auto currentBusLayout = this->getBusesLayout();
-	currentBusLayout.outputBuses.add(type);
-	this->setAudioLayout(currentBusLayout);
-}
-
-void Sequencer::removeOutputBus() {
-	auto currentBusLayout = this->getBusesLayout();
-	if (currentBusLayout.outputBuses.size() > 0) {
-		currentBusLayout.outputBuses.removeLast();
-		this->setAudioLayout(currentBusLayout);
-	}
 }

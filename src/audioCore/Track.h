@@ -7,7 +7,13 @@ public:
 	Track() = delete;
 	Track(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
+	/**
+	 * @brief	Add an audio input bus onto the track.
+	 */
 	void addAdditionalAudioBus();
+	/**
+	 * @brief	Remove the last audio input bus from the track.
+	 */
 	void removeAdditionalAudioBus();
 
 private:
