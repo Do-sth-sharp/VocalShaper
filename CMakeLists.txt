@@ -12,6 +12,8 @@ set(CMAKE_C_STANDARD 17)#使用C17
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+set (JUCE_USE_WINRT_MIDI ON)#Windows 10.0.14393.0 or later
+
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")#MSVC下使用/MD和/MDd
 
 add_subdirectory (LUCE-cpp)

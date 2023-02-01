@@ -49,6 +49,11 @@ luce.initialise = function(commandLineParameters)
 		local mainWindow = luce.FlowWindow.getWindow(0)
 		mainWindow:setFullScreen(true)
 	end
+
+	audioDeviceList = luce.AudioCore.getAllAudioDeviceList()
+	for k, v in ipairs(audioDeviceList) do
+		print(v)
+	end
 end
 
 luce.shutdown = function()

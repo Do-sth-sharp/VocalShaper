@@ -6,6 +6,26 @@ class AudioCore final : public juce::DeletedAtShutdown {
 public:
 	AudioCore();
 
+public:
+	enum class AudioDeviceType {
+		CoreAudio,
+		IOSAudio,
+		WASAPIShared,
+		WASAPIExclusive,
+		WASAPISharedLowLatency,
+		DirectSound,
+		ASIO,
+		ALSA,
+		JACK,
+		Android,
+		OpenSLES,
+		Oboe,
+		Bela
+	};
+
+	static const juce::StringArray getAudioDeviceList(AudioDeviceType type);
+	static const juce::StringArray getAllAudioDeviceList();
+
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
