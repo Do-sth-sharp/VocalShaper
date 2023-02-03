@@ -2,6 +2,8 @@
 
 #include <Defs.h>
 
+class AudioDeviceChangeListener;
+
 class AudioCore final : public juce::DeletedAtShutdown {
 public:
 	AudioCore();
@@ -31,8 +33,11 @@ private:
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
 
+	friend class AudioDeviceChangeListener;
 	void initAudioDevice();
 	void updateAudioBuses();
+
+	std::unique_ptr<AudioDeviceChangeListener> audioDeviceListener = nullptr;
 
 private:
 	static AudioCore* getInstance();

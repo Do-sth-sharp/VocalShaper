@@ -1,6 +1,20 @@
 ﻿#include "AudioCore.h"
 #include "MainGraph.h"
 
+class AudioDeviceChangeListener : public juce::ChangeListener {
+public:
+	AudioDeviceChangeListener(AudioCore* parent) : parent(parent) {};
+	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
+		if (parent) {
+			/** Use Default Audio Device */
+			parent->initAudioDevice();
+		}
+	};
+
+private:
+	AudioCore* const parent = nullptr;
+};
+
 AudioCore::AudioCore() {
 	/** Main Audio Device Manager */
 	this->audioDeviceManager = std::make_unique<juce::AudioDeviceManager>();
@@ -10,6 +24,10 @@ AudioCore::AudioCore() {
 
 	/** Main Graph Player */
 	this->mainGraphPlayer = std::make_unique<juce::AudioProcessorPlayer>();
+
+	/** Audio Device Listener */
+	this->audioDeviceListener = std::make_unique<AudioDeviceChangeListener>(this);
+	this->audioDeviceManager->addChangeListener(this->audioDeviceListener.get());
 
 	/** Init Audio Device */
 	this->initAudioDevice();
