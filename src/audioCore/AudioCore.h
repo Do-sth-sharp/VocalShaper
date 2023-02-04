@@ -28,6 +28,9 @@ public:
 	static const juce::StringArray getAudioDeviceList(AudioDeviceType type);
 	static const juce::StringArray getAllAudioDeviceList();
 
+	void setAudioInputDevice(const juce::String& deviceName);
+	void setAudioOutputDevice(const juce::String& deviceName);
+
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;

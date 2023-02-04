@@ -143,6 +143,24 @@ const juce::StringArray AudioCore::getAllAudioDeviceList() {
 	return result;
 }
 
+void AudioCore::setAudioInputDevice(const juce::String& deviceName) {
+	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	deviceSetup.inputDeviceName = deviceName;
+	deviceSetup.useDefaultInputChannels = true;
+	this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
+
+	this->updateAudioBuses();
+}
+
+void AudioCore::setAudioOutputDevice(const juce::String& deviceName) {
+	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	deviceSetup.outputDeviceName = deviceName;
+	deviceSetup.useDefaultOutputChannels = true;
+	this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
+
+	this->updateAudioBuses();
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
 	this->audioDeviceManager->initialiseWithDefaultDevices(0, 2);
