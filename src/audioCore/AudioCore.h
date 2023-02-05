@@ -7,6 +7,7 @@ class AudioDeviceChangeListener;
 class AudioCore final : public juce::DeletedAtShutdown {
 public:
 	AudioCore();
+	~AudioCore() override;
 
 public:
 	enum class AudioDeviceType {
@@ -30,6 +31,8 @@ public:
 
 	void setAudioInputDevice(const juce::String& deviceName);
 	void setAudioOutputDevice(const juce::String& deviceName);
+	const juce::String getAudioInputDeviceName() const;
+	const juce::String getAudioOutputDeviceName() const;
 
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
@@ -42,7 +45,11 @@ private:
 
 	std::unique_ptr<AudioDeviceChangeListener> audioDeviceListener = nullptr;
 
-private:
+public:
 	static AudioCore* getInstance();
+
+private:
 	static AudioCore* instance;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioCore)
 };

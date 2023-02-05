@@ -6,8 +6,8 @@ public:
 	AudioDeviceChangeListener(AudioCore* parent) : parent(parent) {};
 	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
 		if (parent) {
-			/** Use Default Audio Device */
-			parent->initAudioDevice();
+			/** Update Audio Buses */
+			parent->updateAudioBuses();
 		}
 	};
 
@@ -31,6 +31,12 @@ AudioCore::AudioCore() {
 
 	/** Init Audio Device */
 	this->initAudioDevice();
+}
+
+AudioCore::~AudioCore() {
+	this->audioDeviceManager->removeAllChangeListeners();
+	this->audioDeviceManager->removeAudioCallback(this->mainGraphPlayer.get());
+	this->mainGraphPlayer->setProcessor(nullptr);
 }
 
 const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType type) {
@@ -161,9 +167,19 @@ void AudioCore::setAudioOutputDevice(const juce::String& deviceName) {
 	this->updateAudioBuses();
 }
 
+const juce::String AudioCore::getAudioInputDeviceName() const {
+	auto audioSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	return audioSetup.inputDeviceName;
+}
+
+const juce::String AudioCore::getAudioOutputDeviceName() const {
+	auto audioSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	return audioSetup.outputDeviceName;
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
-	this->audioDeviceManager->initialiseWithDefaultDevices(0, 2);
+	this->audioDeviceManager->initialise(0, 2, nullptr, true);
 
 	/** Add Main Graph To Main Player */
 	this->mainGraphPlayer->setProcessor(this->mainAudioGraph.get());

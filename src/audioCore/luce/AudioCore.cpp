@@ -16,9 +16,37 @@ namespace luce {
 		return 1;
 	}
 
+	LUCE_METHOD(setAudioInputDevice) {
+		auto audioCore = AudioCore::getInstance();
+		audioCore->setAudioInputDevice(luaL_checkstring(L, 1));
+		return 0;
+	}
+
+	LUCE_METHOD(setAudioOutputDevice) {
+		auto audioCore = AudioCore::getInstance();
+		audioCore->setAudioOutputDevice(luaL_checkstring(L, 1));
+		return 0;
+	}
+
+	LUCE_METHOD(getAudioInputDeviceName) {
+		auto audioCore = AudioCore::getInstance();
+		lua_pushstring(L, audioCore->getAudioInputDeviceName().toStdString().c_str());
+		return 1;
+	}
+
+	LUCE_METHOD(getAudioOutputDeviceName) {
+		auto audioCore = AudioCore::getInstance();
+		lua_pushstring(L, audioCore->getAudioOutputDeviceName().toStdString().c_str());
+		return 1;
+	}
+
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
-		getAllAudioDeviceList
+		getAllAudioDeviceList,
+		setAudioInputDevice,
+		setAudioOutputDevice,
+		getAudioInputDeviceName,
+		getAudioOutputDeviceName
 	);
 
 	LUCE_NEW(AudioCore) {
