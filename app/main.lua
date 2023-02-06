@@ -49,6 +49,23 @@ luce.initialise = function(commandLineParameters)
 		local mainWindow = luce.FlowWindow.getWindow(0)
 		mainWindow:setFullScreen(true)
 	end
+
+	local deviceList = luce.AudioCore.getAllAudioDeviceList()
+	print("")
+	print("=========================")
+	for k,v in ipairs(deviceList) do
+		print("[", k, "] ", v)
+	end
+	print("=========================")
+
+	luce.AudioCore.setCurrentAudioDeviceType("DirectSound")
+
+	local deviceType = luce.AudioCore.getCurrentAudioDeivceType()
+	local inputDevice = luce.AudioCore.getAudioInputDeviceName()
+	local outputDevice = luce.AudioCore.getAudioOutputDeviceName()
+	print("Device Type:", deviceType)
+	print("Input Deivce:", inputDevice)
+	print("Output Device:", outputDevice)
 end
 
 luce.shutdown = function()

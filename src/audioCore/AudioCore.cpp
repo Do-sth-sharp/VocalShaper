@@ -177,9 +177,17 @@ const juce::String AudioCore::getAudioOutputDeviceName() const {
 	return audioSetup.outputDeviceName;
 }
 
+void AudioCore::setCurrentAudioDeviceType(const juce::String& typeName) {
+	this->audioDeviceManager->setCurrentAudioDeviceType(typeName, true);
+}
+
+const juce::String AudioCore::getCurrentAudioDeivceType() const {
+	return this->audioDeviceManager->getCurrentAudioDeviceType();
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
-	this->audioDeviceManager->initialise(0, 2, nullptr, true);
+	this->audioDeviceManager->initialise(1, 2, nullptr, true);
 
 	/** Add Main Graph To Main Player */
 	this->mainGraphPlayer->setProcessor(this->mainAudioGraph.get());

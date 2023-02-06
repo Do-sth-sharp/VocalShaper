@@ -34,6 +34,9 @@ public:
 	const juce::String getAudioInputDeviceName() const;
 	const juce::String getAudioOutputDeviceName() const;
 
+	void setCurrentAudioDeviceType(const juce::String& typeName);
+	const juce::String getCurrentAudioDeivceType() const;
+
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;

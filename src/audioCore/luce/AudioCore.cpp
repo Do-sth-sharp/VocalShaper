@@ -40,13 +40,27 @@ namespace luce {
 		return 1;
 	}
 
+	LUCE_METHOD(setCurrentAudioDeviceType) {
+		auto audioCore = AudioCore::getInstance();
+		audioCore->setCurrentAudioDeviceType(luaL_checkstring(L, 1));
+		return 0;
+	}
+	
+	LUCE_METHOD(getCurrentAudioDeivceType) {
+		auto audioCore = AudioCore::getInstance();
+		lua_pushstring(L, audioCore->getCurrentAudioDeivceType().toStdString().c_str());
+		return 1;
+	}
+
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
 		getAllAudioDeviceList,
 		setAudioInputDevice,
 		setAudioOutputDevice,
 		getAudioInputDeviceName,
-		getAudioOutputDeviceName
+		getAudioOutputDeviceName,
+		setCurrentAudioDeviceType,
+		getCurrentAudioDeivceType
 	);
 
 	LUCE_NEW(AudioCore) {
