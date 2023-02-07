@@ -2,8 +2,22 @@
 #include "../AudioCore.h"
 
 namespace luce {
-	LUCE_METHOD(getAllAudioDeviceList) {
-		auto list = AudioCore::getAllAudioDeviceList();
+	LUCE_METHOD(getAllAudioInputDeviceList) {
+		auto list = AudioCore::getAllAudioInputDeviceList();
+
+		lua_newtable(L);
+
+		for (int i = 0; i < list.size(); i++) {
+			lua_pushinteger(L, static_cast<lua_Integer>(i) + 1);
+			lua_pushstring(L, list.getReference(i).toStdString().c_str());
+			lua_settable(L, -3);
+		}
+
+		return 1;
+	}
+
+	LUCE_METHOD(getAllAudioOutputDeviceList) {
+		auto list = AudioCore::getAllAudioOutputDeviceList();
 
 		lua_newtable(L);
 
@@ -54,7 +68,8 @@ namespace luce {
 
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
-		getAllAudioDeviceList,
+		getAllAudioInputDeviceList,
+		getAllAudioOutputDeviceList,
 		setAudioInputDevice,
 		setAudioOutputDevice,
 		getAudioInputDeviceName,

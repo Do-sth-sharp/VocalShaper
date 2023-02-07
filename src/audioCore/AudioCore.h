@@ -26,8 +26,11 @@ public:
 		Bela
 	};
 
-	static const juce::StringArray getAudioDeviceList(AudioDeviceType type);
-	static const juce::StringArray getAllAudioDeviceList();
+	static const juce::StringArray getAudioDeviceList(AudioDeviceType type, bool isInput = false);
+	static const juce::StringArray getAllAudioDeviceList(bool isInput = false);
+
+	static const juce::StringArray getAllAudioInputDeviceList();
+	static const juce::StringArray getAllAudioOutputDeviceList();
 
 	void setAudioInputDevice(const juce::String& deviceName);
 	void setAudioOutputDevice(const juce::String& deviceName);

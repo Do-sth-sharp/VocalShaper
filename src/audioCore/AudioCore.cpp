@@ -39,7 +39,7 @@ AudioCore::~AudioCore() {
 	this->mainGraphPlayer->setProcessor(nullptr);
 }
 
-const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType type) {
+const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType type, bool isInput) {
 	std::unique_ptr<juce::AudioIODeviceType> ptrType = nullptr;
 	switch (type) {
 	case AudioCore::AudioDeviceType::CoreAudio:
@@ -87,66 +87,74 @@ const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType
 
 	if (!ptrType) { return juce::StringArray(); }
 	ptrType->scanForDevices();
-	return ptrType->getDeviceNames();
+	return ptrType->getDeviceNames(isInput);
 }
 
-const juce::StringArray AudioCore::getAllAudioDeviceList() {
+const juce::StringArray AudioCore::getAllAudioDeviceList(bool isInput) {
 	juce::StringArray result, resultTemp;
 
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::CoreAudio);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::CoreAudio, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[CoreAudio]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::IOSAudio);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::IOSAudio, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[iOSAudio]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::WASAPIShared);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::WASAPIShared, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[WASAPI(shared)]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::WASAPIExclusive);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::WASAPIExclusive, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[WASAPI(exclusive)]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::WASAPISharedLowLatency);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::WASAPISharedLowLatency, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[WASAPI(sharedLowLatency)]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::DirectSound);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::DirectSound, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[DirectSound]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::ASIO);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::ASIO, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[ASIO]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::ALSA);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::ALSA, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[ALSA]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::JACK);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::JACK, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[JACK]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::Android);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::Android, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[Android]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::OpenSLES);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::OpenSLES, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[OpenSLES]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::Oboe);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::Oboe, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[Oboe]") + s);
 	}
-	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::Bela);
+	resultTemp = AudioCore::getAudioDeviceList(AudioDeviceType::Bela, isInput);
 	for (auto& s : resultTemp) {
 		result.add(juce::String("[Bela]") + s);
 	}
 
 	return result;
+}
+
+const juce::StringArray AudioCore::getAllAudioInputDeviceList() {
+	return AudioCore::getAllAudioDeviceList(true);
+}
+
+const juce::StringArray AudioCore::getAllAudioOutputDeviceList() {
+	return AudioCore::getAllAudioDeviceList(false);
 }
 
 void AudioCore::setAudioInputDevice(const juce::String& deviceName) {

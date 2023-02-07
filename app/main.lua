@@ -50,10 +50,18 @@ luce.initialise = function(commandLineParameters)
 		mainWindow:setFullScreen(true)
 	end
 
-	local deviceList = luce.AudioCore.getAllAudioDeviceList()
+	local inputDeviceList = luce.AudioCore.getAllAudioInputDeviceList()
 	print("")
+	print("==========Input==========")
+	for k,v in ipairs(inputDeviceList) do
+		print("[", k, "] ", v)
+	end
 	print("=========================")
-	for k,v in ipairs(deviceList) do
+
+	local outputDeviceList = luce.AudioCore.getAllAudioOutputDeviceList()
+	print("")
+	print("=========Output==========")
+	for k,v in ipairs(outputDeviceList) do
 		print("[", k, "] ", v)
 	end
 	print("=========================")
