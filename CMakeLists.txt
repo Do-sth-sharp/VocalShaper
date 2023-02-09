@@ -14,8 +14,10 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")#MSVC下使用/MD和/MDd
 
-set (JUCE_USE_WINRT_MIDI ON)#Windows 10.0.14393.0 or later
+set (JUCE_USE_WINRT_MIDI OFF)#Windows 10.0.14393.0 or later
 set (JUCE_ASIO ON)
+set (JUCE_ASIO_DEBUGGING ON)
+set (JUCE_WINRT_MIDI_LOGGING ON)
 
 set (ASIO_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asiosdk_2.3.3_2019-06-14/common")
 

@@ -40,6 +40,13 @@ public:
 	void setCurrentAudioDeviceType(const juce::String& typeName);
 	const juce::String getCurrentAudioDeivceType() const;
 
+	void playTestSound() const;
+
+	static const juce::StringArray getAllMIDIDeviceList(bool isInput = false);
+
+	static const juce::StringArray getAllMIDIInputDeviceList();
+	static const juce::StringArray getAllMIDIOutputDeviceList();
+
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;

@@ -66,6 +66,40 @@ namespace luce {
 		return 1;
 	}
 
+	LUCE_METHOD(playTestSound) {
+		auto audioCore = AudioCore::getInstance();
+		audioCore->playTestSound();
+		return 0;
+	}
+
+	LUCE_METHOD(getAllMIDIInputDeviceList) {
+		auto list = AudioCore::getAllMIDIInputDeviceList();
+
+		lua_newtable(L);
+
+		for (int i = 0; i < list.size(); i++) {
+			lua_pushinteger(L, static_cast<lua_Integer>(i) + 1);
+			lua_pushstring(L, list.getReference(i).toStdString().c_str());
+			lua_settable(L, -3);
+		}
+
+		return 1;
+	}
+
+	LUCE_METHOD(getAllMIDIOutputDeviceList) {
+		auto list = AudioCore::getAllMIDIOutputDeviceList();
+
+		lua_newtable(L);
+
+		for (int i = 0; i < list.size(); i++) {
+			lua_pushinteger(L, static_cast<lua_Integer>(i) + 1);
+			lua_pushstring(L, list.getReference(i).toStdString().c_str());
+			lua_settable(L, -3);
+		}
+
+		return 1;
+	}
+
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
 		getAllAudioInputDeviceList,
@@ -75,7 +109,10 @@ namespace luce {
 		getAudioInputDeviceName,
 		getAudioOutputDeviceName,
 		setCurrentAudioDeviceType,
-		getCurrentAudioDeivceType
+		getCurrentAudioDeivceType,
+		playTestSound,
+		getAllMIDIInputDeviceList,
+		getAllMIDIOutputDeviceList,
 	);
 
 	LUCE_NEW(AudioCore) {

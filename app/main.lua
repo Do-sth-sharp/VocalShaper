@@ -50,30 +50,50 @@ luce.initialise = function(commandLineParameters)
 		mainWindow:setFullScreen(true)
 	end
 
-	local inputDeviceList = luce.AudioCore.getAllAudioInputDeviceList()
+	--local inputDeviceList = luce.AudioCore.getAllAudioInputDeviceList()
+	--print("")
+	--print("==========Input==========")
+	--for k,v in ipairs(inputDeviceList) do
+	--	print("[", k, "] ", v)
+	--end
+	--print("=========================")
+
+	--local outputDeviceList = luce.AudioCore.getAllAudioOutputDeviceList()
+	--print("")
+	--print("=========Output==========")
+	--for k,v in ipairs(outputDeviceList) do
+	--	print("[", k, "] ", v)
+	--end
+	--print("=========================")
+
+	--luce.AudioCore.setCurrentAudioDeviceType("DirectSound")
+	--luce.AudioCore.setAudioInputDevice("FL Studio ASIO")
+	--luce.AudioCore.setAudioOutputDevice("FL Studio ASIO")
+
+	--local deviceType = luce.AudioCore.getCurrentAudioDeivceType()
+	--local inputDevice = luce.AudioCore.getAudioInputDeviceName()
+	--local outputDevice = luce.AudioCore.getAudioOutputDeviceName()
+	--print("Device Type:", deviceType)
+	--print("Input Deivce:", inputDevice)
+	--print("Output Device:", outputDevice)
+
+	--luce.AudioCore.playTestSound()
+
+	local inputMIDIDeviceList = luce.AudioCore.getAllMIDIInputDeviceList()
 	print("")
-	print("==========Input==========")
-	for k,v in ipairs(inputDeviceList) do
+	print("========MIDI Input=======")
+	for k,v in ipairs(inputMIDIDeviceList) do
 		print("[", k, "] ", v)
 	end
 	print("=========================")
 
-	local outputDeviceList = luce.AudioCore.getAllAudioOutputDeviceList()
+	local outputMIDIDeviceList = luce.AudioCore.getAllMIDIOutputDeviceList()
 	print("")
-	print("=========Output==========")
-	for k,v in ipairs(outputDeviceList) do
+	print("========MIDI Output======")
+	for k,v in ipairs(outputMIDIDeviceList) do
 		print("[", k, "] ", v)
 	end
 	print("=========================")
-
-	luce.AudioCore.setCurrentAudioDeviceType("DirectSound")
-
-	local deviceType = luce.AudioCore.getCurrentAudioDeivceType()
-	local inputDevice = luce.AudioCore.getAudioInputDeviceName()
-	local outputDevice = luce.AudioCore.getAudioOutputDeviceName()
-	print("Device Type:", deviceType)
-	print("Input Deivce:", inputDevice)
-	print("Output Device:", outputDevice)
 end
 
 luce.shutdown = function()

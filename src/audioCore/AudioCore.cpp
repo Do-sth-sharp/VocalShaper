@@ -193,6 +193,30 @@ const juce::String AudioCore::getCurrentAudioDeivceType() const {
 	return this->audioDeviceManager->getCurrentAudioDeviceType();
 }
 
+void AudioCore::playTestSound() const {
+	this->audioDeviceManager->playTestSound();
+}
+
+const juce::StringArray AudioCore::getAllMIDIDeviceList(bool isInput) {
+	auto list = isInput
+		? juce::MidiInput::getAvailableDevices()
+		: juce::MidiOutput::getAvailableDevices();
+
+	juce::StringArray result;
+	for (auto& i : list) {
+		result.add(i.name);
+	}
+	return result;
+}
+
+const juce::StringArray AudioCore::getAllMIDIInputDeviceList() {
+	return AudioCore::getAllMIDIDeviceList(true);
+}
+
+const juce::StringArray AudioCore::getAllMIDIOutputDeviceList() {
+	return AudioCore::getAllMIDIDeviceList(false);
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
 	this->audioDeviceManager->initialise(1, 2, nullptr, true);
