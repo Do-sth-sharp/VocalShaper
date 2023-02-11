@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <Defs.h>
+#include <JuceHeader.h>
 
 class SeqSourceProcessor final : public juce::AudioProcessor {
 public:

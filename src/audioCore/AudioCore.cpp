@@ -1,6 +1,8 @@
 ﻿#include "AudioCore.h"
 #include "MainGraph.h"
 
+#include "AudioDebugger.h"
+
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
 	AudioDeviceChangeListener(AudioCore* parent) : parent(parent) {};
@@ -28,6 +30,9 @@ AudioCore::AudioCore() {
 	/** Audio Device Listener */
 	this->audioDeviceListener = std::make_unique<AudioDeviceChangeListener>(this);
 	this->audioDeviceManager->addChangeListener(this->audioDeviceListener.get());
+
+	/** Audio Device Selector */
+	this->audioDebugger = std::make_unique<AudioDebugger>(this);
 
 	/** Init Audio Device */
 	this->initAudioDevice();
@@ -215,6 +220,10 @@ const juce::StringArray AudioCore::getAllMIDIInputDeviceList() {
 
 const juce::StringArray AudioCore::getAllMIDIOutputDeviceList() {
 	return AudioCore::getAllMIDIDeviceList(false);
+}
+
+juce::Component* AudioCore::getAudioDebugger() const {
+	return this->audioDebugger.get();
 }
 
 void AudioCore::initAudioDevice() {

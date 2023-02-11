@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <Defs.h>
+#include <JuceHeader.h>
 
 class PluginDock final : public juce::AudioProcessorGraph {
 public:
