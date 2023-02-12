@@ -252,6 +252,21 @@ void AudioCore::updateAudioBuses() {
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
 	}
+
+	/* Add MIDI Callback  */
+	{
+		auto midiInputDevice = juce::MidiInput::getAvailableDevices();
+		for (auto& i : midiInputDevice) {
+			if (this->audioDeviceManager->isMidiInputDeviceEnabled(i.identifier)) {
+				this->audioDeviceManager->addMidiInputDeviceCallback(
+					i.identifier, this->mainGraphPlayer.get());
+			}
+			else {
+				this->audioDeviceManager->removeMidiInputDeviceCallback(
+					i.identifier, this->mainGraphPlayer.get());
+			}
+		}
+	}
 }
 
 AudioCore* AudioCore::getInstance() {
