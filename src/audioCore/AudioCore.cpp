@@ -31,8 +31,9 @@ AudioCore::AudioCore() {
 	this->audioDeviceListener = std::make_unique<AudioDeviceChangeListener>(this);
 	this->audioDeviceManager->addChangeListener(this->audioDeviceListener.get());
 
-	/** Audio Device Selector */
-	this->audioDebugger = std::make_unique<AudioDebugger>(this);
+	/** Audio Debug */
+	this->commandProcessor = std::make_unique<AudioCommand>(this);
+	this->audioDebugger = std::make_unique<AudioDebugger>(this, this->commandProcessor.get());
 
 	/** Init Audio Device */
 	this->initAudioDevice();

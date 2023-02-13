@@ -3,11 +3,12 @@
 #include <JuceHeader.h>
 
 class AudioCore;
+class AudioCommand;
 
 class AudioDebugger : public juce::Component {
 public:
 	AudioDebugger() = delete;
-	AudioDebugger(AudioCore* parent);
+	AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor);
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
@@ -16,6 +17,7 @@ public:
 
 private:
 	AudioCore* const parent = nullptr;
+	AudioCommand* const commandProcessor = nullptr;
 
 	std::unique_ptr<juce::AudioDeviceSelectorComponent> deviceSelector = nullptr;
 

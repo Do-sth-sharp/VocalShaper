@@ -1,8 +1,11 @@
 ﻿#include "AudioDebugger.h"
 #include "AudioCore.h"
 
-AudioDebugger::AudioDebugger(AudioCore* parent) 
-	: parent(parent){
+AudioDebugger::AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor)
+	: parent(parent), commandProcessor(commandProcessor) {
+	jassert(parent);
+	jassert(commandProcessor);
+
 	this->setOpaque(true);
 
 	this->deviceSelector = std::make_unique<juce::AudioDeviceSelectorComponent>(

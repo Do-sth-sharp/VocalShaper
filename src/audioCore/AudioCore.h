@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "AudioCommand.h"
 
 class AudioDeviceChangeListener;
 
@@ -55,6 +56,7 @@ private:
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
+	std::unique_ptr<AudioCommand> commandProcessor = nullptr;
 
 	friend class AudioDeviceChangeListener;
 	void initAudioDevice();
