@@ -10,7 +10,7 @@ public:
 	AudioCommand(AudioCore* parent);
 
 public:
-	using CommandResult = std::tuple<bool, juce::String>;
+	using CommandResult = std::tuple<bool, juce::String, juce::String>;
 	using CommandCallback = std::function<void(const CommandResult&)>;
 
 	const CommandResult processCommand(const juce::String& command);
