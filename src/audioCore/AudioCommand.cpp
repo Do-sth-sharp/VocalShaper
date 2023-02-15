@@ -1,11 +1,12 @@
 ﻿#include "AudioCommand.h"
+#include "AudioCore.h"
 
 class CommandParser {
 	CommandParser() = delete;
 
 private:
 	using CommandFuncResult = std::tuple<bool, juce::String>;
-	using CommandFunc = std::function<CommandFuncResult(const juce::StringArray&)>;
+	using CommandFunc = std::function<CommandFuncResult(AudioCore*, const juce::StringArray&)>;
 	using FuncMap = std::map<juce::String, CommandFunc>;
 
 	static juce::StringArray split(const juce::String& command) {
@@ -38,7 +39,7 @@ private:
 		return result;
 	};
 
-	static CommandFuncResult searchThenDo(const FuncMap& funcMap, const juce::StringArray& command) {
+	static CommandFuncResult searchThenDo(AudioCore* audioCore, const FuncMap& funcMap, const juce::StringArray& command) {
 		if (command.size() == 0) {
 			return CommandFuncResult{ false, "Empty Command" };
 		}
@@ -47,22 +48,74 @@ private:
 		if (itFunc != funcMap.end()) {
 			juce::StringArray nextCommand{ command };
 			nextCommand.remove(0);
-			return itFunc->second(nextCommand);
+			return itFunc->second(audioCore, nextCommand);
 		}
 
 		return CommandFuncResult{ false, "Invalid Command:" + command[0] };
 	};
 
 private:
-	static CommandFuncResult echoFunc(const juce::StringArray& command) {
-		return CommandFuncResult{ true, "Echo Test Result" };
+	static CommandFuncResult echoDeviceAudioFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		juce::String result;
+
+		auto setup = audioCore->audioDeviceManager->getAudioDeviceSetup();
+		auto currentDevice = audioCore->audioDeviceManager->getCurrentAudioDevice();
+		auto currentType = audioCore->audioDeviceManager->getCurrentAudioDeviceType();
+
+		result += "========================================================================\n";
+		result += "Current Audio Device Information\n";
+		result += "========================================================================\n";
+		result += "Sample Rate: " + juce::String(currentDevice->getCurrentSampleRate()) + "\n";
+		result += "Buffer Size: " + juce::String(currentDevice->getCurrentBufferSizeSamples()) + "\n";
+		result += "Bit Depth: " + juce::String(currentDevice->getCurrentBitDepth()) + "\n";
+		result += "Device Type: " + currentType + "\n";
+		result += "========================================================================\n";
+		result += "Input Device: " + setup.inputDeviceName + "\n";
+		result += "Input Latency: " + juce::String(currentDevice->getInputLatencyInSamples()) + "\n";
+		result += "Input Channels:\n";
+		auto inputChannels = currentDevice->getInputChannelNames();
+		auto activeInputChannels = currentDevice->getActiveInputChannels();
+		for (int i = 0; i < inputChannels.size(); i++) {
+			result += "\t[" + juce::String(i) + "] " + inputChannels[i] + " - " + (activeInputChannels[i] ? "ON" : "OFF") + "\n";
+		}
+		result += "========================================================================\n";
+		result += "Output Device: " + setup.outputDeviceName + "\n";
+		result += "Output Latency: " + juce::String(currentDevice->getOutputLatencyInSamples()) + "\n";
+		result += "Output Channels:\n";
+		auto outputChannels = currentDevice->getOutputChannelNames();
+		auto activeOutputChannels = currentDevice->getActiveOutputChannels();
+		for (int i = 0; i < outputChannels.size(); i++) {
+			result += "\t[" + juce::String(i) + "] " + outputChannels[i] + " - " + (activeOutputChannels[i] ? "ON" : "OFF") + "\n";
+		}
+		result += "========================================================================\n";
+
+		return CommandFuncResult{ true, result };
 	};
 
-	static CommandFuncResult parse(const juce::StringArray& command) {
+	static CommandFuncResult echoDeviceMIDIFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		return CommandFuncResult{ true, "Echo MIDI Test Result" };
+	};
+
+	static CommandFuncResult echoDeviceFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["audio"] = CommandParser::echoDeviceAudioFunc;
+		funcMap["midi"] = CommandParser::echoDeviceMIDIFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult echoFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["device"] = CommandParser::echoDeviceFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult parse(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
 		funcMap["echo"] = CommandParser::echoFunc;
 
-		return CommandParser::searchThenDo(funcMap, command);
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
 public:
@@ -71,7 +124,7 @@ public:
 			return AudioCommand::CommandResult{ false, command, "Invalid Audio Core" };
 		}
 
-		auto result = CommandParser::parse(CommandParser::split(command));
+		auto result = CommandParser::parse(audioCore, CommandParser::split(command));
 		return AudioCommand::CommandResult{
 			std::get<0>(result), command, std::get<1>(result) };
 	};

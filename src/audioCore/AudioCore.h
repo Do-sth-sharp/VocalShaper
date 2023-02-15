@@ -52,6 +52,7 @@ public:
 
 private:
 	friend class AudioDebugger;
+	friend class CommandParser;
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
