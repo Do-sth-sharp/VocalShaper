@@ -93,7 +93,26 @@ private:
 	};
 
 	static CommandFuncResult echoDeviceMIDIFunc(AudioCore* audioCore, const juce::StringArray& command) {
-		return CommandFuncResult{ true, "Echo MIDI Test Result" };
+		juce::String result;
+		
+		auto midiInputList = juce::MidiInput::getAvailableDevices();
+		auto midiOutputDevice = audioCore->audioDeviceManager->getDefaultMidiOutput();
+
+		result += "========================================================================\n";
+		result += "Current MIDI Device Information\n";
+		result += "========================================================================\n";
+		result += "MIDI Input Devices:\n";
+		for (int i = 0; i < midiInputList.size(); i++) {
+			auto& device = midiInputList.getReference(i);
+			result += "\t[" + juce::String(i) + "] " + device.name + " - " + (audioCore->audioDeviceManager->isMidiInputDeviceEnabled(device.identifier) ? "ON" : "OFF") + "\n";
+			result += "\t\t" + device.identifier + "\n";
+		}
+		result += "========================================================================\n";
+		result += "MIDI Output Device: " + (midiOutputDevice ? midiOutputDevice->getName() : "") + "\n";
+		result += "MIDI Output Device ID: " + (midiOutputDevice ? midiOutputDevice->getIdentifier() : "") + "\n";
+		result += "========================================================================\n";
+
+		return CommandFuncResult{ true, result };
 	};
 
 	static CommandFuncResult echoDeviceFunc(AudioCore* audioCore, const juce::StringArray& command) {
