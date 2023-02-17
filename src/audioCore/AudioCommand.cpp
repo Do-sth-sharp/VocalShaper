@@ -130,9 +130,41 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult listDeviceAudioFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		juce::String result;
+
+		//TODO
+
+		return CommandFuncResult{ true, result };
+	};
+
+	static CommandFuncResult listDeviceMIDIFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		juce::String result;
+
+		//TODO
+
+		return CommandFuncResult{ true, result };
+	};
+
+	static CommandFuncResult listDeviceFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["audio"] = CommandParser::listDeviceAudioFunc;
+		funcMap["midi"] = CommandParser::listDeviceMIDIFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult listFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["device"] = CommandParser::listDeviceFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
 	static CommandFuncResult parse(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
 		funcMap["echo"] = CommandParser::echoFunc;
+		funcMap["list"] = CommandParser::listFunc;
 
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
