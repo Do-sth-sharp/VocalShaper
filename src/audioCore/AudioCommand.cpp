@@ -141,7 +141,26 @@ private:
 	static CommandFuncResult listDeviceMIDIFunc(AudioCore* audioCore, const juce::StringArray& command) {
 		juce::String result;
 
-		//TODO
+		auto midiInputList = juce::MidiInput::getAvailableDevices();
+		auto midiOutputList = juce::MidiOutput::getAvailableDevices();
+
+		result += "========================================================================\n";
+		result += "MIDI Device List\n";
+		result += "========================================================================\n";
+		result += "MIDI Input Devices:\n";
+		for (int i = 0; i < midiInputList.size(); i++) {
+			auto& device = midiInputList.getReference(i);
+			result += "\t[" + juce::String(i) + "] " + device.name + "\n";
+			result += "\t\t" + device.identifier + "\n";
+		}
+		result += "========================================================================\n";
+		result += "MIDI Output Devices:\n";
+		for (int i = 0; i < midiOutputList.size(); i++) {
+			auto& device = midiOutputList.getReference(i);
+			result += "\t[" + juce::String(i) + "] " + device.name + "\n";
+			result += "\t\t" + device.identifier + "\n";
+		}
+		result += "========================================================================\n";
 
 		return CommandFuncResult{ true, result };
 	};
