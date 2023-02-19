@@ -133,7 +133,32 @@ private:
 	static CommandFuncResult listDeviceAudioFunc(AudioCore* audioCore, const juce::StringArray& command) {
 		juce::String result;
 
-		//TODO
+		auto& deviceTypes = audioCore->audioDeviceManager->getAvailableDeviceTypes();
+		for (auto& i : deviceTypes) {
+			i->scanForDevices();
+		}
+
+		result += "========================================================================\n";
+		result += "Audio Device List\n";
+		result += "========================================================================\n";
+		result += "Input Device:\n";
+		for (auto& i : deviceTypes) {
+			auto deviceList = i->getDeviceNames(true);
+			for (auto& deviceName : deviceList) {
+				auto device = i->createDevice(juce::String(), deviceName);
+				//TODO
+			}
+		}
+		result += "========================================================================\n";
+		result += "Output Device:\n";
+		for (auto& i : deviceTypes) {
+			auto deviceList = i->getDeviceNames(false);
+			for (auto& deviceName : deviceList) {
+				auto device = i->createDevice(deviceName, juce::String());
+				//TODO
+			}
+		}
+		result += "========================================================================\n";
 
 		return CommandFuncResult{ true, result };
 	};
