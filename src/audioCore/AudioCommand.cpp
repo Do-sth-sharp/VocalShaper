@@ -142,20 +142,78 @@ private:
 		result += "Audio Device List\n";
 		result += "========================================================================\n";
 		result += "Input Device:\n";
-		for (auto& i : deviceTypes) {
-			auto deviceList = i->getDeviceNames(true);
+		result += "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+		for (auto& type : deviceTypes) {
+			static int deviceTypeCount = 0;
+			result += "\t[Type " + juce::String(deviceTypeCount++) + "] " + type->getTypeName() + "\n";
+			result += "------------------------------------------------------------------------\n";
+
+			auto deviceList = type->getDeviceNames(true);
 			for (auto& deviceName : deviceList) {
-				auto device = i->createDevice(juce::String(), deviceName);
-				//TODO
+				static int deviceCount = 0;
+
+				auto device = type->createDevice(juce::String(), deviceName);
+				
+				result += "\t\t[" + juce::String(deviceCount++) + "] " + deviceName + "\n";
+				result += "\t\t\tSample Rate: ";
+				auto sampleRateList = device->getAvailableSampleRates();
+				for (auto i : sampleRateList) {
+					result += juce::String(i) + " ";
+				}
+				result += "\n";
+				result += "\t\t\tBuffer Size: ";
+				auto bufferSizeList = device->getAvailableBufferSizes();
+				for (auto i : bufferSizeList) {
+					result += juce::String(i) + " ";
+				}
+				result += "\n";
+				result += "\t\t\tBit Depth: " + juce::String(device->getCurrentBitDepth()) + "\n";
+				result += "\t\t\tLatency: " + juce::String(device->getInputLatencyInSamples()) + "\n";
+				result += "\t\t\tChannels: ";
+				auto channelList = device->getInputChannelNames();
+				for (int i = 0; i < channelList.size(); i++) {
+					result += juce::String(i) + "." + channelList[i] + " ";
+				}
+				result += "\n";
+
 			}
 		}
 		result += "========================================================================\n";
 		result += "Output Device:\n";
-		for (auto& i : deviceTypes) {
-			auto deviceList = i->getDeviceNames(false);
+		result += "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+		for (auto& type : deviceTypes) {
+			static int deviceTypeCount = 0;
+			result += "\t[Type " + juce::String(deviceTypeCount++) + "] " + type->getTypeName() + "\n";
+			result += "------------------------------------------------------------------------\n";
+
+			auto deviceList = type->getDeviceNames(false);
 			for (auto& deviceName : deviceList) {
-				auto device = i->createDevice(deviceName, juce::String());
-				//TODO
+				static int deviceCount = 0;
+
+				auto device = type->createDevice(deviceName, juce::String());
+
+				result += "\t\t[" + juce::String(deviceCount++) + "] " + deviceName + "\n";
+				result += "\t\t\tSample Rate: ";
+				auto sampleRateList = device->getAvailableSampleRates();
+				for (auto i : sampleRateList) {
+					result += juce::String(i) + " ";
+				}
+				result += "\n";
+				result += "\t\t\tBuffer Size: ";
+				auto bufferSizeList = device->getAvailableBufferSizes();
+				for (auto i : bufferSizeList) {
+					result += juce::String(i) + " ";
+				}
+				result += "\n";
+				result += "\t\t\tBit Depth: " + juce::String(device->getCurrentBitDepth()) + "\n";
+				result += "\t\t\tLatency: " + juce::String(device->getOutputLatencyInSamples()) + "\n";
+				result += "\t\t\tChannels: ";
+				auto channelList = device->getOutputChannelNames();
+				for (int i = 0; i < channelList.size(); i++) {
+					result += juce::String(i) + "." + channelList[i] + " ";
+				}
+				result += "\n";
+
 			}
 		}
 		result += "========================================================================\n";
