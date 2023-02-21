@@ -76,7 +76,7 @@ private:
 		auto inputChannels = currentDevice->getInputChannelNames();
 		auto activeInputChannels = currentDevice->getActiveInputChannels();
 		for (int i = 0; i < inputChannels.size(); i++) {
-			result += "\t[" + juce::String(i) + "] " + inputChannels[i] + " - " + (activeInputChannels[i] ? "ON" : "OFF") + "\n";
+			result += "    [" + juce::String(i) + "] " + inputChannels[i] + " - " + (activeInputChannels[i] ? "ON" : "OFF") + "\n";
 		}
 		result += "========================================================================\n";
 		result += "Output Device: " + setup.outputDeviceName + "\n";
@@ -85,7 +85,7 @@ private:
 		auto outputChannels = currentDevice->getOutputChannelNames();
 		auto activeOutputChannels = currentDevice->getActiveOutputChannels();
 		for (int i = 0; i < outputChannels.size(); i++) {
-			result += "\t[" + juce::String(i) + "] " + outputChannels[i] + " - " + (activeOutputChannels[i] ? "ON" : "OFF") + "\n";
+			result += "    [" + juce::String(i) + "] " + outputChannels[i] + " - " + (activeOutputChannels[i] ? "ON" : "OFF") + "\n";
 		}
 		result += "========================================================================\n";
 
@@ -104,8 +104,8 @@ private:
 		result += "MIDI Input Devices:\n";
 		for (int i = 0; i < midiInputList.size(); i++) {
 			auto& device = midiInputList.getReference(i);
-			result += "\t[" + juce::String(i) + "] " + device.name + " - " + (audioCore->audioDeviceManager->isMidiInputDeviceEnabled(device.identifier) ? "ON" : "OFF") + "\n";
-			result += "\t\t" + device.identifier + "\n";
+			result += "    [" + juce::String(i) + "] " + device.name + " - " + (audioCore->audioDeviceManager->isMidiInputDeviceEnabled(device.identifier) ? "ON" : "OFF") + "\n";
+			result += "        " + device.identifier + "\n";
 		}
 		result += "========================================================================\n";
 		result += "MIDI Output Device: " + (midiOutputDevice ? midiOutputDevice->getName() : "") + "\n";
@@ -145,7 +145,7 @@ private:
 		result += "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 		for (auto& type : deviceTypes) {
 			static int deviceTypeCount = 0;
-			result += "\t[Type " + juce::String(deviceTypeCount++) + "] " + type->getTypeName() + "\n";
+			result += "    [Type " + juce::String(deviceTypeCount++) + "] " + type->getTypeName() + "\n";
 			result += "------------------------------------------------------------------------\n";
 
 			auto deviceList = type->getDeviceNames(true);
@@ -154,28 +154,29 @@ private:
 
 				auto device = type->createDevice(juce::String(), deviceName);
 				
-				result += "\t\t[" + juce::String(deviceCount++) + "] " + deviceName + "\n";
-				result += "\t\t\tSample Rate: ";
+				result += "        [" + juce::String(deviceCount++) + "] " + deviceName + "\n";
+				result += "            Sample Rate: ";
 				auto sampleRateList = device->getAvailableSampleRates();
 				for (auto i : sampleRateList) {
 					result += juce::String(i) + " ";
 				}
 				result += "\n";
-				result += "\t\t\tBuffer Size: ";
+				result += "            Buffer Size: ";
 				auto bufferSizeList = device->getAvailableBufferSizes();
 				for (auto i : bufferSizeList) {
 					result += juce::String(i) + " ";
 				}
 				result += "\n";
-				result += "\t\t\tBit Depth: " + juce::String(device->getCurrentBitDepth()) + "\n";
-				result += "\t\t\tLatency: " + juce::String(device->getInputLatencyInSamples()) + "\n";
-				result += "\t\t\tChannels: ";
+				result += "            Bit Depth: " + juce::String(device->getCurrentBitDepth()) + "\n";
+				result += "            Latency: " + juce::String(device->getInputLatencyInSamples()) + "\n";
+				result += "            Channels: ";
 				auto channelList = device->getInputChannelNames();
 				for (int i = 0; i < channelList.size(); i++) {
 					result += juce::String(i) + "." + channelList[i] + " ";
 				}
 				result += "\n";
 
+				delete device;
 			}
 		}
 		result += "========================================================================\n";
@@ -183,7 +184,7 @@ private:
 		result += "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 		for (auto& type : deviceTypes) {
 			static int deviceTypeCount = 0;
-			result += "\t[Type " + juce::String(deviceTypeCount++) + "] " + type->getTypeName() + "\n";
+			result += "    [Type " + juce::String(deviceTypeCount++) + "] " + type->getTypeName() + "\n";
 			result += "------------------------------------------------------------------------\n";
 
 			auto deviceList = type->getDeviceNames(false);
@@ -192,28 +193,29 @@ private:
 
 				auto device = type->createDevice(deviceName, juce::String());
 
-				result += "\t\t[" + juce::String(deviceCount++) + "] " + deviceName + "\n";
-				result += "\t\t\tSample Rate: ";
+				result += "        [" + juce::String(deviceCount++) + "] " + deviceName + "\n";
+				result += "            Sample Rate: ";
 				auto sampleRateList = device->getAvailableSampleRates();
 				for (auto i : sampleRateList) {
 					result += juce::String(i) + " ";
 				}
 				result += "\n";
-				result += "\t\t\tBuffer Size: ";
+				result += "            Buffer Size: ";
 				auto bufferSizeList = device->getAvailableBufferSizes();
 				for (auto i : bufferSizeList) {
 					result += juce::String(i) + " ";
 				}
 				result += "\n";
-				result += "\t\t\tBit Depth: " + juce::String(device->getCurrentBitDepth()) + "\n";
-				result += "\t\t\tLatency: " + juce::String(device->getOutputLatencyInSamples()) + "\n";
-				result += "\t\t\tChannels: ";
+				result += "            Bit Depth: " + juce::String(device->getCurrentBitDepth()) + "\n";
+				result += "            Latency: " + juce::String(device->getOutputLatencyInSamples()) + "\n";
+				result += "            Channels: ";
 				auto channelList = device->getOutputChannelNames();
 				for (int i = 0; i < channelList.size(); i++) {
 					result += juce::String(i) + "." + channelList[i] + " ";
 				}
 				result += "\n";
 
+				delete device;
 			}
 		}
 		result += "========================================================================\n";
@@ -233,15 +235,15 @@ private:
 		result += "MIDI Input Devices:\n";
 		for (int i = 0; i < midiInputList.size(); i++) {
 			auto& device = midiInputList.getReference(i);
-			result += "\t[" + juce::String(i) + "] " + device.name + "\n";
-			result += "\t\t" + device.identifier + "\n";
+			result += "    [" + juce::String(i) + "] " + device.name + "\n";
+			result += "         " + device.identifier + "\n";
 		}
 		result += "========================================================================\n";
 		result += "MIDI Output Devices:\n";
 		for (int i = 0; i < midiOutputList.size(); i++) {
 			auto& device = midiOutputList.getReference(i);
-			result += "\t[" + juce::String(i) + "] " + device.name + "\n";
-			result += "\t\t" + device.identifier + "\n";
+			result += "    [" + juce::String(i) + "] " + device.name + "\n";
+			result += "        " + device.identifier + "\n";
 		}
 		result += "========================================================================\n";
 

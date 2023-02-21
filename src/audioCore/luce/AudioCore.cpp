@@ -113,7 +113,7 @@ namespace luce {
 				| juce::ComponentPeer::windowHasCloseButton
 				| juce::ComponentPeer::windowHasMinimiseButton
 				| juce::ComponentPeer::windowHasDropShadow);
-			ptrSelector->centreWithSize(600, 400);
+			ptrSelector->centreWithSize(1200, 400);
 		}
 		else {
 			ptrSelector->removeFromDesktop();
