@@ -100,26 +100,14 @@ namespace luce {
 		return 1;
 	}
 
-	LUCE_METHOD(setAudioDebuggerVisible) {
+	LUCE_METHOD(getAudioDebugger) {
 		auto audioCore = AudioCore::getInstance();
-		auto ptrSelector = audioCore->getAudioDebugger();
+		auto ptrDebuggger = audioCore->getAudioDebugger();
 
-		bool show = lua_toboolean(L, 1);
-		if (show) {
-			ptrSelector->addToDesktop(
-				juce::ComponentPeer::windowAppearsOnTaskbar
-				| juce::ComponentPeer::windowHasTitleBar
-				| juce::ComponentPeer::windowIsResizable
-				| juce::ComponentPeer::windowHasCloseButton
-				| juce::ComponentPeer::windowHasMinimiseButton
-				| juce::ComponentPeer::windowHasDropShadow);
-			ptrSelector->centreWithSize(1200, 400);
-		}
-		else {
-			ptrSelector->removeFromDesktop();
-		}
-		ptrSelector->setVisible(show);
-		return 0;
+		using juce::Component;
+		LUCE_PUSH_USERDATA(L, Component, debugger, (*ptrDebuggger));
+
+		return 1;
 	}
 
 	LUCE_METHOD_LIST(AudioCore);
@@ -135,7 +123,7 @@ namespace luce {
 		playTestSound,
 		getAllMIDIInputDeviceList,
 		getAllMIDIOutputDeviceList,
-		setAudioDebuggerVisible
+		getAudioDebugger
 	);
 
 	LUCE_NEW(AudioCore) {

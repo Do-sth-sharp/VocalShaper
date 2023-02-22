@@ -6,3 +6,4 @@ countries: cn
 "Resource" = "资源"
 "Pattern" = "样式"
 "Track" = "轨道"
+"AudioDebugger" = "音频调试器"

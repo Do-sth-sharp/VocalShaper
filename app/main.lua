@@ -40,6 +40,7 @@ luce.initialise = function(commandLineParameters)
 	resourceView = luce.FlowComponent.new("Resource")
 	patternView = luce.FlowComponent.new("Pattern")
 	trackView = luce.FlowComponent.new("Track")
+	audioDebugger = require("ui.AudioDebugger")
 
 	luce.FlowWindow.layout("./layouts/" .. conf.layout .. ".json",
 		toolBar, resourceView, patternView, trackView)
@@ -48,9 +49,8 @@ luce.initialise = function(commandLineParameters)
 	if windowNum > 0 then
 		local mainWindow = luce.FlowWindow.getWindow(0)
 		mainWindow:setFullScreen(true)
+		mainWindow:openComponent(audioDebugger)
 	end
-
-	luce.AudioCore.setAudioDebuggerVisible(true)
 end
 
 luce.shutdown = function()
