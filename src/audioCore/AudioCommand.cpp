@@ -87,7 +87,7 @@ private:
 		for (int i = 0; i < outputChannels.size(); i++) {
 			result += "    [" + juce::String(i) + "] " + outputChannels[i] + " - " + (activeOutputChannels[i] ? "ON" : "OFF") + "\n";
 		}
-		result += "========================================================================\n";
+		result += "========================================================================";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -110,7 +110,7 @@ private:
 		result += "========================================================================\n";
 		result += "MIDI Output Device: " + (midiOutputDevice ? midiOutputDevice->getName() : "") + "\n";
 		result += "MIDI Output Device ID: " + (midiOutputDevice ? midiOutputDevice->getIdentifier() : "") + "\n";
-		result += "========================================================================\n";
+		result += "========================================================================";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -218,7 +218,7 @@ private:
 				delete device;
 			}
 		}
-		result += "========================================================================\n";
+		result += "========================================================================";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -245,7 +245,7 @@ private:
 			result += "    [" + juce::String(i) + "] " + device.name + "\n";
 			result += "        " + device.identifier + "\n";
 		}
-		result += "========================================================================\n";
+		result += "========================================================================";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -265,10 +265,50 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult setDeviceAudioFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (command.size() < 2) {
+			return CommandFuncResult{ false, "Invalid operand or value count"};
+		}
+		
+		juce::String result;
+
+		//TODO
+
+		return CommandFuncResult{ true, result };
+	};
+
+	static CommandFuncResult setDeviceMIDIFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (command.size() < 2) {
+			return CommandFuncResult{ false, "Invalid operand or value count" };
+		}
+		
+		juce::String result;
+
+		//TODO
+
+		return CommandFuncResult{ true, result };
+	};
+
+	static CommandFuncResult setDeviceFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["audio"] = CommandParser::setDeviceAudioFunc;
+		funcMap["midi"] = CommandParser::setDeviceMIDIFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult setFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["device"] = CommandParser::setDeviceFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
 	static CommandFuncResult parse(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
 		funcMap["echo"] = CommandParser::echoFunc;
 		funcMap["list"] = CommandParser::listFunc;
+		funcMap["set"] = CommandParser::setFunc;
 
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
