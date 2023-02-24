@@ -33,13 +33,18 @@ public:
 	static const juce::StringArray getAllAudioInputDeviceList();
 	static const juce::StringArray getAllAudioOutputDeviceList();
 
-	void setAudioInputDevice(const juce::String& deviceName);
-	void setAudioOutputDevice(const juce::String& deviceName);
+	const juce::String setAudioInputDevice(const juce::String& deviceName);
+	const juce::String setAudioOutputDevice(const juce::String& deviceName);
 	const juce::String getAudioInputDeviceName() const;
 	const juce::String getAudioOutputDeviceName() const;
 
 	void setCurrentAudioDeviceType(const juce::String& typeName);
 	const juce::String getCurrentAudioDeivceType() const;
+
+	const juce::String setAudioSampleRate(double value);
+	const juce::String setAudioBufferSize(int value);
+	double getAudioSampleRate() const;
+	int getAudioBufferSize() const;
 
 	void playTestSound() const;
 

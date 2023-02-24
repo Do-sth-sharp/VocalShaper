@@ -42,12 +42,16 @@ AudioDebugger::AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor)
 
 				text += ">>>" + std::get<1>(result) + "\n";
 				if (std::get<0>(result)) {
-					text += std::get<2>(result) + "\n";
+					text += std::get<2>(result);
 				}
 				else {
 					text += "<<<FAILED!!!>>>\n";
-					text += std::get<2>(result) + "\n";
+					text += std::get<2>(result);
 				}
+				if (text.length() > 0 && text.getLastCharacter() != '\n') {
+					text += "\n";
+				}
+				text += "\n";
 				output->setText(text);
 				output->moveCaretToEnd();
 			}

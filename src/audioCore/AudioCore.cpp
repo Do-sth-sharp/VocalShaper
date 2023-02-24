@@ -163,22 +163,18 @@ const juce::StringArray AudioCore::getAllAudioOutputDeviceList() {
 	return AudioCore::getAllAudioDeviceList(false);
 }
 
-void AudioCore::setAudioInputDevice(const juce::String& deviceName) {
+const juce::String  AudioCore::setAudioInputDevice(const juce::String& deviceName) {
 	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
 	deviceSetup.inputDeviceName = deviceName;
 	deviceSetup.useDefaultInputChannels = true;
-	this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
-
-	this->updateAudioBuses();
+	return this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
 }
 
-void AudioCore::setAudioOutputDevice(const juce::String& deviceName) {
+const juce::String  AudioCore::setAudioOutputDevice(const juce::String& deviceName) {
 	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
 	deviceSetup.outputDeviceName = deviceName;
 	deviceSetup.useDefaultOutputChannels = true;
-	this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
-
-	this->updateAudioBuses();
+	return this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
 }
 
 const juce::String AudioCore::getAudioInputDeviceName() const {
@@ -197,6 +193,28 @@ void AudioCore::setCurrentAudioDeviceType(const juce::String& typeName) {
 
 const juce::String AudioCore::getCurrentAudioDeivceType() const {
 	return this->audioDeviceManager->getCurrentAudioDeviceType();
+}
+
+const juce::String  AudioCore::setAudioSampleRate(double value) {
+	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	deviceSetup.sampleRate = value;
+	return this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
+}
+
+const juce::String  AudioCore::setAudioBufferSize(int value) {
+	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	deviceSetup.bufferSize = value;
+	return this->audioDeviceManager->setAudioDeviceSetup(deviceSetup, true);
+}
+
+double AudioCore::getAudioSampleRate() const {
+	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	return deviceSetup.sampleRate;
+}
+
+int AudioCore::getAudioBufferSize() const {
+	auto deviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	return deviceSetup.bufferSize;
 }
 
 void AudioCore::playTestSound() const {

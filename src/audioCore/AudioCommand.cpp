@@ -87,7 +87,7 @@ private:
 		for (int i = 0; i < outputChannels.size(); i++) {
 			result += "    [" + juce::String(i) + "] " + outputChannels[i] + " - " + (activeOutputChannels[i] ? "ON" : "OFF") + "\n";
 		}
-		result += "========================================================================";
+		result += "========================================================================\n";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -110,7 +110,7 @@ private:
 		result += "========================================================================\n";
 		result += "MIDI Output Device: " + (midiOutputDevice ? midiOutputDevice->getName() : "") + "\n";
 		result += "MIDI Output Device ID: " + (midiOutputDevice ? midiOutputDevice->getIdentifier() : "") + "\n";
-		result += "========================================================================";
+		result += "========================================================================\n";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -218,7 +218,7 @@ private:
 				delete device;
 			}
 		}
-		result += "========================================================================";
+		result += "========================================================================\n";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -245,7 +245,7 @@ private:
 			result += "    [" + juce::String(i) + "] " + device.name + "\n";
 			result += "        " + device.identifier + "\n";
 		}
-		result += "========================================================================";
+		result += "========================================================================\n";
 
 		return CommandFuncResult{ true, result };
 	};
@@ -272,7 +272,70 @@ private:
 		
 		juce::String result;
 
-		//TODO
+		/** Set Device Type */
+		if (command[0] == "type") {
+			audioCore->setCurrentAudioDeviceType(command[1]);
+
+			result += "Current Audio Device Type: " + audioCore->audioDeviceManager->getCurrentAudioDeviceType() + "\n";
+			result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
+			result += "Current Audio Output Device: " + audioCore->getAudioOutputDeviceName() + "\n";
+		}
+		/** Set Input Device */
+		else if (command[0] == "input") {
+			auto err = audioCore->setAudioInputDevice(command[1]);
+			if (err.isNotEmpty()) {
+				result += err;
+				if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
+					result += "\n";
+				}
+			}
+
+			result += "Current Audio Device Type: " + audioCore->audioDeviceManager->getCurrentAudioDeviceType() + "\n";
+			result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
+			result += "Current Audio Output Device: " + audioCore->getAudioOutputDeviceName() + "\n";
+		}
+		/** Set Output Device */
+		else if (command[0] == "output") {
+			auto err = audioCore->setAudioOutputDevice(command[1]);
+			if (err.isNotEmpty()) {
+				result += err;
+				if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
+					result += "\n";
+				}
+			}
+
+			result += "Current Audio Device Type: " + audioCore->audioDeviceManager->getCurrentAudioDeviceType() + "\n";
+			result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
+			result += "Current Audio Output Device: " + audioCore->getAudioOutputDeviceName() + "\n";
+		}
+		/** Set Sample Rate */
+		else if (command[0] == "sampleRate") {
+			auto err = audioCore->setAudioSampleRate(command[1].getDoubleValue());
+			if (err.isNotEmpty()) {
+				result += err;
+				if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
+					result += "\n";
+				}
+			}
+
+			result += "Current Audio Sample Rate: " + juce::String(audioCore->getAudioSampleRate()) + "\n";
+		}
+		/** Set Buffer Size */
+		else if (command[0] == "bufferSize") {
+			auto err = audioCore->setAudioBufferSize(command[1].getIntValue());
+			if (err.isNotEmpty()) {
+				result += err;
+				if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
+					result += "\n";
+				}
+			}
+
+			result += "Current Audio Buffer Size: " + juce::String(audioCore->getAudioBufferSize()) + "\n";
+		}
+		/** Invalid Command */
+		else {
+			return CommandFuncResult{ true, "Invalid Command:" + command[0] };
+		}
 
 		return CommandFuncResult{ true, result };
 	};
@@ -325,6 +388,8 @@ public:
 	};
 };
 
+#if VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
+
 class CommandAsyncThread : public juce::Thread {
 	AudioCore* const parent = nullptr;
 	const juce::String command;
@@ -355,6 +420,8 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CommandAsyncThread);
 };
 
+#endif // VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
+
 AudioCommand::AudioCommand(AudioCore* parent) 
 	: parent(parent) {
 	jassert(parent);
@@ -365,5 +432,13 @@ const AudioCommand::CommandResult AudioCommand::processCommand(const juce::Strin
 }
 
 void AudioCommand::processCommandAsync(const juce::String& command, AudioCommand::CommandCallback callback) {
+#if VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
 	CommandAsyncThread::call(this->parent, command, callback);
+#else
+	auto asyncFunc = [audioCore = this->parent, command, callback] {
+		auto result = CommandParser::run(audioCore, command);
+		juce::MessageManager::callAsync([callback, result] { callback(result); });
+	};
+	juce::MessageManager::callAsync(asyncFunc);
+#endif
 }

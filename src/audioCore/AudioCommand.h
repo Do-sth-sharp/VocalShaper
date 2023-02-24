@@ -2,6 +2,10 @@
 
 #include <JuceHeader.h>
 
+#ifndef VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
+#define VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD 0
+#endif // !VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
+
 class AudioCore;
 
 class AudioCommand {
