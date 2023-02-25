@@ -48,6 +48,9 @@ public:
 
 	void playTestSound() const;
 
+	void setMIDIInputDeviceEnabled(const juce::String& deviceID, bool enabled);
+	void setMIDIOutputDevice(const juce::String& deviceID);
+
 	static const juce::StringArray getAllMIDIDeviceList(bool isInput = false);
 
 	static const juce::StringArray getAllMIDIInputDeviceList();

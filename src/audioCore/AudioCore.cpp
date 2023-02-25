@@ -221,6 +221,19 @@ void AudioCore::playTestSound() const {
 	this->audioDeviceManager->playTestSound();
 }
 
+void AudioCore::setMIDIInputDeviceEnabled(const juce::String& deviceID, bool enabled) {
+	if (enabled) {
+		this->audioDeviceManager->addMidiInputDeviceCallback(deviceID, this->mainGraphPlayer.get());
+	}
+	else {
+		this->audioDeviceManager->removeMidiInputDeviceCallback(deviceID, this->mainGraphPlayer.get());
+	}
+}
+
+void AudioCore::setMIDIOutputDevice(const juce::String& deviceID) {
+	this->audioDeviceManager->setDefaultMidiOutputDevice(deviceID);
+}
+
 const juce::StringArray AudioCore::getAllMIDIDeviceList(bool isInput) {
 	auto list = isInput
 		? juce::MidiInput::getAvailableDevices()
