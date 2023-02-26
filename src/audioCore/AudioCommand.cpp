@@ -341,13 +341,24 @@ private:
 	};
 
 	static CommandFuncResult setDeviceMIDIFunc(AudioCore* audioCore, const juce::StringArray& command) {
-		if (command.size() < 2) {
+		if (command.size() < 1) {
 			return CommandFuncResult{ false, "Invalid operand or value count" };
 		}
-		
+
 		juce::String result;
 
-		//TODO
+		if (command[0] == "input") {
+			if (command.size() < 3) {
+				return CommandFuncResult{ false, "Invalid operand or value count" };
+			}
+			//TODO Set Input Device Enabled
+		}
+		else if (command[0] == "output") {
+			if (command.size() < 2) {
+				return CommandFuncResult{ false, "Invalid operand or value count" };
+			}
+			//TODO Set Output Device
+		}
 
 		return CommandFuncResult{ true, result };
 	};
