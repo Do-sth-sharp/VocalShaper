@@ -50,6 +50,8 @@ public:
 
 	void setMIDIInputDeviceEnabled(const juce::String& deviceID, bool enabled);
 	void setMIDIOutputDevice(const juce::String& deviceID);
+	bool getMIDIInputDeviceEnabled(const juce::String& deviceID) const;
+	const juce::String getMIDIOutputDevice() const;
 
 	static const juce::StringArray getAllMIDIDeviceList(bool isInput = false);
 

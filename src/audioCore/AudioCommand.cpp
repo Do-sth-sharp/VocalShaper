@@ -334,7 +334,7 @@ private:
 		}
 		/** Invalid Command */
 		else {
-			return CommandFuncResult{ true, "Invalid Command:" + command[0] };
+			return CommandFuncResult{ false, "Invalid Command:" + command[0] };
 		}
 
 		return CommandFuncResult{ true, result };
@@ -347,17 +347,28 @@ private:
 
 		juce::String result;
 
+		/** Set Input Device Enabled */
 		if (command[0] == "input") {
 			if (command.size() < 3) {
 				return CommandFuncResult{ false, "Invalid operand or value count" };
 			}
-			//TODO Set Input Device Enabled
+			if (command[2] != "ON" && command[2] != "OFF") {
+				return CommandFuncResult{ true, "Invalid Status:" + command[2] };
+			}
+			audioCore->setMIDIInputDeviceEnabled(command[1], command[2] == "ON");
+			result += "MIDI Input Device: " + command[1] + " - " + (audioCore->getMIDIInputDeviceEnabled(command[1]) ? "ON" : "OFF") + "\n";
 		}
+		/** Set Output Device */
 		else if (command[0] == "output") {
 			if (command.size() < 2) {
 				return CommandFuncResult{ false, "Invalid operand or value count" };
 			}
-			//TODO Set Output Device
+			audioCore->setMIDIOutputDevice(command[1]);
+			result += "MIDI Output Device: " + command[1] + "\n";
+		}
+		/** Invalid Command */
+		else {
+			return CommandFuncResult{ false, "Invalid Command:" + command[0] };
 		}
 
 		return CommandFuncResult{ true, result };
