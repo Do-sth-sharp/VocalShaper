@@ -35,27 +35,26 @@ AudioDebugger::AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor)
 		input->clear();
 		command->processCommandAsync(str, [output](const AudioCommand::CommandResult& result) {
 			if (output) {
-				auto text = output->getText();
-				if (text.length() > 0 && text.getLastCharacter() != '\n') {
-					text += "\n";
+				auto currentText = output->getText();
+				output->moveCaretToEnd();
+				if (currentText.isNotEmpty() && currentText.getLastCharacter() != '\n') {
+					output->insertTextAtCaret("\n");
 				}
 
-				text += ">>>" + std::get<1>(result) + "\n";
+				output->insertTextAtCaret(">>>" + std::get<1>(result) + "\n");
 				if (std::get<0>(result)) {
-					text += std::get<2>(result);
+					output->insertTextAtCaret(std::get<2>(result));
 				}
 				else {
-					text += "<<<FAILED!!!>>>\n";
-					text += std::get<2>(result);
+					output->insertTextAtCaret("<<<FAILED!!!>>>\n");
+					output->insertTextAtCaret(std::get<2>(result));
 				}
-				if (text.length() > 0 && text.getLastCharacter() != '\n') {
-					text += "\n";
+				if (!output->isEmpty() && std::get<2>(result).getLastCharacter() != '\n') {
+					output->insertTextAtCaret("\n");
 				}
-				text += "\n";
-				output->setText(text);
-				output->moveCaretToEnd();
+				output->insertTextAtCaret("\n");
 			}
-			});
+		});
 	};
 	this->addAndMakeVisible(this->commandInput.get());
 }
