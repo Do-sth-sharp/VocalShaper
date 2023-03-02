@@ -110,6 +110,16 @@ namespace luce {
 		return 1;
 	}
 
+	LUCE_METHOD(getMIDIDebugger) {
+		auto audioCore = AudioCore::getInstance();
+		auto ptrDebuggger = audioCore->getMIDIDebugger();
+
+		using juce::Component;
+		LUCE_PUSH_USERDATA(L, Component, debugger, (*ptrDebuggger));
+
+		return 1;
+	}
+
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
 		getAllAudioInputDeviceList,
@@ -123,7 +133,8 @@ namespace luce {
 		playTestSound,
 		getAllMIDIInputDeviceList,
 		getAllMIDIOutputDeviceList,
-		getAudioDebugger
+		getAudioDebugger,
+		getMIDIDebugger
 	);
 
 	LUCE_NEW(AudioCore) {

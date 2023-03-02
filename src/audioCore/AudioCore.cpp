@@ -2,6 +2,7 @@
 #include "MainGraph.h"
 
 #include "AudioDebugger.h"
+#include "MIDIDebugger.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -34,6 +35,16 @@ AudioCore::AudioCore() {
 	/** Audio Debug */
 	this->commandProcessor = std::make_unique<AudioCommand>(this);
 	this->audioDebugger = std::make_unique<AudioDebugger>(this, this->commandProcessor.get());
+
+	/** MIDI Debug */
+	this->midiDebugger = std::make_unique<MIDIDebugger>();
+	dynamic_cast<MainGraph*>(this->mainAudioGraph.get())->setMIDIMessageHook(
+		[debugger = juce::Component::SafePointer(dynamic_cast<MIDIDebugger*>(this->midiDebugger.get()))] 
+		(const juce::MidiMessage& mes) {
+			if (debugger) {
+				debugger->addMessage(mes);
+			}
+		});
 
 	/** Init Audio Device */
 	this->initAudioDevice();
@@ -259,6 +270,10 @@ const juce::StringArray AudioCore::getAllMIDIOutputDeviceList() {
 
 juce::Component* AudioCore::getAudioDebugger() const {
 	return this->audioDebugger.get();
+}
+
+juce::Component* AudioCore::getMIDIDebugger() const {
+	return this->midiDebugger.get();
 }
 
 void AudioCore::initAudioDevice() {

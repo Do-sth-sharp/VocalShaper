@@ -15,5 +15,16 @@ void MIDIDebugger::resized() {
 }
 
 void MIDIDebugger::addMessage(const juce::MidiMessage& message) {
-	//TODO
+	juce::String text;
+	text += message.getDescription();
+	text += " | ";
+	text += juce::String::toHexString(message.getRawData(), message.getRawDataSize(), 1);
+	text += "\n";
+	juce::MessageManager::callAsync(
+		[output = juce::Component::SafePointer(this->messageOutput.get()), text] {
+			if (output) {
+				output->moveCaretToEnd();
+				output->insertTextAtCaret(text);
+			}
+		});
 }

@@ -79,3 +79,44 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 			{this->audioOutputNode->nodeID, i} });
 	}
 }
+
+void MainGraph::setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook) {
+	juce::ScopedWriteLock locker(this->hookLock);
+	this->midiHook = hook;
+}
+
+void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
+	/** Call MIDI Hook */
+	{
+		juce::ScopedReadLock locker(this->hookLock);
+		if (this->midiHook) {
+			for (auto m : midi) {
+				juce::MessageManager::callAsync(
+					[mes = m.getMessage(), hook = this->midiHook] {
+						hook(mes);
+					});
+			}
+		}
+	}
+
+	/** Process Audio Block */
+	this->juce::AudioProcessorGraph::processBlock(audio, midi);
+}
+
+void MainGraph::processBlock(juce::AudioBuffer<double>& audio, juce::MidiBuffer& midi) {
+	/** Call MIDI Hook */
+	{
+		juce::ScopedReadLock locker(this->hookLock);
+		if (this->midiHook) {
+			for (auto m : midi) {
+				juce::MessageManager::callAsync(
+					[mes = m.getMessage(), hook = this->midiHook] {
+						hook(mes);
+					});
+			}
+		}
+	}
+
+	/** Process Audio Block */
+	this->juce::AudioProcessorGraph::processBlock(audio, midi);
+}

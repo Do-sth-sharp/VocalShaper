@@ -59,6 +59,7 @@ public:
 	static const juce::StringArray getAllMIDIOutputDeviceList();
 
 	juce::Component* getAudioDebugger() const;
+	juce::Component* getMIDIDebugger() const;
 
 private:
 	friend class AudioDebugger;
@@ -67,6 +68,7 @@ private:
 	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
+	std::unique_ptr<juce::Component> midiDebugger = nullptr;
 	std::unique_ptr<AudioCommand> commandProcessor = nullptr;
 
 	friend class AudioDeviceChangeListener;

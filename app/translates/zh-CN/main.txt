@@ -7,3 +7,4 @@ countries: cn
 "Pattern" = "样式"
 "Track" = "轨道"
 "AudioDebugger" = "音频调试器"
+"MIDIDebugger" = "MIDI调试器"
