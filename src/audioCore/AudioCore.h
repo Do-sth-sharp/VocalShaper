@@ -70,6 +70,7 @@ private:
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
 	std::unique_ptr<juce::Component> midiDebugger = nullptr;
 	std::unique_ptr<AudioCommand> commandProcessor = nullptr;
+	std::unique_ptr<juce::AudioPluginFormatManager> audioPluginManager = nullptr;
 
 	friend class AudioDeviceChangeListener;
 	void initAudioDevice();

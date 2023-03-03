@@ -4,3 +4,9 @@
 [submodule "RemixIcon"]
 	path = RemixIcon
 	url = https://github.com/Remix-Design/RemixIcon.git
+[submodule "vst3sdk"]
+	path = vst3sdk
+	url = https://github.com/steinbergmedia/vst3sdk.git
+[submodule "vst2-sdk-for-vst3sdk"]
+	path = vst2-sdk-for-vst3sdk
+	url = https://github.com/Do-sth-sharp/vst2-sdk-for-vst3sdk.git
