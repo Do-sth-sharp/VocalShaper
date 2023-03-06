@@ -258,9 +258,18 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult listPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+
+		//TODO
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
 	static CommandFuncResult listFunc(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
 		funcMap["device"] = CommandParser::listDeviceFunc;
+		funcMap["plugin"] = CommandParser::listPluginFunc;
 
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
