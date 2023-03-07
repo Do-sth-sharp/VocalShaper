@@ -398,11 +398,26 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult searchPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		//TODO
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult searchFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["plugin"] = CommandParser::searchPluginFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
 	static CommandFuncResult parse(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
 		funcMap["echo"] = CommandParser::echoFunc;
 		funcMap["list"] = CommandParser::listFunc;
 		funcMap["set"] = CommandParser::setFunc;
+		funcMap["search"] = CommandParser::searchFunc;
 
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
