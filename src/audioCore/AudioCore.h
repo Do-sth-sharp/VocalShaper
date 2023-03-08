@@ -61,6 +61,9 @@ public:
 	juce::Component* getAudioDebugger() const;
 	juce::Component* getMIDIDebugger() const;
 
+	const juce::StringArray getPluginTypeList() const;
+	const juce::Array<juce::PluginDescription> getPluginList() const;
+
 private:
 	friend class AudioDebugger;
 	friend class CommandParser;

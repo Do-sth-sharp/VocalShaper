@@ -280,6 +280,25 @@ juce::Component* AudioCore::getMIDIDebugger() const {
 	return this->midiDebugger.get();
 }
 
+const juce::StringArray AudioCore::getPluginTypeList() const {
+	auto formatList = this->audioPluginManager->getFormats();
+
+	juce::StringArray result;
+	for (auto i : formatList) {
+		result.add(i->getName());
+	}
+
+	return result;
+}
+
+const juce::Array<juce::PluginDescription> AudioCore::getPluginList() const {
+	juce::Array<juce::PluginDescription> result;
+
+	//TODO
+
+	return result;
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
 	this->audioDeviceManager->initialise(1, 2, nullptr, true);
