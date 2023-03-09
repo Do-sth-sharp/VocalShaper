@@ -8,7 +8,7 @@
 
 class AudioCore;
 
-class AudioCommand {
+class AudioCommand final {
 public:
 	AudioCommand() = delete;
 	AudioCommand(AudioCore* parent);

@@ -50,7 +50,9 @@ AudioCore::AudioCore() {
 	this->initAudioDevice();
 
 	/** Audio Plugin Manager */
-	this->audioPluginManager = std::make_unique<juce::AudioPluginFormatManager>();
+	this->audioPluginManager = std::make_unique<AudioPluginManagerHelper>();
+	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>(
+		this->audioPluginManager.get());
 	this->audioPluginManager->addDefaultFormats();
 }
 

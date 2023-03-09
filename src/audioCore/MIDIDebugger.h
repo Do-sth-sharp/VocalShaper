@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 
-class MIDIDebugger : public juce::Component {
+class MIDIDebugger final : public juce::Component {
 public:
 	MIDIDebugger();
 

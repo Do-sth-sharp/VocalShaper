@@ -5,7 +5,7 @@
 class AudioCore;
 class AudioCommand;
 
-class AudioDebugger : public juce::Component {
+class AudioDebugger final : public juce::Component {
 public:
 	AudioDebugger() = delete;
 	AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor);

@@ -1,7 +1,7 @@
 ﻿#include "AudioCommand.h"
 #include "AudioCore.h"
 
-class CommandParser {
+class CommandParser final {
 	CommandParser() = delete;
 
 private:
@@ -436,7 +436,7 @@ public:
 
 #if VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
 
-class CommandAsyncThread : public juce::Thread {
+class CommandAsyncThread final : public juce::Thread {
 	AudioCore* const parent = nullptr;
 	const juce::String command;
 	const AudioCommand::CommandCallback callback;
