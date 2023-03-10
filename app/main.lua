@@ -9,6 +9,12 @@ luce.initialise = function(commandLineParameters)
 	conf = require("ui.Config")
 	ui = require("ui.themes." .. conf.theme)
 
+	-- Set Audio Config
+	luce.AudioCore.setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt")
+	luce.AudioCore.setPluginListTemporaryFilePath("./data/audio/plugins.xml")
+	luce.AudioCore.setPluginBlackListFilePath("./data/audio/blackPlugins.txt")
+	luce.AudioCore.setDeadPluginListPath("./data/audio/deadPlugins")
+
 	-- Set UI Style
 	require("ui.FlowStyle")
 	updateFlowColor()

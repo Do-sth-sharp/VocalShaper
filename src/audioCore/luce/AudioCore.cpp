@@ -120,6 +120,26 @@ namespace luce {
 		return 1;
 	}
 
+	LUCE_METHOD(setPluginSearchPathListFilePath) {
+		AudioConfig::setPluginSearchPathListFilePath(luaL_checkstring(L, 1));
+		return 0;
+	}
+
+	LUCE_METHOD(setPluginListTemporaryFilePath) {
+		AudioConfig::setPluginListTemporaryFilePath(luaL_checkstring(L, 1));
+		return 0;
+	}
+
+	LUCE_METHOD(setPluginBlackListFilePath) {
+		AudioConfig::setPluginBlackListFilePath(luaL_checkstring(L, 1));
+		return 0;
+	}
+
+	LUCE_METHOD(setDeadPluginListPath) {
+		AudioConfig::setDeadPluginListPath(luaL_checkstring(L, 1));
+		return 0;
+	}
+
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
 		getAllAudioInputDeviceList,
@@ -134,7 +154,11 @@ namespace luce {
 		getAllMIDIInputDeviceList,
 		getAllMIDIOutputDeviceList,
 		getAudioDebugger,
-		getMIDIDebugger
+		getMIDIDebugger,
+		setPluginSearchPathListFilePath,
+		setPluginListTemporaryFilePath,
+		setPluginBlackListFilePath,
+		setDeadPluginListPath
 	);
 
 	LUCE_NEW(AudioCore) {

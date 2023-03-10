@@ -50,10 +50,7 @@ AudioCore::AudioCore() {
 	this->initAudioDevice();
 
 	/** Audio Plugin Manager */
-	this->audioPluginManager = std::make_unique<AudioPluginManagerHelper>();
-	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>(
-		this->audioPluginManager.get());
-	this->audioPluginManager->addDefaultFormats();
+	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>();
 }
 
 AudioCore::~AudioCore() {
@@ -283,7 +280,7 @@ juce::Component* AudioCore::getMIDIDebugger() const {
 }
 
 const juce::StringArray AudioCore::getPluginTypeList() const {
-	auto formatList = this->audioPluginManager->getFormats();
+	auto formatList = this->audioPluginSearchThread->getFormats();
 
 	juce::StringArray result;
 	for (auto i : formatList) {

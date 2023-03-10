@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "AudioCommand.h"
 #include "AudioPluginSearchThread.h"
+#include "AudioConfig.h"
 
 class AudioDeviceChangeListener;
 
@@ -74,7 +75,6 @@ private:
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
 	std::unique_ptr<juce::Component> midiDebugger = nullptr;
 	std::unique_ptr<AudioCommand> commandProcessor = nullptr;
-	std::unique_ptr<AudioPluginManagerHelper> audioPluginManager = nullptr;
 	std::unique_ptr<AudioPluginSearchThread> audioPluginSearchThread = nullptr;
 
 	friend class AudioDeviceChangeListener;
