@@ -12,6 +12,14 @@ public:
 	void clearList();
 	void clearTemporary();
 
+	const juce::StringArray getBlackList() const;
+	void addToBlackList(const juce::String& plugin);
+	void removeFromBlackList(const juce::String& plugin);
+
+	const juce::StringArray getSearchPath() const;
+	void addToSearchPath(const juce::String& path) const;
+	void removeFromSearchPath(const juce::String& path) const;
+
 private:
 	void run() override;
 
@@ -20,7 +28,10 @@ private:
 	std::atomic<bool> pluginListValidFlag = false;
 	std::unique_ptr<juce::AudioPluginFormatManager> audioPluginManager = nullptr;
 
-	void clearTemporaryInternal();
+	void clearTemporaryInternal() const;
+	void saveBlackListInternal(const juce::File& file) const;
+	const juce::File getSearchPathFileInternal() const;
+	void saveSearchPathInternal(const juce::StringArray& paths) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginSearchThread)
 };

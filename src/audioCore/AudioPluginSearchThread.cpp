@@ -53,6 +53,58 @@ void AudioPluginSearchThread::clearTemporary() {
 	this->pluginListValidFlag = false;
 }
 
+const juce::StringArray AudioPluginSearchThread::getBlackList() const {
+	return this->pluginList.getBlacklistedFiles();
+}
+
+void AudioPluginSearchThread::addToBlackList(const juce::String& plugin) {
+	this->pluginList.addToBlacklist(plugin);
+
+	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
+	juce::File blackListFile =
+		juce::File::getCurrentWorkingDirectory().getChildFile(blackListFilePath);
+	this->saveBlackListInternal(blackListFile);
+}
+
+void AudioPluginSearchThread::removeFromBlackList(const juce::String& plugin) {
+	this->pluginList.removeFromBlacklist(plugin);
+
+	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
+	juce::File blackListFile =
+		juce::File::getCurrentWorkingDirectory().getChildFile(blackListFilePath);
+	this->saveBlackListInternal(blackListFile);
+}
+
+const juce::StringArray AudioPluginSearchThread::getSearchPath() const {
+	juce::File file = this->getSearchPathFileInternal();
+
+	juce::StringArray result;
+	juce::File pathListFile = this->getSearchPathFileInternal();
+	if (pathListFile.existsAsFile()) {
+		pathListFile.readLines(result);
+	}
+
+	return result;
+}
+
+void AudioPluginSearchThread::addToSearchPath(const juce::String& path) const {
+	auto paths = this->getSearchPath();
+
+	if (!paths.contains(path)) {
+		paths.add(path);
+	}
+
+	this->saveSearchPathInternal(paths);
+}
+
+void AudioPluginSearchThread::removeFromSearchPath(const juce::String& path) const {
+	auto paths = this->getSearchPath();
+
+	paths.removeString(path);
+
+	this->saveSearchPathInternal(paths);
+}
+
 void AudioPluginSearchThread::run() {
 	/** Get Temporary File */
 	juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
@@ -91,13 +143,7 @@ void AudioPluginSearchThread::run() {
 	}
 
 	/** Get Search Path */
-	juce::StringArray searchPathList;
-	juce::String pathListFilePath = AudioConfig::getPluginSearchPathListFilePath();
-	juce::File pathListFile =
-		juce::File::getCurrentWorkingDirectory().getChildFile(pathListFilePath);
-	if (pathListFile.existsAsFile()) {
-		pathListFile.readLines(searchPathList);
-	}
+	juce::StringArray searchPathList = this->getSearchPath();
 	juce::FileSearchPath searchPath;
 	for (auto& s : searchPathList) {
 		searchPath.addPath(s);
@@ -144,11 +190,7 @@ void AudioPluginSearchThread::run() {
 	}
 	
 	/** Save Black List File */
-	if (!blackListFile.getParentDirectory().exists()) {
-		blackListFile.getParentDirectory().createDirectory();
-	}
-	blackListFile.replaceWithText(
-		this->pluginList.getBlacklistedFiles().joinIntoString("\n"));
+	this->saveBlackListInternal(blackListFile);
 
 	/** Save Plugin Temporary */
 	auto xmlTemp = this->pluginList.createXml();
@@ -163,7 +205,7 @@ void AudioPluginSearchThread::run() {
 	this->pluginListValidFlag = true;
 }
 
-void AudioPluginSearchThread::clearTemporaryInternal() {
+void AudioPluginSearchThread::clearTemporaryInternal() const {
 	juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
 	juce::File temporaryFile =
 		juce::File::getCurrentWorkingDirectory().getChildFile(temporaryFilePath);
@@ -171,4 +213,25 @@ void AudioPluginSearchThread::clearTemporaryInternal() {
 		/** Remove Temporary File */
 		temporaryFile.deleteFile();
 	}
+}
+
+void AudioPluginSearchThread::saveBlackListInternal(const juce::File& file) const {
+	if (!file.getParentDirectory().exists()) {
+		file.getParentDirectory().createDirectory();
+	}
+	file.replaceWithText(
+		this->pluginList.getBlacklistedFiles().joinIntoString("\n"));
+}
+
+const juce::File AudioPluginSearchThread::getSearchPathFileInternal() const {
+	juce::String pathListFilePath = AudioConfig::getPluginSearchPathListFilePath();
+	return juce::File::getCurrentWorkingDirectory().getChildFile(pathListFilePath);
+}
+
+void AudioPluginSearchThread::saveSearchPathInternal(const juce::StringArray& paths) const {
+	juce::File file = this->getSearchPathFileInternal();
+	if (!file.getParentDirectory().exists()) {
+		file.getParentDirectory().createDirectory();
+	}
+	file.replaceWithText(paths.joinIntoString("\n"));
 }
