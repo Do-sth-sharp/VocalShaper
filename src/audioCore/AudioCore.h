@@ -64,7 +64,7 @@ public:
 	juce::Component* getMIDIDebugger() const;
 
 	const juce::StringArray getPluginTypeList() const;
-	const juce::Array<juce::PluginDescription> getPluginList() const;
+	const std::tuple<bool, juce::KnownPluginList&> getPluginList() const;
 
 private:
 	friend class AudioDebugger;

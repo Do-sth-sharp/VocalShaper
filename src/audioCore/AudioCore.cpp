@@ -290,12 +290,8 @@ const juce::StringArray AudioCore::getPluginTypeList() const {
 	return result;
 }
 
-const juce::Array<juce::PluginDescription> AudioCore::getPluginList() const {
-	juce::Array<juce::PluginDescription> result;
-
-	//TODO
-
-	return result;
+const std::tuple<bool, juce::KnownPluginList&> AudioCore::getPluginList() const {
+	return this->audioPluginSearchThread->getPluginList();
 }
 
 void AudioCore::initAudioDevice() {
