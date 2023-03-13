@@ -294,6 +294,38 @@ const std::tuple<bool, juce::KnownPluginList&> AudioCore::getPluginList() const 
 	return this->audioPluginSearchThread->getPluginList();
 }
 
+void AudioCore::clearPluginList() {
+	this->audioPluginSearchThread->clearList();
+}
+
+void AudioCore::clearPluginTemporary() {
+	this->audioPluginSearchThread->clearTemporary();
+}
+
+const juce::StringArray AudioCore::getPluginBlackList() const {
+	return this->audioPluginSearchThread->getBlackList();
+}
+
+void AudioCore::addToPluginBlackList(const juce::String& plugin) {
+	this->audioPluginSearchThread->addToBlackList(plugin);
+}
+
+void AudioCore::removeFromPluginBlackList(const juce::String& plugin) {
+	this->audioPluginSearchThread->removeFromBlackList(plugin);
+}
+
+const juce::StringArray AudioCore::getPluginSearchPath() const {
+	return this->audioPluginSearchThread->getSearchPath();
+}
+
+void AudioCore::addToPluginSearchPath(const juce::String& path) const {
+	this->audioPluginSearchThread->addToSearchPath(path);
+}
+
+void AudioCore::removeFromPluginSearchPath(const juce::String& path) const {
+	this->audioPluginSearchThread->removeFromSearchPath(path);
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
 	this->audioDeviceManager->initialise(1, 2, nullptr, true);

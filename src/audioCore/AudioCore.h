@@ -65,6 +65,16 @@ public:
 
 	const juce::StringArray getPluginTypeList() const;
 	const std::tuple<bool, juce::KnownPluginList&> getPluginList() const;
+	void clearPluginList();
+	void clearPluginTemporary();
+
+	const juce::StringArray getPluginBlackList() const;
+	void addToPluginBlackList(const juce::String& plugin);
+	void removeFromPluginBlackList(const juce::String& plugin);
+
+	const juce::StringArray getPluginSearchPath() const;
+	void addToPluginSearchPath(const juce::String& path) const;
+	void removeFromPluginSearchPath(const juce::String& path) const;
 
 private:
 	friend class AudioDebugger;

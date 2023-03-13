@@ -259,11 +259,40 @@ private:
 	};
 
 	static CommandFuncResult listPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
-		FuncMap funcMap;
+		auto listResult = audioCore->getPluginList();
+		if (!std::get<0>(listResult)) {
+			return CommandFuncResult{ true, "Searching Audio Plugin..." };
+		}
+		
+		juce::String result;
+		result += "========================================================================\n";
+		result += "Plugin List\n";
+		result += "========================================================================\n";
 
-		//TODO
+		auto list = std::get<1>(listResult).getTypes();
+		for (int i = 0; i < list.size(); i++) {
+			result += "[" + juce::String(i) + "]\n";
+			result += "    name: " + list[i].name + "\n";
+			result += "    descriptiveName: " + list[i].descriptiveName + "\n";
+			result += "    pluginFormatName: " + list[i].pluginFormatName + "\n";
+			result += "    category: " + list[i].category + "\n";
+			result += "    manufacturerName: " + list[i].manufacturerName + "\n";
+			result += "    version: " + list[i].version + "\n";
+			result += "    fileOrIdentifier: " + list[i].fileOrIdentifier + "\n";
+			result += "    lastFileModTime: " + list[i].lastFileModTime.toString(true, true, true, true) + "\n";
+			result += "    lastInfoUpdateTime: " + list[i].lastInfoUpdateTime.toString(true, true, true, true) + "\n";
+			result += "    uniqueId: " + juce::String(list[i].uniqueId) + "\n";
+			result += "    isInstrument: " + juce::String(list[i].isInstrument ? "true" : "false") + "\n";
+			result += "    numInputChannels: " + juce::String(list[i].numInputChannels) + "\n";
+			result += "    numOutputChannels: " + juce::String(list[i].numOutputChannels) + "\n";
+			result += "    hasSharedContainer: " + juce::String(list[i].hasSharedContainer ? "true" : "false") + "\n";
+			result += "    hasARAExtension: " + juce::String(list[i].hasARAExtension ? "true" : "false") + "\n";
+			result += "    \n";
+		}
 
-		return CommandParser::searchThenDo(audioCore, funcMap, command);
+		result += "========================================================================\n";
+
+		return CommandFuncResult{ true, result };
 	};
 
 	static CommandFuncResult listFunc(AudioCore* audioCore, const juce::StringArray& command) {
@@ -399,10 +428,10 @@ private:
 	};
 
 	static CommandFuncResult searchPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
-		FuncMap funcMap;
-		//TODO
+		audioCore->clearPluginList();
+		audioCore->getPluginList();
 
-		return CommandParser::searchThenDo(audioCore, funcMap, command);
+		return CommandFuncResult{ true, "Searching Audio Plugin..." };
 	};
 
 	static CommandFuncResult searchFunc(AudioCore* audioCore, const juce::StringArray& command) {

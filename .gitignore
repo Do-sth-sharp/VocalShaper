@@ -60,3 +60,6 @@ cmake-build-*/**
 # Directory Links
 app/RemixIcon/**
 app/lua/luce/**
+
+# App Datas
+app/data/**

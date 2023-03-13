@@ -6,6 +6,8 @@ namespace juce {
 	XmlElement::TextFormat::TextFormat() {}
 }
 
+//TODO Move Plugin Scanner To Another Process
+
 AudioPluginSearchThread::AudioPluginSearchThread()
 	: Thread("Audio Plugin Search Thread") {
 	this->audioPluginManager = std::make_unique<juce::AudioPluginFormatManager>();
