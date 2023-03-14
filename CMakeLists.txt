@@ -31,10 +31,23 @@ set (ARA_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ARA_SDK")
 
 add_subdirectory (LUCE-cpp)
 
+# Plugin Searcher Target
+file (GLOB_RECURSE PLUGINSEARCHER_SRC "./pluginSearcher/*.cpp")
+add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
+if (MSVC)
+    target_compile_definitions (PluginSearcher PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
+endif (MSVC)
+target_compile_definitions (PluginSearcher PRIVATE "LUCE_DLL_BUILD=1")
+target_link_libraries (PluginSearcher PRIVATE libJUCE)
+add_dependencies (PluginSearcher libJUCE)
+
+set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+
+# Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC})
 target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1")
 target_link_libraries (VocalShaper PRIVATE libLUCE)
-add_dependencies (VocalShaper libLUCE)
+add_dependencies (VocalShaper libLUCE PluginSearcher)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")

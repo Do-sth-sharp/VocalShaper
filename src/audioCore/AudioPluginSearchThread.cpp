@@ -1,12 +1,16 @@
 ﻿#include "AudioPluginSearchThread.h"
 #include "AudioConfig.h"
 
-/** Fixed JUCE Symbol Export */
-namespace juce {
-	XmlElement::TextFormat::TextFormat() {}
-}
-
-//TODO Move Plugin Scanner To Another Process
+/** Plugin Searcher Path */
+#if JUCE_WINDOWS
+#define PluginSearcherPath "./PluginSearcher.exe"
+#elif JUCE_LINUX
+#define PluginSearcherPath "./PluginSearcher"
+#elif JUCE_MAC
+#define PluginSearcherPath "./PluginSearcher"
+#else
+#define PluginSearcherPath "./PluginSearcher"
+#endif // JUCE_WINDOWS
 
 AudioPluginSearchThread::AudioPluginSearchThread()
 	: Thread("Audio Plugin Search Thread") {
@@ -81,9 +85,8 @@ const juce::StringArray AudioPluginSearchThread::getSearchPath() const {
 	juce::File file = this->getSearchPathFileInternal();
 
 	juce::StringArray result;
-	juce::File pathListFile = this->getSearchPathFileInternal();
-	if (pathListFile.existsAsFile()) {
-		pathListFile.readLines(result);
+	if (file.existsAsFile()) {
+		file.readLines(result);
 	}
 
 	return result;
@@ -112,6 +115,44 @@ void AudioPluginSearchThread::run() {
 	juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
 	juce::File temporaryFile =
 		juce::File::getCurrentWorkingDirectory().getChildFile(temporaryFilePath);
+
+	/** If Temporary File Doesn't Exist */
+	if (!temporaryFile.existsAsFile()) {
+		/** Init Child Process */
+		juce::ChildProcess process;
+
+		/** Get Searcher Path */
+		juce::File searcher = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+			.getParentDirectory().getChildFile(PluginSearcherPath);
+		juce::String searcherPath = searcher.getFullPathName().quoted();
+
+		/** Get Command Args */
+		juce::String arg0 = AudioConfig::getPluginSearchPathListFilePath().quoted();
+		juce::String arg1 = AudioConfig::getPluginListTemporaryFilePath().quoted();
+		juce::String arg2 = AudioConfig::getPluginBlackListFilePath().quoted();
+		juce::String arg3 = AudioConfig::getDeadPluginListPath().quoted();
+
+		/** Get Process Command */
+		juce::String processCommand
+			= searcherPath + " " + arg0 + " " + arg1 + " " + arg2 + " " + arg3;
+
+		/** Start Process */
+		process.start(processCommand, 0);
+
+		/** Wait For Process Finished */
+		while (process.isRunning()) {
+			/** Check If Thread Terminate */
+			if (this->threadShouldExit()) {
+				process.kill();
+				return;
+			}
+
+			/** Thread Sleep */
+			juce::Thread::sleep(10);
+		}
+	}
+
+	/** Read Temporary File */
 	if (temporaryFile.existsAsFile()) {
 		/** Load From Xml File */
 		auto xmlElement = juce::XmlDocument::parse(temporaryFile);
@@ -128,83 +169,6 @@ void AudioPluginSearchThread::run() {
 			temporaryFile.deleteFile();
 		}
 	}
-
-	/** Get Black List */
-	juce::StringArray blackList;
-	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
-	juce::File blackListFile =
-		juce::File::getCurrentWorkingDirectory().getChildFile(blackListFilePath);
-	if (blackListFile.existsAsFile()) {
-		blackListFile.readLines(blackList);
-
-		/** Apply Black List */
-		this->pluginList.clearBlacklistedFiles();
-		for (auto& s : blackList) {
-			this->pluginList.addToBlacklist(s);
-		}
-	}
-
-	/** Get Search Path */
-	juce::StringArray searchPathList = this->getSearchPath();
-	juce::FileSearchPath searchPath;
-	for (auto& s : searchPathList) {
-		searchPath.addPath(s);
-	}
-
-	/** Get Dead List Path */
-	juce::String deadListPath = AudioConfig::getDeadPluginListPath();
-	juce::File deadListFile =
-		juce::File::getCurrentWorkingDirectory().getChildFile(deadListPath);
-	if (!deadListFile.exists()) {
-		deadListFile.createDirectory();
-	}
-
-	/** Get All Support Plugin Type */
-	auto pluginTypes = this->audioPluginManager->getFormats();
-	juce::StringArray deadPlugins;
-	for (auto type : pluginTypes) {
-		/** Prepare Dead List File */
-		juce::File deadFile = deadListFile.getChildFile(type->getName() + ".txt");
-
-		/** Init The Scanner */
-		juce::PluginDirectoryScanner scanner(
-			this->pluginList, *type, searchPath, true, deadFile, true);
-
-		/** Scan Plugins */
-		juce::String currentPlugin;
-		while (scanner.scanNextFile(true, currentPlugin)) {
-			/** Check For Stop */
-			if (this->threadShouldExit()) {
-				this->pluginList.clear();
-				this->pluginList.clearBlacklistedFiles();
-				this->pluginListValidFlag = false;
-				return;
-			}
-		}
-
-		/** Save Dead Plugins */
-		deadPlugins.addArray(scanner.getFailedFiles());
-	}
-
-	/** Apply Dead Plugins As Black List */
-	for (auto& s : deadPlugins) {
-		this->pluginList.addToBlacklist(s);
-	}
-	
-	/** Save Black List File */
-	this->saveBlackListInternal(blackListFile);
-
-	/** Save Plugin Temporary */
-	auto xmlTemp = this->pluginList.createXml();
-	if (xmlTemp) {
-		if (!temporaryFile.getParentDirectory().exists()) {
-			temporaryFile.getParentDirectory().createDirectory();
-		}
-		temporaryFile.replaceWithText(xmlTemp->toString());
-	}
-
-	/** Set List Valid Flag */
-	this->pluginListValidFlag = true;
 }
 
 void AudioPluginSearchThread::clearTemporaryInternal() const {
