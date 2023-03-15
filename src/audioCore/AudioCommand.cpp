@@ -563,10 +563,18 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult clearPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (audioCore->pluginSearchThreadIsRunning()) {
+			return CommandFuncResult{ false, "Don't clear plugin list while searching plugin." };
+		}
+
+		audioCore->clearPluginTemporary();
+		return CommandFuncResult{ true, "Clear plugin list." };
+	};
+
 	static CommandFuncResult clearFunc(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
-		/*funcMap["plugin"] = CommandParser::removePluginFunc;*/
-		/** TODO */
+		funcMap["plugin"] = CommandParser::clearPluginFunc;
 
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
