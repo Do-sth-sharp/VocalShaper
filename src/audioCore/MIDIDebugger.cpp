@@ -7,6 +7,7 @@ MIDIDebugger::MIDIDebugger()
 	this->messageOutput->setReadOnly(true);
 	this->messageOutput->setTabKeyUsedAsCharacter(true);
 	this->messageOutput->setScrollToShowCursor(true);
+	this->messageOutput->setScrollbarsShown(false);
 	this->addAndMakeVisible(this->messageOutput.get());
 }
 
