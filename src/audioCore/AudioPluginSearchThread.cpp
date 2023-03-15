@@ -60,25 +60,33 @@ void AudioPluginSearchThread::clearTemporary() {
 }
 
 const juce::StringArray AudioPluginSearchThread::getBlackList() const {
-	return this->pluginList.getBlacklistedFiles();
+	juce::File file = this->getBlackListFileInternal();
+
+	juce::StringArray result;
+	if (file.existsAsFile()) {
+		file.readLines(result);
+	}
+	result.removeEmptyStrings(true);
+
+	return result;
 }
 
-void AudioPluginSearchThread::addToBlackList(const juce::String& plugin) {
-	this->pluginList.addToBlacklist(plugin);
+void AudioPluginSearchThread::addToBlackList(const juce::String& plugin) const {
+	auto list = this->getBlackList();
 
-	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
-	juce::File blackListFile =
-		juce::File::getCurrentWorkingDirectory().getChildFile(blackListFilePath);
-	this->saveBlackListInternal(blackListFile);
+	if (!list.contains(plugin)) {
+		list.add(plugin);
+	}
+
+	this->saveBlackListInternal(list);
 }
 
-void AudioPluginSearchThread::removeFromBlackList(const juce::String& plugin) {
-	this->pluginList.removeFromBlacklist(plugin);
+void AudioPluginSearchThread::removeFromBlackList(const juce::String& plugin) const {
+	auto list = this->getBlackList();
 
-	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
-	juce::File blackListFile =
-		juce::File::getCurrentWorkingDirectory().getChildFile(blackListFilePath);
-	this->saveBlackListInternal(blackListFile);
+	list.removeString(plugin);
+
+	this->saveBlackListInternal(list);
 }
 
 const juce::StringArray AudioPluginSearchThread::getSearchPath() const {
@@ -88,6 +96,7 @@ const juce::StringArray AudioPluginSearchThread::getSearchPath() const {
 	if (file.existsAsFile()) {
 		file.readLines(result);
 	}
+	result.removeEmptyStrings(true);
 
 	return result;
 }
@@ -181,12 +190,17 @@ void AudioPluginSearchThread::clearTemporaryInternal() const {
 	}
 }
 
-void AudioPluginSearchThread::saveBlackListInternal(const juce::File& file) const {
+const juce::File AudioPluginSearchThread::getBlackListFileInternal() const {
+	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
+	return juce::File::getCurrentWorkingDirectory().getChildFile(blackListFilePath);
+}
+
+void AudioPluginSearchThread::saveBlackListInternal(const juce::StringArray& blackList) const {
+	juce::File file = this->getBlackListFileInternal();
 	if (!file.getParentDirectory().exists()) {
 		file.getParentDirectory().createDirectory();
 	}
-	file.replaceWithText(
-		this->pluginList.getBlacklistedFiles().joinIntoString("\n"));
+	file.replaceWithText(blackList.joinIntoString("\n"));
 }
 
 const juce::File AudioPluginSearchThread::getSearchPathFileInternal() const {

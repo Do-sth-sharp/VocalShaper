@@ -302,15 +302,19 @@ void AudioCore::clearPluginTemporary() {
 	this->audioPluginSearchThread->clearTemporary();
 }
 
+bool AudioCore::pluginSearchThreadIsRunning() const {
+	return this->audioPluginSearchThread->isThreadRunning();
+}
+
 const juce::StringArray AudioCore::getPluginBlackList() const {
 	return this->audioPluginSearchThread->getBlackList();
 }
 
-void AudioCore::addToPluginBlackList(const juce::String& plugin) {
+void AudioCore::addToPluginBlackList(const juce::String& plugin) const {
 	this->audioPluginSearchThread->addToBlackList(plugin);
 }
 
-void AudioCore::removeFromPluginBlackList(const juce::String& plugin) {
+void AudioCore::removeFromPluginBlackList(const juce::String& plugin) const {
 	this->audioPluginSearchThread->removeFromBlackList(plugin);
 }
 

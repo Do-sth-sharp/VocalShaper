@@ -111,6 +111,7 @@ const juce::StringArray PluginSearcher::getSearchPath() const {
 	if (file.existsAsFile()) {
 		file.readLines(result);
 	}
+	result.removeEmptyStrings(true);
 
 	return result;
 }
@@ -127,6 +128,7 @@ const juce::StringArray PluginSearcher::getBlackList() const {
 	if (file.existsAsFile()) {
 		file.readLines(result);
 	}
+	result.removeEmptyStrings(true);
 
 	return result;
 }

@@ -67,13 +67,32 @@ public:
 	const std::tuple<bool, juce::KnownPluginList&> getPluginList() const;
 	void clearPluginList();
 	void clearPluginTemporary();
+	bool pluginSearchThreadIsRunning() const;
 
+	/**
+	 * @attention	Don't change plugin black list while searching plugin.
+	 */
 	const juce::StringArray getPluginBlackList() const;
-	void addToPluginBlackList(const juce::String& plugin);
-	void removeFromPluginBlackList(const juce::String& plugin);
+	/**
+	 * @attention	Don't change plugin black list while searching plugin.
+	 */
+	void addToPluginBlackList(const juce::String& plugin) const;
+	/**
+	 * @attention	Don't change plugin black list while searching plugin.
+	 */
+	void removeFromPluginBlackList(const juce::String& plugin) const;
 
+	/**
+	 * @attention	Don't change plugin search path while searching plugin.
+	 */
 	const juce::StringArray getPluginSearchPath() const;
+	/**
+	 * @attention	Don't change plugin search path while searching plugin.
+	 */
 	void addToPluginSearchPath(const juce::String& path) const;
+	/**
+	 * @attention	Don't change plugin search path while searching plugin.
+	 */
 	void removeFromPluginSearchPath(const juce::String& path) const;
 
 private:

@@ -258,7 +258,47 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult listPluginBlackListFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		juce::String result;
+
+		result += "========================================================================\n";
+		result += "Plugin Black List\n";
+		result += "========================================================================\n";
+
+		auto blackList = audioCore->getPluginBlackList();
+		for (auto& s : blackList) {
+			result += s + "\n";
+		}
+		result += "========================================================================\n";
+
+		return CommandFuncResult{ true, result };
+	};
+
+	static CommandFuncResult listPluginSearchPathFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		juce::String result;
+
+		result += "========================================================================\n";
+		result += "Plugin Search Path\n";
+		result += "========================================================================\n";
+
+		auto searchPath = audioCore->getPluginSearchPath();
+		for (auto& s : searchPath) {
+			result += s + "\n";
+		}
+		result += "========================================================================\n";
+
+		return CommandFuncResult{ true, result };
+	};
+
 	static CommandFuncResult listPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["blackList"] = CommandParser::listPluginBlackListFunc;
+		funcMap["searchPath"] = CommandParser::listPluginSearchPathFunc;
+		auto subResult = CommandParser::searchThenDo(audioCore, funcMap, command);
+		if (std::get<0>(subResult)) {
+			return subResult;
+		}
+		
 		auto listResult = audioCore->getPluginList();
 		if (!std::get<0>(listResult)) {
 			return CommandFuncResult{ true, "Searching Audio Plugin..." };
@@ -441,12 +481,105 @@ private:
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};
 
+	static CommandFuncResult addPluginBlackListFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (command.size() != 1) {
+			return CommandFuncResult{ false, "Invalid value count" };
+		}
+
+		if (audioCore->pluginSearchThreadIsRunning()) {
+			return CommandFuncResult{ false, "Don't change plugin black list while searching plugin." };
+		}
+
+		audioCore->addToPluginBlackList(command[0]);
+		return CommandFuncResult{ true, "Add to plugin black list." };
+	};
+
+	static CommandFuncResult addPluginSearchPathFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (command.size() != 1) {
+			return CommandFuncResult{ false, "Invalid value count" };
+		}
+
+		if (audioCore->pluginSearchThreadIsRunning()) {
+			return CommandFuncResult{ false, "Don't change plugin search path while searching plugin." };
+		}
+
+		audioCore->addToPluginSearchPath(command[0]);
+		return CommandFuncResult{ true, "Add to plugin search path." };
+	};
+
+	static CommandFuncResult addPluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["blackList"] = CommandParser::addPluginBlackListFunc;
+		funcMap["searchPath"] = CommandParser::addPluginSearchPathFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult addFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["plugin"] = CommandParser::addPluginFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult removePluginBlackListFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (command.size() != 1) {
+			return CommandFuncResult{ false, "Invalid value count" };
+		}
+
+		if (audioCore->pluginSearchThreadIsRunning()) {
+			return CommandFuncResult{ false, "Don't change plugin black list while searching plugin." };
+		}
+
+		audioCore->removeFromPluginBlackList(command[0]);
+		return CommandFuncResult{ true, "Remove from plugin black list." };
+	};
+
+	static CommandFuncResult removePluginSearchPathFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		if (command.size() != 1) {
+			return CommandFuncResult{ false, "Invalid value count" };
+		}
+
+		if (audioCore->pluginSearchThreadIsRunning()) {
+			return CommandFuncResult{ false, "Don't change plugin search path while searching plugin." };
+		}
+
+		audioCore->removeFromPluginSearchPath(command[0]);
+		return CommandFuncResult{ true, "Remove from plugin search path." };
+	};
+
+	static CommandFuncResult removePluginFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["blackList"] = CommandParser::removePluginBlackListFunc;
+		funcMap["searchPath"] = CommandParser::removePluginSearchPathFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult removeFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		funcMap["plugin"] = CommandParser::removePluginFunc;
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
+	static CommandFuncResult clearFunc(AudioCore* audioCore, const juce::StringArray& command) {
+		FuncMap funcMap;
+		/*funcMap["plugin"] = CommandParser::removePluginFunc;*/
+		/** TODO */
+
+		return CommandParser::searchThenDo(audioCore, funcMap, command);
+	};
+
 	static CommandFuncResult parse(AudioCore* audioCore, const juce::StringArray& command) {
 		FuncMap funcMap;
 		funcMap["echo"] = CommandParser::echoFunc;
 		funcMap["list"] = CommandParser::listFunc;
 		funcMap["set"] = CommandParser::setFunc;
 		funcMap["search"] = CommandParser::searchFunc;
+		funcMap["add"] = CommandParser::addFunc;
+		funcMap["remove"] = CommandParser::removeFunc;
+		funcMap["clear"] = CommandParser::clearFunc;
 
 		return CommandParser::searchThenDo(audioCore, funcMap, command);
 	};

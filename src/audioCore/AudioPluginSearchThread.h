@@ -13,8 +13,8 @@ public:
 	void clearTemporary();
 
 	const juce::StringArray getBlackList() const;
-	void addToBlackList(const juce::String& plugin);
-	void removeFromBlackList(const juce::String& plugin);
+	void addToBlackList(const juce::String& plugin) const;
+	void removeFromBlackList(const juce::String& plugin) const;
 
 	const juce::StringArray getSearchPath() const;
 	void addToSearchPath(const juce::String& path) const;
@@ -29,7 +29,8 @@ private:
 	std::unique_ptr<juce::AudioPluginFormatManager> audioPluginManager = nullptr;
 
 	void clearTemporaryInternal() const;
-	void saveBlackListInternal(const juce::File& file) const;
+	const juce::File getBlackListFileInternal() const;
+	void saveBlackListInternal(const juce::StringArray& blackList) const;
 	const juce::File getSearchPathFileInternal() const;
 	void saveSearchPathInternal(const juce::StringArray& paths) const;
 
