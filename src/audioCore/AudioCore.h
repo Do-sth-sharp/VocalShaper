@@ -4,6 +4,7 @@
 #include "AudioCommand.h"
 #include "AudioPluginSearchThread.h"
 #include "AudioConfig.h"
+#include "MainGraph.h"
 
 class AudioDeviceChangeListener;
 
@@ -95,11 +96,20 @@ public:
 	 */
 	void removeFromPluginSearchPath(const juce::String& path) const;
 
+	/**
+	 * @brief	Get the Mixer Processor.
+	 */
+	Mixer* getMixer() const;
+	/**
+	 * @brief	Get the Sequencer Processor.
+	 */
+	Sequencer* getSequencer() const;
+
 private:
 	friend class AudioDebugger;
 	friend class CommandParser;
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
-	std::unique_ptr<juce::AudioProcessorGraph> mainAudioGraph = nullptr;
+	std::unique_ptr<MainGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
 	std::unique_ptr<juce::Component> midiDebugger = nullptr;

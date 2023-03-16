@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "Mixer.h"
+#include "Sequencer.h"
 
 class MainGraph final : public juce::AudioProcessorGraph {
 public:
@@ -15,6 +17,15 @@ public:
 	 * @brief	Set the MIDI Message Hook.
 	 */
 	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook);
+
+	/**
+	 * @brief	Get the Mixer Processor.
+	 */
+	Mixer* getMixer() const;
+	/**
+	 * @brief	Get the Sequencer Processor.
+	 */
+	Sequencer* getSequencer() const;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr sequencer;

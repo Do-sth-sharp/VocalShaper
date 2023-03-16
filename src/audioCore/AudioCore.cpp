@@ -1,5 +1,4 @@
 ﻿#include "AudioCore.h"
-#include "MainGraph.h"
 
 #include "AudioDebugger.h"
 #include "MIDIDebugger.h"
@@ -38,7 +37,7 @@ AudioCore::AudioCore() {
 
 	/** MIDI Debug */
 	this->midiDebugger = std::make_unique<MIDIDebugger>();
-	dynamic_cast<MainGraph*>(this->mainAudioGraph.get())->setMIDIMessageHook(
+	this->mainAudioGraph->setMIDIMessageHook(
 		[debugger = juce::Component::SafePointer(dynamic_cast<MIDIDebugger*>(this->midiDebugger.get()))] 
 		(const juce::MidiMessage& mes) {
 			if (debugger) {
@@ -330,6 +329,14 @@ void AudioCore::removeFromPluginSearchPath(const juce::String& path) const {
 	this->audioPluginSearchThread->removeFromSearchPath(path);
 }
 
+Mixer* AudioCore::getMixer() const {
+	return this->mainAudioGraph->getMixer();
+}
+
+Sequencer* AudioCore::getSequencer() const {
+	return this->mainAudioGraph->getSequencer();
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
 	this->audioDeviceManager->initialise(1, 2, nullptr, true);
@@ -346,7 +353,7 @@ void AudioCore::initAudioDevice() {
 
 void AudioCore::updateAudioBuses() {
 	/** Link Audio Bus To Sequencer And Mixer */
-	auto mainGraph = dynamic_cast<MainGraph*>(this->mainAudioGraph.get());
+	auto mainGraph = this->mainAudioGraph.get();
 	if (mainGraph) {
 		/** Get Input Channel Num */
 		auto audioDeviceSetup = this->audioDeviceManager->getAudioDeviceSetup();

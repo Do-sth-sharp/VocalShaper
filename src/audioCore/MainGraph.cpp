@@ -1,6 +1,4 @@
 ﻿#include "MainGraph.h"
-#include "Sequencer.h"
-#include "Mixer.h"
 
 MainGraph::MainGraph() {
 	/** The Main Audio IO Node */
@@ -52,11 +50,11 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	this->audioOutputNode->getProcessor()->setBusesLayout(outputLayout);
 
 	/** Set Layout Of Sequencer And Mixer */
-	auto sequencer = dynamic_cast<Sequencer*>(this->sequencer->getProcessor());
+	auto sequencer = this->getSequencer();
 	if (sequencer) {
 		sequencer->setInputChannels(busLayout.inputBuses);
 	}
-	auto mixer = dynamic_cast<Mixer*>(this->mixer->getProcessor());
+	auto mixer = this->getMixer();
 	if (mixer) {
 		mixer->setInputDeviceChannels(busLayout.inputBuses);
 		mixer->setOutputChannels(busLayout.outputBuses);
@@ -83,6 +81,14 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 void MainGraph::setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook) {
 	juce::ScopedWriteLock locker(this->hookLock);
 	this->midiHook = hook;
+}
+
+Mixer* MainGraph::getMixer() const {
+	return dynamic_cast<Mixer*>(this->mixer->getProcessor());
+}
+
+Sequencer* MainGraph::getSequencer() const {
+	return dynamic_cast<Sequencer*>(this->sequencer->getProcessor());
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
