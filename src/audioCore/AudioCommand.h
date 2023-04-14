@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include <lua.hpp>
 
 #ifndef VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
 #define VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD 0
@@ -22,6 +23,7 @@ public:
 
 private:
 	AudioCore* const parent = nullptr;
+	std::unique_ptr<lua_State, std::function<void(lua_State*)>> cState = nullptr;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioCommand)
 };

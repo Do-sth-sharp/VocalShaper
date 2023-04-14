@@ -107,7 +107,7 @@ public:
 
 private:
 	friend class AudioDebugger;
-	friend class CommandParser;
+	friend class CommandBase;
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<MainGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
