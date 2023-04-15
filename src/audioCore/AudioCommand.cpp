@@ -19,8 +19,10 @@ protected:
 		auto result = this->func(ac, L);
 	
 		lua_pushboolean(L, std::get<0>(result));
+		lua_setglobal(L, "sta");
 		lua_pushstring(L, std::get<1>(result).toRawUTF8());
-		return 2;
+		lua_setglobal(L, "res");
+		return 0;
 	};
 };
 
