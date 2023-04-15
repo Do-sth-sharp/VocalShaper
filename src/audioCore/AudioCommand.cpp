@@ -1,7 +1,9 @@
 ﻿#include "AudioCommand.h"
 #include "AudioCore.h"
 
-class CommandBase {
+class CommandBase : public juce::DeletedAtShutdown {
+	JUCE_LEAK_DETECTOR(CommandBase);
+
 protected:
 	using CommandFuncResult = std::tuple<bool, juce::String>;
 	virtual CommandFuncResult func(AudioCore*, lua_State*) = 0;
@@ -10,31 +12,48 @@ protected:
 		return ac->audioDeviceManager.get();
 	};
 
-public:
-	int operator()(lua_State* L) {
+	int interface(lua_State* L) {
 		if (!L) { return 0; };
-		AudioCore* ac = reinterpret_cast<AudioCore*>(lua_touserdata(L, 1));
-	
-		lua_pushvalue(L, 1);
-		lua_remove(L, 1);
+		AudioCore* ac = AudioCore::getInstance();
 	
 		auto result = this->func(ac, L);
-		lua_insert(L, 1);
-		lua_pop(L, 1);
 	
 		lua_pushboolean(L, std::get<0>(result));
-		lua_pushstring(L, std::get<1>(result).toStdString().c_str());
+		lua_pushstring(L, std::get<1>(result).toRawUTF8());
 		return 2;
 	};
 };
 
 #define AUDIOCORE_FUNC(n) \
 	class n##Class final : public CommandBase { \
+		JUCE_LEAK_DETECTOR(n##Class); \
+		\
 	private: \
-		 CommandFuncResult func(AudioCore*, lua_State*) override; \
+		CommandFuncResult func(AudioCore*, lua_State*) override; \
+		static n##Class* instance; \
+		static n##Class* getInstance(){ \
+			return n##Class::instance ? n##Class::instance : (n##Class::instance = new n##Class()); \
+		} \
+		\
+	public: \
+		static int lFunc(lua_State* L) { \
+			return n##Class::getInstance()->interface(L); \
+		}; \
 	}; \
 	\
+	n##Class* n##Class::instance = nullptr; \
+	\
 	CommandBase::CommandFuncResult n##Class::func(AudioCore* audioCore, lua_State* L)
+
+#define LUA_PUSH_AUDIOCORE_FUNC(L, n) \
+	lua_pushcfunction(L, n##Class::lFunc)
+
+#define LUA_ADD_AUDIOCORE_FUNC(L, s, n) \
+	lua_pushstring(L, s); \
+	LUA_PUSH_AUDIOCORE_FUNC(L, n); \
+	lua_settable(L, -3)
+
+#define LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, n) LUA_ADD_AUDIOCORE_FUNC(L, #n, n)
 
 AUDIOCORE_FUNC(echoDeviceAudio) {
 	juce::String result;
@@ -432,81 +451,68 @@ AUDIOCORE_FUNC(clearPlugin) {
 	return CommandFuncResult{ true, "Clear plugin list." };
 }
 
-class CommandParser final {
-	CommandParser() = delete;
-
-private:
-	using CommandFuncResult = std::tuple<bool, juce::String>;
-	using CommandFunc = std::function<CommandFuncResult(AudioCore*, const juce::StringArray&)>;
-
-public:
-	static const AudioCommand::CommandResult run(AudioCore* audioCore, const juce::String& command) {
-		if (!audioCore) {
-			return AudioCommand::CommandResult{ false, command, "Invalid Audio Core" };
-		}
-
-		return AudioCommand::CommandResult{
-			false, command, "TODO"};
-	};
-};
-
-#if VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
-
-class CommandAsyncThread final : public juce::Thread {
-	AudioCore* const parent = nullptr;
-	const juce::String command;
-	const AudioCommand::CommandCallback callback;
-
-public:
-	CommandAsyncThread(AudioCore* parent, const juce::String& command, AudioCommand::CommandCallback callback)
-		: Thread("Audio Command:" + command), parent(parent), command(command), callback(callback) {};
-	~CommandAsyncThread() {
-		if (this->isThreadRunning()) {
-			this->stopThread(3000);
-		}
-	};
-
-public:
-	static void call(AudioCore* parent, const juce::String& command, AudioCommand::CommandCallback callback) {
-		(new CommandAsyncThread(parent, command, callback))->startThread();
-	}
-
-private:
-	void run() override {
-		auto result = CommandParser::run(this->parent, command);
-		juce::MessageManager::callAsync([callback = this->callback, result] { callback(result); });
-
-		juce::MessageManager::callAsync([this] { delete this; });
-	};
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CommandAsyncThread);
-};
-
-#endif // VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
-
-AudioCommand::AudioCommand(AudioCore* parent) 
-	: parent(parent) {
-	jassert(parent);
-
+AudioCommand::AudioCommand() {
 	/** Init Lua State */
 	this->cState = std::unique_ptr<lua_State, std::function<void(lua_State*)>>(
 		luaL_newstate(), lua_close);
 
-	/** TODO Load Functions */
+	/** Load Functions */
+	lua_newtable(this->cState.get());
+
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), echoDeviceAudio);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), echoDeviceMIDI);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), listDeviceAudio);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), listDeviceMIDI);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), listPluginBlackList);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), listPluginSearchPath);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), listPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceAudioType);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceAudioInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceAudioOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceAudioSampleRate);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceAudioBufferSize);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceMIDIInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), setDeviceMIDIOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), searchPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), addPluginBlackList);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), addPluginSearchPath);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), removePluginBlackList);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), removePluginSearchPath);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), clearPlugin);
+
+	lua_setglobal(this->cState.get(), "AudioCore");
 }
 
 const AudioCommand::CommandResult AudioCommand::processCommand(const juce::String& command) {
-	return CommandParser::run(this->parent, command);
+	/** Do Command */
+	if (luaL_dostring(this->cState.get(), command.toStdString().c_str())) {
+		return AudioCommand::CommandResult{ false, command, luaL_checkstring(this->cState.get(), -1)};
+	}
+
+	/** Check Result */
+	bool state = false;
+	juce::String res = "Bad command return value!";
+	if (lua_getglobal(this->cState.get(), "sta") == LUA_TBOOLEAN) {
+		state = lua_toboolean(this->cState.get(), -1);
+	}
+	if (lua_getglobal(this->cState.get(), "res") == LUA_TSTRING) {
+		res = juce::String::fromUTF8(lua_tostring(this->cState.get(), -1));
+	}
+	lua_pop(this->cState.get(), 2);
+
+	return AudioCommand::CommandResult{ state, command, res };
 }
 
 void AudioCommand::processCommandAsync(const juce::String& command, AudioCommand::CommandCallback callback) {
-#if VOCALSHAPER_USE_AUDIO_COMMAND_ASYNC_THREAD
-	CommandAsyncThread::call(this->parent, command, callback);
-#else
-	auto asyncFunc = [audioCore = this->parent, command, callback] {
-		auto result = CommandParser::run(audioCore, command);
+	auto asyncFunc = [command, callback] {
+		auto result = AudioCommand::getInstance()->processCommand(command);
 		juce::MessageManager::callAsync([callback, result] { callback(result); });
 	};
 	juce::MessageManager::callAsync(asyncFunc);
-#endif
 }
+
+AudioCommand* AudioCommand::getInstance() {
+	return AudioCommand::instance ? AudioCommand::instance : (AudioCommand::instance = new AudioCommand());
+}
+
+AudioCommand* AudioCommand::instance = nullptr;

@@ -1,10 +1,10 @@
 ﻿#include "AudioDebugger.h"
 #include "AudioCore.h"
+#include "AudioCommand.h"
 
-AudioDebugger::AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor)
-	: parent(parent), commandProcessor(commandProcessor) {
+AudioDebugger::AudioDebugger(AudioCore* parent)
+	: parent(parent) {
 	jassert(parent);
-	jassert(commandProcessor);
 
 	this->setOpaque(true);
 
@@ -28,12 +28,11 @@ AudioDebugger::AudioDebugger(AudioCore* parent, AudioCommand* commandProcessor)
 	this->commandInput->setScrollToShowCursor(true);
 	this->commandInput->setPopupMenuEnabled(false);
 	this->commandInput->onReturnKey =
-		[command = this->commandProcessor,
-		input = this->commandInput.get(),
+		[input = this->commandInput.get(),
 		output = juce::Component::SafePointer(this->commandOutput.get())] {
 		auto str = input->getText();
 		input->clear();
-		command->processCommandAsync(str, [output](const AudioCommand::CommandResult& result) {
+		AudioCommand::getInstance()->processCommandAsync(str, [output](const AudioCommand::CommandResult& result) {
 			if (output) {
 				auto currentText = output->getText();
 				output->moveCaretToEnd();
