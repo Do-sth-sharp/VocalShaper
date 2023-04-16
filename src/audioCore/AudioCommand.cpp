@@ -453,6 +453,11 @@ AUDIOCORE_FUNC(clearPlugin) {
 	return CommandFuncResult{ true, "Clear plugin list." };
 }
 
+AUDIOCORE_FUNC(echoMixerTrack) {
+	juce::String result;
+	return CommandFuncResult{ true, result };
+}
+
 AudioCommand::AudioCommand() {
 	/** Init Lua State */
 	this->cState = std::unique_ptr<lua_State, std::function<void(lua_State*)>>(
@@ -481,6 +486,7 @@ AudioCommand::AudioCommand() {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), removePluginSearchPath);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), clearPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(this->cState.get(), echoMixerTrack);
 
 	lua_setglobal(this->cState.get(), "AudioCore");
 }
