@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "Track.h"
 
 class Mixer final : public juce::AudioProcessorGraph {
 public:
@@ -22,7 +23,7 @@ public:
 	/**
 	 * @brief	Get processor pointer of the track.
 	 */
-	juce::AudioProcessor* getTrackProcessor(int index) const;
+	Track* getTrackProcessor(int index) const;
 
 	/**
 	 * @brief	Connect audio input channel of the track with audio input node (sequencer channel).

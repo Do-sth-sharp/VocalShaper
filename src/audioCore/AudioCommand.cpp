@@ -455,6 +455,30 @@ AUDIOCORE_FUNC(clearPlugin) {
 
 AUDIOCORE_FUNC(echoMixerTrack) {
 	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		result += "========================================================================\n";
+		result += "Mixer Track List\n";
+		result += "========================================================================\n";
+
+		int trackNum = mixer->getTrackNum();
+		for (int i = 0; i < trackNum; i++) {
+			if (i > 0) {
+				result += "------------------------------------------------------------------------\n";
+			}
+
+			auto track = mixer->getTrackProcessor(i);
+			result += "[" + juce::String(i) + "]\n";
+			result += "\tBus Type: " + track->getAudioChannelSet().getDescription() + "\n";
+			result += "\tInput Channel: " + juce::String(track->getTotalNumInputChannels()) + "\n";
+			result += "\tOutput Channel: " + juce::String(track->getTotalNumOutputChannels()) + "\n";
+			result += "\tMute: " + juce::String(track->getMute() ? "True" : "False") + "\n";
+		}
+
+		result += "========================================================================\n";
+	}
+
 	return CommandFuncResult{ true, result };
 }
 

@@ -1,5 +1,4 @@
 ﻿#include "Mixer.h"
-#include "Track.h"
 #include "Utils.h"
 
 Mixer::Mixer() {
@@ -29,9 +28,9 @@ int Mixer::getTrackNum() const {
 	return this->trackNodeList.size();
 }
 
-juce::AudioProcessor* Mixer::getTrackProcessor(int index) const {
+Track* Mixer::getTrackProcessor(int index) const {
 	if (index < 0 || index >= this->trackNodeList.size()) { return nullptr; }
-	return this->trackNodeList.getUnchecked(index)->getProcessor();
+	return dynamic_cast<Track*>(this->trackNodeList.getUnchecked(index)->getProcessor());
 }
 
 void Mixer::setTrackAudioInputFromSequencer(int trackIndex, int srcChannel, int dstChannel) {

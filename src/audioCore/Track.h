@@ -16,6 +16,11 @@ public:
 	 */
 	void removeAdditionalAudioBus();
 
+	void setMute(bool mute);
+	bool getMute() const;
+
+	const juce::AudioChannelSet& getAudioChannelSet() const;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
@@ -25,7 +30,7 @@ private:
 
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Panner<float>> gainAndPanner;
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> slider;
-	bool isMute = false;
+	std::atomic<bool> isMute = false;
 
 private:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;

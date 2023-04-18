@@ -90,6 +90,18 @@ void Track::removeAdditionalAudioBus() {
 		this->removeIllegalConnections();
 	}
 }
+
+void Track::setMute(bool mute) {
+	this->isMute = mute;
+}
+
+bool Track::getMute() const {
+	return this->isMute;
+}
+
+const juce::AudioChannelSet& Track::getAudioChannelSet() const {
+	return this->audioChannels;
+}
                                   
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Prepare Gain And Panner */
