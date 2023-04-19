@@ -101,6 +101,15 @@ public:
 	 */
 	void setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& channels);
 
+	using TrackConnection = std::tuple<int, int, int, int>;
+	using TrackConnectionList = juce::Array< TrackConnection>;
+
+	TrackConnectionList getTrackInputFromTrackConnections(int index);
+	TrackConnectionList getTrackInputFromSequencerConnections(int index);
+	TrackConnectionList getTrackInputFromDeviceConnections(int index);
+	TrackConnectionList getTrackOutputToTrackConnections(int index);
+	TrackConnectionList getTrackOutputToDeviceConnections(int index);
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;

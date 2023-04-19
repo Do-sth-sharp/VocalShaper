@@ -471,8 +471,8 @@ AUDIOCORE_FUNC(echoMixerTrack) {
 			auto track = mixer->getTrackProcessor(i);
 			result += "[" + juce::String(i) + "]\n";
 			result += "\tBus Type: " + track->getAudioChannelSet().getDescription() + "\n";
-			result += "\tInput Channel: " + juce::String(track->getTotalNumInputChannels()) + "\n";
-			result += "\tOutput Channel: " + juce::String(track->getTotalNumOutputChannels()) + "\n";
+			result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
+			result += "\tOutput Bus: " + juce::String(track->getBusCount(false)) + "\n";
 			result += "\tMute: " + juce::String(track->getMute() ? "True" : "False") + "\n";
 		}
 
@@ -484,6 +484,85 @@ AUDIOCORE_FUNC(echoMixerTrack) {
 
 AUDIOCORE_FUNC(echoMixerTrackInfo) {
 	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		int trackNum = mixer->getTrackNum();
+		int trackId = luaL_checkinteger(L, 1);
+		if (trackId < 0 || trackId >= trackNum) {
+			return CommandFuncResult{ false, "Invalid track ID: " + juce::String(trackId)};
+		}
+
+		result += "========================================================================\n";
+		result += "Mixer Track " + juce::String(trackId) + "\n";
+		result += "========================================================================\n";
+
+		auto track = mixer->getTrackProcessor(trackId);
+		
+		result += "Bus Type: " + track->getAudioChannelSet().getDescription() + "\n";
+		result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
+		result += "\tOutput Bus: " + juce::String(track->getBusCount(false)) + "\n";
+		result += "Mute: " + juce::String(track->getMute() ? "True" : "False") + "\n";
+
+		result += "------------------------------------------------------------------------\n";
+
+		result += "Input From Track:\n";
+		auto inputFromTrackConnectiones = mixer->getTrackInputFromTrackConnections(trackId);
+		for (int i = 0; i < inputFromTrackConnectiones.size(); i++) {
+			auto connection = inputFromTrackConnectiones.getUnchecked(i);
+			result += "\t[" + juce::String(i) + "] "
+				+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
+				+ " - "
+				+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
+				+ "\n";
+		}
+
+		result += "Input From Sequencer:\n";
+		auto inputFromSequencerConnectiones = mixer->getTrackInputFromSequencerConnections(trackId);
+		for (int i = 0; i < inputFromSequencerConnectiones.size(); i++) {
+			auto connection = inputFromSequencerConnectiones.getUnchecked(i);
+			result += "\t[" + juce::String(i) + "] "
+				+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+				+ "\n";
+		}
+
+		result += "Input From Device:\n";
+		auto inputFromDeviceConnectiones = mixer->getTrackInputFromDeviceConnections(trackId);
+		for (int i = 0; i < inputFromDeviceConnectiones.size(); i++) {
+			auto connection = inputFromDeviceConnectiones.getUnchecked(i);
+			result += "\t[" + juce::String(i) + "] "
+				+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+				+ "\n";
+		}
+
+		result += "------------------------------------------------------------------------\n";
+
+		result += "Output To Track:\n";
+		auto outputToTrackConnectiones = mixer->getTrackOutputToTrackConnections(trackId);
+		for (int i = 0; i < outputToTrackConnectiones.size(); i++) {
+			auto connection = outputToTrackConnectiones.getUnchecked(i);
+			result += "\t[" + juce::String(i) + "] "
+				+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
+				+ " - "
+				+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
+				+ "\n";
+		}
+
+		result += "Output To Device:\n";
+		auto outputToDeviceConnectiones = mixer->getTrackOutputToDeviceConnections(trackId);
+		for (int i = 0; i < outputToDeviceConnectiones.size(); i++) {
+			auto connection = outputToDeviceConnectiones.getUnchecked(i);
+			result += "\t[" + juce::String(i) + "] "
+				+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+				+ "\n";
+		}
+
+		/** TODO Slider Gain And Panner */
+		/** TODO Plugin List */
+
+		result += "========================================================================\n";
+	}
+
 	return CommandFuncResult{ true, result };
 }
 

@@ -313,6 +313,197 @@ void Mixer::setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& cha
 	this->setAudioLayout(currentBusLayout);
 }
 
+Mixer::TrackConnectionList Mixer::getTrackInputFromTrackConnections(int index) {
+	/** Check Index */
+	if (index < 0 || index >= this->trackNodeList.size()) {
+		return Mixer::TrackConnectionList{};
+	}
+
+	/** Get Current Track ID */
+	juce::AudioProcessorGraph::NodeID currentID 
+		= this->trackNodeList.getUnchecked(index)->nodeID;
+	Mixer::TrackConnectionList resultList;
+
+	for (auto& i : this->trackAudioSendConnectionList) {
+		if (i.destination.nodeID == currentID) {
+			/** Get Source Track Index */
+			int sourceIndex = this->trackNodeList.indexOf(
+				this->getNodeForId(i.source.nodeID));
+			if (sourceIndex < 0 || sourceIndex >= this->trackNodeList.size()) {
+				continue;
+			}
+
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				sourceIndex, i.source.channelIndex, index, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(Mixer::TrackConnection& first, Mixer::TrackConnection& second) {
+			if (std::get<3>(first) == std::get<3>(second)) {
+				if (std::get<0>(first) == std::get<0>(second)) {
+					return std::get<1>(first) - std::get<1>(second);
+				}
+				return std::get<0>(first) - std::get<0>(second);
+			}
+			return std::get<3>(first) - std::get<3>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
+Mixer::TrackConnectionList Mixer::getTrackInputFromSequencerConnections(int index) {
+	/** Check Index */
+	if (index < 0 || index >= this->trackNodeList.size()) {
+		return Mixer::TrackConnectionList{};
+	}
+
+	/** Get Current Track ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->trackNodeList.getUnchecked(index)->nodeID;
+	Mixer::TrackConnectionList resultList;
+
+	for (auto& i : this->trackAudioInputFromSequencerConnectionList) {
+		if (i.destination.nodeID == currentID) {
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				-1, i.source.channelIndex, index, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(Mixer::TrackConnection& first, Mixer::TrackConnection& second) {
+			if (std::get<3>(first) == std::get<3>(second)) {
+				return std::get<1>(first) - std::get<1>(second);
+			}
+			return std::get<3>(first) - std::get<3>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
+Mixer::TrackConnectionList Mixer::getTrackInputFromDeviceConnections(int index) {
+	/** Check Index */
+	if (index < 0 || index >= this->trackNodeList.size()) {
+		return Mixer::TrackConnectionList{};
+	}
+
+	/** Get Current Track ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->trackNodeList.getUnchecked(index)->nodeID;
+	Mixer::TrackConnectionList resultList;
+
+	for (auto& i : this->trackAudioInputFromDeviceConnectionList) {
+		if (i.destination.nodeID == currentID) {
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				-1, i.source.channelIndex - this->sequencerChannelNum,
+				index, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(Mixer::TrackConnection& first, Mixer::TrackConnection& second) {
+			if (std::get<3>(first) == std::get<3>(second)) {
+				return std::get<1>(first) - std::get<1>(second);
+			}
+			return std::get<3>(first) - std::get<3>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
+Mixer::TrackConnectionList Mixer::getTrackOutputToTrackConnections(int index) {
+	/** Check Index */
+	if (index < 0 || index >= this->trackNodeList.size()) {
+		return Mixer::TrackConnectionList{};
+	}
+
+	/** Get Current Track ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->trackNodeList.getUnchecked(index)->nodeID;
+	Mixer::TrackConnectionList resultList;
+
+	for (auto& i : this->trackAudioSendConnectionList) {
+		if (i.source.nodeID == currentID) {
+			/** Get Destination Track Index */
+			int destIndex = this->trackNodeList.indexOf(
+				this->getNodeForId(i.destination.nodeID));
+			if (destIndex < 0 || destIndex >= this->trackNodeList.size()) {
+				continue;
+			}
+
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				index, i.source.channelIndex, destIndex, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(Mixer::TrackConnection& first, Mixer::TrackConnection& second) {
+			if (std::get<1>(first) == std::get<1>(second)) {
+				if (std::get<2>(first) == std::get<2>(second)) {
+					return std::get<3>(first) - std::get<3>(second);
+				}
+				return std::get<2>(first) - std::get<2>(second);
+			}
+			return std::get<1>(first) - std::get<1>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
+Mixer::TrackConnectionList Mixer::getTrackOutputToDeviceConnections(int index) {
+	/** Check Index */
+	if (index < 0 || index >= this->trackNodeList.size()) {
+		return Mixer::TrackConnectionList{};
+	}
+
+	/** Get Current Track ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->trackNodeList.getUnchecked(index)->nodeID;
+	Mixer::TrackConnectionList resultList;
+
+	for (auto& i : this->trackAudioOutputConnectionList) {
+		if (i.source.nodeID == currentID) {
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				index, i.source.channelIndex, -1, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(Mixer::TrackConnection& first, Mixer::TrackConnection& second) {
+			if (std::get<1>(first) == std::get<1>(second)) {
+				return std::get<3>(first) - std::get<3>(second);
+			}
+			return std::get<1>(first) - std::get<1>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
 	auto ptrNode = this->addNode(std::make_unique<Track>(type));
