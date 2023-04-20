@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "PluginDock.h"
 
 class Track final : public juce::AudioProcessorGraph {
 public:
@@ -18,8 +19,16 @@ public:
 
 	void setMute(bool mute);
 	bool getMute() const;
+	void setGain(float gain);
+	float getGain() const;
+	void setPan(float pan);
+	float getPan() const;
+	void setSlider(float slider);
+	float getSlider() const;
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
+
+	PluginDock* getPluginDock() const;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
@@ -31,6 +40,8 @@ private:
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Panner<float>> gainAndPanner;
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> slider;
 	std::atomic<bool> isMute = false;
+
+	float panValue = 0.0;
 
 private:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;

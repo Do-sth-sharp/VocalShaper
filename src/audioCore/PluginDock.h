@@ -25,6 +25,10 @@ public:
 	 */
 	void removeAdditionalAudioBus();
 
+	using PluginState = std::tuple<juce::String, bool>;
+	using PluginStateList = juce::Array<PluginState>;
+	PluginStateList getPluginList() const;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;

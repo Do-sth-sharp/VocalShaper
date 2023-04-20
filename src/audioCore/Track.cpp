@@ -1,5 +1,4 @@
 ﻿#include "Track.h"
-#include "PluginDock.h"
 
 /** To Fix Symbol Export Error Of juce::dsp::Panner<float> */
 #include <juce_dsp/processors/juce_Panner.cpp>
@@ -99,8 +98,44 @@ bool Track::getMute() const {
 	return this->isMute;
 }
 
+void Track::setGain(float gain) {
+	auto& gainDsp = this->gainAndPanner.get<0>();
+	gainDsp.setGainDecibels(gain);
+}
+
+float Track::getGain() const {
+	auto& gainDsp = this->gainAndPanner.get<0>();
+	return gainDsp.getGainDecibels();
+}
+
+void Track::setPan(float pan) {
+	pan = juce::jlimit(-1.0f, 1.0f, pan);
+	this->panValue = pan;
+
+	auto& panDsp = this->gainAndPanner.get<1>();
+	panDsp.setPan(pan);
+}
+
+float Track::getPan() const {
+	return this->panValue;
+}
+
+void Track::setSlider(float slider) {
+	auto& sliderDsp = this->slider.get<0>();
+	sliderDsp.setGainLinear(slider);
+}
+
+float Track::getSlider() const {
+	auto& sliderDsp = this->slider.get<0>();
+	return sliderDsp.getGainLinear();
+}
+
 const juce::AudioChannelSet& Track::getAudioChannelSet() const {
 	return this->audioChannels;
+}
+
+PluginDock* Track::getPluginDock() const {
+	return dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
 }
                                   
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {

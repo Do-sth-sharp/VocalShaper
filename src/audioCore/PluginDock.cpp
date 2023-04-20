@@ -154,3 +154,14 @@ void PluginDock::removeAdditionalAudioBus() {
 		this->removeIllegalConnections();
 	}
 }
+
+PluginDock::PluginStateList PluginDock::getPluginList() const {
+	PluginDock::PluginStateList result;
+
+	for (auto& plugin : this->pluginNodeList) {
+		result.add(std::make_tuple(
+			plugin->getProcessor()->getName(), !plugin->isBypassed()));
+	}
+
+	return result;
+}
