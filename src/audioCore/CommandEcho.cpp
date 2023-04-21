@@ -80,6 +80,8 @@ AUDIOCORE_FUNC(echoMixerTrack) {
 			result += "\tBus Type: " + track->getAudioChannelSet().getDescription() + "\n";
 			result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
 			result += "\tOutput Bus: " + juce::String(track->getBusCount(false)) + "\n";
+			result += "\tInput Channel: " + juce::String(track->getTotalNumInputChannels()) + "\n";
+			result += "\tOutput Channel: " + juce::String(track->getTotalNumOutputChannels()) + "\n";
 			result += "\tMute: " + juce::String(track->getMute() ? "True" : "False") + "\n";
 		}
 
@@ -109,6 +111,8 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 			result += "Bus Type: " + track->getAudioChannelSet().getDescription() + "\n";
 			result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
 			result += "\tOutput Bus: " + juce::String(track->getBusCount(false)) + "\n";
+			result += "\tInput Channel: " + juce::String(track->getTotalNumInputChannels()) + "\n";
+			result += "\tOutput Channel: " + juce::String(track->getTotalNumOutputChannels()) + "\n";
 			result += "Mute: " + juce::String(track->getMute() ? "True" : "False") + "\n";
 			result += "Gain: " + juce::String(track->getGain()) + "\n";
 			result += "Pan: " + juce::String(track->getPan()) + "\n";
