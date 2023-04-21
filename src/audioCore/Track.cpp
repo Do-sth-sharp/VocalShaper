@@ -5,6 +5,11 @@
 
 Track::Track(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
+	/** Set Effects */
+	this->setGain(0);
+	this->setPan(0);
+	this->setSlider(1);
+
 	/** Set Channel Layout */
 	this->setChannelLayoutOfBus(true, 0, type);
 	this->setChannelLayoutOfBus(false, 0, type);
