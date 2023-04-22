@@ -97,6 +97,11 @@ public:
 	int getSequencerBusNum() const;
 
 	/**
+	 * @brief	Get sequencer audio input channel number.
+	 */
+	int getSequencerChannelNum() const;
+
+	/**
 	 * @brief	Set audio input channel (device channel) layout.
 	 */
 	void setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& channels);
@@ -130,6 +135,8 @@ private:
 
 	int sequencerBusNum = 0;
 	int sequencerChannelNum = 0;
+
+	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Mixer)
 };

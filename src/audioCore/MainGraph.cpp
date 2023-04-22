@@ -108,21 +108,3 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	/** Process Audio Block */
 	this->juce::AudioProcessorGraph::processBlock(audio, midi);
 }
-
-void MainGraph::processBlock(juce::AudioBuffer<double>& audio, juce::MidiBuffer& midi) {
-	/** Call MIDI Hook */
-	{
-		juce::ScopedReadLock locker(this->hookLock);
-		if (this->midiHook) {
-			for (auto m : midi) {
-				juce::MessageManager::callAsync(
-					[mes = m.getMessage(), hook = this->midiHook] {
-						hook(mes);
-					});
-			}
-		}
-	}
-
-	/** Process Audio Block */
-	this->juce::AudioProcessorGraph::processBlock(audio, midi);
-}

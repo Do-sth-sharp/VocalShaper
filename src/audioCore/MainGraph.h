@@ -37,7 +37,6 @@ private:
 	juce::ReadWriteLock hookLock;
 
 	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;
-	void processBlock(juce::AudioBuffer<double>& audio, juce::MidiBuffer& midi) override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGraph)
 };

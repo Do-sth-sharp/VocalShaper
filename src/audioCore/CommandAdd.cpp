@@ -152,8 +152,77 @@ AUDIOCORE_FUNC(addMixerTrack) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addMixerTrackSend) {
+	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		int src = luaL_checkinteger(L, 1);
+		int srcc = luaL_checkinteger(L, 2);
+		int dst = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+		mixer->setTrackSend(src, srcc, dst, dstc);
+
+		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(addMixerTrackInputFromDevice) {
+	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		int srcc = luaL_checkinteger(L, 1);
+		int dst = luaL_checkinteger(L, 2);
+		int dstc = luaL_checkinteger(L, 3);
+		mixer->setTrackAudioInputFromDevice(srcc, dst, dstc);
+
+		result += "[Device] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(addMixerTrackInputFromSequencer) {
+	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		int srcc = luaL_checkinteger(L, 1);
+		int dst = luaL_checkinteger(L, 2);
+		int dstc = luaL_checkinteger(L, 3);
+		mixer->setTrackAudioInputFromSequencer(srcc, dst, dstc);
+
+		result += "[Sequencer] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(addMixerTrackOutput) {
+	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		int src = luaL_checkinteger(L, 1);
+		int srcc = luaL_checkinteger(L, 2);
+		int dstc = luaL_checkinteger(L, 3);
+		mixer->setTrackAudioOutput(src, srcc, dstc);
+
+		result += juce::String(src) + ", " + juce::String(srcc) + " - " + "[Device] " + juce::String(dstc) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrack);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackSend);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromDevice);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromSequencer);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
 }

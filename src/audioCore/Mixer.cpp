@@ -299,6 +299,10 @@ int Mixer::getSequencerBusNum() const {
 	return this->sequencerBusNum;
 }
 
+int Mixer::getSequencerChannelNum() const {
+	return this->sequencerChannelNum;
+}
+
 void Mixer::setInputDeviceChannels(const juce::Array<juce::AudioChannelSet>& channels) {
 	/** Get Current Bus Layout */
 	auto currentBusLayout = this->getBusesLayout();
@@ -603,7 +607,7 @@ void Mixer::removeIllegalInputConnections() {
 				this->removeConnection(element);
 				return true;
 			}
-	return false;
+			return false;
 		});
 	this->trackAudioInputFromDeviceConnectionList.removeIf(
 		[this](const juce::AudioProcessorGraph::Connection& element) {
@@ -611,7 +615,7 @@ void Mixer::removeIllegalInputConnections() {
 				this->removeConnection(element);
 				return true;
 			}
-	return false;
+			return false;
 		});
 }
 
@@ -622,6 +626,11 @@ void Mixer::removeIllegalOutputConnections() {
 				this->removeConnection(element);
 				return true;
 			}
-	return false;
+			return false;
 		});
+}
+
+void Mixer::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
+	/** For Debug */
+	this->juce::AudioProcessorGraph::processBlock(audio, midi);
 }

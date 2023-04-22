@@ -60,6 +60,34 @@ AUDIOCORE_FUNC(echoDeviceMIDI) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(echoMixerInfo) {
+	juce::String result;
+
+	auto mixer = audioCore->getMixer();
+	if (mixer) {
+		result += "========================================================================\n";
+		result += "Mixer\n";
+		result += "========================================================================\n";
+
+		int icn = mixer->getTotalNumInputChannels();
+		int ocn = mixer->getTotalNumOutputChannels();
+		int ibsn = mixer->getSequencerBusNum();
+		int icsn = mixer->getSequencerChannelNum();
+		int icdn = icn - icsn;
+
+		result += "Total Input Channel: " + juce::String(icn) + "\n";
+		result += "Total Output Channel: " + juce::String(ocn) + "\n";
+		result += "Sequencer Input Bus: " + juce::String(ibsn) + "\n";
+		result += "Sequencer Input Channel: " + juce::String(icsn) + "\n";
+		result += "Device Input Channel: " + juce::String(icdn) + "\n";
+		result += "Total Track: " + juce::String(mixer->getTrackNum()) + "\n";
+
+		result += "========================================================================\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(echoMixerTrack) {
 	juce::String result;
 
@@ -195,6 +223,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceMIDI);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerInfo);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackInfo);
 }
