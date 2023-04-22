@@ -356,8 +356,8 @@ void AudioCore::updateAudioBuses() {
 	if (mainGraph) {
 		/** Get Input Channel Num */
 		auto audioDeviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
-		auto inputChannelNum = audioDeviceSetup.inputChannels.toInteger();
-		auto outputChannelNum = audioDeviceSetup.outputChannels.toInteger();
+		auto inputChannelNum = audioDeviceSetup.inputChannels.countNumberOfSetBits();
+		auto outputChannelNum = audioDeviceSetup.outputChannels.countNumberOfSetBits();
 
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
