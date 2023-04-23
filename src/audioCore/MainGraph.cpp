@@ -63,13 +63,18 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	/** Link Audio Channels Of Sequencer And Mixer */
 	this->removeIllegalConnections();
 
+	int mixerSeqChannelNum = 0;
+	if (mixer) {
+		mixerSeqChannelNum = mixer->getSequencerChannelNum();
+	}
+	
 	for (int i = 0; i < inputChannelNum; i++) {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i},
 			{this->sequencer->nodeID, i} });
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i},
-			{this->mixer->nodeID, i} });
+			{this->mixer->nodeID, mixerSeqChannelNum + i} });
 	}
 	for (int i = 0; i < outputChannelNum; i++) {
 		this->addConnection(
