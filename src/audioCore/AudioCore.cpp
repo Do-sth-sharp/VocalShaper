@@ -348,6 +348,8 @@ void AudioCore::initAudioDevice() {
 
 	/** Update Audio Buses */
 	this->updateAudioBuses();
+
+	/** TODO Prepare To Play */
 }
 
 void AudioCore::updateAudioBuses() {
