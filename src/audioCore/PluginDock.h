@@ -29,6 +29,8 @@ public:
 	using PluginStateList = juce::Array<PluginState>;
 	PluginStateList getPluginList() const;
 
+	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;

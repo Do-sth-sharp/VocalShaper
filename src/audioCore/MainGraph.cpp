@@ -96,6 +96,24 @@ Sequencer* MainGraph::getSequencer() const {
 	return dynamic_cast<Sequencer*>(this->sequencer->getProcessor());
 }
 
+void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
+	/** Current Graph */
+	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** Mixer */
+	auto mixer = this->getMixer();
+	if (mixer) {
+		mixer->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	}
+
+	/** Sequencer */
+	auto sequencer = this->getSequencer();
+	if (sequencer) {
+		sequencer->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	}
+}
+
+
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Call MIDI Hook */
 	{

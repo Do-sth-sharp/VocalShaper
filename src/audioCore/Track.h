@@ -30,6 +30,8 @@ public:
 
 	PluginDock* getPluginDock() const;
 
+	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
@@ -44,7 +46,6 @@ private:
 	float panValue = 0.0;
 
 private:
-	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Track)

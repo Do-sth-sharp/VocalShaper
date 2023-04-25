@@ -77,6 +77,9 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 
 		/** Add Node To The Plugin List */
 		this->pluginNodeList.insert(index, ptrNode);
+
+		/** Prepare To Play */
+		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 	}
 	else {
 		jassertfalse;
@@ -164,4 +167,15 @@ PluginDock::PluginStateList PluginDock::getPluginList() const {
 	}
 
 	return result;
+}
+
+void PluginDock::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
+	/** PluginDock */
+	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** Plugins */
+	for (auto& i : this->pluginNodeList) {
+		auto plugin = i->getProcessor();
+		plugin->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	}
 }

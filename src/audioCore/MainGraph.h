@@ -27,6 +27,8 @@ public:
 	 */
 	Sequencer* getSequencer() const;
 
+	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr sequencer;
 	juce::AudioProcessorGraph::Node::Ptr mixer;

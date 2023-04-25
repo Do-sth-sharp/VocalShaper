@@ -128,6 +128,8 @@ public:
 	 */
 	void removeOutputBus();
 
+	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

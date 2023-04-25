@@ -30,6 +30,9 @@ void Sequencer::insertSource(std::unique_ptr<juce::AudioProcessor> processor, in
 
 		/** Add Node To The Source List */
 		this->audioSourceNodeList.insert(index, ptrNode);
+
+		/** Prepare To Play */
+		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 	}
 	else {
 		jassertfalse;
@@ -108,6 +111,9 @@ void Sequencer::insertInstrument(std::unique_ptr<juce::AudioProcessor> processor
 
 		/** Add Node To The Source List */
 		this->instrumentNodeList.insert(index, ptrNode);
+
+		/** Prepare To Play */
+		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 	}
 	else {
 		jassertfalse;
@@ -480,6 +486,23 @@ void Sequencer::removeOutputBus() {
 	if (currentBusLayout.outputBuses.size() > 0) {
 		currentBusLayout.outputBuses.removeLast();
 		this->setAudioLayout(currentBusLayout);
+	}
+}
+
+void Sequencer::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
+	/** Sequencer */
+	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** Audio Source */
+	for (auto& i : this->audioSourceNodeList) {
+		auto src = i->getProcessor();
+		src->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	}
+
+	/** Instrument */
+	for (auto& i : this->instrumentNodeList) {
+		auto instr = i->getProcessor();
+		instr->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 }
 

@@ -115,6 +115,8 @@ public:
 	TrackConnectionList getTrackOutputToTrackConnections(int index);
 	TrackConnectionList getTrackOutputToDeviceConnections(int index);
 
+	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;

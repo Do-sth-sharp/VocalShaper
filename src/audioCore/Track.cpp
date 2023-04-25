@@ -158,6 +158,12 @@ void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 
 	/** Prepare Current Graph */
 	this->AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** Prepare Plugins */
+	auto pluginDock = this->getPluginDock();
+	if (pluginDock) {
+		pluginDock->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	}
 }
 
 void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {

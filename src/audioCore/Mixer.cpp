@@ -508,6 +508,17 @@ Mixer::TrackConnectionList Mixer::getTrackOutputToDeviceConnections(int index) {
 	return resultList;
 }
 
+void Mixer::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
+	/** Current Graph */
+	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** Tracks */
+	for (auto& i : this->trackNodeList) {
+		auto track = i->getProcessor();
+		track->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	}
+}
+
 juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
 	auto ptrNode = this->addNode(std::make_unique<Track>(type));
@@ -524,6 +535,9 @@ juce::AudioProcessorGraph::Node::Ptr Mixer::insertTrackInternal(int index, const
 		this->addConnection(
 			{ {this->midiInputNode->nodeID, this->midiChannelIndex},
 			{ptrNode->nodeID, this->midiChannelIndex} });
+
+		/** Prepare To Play */
+		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 	}
 	else {
 		jassertfalse;

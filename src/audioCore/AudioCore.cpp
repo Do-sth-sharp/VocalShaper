@@ -348,8 +348,6 @@ void AudioCore::initAudioDevice() {
 
 	/** Update Audio Buses */
 	this->updateAudioBuses();
-
-	/** TODO Prepare To Play */
 }
 
 void AudioCore::updateAudioBuses() {
@@ -363,6 +361,9 @@ void AudioCore::updateAudioBuses() {
 
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
+
+		/** Change Main Graph SampleRate */
+		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);
 	}
 
 	/* Add MIDI Callback  */
