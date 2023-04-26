@@ -24,6 +24,13 @@ AudioCore::AudioCore() {
 	/** Main Audio Graph Of The Audio Core */
 	this->mainAudioGraph = std::make_unique<MainGraph>();
 
+	/**
+	* TODO Audio Play Head
+	* Derive the juce::AudioPlayHead class
+	*/
+	/*this->playHead = std::make_unique<juce::AudioPlayHead>();
+	this->mainAudioGraph->setPlayHead(this->playHead.get());*/
+
 	/** Main Graph Player */
 	this->mainGraphPlayer = std::make_unique<juce::AudioProcessorPlayer>();
 

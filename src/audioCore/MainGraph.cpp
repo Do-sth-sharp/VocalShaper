@@ -28,6 +28,14 @@ MainGraph::MainGraph() {
 	this->addConnection(
 		{ {this->sequencer->nodeID, this->midiChannelIndex},
 		{this->mixer->nodeID, this->midiChannelIndex} });
+
+	/**
+	 * TODO Fix Bugs
+	 * The sequencer only has input channels and without output channels.
+	 * Then the audio data will be cleared after process the block in sequencer.
+	 * I don't find the reason now, so I bypassed it.
+	 */
+	this->sequencer->setBypassed(true);
 }
 
 void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
@@ -64,8 +72,9 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	this->removeIllegalConnections();
 
 	int mixerSeqChannelNum = 0;
-	if (mixer) {
+	if (mixer && sequencer) {
 		mixerSeqChannelNum = mixer->getSequencerChannelNum();
+		jassert(mixerSeqChannelNum == sequencer->getTotalNumOutputChannels());
 	}
 	
 	for (int i = 0; i < inputChannelNum; i++) {

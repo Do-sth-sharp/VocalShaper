@@ -558,3 +558,8 @@ void Sequencer::removeIllegalAudioOutputConnections() {
 			return false;
 		});
 }
+
+void Sequencer::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
+	/** For Debug */
+	this->juce::AudioProcessorGraph::processBlock(audio, midi);
+}

@@ -113,6 +113,7 @@ private:
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
 	std::unique_ptr<juce::Component> midiDebugger = nullptr;
 	std::unique_ptr<AudioPluginSearchThread> audioPluginSearchThread = nullptr;
+	std::unique_ptr<juce::AudioPlayHead> playHead = nullptr;
 
 	friend class AudioDeviceChangeListener;
 	void initAudioDevice();
