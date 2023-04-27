@@ -105,6 +105,48 @@ Sequencer* MainGraph::getSequencer() const {
 	return dynamic_cast<Sequencer*>(this->sequencer->getProcessor());
 }
 
+void MainGraph::addSequencerOutputBus(const juce::AudioChannelSet& type) {
+	/** Get Sequencer And Mixer */
+	auto mixer = this->getMixer();
+	auto sequencer = this->getSequencer();
+
+	if (mixer && sequencer) {
+		/** Sequencer Channel Num Should Match */
+		int seqChannelNum = sequencer->getTotalNumOutputChannels();
+		jassert(seqChannelNum == mixer->getSequencerChannelNum());
+
+		/** Add Bus */
+		sequencer->addOutputBus(type);
+		mixer->addSequencerBus(type);
+
+		/** Connect Channel */
+		int newChannelNum = type.size();
+		for (int i = 0; i < newChannelNum; i++) {
+			this->addConnection({ {this->sequencer->nodeID, seqChannelNum + i},
+				{this->mixer->nodeID, seqChannelNum + i} });
+		}
+	}
+}
+
+void MainGraph::removeSequencerOutputBus() {
+	/** Get Sequencer And Mixer */
+	auto mixer = this->getMixer();
+	auto sequencer = this->getSequencer();
+
+	if (mixer && sequencer) {
+		/** Sequencer Channel Num Should Match */
+		int seqChannelNum = sequencer->getTotalNumOutputChannels();
+		jassert(seqChannelNum == mixer->getSequencerChannelNum());
+
+		/** Remove Bus */
+		sequencer->removeOutputBus();
+		mixer->removeSequencerBus();
+
+		/** Disconnect Channel */
+		this->removeIllegalConnections();
+	}
+}
+
 void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Current Graph */
 	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);

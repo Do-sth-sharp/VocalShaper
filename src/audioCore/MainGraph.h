@@ -27,6 +27,9 @@ public:
 	 */
 	Sequencer* getSequencer() const;
 
+	void addSequencerOutputBus(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	void removeSequencerOutputBus();
+
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 
 private:
