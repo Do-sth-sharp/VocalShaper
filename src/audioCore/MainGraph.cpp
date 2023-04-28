@@ -29,6 +29,10 @@ MainGraph::MainGraph() {
 		{ {this->sequencer->nodeID, this->midiChannelIndex},
 		{this->mixer->nodeID, this->midiChannelIndex} });
 
+	/** Create Default Tracks And Channels */
+	this->addSequencerOutputBus();
+	this->getMixer()->insertTrack();
+
 	/**
 	 * TODO Fix Bugs
 	 * The sequencer only has input channels and without output channels.
@@ -138,12 +142,16 @@ void MainGraph::removeSequencerOutputBus() {
 		int seqChannelNum = sequencer->getTotalNumOutputChannels();
 		jassert(seqChannelNum == mixer->getSequencerChannelNum());
 
-		/** Remove Bus */
-		sequencer->removeOutputBus();
-		mixer->removeSequencerBus();
+		/** Sequencer Bus Num */
+		int seqBusNum = mixer->getSequencerBusNum();
+		if (seqBusNum > 1) {
+			/** Remove Bus */
+			sequencer->removeOutputBus();
+			mixer->removeSequencerBus();
 
-		/** Disconnect Channel */
-		this->removeIllegalConnections();
+			/** Disconnect Channel */
+			this->removeIllegalConnections();
+		}
 	}
 }
 

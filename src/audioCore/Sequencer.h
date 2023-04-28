@@ -150,6 +150,9 @@ private:
 	void removeIllegalAudioSendConnections();
 	void removeIllegalAudioOutputConnections();
 
+	bool canAddBus(bool isInput) const override { return true; };
+	bool canRemoveBus(bool isInput) const override { return true; };
+
 	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sequencer)

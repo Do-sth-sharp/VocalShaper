@@ -506,19 +506,54 @@ void Sequencer::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 	}
 }
 
+/** TODO Fix Audio Bus Num */
 void Sequencer::setAudioLayout(const juce::AudioProcessorGraph::BusesLayout& busLayout) {
+	/** Get IO Node */
+	auto inputNode = this->audioInputNode->getProcessor();
+	auto outputNode = this->audioOutputNode->getProcessor();
+
+	/** Set Bus Num */
+	int inputBusNum = this->getBusCount(true);
+	int outputBusNum = this->getBusCount(true);
+	int newInputBusNum = busLayout.inputBuses.size() - inputBusNum;
+	int newOutputBusNum = busLayout.outputBuses.size() - outputBusNum;
+	for (int i = 0; i < std::abs(newInputBusNum); i++) {
+		if (newInputBusNum > 0) {
+			this->addBus(true);
+			inputNode->addBus(true);
+			inputNode->addBus(false);
+		}
+		else {
+			this->removeBus(true);
+			inputNode->removeBus(true);
+			inputNode->removeBus(false);
+		}
+	}
+	for (int i = 0; i < std::abs(newOutputBusNum); i++) {
+		if (newOutputBusNum > 0) {
+			this->addBus(false);
+			outputNode->addBus(true);
+			outputNode->addBus(false);
+		}
+		else {
+			this->removeBus(false);
+			outputNode->removeBus(true);
+			outputNode->removeBus(false);
+		}
+	}
+
 	/** Set Layout Of Main Graph */
 	this->setBusesLayout(busLayout);
 
 	/** Set Layout Of Input Node */
 	juce::AudioProcessorGraph::BusesLayout inputLayout = busLayout;
 	inputLayout.outputBuses = inputLayout.inputBuses;
-	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+	inputNode->setBusesLayout(inputLayout);
 
 	/** Set Layout Of Output Node */
 	juce::AudioProcessorGraph::BusesLayout outputLayout = busLayout;
 	outputLayout.inputBuses = outputLayout.outputBuses;
-	this->audioOutputNode->getProcessor()->setBusesLayout(outputLayout);
+	outputNode->setBusesLayout(outputLayout);
 
 	/** Auto Remove Connections */
 	this->removeIllegalAudioInputConnections();
