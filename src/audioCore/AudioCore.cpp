@@ -335,12 +335,8 @@ void AudioCore::removeFromPluginSearchPath(const juce::String& path) const {
 	this->audioPluginSearchThread->removeFromSearchPath(path);
 }
 
-Mixer* AudioCore::getMixer() const {
-	return this->mainAudioGraph->getMixer();
-}
-
-Sequencer* AudioCore::getSequencer() const {
-	return this->mainAudioGraph->getSequencer();
+MainGraph* AudioCore::getGraph() const {
+	return this->mainAudioGraph.get();
 }
 
 void AudioCore::initAudioDevice() {

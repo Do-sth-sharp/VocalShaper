@@ -95,14 +95,7 @@ public:
 	 */
 	void removeFromPluginSearchPath(const juce::String& path) const;
 
-	/**
-	 * @brief	Get the Mixer Processor.
-	 */
-	Mixer* getMixer() const;
-	/**
-	 * @brief	Get the Sequencer Processor.
-	 */
-	Sequencer* getSequencer() const;
+	MainGraph* getGraph() const;
 
 private:
 	friend class AudioDebugger;

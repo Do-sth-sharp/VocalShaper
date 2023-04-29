@@ -21,13 +21,13 @@ AUDIOCORE_FUNC(removePluginSearchPath) {
 AUDIOCORE_FUNC(removeMixerTrack) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int index = luaL_checkinteger(L, 1);
-		mixer->removeTrack(index);
+		graph->removeTrack(index);
 
 		result += "Remove Mixer Track: " + juce::String(index) + "\n";
-		result += "Total Mixer Track Num: " + juce::String(mixer->getTrackNum()) + "\n";
+		result += "Total Mixer Track Num: " + juce::String(graph->getTrackNum()) + "\n";
 	}
 
 	return CommandFuncResult{ true, result };
@@ -36,13 +36,13 @@ AUDIOCORE_FUNC(removeMixerTrack) {
 AUDIOCORE_FUNC(removeMixerTrackSend) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dst = luaL_checkinteger(L, 3);
 		int dstc = luaL_checkinteger(L, 4);
-		mixer->removeTrackSend(src, srcc, dst, dstc);
+		graph->removeAudioTrk2TrkConnection(src, dst, srcc, dstc);
 
 		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
 	}
@@ -53,30 +53,14 @@ AUDIOCORE_FUNC(removeMixerTrackSend) {
 AUDIOCORE_FUNC(removeMixerTrackInputFromDevice) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int srcc = luaL_checkinteger(L, 1);
 		int dst = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
-		mixer->removeTrackAudioInputFromDevice(srcc, dst, dstc);
+		graph->removeAudioI2TrkConnection(dst, srcc, dstc);
 
 		result += "[Device] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
-}
-
-AUDIOCORE_FUNC(removeMixerTrackInputFromSequencer) {
-	juce::String result;
-
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
-		int srcc = luaL_checkinteger(L, 1);
-		int dst = luaL_checkinteger(L, 2);
-		int dstc = luaL_checkinteger(L, 3);
-		mixer->removeTrackAudioInputFromSequencer(srcc, dst, dstc);
-
-		result += "[Sequencer] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
 	}
 
 	return CommandFuncResult{ true, result };
@@ -85,12 +69,12 @@ AUDIOCORE_FUNC(removeMixerTrackInputFromSequencer) {
 AUDIOCORE_FUNC(removeMixerTrackOutput) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
-		mixer->removeTrackAudioOutput(src, srcc, dstc);
+		graph->removeAudioTrk2OConnection(src, srcc, dstc);
 
 		result += juce::String(src) + ", " + juce::String(srcc) + " - " + "[Device] " + juce::String(dstc) + " (Removed)\n";
 	}
@@ -104,6 +88,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackSend);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackInputFromDevice);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackInputFromSequencer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackOutput);
 }

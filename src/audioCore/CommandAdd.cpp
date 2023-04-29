@@ -21,8 +21,8 @@ AUDIOCORE_FUNC(addPluginSearchPath) {
 AUDIOCORE_FUNC(addMixerTrack) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		juce::AudioChannelSet trackType;
 		int trackTypeArg = luaL_checkinteger(L, 2);
 		switch (trackTypeArg) {
@@ -143,10 +143,10 @@ AUDIOCORE_FUNC(addMixerTrack) {
 			break;
 		}
 
-		mixer->insertTrack(luaL_checkinteger(L, 1), trackType);
+		graph->insertTrack(luaL_checkinteger(L, 1), trackType);
 
 		result += "Add Mixer Track: [" + juce::String(trackTypeArg) + "]" + trackType.getDescription() + "\n";
-		result += "Total Mixer Track Num: " + juce::String(mixer->getTrackNum()) + "\n";
+		result += "Total Mixer Track Num: " + juce::String(graph->getTrackNum()) + "\n";
 	}
 
 	return CommandFuncResult{ true, result };
@@ -155,13 +155,13 @@ AUDIOCORE_FUNC(addMixerTrack) {
 AUDIOCORE_FUNC(addMixerTrackSend) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dst = luaL_checkinteger(L, 3);
 		int dstc = luaL_checkinteger(L, 4);
-		mixer->setTrackSend(src, srcc, dst, dstc);
+		graph->setAudioTrk2TrkConnection(src, dst, srcc, dstc);
 
 		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
 	}
@@ -172,30 +172,14 @@ AUDIOCORE_FUNC(addMixerTrackSend) {
 AUDIOCORE_FUNC(addMixerTrackInputFromDevice) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int srcc = luaL_checkinteger(L, 1);
 		int dst = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
-		mixer->setTrackAudioInputFromDevice(srcc, dst, dstc);
+		graph->setAudioI2TrkConnection(dst, srcc, dstc);
 
 		result += "[Device] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
-}
-
-AUDIOCORE_FUNC(addMixerTrackInputFromSequencer) {
-	juce::String result;
-
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
-		int srcc = luaL_checkinteger(L, 1);
-		int dst = luaL_checkinteger(L, 2);
-		int dstc = luaL_checkinteger(L, 3);
-		mixer->setTrackAudioInputFromSequencer(srcc, dst, dstc);
-
-		result += "[Sequencer] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
 	}
 
 	return CommandFuncResult{ true, result };
@@ -204,12 +188,12 @@ AUDIOCORE_FUNC(addMixerTrackInputFromSequencer) {
 AUDIOCORE_FUNC(addMixerTrackOutput) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
-		mixer->setTrackAudioOutput(src, srcc, dstc);
+		graph->setAudioTrk2OConnection(src, srcc, dstc);
 
 		result += juce::String(src) + ", " + juce::String(srcc) + " - " + "[Device] " + juce::String(dstc) + "\n";
 	}
@@ -223,6 +207,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackSend);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromDevice);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromSequencer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
 }

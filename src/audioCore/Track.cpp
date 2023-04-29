@@ -144,6 +144,10 @@ PluginDock* Track::getPluginDock() const {
 }
                                   
 void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
+	if (sampleRate <= 0 || maximumExpectedSamplesPerBlock <= 0) {
+		return;
+	}
+
 	/** Prepare Gain And Panner */
 	this->gainAndPanner.prepare(juce::dsp::ProcessSpec(
 		sampleRate, maximumExpectedSamplesPerBlock,

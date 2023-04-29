@@ -63,24 +63,18 @@ AUDIOCORE_FUNC(echoDeviceMIDI) {
 AUDIOCORE_FUNC(echoMixerInfo) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		result += "========================================================================\n";
 		result += "Mixer\n";
 		result += "========================================================================\n";
 
-		int icn = mixer->getTotalNumInputChannels();
-		int ocn = mixer->getTotalNumOutputChannels();
-		int ibsn = mixer->getSequencerBusNum();
-		int icsn = mixer->getSequencerChannelNum();
-		int icdn = icn - icsn;
+		int icn = graph->getTotalNumInputChannels();
+		int ocn = graph->getTotalNumOutputChannels();
 
 		result += "Total Input Channel: " + juce::String(icn) + "\n";
 		result += "Total Output Channel: " + juce::String(ocn) + "\n";
-		result += "Sequencer Input Bus: " + juce::String(ibsn) + "\n";
-		result += "Sequencer Input Channel: " + juce::String(icsn) + "\n";
-		result += "Device Input Channel: " + juce::String(icdn) + "\n";
-		result += "Total Track: " + juce::String(mixer->getTrackNum()) + "\n";
+		result += "Total Track: " + juce::String(graph->getTrackNum()) + "\n";
 
 		result += "========================================================================\n";
 	}
@@ -91,19 +85,19 @@ AUDIOCORE_FUNC(echoMixerInfo) {
 AUDIOCORE_FUNC(echoMixerTrack) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
+	auto graph = audioCore->getGraph();
+	if (graph) {
 		result += "========================================================================\n";
 		result += "Mixer Track List\n";
 		result += "========================================================================\n";
 
-		int trackNum = mixer->getTrackNum();
+		int trackNum = graph->getTrackNum();
 		for (int i = 0; i < trackNum; i++) {
 			if (i > 0) {
 				result += "------------------------------------------------------------------------\n";
 			}
 
-			auto track = mixer->getTrackProcessor(i);
+			auto track = graph->getTrackProcessor(i);
 			result += "[" + juce::String(i) + "]\n";
 			result += "\tBus Type: " + track->getAudioChannelSet().getDescription() + "\n";
 			result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
@@ -122,9 +116,9 @@ AUDIOCORE_FUNC(echoMixerTrack) {
 AUDIOCORE_FUNC(echoMixerTrackInfo) {
 	juce::String result;
 
-	auto mixer = audioCore->getMixer();
-	if (mixer) {
-		int trackNum = mixer->getTrackNum();
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackNum = graph->getTrackNum();
 		int trackId = luaL_checkinteger(L, 1);
 		if (trackId < 0 || trackId >= trackNum) {
 			return CommandFuncResult{ false, "Invalid track ID: " + juce::String(trackId) };
@@ -134,7 +128,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 		result += "Mixer Track " + juce::String(trackId) + "\n";
 		result += "========================================================================\n";
 
-		auto track = mixer->getTrackProcessor(trackId);
+		auto track = graph->getTrackProcessor(trackId);
 		if (track) {
 			result += "Bus Type: " + track->getAudioChannelSet().getDescription() + "\n";
 			result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
@@ -149,7 +143,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 			result += "------------------------------------------------------------------------\n";
 
 			result += "Input From Track:\n";
-			auto inputFromTrackConnectiones = mixer->getTrackInputFromTrackConnections(trackId);
+			auto inputFromTrackConnectiones = graph->getTrackInputFromTrackConnections(trackId);
 			for (int i = 0; i < inputFromTrackConnectiones.size(); i++) {
 				auto connection = inputFromTrackConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
@@ -159,8 +153,8 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 					+ "\n";
 			}
 
-			result += "Input From Sequencer:\n";
-			auto inputFromSequencerConnectiones = mixer->getTrackInputFromSequencerConnections(trackId);
+			result += "Input From Source:\n";
+			auto inputFromSequencerConnectiones = graph->getTrackInputFromSrcConnections(trackId);
 			for (int i = 0; i < inputFromSequencerConnectiones.size(); i++) {
 				auto connection = inputFromSequencerConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
@@ -168,8 +162,17 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 					+ "\n";
 			}
 
+			result += "Input From Instrument:\n";
+			auto inputFromInstrumentConnectiones = graph->getTrackInputFromInstrConnections(trackId);
+			for (int i = 0; i < inputFromInstrumentConnectiones.size(); i++) {
+				auto connection = inputFromInstrumentConnectiones.getUnchecked(i);
+				result += "\t[" + juce::String(i) + "] "
+					+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+					+ "\n";
+			}
+
 			result += "Input From Device:\n";
-			auto inputFromDeviceConnectiones = mixer->getTrackInputFromDeviceConnections(trackId);
+			auto inputFromDeviceConnectiones = graph->getTrackInputFromDeviceConnections(trackId);
 			for (int i = 0; i < inputFromDeviceConnectiones.size(); i++) {
 				auto connection = inputFromDeviceConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
@@ -180,7 +183,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 			result += "------------------------------------------------------------------------\n";
 
 			result += "Output To Track:\n";
-			auto outputToTrackConnectiones = mixer->getTrackOutputToTrackConnections(trackId);
+			auto outputToTrackConnectiones = graph->getTrackOutputToTrackConnections(trackId);
 			for (int i = 0; i < outputToTrackConnectiones.size(); i++) {
 				auto connection = outputToTrackConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
@@ -191,7 +194,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 			}
 
 			result += "Output To Device:\n";
-			auto outputToDeviceConnectiones = mixer->getTrackOutputToDeviceConnections(trackId);
+			auto outputToDeviceConnectiones = graph->getTrackOutputToDeviceConnections(trackId);
 			for (int i = 0; i < outputToDeviceConnectiones.size(); i++) {
 				auto connection = outputToDeviceConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
