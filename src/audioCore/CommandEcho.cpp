@@ -223,10 +223,61 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(echoMixerTrackGain) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			result += "Mixer Track Gain Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getGain()) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoMixerTrackPan) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			result += "Mixer Track Pan Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getPan()) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoMixerTrackSlider) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			result += "Mixer Track Slider Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getSlider()) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceMIDI);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerInfo);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackInfo);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackGain);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackPan);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackSlider);
 }

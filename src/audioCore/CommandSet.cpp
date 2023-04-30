@@ -95,6 +95,63 @@ AUDIOCORE_FUNC(setDeviceMIDIOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setMixerTrackGain) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		double value = luaL_checknumber(L, 2);
+		
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			track->setGain(static_cast<float>(value));
+
+			result += "Set Mixer Track Gain Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getGain()) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setMixerTrackPan) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		double value = luaL_checknumber(L, 2);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			track->setPan(static_cast<float>(value));
+
+			result += "Set Mixer Track Pan Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getPan()) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setMixerTrackSlider) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		double value = luaL_checknumber(L, 2);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			track->setSlider(static_cast<float>(value));
+
+			result += "Set Mixer Track Slider Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getSlider()) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -103,4 +160,7 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioBufferSize);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceMIDIInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceMIDIOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackGain);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackPan);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
 }
