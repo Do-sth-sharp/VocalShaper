@@ -110,7 +110,7 @@ const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType
 		break;
 	}
 
-	if (!ptrType) { return juce::StringArray(); }
+	if (!ptrType) { return juce::StringArray{}; }
 	ptrType->scanForDevices();
 	return ptrType->getDeviceNames(isInput);
 }
@@ -309,6 +309,17 @@ void AudioCore::clearPluginTemporary() {
 
 bool AudioCore::pluginSearchThreadIsRunning() const {
 	return this->audioPluginSearchThread->isThreadRunning();
+}
+
+const juce::PluginDescription AudioCore::findPlugin(const juce::String& identifier, bool isInstrument) const {
+	auto& list = std::get<1>(this->getPluginList());
+
+	auto ptr = list.getTypeForIdentifierString(identifier);
+	if (ptr && ptr->isInstrument == isInstrument) {
+		return *(ptr.get());
+	}
+
+	return juce::PluginDescription{};
 }
 
 const juce::StringArray AudioCore::getPluginBlackList() const {

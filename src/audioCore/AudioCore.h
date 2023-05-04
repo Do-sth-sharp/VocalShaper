@@ -68,6 +68,7 @@ public:
 	void clearPluginList();
 	void clearPluginTemporary();
 	bool pluginSearchThreadIsRunning() const;
+	const juce::PluginDescription findPlugin(const juce::String& identifier, bool isInstrument = false) const;
 
 	/**
 	 * @attention	Don't change plugin black list while searching plugin.
