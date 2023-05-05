@@ -9,3 +9,5 @@ namespace utils {
 	std::tuple<int, int> getChannelIndexAndNumOfBus(
 		const juce::AudioProcessor* processor, int busIndex, bool isInput);
 }
+
+#define UNUSED(var) (void)var
