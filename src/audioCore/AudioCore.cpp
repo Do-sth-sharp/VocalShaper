@@ -322,6 +322,10 @@ const juce::PluginDescription AudioCore::findPlugin(const juce::String& identifi
 	return juce::PluginDescription{};
 }
 
+void AudioCore::addEffect(const juce::String& identifier, int trackIndex, int effectIndex) {
+	/** TODO */
+}
+
 const juce::StringArray AudioCore::getPluginBlackList() const {
 	return this->audioPluginSearchThread->getBlackList();
 }

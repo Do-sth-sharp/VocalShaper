@@ -70,6 +70,8 @@ public:
 	bool pluginSearchThreadIsRunning() const;
 	const juce::PluginDescription findPlugin(const juce::String& identifier, bool isInstrument = false) const;
 
+	void addEffect(const juce::String& identifier, int trackIndex, int effectIndex);
+
 	/**
 	 * @attention	Don't change plugin black list while searching plugin.
 	 */
