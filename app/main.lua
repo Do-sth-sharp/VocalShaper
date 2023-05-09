@@ -73,6 +73,7 @@ end
 luce.shutdown = function()
 	-- Shutdown FlowUI At Application Shutdown To Avoid Memory Leak
 	luce.FlowWindow.shutdown()
+	luce.AudioCore.shutdown()
 end
 
 luce.anotherInstanceStarted = function(commandLine)

@@ -2,6 +2,7 @@
 
 #include "AudioDebugger.h"
 #include "MIDIDebugger.h"
+#include "PluginLoader.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -311,19 +312,35 @@ bool AudioCore::pluginSearchThreadIsRunning() const {
 	return this->audioPluginSearchThread->isThreadRunning();
 }
 
-const juce::PluginDescription AudioCore::findPlugin(const juce::String& identifier, bool isInstrument) const {
+const std::unique_ptr<juce::PluginDescription> AudioCore::findPlugin(const juce::String& identifier, bool isInstrument) const {
 	auto& list = std::get<1>(this->getPluginList());
 
 	auto ptr = list.getTypeForIdentifierString(identifier);
 	if (ptr && ptr->isInstrument == isInstrument) {
-		return *(ptr.get());
+		return std::move(ptr);
 	}
 
-	return juce::PluginDescription{};
+	return nullptr;
 }
 
 void AudioCore::addEffect(const juce::String& identifier, int trackIndex, int effectIndex) {
-	/** TODO */
+	auto des = this->findPlugin(identifier, false);
+	if (des) {
+		auto loadCallback = 
+			[trackIndex, effectIndex, graph = this->getGraph()] (std::unique_ptr<juce::AudioPluginInstance> ptr) {
+			if (graph && ptr) {
+				auto track = graph->getTrackProcessor(trackIndex);
+				if (track) {
+					auto pluginDock = track->getPluginDock();
+					if (pluginDock) {
+						pluginDock->insertPlugin(std::move(ptr), effectIndex);
+					}
+				}
+			}
+		};
+
+		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
+	}
 }
 
 const juce::StringArray AudioCore::getPluginBlackList() const {
@@ -402,6 +419,13 @@ void AudioCore::updateAudioBuses() {
 
 AudioCore* AudioCore::getInstance() {
 	return AudioCore::instance ? AudioCore::instance : (AudioCore::instance = new AudioCore());
+}
+
+void AudioCore::releaseInstance() {
+	if (AudioCore::instance) {
+		delete AudioCore::instance;
+		AudioCore::instance = nullptr;
+	}
 }
 
 AudioCore* AudioCore::instance = nullptr;

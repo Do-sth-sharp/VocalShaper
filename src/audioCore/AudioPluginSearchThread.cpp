@@ -34,6 +34,23 @@ std::tuple<bool, juce::KnownPluginList&> AudioPluginSearchThread::getPluginList(
 	}
 
 	if (!this->pluginListValidFlag) {
+		/** Read Temporary Sync */
+		juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
+		juce::File temporaryFile =
+			juce::File::getCurrentWorkingDirectory().getChildFile(temporaryFilePath);
+		if (temporaryFile.existsAsFile()) {
+			/** Load From Xml File */
+			auto xmlElement = juce::XmlDocument::parse(temporaryFile);
+			if (xmlElement) {
+				/** Create Plugin List From Xml Data */
+				this->pluginList.recreateFromXml(*xmlElement);
+
+				/** Set List Valid Flag And Return */
+				this->pluginListValidFlag = true;
+				return std::tuple<bool, juce::KnownPluginList&>(true, this->pluginList);
+			}
+		}
+
 		this->startThread();
 		return std::tuple<bool, juce::KnownPluginList&>(false, this->pluginList);
 	}

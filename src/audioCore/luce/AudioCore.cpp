@@ -140,6 +140,11 @@ namespace luce {
 		return 0;
 	}
 
+	LUCE_METHOD(shutdown) {
+		AudioCore::releaseInstance();
+		return 0;
+	}
+
 	LUCE_METHOD_LIST(AudioCore);
 	LUCE_STATIC_METHOD_LIST(AudioCore,
 		getAllAudioInputDeviceList,
@@ -158,7 +163,8 @@ namespace luce {
 		setPluginSearchPathListFilePath,
 		setPluginListTemporaryFilePath,
 		setPluginBlackListFilePath,
-		setDeadPluginListPath
+		setDeadPluginListPath,
+		shutdown
 	);
 
 	LUCE_NEW(AudioCore) {

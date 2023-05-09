@@ -68,7 +68,7 @@ public:
 	void clearPluginList();
 	void clearPluginTemporary();
 	bool pluginSearchThreadIsRunning() const;
-	const juce::PluginDescription findPlugin(const juce::String& identifier, bool isInstrument = false) const;
+	const std::unique_ptr<juce::PluginDescription> findPlugin(const juce::String& identifier, bool isInstrument = false) const;
 
 	void addEffect(const juce::String& identifier, int trackIndex, int effectIndex);
 
@@ -119,6 +119,7 @@ private:
 
 public:
 	static AudioCore* getInstance();
+	static void releaseInstance();
 
 private:
 	static AudioCore* instance;

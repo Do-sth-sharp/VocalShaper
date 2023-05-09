@@ -7,12 +7,10 @@ public:
 	PluginLoader();
 	~PluginLoader() override = default;
 
-	using PluginLoadCallback = std::function<void(juce::AudioPluginInstance*)>;
+	using PluginLoadCallback = std::function<void(std::unique_ptr<juce::AudioPluginInstance>)>;
 	void loadPlugin(const juce::PluginDescription& pluginInfo, const PluginLoadCallback& callback);
-	void unloadPlugin(juce::AudioPluginInstance* pluginInstance);
 
 private:
-	juce::OwnedArray<juce::AudioPluginInstance> pluginInstanceList;
 	std::unique_ptr<juce::AudioPluginFormatManager> pluginFormatManager;
 
 public:

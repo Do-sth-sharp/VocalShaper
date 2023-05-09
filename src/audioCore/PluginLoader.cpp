@@ -21,11 +21,9 @@ void PluginLoader::loadPlugin(
 
 	/** Create Callback */
 	auto asyncCallback =
-		[callback, &list = this->pluginInstanceList] (std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& e) {
+		[callback] (std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& e) {
 		if (p) {
-			auto instance = p.release();
-			list.add(instance);
-			callback(instance);
+			callback(std::move(p));
 			return;
 		}
 
@@ -36,10 +34,6 @@ void PluginLoader::loadPlugin(
 
 	/** Create Instance */
 	this->pluginFormatManager->createPluginInstanceAsync(pluginInfo, sampleRate, bufferSize, asyncCallback);
-}
-
-void PluginLoader::unloadPlugin(juce::AudioPluginInstance* pluginInstance) {
-	this->pluginInstanceList.removeObject(pluginInstance, true);
 }
 
 PluginLoader* PluginLoader::getInstance() {

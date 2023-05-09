@@ -6,7 +6,7 @@ class PluginDock final : public juce::AudioProcessorGraph {
 public:
 	PluginDock() = delete;
 	PluginDock(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
-
+	
 	/**
 	 * @brief	Insert a plugin onto the plugin dock.
 	 */

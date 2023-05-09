@@ -176,6 +176,7 @@ AUDIOCORE_FUNC(listPlugin) {
 		result += "    lastFileModTime: " + list[i].lastFileModTime.toString(true, true, true, true) + "\n";
 		result += "    lastInfoUpdateTime: " + list[i].lastInfoUpdateTime.toString(true, true, true, true) + "\n";
 		result += "    uniqueId: " + juce::String::toHexString(list[i].uniqueId) + "\n";
+		result += "    identifier: " + list[i].createIdentifierString() + "\n";
 		result += "    isInstrument: " + juce::String(list[i].isInstrument ? "true" : "false") + "\n";
 		result += "    numInputChannels: " + juce::String(list[i].numInputChannels) + "\n";
 		result += "    numOutputChannels: " + juce::String(list[i].numOutputChannels) + "\n";

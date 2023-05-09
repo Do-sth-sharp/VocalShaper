@@ -201,6 +201,19 @@ AUDIOCORE_FUNC(addMixerTrackOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addMixerPlugin) {
+	juce::String result;
+
+	int trackIndex = luaL_checkinteger(L, 1);
+	int effectIndex = luaL_checkinteger(L, 2);
+	juce::String pid = luaL_checkstring(L, 3);
+	AudioCore::getInstance()->addEffect(pid, trackIndex, effectIndex);
+
+	result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -208,4 +221,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackSend);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPlugin);
 }
