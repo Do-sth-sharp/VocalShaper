@@ -19,11 +19,39 @@ protected:
 		if (!L) { return 0; };
 		AudioCore* ac = AudioCore::getInstance();
 
-		auto result = this->func(ac, L);
+		bool sta = false;
+		juce::String res;
 
-		lua_pushboolean(L, std::get<0>(result));
+		std::tie(sta, res) = this->func(ac, L);
+
+		if (res.isNotEmpty() && res.getLastCharacter() != '\n') {
+			res += '\n';
+		}
+
+		juce::String output;
+		lua_getglobal(L, "res");
+		if (lua_isstring(L, -1)) {
+			output = lua_tostring(L, -1);
+		}
+		lua_pop(L, 1);
+		bool state = true;
+		lua_getglobal(L, "sta");
+		if (lua_isboolean(L, -1)) {
+			state = lua_toboolean(L, -1);
+		}
+		lua_pop(L, 1);
+
+		output += res;
+		state = state && sta;
+
+		if (!sta) {
+			lua_pushstring(L, output.toStdString().c_str());
+			lua_error(L);
+		}
+
+		lua_pushboolean(L, state);
 		lua_setglobal(L, "sta");
-		lua_pushstring(L, std::get<1>(result).toRawUTF8());
+		lua_pushstring(L, output.toStdString().c_str());
 		lua_setglobal(L, "res");
 		return 0;
 	};

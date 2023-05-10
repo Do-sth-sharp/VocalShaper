@@ -22,6 +22,12 @@ AudioCommand::AudioCommand() {
 }
 
 const AudioCommand::CommandResult AudioCommand::processCommand(const juce::String& command) {
+	/** Clear Result */
+	lua_pushnil(this->cState.get());
+	lua_setglobal(this->cState.get(), "sta");
+	lua_pushnil(this->cState.get());
+	lua_setglobal(this->cState.get(), "res");
+
 	/** Do Command */
 	if (luaL_dostring(this->cState.get(), command.toStdString().c_str())) {
 		return AudioCommand::CommandResult{ false, command, luaL_checkstring(this->cState.get(), -1)};
