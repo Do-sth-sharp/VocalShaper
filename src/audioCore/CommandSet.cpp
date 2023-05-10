@@ -152,6 +152,36 @@ AUDIOCORE_FUNC(setMixerTrackSlider) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setMixerPluginWindow) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		auto plugin = AudioCore::getInstance()->getEffect(trackIndex, effectIndex);
+		if (plugin) {
+			auto editor = plugin->createEditorIfNeeded();
+			if (editor) {
+				bool visible = lua_toboolean(L, 3);
+
+				if (visible) {
+					editor->setName(plugin->getName());
+					editor->addToDesktop(
+						juce::ComponentPeer::windowAppearsOnTaskbar |
+						juce::ComponentPeer::windowHasTitleBar |
+						juce::ComponentPeer::windowHasDropShadow);
+				}
+				editor->setVisible(visible);
+
+				result += "Plugin Window: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -163,4 +193,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackGain);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackPan);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginWindow);
 }

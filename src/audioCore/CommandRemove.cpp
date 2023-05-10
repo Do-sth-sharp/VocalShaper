@@ -82,6 +82,18 @@ AUDIOCORE_FUNC(removeMixerTrackOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeMixerPlugin) {
+	juce::String result;
+
+	int trackIndex = luaL_checkinteger(L, 1);
+	int effectIndex = luaL_checkinteger(L, 2);
+	AudioCore::getInstance()->removeEffect(trackIndex, effectIndex);
+
+	result += "Remove Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "]" + "\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -89,4 +101,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackSend);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPlugin);
 }

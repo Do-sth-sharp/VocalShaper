@@ -323,7 +323,7 @@ const std::unique_ptr<juce::PluginDescription> AudioCore::findPlugin(const juce:
 	return nullptr;
 }
 
-void AudioCore::addEffect(const juce::String& identifier, int trackIndex, int effectIndex) {
+bool AudioCore::addEffect(const juce::String& identifier, int trackIndex, int effectIndex) {
 	auto des = this->findPlugin(identifier, false);
 	if (des) {
 		auto loadCallback = 
@@ -340,7 +340,38 @@ void AudioCore::addEffect(const juce::String& identifier, int trackIndex, int ef
 		};
 
 		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
+		return true;
 	}
+	return false;
+}
+
+juce::AudioPluginInstance* AudioCore::getEffect(int trackIndex, int effectIndex) {
+	auto graph = this->getGraph();
+	if (graph) {
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				return pluginDock->getPluginProcessor(effectIndex);
+			}
+		}
+	}
+	return nullptr;
+}
+
+bool AudioCore::removeEffect(int trackIndex, int effectIndex) {
+	auto graph = this->getGraph();
+	if (graph) {
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				pluginDock->removePlugin(effectIndex);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 const juce::StringArray AudioCore::getPluginBlackList() const {

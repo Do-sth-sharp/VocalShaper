@@ -27,6 +27,16 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 	}
 }
 
+PluginDock::~PluginDock() {
+	for (auto& i : this->pluginNodeList) {
+		if (auto processor = i->getProcessor()) {
+			if (auto editor = processor->getActiveEditor()) {
+				if (editor) { delete editor; }
+			}
+		}
+	}
+}
+
 void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index) {
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
@@ -93,6 +103,13 @@ void PluginDock::removePlugin(int index) {
 	/** Get The Node Ptr Then Remove From The List */
 	auto ptrNode = this->pluginNodeList.removeAndReturn(index);
 
+	/** Close The Editor */
+	if (auto processor = ptrNode->getProcessor()) {
+		if (auto editor = juce::Component::SafePointer(processor->getActiveEditor())) {
+			juce::MessageManager::callAsync([editor] {if (editor) { delete editor; }});
+		}
+	}
+
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
 
@@ -122,6 +139,16 @@ void PluginDock::removePlugin(int index) {
 				{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
 		}
 	}
+}
+
+int PluginDock::getPluginNum() const {
+	return this->pluginNodeList.size();
+}
+
+juce::AudioPluginInstance* PluginDock::getPluginProcessor(int index) const {
+	if (index < 0 || index >= this->pluginNodeList.size()) { return nullptr; }
+	return dynamic_cast<juce::AudioPluginInstance*>(
+		this->pluginNodeList.getUnchecked(index)->getProcessor());
 }
 
 void PluginDock::addAdditionalAudioBus() {
