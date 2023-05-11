@@ -19,6 +19,7 @@ public:
 
 	int getPluginNum() const;
 	juce::AudioPluginInstance* getPluginProcessor(int index) const;
+	void setPluginBypass(int index, bool bypass);
 
 	/**
 	 * @brief	Add an audio input bus onto the plugin dock.

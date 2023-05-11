@@ -374,6 +374,19 @@ bool AudioCore::removeEffect(int trackIndex, int effectIndex) {
 	return false;
 }
 
+void AudioCore::bypassEffect(int trackIndex, int effectIndex, bool bypass) {
+	auto graph = this->getGraph();
+	if (graph) {
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				pluginDock->setPluginBypass(effectIndex, bypass);
+			}
+		}
+	}
+}
+
 const juce::StringArray AudioCore::getPluginBlackList() const {
 	return this->audioPluginSearchThread->getBlackList();
 }

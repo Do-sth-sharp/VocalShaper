@@ -182,6 +182,23 @@ AUDIOCORE_FUNC(setMixerPluginWindow) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setMixerPluginBypass) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		bool bypass = lua_toboolean(L, 3);
+
+		AudioCore::getInstance()->bypassEffect(trackIndex, effectIndex, bypass);
+		
+		result += "Plugin Bypass: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -194,4 +211,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackPan);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginWindow);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginBypass);
 }

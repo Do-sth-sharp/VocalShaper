@@ -73,6 +73,7 @@ public:
 	bool addEffect(const juce::String& identifier, int trackIndex, int effectIndex);
 	juce::AudioPluginInstance* getEffect(int trackIndex, int effectIndex);
 	bool removeEffect(int trackIndex, int effectIndex);
+	void bypassEffect(int trackIndex, int effectIndex, bool bypass);
 
 	/**
 	 * @attention	Don't change plugin black list while searching plugin.

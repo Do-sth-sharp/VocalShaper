@@ -151,6 +151,14 @@ juce::AudioPluginInstance* PluginDock::getPluginProcessor(int index) const {
 		this->pluginNodeList.getUnchecked(index)->getProcessor());
 }
 
+void PluginDock::setPluginBypass(int index, bool bypass) {
+	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
+	auto node = this->pluginNodeList.getUnchecked(index);
+	if (node) {
+		node->setBypassed(bypass);
+	}
+}
+
 void PluginDock::addAdditionalAudioBus() {
 	/** Prepare Bus Layout */
 	auto layout = this->getBusesLayout();
