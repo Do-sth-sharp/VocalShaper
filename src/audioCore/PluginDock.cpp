@@ -37,7 +37,7 @@ PluginDock::~PluginDock() {
 	}
 }
 
-void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index) {
+bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index) {
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
 	if (ptrNode) {
@@ -66,6 +66,16 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 			/** Get Main Bus */
 			int mainBusChannels = this->getMainBusNumInputChannels();
 
+			/** Get Plugin Bus */
+			int pluginInputChannels = ptrNode->getProcessor()->getMainBusNumInputChannels();
+			int pluginOutputChannels = ptrNode->getProcessor()->getMainBusNumOutputChannels();
+
+			/** Check Channels */
+			if (pluginInputChannels < mainBusChannels || pluginOutputChannels < mainBusChannels) {
+				this->removeNode(ptrNode->nodeID);
+				return false;
+			}
+
 			/** Remove Connection Between Hot Spot Nodes */
 			for (int i = 0; i < mainBusChannels; i++) {
 				this->removeConnection(
@@ -90,9 +100,12 @@ void PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, i
 
 		/** Prepare To Play */
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+		return true;
 	}
 	else {
 		jassertfalse;
+		return false;
 	}
 }
 
