@@ -11,11 +11,11 @@ public:
 	/**
 	 * @brief	Add an audio input bus onto the track.
 	 */
-	void addAdditionalAudioBus();
+	bool addAdditionalAudioBus();
 	/**
 	 * @brief	Remove the last audio input bus from the track.
 	 */
-	void removeAdditionalAudioBus();
+	bool removeAdditionalAudioBus();
 
 	void setMute(bool mute);
 	bool getMute() const;
@@ -46,6 +46,9 @@ private:
 	float panValue = 0.0;
 
 private:
+	bool canAddBus(bool isInput) const override;
+	bool canRemoveBus(bool isInput) const override;
+
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Track)

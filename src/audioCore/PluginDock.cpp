@@ -3,8 +3,12 @@
 PluginDock::PluginDock(const juce::AudioChannelSet& type) 
 	: audioChannels(type) {
 	/** Set Channel Layout */
-	this->setChannelLayoutOfBus(true, 0, type);
-	this->setChannelLayoutOfBus(false, 0, type);
+	juce::AudioProcessorGraph::BusesLayout layout;
+	layout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(type.size()));
+	layout.outputBuses.add(
+		juce::AudioChannelSet::discreteChannels(type.size()));
+	this->setBusesLayout(layout);
 
 	/** The Main Audio IO Node Of The Dock */
 	this->audioInputNode = this->addNode(
@@ -18,6 +22,13 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 	this->midiInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
+
+	/** Set Audio Input Node Channel Num */
+	juce::AudioProcessorGraph::BusesLayout inputLayout;
+	inputLayout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
+	inputLayout.outputBuses = inputLayout.inputBuses;
+	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
 	/** Connect The Audio Input And Output Node */
 	int mainBusChannels = this->getMainBusNumInputChannels();
@@ -172,38 +183,61 @@ void PluginDock::setPluginBypass(int index, bool bypass) {
 	}
 }
 
-void PluginDock::addAdditionalAudioBus() {
+bool PluginDock::addAdditionalAudioBus() {
+	/** Check Channel Num */
+	if (this->getTotalNumInputChannels() + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
+		return false;
+	}
+
 	/** Prepare Bus Layout */
 	auto layout = this->getBusesLayout();
-	layout.inputBuses.add(this->audioChannels);
+
+	/** Set Additional Channel Num */
+	layout.inputBuses.clear();
+	layout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels() + this->audioChannels.size()));
 
 	/** Set Bus Layout Of Current Graph */
 	this->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Input Node */
-	juce::AudioProcessorGraph::BusesLayout inputLayout = layout;
+	juce::AudioProcessorGraph::BusesLayout inputLayout;
+	inputLayout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
 	inputLayout.outputBuses = inputLayout.inputBuses;
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+	return true;
 }
 
-void PluginDock::removeAdditionalAudioBus() {
-	/** Check Has Additional Bus */
-	auto layout = this->getBusesLayout();
-	if (layout.inputBuses.size() > 1) {
-		/** Prepare Bus Layout */
-		layout.inputBuses.removeLast();
-
-		/** Set Bus Layout Of Current Graph */
-		this->setBusesLayout(layout);
-
-		/** Set Bus Layout Of Input Node */
-		juce::AudioProcessorGraph::BusesLayout inputLayout = layout;
-		inputLayout.outputBuses = inputLayout.inputBuses;
-		this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
-
-		/** Auto Remove Connection */
-		this->removeIllegalConnections();
+bool PluginDock::removeAdditionalAudioBus() {
+	/** Check Channel Num */
+	if (this->getTotalNumInputChannels() - this->audioChannels.size() >= this->audioChannels.size()) {
+		return false;
 	}
+
+	/** Prepare Bus Layout */
+	auto layout = this->getBusesLayout();
+
+	/** Set Additional Channel Num */
+	layout.inputBuses.clear();
+	layout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels() - this->audioChannels.size()));
+
+	/** Set Bus Layout Of Current Graph */
+	this->setBusesLayout(layout);
+
+	/** Set Bus Layout Of Input Node */
+	juce::AudioProcessorGraph::BusesLayout inputLayout;
+	inputLayout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
+	inputLayout.outputBuses = inputLayout.inputBuses;
+	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+	/** Auto Remove Connection */
+	this->removeIllegalConnections();
+
+	return true;
 }
 
 PluginDock::PluginStateList PluginDock::getPluginList() const {

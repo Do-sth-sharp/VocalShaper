@@ -24,11 +24,11 @@ public:
 	/**
 	 * @brief	Add an audio input bus onto the plugin dock.
 	 */
-	void addAdditionalAudioBus();
+	bool addAdditionalAudioBus();
 	/**
 	 * @brief	Remove the last audio input bus from the plugin dock.
 	 */
-	void removeAdditionalAudioBus();
+	bool removeAdditionalAudioBus();
 
 	using PluginState = std::tuple<juce::String, bool>;
 	using PluginStateList = juce::Array<PluginState>;
