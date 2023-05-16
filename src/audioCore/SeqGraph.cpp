@@ -1,5 +1,7 @@
 #include "MainGraph.h"
 
+#include "PlayPosition.h"
+
 void MainGraph::insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index) {
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
@@ -13,6 +15,7 @@ void MainGraph::insertSource(std::unique_ptr<juce::AudioProcessor> processor, in
 		this->audioSourceNodeList.insert(index, ptrNode);
 
 		/** Prepare To Play */
+		ptrNode->getProcessor()->setPlayHead(PlayPosition::getInstance());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 	}
 	else {
@@ -94,6 +97,7 @@ bool MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> proc
 		this->instrumentNodeList.insert(index, ptrNode);
 
 		/** Prepare To Play */
+		ptrNode->getProcessor()->setPlayHead(PlayPosition::getInstance());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 		return true;

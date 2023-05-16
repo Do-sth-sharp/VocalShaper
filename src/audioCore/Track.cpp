@@ -1,5 +1,7 @@
 ﻿#include "Track.h"
 
+#include "PlayPosition.h"
+
 /** To Fix Symbol Export Error Of juce::dsp::Panner<float> */
 #include <juce_dsp/processors/juce_Panner.cpp>
 
@@ -203,6 +205,7 @@ void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 	/** Prepare Plugins */
 	auto pluginDock = this->getPluginDock();
 	if (pluginDock) {
+		pluginDock->setPlayHead(PlayPosition::getInstance());
 		pluginDock->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 }

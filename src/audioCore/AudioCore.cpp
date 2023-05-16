@@ -3,6 +3,7 @@
 #include "AudioDebugger.h"
 #include "MIDIDebugger.h"
 #include "PluginLoader.h"
+#include "PlayPosition.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -63,6 +64,7 @@ AudioCore::~AudioCore() {
 	this->audioDeviceManager->removeAllChangeListeners();
 	this->audioDeviceManager->removeAudioCallback(this->mainGraphPlayer.get());
 	this->mainGraphPlayer->setProcessor(nullptr);
+	PlayPosition::releaseInstance();
 }
 
 const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType type, bool isInput) {
@@ -481,7 +483,8 @@ void AudioCore::updateAudioBuses() {
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
 
-		/** Change Main Graph SampleRate */
+		/** Change Main Graph SampleRate And Set Play Head */
+		mainGraph->setPlayHead(PlayPosition::getInstance());
 		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);
 	}
 

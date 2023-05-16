@@ -1,6 +1,8 @@
 -- Add Instrument Plugin
 AC.addSequencerPlugin(0, "VST3-MONSTER Piano v2-2022.07-d77ff23b-efa9463a");
 AC.addSequencerPlugin(1, "VST3-ACE Bridge-60483eb8-ca199f24");
+AC.addSequencerPlugin(2, "VST-VOCALOID5 VSTi-b099a95-56355632");
+AC.addSequencerPlugin(3, "VST-synthesizer-v-plugin64-c0552195-53796e56");
 
 -- Set Audio Output
 AC.addSequencerPluginOutput(0, 0, 0, 0);
