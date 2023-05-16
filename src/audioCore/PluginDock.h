@@ -30,6 +30,9 @@ public:
 	 */
 	bool removeAdditionalAudioBus();
 
+	void addAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel);
+	void removeAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel);
+
 	using PluginState = std::tuple<juce::String, bool>;
 	using PluginStateList = juce::Array<PluginState>;
 	PluginStateList getPluginList() const;
@@ -42,6 +45,8 @@ private:
 	juce::AudioChannelSet audioChannels;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> pluginNodeList;
+
+	juce::Array<juce::AudioProcessorGraph::Connection> additionalConnectionList;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDock)
 };

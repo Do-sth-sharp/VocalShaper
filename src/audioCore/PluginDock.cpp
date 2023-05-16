@@ -240,6 +240,49 @@ bool PluginDock::removeAdditionalAudioBus() {
 	return true;
 }
 
+void PluginDock::addAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel) {
+	/** Limit Index */
+	if (pluginIndex < 0 || pluginIndex >= this->pluginNodeList.size()) {
+		return;
+	}
+	if (srcChannel < this->audioChannels.size() ||
+		srcChannel >= this->getTotalNumInputChannels()) {
+		return;
+	}
+
+	/** Get Node ID */
+	auto ptrNode = this->pluginNodeList.getUnchecked(pluginIndex);
+	auto nodeID = ptrNode->nodeID;
+
+	/** Get Channels */
+	int nodeChannels = ptrNode->getProcessor()->getTotalNumInputChannels();
+	if (dstChannel < 0 || dstChannel >= nodeChannels) { return; }
+
+	/** Link Bus */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
+	if (!this->isConnected(connection)) {
+		this->addConnection(connection);
+		this->additionalConnectionList.add(connection);
+	}
+}
+
+void PluginDock::removeAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel) {
+	/** Limit Index */
+	if (pluginIndex < 0 || pluginIndex >= this->pluginNodeList.size()) {
+		return;
+	}
+
+	/** Get Node ID */
+	auto nodeID = this->pluginNodeList.getUnchecked(pluginIndex)->nodeID;
+
+	/** Remove Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
+	this->removeConnection(connection);
+	this->additionalConnectionList.removeAllInstancesOf(connection);
+}
+
 PluginDock::PluginStateList PluginDock::getPluginList() const {
 	PluginDock::PluginStateList result;
 

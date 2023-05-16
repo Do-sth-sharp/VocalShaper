@@ -214,6 +214,30 @@ AUDIOCORE_FUNC(addMixerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addMixerPluginAdditionalInput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int srcc = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				pluginDock->addAdditionalBusConnection(effectIndex, srcc, dstc);
+
+				result += "Link Plugin Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(srcc) + " - " + juce::String(dstc) + "\n";
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -222,4 +246,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPluginAdditionalInput);
 }

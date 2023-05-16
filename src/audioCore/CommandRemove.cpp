@@ -94,6 +94,31 @@ AUDIOCORE_FUNC(removeMixerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
+
+AUDIOCORE_FUNC(removeMixerPluginAdditionalInput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int srcc = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				pluginDock->removeAdditionalBusConnection(effectIndex, srcc, dstc);
+
+				result += "Unlink Plugin Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(srcc) + " - " + juce::String(dstc) + "\n";
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -102,4 +127,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPluginAdditionalInput);
 }
