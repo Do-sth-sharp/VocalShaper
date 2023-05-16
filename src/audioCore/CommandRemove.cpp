@@ -130,6 +130,23 @@ AUDIOCORE_FUNC(removeSequencerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeSequencerPluginOutput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int src = luaL_checkinteger(L, 1);
+		int srcc = luaL_checkinteger(L, 2);
+		int dst = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+		graph->removeAudioInstr2TrkConnection(src, dst, srcc, dstc);
+
+		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -140,4 +157,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPluginAdditionalInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPluginOutput);
 }

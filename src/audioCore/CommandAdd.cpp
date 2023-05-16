@@ -250,6 +250,23 @@ AUDIOCORE_FUNC(addSequencerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addSequencerPluginOutput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int src = luaL_checkinteger(L, 1);
+		int srcc = luaL_checkinteger(L, 2);
+		int dst = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+		graph->setAudioInstr2TrkConnection(src, dst, srcc, dstc);
+
+		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -260,4 +277,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPluginAdditionalInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPluginOutput);
 }
