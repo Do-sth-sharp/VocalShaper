@@ -199,6 +199,51 @@ AUDIOCORE_FUNC(setMixerPluginBypass) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setSequencerPluginWindow) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		auto plugin = AudioCore::getInstance()->getInstrument(instrIndex);
+		if (plugin) {
+			auto editor = plugin->createEditorIfNeeded();
+			if (editor) {
+				bool visible = lua_toboolean(L, 2);
+
+				if (visible) {
+					editor->setName(plugin->getName());
+					editor->addToDesktop(
+						juce::ComponentPeer::windowAppearsOnTaskbar |
+						juce::ComponentPeer::windowHasTitleBar |
+						juce::ComponentPeer::windowHasDropShadow);
+				}
+				editor->setVisible(visible);
+
+				result += "Plugin Window: [" + juce::String(instrIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setSequencerPluginBypass) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		bool bypass = lua_toboolean(L, 2);
+
+		AudioCore::getInstance()->bypassInstrument(instrIndex, bypass);
+
+		result += "Plugin Bypass: [" + juce::String(instrIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -212,4 +257,6 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginWindow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginBypass);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginWindow);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginBypass);
 }

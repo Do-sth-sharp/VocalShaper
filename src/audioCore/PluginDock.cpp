@@ -48,7 +48,7 @@ PluginDock::~PluginDock() {
 	}
 }
 
-bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index) {
+bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
 	if (ptrNode) {
@@ -133,6 +133,16 @@ void PluginDock::removePlugin(int index) {
 			juce::MessageManager::callAsync([editor] {if (editor) { delete editor; }});
 		}
 	}
+
+	/** Remove Additional Connection */
+	this->additionalConnectionList.removeIf(
+		[this, nodeID = ptrNode->nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);

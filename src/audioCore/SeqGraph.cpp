@@ -81,7 +81,7 @@ void MainGraph::removeSource(int index) {
 	this->removeNode(ptrNode->nodeID);
 }
 
-void MainGraph::insertInstrument(std::unique_ptr<juce::AudioProcessor> processor, int index) {
+bool MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
 	/** Add To The Graph */
 	auto ptrNode = this->addNode(std::move(processor));
 	if (ptrNode) {
@@ -95,9 +95,12 @@ void MainGraph::insertInstrument(std::unique_ptr<juce::AudioProcessor> processor
 
 		/** Prepare To Play */
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+		return true;
 	}
 	else {
 		jassertfalse;
+		return false;
 	}
 }
 
@@ -107,6 +110,13 @@ void MainGraph::removeInstrument(int index) {
 
 	/** Get The Node Ptr Then Remove From The List */
 	auto ptrNode = this->instrumentNodeList.removeAndReturn(index);
+
+	/** Close The Editor */
+	if (auto processor = ptrNode->getProcessor()) {
+		if (auto editor = juce::Component::SafePointer(processor->getActiveEditor())) {
+			juce::MessageManager::callAsync([editor] {if (editor) { delete editor; }});
+		}
+	}
 
 	/** Remove MIDI Instrument Connection */
 	this->midiSrc2InstrConnectionList.removeIf(
@@ -145,9 +155,10 @@ int MainGraph::getInstrumentNum() const {
 	return this->instrumentNodeList.size();
 }
 
-juce::AudioProcessor* MainGraph::getInstrumentProcessor(int index) const {
+juce::AudioPluginInstance* MainGraph::getInstrumentProcessor(int index) const {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return nullptr; }
-	return this->instrumentNodeList.getUnchecked(index)->getProcessor();
+	return dynamic_cast<juce::AudioPluginInstance*>(
+		this->instrumentNodeList.getUnchecked(index)->getProcessor());
 }
 
 void MainGraph::setMIDII2SrcConnection(int sourceIndex) {

@@ -6,10 +6,11 @@
 class MainGraph final : public juce::AudioProcessorGraph {
 public:
 	MainGraph();
+	~MainGraph() override;
 
 	void insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
 	void removeSource(int index);
-	void insertInstrument(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	bool insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
 	void removeInstrument(int index);
 	void insertTrack(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeTrack(int index);
@@ -17,9 +18,10 @@ public:
 	int getSourceNum() const;
 	juce::AudioProcessor* getSourceProcessor(int index) const;
 	int getInstrumentNum() const;
-	juce::AudioProcessor* getInstrumentProcessor(int index) const;
+	juce::AudioPluginInstance* getInstrumentProcessor(int index) const;
 	int getTrackNum() const;
 	Track* getTrackProcessor(int index) const;
+	void setInstrumentBypass(int index, bool bypass);
 
 	void setMIDII2SrcConnection(int sourceIndex);
 	void removeMIDII2SrcConnection(int sourceIndex);

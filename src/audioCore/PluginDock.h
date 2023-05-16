@@ -11,7 +11,7 @@ public:
 	/**
 	 * @brief	Insert a plugin onto the plugin dock.
 	 */
-	bool insertPlugin(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	bool insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
 	/**
 	 * @brief	Remove a plugin from the plugin dock.
 	 */

@@ -345,7 +345,7 @@ bool AudioCore::addEffect(const juce::String& identifier, int trackIndex, int ef
 	return false;
 }
 
-juce::AudioPluginInstance* AudioCore::getEffect(int trackIndex, int effectIndex) {
+juce::AudioPluginInstance* AudioCore::getEffect(int trackIndex, int effectIndex) const {
 	auto graph = this->getGraph();
 	if (graph) {
 		auto track = graph->getTrackProcessor(trackIndex);
@@ -384,6 +384,46 @@ void AudioCore::bypassEffect(int trackIndex, int effectIndex, bool bypass) {
 				pluginDock->setPluginBypass(effectIndex, bypass);
 			}
 		}
+	}
+}
+
+bool AudioCore::addInstrument(const juce::String& identifier, int instrIndex) {
+	auto des = this->findPlugin(identifier, true);
+	if (des) {
+		auto loadCallback =
+			[instrIndex, graph = this->getGraph()](std::unique_ptr<juce::AudioPluginInstance> ptr) {
+			if (graph && ptr) {
+				graph->insertInstrument(std::move(ptr), instrIndex);
+			}
+		};
+
+		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
+		return true;
+	}
+	return false;
+}
+
+juce::AudioPluginInstance* AudioCore::getInstrument(int instrIndex) const {
+	auto graph = this->getGraph();
+	if (graph) {
+		return graph->getInstrumentProcessor(instrIndex);
+	}
+	return nullptr;
+}
+
+bool AudioCore::removeInstrument(int instrIndex) {
+	auto graph = this->getGraph();
+	if (graph) {
+		graph->removeInstrument(instrIndex);
+		return true;
+	}
+	return false;
+}
+
+void AudioCore::bypassInstrument(int instrIndex, bool bypass) {
+	auto graph = this->getGraph();
+	if (graph) {
+		graph->setInstrumentBypass(instrIndex, bypass);
 	}
 }
 

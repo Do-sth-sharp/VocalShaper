@@ -15,6 +15,16 @@ MainGraph::MainGraph() {
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
 }
 
+MainGraph::~MainGraph() {
+	for (auto& i : this->instrumentNodeList) {
+		if (auto processor = i->getProcessor()) {
+			if (auto editor = processor->getActiveEditor()) {
+				if (editor) { delete editor; }
+			}
+		}
+	}
+}
+
 void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	/** Create Buses Layout */
 	juce::AudioProcessorGraph::BusesLayout busLayout;
