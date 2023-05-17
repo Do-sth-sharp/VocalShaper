@@ -237,7 +237,42 @@ void MainGraph::removeAudioI2SrcConnection(int sourceIndex, int srcChannel, int 
 	this->audioI2SrcConnectionList.removeAllInstancesOf(connection);
 }
 
-void MainGraph::addMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
+void MainGraph::setMIDII2InstrConnection(int instrIndex) {
+	/** Limit Index */
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
+
+	/** Remove Current Connection */
+	this->removeMIDII2InstrConnection(instrIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Add Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {nodeID, this->midiChannelIndex} };
+	this->addConnection(connection);
+	this->midiI2InstrConnectionList.add(connection);
+}
+
+void MainGraph::removeMIDII2InstrConnection(int instrIndex) {
+	/** Limit Index */
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Remove Connection */
+	this->midiI2InstrConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
+void MainGraph::setMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
 	/** Limit Index */
 	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
 	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
@@ -301,6 +336,19 @@ bool MainGraph::isAudioI2SrcConnected(int sourceIndex, int srcChannel, int dstCh
 	juce::AudioProcessorGraph::Connection connection =
 	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
 	return this->audioI2SrcConnectionList.contains(connection);
+}
+
+bool MainGraph::isMIDII2InstrConnected(int instrIndex) const {
+	/** Limit Index */
+	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {nodeID, this->midiChannelIndex} };
+	return this->midiI2InstrConnectionList.contains(connection);
 }
 
 bool MainGraph::isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const {

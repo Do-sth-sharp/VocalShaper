@@ -20,3 +20,7 @@ AC.setMixerPluginWindow(0, 0, false);
 -- Effect Plugin Bypass
 AC.setMixerPluginBypass(0, 0, true);
 AC.setMixerPluginBypass(0, 0, false);
+
+-- Track Audio Send
+AC.addMixerTrackSend(0, 0, 1, 0);
+AC.addMixerTrackSend(0, 1, 1, 1);

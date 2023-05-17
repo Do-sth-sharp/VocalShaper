@@ -267,6 +267,20 @@ AUDIOCORE_FUNC(addSequencerPluginOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addSequencerPluginMidiInput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int src = luaL_checkinteger(L, 1);
+		graph->setMIDII2InstrConnection(src);
+
+		result += juce::String("[MIDI Input]") + " - " + juce::String(src) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -278,4 +292,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPluginAdditionalInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPluginOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPluginMidiInput);
 }

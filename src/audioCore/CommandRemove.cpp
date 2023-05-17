@@ -147,6 +147,20 @@ AUDIOCORE_FUNC(removeSequencerPluginOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeSequencerPluginMidiInput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int src = luaL_checkinteger(L, 1);
+		graph->removeMIDII2InstrConnection(src);
+
+		result += juce::String("[MIDI Input]") + " - " + juce::String(src) + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -158,4 +172,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPluginAdditionalInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPluginOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPluginMidiInput);
 }
