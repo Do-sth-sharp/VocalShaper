@@ -22,10 +22,39 @@ void MIDIDebugger::addMessage(const juce::MidiMessage& message) {
 	text += juce::String::toHexString(message.getRawData(), message.getRawDataSize(), 1);
 	text += "\n";
 	juce::MessageManager::callAsync(
-		[output = juce::Component::SafePointer(this->messageOutput.get()), text] {
+		[output = juce::Component::SafePointer(this->messageOutput.get()),
+		text, maxNum = this->maxNum] {
 			if (output) {
+				juce::String current = output->getText();
+				juce::StringArray list = juce::StringArray::fromLines(current);
+
+				list.add(text);
+				list.removeEmptyStrings(true);
+				if (list.size() > maxNum) {
+					list.removeRange(0, list.size() - maxNum);
+				}
+
+				output->setText(list.joinIntoString("\n"));
 				output->moveCaretToEnd();
-				output->insertTextAtCaret(text);
 			}
 		});
+}
+
+void MIDIDebugger::setMaxNum(int num) {
+	this->maxNum = std::max(num, 0);
+
+	juce::String current = this->messageOutput->getText();
+	juce::StringArray list = juce::StringArray::fromLines(current);
+
+	list.removeEmptyStrings(true);
+	if (list.size() > maxNum) {
+		list.removeRange(0, list.size() - std::max(maxNum, 0));
+	}
+
+	this->messageOutput->setText(list.joinIntoString("\n"));
+	this->messageOutput->moveCaretToEnd();
+}
+
+int MIDIDebugger::getMaxNum() const {
+	return this->maxNum;
 }

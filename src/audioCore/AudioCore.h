@@ -63,6 +63,9 @@ public:
 	juce::Component* getAudioDebugger() const;
 	juce::Component* getMIDIDebugger() const;
 
+	void setMIDIDebuggerMaxNum(int num);
+	int getMIDIDebuggerMaxNum() const;
+
 	const juce::StringArray getPluginTypeList() const;
 	const std::tuple<bool, juce::KnownPluginList&> getPluginList() const;
 	void clearPluginList();

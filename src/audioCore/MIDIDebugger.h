@@ -10,8 +10,12 @@ public:
 
 	void addMessage(const juce::MidiMessage& message);
 
+	void setMaxNum(int num = 30);
+	int getMaxNum() const;
+
 private:
 	std::unique_ptr<juce::TextEditor> messageOutput = nullptr;
+	int maxNum = 30;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MIDIDebugger)
 };

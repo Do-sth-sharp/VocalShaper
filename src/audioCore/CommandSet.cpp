@@ -95,6 +95,15 @@ AUDIOCORE_FUNC(setDeviceMIDIOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setMIDIDebuggerMaxNum) {
+	juce::String result;
+
+	audioCore->setMIDIDebuggerMaxNum(luaL_checkinteger(L, 1));
+	result += "MIDI Debugger Max Num: " + juce::String(audioCore->getMIDIDebuggerMaxNum()) + "\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(setMixerTrackGain) {
 	juce::String result;
 

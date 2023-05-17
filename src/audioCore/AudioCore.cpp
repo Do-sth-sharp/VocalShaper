@@ -287,6 +287,21 @@ juce::Component* AudioCore::getMIDIDebugger() const {
 	return this->midiDebugger.get();
 }
 
+void AudioCore::setMIDIDebuggerMaxNum(int num) {
+	auto dbg = dynamic_cast<MIDIDebugger*>(this->getMIDIDebugger());
+	if (dbg) {
+		dbg->setMaxNum(num);
+	}
+}
+
+int AudioCore::getMIDIDebuggerMaxNum() const {
+	auto dbg = dynamic_cast<MIDIDebugger*>(this->getMIDIDebugger());
+	if (dbg) {
+		return dbg->getMaxNum();
+	}
+	return -1;
+}
+
 const juce::StringArray AudioCore::getPluginTypeList() const {
 	auto formatList = this->audioPluginSearchThread->getFormats();
 
