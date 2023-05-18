@@ -164,27 +164,24 @@ AUDIOCORE_FUNC(setMixerTrackSlider) {
 AUDIOCORE_FUNC(setMixerPluginWindow) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
-		int trackIndex = luaL_checkinteger(L, 1);
-		int effectIndex = luaL_checkinteger(L, 2);
-		auto plugin = AudioCore::getInstance()->getEffect(trackIndex, effectIndex);
-		if (plugin) {
-			auto editor = plugin->createEditorIfNeeded();
-			if (editor) {
-				bool visible = lua_toboolean(L, 3);
+	int trackIndex = luaL_checkinteger(L, 1);
+	int effectIndex = luaL_checkinteger(L, 2);
+	auto plugin = AudioCore::getInstance()->getEffect(trackIndex, effectIndex);
+	if (plugin) {
+		auto editor = plugin->createEditorIfNeeded();
+		if (editor) {
+			bool visible = lua_toboolean(L, 3);
 
-				if (visible) {
-					editor->setName(plugin->getName());
-					editor->addToDesktop(
-						juce::ComponentPeer::windowAppearsOnTaskbar |
-						juce::ComponentPeer::windowHasTitleBar |
-						juce::ComponentPeer::windowHasDropShadow);
-				}
-				editor->setVisible(visible);
-
-				result += "Plugin Window: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
+			if (visible) {
+				editor->setName(plugin->getName());
+				editor->addToDesktop(
+					juce::ComponentPeer::windowAppearsOnTaskbar |
+					juce::ComponentPeer::windowHasTitleBar |
+					juce::ComponentPeer::windowHasDropShadow);
 			}
+			editor->setVisible(visible);
+
+			result += "Plugin Window: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 		}
 	}
 
@@ -194,16 +191,13 @@ AUDIOCORE_FUNC(setMixerPluginWindow) {
 AUDIOCORE_FUNC(setMixerPluginBypass) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
-		int trackIndex = luaL_checkinteger(L, 1);
-		int effectIndex = luaL_checkinteger(L, 2);
-		bool bypass = lua_toboolean(L, 3);
+	int trackIndex = luaL_checkinteger(L, 1);
+	int effectIndex = luaL_checkinteger(L, 2);
+	bool bypass = lua_toboolean(L, 3);
 
-		AudioCore::getInstance()->bypassEffect(trackIndex, effectIndex, bypass);
-		
-		result += "Plugin Bypass: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
-	}
+	AudioCore::getInstance()->bypassEffect(trackIndex, effectIndex, bypass);
+
+	result += "Plugin Bypass: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
 
 	return CommandFuncResult{ true, result };
 }
@@ -211,26 +205,23 @@ AUDIOCORE_FUNC(setMixerPluginBypass) {
 AUDIOCORE_FUNC(setSequencerPluginWindow) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
-		int instrIndex = luaL_checkinteger(L, 1);
-		auto plugin = AudioCore::getInstance()->getInstrument(instrIndex);
-		if (plugin) {
-			auto editor = plugin->createEditorIfNeeded();
-			if (editor) {
-				bool visible = lua_toboolean(L, 2);
+	int instrIndex = luaL_checkinteger(L, 1);
+	auto plugin = AudioCore::getInstance()->getInstrument(instrIndex);
+	if (plugin) {
+		auto editor = plugin->createEditorIfNeeded();
+		if (editor) {
+			bool visible = lua_toboolean(L, 2);
 
-				if (visible) {
-					editor->setName(plugin->getName());
-					editor->addToDesktop(
-						juce::ComponentPeer::windowAppearsOnTaskbar |
-						juce::ComponentPeer::windowHasTitleBar |
-						juce::ComponentPeer::windowHasDropShadow);
-				}
-				editor->setVisible(visible);
-
-				result += "Plugin Window: [" + juce::String(instrIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
+			if (visible) {
+				editor->setName(plugin->getName());
+				editor->addToDesktop(
+					juce::ComponentPeer::windowAppearsOnTaskbar |
+					juce::ComponentPeer::windowHasTitleBar |
+					juce::ComponentPeer::windowHasDropShadow);
 			}
+			editor->setVisible(visible);
+
+			result += "Plugin Window: [" + juce::String(instrIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 		}
 	}
 
@@ -240,14 +231,30 @@ AUDIOCORE_FUNC(setSequencerPluginWindow) {
 AUDIOCORE_FUNC(setSequencerPluginBypass) {
 	juce::String result;
 
+	int instrIndex = luaL_checkinteger(L, 1);
+	bool bypass = lua_toboolean(L, 2);
+
+	AudioCore::getInstance()->bypassInstrument(instrIndex, bypass);
+
+	result += "Plugin Bypass: [" + juce::String(instrIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setSequencerPluginMIDIChannel) {
+	juce::String result;
+
 	auto graph = audioCore->getGraph();
 	if (graph) {
 		int instrIndex = luaL_checkinteger(L, 1);
-		bool bypass = lua_toboolean(L, 2);
+		int channel = luaL_checkinteger(L, 2);
 
-		AudioCore::getInstance()->bypassInstrument(instrIndex, bypass);
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			instr->setMIDIChannel(channel);
 
-		result += "Plugin Bypass: [" + juce::String(instrIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+			result += "Plugin MIDI Channel: [" + juce::String(instrIndex) + "] " + juce::String(instr->getMIDIChannel()) + "\n";
+		}
 	}
 
 	return CommandFuncResult{ true, result };
@@ -268,4 +275,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginWindow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginBypass);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginMIDIChannel);
 }

@@ -165,6 +165,23 @@ PluginDecorator* MainGraph::getInstrumentProcessor(int index) const {
 		this->instrumentNodeList.getUnchecked(index)->getProcessor());
 }
 
+void MainGraph::setInstrumentBypass(int index, bool bypass) {
+	if (index < 0 || index >= this->instrumentNodeList.size()) { return; }
+	auto node = this->instrumentNodeList.getUnchecked(index);
+	if (node) {
+		node->setBypassed(bypass);
+	}
+}
+
+bool MainGraph::getInstrumentBypass(int index) const {
+	if (index < 0 || index >= this->instrumentNodeList.size()) { return false; }
+	auto node = this->instrumentNodeList.getUnchecked(index);
+	if (node) {
+		return node->isBypassed();
+	}
+	return false;
+}
+
 void MainGraph::setMIDII2SrcConnection(int sourceIndex) {
 	/** Limit Index */
 	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }

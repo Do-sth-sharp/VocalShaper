@@ -19,6 +19,17 @@ bool PluginDecorator::canPluginRemoveBus(bool isInput) const {
 	return this->plugin->canRemoveBus(isInput);
 }
 
+void PluginDecorator::setMIDIChannel(int channel) {
+	if (channel > 16 || channel < 0) {
+		channel = 0;
+	}
+	this->midiChannel = channel;
+}
+
+int PluginDecorator::getMIDIChannel() const {
+	return this->midiChannel;
+}
+
 const juce::String PluginDecorator::getName() const {
 	return this->plugin->getName();
 }
@@ -42,11 +53,13 @@ void PluginDecorator::memoryWarningReceived() {
 
 void PluginDecorator::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
 	this->plugin->processBlock(buffer, midiMessages);
 }
 
 void PluginDecorator::processBlock(
 	juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
+	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
 	this->plugin->processBlock(buffer, midiMessages);
 }
 
@@ -301,5 +314,19 @@ void PluginDecorator::syncBusesNumFromPlugin() {
 
 	if (flagChanged) {
 		this->setBusesLayout(currentBusesLayout);
+	}
+}
+
+void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages) {
+	/** Filter MIDI Channel */
+	if (channel >= 1 && channel <= 16) {
+		juce::MidiBuffer bufferTemp;
+		for (auto it = midiMessages.cbegin(); it != midiMessages.cend(); it++) {
+			auto message = (*it).getMessage();
+			if (message.getChannel() == channel) {
+				bufferTemp.addEvent(message, (*it).samplePosition);
+			}
+		}
+		midiMessages = bufferTemp;
 	}
 }

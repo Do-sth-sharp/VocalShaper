@@ -10,6 +10,9 @@ public:
 	bool canPluginAddBus(bool isInput) const;
 	bool canPluginRemoveBus(bool isInput) const;
 
+	void setMIDIChannel(int channel);
+	int getMIDIChannel() const;
+
 public:
 	const juce::String getName() const override;
 	juce::StringArray getAlternateDisplayNames() const override;
@@ -77,6 +80,7 @@ public:
 private:
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
 	bool initFlag = false;
+	std::atomic_int midiChannel = 1;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;
@@ -84,6 +88,8 @@ private:
 	void updatePluginBuses();
 	void syncBusesFromPlugin();
 	void syncBusesNumFromPlugin();
+
+	static void filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)
 };

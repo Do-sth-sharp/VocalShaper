@@ -100,14 +100,6 @@ Track* MainGraph::getTrackProcessor(int index) const {
 	return dynamic_cast<Track*>(this->trackNodeList.getUnchecked(index)->getProcessor());
 }
 
-void MainGraph::setInstrumentBypass(int index, bool bypass) {
-	if (index < 0 || index >= this->instrumentNodeList.size()) { return; }
-	auto node = this->instrumentNodeList.getUnchecked(index);
-	if (node) {
-		node->setBypassed(bypass);
-	}
-}
-
 void MainGraph::setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel) {
 	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
 	if (srcChannel < 0 || srcChannel >= this->getTotalNumInputChannels()) { return; }

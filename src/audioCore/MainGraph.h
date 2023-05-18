@@ -23,6 +23,7 @@ public:
 	int getTrackNum() const;
 	Track* getTrackProcessor(int index) const;
 	void setInstrumentBypass(int index, bool bypass);
+	bool getInstrumentBypass(int index) const;
 
 	void setMIDII2SrcConnection(int sourceIndex);
 	void removeMIDII2SrcConnection(int sourceIndex);

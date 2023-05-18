@@ -23,3 +23,6 @@ AC.setSequencerPluginBypass(0, false);
 -- Instrument Plugin MIDI Input From Device
 AC.addSequencerPluginMidiInput(0);
 AC.removeSequencerPluginMidiInput(0);
+
+-- Instrument Plugin MIDI Channel
+AC.setSequencerPluginMIDIChannel(0, 0);
