@@ -2,6 +2,8 @@
 
 #include <JuceHeader.h>
 
+#include "PluginDecorator.h"
+
 class PluginDock final : public juce::AudioProcessorGraph {
 public:
 	PluginDock() = delete;
@@ -18,7 +20,7 @@ public:
 	void removePlugin(int index);
 
 	int getPluginNum() const;
-	juce::AudioPluginInstance* getPluginProcessor(int index) const;
+	PluginDecorator* getPluginProcessor(int index) const;
 	void setPluginBypass(int index, bool bypass);
 
 	/**

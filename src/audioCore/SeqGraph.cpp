@@ -86,7 +86,7 @@ void MainGraph::removeSource(int index) {
 
 bool MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::move(processor));
+	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(std::move(processor)));
 	if (ptrNode) {
 		/** Limit Index */
 		if (index < 0 || index > this->instrumentNodeList.size()) {
@@ -159,9 +159,9 @@ int MainGraph::getInstrumentNum() const {
 	return this->instrumentNodeList.size();
 }
 
-juce::AudioPluginInstance* MainGraph::getInstrumentProcessor(int index) const {
+PluginDecorator* MainGraph::getInstrumentProcessor(int index) const {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return nullptr; }
-	return dynamic_cast<juce::AudioPluginInstance*>(
+	return dynamic_cast<PluginDecorator*>(
 		this->instrumentNodeList.getUnchecked(index)->getProcessor());
 }
 

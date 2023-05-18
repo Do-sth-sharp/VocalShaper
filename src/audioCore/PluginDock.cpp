@@ -51,7 +51,7 @@ PluginDock::~PluginDock() {
 
 bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::move(processor));
+	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(std::move(processor)));
 	if (ptrNode) {
 		/** Limit Index */
 		if (index < 0 || index > this->pluginNodeList.size()) {
@@ -181,9 +181,9 @@ int PluginDock::getPluginNum() const {
 	return this->pluginNodeList.size();
 }
 
-juce::AudioPluginInstance* PluginDock::getPluginProcessor(int index) const {
+PluginDecorator* PluginDock::getPluginProcessor(int index) const {
 	if (index < 0 || index >= this->pluginNodeList.size()) { return nullptr; }
-	return dynamic_cast<juce::AudioPluginInstance*>(
+	return dynamic_cast<PluginDecorator*>(
 		this->pluginNodeList.getUnchecked(index)->getProcessor());
 }
 

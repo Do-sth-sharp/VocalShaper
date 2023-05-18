@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "Track.h"
+#include "PluginDecorator.h"
 
 class MainGraph final : public juce::AudioProcessorGraph {
 public:
@@ -18,7 +19,7 @@ public:
 	int getSourceNum() const;
 	juce::AudioProcessor* getSourceProcessor(int index) const;
 	int getInstrumentNum() const;
-	juce::AudioPluginInstance* getInstrumentProcessor(int index) const;
+	PluginDecorator* getInstrumentProcessor(int index) const;
 	int getTrackNum() const;
 	Track* getTrackProcessor(int index) const;
 	void setInstrumentBypass(int index, bool bypass);

@@ -362,7 +362,7 @@ bool AudioCore::addEffect(const juce::String& identifier, int trackIndex, int ef
 	return false;
 }
 
-juce::AudioPluginInstance* AudioCore::getEffect(int trackIndex, int effectIndex) const {
+PluginDecorator* AudioCore::getEffect(int trackIndex, int effectIndex) const {
 	auto graph = this->getGraph();
 	if (graph) {
 		auto track = graph->getTrackProcessor(trackIndex);
@@ -420,7 +420,7 @@ bool AudioCore::addInstrument(const juce::String& identifier, int instrIndex) {
 	return false;
 }
 
-juce::AudioPluginInstance* AudioCore::getInstrument(int instrIndex) const {
+PluginDecorator* AudioCore::getInstrument(int instrIndex) const {
 	auto graph = this->getGraph();
 	if (graph) {
 		return graph->getInstrumentProcessor(instrIndex);

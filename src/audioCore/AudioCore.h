@@ -74,12 +74,12 @@ public:
 	const std::unique_ptr<juce::PluginDescription> findPlugin(const juce::String& identifier, bool isInstrument = false) const;
 
 	bool addEffect(const juce::String& identifier, int trackIndex, int effectIndex);
-	juce::AudioPluginInstance* getEffect(int trackIndex, int effectIndex) const;
+	PluginDecorator* getEffect(int trackIndex, int effectIndex) const;
 	bool removeEffect(int trackIndex, int effectIndex);
 	void bypassEffect(int trackIndex, int effectIndex, bool bypass);
 
 	bool addInstrument(const juce::String& identifier, int instrIndex);
-	juce::AudioPluginInstance* getInstrument(int instrIndex) const;
+	PluginDecorator* getInstrument(int instrIndex) const;
 	bool removeInstrument(int instrIndex);
 	void bypassInstrument(int instrIndex, bool bypass);
 
