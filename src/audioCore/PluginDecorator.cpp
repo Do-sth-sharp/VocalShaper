@@ -30,6 +30,10 @@ int PluginDecorator::getMIDIChannel() const {
 	return this->midiChannel;
 }
 
+const juce::Array<juce::AudioProcessorParameter*>& PluginDecorator::getPluginParamList() const {
+	return this->plugin->getParameters();
+}
+
 const juce::String PluginDecorator::getName() const {
 	return this->plugin->getName();
 }

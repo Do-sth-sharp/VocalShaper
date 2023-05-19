@@ -190,10 +190,138 @@ AUDIOCORE_FUNC(listPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
+#define PLUGIN_PARAM_CATEGORY_CASE(t) \
+	case juce::AudioProcessorParameter::Category::t: \
+		result += "    Category: " #t "\n"; \
+		break
+
+AUDIOCORE_FUNC(listSequencerPluginParam) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			auto& paramList = instr->getPluginParamList();
+
+			result += "========================================================================\n";
+			result += "Param List Of Instr [" + juce::String(instrIndex) + "]\n";
+			result += "========================================================================\n";
+
+			for (int i = 0; i < paramList.size(); i++) {
+				auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i));
+				if (param) {
+					result += "[" + juce::String(i) + "] " + param->getName(INT_MAX) + "\n";
+					result += "    Value: " + param->getCurrentValueAsText() + "\n";
+					result += "    Label: " + param->getLabel() + "\n";
+					switch (param->getCategory()) {
+						PLUGIN_PARAM_CATEGORY_CASE(genericParameter);
+						PLUGIN_PARAM_CATEGORY_CASE(inputGain);
+						PLUGIN_PARAM_CATEGORY_CASE(outputGain);
+						PLUGIN_PARAM_CATEGORY_CASE(inputMeter);
+						PLUGIN_PARAM_CATEGORY_CASE(outputMeter);
+						PLUGIN_PARAM_CATEGORY_CASE(compressorLimiterGainReductionMeter);
+						PLUGIN_PARAM_CATEGORY_CASE(expanderGateGainReductionMeter);
+						PLUGIN_PARAM_CATEGORY_CASE(analysisMeter);
+						PLUGIN_PARAM_CATEGORY_CASE(otherMeter);
+					default:
+						result += "    Category: " "undefined" "\n";
+						break;
+					}
+					result += "    Num Steps: " + juce::String(param->getNumSteps()) + "\n";
+					result += "    Possible States: " + param->getAllValueStrings().joinIntoString(", ") + "\n";
+					result += "    Is Discrete : " + juce::String(param->isDiscrete() ? "true" : "false") + "\n";
+					result += "    Is Boolean : " + juce::String(param->isBoolean() ? "true" : "false") + "\n";
+					result += "    Is Orientation Inverted: " + juce::String(param->isOrientationInverted() ? "true" : "false") + "\n";
+					result += "    Is Automatable: " + juce::String(param->isAutomatable() ? "true" : "false") + "\n";
+					result += "    Is Meta Parameter: " + juce::String(param->isMetaParameter() ? "true" : "false") + "\n";
+					result += "    Version Hint: " + juce::String(param->getVersionHint()) + "\n";
+					
+					if (auto ptr = dynamic_cast<juce::AudioProcessorParameterWithID*>(param)) {
+						result += "    ID: " + ptr->getParameterID() + "\n";
+					}
+				}
+			}
+
+			result += "========================================================================\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(listMixerPluginParam) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					auto& paramList = effect->getPluginParamList();
+
+					result += "========================================================================\n";
+					result += "Param List Of Effect [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "]\n";
+					result += "========================================================================\n";
+
+					for (int i = 0; i < paramList.size(); i++) {
+						auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i));
+						if (param) {
+							result += "[" + juce::String(i) + "] " + param->getName(INT_MAX) + "\n";
+							result += "    Value: " + param->getCurrentValueAsText() + "\n";
+							result += "    Label: " + param->getLabel() + "\n";
+							switch (param->getCategory()) {
+								PLUGIN_PARAM_CATEGORY_CASE(genericParameter);
+								PLUGIN_PARAM_CATEGORY_CASE(inputGain);
+								PLUGIN_PARAM_CATEGORY_CASE(outputGain);
+								PLUGIN_PARAM_CATEGORY_CASE(inputMeter);
+								PLUGIN_PARAM_CATEGORY_CASE(outputMeter);
+								PLUGIN_PARAM_CATEGORY_CASE(compressorLimiterGainReductionMeter);
+								PLUGIN_PARAM_CATEGORY_CASE(expanderGateGainReductionMeter);
+								PLUGIN_PARAM_CATEGORY_CASE(analysisMeter);
+								PLUGIN_PARAM_CATEGORY_CASE(otherMeter);
+							default:
+								result += "    Category: " "undefined" "\n";
+								break;
+							}
+							result += "    Num Steps: " + juce::String(param->getNumSteps()) + "\n";
+							result += "    Possible States: " + param->getAllValueStrings().joinIntoString(", ") + "\n";
+							result += "    Is Discrete : " + juce::String(param->isDiscrete() ? "true" : "false") + "\n";
+							result += "    Is Boolean : " + juce::String(param->isBoolean() ? "true" : "false") + "\n";
+							result += "    Is Orientation Inverted: " + juce::String(param->isOrientationInverted() ? "true" : "false") + "\n";
+							result += "    Is Automatable: " + juce::String(param->isAutomatable() ? "true" : "false") + "\n";
+							result += "    Is Meta Parameter: " + juce::String(param->isMetaParameter() ? "true" : "false") + "\n";
+							result += "    Version Hint: " + juce::String(param->getVersionHint()) + "\n";
+
+							if (auto ptr = dynamic_cast<juce::AudioProcessorParameterWithID*>(param)) {
+								result += "    ID: " + ptr->getParameterID() + "\n";
+							}
+						}
+					}
+
+					result += "========================================================================\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandList(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listDeviceMIDI);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listPluginSearchPath);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listSequencerPluginParam);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listMixerPluginParam);
 }

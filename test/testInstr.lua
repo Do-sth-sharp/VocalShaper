@@ -26,3 +26,6 @@ AC.removeSequencerPluginMidiInput(0);
 
 -- Instrument Plugin MIDI Channel
 AC.setSequencerPluginMIDIChannel(0, 0);
+
+-- Instrument Plugin Param
+AC.listSequencerPluginParam(0);

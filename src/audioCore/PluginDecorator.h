@@ -13,6 +13,16 @@ public:
 	void setMIDIChannel(int channel);
 	int getMIDIChannel() const;
 
+	const juce::Array<juce::AudioProcessorParameter*>& getPluginParamList() const;
+	/*template<typename T>
+	T getParamValue(int index) const;
+	template<typename T>
+	T getParamValue(const juce::String& name) const;
+	template<typename T>
+	void setParamValue(int index, T value);
+	template<typename T>
+	void setParamValue(const juce::String& name, T value);*/
+
 public:
 	const juce::String getName() const override;
 	juce::StringArray getAlternateDisplayNames() const override;
