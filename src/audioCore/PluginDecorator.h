@@ -19,6 +19,11 @@ public:
 	float getParamDefaultValue(int index) const;
 	void setParamValue(int index, float value);
 
+	void connectParamCC(int paramIndex, int CCIndex);
+	int getCCParamConnection(int CCIndex) const;
+	int getParamCCConnection(int paramIndex) const;
+	void setParamCCListenning(int paramIndex);
+
 public:
 	const juce::String getName() const override;
 	juce::StringArray getAlternateDisplayNames() const override;
@@ -87,6 +92,9 @@ private:
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
 	bool initFlag = false;
 	std::atomic_int midiChannel = 1;
+	juce::Array<std::atomic_int> paramCCList;
+	std::atomic_int paramListenningCC = -1;
+	std::atomic_bool midiShouldOutput = false;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;
@@ -96,6 +104,7 @@ private:
 	void syncBusesNumFromPlugin();
 
 	static void filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages);
+	static void interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)
 };

@@ -4,6 +4,11 @@ PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plug
 	: plugin(std::move(plugin)) {
 	jassert(this->plugin);
 
+	this->paramCCList.resize(128);
+	for (int i = 0; i < 128; i++) {
+		this->paramCCList[i] = -1;
+	}
+
 	this->initFlag = true;
 
 	this->syncBusesFromPlugin();
@@ -66,6 +71,30 @@ void PluginDecorator::setParamValue(int index, float value) {
 	param->setValue(value);
 }
 
+void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
+	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
+	if (paramIndex < 0 || paramIndex >= this->getPluginParamList().size()) { return; }
+
+	this->paramCCList[CCIndex] = paramIndex;
+}
+
+int PluginDecorator::getCCParamConnection(int CCIndex) const {
+	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
+	return this->paramCCList[CCIndex];
+}
+
+int PluginDecorator::getParamCCConnection(int paramIndex) const {
+	return this->paramCCList.indexOf(paramIndex);
+}
+
+void PluginDecorator::setParamCCListenning(int paramIndex) {
+	if (paramIndex < 0 || paramIndex >= this->getPluginParamList().size()) {
+		this->paramListenningCC = -1;
+		return;
+	}
+	this->paramListenningCC = paramIndex;
+}
+
 const juce::String PluginDecorator::getName() const {
 	return this->plugin->getName();
 }
@@ -90,13 +119,25 @@ void PluginDecorator::memoryWarningReceived() {
 void PluginDecorator::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
+
+	/** TODO Link Param With MIDI CC */
+	/** TODO Change Param By MIDI CC */
+
 	this->plugin->processBlock(buffer, midiMessages);
+
+	PluginDecorator::interceptMIDIMessage(this->midiShouldOutput, midiMessages);
 }
 
 void PluginDecorator::processBlock(
 	juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
 	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
+
+	/** TODO Link Param With MIDI CC */
+	/** TODO Change Param By MIDI CC */
+
 	this->plugin->processBlock(buffer, midiMessages);
+
+	PluginDecorator::interceptMIDIMessage(this->midiShouldOutput, midiMessages);
 }
 
 void PluginDecorator::processBlockBypassed(
@@ -364,5 +405,11 @@ void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessa
 			}
 		}
 		midiMessages = bufferTemp;
+	}
+}
+
+void PluginDecorator::interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages) {
+	if (!shouldMIDIOutput) {
+		midiMessages = juce::MidiBuffer{};
 	}
 }
