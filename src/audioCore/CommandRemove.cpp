@@ -82,7 +82,7 @@ AUDIOCORE_FUNC(removeMixerTrackOutput) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(removeMixerPlugin) {
+AUDIOCORE_FUNC(removeEffect) {
 	juce::String result;
 
 	int trackIndex = luaL_checkinteger(L, 1);
@@ -95,7 +95,7 @@ AUDIOCORE_FUNC(removeMixerPlugin) {
 }
 
 
-AUDIOCORE_FUNC(removeMixerPluginAdditionalInput) {
+AUDIOCORE_FUNC(removeEffectAdditionalInput) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -119,7 +119,7 @@ AUDIOCORE_FUNC(removeMixerPluginAdditionalInput) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(removeSequencerPlugin) {
+AUDIOCORE_FUNC(removeInstr) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
@@ -130,7 +130,7 @@ AUDIOCORE_FUNC(removeSequencerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(removeSequencerPluginOutput) {
+AUDIOCORE_FUNC(removeInstrOutput) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -147,7 +147,7 @@ AUDIOCORE_FUNC(removeSequencerPluginOutput) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(removeSequencerPluginMidiInput) {
+AUDIOCORE_FUNC(removeInstrMidiInput) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -168,9 +168,9 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackSend);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPlugin);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerPluginAdditionalInput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPlugin);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPluginOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerPluginMidiInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffect);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectAdditionalInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstr);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrMidiInput);
 }

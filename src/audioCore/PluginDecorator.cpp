@@ -34,6 +34,38 @@ const juce::Array<juce::AudioProcessorParameter*>& PluginDecorator::getPluginPar
 	return this->plugin->getParameters();
 }
 
+const juce::String PluginDecorator::getParamName(int index) const {
+	auto& paramList = this->getPluginParamList();
+	if (index < 0 || index >= paramList.size()) { return juce::String{}; }
+
+	auto param = paramList.getUnchecked(index);
+	return param->getName(INT_MAX);
+}
+
+float PluginDecorator::getParamValue(int index) const {
+	auto& paramList = this->getPluginParamList();
+	if (index < 0 || index >= paramList.size()) { return 0; }
+
+	auto param = paramList.getUnchecked(index);
+	return param->getValue();
+}
+
+float PluginDecorator::getParamDefaultValue(int index) const {
+	auto& paramList = this->getPluginParamList();
+	if (index < 0 || index >= paramList.size()) { return 0; }
+
+	auto param = paramList.getUnchecked(index);
+	return param->getDefaultValue();
+}
+
+void PluginDecorator::setParamValue(int index, float value) {
+	auto& paramList = this->getPluginParamList();
+	if (index < 0 || index >= paramList.size()) { return; }
+
+	auto param = paramList.getUnchecked(index);
+	param->setValue(value);
+}
+
 const juce::String PluginDecorator::getName() const {
 	return this->plugin->getName();
 }

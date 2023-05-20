@@ -195,7 +195,7 @@ AUDIOCORE_FUNC(listPlugin) {
 		result += "    Category: " #t "\n"; \
 		break
 
-AUDIOCORE_FUNC(listSequencerPluginParam) {
+AUDIOCORE_FUNC(listInstrParam) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -252,7 +252,7 @@ AUDIOCORE_FUNC(listSequencerPluginParam) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(listMixerPluginParam) {
+AUDIOCORE_FUNC(listEffectParam) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -322,6 +322,6 @@ void regCommandList(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listPluginSearchPath);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listPlugin);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listSequencerPluginParam);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listMixerPluginParam);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listInstrParam);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, listEffectParam);
 }

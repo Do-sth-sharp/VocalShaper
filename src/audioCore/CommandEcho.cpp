@@ -271,6 +271,88 @@ AUDIOCORE_FUNC(echoMixerTrackSlider) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(echoInstrParamValue) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int paramIndex = luaL_checkinteger(L, 2);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			result += "Instr Param Value: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - " + juce::String(instr->getParamValue(paramIndex)) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoInstrParamDefaultValue) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int paramIndex = luaL_checkinteger(L, 2);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			result += "Instr Param Default Value: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - " + juce::String(instr->getParamDefaultValue(paramIndex)) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoEffectParamValue) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int paramIndex = luaL_checkinteger(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					result += "Effect Param Value: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - " + juce::String(effect->getParamValue(paramIndex)) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoEffectParamDefaultValue) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int paramIndex = luaL_checkinteger(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					result += "Effect Param Default Value: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - " + juce::String(effect->getParamDefaultValue(paramIndex)) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceMIDI);
@@ -280,4 +362,8 @@ void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackGain);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackPan);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoMixerTrackSlider);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrParamValue);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrParamDefaultValue);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamValue);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamDefaultValue);
 }

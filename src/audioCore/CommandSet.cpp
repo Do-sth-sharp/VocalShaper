@@ -161,7 +161,7 @@ AUDIOCORE_FUNC(setMixerTrackSlider) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(setMixerPluginWindow) {
+AUDIOCORE_FUNC(setEffectWindow) {
 	juce::String result;
 
 	int trackIndex = luaL_checkinteger(L, 1);
@@ -188,7 +188,7 @@ AUDIOCORE_FUNC(setMixerPluginWindow) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(setMixerPluginBypass) {
+AUDIOCORE_FUNC(setEffectBypass) {
 	juce::String result;
 
 	int trackIndex = luaL_checkinteger(L, 1);
@@ -202,7 +202,7 @@ AUDIOCORE_FUNC(setMixerPluginBypass) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(setSequencerPluginWindow) {
+AUDIOCORE_FUNC(setInstrWindow) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
@@ -228,7 +228,7 @@ AUDIOCORE_FUNC(setSequencerPluginWindow) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(setSequencerPluginBypass) {
+AUDIOCORE_FUNC(setInstrBypass) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
@@ -241,7 +241,7 @@ AUDIOCORE_FUNC(setSequencerPluginBypass) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(setSequencerPluginMIDIChannel) {
+AUDIOCORE_FUNC(setInstrMIDIChannel) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -260,6 +260,51 @@ AUDIOCORE_FUNC(setSequencerPluginMIDIChannel) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setInstrParamValue) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int paramIndex = luaL_checkinteger(L, 2);
+		float value = luaL_checknumber(L, 3);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			instr->setParamValue(paramIndex, value);
+			result += "Set Instr Param Value: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - " + juce::String(instr->getParamValue(paramIndex)) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setEffectParamValue) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int paramIndex = luaL_checkinteger(L, 3);
+		float value = luaL_checknumber(L, 4);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					effect->setParamValue(paramIndex, value);
+					result += "Effect Param Value: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - " + juce::String(effect->getParamValue(paramIndex)) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -271,9 +316,11 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackGain);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackPan);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginWindow);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerPluginBypass);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginWindow);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginBypass);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerPluginMIDIChannel);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectWindow);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectBypass);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrWindow);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrBypass);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDIChannel);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamValue);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamValue);
 }

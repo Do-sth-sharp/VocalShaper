@@ -201,7 +201,7 @@ AUDIOCORE_FUNC(addMixerTrackOutput) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(addMixerPlugin) {
+AUDIOCORE_FUNC(addEffect) {
 	juce::String result;
 
 	int trackIndex = luaL_checkinteger(L, 1);
@@ -214,7 +214,7 @@ AUDIOCORE_FUNC(addMixerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(addMixerPluginAdditionalInput) {
+AUDIOCORE_FUNC(addEffectAdditionalInput) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -238,7 +238,7 @@ AUDIOCORE_FUNC(addMixerPluginAdditionalInput) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(addSequencerPlugin) {
+AUDIOCORE_FUNC(addInstr) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
@@ -250,7 +250,7 @@ AUDIOCORE_FUNC(addSequencerPlugin) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(addSequencerPluginOutput) {
+AUDIOCORE_FUNC(addInstrOutput) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -267,7 +267,7 @@ AUDIOCORE_FUNC(addSequencerPluginOutput) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(addSequencerPluginMidiInput) {
+AUDIOCORE_FUNC(addInstrMidiInput) {
 	juce::String result;
 
 	auto graph = audioCore->getGraph();
@@ -288,9 +288,9 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackSend);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPlugin);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerPluginAdditionalInput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPlugin);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPluginOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerPluginMidiInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addEffect);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addEffectAdditionalInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstr);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrMidiInput);
 }
