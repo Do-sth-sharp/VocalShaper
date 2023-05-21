@@ -2,9 +2,6 @@
 
 #include "PlayPosition.h"
 
-/** To Fix Symbol Export Error Of juce::dsp::Panner<float> */
-#include <juce_dsp/processors/juce_Panner.cpp>
-
 Track::Track(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
 	/** Set Effects */

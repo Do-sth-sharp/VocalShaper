@@ -4,8 +4,7 @@ PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plug
 	: plugin(std::move(plugin)) {
 	jassert(this->plugin);
 
-	this->paramCCList.resize(128);
-	for (int i = 0; i < 128; i++) {
+	for (int i = 0; i < this->paramCCList.size(); i++) {
 		this->paramCCList[i] = -1;
 	}
 
@@ -75,16 +74,32 @@ void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
 	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
 	if (paramIndex < 0 || paramIndex >= this->getPluginParamList().size()) { return; }
 
+	auto currentCC = this->getParamCCConnection(paramIndex);
+	if (currentCC > -1) {
+		this->paramCCList[currentCC] = -1;
+	}
+
 	this->paramCCList[CCIndex] = paramIndex;
 }
 
 int PluginDecorator::getCCParamConnection(int CCIndex) const {
-	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
+	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return -1; }
 	return this->paramCCList[CCIndex];
 }
 
 int PluginDecorator::getParamCCConnection(int paramIndex) const {
-	return this->paramCCList.indexOf(paramIndex);
+	auto it = std::find(this->paramCCList.begin(), this->paramCCList.end(), paramIndex);
+
+	if (it != this->paramCCList.end()) {
+		return it - this->paramCCList.begin();
+	}
+
+	return -1;
+}
+
+void PluginDecorator::removeCCParamConnection(int CCIndex) {
+	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
+	this->paramCCList[CCIndex] = -1;
 }
 
 void PluginDecorator::setParamCCListenning(int paramIndex) {
@@ -92,6 +107,12 @@ void PluginDecorator::setParamCCListenning(int paramIndex) {
 		this->paramListenningCC = -1;
 		return;
 	}
+
+	auto currentCC = this->getParamCCConnection(paramIndex);
+	if (currentCC > -1) {
+		this->paramCCList[currentCC] = -1;
+	}
+
 	this->paramListenningCC = paramIndex;
 }
 
@@ -120,8 +141,7 @@ void PluginDecorator::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
 
-	/** TODO Link Param With MIDI CC */
-	/** TODO Change Param By MIDI CC */
+	this->parseMIDICC(midiMessages);
 
 	this->plugin->processBlock(buffer, midiMessages);
 
@@ -132,8 +152,7 @@ void PluginDecorator::processBlock(
 	juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
 	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
 
-	/** TODO Link Param With MIDI CC */
-	/** TODO Change Param By MIDI CC */
+	this->parseMIDICC(midiMessages);
 
 	this->plugin->processBlock(buffer, midiMessages);
 
@@ -411,5 +430,33 @@ void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessa
 void PluginDecorator::interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages) {
 	if (!shouldMIDIOutput) {
 		midiMessages = juce::MidiBuffer{};
+	}
+}
+
+void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
+	for (auto i : midiMessages) {
+		/** Get Message */
+		auto message = i.getMessage();
+		if (!message.isController()) { continue; }
+
+		/** Auto Link Param */
+		int paramListenningCC = this->paramListenningCC;
+		this->paramListenningCC = -1;
+		if (paramListenningCC > -1) {
+			this->paramCCList[message.getControllerNumber()] = paramListenningCC;
+		}
+
+		/** Set Param Value */
+		int paramIndex = this->paramCCList[message.getControllerNumber()];
+		if (paramIndex > -1) {
+			auto param = this->plugin->getParameters()[paramIndex];
+			if (param) {
+				param->beginChangeGesture();
+
+				param->setValueNotifyingHost(message.getControllerValue() / 127.f);
+
+				param->endChangeGesture();
+			}
+		}
 	}
 }

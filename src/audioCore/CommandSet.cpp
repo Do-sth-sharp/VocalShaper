@@ -305,6 +305,94 @@ AUDIOCORE_FUNC(setEffectParamValue) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setInstrParamConnectToCC) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int paramIndex = luaL_checkinteger(L, 2);
+		int CCIndex = luaL_checkinteger(L, 3);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			instr->connectParamCC(paramIndex, CCIndex);
+			result += "Connect Instr Param To MIDI CC: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - MIDI CC " + juce::String(instr->getParamCCConnection(paramIndex)) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setEffectParamConnectToCC) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int paramIndex = luaL_checkinteger(L, 3);
+		int CCIndex = luaL_checkinteger(L, 4);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					effect->connectParamCC(paramIndex, CCIndex);
+					result += "Connect Effect Param To MIDI CC: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - MIDI CC " + juce::String(effect->getParamCCConnection(paramIndex)) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setInstrParamListenCC) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int paramIndex = luaL_checkinteger(L, 2);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			instr->setParamCCListenning(paramIndex);
+			result += "Instr Param Listenning MIDI CC: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setEffectParamListenCC) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int paramIndex = luaL_checkinteger(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					effect->setParamCCListenning(paramIndex);
+					result += "Effect Param Listenning MIDI CC: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -323,4 +411,8 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDIChannel);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamValue);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamValue);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamConnectToCC);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamConnectToCC);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamListenCC);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamListenCC);
 }

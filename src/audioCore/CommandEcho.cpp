@@ -353,6 +353,100 @@ AUDIOCORE_FUNC(echoEffectParamDefaultValue) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(echoInstrParamCC) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int paramIndex = luaL_checkinteger(L, 2);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			result += "Instr Param MIDI CC: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - MIDI CC " + juce::String(instr->getParamCCConnection(paramIndex)) + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoEffectParamCC) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int paramIndex = luaL_checkinteger(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					result += "Effect Param MIDI CC: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - MIDI CC " + juce::String(effect->getParamCCConnection(paramIndex)) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoInstrCCParam) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		int CCIndex = luaL_checkinteger(L, 2);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			int paramIndex = instr->getCCParamConnection(CCIndex);
+			if (paramIndex > -1) {
+				result += "Instr Param MIDI CC: MIDI CC " + juce::String(CCIndex) + " - [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + "\n";
+			}
+			else {
+				result += "Instr Param MIDI CC: MIDI CC " + juce::String(CCIndex) + " - Disabled\n";
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoEffectCCParam) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int CCIndex = luaL_checkinteger(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					int paramIndex = effect->getCCParamConnection(CCIndex);
+					if (paramIndex > -1) {
+						result += "Effect Param MIDI CC: MIDI CC " + juce::String(CCIndex) + " - [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + "\n";
+					}
+					else {
+						result += "Effect Param MIDI CC: MIDI CC " + juce::String(CCIndex) + " - Disabled\n";
+					}
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceMIDI);
@@ -366,4 +460,8 @@ void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrParamDefaultValue);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamValue);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamDefaultValue);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrParamCC);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamCC);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrCCParam);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectCCParam);
 }

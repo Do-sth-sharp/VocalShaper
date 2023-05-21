@@ -32,3 +32,9 @@ AC.listInstrParam(0);
 AC.echoInstrParamValue(0, 2);
 AC.echoInstrParamDefaultValue(0, 2);
 AC.setInstrParamValue(0, 2, 0.5);
+
+-- Instrument Plugin Param MIDI CC
+AC.setInstrParamListenCC(0, 2);
+AC.echoInstrParamCC(0, 2);
+AC.echoInstrCCParam(0, 85);
+AC.removeInstrParamCCConnection(0, 85);
