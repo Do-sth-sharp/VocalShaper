@@ -455,6 +455,10 @@ void PluginDecorator::interceptMIDICCMessage(bool shouldMIDICCIntercept, juce::M
 }
 
 void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
+	/** Param Changed Temp */
+	std::map<int, float> paramTemp;
+
+	/** Parse Message */
 	for (auto i : midiMessages) {
 		/** Get Message */
 		auto message = i.getMessage();
@@ -467,17 +471,21 @@ void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
 			this->paramCCList[message.getControllerNumber()] = paramListenningCC;
 		}
 
-		/** Set Param Value */
+		/** Get Param Changed */
 		int paramIndex = this->paramCCList[message.getControllerNumber()];
 		if (paramIndex > -1) {
-			auto param = this->plugin->getParameters()[paramIndex];
-			if (param) {
-				param->beginChangeGesture();
+			paramTemp[paramIndex] = message.getControllerValue() / 127.f;
+		}
+	}
 
-				param->setValueNotifyingHost(message.getControllerValue() / 127.f);
-
-				param->endChangeGesture();
-			}
+	/** Set Param Value */
+	auto& paramList = this->plugin->getParameters();
+	for (auto& i : paramTemp) {
+		auto param = paramList[i.first];
+		if (param) {
+			param->beginChangeGesture();
+			param->setValueNotifyingHost(i.second);
+			param->endChangeGesture();
 		}
 	}
 }
