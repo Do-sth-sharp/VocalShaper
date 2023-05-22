@@ -39,6 +39,8 @@ public:
 	void removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel);
 	void setAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel);
 	void removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel);
+	void setMIDII2TrkConnection(int trackIndex);
+	void removeMIDII2TrkConnection(int trackIndex);
 	void setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel);
 	void removeAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel);
 	void setAudioTrk2OConnection(int trackIndex, int srcChannel, int dstChannel);
@@ -53,6 +55,7 @@ public:
 	bool isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const;
 	bool isAudioSrc2TrkConnected(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) const;
 	bool isAudioInstr2TrkConnected(int instrIndex, int trackIndex, int srcChannel, int dstChannel) const;
+	bool isMIDII2TrkConnected(int trackIndex) const;
 	bool isAudioI2TrkConnected(int trackIndex, int srcChannel, int dstChannel) const;
 	bool isAudioTrk2OConnected(int trackIndex, int srcChannel, int dstChannel) const;
 	bool isAudioTrk2TrkConnected(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) const;
@@ -94,6 +97,7 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Connection> midiSrc2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioSrc2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioInstr2TrkConnectionList;
+	juce::Array<juce::AudioProcessorGraph::Connection> midiI2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioI2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2OConnectionList;

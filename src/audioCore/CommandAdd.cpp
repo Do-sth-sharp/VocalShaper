@@ -272,10 +272,24 @@ AUDIOCORE_FUNC(addInstrMidiInput) {
 
 	auto graph = audioCore->getGraph();
 	if (graph) {
-		int src = luaL_checkinteger(L, 1);
-		graph->setMIDII2InstrConnection(src);
+		int dst = luaL_checkinteger(L, 1);
+		graph->setMIDII2InstrConnection(dst);
 
-		result += juce::String("[MIDI Input]") + " - " + juce::String(src) + "\n";
+		result += juce::String("[MIDI Input]") + " - " + juce::String(dst) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(addMixerTrackMidiInput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int dst = luaL_checkinteger(L, 1);
+		graph->setMIDII2TrkConnection(dst);
+
+		result += juce::String("[MIDI Input]") + " - " + juce::String(dst) + "\n";
 	}
 
 	return CommandFuncResult{ true, result };
@@ -293,4 +307,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrMidiInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiInput);
 }

@@ -260,6 +260,31 @@ AUDIOCORE_FUNC(setInstrMIDIChannel) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setEffectMIDIChannel) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		int channel = luaL_checkinteger(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					effect->setMIDIChannel(channel);
+					result += "Plugin MIDI Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(effect->getMIDIChannel()) + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(setInstrParamValue) {
 	juce::String result;
 
@@ -452,6 +477,7 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrWindow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDIChannel);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectMIDIChannel);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamValue);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamValue);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamConnectToCC);

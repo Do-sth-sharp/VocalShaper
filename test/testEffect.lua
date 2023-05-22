@@ -30,3 +30,17 @@ AC.listEffectParam(0, 0);
 AC.echoEffectParamValue(0, 0, 0);
 AC.echoEffectParamDefaultValue(0, 0, 0);
 AC.setEffectParamValue(0, 0, 0, 1);
+
+-- Track MIDI Input From Device
+AC.addMixerTrackMidiInput(0);
+AC.removeMixerTrackMidiInput(0);
+
+-- Effect Plugin MIDI Channel
+AC.setEffectMIDIChannel(0, 0, 0);
+
+-- Effect Plugin Param MIDI CC
+AC.setEffectParamListenCC(0, 0, 0);
+AC.setEffectMIDICCIntercept(0, 0, true);
+AC.echoEffectParamCC(0, 0, 0);
+AC.echoEffectCCParam(0, 0, 17);
+AC.removeEffectParamCCConnection(0, 0, 17);

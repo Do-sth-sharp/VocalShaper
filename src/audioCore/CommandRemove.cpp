@@ -152,10 +152,10 @@ AUDIOCORE_FUNC(removeInstrMidiInput) {
 
 	auto graph = audioCore->getGraph();
 	if (graph) {
-		int src = luaL_checkinteger(L, 1);
-		graph->removeMIDII2InstrConnection(src);
+		int dst = luaL_checkinteger(L, 1);
+		graph->removeMIDII2InstrConnection(dst);
 
-		result += juce::String("[MIDI Input]") + " - " + juce::String(src) + " (Removed)\n";
+		result += juce::String("[MIDI Input]") + " - " + juce::String(dst) + " (Removed)\n";
 	}
 
 	return CommandFuncResult{ true, result };
@@ -204,6 +204,20 @@ AUDIOCORE_FUNC(removeEffectParamCCConnection) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeMixerTrackMidiInput) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int dst = luaL_checkinteger(L, 1);
+		graph->removeMIDII2TrkConnection(dst);
+
+		result += juce::String("[MIDI Input]") + " - " + juce::String(dst) + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -218,4 +232,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectParamCCConnection);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiInput);
 }

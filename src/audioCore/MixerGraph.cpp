@@ -100,6 +100,42 @@ Track* MainGraph::getTrackProcessor(int index) const {
 	return dynamic_cast<Track*>(this->trackNodeList.getUnchecked(index)->getProcessor());
 }
 
+void MainGraph::setMIDII2TrkConnection(int trackIndex) {
+	/** Limit Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Remove Current Connection */
+	this->removeMIDII2TrkConnection(trackIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+
+	/** Add Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->midiInputNode->nodeID, this->midiChannelIndex},
+	{nodeID, this->midiChannelIndex} };
+	this->addConnection(connection);
+	this->midiI2TrkConnectionList.add(connection);
+}
+
+void MainGraph::removeMIDII2TrkConnection(int trackIndex) {
+	/** Limit Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+
+	/** Remove Connection */
+	this->midiI2TrkConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
 void MainGraph::setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel) {
 	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
 	if (srcChannel < 0 || srcChannel >= this->getTotalNumInputChannels()) { return; }
@@ -210,6 +246,19 @@ void MainGraph::removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, 
 	{ {nodeID, srcChannel}, {dstNodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioTrk2TrkConnectionList.removeAllInstancesOf(connection);
+}
+
+bool MainGraph::isMIDII2TrkConnected(int trackIndex) const {
+	/** Limit Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {nodeID, this->midiChannelIndex} };
+	return this->midiI2TrkConnectionList.contains(connection);
 }
 
 bool MainGraph::isAudioI2TrkConnected(int trackIndex, int srcChannel, int dstChannel) const {
