@@ -25,6 +25,9 @@ public:
 	void removeCCParamConnection(int CCIndex);
 	void setParamCCListenning(int paramIndex);
 
+	void setMIDICCIntercept(bool midiCCShouldIntercept);
+	bool getMIDICCIntercept() const;
+
 public:
 	const juce::String getName() const override;
 	juce::StringArray getAlternateDisplayNames() const override;
@@ -96,6 +99,7 @@ private:
 	std::array<std::atomic_int, 128> paramCCList;
 	std::atomic_int paramListenningCC = -1;
 	std::atomic_bool midiShouldOutput = false;
+	std::atomic_bool midiCCShouldIntercept = true;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;
@@ -106,6 +110,7 @@ private:
 
 	static void filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages);
 	static void interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages);
+	static void interceptMIDICCMessage(bool shouldMIDICCIntercept, juce::MidiBuffer& midiMessages);
 
 	void parseMIDICC(juce::MidiBuffer& midiMessages);
 

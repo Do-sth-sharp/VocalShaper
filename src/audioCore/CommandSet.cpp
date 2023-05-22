@@ -393,6 +393,49 @@ AUDIOCORE_FUNC(setEffectParamListenCC) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setInstrMIDICCIntercept) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int instrIndex = luaL_checkinteger(L, 1);
+		bool intercept = lua_toboolean(L, 2);
+
+		auto instr = graph->getInstrumentProcessor(instrIndex);
+		if (instr) {
+			instr->setMIDICCIntercept(intercept);
+			result += "Set Instr MIDI CC Intercept: [" + juce::String(instrIndex) + "] " + juce::String(instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(setEffectMIDICCIntercept) {
+	juce::String result;
+
+	auto graph = audioCore->getGraph();
+	if (graph) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		int effectIndex = luaL_checkinteger(L, 2);
+		bool intercept = lua_toboolean(L, 3);
+
+		auto track = graph->getTrackProcessor(trackIndex);
+		if (track) {
+			auto pluginDock = track->getPluginDock();
+			if (pluginDock) {
+				auto effect = pluginDock->getPluginProcessor(effectIndex);
+				if (effect) {
+					effect->setMIDICCIntercept(intercept);
+					result += "Set Effect MIDI CC Intercept: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(effect->getMIDICCIntercept() ? "ON" : "OFF") + "\n";
+				}
+			}
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -415,4 +458,6 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamConnectToCC);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrParamListenCC);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamListenCC);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDICCIntercept);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectMIDICCIntercept);
 }

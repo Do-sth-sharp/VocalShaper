@@ -116,6 +116,14 @@ void PluginDecorator::setParamCCListenning(int paramIndex) {
 	this->paramListenningCC = paramIndex;
 }
 
+void PluginDecorator::setMIDICCIntercept(bool midiCCShouldIntercept) {
+	this->midiCCShouldIntercept = midiCCShouldIntercept;
+}
+
+bool PluginDecorator::getMIDICCIntercept() const {
+	return this->midiCCShouldIntercept;
+}
+
 const juce::String PluginDecorator::getName() const {
 	return this->plugin->getName();
 }
@@ -140,8 +148,8 @@ void PluginDecorator::memoryWarningReceived() {
 void PluginDecorator::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
-
 	this->parseMIDICC(midiMessages);
+	PluginDecorator::interceptMIDICCMessage(this->midiCCShouldIntercept, midiMessages);
 
 	this->plugin->processBlock(buffer, midiMessages);
 
@@ -151,8 +159,8 @@ void PluginDecorator::processBlock(
 void PluginDecorator::processBlock(
 	juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
 	PluginDecorator::filterMIDIMessage(this->midiChannel, midiMessages);
-
 	this->parseMIDICC(midiMessages);
+	PluginDecorator::interceptMIDICCMessage(this->midiCCShouldIntercept, midiMessages);
 
 	this->plugin->processBlock(buffer, midiMessages);
 
@@ -430,6 +438,19 @@ void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessa
 void PluginDecorator::interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages) {
 	if (!shouldMIDIOutput) {
 		midiMessages = juce::MidiBuffer{};
+	}
+}
+
+void PluginDecorator::interceptMIDICCMessage(bool shouldMIDICCIntercept, juce::MidiBuffer& midiMessages) {
+	if (shouldMIDICCIntercept) {
+		juce::MidiBuffer bufferTemp;
+		for (auto i : midiMessages) {
+			auto message = i.getMessage();
+			if (!message.isController()) {
+				bufferTemp.addEvent(message, i.samplePosition);
+			}
+		}
+		midiMessages = bufferTemp;
 	}
 }
 
