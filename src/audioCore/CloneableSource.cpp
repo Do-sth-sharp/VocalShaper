@@ -12,7 +12,7 @@ CloneableSource::CloneableSource(const CloneableSource* src, const juce::String&
 }
 
 bool CloneableSource::cloneFrom(const CloneableSource* src) {
-	if (this->cloneFrom(src)) {
+	if (this->clone(src)) {
 		this->name = src->name;
 		this->isSaved = (bool)src->isSaved;
 		return true;
