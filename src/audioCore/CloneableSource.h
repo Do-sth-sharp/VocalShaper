@@ -2,6 +2,10 @@
 
 #include <JuceHeader.h>
 
+class CloneableSource;
+template<typename T>
+concept IsCloneable = std::derived_from<T, CloneableSource>;
+
 class CloneableSource {
 public:
 	CloneableSource(const juce::String& name = juce::String{});
@@ -20,6 +24,28 @@ public:
 	void setName(const juce::String& name);
 	const juce::String getName() const;
 
+	template<IsCloneable SourceType>
+	class SafePointer {
+	public:
+		SafePointer() = default;
+		SafePointer(SourceType* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (SourceType* newSource) { weakRef = newSource; return *this; };
+
+		SourceType* getSource() const noexcept { return dynamic_cast<SourceType*> (weakRef.get()); };
+		operator SourceType* () const noexcept { return getSource(); };
+		SourceType* operator->() const noexcept { return getSource(); };
+		void deleteAndZero() { delete getSource(); };
+
+		bool operator== (SourceType* component) const noexcept { return weakRef == component; };
+		bool operator!= (SourceType* component) const noexcept { return weakRef != component; };
+
+	private:
+		juce::WeakReference<CloneableSource> weakRef;
+	};
+
 protected:
 	virtual bool clone(const CloneableSource* src) = 0;
 	virtual bool load(const juce::File& file) = 0;
@@ -32,5 +58,6 @@ private:
 	const int id = -1;
 	juce::String name;
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource);
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource);
 };
