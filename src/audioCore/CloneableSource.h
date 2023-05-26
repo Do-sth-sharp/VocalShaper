@@ -50,7 +50,7 @@ protected:
 	virtual bool clone(const CloneableSource* src) = 0;
 	virtual bool load(const juce::File& file) = 0;
 	virtual bool save(const juce::File& file) const = 0;
-	virtual int getLength() const = 0;
+	virtual double getLength() const = 0;
 
 private:
 	static std::atomic_int globalCounter;
