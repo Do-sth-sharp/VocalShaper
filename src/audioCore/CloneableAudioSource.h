@@ -25,6 +25,10 @@ private:
 	double sourceSampleRate = 0;
 	double currentSampleRate = 0;
 
+	int bitsPerSample = 32;
+	juce::StringPairArray metadataValues;
+	int qualityOptionIndex = 0;
+
 	static juce::AudioFormat* findAudioFormat(const juce::File& file);
 	static std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
 	static std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,

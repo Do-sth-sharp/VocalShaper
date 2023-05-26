@@ -69,7 +69,7 @@ bool CloneableAudioSource::save(const juce::File& file) const {
 	/** Create Audio Writer */
 	auto audioWriter = CloneableAudioSource::createAudioWriter(file,
 		this->sourceSampleRate, juce::AudioChannelSet::canonicalChannelSet(this->buffer.getNumChannels()),
-		32, juce::StringPairArray{}, 0);
+		this->bitsPerSample, this->metadataValues, this->qualityOptionIndex);
 	if (!audioWriter) { return false; }
 
 	/** Write Data */
@@ -87,6 +87,7 @@ class SingletonAudioFormatManager : public juce::AudioFormatManager,
 public:
 	SingletonAudioFormatManager();
 
+public:
 	static SingletonAudioFormatManager* getInstance();
 
 private:
