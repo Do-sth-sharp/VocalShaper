@@ -58,6 +58,6 @@ private:
 	const int id = -1;
 	juce::String name;
 
-	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource);
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource);
+	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource)
 };

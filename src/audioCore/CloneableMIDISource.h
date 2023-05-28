@@ -21,5 +21,5 @@ private:
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableMIDISource);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableMIDISource)
 };
