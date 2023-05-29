@@ -24,7 +24,7 @@ public:
 	void setName(const juce::String& name);
 	const juce::String getName() const;
 
-	template<IsCloneable SourceType>
+	template<IsCloneable SourceType = CloneableSource>
 	class SafePointer {
 	public:
 		SafePointer() = default;

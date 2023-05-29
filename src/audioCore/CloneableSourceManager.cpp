@@ -12,7 +12,7 @@ void CloneableSourceManager::removeSource(int index) {
 	this->sourceList.remove(index, true);
 }
 
-CloneableSource::SafePointer<CloneableSource> CloneableSourceManager::getSource(int index) const {
+CloneableSource::SafePointer<> CloneableSourceManager::getSource(int index) const {
 	return this->sourceList[index];
 }
 

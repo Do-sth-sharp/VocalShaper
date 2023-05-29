@@ -11,7 +11,7 @@ public:
 	void addSource(std::unique_ptr<CloneableSource> src);
 	void removeSource(CloneableSource* src);
 	void removeSource(int index);
-	CloneableSource::SafePointer<CloneableSource> getSource(int index) const;
+	CloneableSource::SafePointer<> getSource(int index) const;
 	int getSourceNum() const;
 
 private:
