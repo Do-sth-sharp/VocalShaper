@@ -8,7 +8,6 @@ public:
 	PlayPosition() = default;
 	~PlayPosition()override = default;
 
-private:
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const override;
 
 public:

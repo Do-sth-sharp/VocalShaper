@@ -2,6 +2,8 @@
 
 #include <JuceHeader.h>
 
+#include "SourceList.h"
+
 class SeqSourceProcessor final : public juce::AudioProcessor {
 public:
 	SeqSourceProcessor() = delete;
@@ -10,9 +12,9 @@ public:
 public:
 	const juce::String getName() const override { return "SeqSource"; };
 
-	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override {};
+	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void releaseResources() override {};
-	void processBlock(juce::AudioBuffer< float >& buffer, juce::MidiBuffer& midiMessages) override {};
+	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 
 	bool acceptsMidi() const override { return true; };
 	bool producesMidi() const override { return true; };
@@ -23,7 +25,7 @@ public:
 	int getNumPrograms() override { return 0; };
 	int getCurrentProgram() override { return 0; };
 	void setCurrentProgram(int index) override {};
-	const juce::String getProgramName(int index) override { return juce::String(); };
+	const juce::String getProgramName(int index) override { return juce::String{}; };
 	void changeProgramName(int index, const juce::String& newName) override {};
 
 	void getStateInformation(juce::MemoryBlock& destData) override {};
@@ -33,6 +35,7 @@ public:
 
 private:
 	juce::AudioChannelSet audioChannels;
+	SourceList srcs;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)
 };

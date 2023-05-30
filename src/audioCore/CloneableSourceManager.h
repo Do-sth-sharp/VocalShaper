@@ -13,9 +13,10 @@ public:
 	void removeSource(int index);
 	CloneableSource::SafePointer<> getSource(int index) const;
 	int getSourceNum() const;
+	const juce::CriticalSection& getLock() const;
 
 private:
-	juce::OwnedArray<CloneableSource> sourceList;
+	juce::OwnedArray<CloneableSource, juce::CriticalSection> sourceList;
 
 public:
 	static CloneableSourceManager* getInstance();
