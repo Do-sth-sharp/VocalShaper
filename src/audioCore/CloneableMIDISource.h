@@ -8,6 +8,10 @@ public:
 	CloneableMIDISource() = default;
 	~CloneableMIDISource() override = default;
 
+	void readData(
+		juce::MidiBuffer& buffer, double baseTime,
+		double startTime, double endTime) const;
+
 private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;

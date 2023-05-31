@@ -1,5 +1,11 @@
 #include "CloneableMIDISource.h"
 
+void CloneableMIDISource::readData(
+    juce::MidiBuffer& buffer, double baseTime,
+    double startTime, double endTime) const {
+    /** TODO Get MIDI Data */
+}
+
 bool CloneableMIDISource::clone(const CloneableSource* src) {
 	/** Check Source Type */
 	auto ptrSrc = dynamic_cast<const CloneableMIDISource*>(src);
