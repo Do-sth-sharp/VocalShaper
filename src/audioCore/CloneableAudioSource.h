@@ -14,6 +14,7 @@ public:
 
 	void readData(juce::AudioBuffer<float>& buffer, double bufferDeviation,
 		double dataDeviation, double length) const;
+	int getChannelNum() const;
 
 private:
 	bool clone(const CloneableSource* src) override;

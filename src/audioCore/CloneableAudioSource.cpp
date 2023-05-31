@@ -27,6 +27,10 @@ void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double buf
 	}
 }
 
+int CloneableAudioSource::getChannelNum() const {
+	return this->buffer.getNumChannels();
+}
+
 bool CloneableAudioSource::clone(const CloneableSource* src) {
 	/** Check Source Type */
 	auto ptrSrc = dynamic_cast<const CloneableAudioSource*>(src);
