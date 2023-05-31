@@ -14,10 +14,19 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 void SeqSourceProcessor::prepareToPlay(
 	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {}
 
+/** TODO Block Contains More Than One Seq */
 void SeqSourceProcessor::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Check Buffer Is Empty */
 	if (buffer.getNumSamples() <= 0) { return; }
+
+	/** Clear Audio Channel */
+	auto dspBlock = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(
+		0, buffer.getNumChannels());
+	dspBlock.fill(0);
+
+	/** Clear MIDI Buffer */
+	midiMessages.clear();
 
 	/** Get Play Head */
 	auto playHead = dynamic_cast<PlayPosition*>(this->getPlayHead());
