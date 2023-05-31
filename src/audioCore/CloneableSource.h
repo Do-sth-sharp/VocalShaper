@@ -15,7 +15,7 @@ public:
 	bool cloneFrom(const CloneableSource* src);
 	bool loadFrom(const juce::File& file);
 	bool saveAs(const juce::File& file) const;
-	int getSourceLength() const;
+	double getSourceLength() const;
 
 	bool checkSaved() const;
 	void changed();

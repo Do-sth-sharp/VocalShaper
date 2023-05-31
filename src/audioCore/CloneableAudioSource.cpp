@@ -17,6 +17,16 @@ double CloneableAudioSource::getSourceSampleRate() const {
 	return this->sourceSampleRate;
 }
 
+void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double bufferDeviation,
+	double dataDeviation, double length) const {
+	if (this->source && this->memorySource) {
+		this->memorySource->setNextReadPosition(dataDeviation * this->sourceSampleRate);
+		this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
+			&buffer, (int)std::floor(bufferDeviation * this->currentSampleRate),
+				(int)std::floor(length * this->currentSampleRate)});
+	}
+}
+
 bool CloneableAudioSource::clone(const CloneableSource* src) {
 	/** Check Source Type */
 	auto ptrSrc = dynamic_cast<const CloneableAudioSource*>(src);

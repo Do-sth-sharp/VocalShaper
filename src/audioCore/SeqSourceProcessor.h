@@ -31,7 +31,7 @@ public:
 	void getStateInformation(juce::MemoryBlock& destData) override {};
 	void setStateInformation(const void* data, int sizeInBytes) override {};
 
-	double getTailLengthSeconds() const override { return 0; };
+	double getTailLengthSeconds() const override;
 
 private:
 	juce::AudioChannelSet audioChannels;

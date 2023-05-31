@@ -27,6 +27,7 @@ public:
 	 * @attention Get the lock before use this method.
 	 */
 	const SeqBlock& getReference(int index) const;
+	int size() const;
 	bool add(const SeqBlock& block);
 	const juce::CriticalSection& getLock() const noexcept;
 

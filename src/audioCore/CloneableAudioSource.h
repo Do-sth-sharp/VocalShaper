@@ -12,6 +12,9 @@ public:
 	double getSampleRate() const;
 	double getSourceSampleRate() const;
 
+	void readData(juce::AudioBuffer<float>& buffer, double bufferDeviation,
+		double dataDeviation, double length) const;
+
 private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;

@@ -36,7 +36,7 @@ bool CloneableSource::saveAs(const juce::File& file) const {
 	return false;
 }
 
-int CloneableSource::getSourceLength() const {
+double CloneableSource::getSourceLength() const {
 	return this->getLength();
 }
 

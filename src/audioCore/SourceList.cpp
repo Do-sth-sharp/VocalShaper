@@ -66,6 +66,11 @@ const SourceList::SeqBlock& SourceList::getReference(int index) const {
 	return this->list.getReference(index);
 }
 
+int SourceList::size() const {
+	juce::GenericScopedLock locker(this->getLock());
+	return this->list.size();
+}
+
 bool SourceList::add(const SourceList::SeqBlock& block) {
 	/** Get Lock */
 	juce::GenericScopedLock locker(this->getLock());
