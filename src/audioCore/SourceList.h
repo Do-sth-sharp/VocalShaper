@@ -14,7 +14,7 @@ public:
 	/**
 	 * @attention Call this only on audio thread. Get the lock before use this method.
 	 */
-	int match(double t) const;
+	std::tuple<int, int> match(double startTime, double endTime) const;
 	/**
 	 * @attention Get the lock before use this method.
 	 */
@@ -35,8 +35,9 @@ private:
 	juce::Array<SeqBlock, juce::CriticalSection> list;
 	mutable int lastIndex = -1;
 
-	int binarySearchFast(int low, int high, double t) const;
 	int binarySearchInsert(int low, int high, double t) const;
+	int binarySearchStart(int low, int high, double t) const;
+	int seqSearchEnd(int low, int high, double t) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceList)
 };

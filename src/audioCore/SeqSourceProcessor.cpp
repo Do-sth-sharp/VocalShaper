@@ -14,7 +14,6 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 void SeqSourceProcessor::prepareToPlay(
 	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {}
 
-/** TODO Block Contains More Than One Seq */
 void SeqSourceProcessor::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Check Buffer Is Empty */
@@ -40,45 +39,45 @@ void SeqSourceProcessor::processBlock(
 	if (!position->getIsPlaying()) { return; }
 
 	/** Get Time */
-	double time = position->getTimeInSeconds().orFallback(-1);
-
-	/** Find Source */
-	SourceList::SeqBlock block;
-	{
-		juce::GenericScopedLock locker(this->srcs.getLock());
-
-		int index = this->srcs.match(time);
-		if (index >= 0) {
-			block = this->srcs.getUnchecked(index);
-		}
-	}
+	double startTime = position->getTimeInSeconds().orFallback(-1);
+	double sampleRate = this->getSampleRate();
+	double duration = buffer.getNumSamples() / sampleRate;
+	double endTime = startTime + duration;
 
 	/** Copy Source Data */
 	{
-		juce::GenericScopedLock locker(CloneableSourceManager::getInstance()->getLock());
-		if (CloneableSource::SafePointer<> ptr = std::get<3>(block)) {
-			/** Caculate Time */
-			double sampleRate = this->getSampleRate();
-			double duration = buffer.getNumSamples() / sampleRate;
-			double endTime = time + duration;
+		juce::GenericScopedLock managerLocker(CloneableSourceManager::getInstance()->getLock());
+		juce::GenericScopedLock srcLocker(this->srcs.getLock());
 
-			double dataStartTime = std::get<0>(block) + std::max(std::get<2>(block), 0.);
-			double dataEndTime = 
-				std::min(std::get<1>(block), std::get<0>(block) + std::get<2>(block) + ptr->getSourceLength());
+		/** Find Hot Block */
+		auto index = this->srcs.match(startTime, endTime);
 
-			if (dataEndTime > dataStartTime) {
-				double hotStartTime = std::max(time, dataStartTime);
-				double hotEndTime = std::min(endTime, dataEndTime);
+		for (int i = std::get<0>(index);
+			i <= std::get<1>(index) && i < this->srcs.size(); i++) {
+			/** Get Block */
+			auto block = this->srcs.getUnchecked(i);
 
-				if (hotEndTime > hotStartTime) {
-					if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-						p->readData(buffer,
-							hotStartTime - time,
-							hotStartTime - (std::get<0>(block) + std::get<2>(block)),
-							hotEndTime - hotStartTime);
-					}
-					else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-						/** TODO Copy MIDI Message */
+			if (CloneableSource::SafePointer<> ptr = std::get<3>(block)) {
+				/** Caculate Time */
+				double dataStartTime = std::get<0>(block) + std::max(std::get<2>(block), 0.);
+				double dataEndTime =
+					std::min(std::get<1>(block), std::get<0>(block) + std::get<2>(block) + ptr->getSourceLength());
+
+				if (dataEndTime > dataStartTime) {
+					double hotStartTime = std::max(startTime, dataStartTime);
+					double hotEndTime = std::min(endTime, dataEndTime);
+
+					if (hotEndTime > hotStartTime) {
+						if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+							/** Copy Audio Data */
+							p->readData(buffer,
+								hotStartTime - startTime,
+								hotStartTime - (std::get<0>(block) + std::get<2>(block)),
+								hotEndTime - hotStartTime);
+						}
+						else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
+							/** TODO Copy MIDI Message */
+						}
 					}
 				}
 			}

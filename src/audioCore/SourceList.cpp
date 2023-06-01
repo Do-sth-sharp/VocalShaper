@@ -1,57 +1,65 @@
 #include "SourceList.h"
 
-int SourceList::match(double t) const {
+std::tuple<int, int> SourceList::match(double startTime, double endTime) const {
 	/** Empty */
-	if (this->list.isEmpty()) { return -1; }
+	if (this->list.isEmpty()) { return { -1, -1 }; }
 
 	/** Search Range */
 	int sLow = 0, sHigh = this->list.size();
 
-	/** Try To Use Last Index */
-	if (this->lastIndex >= 0 && this->lastIndex < this->list.size()) {
-		/** Try Last Index */
-		auto& lastSeq = this->list.getReference(this->lastIndex);
-		if (std::get<0>(lastSeq) <= t && std::get<1>(lastSeq) > t) {
-			/** Last Index Match */
-			return this->lastIndex;
-		}
-		else if (std::get<1>(lastSeq) <= t) {
-			/** After Last Index */
-			if (this->lastIndex < this->list.size() - 1) {
-				/** Try Next Index */
-				auto& nextSeq = this->list.getReference(this->lastIndex + 1);
-				if (std::get<0>(nextSeq) <= t && std::get<1>(nextSeq) > t) {
-					/** Next Index Match */
-					return ++(this->lastIndex);
-				}
-				else if (std::get<1>(nextSeq) <= t) {
-					/** After Next Index */
-					sLow = this->lastIndex + 1;
+	/** Result Var */
+	int start = this->lastIndex;
+
+	do {
+		/** Try To Use Last Index */
+		if (this->lastIndex >= 0 && this->lastIndex < this->list.size()) {
+			/** Try Last Index */
+			auto& lastSeq = this->list.getReference(this->lastIndex);
+			if (std::get<0>(lastSeq) <= startTime && std::get<1>(lastSeq) > endTime) {
+				/** Last Index Match */
+				break;
+			}
+			else if (std::get<1>(lastSeq) <= startTime) {
+				/** After Last Index */
+				if (this->lastIndex < this->list.size() - 1) {
+					/** Try Next Index */
+					auto& nextSeq = this->list.getReference(this->lastIndex + 1);
+					if (std::get<1>(lastSeq) <= startTime && std::get<1>(nextSeq) > startTime) {
+						/** Next Index Match */
+						start = this->lastIndex + 1;
+						break;
+					}
+					else if (std::get<1>(nextSeq) <= startTime) {
+						/** After Next Index */
+						sLow = this->lastIndex + 1;
+					}
 				}
 				else {
-					/** Between Last Index And Next */
-					return -1;
+					/** Last Index Is End */
+					return { -1, -1 };
 				}
 			}
 			else {
-				/** Last Index Is End */
-				return -1;
+				/** Before Last Index */
+				sHigh = this->lastIndex;
 			}
 		}
-		else {
-			/** Before Last Index */
-			sHigh = this->lastIndex;
+
+		/** Binary Search */
+		start = this->binarySearchStart(sLow, sHigh, startTime);
+		if (start > -1) {
+			break;
 		}
-	}
 
-	/** Binary Search */
-	int result = this->binarySearchFast(sLow, sHigh, t);
-	if (result > -1) {
-		return this->lastIndex = result;
-	}
+		/** Seq Unexists */
+		return { -1, -1 };
+	} while (false);
+	
+	/** Found Result */
+	int end = this->seqSearchEnd(start, this->list.size(), endTime);
 
-	/** Seq Unexists */
-	return -1;
+	if (end <= -1) { return { -1, -1 }; }
+	return { start, this->lastIndex = end };
 }
 
 const SourceList::SeqBlock SourceList::get(int index) const {
@@ -100,25 +108,6 @@ const juce::CriticalSection& SourceList::getLock() const noexcept {
 	return this->list.getLock();
 }
 
-int SourceList::binarySearchFast(int low, int high, double t) const {
-	while (low <= high) {
-		int mid = low + (high - low) / 2;
-
-		auto& current = this->list.getReference(mid);
-		if (t < std::get<0>(current)) {
-			high = mid - 1;
-			continue;
-		}
-		else if (t >= std::get<1>(current)) {
-			low = mid + 1;
-			continue;
-		}
-		return mid;
-	}
-	
-	return -1;
-}
-
 int SourceList::binarySearchInsert(int low, int high, double t) const {
 	while (low <= high) {
 		int mid = low + (high - low) / 2;
@@ -146,6 +135,62 @@ int SourceList::binarySearchInsert(int low, int high, double t) const {
 		else {
 			low = mid + 1;
 			continue;
+		}
+	}
+
+	return -1;
+}
+
+int SourceList::binarySearchStart(int low, int high, double t) const {
+	while (low <= high) {
+		int mid = low + (high - low) / 2;
+
+		auto& current = this->list.getReference(mid);
+		if (mid == low) {
+			if (t < std::get<1>(current)) {
+				return low;
+			}
+		}
+		if (mid == high) {
+			if (t >= std::get<0>(current) && t < std::get<1>(current)) {
+				return high;
+			}
+			else if (t >= std::get<1>(current)) {
+				return -1;
+			}
+		}
+
+		auto& next = this->list.getReference(mid + 1);
+		if (t >= std::get<0>(current) && t < std::get<0>(next)) {
+			return mid + 1;
+		}
+		else if (t < std::get<0>(current)) {
+			high = mid - 1;
+			continue;
+		}
+		else {
+			low = mid + 1;
+			continue;
+		}
+	}
+
+	return -1;
+}
+
+int SourceList::seqSearchEnd(int low, int high, double t) const {
+	for (int i = low; i <= high; i++) {
+		auto& current = this->list.getReference(i);
+
+		if (i == low && t < std::get<0>(current)) {
+			return -1;
+		}
+		if (i == high && t >= std::get<0>(current)) {
+			return i;
+		}
+
+		auto& next = this->list.getReference(i + 1);
+		if (t >= std::get<0>(current) && t < std::get<0>(next)) {
+			return i;
 		}
 	}
 
