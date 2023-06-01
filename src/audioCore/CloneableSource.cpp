@@ -12,11 +12,16 @@ CloneableSource::CloneableSource(const CloneableSource* src, const juce::String&
 }
 
 bool CloneableSource::cloneFrom(const CloneableSource* src) {
+	double sampleRateTemp = this->currentSampleRate;
+	this->currentSampleRate = (double)src->currentSampleRate;
+
 	if (this->clone(src)) {
 		this->name = src->name;
 		this->isSaved = (bool)src->isSaved;
 		return true;
 	}
+
+	this->currentSampleRate = sampleRateTemp;
 	return false;
 }
 
@@ -58,4 +63,15 @@ void CloneableSource::setName(const juce::String& name) {
 
 const juce::String CloneableSource::getName() const {
 	return this->name;
+}
+
+void CloneableSource::setSampleRate(double sampleRate) {
+	if (this->currentSampleRate == sampleRate) { return; }
+
+	this->currentSampleRate = sampleRate;
+	this->sampleRateChanged();
+}
+
+double CloneableSource::getSampleRate() const {
+	return this->currentSampleRate;
 }

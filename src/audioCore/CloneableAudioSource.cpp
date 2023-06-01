@@ -1,18 +1,5 @@
 #include "CloneableAudioSource.h"
 
-void CloneableAudioSource::setSampleRate(double sampleRate) {
-	if (this->currentSampleRate == sampleRate) { return; }
-
-	this->currentSampleRate = sampleRate;
-	if (this->source) {
-		this->source->setResamplingRatio(this->sourceSampleRate / this->currentSampleRate);
-	}
-}
-
-double CloneableAudioSource::getSampleRate() const {
-	return this->currentSampleRate;
-}
-
 double CloneableAudioSource::getSourceSampleRate() const {
 	return this->sourceSampleRate;
 }
@@ -22,8 +9,8 @@ void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double buf
 	if (this->source && this->memorySource) {
 		this->memorySource->setNextReadPosition(dataDeviation * this->sourceSampleRate);
 		this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
-			&buffer, (int)std::floor(bufferDeviation * this->currentSampleRate),
-				(int)std::floor(length * this->currentSampleRate)});
+			&buffer, (int)std::floor(bufferDeviation * this->getSampleRate()),
+				(int)std::floor(length * this->getSampleRate())});
 	}
 }
 
@@ -49,8 +36,7 @@ bool CloneableAudioSource::clone(const CloneableSource* src) {
 	this->source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
 
 	/** Set Sample Rate */
-	this->currentSampleRate = ptrSrc->currentSampleRate;
-	this->source->setResamplingRatio(this->sourceSampleRate / this->currentSampleRate);
+	this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 
 	return true;
 }
@@ -74,7 +60,7 @@ bool CloneableAudioSource::load(const juce::File& file) {
 	this->source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
 
 	/** Set Sample Rate */
-	this->source->setResamplingRatio(this->sourceSampleRate / this->currentSampleRate);
+	this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 
 	return true;
 }
@@ -94,6 +80,12 @@ bool CloneableAudioSource::save(const juce::File& file) const {
 
 double CloneableAudioSource::getLength() const {
 	return this->buffer.getNumSamples() / this->sourceSampleRate;
+}
+
+void CloneableAudioSource::sampleRateChanged() {
+	if (this->source) {
+		this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
+	}
 }
 
 class SingletonAudioFormatManager : public juce::AudioFormatManager,

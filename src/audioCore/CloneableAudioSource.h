@@ -8,8 +8,6 @@ public:
 	CloneableAudioSource() = default;
 	~CloneableAudioSource() override = default;
 
-	void setSampleRate(double sampleRate);
-	double getSampleRate() const;
 	double getSourceSampleRate() const;
 
 	void readData(juce::AudioBuffer<float>& buffer, double bufferDeviation,
@@ -21,13 +19,13 @@ private:
 	bool load(const juce::File& file) override;
 	bool save(const juce::File& file) const override;
 	double getLength() const override;
+	void sampleRateChanged() override;
 
 private:
 	juce::AudioSampleBuffer buffer;
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;
-	double currentSampleRate = 0;
 
 	int bitsPerSample = 32;
 	juce::StringPairArray metadataValues;

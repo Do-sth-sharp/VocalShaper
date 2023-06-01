@@ -76,7 +76,12 @@ void SeqSourceProcessor::processBlock(
 								hotEndTime - hotStartTime);
 						}
 						else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-							/** TODO Copy MIDI Message */
+							/** Copy MIDI Message */
+							double dataTime = std::get<0>(block) + std::get<2>(block);
+							p->readData(midiMessages,
+								dataTime - startTime,
+								hotStartTime - dataTime,
+								hotEndTime - dataTime);
 						}
 					}
 				}

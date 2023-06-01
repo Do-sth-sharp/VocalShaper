@@ -24,6 +24,9 @@ public:
 	void setName(const juce::String& name);
 	const juce::String getName() const;
 
+	void setSampleRate(double sampleRate);
+	double getSampleRate() const;
+
 	template<IsCloneable SourceType = CloneableSource>
 	class SafePointer {
 	public:
@@ -51,12 +54,14 @@ protected:
 	virtual bool load(const juce::File& file) = 0;
 	virtual bool save(const juce::File& file) const = 0;
 	virtual double getLength() const = 0;
+	virtual void sampleRateChanged() {};
 
 private:
 	static std::atomic_int globalCounter;
 	mutable std::atomic_bool isSaved = true;
 	const int id = -1;
 	juce::String name;
+	std::atomic<double> currentSampleRate = 0;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource)

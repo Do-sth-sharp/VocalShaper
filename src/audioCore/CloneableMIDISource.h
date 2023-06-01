@@ -21,9 +21,10 @@ private:
 private:
 	juce::MidiFile buffer;
 
-	static double convertTicksToSeconds(double time,
+	static double convertSecondsToTicks(double time,
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);
+	static void convertSecondsToTicks(juce::MidiFile& file);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableMIDISource)
 };
