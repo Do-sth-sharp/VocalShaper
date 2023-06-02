@@ -11,6 +11,7 @@ public:
 	void readData(
 		juce::MidiBuffer& buffer, double baseTime,
 		double startTime, double endTime) const;
+	int getTrackNum() const;
 
 private:
 	bool clone(const CloneableSource* src) override;

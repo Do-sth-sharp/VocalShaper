@@ -20,6 +20,10 @@ void CloneableMIDISource::readData(
     }
 }
 
+int CloneableMIDISource::getTrackNum() const {
+    return this->buffer.getNumTracks();
+}
+
 bool CloneableMIDISource::clone(const CloneableSource* src) {
 	/** Check Source Type */
 	auto ptrSrc = dynamic_cast<const CloneableMIDISource*>(src);

@@ -218,6 +218,18 @@ AUDIOCORE_FUNC(removeMixerTrackMidiInput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeSource) {
+	juce::String result;
+
+	auto manager = CloneableSourceManager::getInstance();
+	if (manager) {
+		manager->removeSource(luaL_checkinteger(L, 1));
+		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -233,4 +245,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSource);
 }

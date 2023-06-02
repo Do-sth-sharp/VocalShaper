@@ -58,6 +58,7 @@ AudioCore::~AudioCore() {
 	this->audioDeviceManager->removeAudioCallback(this->mainGraphPlayer.get());
 	this->mainGraphPlayer->setProcessor(nullptr);
 	PlayPosition::releaseInstance();
+	CloneableSourceManager::releaseInstance();
 }
 
 const juce::StringArray AudioCore::getAudioDeviceList(AudioCore::AudioDeviceType type, bool isInput) {

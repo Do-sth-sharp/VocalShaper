@@ -4,6 +4,9 @@
 #include "AudioPluginSearchThread.h"
 #include "AudioConfig.h"
 #include "MainGraph.h"
+#include "CloneableSourceManager.h"
+#include "CloneableAudioSource.h"
+#include "CloneableMIDISource.h"
 
 class AudioDeviceChangeListener;
 

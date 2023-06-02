@@ -447,6 +447,52 @@ AUDIOCORE_FUNC(echoEffectCCParam) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(echoSourceNum) {
+	juce::String result;
+
+	auto manager = CloneableSourceManager::getInstance();
+	if (manager) {
+		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(echoSource) {
+	juce::String result;
+
+	auto manager = CloneableSourceManager::getInstance();
+	if (manager) {
+		int sourceIndex = luaL_checkinteger(L, 1);
+
+		auto source = manager->getSource(sourceIndex);
+		if (source) {
+			result += "========================================================================\n";
+			result += "Source " + juce::String(sourceIndex) + "\n";
+			result += "========================================================================\n";
+			result += "ID: " + juce::String(source->getId()) + "\n";
+			result += "Name: " + source->getName() + "\n";
+			result += "Length: " + juce::String(source->getSourceLength()) + "\n";
+			result += "SampleRate: " + juce::String(source->getSampleRate()) + "\n";
+			if (auto ptr = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
+				result += "Type: Audio\n";
+				result += "Source SampleRate: " + juce::String(ptr->getSourceSampleRate()) + "\n";
+				result += "Channel Num: " + juce::String(ptr->getChannelNum()) + "\n";
+			}
+			else if (auto ptr = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
+				result += "Type: MIDI\n";
+				result += "Track Num: " + juce::String(ptr->getTrackNum()) + "\n";
+			}
+			else {
+				result += "Type: Unknown\n";
+			}
+			result += "========================================================================\n";
+		}
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceMIDI);
@@ -464,4 +510,6 @@ void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamCC);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrCCParam);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectCCParam);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoSourceNum);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoSource);
 }
