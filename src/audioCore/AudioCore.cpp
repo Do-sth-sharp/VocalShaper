@@ -282,15 +282,13 @@ juce::Component* AudioCore::getMIDIDebugger() const {
 }
 
 void AudioCore::setMIDIDebuggerMaxNum(int num) {
-	auto dbg = dynamic_cast<MIDIDebugger*>(this->getMIDIDebugger());
-	if (dbg) {
+	if (auto dbg = dynamic_cast<MIDIDebugger*>(this->getMIDIDebugger())) {
 		dbg->setMaxNum(num);
 	}
 }
 
 int AudioCore::getMIDIDebuggerMaxNum() const {
-	auto dbg = dynamic_cast<MIDIDebugger*>(this->getMIDIDebugger());
-	if (dbg) {
+	if (auto dbg = dynamic_cast<MIDIDebugger*>(this->getMIDIDebugger())) {
 		return dbg->getMaxNum();
 	}
 	return -1;
@@ -335,15 +333,12 @@ const std::unique_ptr<juce::PluginDescription> AudioCore::findPlugin(const juce:
 }
 
 bool AudioCore::addEffect(const juce::String& identifier, int trackIndex, int effectIndex) {
-	auto des = this->findPlugin(identifier, false);
-	if (des) {
+	if (auto des = this->findPlugin(identifier, false)) {
 		auto loadCallback = 
 			[trackIndex, effectIndex, graph = this->getGraph()] (std::unique_ptr<juce::AudioPluginInstance> ptr) {
 			if (graph && ptr) {
-				auto track = graph->getTrackProcessor(trackIndex);
-				if (track) {
-					auto pluginDock = track->getPluginDock();
-					if (pluginDock) {
+				if (auto track = graph->getTrackProcessor(trackIndex)) {
+					if (auto pluginDock = track->getPluginDock()) {
 						pluginDock->insertPlugin(std::move(ptr), effectIndex);
 					}
 				}
@@ -357,12 +352,9 @@ bool AudioCore::addEffect(const juce::String& identifier, int trackIndex, int ef
 }
 
 PluginDecorator* AudioCore::getEffect(int trackIndex, int effectIndex) const {
-	auto graph = this->getGraph();
-	if (graph) {
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
+	if (auto graph = this->getGraph()) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
 				return pluginDock->getPluginProcessor(effectIndex);
 			}
 		}
@@ -371,12 +363,9 @@ PluginDecorator* AudioCore::getEffect(int trackIndex, int effectIndex) const {
 }
 
 bool AudioCore::removeEffect(int trackIndex, int effectIndex) {
-	auto graph = this->getGraph();
-	if (graph) {
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
+	if (auto graph = this->getGraph()) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
 				pluginDock->removePlugin(effectIndex);
 				return true;
 			}
@@ -386,12 +375,9 @@ bool AudioCore::removeEffect(int trackIndex, int effectIndex) {
 }
 
 void AudioCore::bypassEffect(int trackIndex, int effectIndex, bool bypass) {
-	auto graph = this->getGraph();
-	if (graph) {
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
+	if (auto graph = this->getGraph()) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
 				pluginDock->setPluginBypass(effectIndex, bypass);
 			}
 		}
@@ -399,8 +385,7 @@ void AudioCore::bypassEffect(int trackIndex, int effectIndex, bool bypass) {
 }
 
 bool AudioCore::addInstrument(const juce::String& identifier, int instrIndex) {
-	auto des = this->findPlugin(identifier, true);
-	if (des) {
+	if (auto des = this->findPlugin(identifier, true)) {
 		auto loadCallback =
 			[instrIndex, graph = this->getGraph()](std::unique_ptr<juce::AudioPluginInstance> ptr) {
 			if (graph && ptr) {
@@ -415,16 +400,14 @@ bool AudioCore::addInstrument(const juce::String& identifier, int instrIndex) {
 }
 
 PluginDecorator* AudioCore::getInstrument(int instrIndex) const {
-	auto graph = this->getGraph();
-	if (graph) {
+	if (auto graph = this->getGraph()) {
 		return graph->getInstrumentProcessor(instrIndex);
 	}
 	return nullptr;
 }
 
 bool AudioCore::removeInstrument(int instrIndex) {
-	auto graph = this->getGraph();
-	if (graph) {
+	if (auto graph = this->getGraph()) {
 		graph->removeInstrument(instrIndex);
 		return true;
 	}
@@ -432,8 +415,7 @@ bool AudioCore::removeInstrument(int instrIndex) {
 }
 
 void AudioCore::bypassInstrument(int instrIndex, bool bypass) {
-	auto graph = this->getGraph();
-	if (graph) {
+	if (auto graph = this->getGraph()) {
 		graph->setInstrumentBypass(instrIndex, bypass);
 	}
 }
@@ -482,8 +464,7 @@ void AudioCore::initAudioDevice() {
 
 void AudioCore::updateAudioBuses() {
 	/** Link Audio Bus To Sequencer And Mixer */
-	auto mainGraph = this->mainAudioGraph.get();
-	if (mainGraph) {
+	if (auto mainGraph = this->mainAudioGraph.get()) {
 		/** Get Input Channel Num */
 		auto audioDeviceSetup = this->audioDeviceManager->getAudioDeviceSetup();
 		auto inputChannelNum = audioDeviceSetup.inputChannels.countNumberOfSetBits();

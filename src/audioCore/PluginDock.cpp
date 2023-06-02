@@ -43,7 +43,7 @@ PluginDock::~PluginDock() {
 	for (auto& i : this->pluginNodeList) {
 		if (auto processor = i->getProcessor()) {
 			if (auto editor = processor->getActiveEditor()) {
-				if (editor) { delete editor; }
+				delete editor;
 			}
 		}
 	}
@@ -189,8 +189,7 @@ PluginDecorator* PluginDock::getPluginProcessor(int index) const {
 
 void PluginDock::setPluginBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
-	auto node = this->pluginNodeList.getUnchecked(index);
-	if (node) {
+	if (auto node = this->pluginNodeList.getUnchecked(index)) {
 		node->setBypassed(bypass);
 	}
 }

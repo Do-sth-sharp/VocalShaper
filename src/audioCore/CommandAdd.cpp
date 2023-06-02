@@ -21,8 +21,7 @@ AUDIOCORE_FUNC(addPluginSearchPath) {
 AUDIOCORE_FUNC(addMixerTrack) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		juce::AudioChannelSet trackType;
 		int trackTypeArg = luaL_checkinteger(L, 2);
 		switch (trackTypeArg) {
@@ -155,8 +154,7 @@ AUDIOCORE_FUNC(addMixerTrack) {
 AUDIOCORE_FUNC(addMixerTrackSend) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dst = luaL_checkinteger(L, 3);
@@ -172,8 +170,7 @@ AUDIOCORE_FUNC(addMixerTrackSend) {
 AUDIOCORE_FUNC(addMixerTrackInputFromDevice) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int srcc = luaL_checkinteger(L, 1);
 		int dst = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
@@ -188,8 +185,7 @@ AUDIOCORE_FUNC(addMixerTrackInputFromDevice) {
 AUDIOCORE_FUNC(addMixerTrackOutput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
@@ -217,17 +213,14 @@ AUDIOCORE_FUNC(addEffect) {
 AUDIOCORE_FUNC(addEffectAdditionalInput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int srcc = luaL_checkinteger(L, 3);
 		int dstc = luaL_checkinteger(L, 4);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
 				pluginDock->addAdditionalBusConnection(effectIndex, srcc, dstc);
 
 				result += "Link Plugin Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(srcc) + " - " + juce::String(dstc) + "\n";
@@ -253,8 +246,7 @@ AUDIOCORE_FUNC(addInstr) {
 AUDIOCORE_FUNC(addInstrOutput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dst = luaL_checkinteger(L, 3);
@@ -270,8 +262,7 @@ AUDIOCORE_FUNC(addInstrOutput) {
 AUDIOCORE_FUNC(addInstrMidiInput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int dst = luaL_checkinteger(L, 1);
 		graph->setMIDII2InstrConnection(dst);
 
@@ -284,8 +275,7 @@ AUDIOCORE_FUNC(addInstrMidiInput) {
 AUDIOCORE_FUNC(addMixerTrackMidiInput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int dst = luaL_checkinteger(L, 1);
 		graph->setMIDII2TrkConnection(dst);
 
@@ -298,8 +288,7 @@ AUDIOCORE_FUNC(addMixerTrackMidiInput) {
 AUDIOCORE_FUNC(addAudioSource) {
 	juce::String result;
 
-	auto manager = CloneableSourceManager::getInstance();
-	if (manager) {
+	if (auto manager = CloneableSourceManager::getInstance()) {
 		manager->addSource(std::unique_ptr<CloneableSource>(new CloneableAudioSource));
 		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
 	}
@@ -310,8 +299,7 @@ AUDIOCORE_FUNC(addAudioSource) {
 AUDIOCORE_FUNC(addMIDISource) {
 	juce::String result;
 
-	auto manager = CloneableSourceManager::getInstance();
-	if (manager) {
+	if (auto manager = CloneableSourceManager::getInstance()) {
 		manager->addSource(std::unique_ptr<CloneableSource>(new CloneableMIDISource));
 		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
 	}

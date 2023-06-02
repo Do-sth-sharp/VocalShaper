@@ -107,13 +107,11 @@ AUDIOCORE_FUNC(setMIDIDebuggerMaxNum) {
 AUDIOCORE_FUNC(setMixerTrackGain) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		double value = luaL_checknumber(L, 2);
 		
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
 			track->setGain(static_cast<float>(value));
 
 			result += "Set Mixer Track Gain Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getGain()) + "\n";
@@ -126,13 +124,11 @@ AUDIOCORE_FUNC(setMixerTrackGain) {
 AUDIOCORE_FUNC(setMixerTrackPan) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		double value = luaL_checknumber(L, 2);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
 			track->setPan(static_cast<float>(value));
 
 			result += "Set Mixer Track Pan Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getPan()) + "\n";
@@ -145,13 +141,11 @@ AUDIOCORE_FUNC(setMixerTrackPan) {
 AUDIOCORE_FUNC(setMixerTrackSlider) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		double value = luaL_checknumber(L, 2);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
 			track->setSlider(static_cast<float>(value));
 
 			result += "Set Mixer Track Slider Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getSlider()) + "\n";
@@ -166,10 +160,8 @@ AUDIOCORE_FUNC(setEffectWindow) {
 
 	int trackIndex = luaL_checkinteger(L, 1);
 	int effectIndex = luaL_checkinteger(L, 2);
-	auto plugin = AudioCore::getInstance()->getEffect(trackIndex, effectIndex);
-	if (plugin) {
-		auto editor = plugin->createEditorIfNeeded();
-		if (editor) {
+	if (auto plugin = AudioCore::getInstance()->getEffect(trackIndex, effectIndex)) {
+		if (auto editor = plugin->createEditorIfNeeded()) {
 			bool visible = lua_toboolean(L, 3);
 
 			if (visible) {
@@ -206,10 +198,8 @@ AUDIOCORE_FUNC(setInstrWindow) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
-	auto plugin = AudioCore::getInstance()->getInstrument(instrIndex);
-	if (plugin) {
-		auto editor = plugin->createEditorIfNeeded();
-		if (editor) {
+	if (auto plugin = AudioCore::getInstance()->getInstrument(instrIndex)) {
+		if (auto editor = plugin->createEditorIfNeeded()) {
 			bool visible = lua_toboolean(L, 2);
 
 			if (visible) {
@@ -244,13 +234,11 @@ AUDIOCORE_FUNC(setInstrBypass) {
 AUDIOCORE_FUNC(setInstrMIDIChannel) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int channel = luaL_checkinteger(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			instr->setMIDIChannel(channel);
 
 			result += "Plugin MIDI Channel: [" + juce::String(instrIndex) + "] " + juce::String(instr->getMIDIChannel()) + "\n";
@@ -263,18 +251,14 @@ AUDIOCORE_FUNC(setInstrMIDIChannel) {
 AUDIOCORE_FUNC(setEffectMIDIChannel) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int channel = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					effect->setMIDIChannel(channel);
 					result += "Plugin MIDI Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(effect->getMIDIChannel()) + "\n";
 				}
@@ -288,14 +272,12 @@ AUDIOCORE_FUNC(setEffectMIDIChannel) {
 AUDIOCORE_FUNC(setInstrParamValue) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int paramIndex = luaL_checkinteger(L, 2);
 		float value = luaL_checknumber(L, 3);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			instr->setParamValue(paramIndex, value);
 			result += "Set Instr Param Value: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - " + juce::String(instr->getParamValue(paramIndex)) + "\n";
 		}
@@ -307,19 +289,15 @@ AUDIOCORE_FUNC(setInstrParamValue) {
 AUDIOCORE_FUNC(setEffectParamValue) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int paramIndex = luaL_checkinteger(L, 3);
 		float value = luaL_checknumber(L, 4);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					effect->setParamValue(paramIndex, value);
 					result += "Effect Param Value: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - " + juce::String(effect->getParamValue(paramIndex)) + "\n";
 				}
@@ -333,14 +311,12 @@ AUDIOCORE_FUNC(setEffectParamValue) {
 AUDIOCORE_FUNC(setInstrParamConnectToCC) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int paramIndex = luaL_checkinteger(L, 2);
 		int CCIndex = luaL_checkinteger(L, 3);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			instr->connectParamCC(paramIndex, CCIndex);
 			result += "Connect Instr Param To MIDI CC: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - MIDI CC " + juce::String(instr->getParamCCConnection(paramIndex)) + "\n";
 		}
@@ -352,19 +328,15 @@ AUDIOCORE_FUNC(setInstrParamConnectToCC) {
 AUDIOCORE_FUNC(setEffectParamConnectToCC) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int paramIndex = luaL_checkinteger(L, 3);
 		int CCIndex = luaL_checkinteger(L, 4);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					effect->connectParamCC(paramIndex, CCIndex);
 					result += "Connect Effect Param To MIDI CC: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - MIDI CC " + juce::String(effect->getParamCCConnection(paramIndex)) + "\n";
 				}
@@ -378,13 +350,11 @@ AUDIOCORE_FUNC(setEffectParamConnectToCC) {
 AUDIOCORE_FUNC(setInstrParamListenCC) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int paramIndex = luaL_checkinteger(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			instr->setParamCCListenning(paramIndex);
 			result += "Instr Param Listenning MIDI CC: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + "\n";
 		}
@@ -395,19 +365,15 @@ AUDIOCORE_FUNC(setInstrParamListenCC) {
 
 AUDIOCORE_FUNC(setEffectParamListenCC) {
 	juce::String result;
-
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int paramIndex = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					effect->setParamCCListenning(paramIndex);
 					result += "Effect Param Listenning MIDI CC: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + "\n";
 				}
@@ -421,13 +387,11 @@ AUDIOCORE_FUNC(setEffectParamListenCC) {
 AUDIOCORE_FUNC(setInstrMIDICCIntercept) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		bool intercept = lua_toboolean(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			instr->setMIDICCIntercept(intercept);
 			result += "Set Instr MIDI CC Intercept: [" + juce::String(instrIndex) + "] " + juce::String(instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n";
 		}
@@ -439,18 +403,14 @@ AUDIOCORE_FUNC(setInstrMIDICCIntercept) {
 AUDIOCORE_FUNC(setEffectMIDICCIntercept) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		bool intercept = lua_toboolean(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					effect->setMIDICCIntercept(intercept);
 					result += "Set Effect MIDI CC Intercept: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(effect->getMIDICCIntercept() ? "ON" : "OFF") + "\n";
 				}

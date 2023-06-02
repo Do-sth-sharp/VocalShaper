@@ -121,8 +121,7 @@ void CloneableMIDISource::convertSecondsToTicks(juce::MidiFile& file) {
     if (timeFormat != 0)
     {
         for (int i = 0; i < file.getNumTracks(); i++) {
-            auto track = file.getTrack(i);
-            if (track) {
+            if (auto track = file.getTrack(i)) {
                 for (int j = track->getNumEvents(); --j >= 0;)
                 {
                     auto& m = track->getEventPointer(j)->message;

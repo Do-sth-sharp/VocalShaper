@@ -40,8 +40,7 @@ std::tuple<bool, juce::KnownPluginList&> AudioPluginSearchThread::getPluginList(
 			juce::File::getCurrentWorkingDirectory().getChildFile(temporaryFilePath);
 		if (temporaryFile.existsAsFile()) {
 			/** Load From Xml File */
-			auto xmlElement = juce::XmlDocument::parse(temporaryFile);
-			if (xmlElement) {
+			if (auto xmlElement = juce::XmlDocument::parse(temporaryFile)) {
 				/** Create Plugin List From Xml Data */
 				this->pluginList.recreateFromXml(*xmlElement);
 
@@ -181,8 +180,7 @@ void AudioPluginSearchThread::run() {
 	/** Read Temporary File */
 	if (temporaryFile.existsAsFile()) {
 		/** Load From Xml File */
-		auto xmlElement = juce::XmlDocument::parse(temporaryFile);
-		if (xmlElement) {
+		if (auto xmlElement = juce::XmlDocument::parse(temporaryFile)) {
 			/** Create Plugin List From Xml Data */
 			this->pluginList.recreateFromXml(*xmlElement);
 

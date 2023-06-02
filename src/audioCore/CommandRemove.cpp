@@ -21,8 +21,7 @@ AUDIOCORE_FUNC(removePluginSearchPath) {
 AUDIOCORE_FUNC(removeMixerTrack) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int index = luaL_checkinteger(L, 1);
 		graph->removeTrack(index);
 
@@ -36,8 +35,7 @@ AUDIOCORE_FUNC(removeMixerTrack) {
 AUDIOCORE_FUNC(removeMixerTrackSend) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dst = luaL_checkinteger(L, 3);
@@ -53,8 +51,7 @@ AUDIOCORE_FUNC(removeMixerTrackSend) {
 AUDIOCORE_FUNC(removeMixerTrackInputFromDevice) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int srcc = luaL_checkinteger(L, 1);
 		int dst = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
@@ -69,8 +66,7 @@ AUDIOCORE_FUNC(removeMixerTrackInputFromDevice) {
 AUDIOCORE_FUNC(removeMixerTrackOutput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dstc = luaL_checkinteger(L, 3);
@@ -98,17 +94,14 @@ AUDIOCORE_FUNC(removeEffect) {
 AUDIOCORE_FUNC(removeEffectAdditionalInput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int srcc = luaL_checkinteger(L, 3);
 		int dstc = luaL_checkinteger(L, 4);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
 				pluginDock->removeAdditionalBusConnection(effectIndex, srcc, dstc);
 
 				result += "Unlink Plugin Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(srcc) + " - " + juce::String(dstc) + "\n";
@@ -133,8 +126,7 @@ AUDIOCORE_FUNC(removeInstr) {
 AUDIOCORE_FUNC(removeInstrOutput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int src = luaL_checkinteger(L, 1);
 		int srcc = luaL_checkinteger(L, 2);
 		int dst = luaL_checkinteger(L, 3);
@@ -150,8 +142,7 @@ AUDIOCORE_FUNC(removeInstrOutput) {
 AUDIOCORE_FUNC(removeInstrMidiInput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int dst = luaL_checkinteger(L, 1);
 		graph->removeMIDII2InstrConnection(dst);
 
@@ -164,13 +155,11 @@ AUDIOCORE_FUNC(removeInstrMidiInput) {
 AUDIOCORE_FUNC(removeInstrParamCCConnection) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int CCIndex = luaL_checkinteger(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			instr->removeCCParamConnection(CCIndex);
 			result += "Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(CCIndex) + "\n";
 		}
@@ -182,18 +171,14 @@ AUDIOCORE_FUNC(removeInstrParamCCConnection) {
 AUDIOCORE_FUNC(removeEffectParamCCConnection) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int CCIndex = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					effect->removeCCParamConnection(CCIndex);
 					result += "Remove Effect Param MIDI CC Connection: " "MIDI CC " + juce::String(CCIndex) + "\n";
 				}
@@ -207,8 +192,7 @@ AUDIOCORE_FUNC(removeEffectParamCCConnection) {
 AUDIOCORE_FUNC(removeMixerTrackMidiInput) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int dst = luaL_checkinteger(L, 1);
 		graph->removeMIDII2TrkConnection(dst);
 
@@ -221,8 +205,7 @@ AUDIOCORE_FUNC(removeMixerTrackMidiInput) {
 AUDIOCORE_FUNC(removeSource) {
 	juce::String result;
 
-	auto manager = CloneableSourceManager::getInstance();
-	if (manager) {
+	if (auto manager = CloneableSourceManager::getInstance()) {
 		manager->removeSource(luaL_checkinteger(L, 1));
 		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
 	}

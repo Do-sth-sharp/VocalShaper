@@ -4,8 +4,7 @@
 
 void MainGraph::insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::move(processor));
-	if (ptrNode) {
+	if (auto ptrNode = this->addNode(std::move(processor))) {
 		/** Limit Index */
 		if (index < 0 || index > this->audioSourceNodeList.size()) {
 			index = this->audioSourceNodeList.size();
@@ -86,8 +85,7 @@ void MainGraph::removeSource(int index) {
 
 bool MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(std::move(processor)));
-	if (ptrNode) {
+	if (auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(std::move(processor)))) {
 		/** Limit Index */
 		if (index < 0 || index > this->instrumentNodeList.size()) {
 			index = this->instrumentNodeList.size();
@@ -167,16 +165,14 @@ PluginDecorator* MainGraph::getInstrumentProcessor(int index) const {
 
 void MainGraph::setInstrumentBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return; }
-	auto node = this->instrumentNodeList.getUnchecked(index);
-	if (node) {
+	if (auto node = this->instrumentNodeList.getUnchecked(index)) {
 		node->setBypassed(bypass);
 	}
 }
 
 bool MainGraph::getInstrumentBypass(int index) const {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return false; }
-	auto node = this->instrumentNodeList.getUnchecked(index);
-	if (node) {
+	if (auto node = this->instrumentNodeList.getUnchecked(index)) {
 		return node->isBypassed();
 	}
 	return false;

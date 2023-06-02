@@ -198,12 +198,10 @@ AUDIOCORE_FUNC(listPlugin) {
 AUDIOCORE_FUNC(listInstrParam) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			auto& paramList = instr->getPluginParamList();
 
 			result += "========================================================================\n";
@@ -211,8 +209,7 @@ AUDIOCORE_FUNC(listInstrParam) {
 			result += "========================================================================\n";
 
 			for (int i = 0; i < paramList.size(); i++) {
-				auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i));
-				if (param) {
+				if (auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i))) {
 					result += "[" + juce::String(i) + "] " + param->getName(INT_MAX) + "\n";
 					result += "    Value: " + param->getCurrentValueAsText() + "\n";
 					result += "    Label: " + param->getLabel() + "\n";
@@ -255,17 +252,13 @@ AUDIOCORE_FUNC(listInstrParam) {
 AUDIOCORE_FUNC(listEffectParam) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					auto& paramList = effect->getPluginParamList();
 
 					result += "========================================================================\n";
@@ -273,8 +266,7 @@ AUDIOCORE_FUNC(listEffectParam) {
 					result += "========================================================================\n";
 
 					for (int i = 0; i < paramList.size(); i++) {
-						auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i));
-						if (param) {
+						if (auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i))) {
 							result += "[" + juce::String(i) + "] " + param->getName(INT_MAX) + "\n";
 							result += "    Value: " + param->getCurrentValueAsText() + "\n";
 							result += "    Label: " + param->getLabel() + "\n";

@@ -63,8 +63,7 @@ AUDIOCORE_FUNC(echoDeviceMIDI) {
 AUDIOCORE_FUNC(echoMixerInfo) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		result += "========================================================================\n";
 		result += "Mixer\n";
 		result += "========================================================================\n";
@@ -85,8 +84,7 @@ AUDIOCORE_FUNC(echoMixerInfo) {
 AUDIOCORE_FUNC(echoMixerTrack) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		result += "========================================================================\n";
 		result += "Mixer Track List\n";
 		result += "========================================================================\n";
@@ -116,8 +114,7 @@ AUDIOCORE_FUNC(echoMixerTrack) {
 AUDIOCORE_FUNC(echoMixerTrackInfo) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackNum = graph->getTrackNum();
 		int trackId = luaL_checkinteger(L, 1);
 		if (trackId < 0 || trackId >= trackNum) {
@@ -128,8 +125,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 		result += "Mixer Track " + juce::String(trackId) + "\n";
 		result += "========================================================================\n";
 
-		auto track = graph->getTrackProcessor(trackId);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackId)) {
 			result += "Bus Type: " + track->getAudioChannelSet().getDescription() + "\n";
 			result += "\tInput Bus: " + juce::String(track->getBusCount(true)) + "\n";
 			result += "\tOutput Bus: " + juce::String(track->getBusCount(false)) + "\n";
@@ -205,8 +201,7 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 			result += "------------------------------------------------------------------------\n";
 
 			result += "Plugins:\n";
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
+			if (auto pluginDock = track->getPluginDock()) {
 				auto pluginList = pluginDock->getPluginList();
 				for (int i = 0; i < pluginList.size(); i++) {
 					auto pluginState = pluginList.getUnchecked(i);
@@ -226,12 +221,10 @@ AUDIOCORE_FUNC(echoMixerTrackInfo) {
 AUDIOCORE_FUNC(echoMixerTrackGain) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
 			result += "Mixer Track Gain Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getGain()) + "\n";
 		}
 	}
@@ -242,12 +235,10 @@ AUDIOCORE_FUNC(echoMixerTrackGain) {
 AUDIOCORE_FUNC(echoMixerTrackPan) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
 			result += "Mixer Track Pan Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getPan()) + "\n";
 		}
 	}
@@ -258,12 +249,10 @@ AUDIOCORE_FUNC(echoMixerTrackPan) {
 AUDIOCORE_FUNC(echoMixerTrackSlider) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
 			result += "Mixer Track Slider Value: <" + juce::String(trackIndex) + "> " + juce::String(track->getSlider()) + "\n";
 		}
 	}
@@ -274,13 +263,11 @@ AUDIOCORE_FUNC(echoMixerTrackSlider) {
 AUDIOCORE_FUNC(echoInstrParamValue) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int paramIndex = luaL_checkinteger(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			result += "Instr Param Value: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - " + juce::String(instr->getParamValue(paramIndex)) + "\n";
 		}
 	}
@@ -291,13 +278,11 @@ AUDIOCORE_FUNC(echoInstrParamValue) {
 AUDIOCORE_FUNC(echoInstrParamDefaultValue) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int paramIndex = luaL_checkinteger(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			result += "Instr Param Default Value: [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + " - " + juce::String(instr->getParamDefaultValue(paramIndex)) + "\n";
 		}
 	}
@@ -308,18 +293,14 @@ AUDIOCORE_FUNC(echoInstrParamDefaultValue) {
 AUDIOCORE_FUNC(echoEffectParamValue) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int paramIndex = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					result += "Effect Param Value: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - " + juce::String(effect->getParamValue(paramIndex)) + "\n";
 				}
 			}
@@ -332,18 +313,14 @@ AUDIOCORE_FUNC(echoEffectParamValue) {
 AUDIOCORE_FUNC(echoEffectParamDefaultValue) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int paramIndex = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					result += "Effect Param Default Value: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - " + juce::String(effect->getParamDefaultValue(paramIndex)) + "\n";
 				}
 			}
@@ -356,8 +333,7 @@ AUDIOCORE_FUNC(echoEffectParamDefaultValue) {
 AUDIOCORE_FUNC(echoInstrParamCC) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int paramIndex = luaL_checkinteger(L, 2);
 
@@ -373,18 +349,14 @@ AUDIOCORE_FUNC(echoInstrParamCC) {
 AUDIOCORE_FUNC(echoEffectParamCC) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int paramIndex = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					result += "Effect Param MIDI CC: [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + " - MIDI CC " + juce::String(effect->getParamCCConnection(paramIndex)) + "\n";
 				}
 			}
@@ -397,13 +369,11 @@ AUDIOCORE_FUNC(echoEffectParamCC) {
 AUDIOCORE_FUNC(echoInstrCCParam) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int instrIndex = luaL_checkinteger(L, 1);
 		int CCIndex = luaL_checkinteger(L, 2);
 
-		auto instr = graph->getInstrumentProcessor(instrIndex);
-		if (instr) {
+		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
 			int paramIndex = instr->getCCParamConnection(CCIndex);
 			if (paramIndex > -1) {
 				result += "Instr Param MIDI CC: MIDI CC " + juce::String(CCIndex) + " - [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + "\n";
@@ -420,18 +390,14 @@ AUDIOCORE_FUNC(echoInstrCCParam) {
 AUDIOCORE_FUNC(echoEffectCCParam) {
 	juce::String result;
 
-	auto graph = audioCore->getGraph();
-	if (graph) {
+	if (auto graph = audioCore->getGraph()) {
 		int trackIndex = luaL_checkinteger(L, 1);
 		int effectIndex = luaL_checkinteger(L, 2);
 		int CCIndex = luaL_checkinteger(L, 3);
 
-		auto track = graph->getTrackProcessor(trackIndex);
-		if (track) {
-			auto pluginDock = track->getPluginDock();
-			if (pluginDock) {
-				auto effect = pluginDock->getPluginProcessor(effectIndex);
-				if (effect) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
 					int paramIndex = effect->getCCParamConnection(CCIndex);
 					if (paramIndex > -1) {
 						result += "Effect Param MIDI CC: MIDI CC " + juce::String(CCIndex) + " - [" + juce::String(paramIndex) + "] " + effect->getParamName(paramIndex) + "\n";
@@ -450,8 +416,7 @@ AUDIOCORE_FUNC(echoEffectCCParam) {
 AUDIOCORE_FUNC(echoSourceNum) {
 	juce::String result;
 
-	auto manager = CloneableSourceManager::getInstance();
-	if (manager) {
+	if (auto manager = CloneableSourceManager::getInstance()) {
 		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
 	}
 
@@ -461,12 +426,10 @@ AUDIOCORE_FUNC(echoSourceNum) {
 AUDIOCORE_FUNC(echoSource) {
 	juce::String result;
 
-	auto manager = CloneableSourceManager::getInstance();
-	if (manager) {
+	if (auto manager = CloneableSourceManager::getInstance()) {
 		int sourceIndex = luaL_checkinteger(L, 1);
 
-		auto source = manager->getSource(sourceIndex);
-		if (source) {
+		if (auto source = manager->getSource(sourceIndex)) {
 			result += "========================================================================\n";
 			result += "Source " + juce::String(sourceIndex) + "\n";
 			result += "========================================================================\n";

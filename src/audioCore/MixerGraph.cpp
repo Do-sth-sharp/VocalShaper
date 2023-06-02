@@ -4,8 +4,7 @@
 
 void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
-	auto ptrNode = this->addNode(std::make_unique<Track>(type));
-	if (ptrNode) {
+	if (auto ptrNode = this->addNode(std::make_unique<Track>(type))) {
 		/** Limit Index */
 		if (index < 0 || index > this->trackNodeList.size()) {
 			index = this->trackNodeList.size();

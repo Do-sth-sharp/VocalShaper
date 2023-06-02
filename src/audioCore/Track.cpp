@@ -80,8 +80,7 @@ bool Track::addAdditionalAudioBus() {
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
 	/** Set Bus Layout Of Plugin Dock Node */
-	auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
-	if (ptrPluginDock) {
+	if (auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())) {
 		jassert(ptrPluginDock->addAdditionalAudioBus());
 	}
 
@@ -120,8 +119,7 @@ bool Track::removeAdditionalAudioBus() {
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
 	/** Set Bus Layout Of Plugin Dock Node */
-	auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
-	if (ptrPluginDock) {
+	if (auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())) {
 		jassert(ptrPluginDock->removeAdditionalAudioBus());
 	}
 
@@ -200,8 +198,7 @@ void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 	this->AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 
 	/** Prepare Plugins */
-	auto pluginDock = this->getPluginDock();
-	if (pluginDock) {
+	if (auto pluginDock = this->getPluginDock()) {
 		pluginDock->setPlayHead(PlayPosition::getInstance());
 		pluginDock->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}

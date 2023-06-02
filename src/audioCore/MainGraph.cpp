@@ -21,7 +21,7 @@ MainGraph::~MainGraph() {
 	for (auto& i : this->instrumentNodeList) {
 		if (auto processor = i->getProcessor()) {
 			if (auto editor = processor->getActiveEditor()) {
-				if (editor) { delete editor; }
+				delete editor;
 			}
 		}
 	}
