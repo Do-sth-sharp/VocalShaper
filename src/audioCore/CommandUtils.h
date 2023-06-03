@@ -31,7 +31,7 @@ protected:
 		juce::String output;
 		lua_getglobal(L, "res");
 		if (lua_isstring(L, -1)) {
-			output = lua_tostring(L, -1);
+			output = juce::String::fromUTF8(lua_tostring(L, -1));
 		}
 		lua_pop(L, 1);
 		bool state = true;
@@ -95,3 +95,5 @@ void regCommandList(lua_State* L);
 void regCommandRemove(lua_State* L);
 void regCommandSearch(lua_State* L);
 void regCommandSet(lua_State* L);
+void regCommandLoad(lua_State* L);
+void regCommandSave(lua_State* L);

@@ -17,6 +17,8 @@ AudioCommand::AudioCommand() {
 	regCommandRemove(this->cState.get());
 	regCommandSearch(this->cState.get());
 	regCommandSet(this->cState.get());
+	regCommandLoad(this->cState.get());
+	regCommandSave(this->cState.get());
 
 	lua_setglobal(this->cState.get(), "AC");
 }
@@ -30,7 +32,7 @@ const AudioCommand::CommandResult AudioCommand::processCommand(const juce::Strin
 
 	/** Do Command */
 	if (luaL_dostring(this->cState.get(), command.toStdString().c_str())) {
-		return AudioCommand::CommandResult{ false, command, luaL_checkstring(this->cState.get(), -1)};
+		return AudioCommand::CommandResult{ false, command, juce::String::fromUTF8(luaL_checkstring(this->cState.get(), -1))};
 	}
 
 	/** Check Result */

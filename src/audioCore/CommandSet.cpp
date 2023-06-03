@@ -2,7 +2,7 @@
 
 AUDIOCORE_FUNC(setDeviceAudioType) {
 	juce::String result;
-	audioCore->setCurrentAudioDeviceType(luaL_checkstring(L, 1));
+	audioCore->setCurrentAudioDeviceType(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 
 	result += "Current Audio Device Type: " + getAudioDeviceManager(audioCore)->getCurrentAudioDeviceType() + "\n";
 	result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
@@ -13,7 +13,7 @@ AUDIOCORE_FUNC(setDeviceAudioType) {
 
 AUDIOCORE_FUNC(setDeviceAudioInput) {
 	juce::String result;
-	auto err = audioCore->setAudioInputDevice(luaL_checkstring(L, 1));
+	auto err = audioCore->setAudioInputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 	if (err.isNotEmpty()) {
 		result += err;
 		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
@@ -30,7 +30,7 @@ AUDIOCORE_FUNC(setDeviceAudioInput) {
 
 AUDIOCORE_FUNC(setDeviceAudioOutput) {
 	juce::String result;
-	auto err = audioCore->setAudioOutputDevice(luaL_checkstring(L, 1));
+	auto err = audioCore->setAudioOutputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 	if (err.isNotEmpty()) {
 		result += err;
 		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
@@ -78,7 +78,7 @@ AUDIOCORE_FUNC(setDeviceAudioBufferSize) {
 AUDIOCORE_FUNC(setDeviceMIDIInput) {
 	juce::String result;
 
-	juce::String device = luaL_checkstring(L, 1);
+	juce::String device = juce::String::fromUTF8(luaL_checkstring(L, 1));
 	audioCore->setMIDIInputDeviceEnabled(device, lua_toboolean(L, 2));
 	result += "MIDI Input Device: " + device + " - " + (audioCore->getMIDIInputDeviceEnabled(device) ? "ON" : "OFF") + "\n";
 
@@ -88,7 +88,7 @@ AUDIOCORE_FUNC(setDeviceMIDIInput) {
 AUDIOCORE_FUNC(setDeviceMIDIOutput) {
 	juce::String result;
 
-	juce::String device = luaL_checkstring(L, 1);
+	juce::String device = juce::String::fromUTF8(luaL_checkstring(L, 1));
 	audioCore->setMIDIOutputDevice(device);
 	result += "MIDI Output Device: " + device + "\n";
 

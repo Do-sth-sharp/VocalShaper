@@ -5,7 +5,7 @@ AUDIOCORE_FUNC(addPluginBlackList) {
 		return CommandFuncResult{ false, "Don't change plugin black list while searching plugin." };
 	}
 
-	audioCore->addToPluginBlackList(luaL_checkstring(L, 1));
+	audioCore->addToPluginBlackList(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 	return CommandFuncResult{ true, "Add to plugin black list." };
 }
 
@@ -14,7 +14,7 @@ AUDIOCORE_FUNC(addPluginSearchPath) {
 		return CommandFuncResult{ false, "Don't change plugin search path while searching plugin." };
 	}
 
-	audioCore->addToPluginSearchPath(luaL_checkstring(L, 1));
+	audioCore->addToPluginSearchPath(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 	return CommandFuncResult{ true, "Add to plugin search path." };
 }
 
@@ -202,7 +202,7 @@ AUDIOCORE_FUNC(addEffect) {
 
 	int trackIndex = luaL_checkinteger(L, 1);
 	int effectIndex = luaL_checkinteger(L, 2);
-	juce::String pid = luaL_checkstring(L, 3);
+	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 3));
 	AudioCore::getInstance()->addEffect(pid, trackIndex, effectIndex);
 
 	result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
@@ -235,7 +235,7 @@ AUDIOCORE_FUNC(addInstr) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
-	juce::String pid = luaL_checkstring(L, 2);
+	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 2));
 	AudioCore::getInstance()->addInstrument(pid, instrIndex);
 
 	result += "Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + "\n";
