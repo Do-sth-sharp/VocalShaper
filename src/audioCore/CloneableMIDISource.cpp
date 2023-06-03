@@ -55,6 +55,8 @@ bool CloneableMIDISource::save(const juce::File& file) const {
     /** Create Output Stream */
 	juce::FileOutputStream stream(file);
 	if (stream.failedToOpen()) { return false; }
+    stream.setPosition(0);
+    stream.truncate();
 
     /** Copy Data */
     juce::MidiFile midiFile{ this->buffer };

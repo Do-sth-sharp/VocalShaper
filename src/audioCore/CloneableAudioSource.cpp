@@ -131,6 +131,11 @@ std::unique_ptr<juce::AudioFormatWriter> CloneableAudioSource::createAudioWriter
 	if (!format) { return nullptr; }
 
 	auto outStream = new juce::FileOutputStream(file);
+	if (outStream->openedOk()) {
+		outStream->setPosition(0);
+		outStream->truncate();
+	}
+
 	auto writer = format->createWriterFor(outStream,
 		sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
 	if (!writer) {
