@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 
-class PluginLoader final : public juce::DeletedAtShutdown {
+class PluginLoader final : private juce::DeletedAtShutdown {
 public:
 	PluginLoader();
 	~PluginLoader() override = default;

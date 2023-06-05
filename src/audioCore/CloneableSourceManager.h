@@ -3,7 +3,7 @@
 #include <JuceHeader.h>
 #include "CloneableSource.h"
 
-class CloneableSourceManager final : public juce::DeletedAtShutdown {
+class CloneableSourceManager final : private juce::DeletedAtShutdown {
 public:
 	CloneableSourceManager() = default;
 	~CloneableSourceManager() override = default;

@@ -4,7 +4,7 @@
 #include "AudioCore.h"
 #include <lua.hpp>
 
-class CommandBase : public juce::DeletedAtShutdown {
+class CommandBase : private juce::DeletedAtShutdown {
 	JUCE_LEAK_DETECTOR(CommandBase);
 
 protected:

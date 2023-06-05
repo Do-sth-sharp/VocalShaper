@@ -10,7 +10,7 @@
 
 class AudioDeviceChangeListener;
 
-class AudioCore final : public juce::DeletedAtShutdown {
+class AudioCore final : private juce::DeletedAtShutdown {
 public:
 	AudioCore();
 	~AudioCore() override;

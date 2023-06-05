@@ -5,7 +5,7 @@
 
 class AudioCore;
 
-class AudioCommand final : public juce::DeletedAtShutdown {
+class AudioCommand final : private juce::DeletedAtShutdown {
 public:
 	AudioCommand();
 

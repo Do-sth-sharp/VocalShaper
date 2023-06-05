@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <JuceHeader.h>
 
-class AudioConfig final : public juce::DeletedAtShutdown {
+class AudioConfig final : private juce::DeletedAtShutdown {
 public:
 	AudioConfig() = default;
 
