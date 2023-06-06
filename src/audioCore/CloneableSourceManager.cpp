@@ -1,18 +1,28 @@
 #include "CloneableSourceManager.h"
+#include "AudioIOList.h"
 
-void CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
+bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
+	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
+
 	juce::GenericScopedLock locker(this->getLock());
 	this->sourceList.add(std::move(src));
+	return true;
 }
 
-void CloneableSourceManager::removeSource(CloneableSource* src) {
+bool CloneableSourceManager::removeSource(CloneableSource* src) {
+	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
+
 	juce::GenericScopedLock locker(this->getLock());
 	this->sourceList.removeObject(src, true);
+	return true;
 }
 
-void CloneableSourceManager::removeSource(int index) {
+bool CloneableSourceManager::removeSource(int index) {
+	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
+
 	juce::GenericScopedLock locker(this->getLock());
 	this->sourceList.remove(index, true);
+	return true;
 }
 
 CloneableSource::SafePointer<> CloneableSourceManager::getSource(int index) const {

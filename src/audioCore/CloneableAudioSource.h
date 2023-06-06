@@ -23,6 +23,7 @@ private:
 
 private:
 	juce::AudioSampleBuffer buffer;
+	juce::CriticalSection lock;
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;

@@ -21,6 +21,7 @@ private:
 
 private:
 	juce::MidiFile buffer;
+	juce::ReadWriteLock lock;
 
 	static double convertSecondsToTicks(double time,
 		const juce::MidiMessageSequence& tempoEvents,

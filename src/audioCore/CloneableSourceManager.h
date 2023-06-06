@@ -8,9 +8,18 @@ public:
 	CloneableSourceManager() = default;
 	~CloneableSourceManager() override = default;
 
-	void addSource(std::unique_ptr<CloneableSource> src);
-	void removeSource(CloneableSource* src);
-	void removeSource(int index);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool addSource(std::unique_ptr<CloneableSource> src);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool removeSource(CloneableSource* src);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool removeSource(int index);
 	CloneableSource::SafePointer<> getSource(int index) const;
 	int getSourceNum() const;
 	const juce::CriticalSection& getLock() const;

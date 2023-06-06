@@ -58,6 +58,7 @@ AudioCore::~AudioCore() {
 	this->audioDeviceManager->removeAudioCallback(this->mainGraphPlayer.get());
 	this->mainGraphPlayer->setProcessor(nullptr);
 	PlayPosition::releaseInstance();
+	AudioIOList::releaseInstance();
 	CloneableSourceManager::releaseInstance();
 }
 

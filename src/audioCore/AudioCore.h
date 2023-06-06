@@ -7,6 +7,7 @@
 #include "CloneableSourceManager.h"
 #include "CloneableAudioSource.h"
 #include "CloneableMIDISource.h"
+#include "AudioIOList.h"
 
 class AudioDeviceChangeListener;
 

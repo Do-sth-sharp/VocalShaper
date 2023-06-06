@@ -19,6 +19,22 @@ AUDIOCORE_FUNC(loadSource) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(loadSourceAsync) {
+	juce::String result;
+
+	if (auto manager = CloneableSourceManager::getInstance()) {
+		int sourceIndex = luaL_checkinteger(L, 1);
+		juce::String sourcePath = juce::String::fromUTF8(luaL_checkstring(L, 2));
+		
+		AudioIOList::getInstance()->load(sourceIndex, sourcePath);
+
+		result += "Create Load Source Data Task: " + sourcePath + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandLoad(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, loadSource);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, loadSourceAsync);
 }

@@ -3,6 +3,8 @@
 void CloneableMIDISource::readData(
     juce::MidiBuffer& buffer, double baseTime,
     double startTime, double endTime) const {
+    juce::ScopedReadLock locker(this->lock);
+
     /** Get MIDI Data */
     juce::MidiMessageSequence total;
     for (int i = 0; i < this->buffer.getNumTracks(); i++) {
@@ -30,7 +32,11 @@ bool CloneableMIDISource::clone(const CloneableSource* src) {
 	if (!ptrSrc) { return false; }
 
 	/** Copy MIDI Data */
-	this->buffer = ptrSrc->buffer;
+    {
+        juce::ScopedWriteLock locker0(this->lock);
+        juce::ScopedReadLock locker1(ptrSrc->lock);
+        this->buffer = ptrSrc->buffer;
+    }
 
 	return true;
 }
@@ -45,8 +51,11 @@ bool CloneableMIDISource::load(const juce::File& file) {
 	if (!midiFile.readFrom(stream, true)) { return false; }
 
 	/** Copy Data */
-	this->buffer = midiFile;
-    this->buffer.convertTimestampTicksToSeconds();
+    {
+        juce::ScopedWriteLock locker(this->lock);
+        this->buffer = midiFile;
+        this->buffer.convertTimestampTicksToSeconds();
+    }
 
 	return true;
 }
@@ -59,6 +68,7 @@ bool CloneableMIDISource::save(const juce::File& file) const {
     stream.truncate();
 
     /** Copy Data */
+    juce::ScopedWriteLock locker(this->lock);
     juce::MidiFile midiFile{ this->buffer };
     CloneableMIDISource::convertSecondsToTicks(midiFile);
 
@@ -67,6 +77,8 @@ bool CloneableMIDISource::save(const juce::File& file) const {
 }
 
 double CloneableMIDISource::getLength() const {
+    juce::ScopedReadLock locker(this->lock);
+
 	/** Get Time In Seconds */
     return this->buffer.getLastTimestamp();
 }
