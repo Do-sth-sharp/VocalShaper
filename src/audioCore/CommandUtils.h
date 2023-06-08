@@ -19,10 +19,7 @@ protected:
 		if (!L) { return 0; };
 		AudioCore* ac = AudioCore::getInstance();
 
-		bool sta = false;
-		juce::String res;
-
-		std::tie(sta, res) = this->func(ac, L);
+		auto [sta, res] = this->func(ac, L);
 
 		if (res.isNotEmpty() && res.getLastCharacter() != '\n') {
 			res += '\n';
