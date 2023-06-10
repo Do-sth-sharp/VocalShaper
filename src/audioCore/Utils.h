@@ -24,6 +24,9 @@ namespace utils {
 	double convertTicksToSecondsWithObjectiveTempoTime(double time,
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);
+
+	std::tuple<int, double, double> getBarBySecond(double time,
+		const juce::MidiMessageSequence& tempoEvents);
 }
 
 #define UNUSED(var) (void)var

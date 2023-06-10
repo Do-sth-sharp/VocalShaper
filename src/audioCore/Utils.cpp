@@ -28,178 +28,304 @@ namespace utils {
 	double convertSecondsToTicks(double time,
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat) {
-        if (timeFormat < 0)
-            return time * (-(timeFormat >> 8) * (timeFormat & 0xff));
+		if (timeFormat < 0)
+			return time * (-(timeFormat >> 8) * (timeFormat & 0xff));
 
-        double lastTime = 0, correctedTime = 0;
-        auto tickLen = 1.0 / (timeFormat & 0x7fff);
-        auto secsPerTick = 0.5 * tickLen;
-        auto numEvents = tempoEvents.getNumEvents();
+		double lastTime = 0, correctedTime = 0;
+		auto tickLen = 1.0 / (timeFormat & 0x7fff);
+		auto secsPerTick = 0.5 * tickLen;
+		auto numEvents = tempoEvents.getNumEvents();
 
-        for (int i = 0; i < numEvents; ++i)
-        {
-            auto& m = tempoEvents.getEventPointer(i)->message;
-            auto eventTime = m.getTimeStamp();
+		for (int i = 0; i < numEvents; ++i) {
+			auto& m = tempoEvents.getEventPointer(i)->message;
+			auto eventTime = m.getTimeStamp();
 
-            if (eventTime >= time)
-                break;
+			if (eventTime >= time)
+				break;
 
-            correctedTime += (eventTime - lastTime) / secsPerTick;
-            lastTime = eventTime;
+			correctedTime += (eventTime - lastTime) / secsPerTick;
+			lastTime = eventTime;
 
-            if (m.isTempoMetaEvent())
-                secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
+			if (m.isTempoMetaEvent())
+				secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
 
-            while (i + 1 < numEvents)
-            {
-                auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
 
-                if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
-                    break;
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
 
-                if (m2.isTempoMetaEvent())
-                    secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
+				if (m2.isTempoMetaEvent())
+					secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
 
-                ++i;
-            }
-        }
+				++i;
+			}
+		}
 
-        return correctedTime + (time - lastTime) / secsPerTick;
+		return correctedTime + (time - lastTime) / secsPerTick;
 	}
 
-    double convertTicksToSeconds(double time,
-        const juce::MidiMessageSequence& tempoEvents,
-        int timeFormat) {
-        if (timeFormat < 0)
-            return time / (-(timeFormat >> 8) * (timeFormat & 0xff));
+	double convertTicksToSeconds(double time,
+		const juce::MidiMessageSequence& tempoEvents,
+		int timeFormat) {
+		if (timeFormat < 0)
+			return time / (-(timeFormat >> 8) * (timeFormat & 0xff));
 
-        double lastTime = 0, correctedTime = 0;
-        auto tickLen = 1.0 / (timeFormat & 0x7fff);
-        auto secsPerTick = 0.5 * tickLen;
-        auto numEvents = tempoEvents.getNumEvents();
+		double lastTime = 0, correctedTime = 0;
+		auto tickLen = 1.0 / (timeFormat & 0x7fff);
+		auto secsPerTick = 0.5 * tickLen;
+		auto numEvents = tempoEvents.getNumEvents();
 
-        for (int i = 0; i < numEvents; ++i)
-        {
-            auto& m = tempoEvents.getEventPointer(i)->message;
-            auto eventTime = m.getTimeStamp();
+		for (int i = 0; i < numEvents; ++i) {
+			auto& m = tempoEvents.getEventPointer(i)->message;
+			auto eventTime = m.getTimeStamp();
 
-            if (eventTime >= time)
-                break;
+			if (eventTime >= time)
+				break;
 
-            correctedTime += (eventTime - lastTime) * secsPerTick;
-            lastTime = eventTime;
+			correctedTime += (eventTime - lastTime) * secsPerTick;
+			lastTime = eventTime;
 
-            if (m.isTempoMetaEvent())
-                secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
+			if (m.isTempoMetaEvent())
+				secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
 
-            while (i + 1 < numEvents)
-            {
-                auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
 
-                if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
-                    break;
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
 
-                if (m2.isTempoMetaEvent())
-                    secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
+				if (m2.isTempoMetaEvent())
+					secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
 
-                ++i;
-            }
-        }
+				++i;
+			}
+		}
 
-        return correctedTime + (time - lastTime) * secsPerTick;
-    }
+		return correctedTime + (time - lastTime) * secsPerTick;
+	}
 
-    double convertSecondsToTicksWithObjectiveTempoTime(double time,
-        const juce::MidiMessageSequence& tempoEvents,
-        int timeFormat) {
-        if (timeFormat < 0)
-            return time * (-(timeFormat >> 8) * (timeFormat & 0xff));
+	double convertSecondsToTicksWithObjectiveTempoTime(double time,
+		const juce::MidiMessageSequence& tempoEvents,
+		int timeFormat) {
+		if (timeFormat < 0)
+			return time * (-(timeFormat >> 8) * (timeFormat & 0xff));
 
-        double lastTime = 0, correctedTime = 0;
-        auto tickLen = 1.0 / (timeFormat & 0x7fff);
-        auto secsPerTick = 0.5 * tickLen;
-        auto numEvents = tempoEvents.getNumEvents();
+		double lastTime = 0, correctedTime = 0;
+		auto tickLen = 1.0 / (timeFormat & 0x7fff);
+		auto secsPerTick = 0.5 * tickLen;
+		auto numEvents = tempoEvents.getNumEvents();
 
-        auto resFunc = [&correctedTime, &time, &secsPerTick, &lastTime] () -> double {
-            return correctedTime + (time / secsPerTick - lastTime);
-        };
+		for (int i = 0; i < numEvents; ++i) {
+			auto& m = tempoEvents.getEventPointer(i)->message;
+			auto eventTime = m.getTimeStamp();
 
-        for (int i = 0; i < numEvents; ++i)
-        {
-            auto& m = tempoEvents.getEventPointer(i)->message;
-            auto eventTime = m.getTimeStamp();
+			double srcTimeDistance = (eventTime - correctedTime) * secsPerTick;
+			if (lastTime + srcTimeDistance >= time)
+				break;
 
-            double result = resFunc();
-            if (eventTime >= result)
-                return result;
+			lastTime += srcTimeDistance;
+			correctedTime = eventTime;
 
-            correctedTime += (eventTime - lastTime);
-            lastTime = eventTime;
+			if (m.isTempoMetaEvent())
+				secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
 
-            if (m.isTempoMetaEvent())
-                secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
 
-            while (i + 1 < numEvents)
-            {
-                auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
 
-                if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
-                    break;
+				if (m2.isTempoMetaEvent())
+					secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
 
-                if (m2.isTempoMetaEvent())
-                    secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
+				++i;
+			}
+		}
 
-                ++i;
-            }
-        }
+		return correctedTime + (time - lastTime) / secsPerTick;
+	}
 
-        return resFunc();
-    }
+	double convertTicksToSecondsWithObjectiveTempoTime(double time,
+		const juce::MidiMessageSequence& tempoEvents,
+		int timeFormat) {
+		if (timeFormat < 0)
+			return time / (-(timeFormat >> 8) * (timeFormat & 0xff));
 
-    double convertTicksToSecondsWithObjectiveTempoTime(double time,
-        const juce::MidiMessageSequence& tempoEvents,
-        int timeFormat) {
-        if (timeFormat < 0)
-            return time / (-(timeFormat >> 8) * (timeFormat & 0xff));
+		double lastTime = 0, correctedTime = 0;
+		auto tickLen = 1.0 / (timeFormat & 0x7fff);
+		auto secsPerTick = 0.5 * tickLen;
+		auto numEvents = tempoEvents.getNumEvents();
 
-        double lastTime = 0, correctedTime = 0;
-        auto tickLen = 1.0 / (timeFormat & 0x7fff);
-        auto secsPerTick = 0.5 * tickLen;
-        auto numEvents = tempoEvents.getNumEvents();
+		for (int i = 0; i < numEvents; ++i) {
+			auto& m = tempoEvents.getEventPointer(i)->message;
+			auto eventTime = m.getTimeStamp();
 
-        auto resFunc = [&correctedTime, &time, &secsPerTick, &lastTime]() -> double {
-            return correctedTime + (time * secsPerTick - lastTime);
-        };
+			double srcTimeDistance = (eventTime - correctedTime) / secsPerTick;
+			if (lastTime + srcTimeDistance >= time)
+				break;
 
-        for (int i = 0; i < numEvents; ++i)
-        {
-            auto& m = tempoEvents.getEventPointer(i)->message;
-            auto eventTime = m.getTimeStamp();
+			lastTime += srcTimeDistance;
+			correctedTime = eventTime;
 
-            double result = resFunc();
-            if (eventTime >= result)
-                return result;
+			if (m.isTempoMetaEvent())
+				secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
 
-            correctedTime += (eventTime - lastTime);
-            lastTime = eventTime;
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
 
-            if (m.isTempoMetaEvent())
-                secsPerTick = tickLen * m.getTempoSecondsPerQuarterNote();
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
 
-            while (i + 1 < numEvents)
-            {
-                auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+				if (m2.isTempoMetaEvent())
+					secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
 
-                if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
-                    break;
+				++i;
+			}
+		}
 
-                if (m2.isTempoMetaEvent())
-                    secsPerTick = tickLen * m2.getTempoSecondsPerQuarterNote();
+		return correctedTime + (time - lastTime) * secsPerTick;
+	}
 
-                ++i;
-            }
-        }
+	std::tuple<int, double, double> getBarBySecond(double time,
+		const juce::MidiMessageSequence& tempoEvents) {
+		auto numEvents = tempoEvents.getNumEvents();
 
-        return resFunc();
-    }
+		/** Event Time In Quarter */
+		double correctedQuarter = 0;
+		double lastValidQuarter = 0;
+
+		/** Event Time In Seconds */
+		double lastTime = 0;
+		double lastValidSecond = 0;
+
+		/** Event Time In Bar */
+		double lastValidBar = 0;
+
+		/** State Temp */
+		double secsPerQuarter = 0.5, quarterPerBar = 4.0;
+
+		/** State Wait For Valid Temp */
+		double tempValidQuarter = 0;
+		double tempValidSecond = 0;
+		double tempValidBar = 0;
+		double quarterPerBarWaitForValid = 4.0;
+
+		for (int i = 0; i < numEvents; ++i) {
+			auto& m = tempoEvents.getEventPointer(i)->message;
+			auto eventTime = m.getTimeStamp();
+
+			if (eventTime >= time)
+				break;
+
+			correctedQuarter += (eventTime - lastTime) / secsPerQuarter;
+			lastTime = eventTime;
+
+			/** Temp Valid */
+			if (correctedQuarter > tempValidQuarter) {
+				lastValidQuarter = tempValidQuarter;
+				lastValidSecond = tempValidSecond;
+				lastValidBar = tempValidBar;
+				quarterPerBar = quarterPerBarWaitForValid;
+			}
+
+			if (m.isTempoMetaEvent()) {
+				secsPerQuarter = m.getTempoSecondsPerQuarterNote();
+
+				/** Check Delay Valid */
+				double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
+				double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
+				double barDistance = std::floor(barCountFromLastValid);
+				if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
+					barDistance++;
+				}
+
+				/** Set Wait For Valid Temp */
+				tempValidBar = lastValidBar + barDistance;
+				tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+				tempValidSecond = lastValidSecond + barDistance * quarterPerBar * secsPerQuarter;
+			}
+
+			if (m.isTimeSignatureMetaEvent()) {
+				int numerator = 4, denominator = 4;
+				m.getTimeSignatureInfo(numerator, denominator);
+
+				/** Check Delay Valid */
+				double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
+				double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
+				double barDistance = std::floor(barCountFromLastValid);
+				if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
+					barDistance++;
+				}
+
+				/** Set Wait For Valid Temp */
+				quarterPerBarWaitForValid = numerator * (4.0 / denominator);
+				tempValidBar = lastValidBar + barDistance;
+				tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+				tempValidSecond = lastValidSecond + barDistance * quarterPerBar * secsPerQuarter;
+			}
+
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
+
+				if (m2.isTempoMetaEvent()) {
+					secsPerQuarter = m2.getTempoSecondsPerQuarterNote();
+
+					/** Check Delay Valid */
+					double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
+					double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
+					double barDistance = std::floor(barCountFromLastValid);
+					if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
+						barDistance++;
+					}
+
+					/** Set Wait For Valid Temp */
+					tempValidBar = lastValidBar + barDistance;
+					tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+					tempValidSecond = lastValidSecond + barDistance * quarterPerBar * secsPerQuarter;
+				}
+
+				if (m.isTimeSignatureMetaEvent()) {
+					int numerator = 4, denominator = 4;
+					m.getTimeSignatureInfo(numerator, denominator);
+
+					/** Check Delay Valid */
+					double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
+					double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
+					double barDistance = std::floor(barCountFromLastValid);
+					if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
+						barDistance++;
+					}
+
+					/** Set Wait For Valid Temp */
+					quarterPerBarWaitForValid = numerator * (4.0 / denominator);
+					tempValidBar = lastValidBar + barDistance;
+					tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+					tempValidSecond = lastValidSecond + barDistance * quarterPerBar * secsPerQuarter;
+				}
+
+				++i;
+			}
+		}
+
+		/** Get Time In Quarter */
+		double timeQuarter = correctedQuarter + (time - lastTime) / secsPerQuarter;
+
+		/** Temp Valid */
+		if (timeQuarter > tempValidQuarter) {
+			lastValidQuarter = tempValidQuarter;
+			lastValidSecond = tempValidSecond;
+			lastValidBar = tempValidBar;
+			quarterPerBar = quarterPerBarWaitForValid;
+		}
+
+		int barResult = lastValidBar + std::floor((timeQuarter - lastValidQuarter) / quarterPerBar);
+		return std::make_tuple(
+			barResult, 
+			lastValidQuarter + (barResult - lastValidBar) * quarterPerBar,
+			lastValidSecond + (barResult - lastValidBar) * quarterPerBar * secsPerQuarter);
+	}
 }

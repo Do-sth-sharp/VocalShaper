@@ -1,6 +1,7 @@
 #include "PlayPosition.h"
 
 #include <chrono>
+#include "Utils.h"
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> PlayPosition::getPosition() const {
 	juce::ScopedReadLock locker(this->lock);
@@ -12,6 +13,10 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> PlayPosition::getPosition() co
 	this->position.setHostTimeNs((uint64_t)ns.count());
 
 	return juce::makeOptional(this->position);
+}
+
+const juce::ReadWriteLock& PlayPosition::getLock() const {
+	return this->lock;
 }
 
 bool PlayPosition::canControlTransport() {
@@ -36,6 +41,75 @@ void PlayPosition::transportRewind() {
 	this->position.setBarCount(0);
 	this->position.setPpqPositionOfLastBarStart(0);
 	this->position.setPpqPosition(0);
+}
+
+void PlayPosition::setTimeFormat(short ticksPerQuarter) {
+	juce::ScopedWriteLock locker(this->lock);
+	this->timeFormat = ticksPerQuarter;
+}
+
+void PlayPosition::setLooping(bool looping) {
+	juce::ScopedWriteLock locker(this->lock);
+	this->position.setIsLooping(looping);
+}
+
+void PlayPosition::setLoopPointsInSeconds(const std::tuple<double, double>& points) {
+	juce::ScopedWriteLock locker(this->lock);
+
+	auto [start, end] = points;
+	start = this->toTick(start) / this->timeFormat;
+	end = this->toTick(end) / this->timeFormat;
+
+	this->position.setLoopPoints(
+		juce::AudioPlayHead::LoopPoints{ start, end });
+}
+
+void PlayPosition::setLoopPointsInQuarter(const std::tuple<double, double>& points) {
+	juce::ScopedWriteLock locker(this->lock);
+	this->position.setLoopPoints(
+		juce::AudioPlayHead::LoopPoints{ std::get<0>(points), std::get<1>(points) });
+}
+
+void PlayPosition::setPositionInSeconds(double time) {
+	juce::ScopedWriteLock locker(this->lock);
+	this->position.setTimeInSamples((int64_t)std::floor(time * this->sampleRate));
+	this->position.setTimeInSeconds(time);
+	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
+
+	auto barInfo = this->toBar(time);
+	this->position.setBarCount(std::get<0>(barInfo));
+	this->position.setPpqPositionOfLastBarStart(std::get<1>(barInfo));
+	
+}
+
+void PlayPosition::setPositionInQuarter(double time) {
+
+}
+
+double PlayPosition::toSecond(double timeTick) const {
+	return this->toSecond(timeTick, this->timeFormat);
+}
+
+double PlayPosition::toTick(double timeSecond) const {
+	return this->toTick(timeSecond, this->timeFormat);
+}
+
+std::tuple<int, double, double> PlayPosition::toBar(double timeSecond) const {
+	return this->toBar(timeSecond, this->timeFormat);
+}
+
+double PlayPosition::toSecond(double timeTick, short timeFormat) const {
+	return utils::convertTicksToSecondsWithObjectiveTempoTime(
+		timeTick, this->tempos, this->timeFormat);
+}
+
+double PlayPosition::toTick(double timeSecond, short timeFormat) const {
+	return utils::convertSecondsToTicks(
+		timeSecond, this->tempos, timeFormat);
+}
+
+std::tuple<int, double, double> PlayPosition::toBar(double timeSecond, short /*timeFormat*/) const {
+	return utils::getBarBySecond(timeSecond, this->tempos);
 }
 
 PlayPosition* PlayPosition::getInstance() {
