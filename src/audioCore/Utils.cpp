@@ -192,45 +192,95 @@ namespace utils {
 		auto numEvents = tempoEvents.getNumEvents();
 
 		/** Temporary */
-		juce::Array<std::tuple<double, double, double>> tempList;
+		juce::Array<std::tuple<double, double, double, double>> tempList;
 
-		double timeQuarter = 0;
-		{
-			/** Corrected Time */
-			double correctedQuarter = 0;
-			double lastValidQuarter = 0;
+		/** Corrected Time */
+		double correctedQuarter = 0;
+		double lastValidQuarter = 0;
 
-			/** Event Time In Seconds */
-			double lastTime = 0;
+		/** Event Time In Bar */
+		double lastValidBar = 0;
 
-			/** State Temp */
-			double secsPerQuarter = 0.5, quarterPerBar = 4.0;
+		/** Event Time In Seconds */
+		double lastTime = 0;
 
-			/** State Wait For Valid Temp */
-			double tempValidQuarter = 0;
-			double secPerQuarterWaitForValid = 0.5;
-			double quarterPerBarWaitForValid = 4.0;
+		/** State Temp */
+		double secsPerQuarter = 0.5, quarterPerBar = 4.0;
 
-			for (int i = 0; i < numEvents; ++i) {
-				auto& m = tempoEvents.getEventPointer(i)->message;
-				auto eventTime = m.getTimeStamp();
+		/** State Wait For Valid Temp */
+		double tempValidQuarter = 0;
+		double tempValidBar = 0;
+		double secPerQuarterWaitForValid = 0.5;
+		double quarterPerBarWaitForValid = 4.0;
 
-				if (eventTime >= time)
-					break;
+		/** Add First Event */
+		tempList.add({ tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
 
-				/** Temp Valid */
-				if (correctedQuarter + (eventTime - lastTime) / secPerQuarterWaitForValid > tempValidQuarter) {
-					tempList.add({ tempValidQuarter, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
-					lastValidQuarter = tempValidQuarter;
-					secsPerQuarter = secPerQuarterWaitForValid;
-					quarterPerBar = quarterPerBarWaitForValid;
+		/** Build Temporary */
+		for (int i = 0; i < numEvents; ++i) {
+			auto& m = tempoEvents.getEventPointer(i)->message;
+			auto eventTime = m.getTimeStamp();
+
+			if (eventTime >= time)
+				break;
+
+			/** Temp Valid */
+			if (correctedQuarter + (eventTime - lastTime) / secsPerQuarter > tempValidQuarter) {
+				if (std::get<0>(tempList.getLast()) < tempValidQuarter) {
+					tempList.add({ tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
+				}
+				else {
+					tempList.getReference(tempList.size() - 1)
+						= std::make_tuple(tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid);
 				}
 
-				correctedQuarter += (eventTime - lastTime) / secsPerQuarter;
-				lastTime = eventTime;
+				lastValidQuarter = tempValidQuarter;
+				lastValidBar = tempValidBar;
+				secsPerQuarter = secPerQuarterWaitForValid;
+				quarterPerBar = quarterPerBarWaitForValid;
+			}
 
-				if (m.isTempoMetaEvent()) {
-					secsPerQuarter = m.getTempoSecondsPerQuarterNote();
+			correctedQuarter += (eventTime - lastTime) / secsPerQuarter;
+			lastTime = eventTime;
+
+			if (m.isTempoMetaEvent()) {
+				secPerQuarterWaitForValid = m.getTempoSecondsPerQuarterNote();
+
+				/** Check Delay Valid */
+				double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
+				double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
+				double barDistance = barCountFromLastValid;
+
+				/** Set Wait For Valid Temp */
+				tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+			}
+
+			if (m.isTimeSignatureMetaEvent()) {
+				int numerator = 4, denominator = 4;
+				m.getTimeSignatureInfo(numerator, denominator);
+
+				/** Check Delay Valid */
+				double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
+				double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
+				double barDistance = std::floor(barCountFromLastValid);
+				if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
+					barDistance++;
+				}
+
+				/** Set Wait For Valid Temp */
+				quarterPerBarWaitForValid = numerator * (4.0 / denominator);
+				tempValidBar = lastValidBar + barDistance;
+				tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+			}
+
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
+
+				if (m2.isTempoMetaEvent()) {
+					secPerQuarterWaitForValid = m2.getTempoSecondsPerQuarterNote();
 
 					/** Check Delay Valid */
 					double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
@@ -238,6 +288,7 @@ namespace utils {
 					double barDistance = barCountFromLastValid;
 
 					/** Set Wait For Valid Temp */
+					tempValidBar = lastValidBar + barDistance;
 					tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
 				}
 
@@ -255,64 +306,46 @@ namespace utils {
 
 					/** Set Wait For Valid Temp */
 					quarterPerBarWaitForValid = numerator * (4.0 / denominator);
+					tempValidBar = lastValidBar + barDistance;
 					tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
 				}
 
-				while (i + 1 < numEvents) {
-					auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
-
-					if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
-						break;
-
-					if (m2.isTempoMetaEvent()) {
-						secsPerQuarter = m2.getTempoSecondsPerQuarterNote();
-
-						/** Check Delay Valid */
-						double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
-						double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
-						double barDistance = barCountFromLastValid;
-
-						/** Set Wait For Valid Temp */
-						tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
-					}
-
-					if (m.isTimeSignatureMetaEvent()) {
-						int numerator = 4, denominator = 4;
-						m.getTimeSignatureInfo(numerator, denominator);
-
-						/** Check Delay Valid */
-						double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
-						double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
-						double barDistance = std::floor(barCountFromLastValid);
-						if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
-							barDistance++;
-						}
-
-						/** Set Wait For Valid Temp */
-						quarterPerBarWaitForValid = numerator * (4.0 / denominator);
-						tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
-					}
-
-					++i;
-				}
+				++i;
 			}
-
-			/** Temp Valid */
-			if (correctedQuarter + (time - lastTime) / secPerQuarterWaitForValid > tempValidQuarter) {
-				tempList.add({ tempValidQuarter, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
-				lastValidQuarter = tempValidQuarter;
-				secsPerQuarter = secPerQuarterWaitForValid;
-				quarterPerBar = quarterPerBarWaitForValid;
-			}
-
-			/** Get Time In Quarter */
-			timeQuarter = correctedQuarter + (time - lastTime) / secsPerQuarter;
-		}
-		
-		for (int i = 0; i < tempList.size(); i++) {
-			/** TODO Dearch Temp */
 		}
 
+		/** Temp Valid */
+		if (correctedQuarter + (time - lastTime) / secsPerQuarter > tempValidQuarter) {
+			if (std::get<0>(tempList.getLast()) < tempValidQuarter) {
+				tempList.add({ tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
+			}
+			else {
+				tempList.getReference(tempList.size() - 1)
+					= std::make_tuple(tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid);
+			}
+
+			lastValidQuarter = tempValidQuarter;
+			lastValidBar = tempValidBar;
+			secsPerQuarter = secPerQuarterWaitForValid;
+			quarterPerBar = quarterPerBarWaitForValid;
+		}
+
+		/** Get Time In Quarter */
+		double timeQuarter = correctedQuarter + (time - lastTime) / secsPerQuarter;
+
+		/** Find Bar */
+		int barResult = std::floor(lastValidBar + (timeQuarter - lastValidQuarter) / quarterPerBar);
+
+		/** Find Last Match Temp */
+		for (int i = tempList.size() - 1; i >= 0; i--) {
+			auto& [currentQuarter, currentBar, currentSPQ, currentQPB] = tempList.getReference(i);
+
+			if (currentBar > barResult) {
+				continue;
+			}
+
+			return { barResult, currentQuarter + (barResult - currentBar) * currentQPB };
+		}
 
 		return { 0, 0. };
 	}
