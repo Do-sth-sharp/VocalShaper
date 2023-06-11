@@ -17,6 +17,7 @@ public:
 	void transportRewind() override;
 
 	void setTimeFormat(short ticksPerQuarter);
+	void setSampleRate(double sampleRate);
 	void setLooping(bool looping);
 	void setLoopPointsInSeconds(const std::tuple<double, double>& points);
 	void setLoopPointsInQuarter(const std::tuple<double, double>& points);
@@ -36,6 +37,8 @@ private:
 	std::atomic_short timeFormat = 480;
 	std::atomic<double> sampleRate = 48000;
 	juce::ReadWriteLock lock;
+
+	void updatePositionByTimeInSecond();
 
 public:
 	static PlayPosition* getInstance();

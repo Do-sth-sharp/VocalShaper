@@ -48,6 +48,14 @@ void PlayPosition::setTimeFormat(short ticksPerQuarter) {
 	this->timeFormat = ticksPerQuarter;
 }
 
+void PlayPosition::setSampleRate(double sampleRate) {
+	juce::ScopedWriteLock locker(this->lock);
+	this->sampleRate = sampleRate;
+
+	this->position.setTimeInSamples(
+		(int64_t)std::floor(this->position.getTimeInSeconds().orFallback(0) * this->sampleRate));
+}
+
 void PlayPosition::setLooping(bool looping) {
 	juce::ScopedWriteLock locker(this->lock);
 	this->position.setIsLooping(looping);
@@ -72,18 +80,14 @@ void PlayPosition::setLoopPointsInQuarter(const std::tuple<double, double>& poin
 
 void PlayPosition::setPositionInSeconds(double time) {
 	juce::ScopedWriteLock locker(this->lock);
-	this->position.setTimeInSamples((int64_t)std::floor(time * this->sampleRate));
 	this->position.setTimeInSeconds(time);
-	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
 
-	auto barInfo = this->toBar(time);
-	this->position.setBarCount(std::get<0>(barInfo));
-	this->position.setPpqPositionOfLastBarStart(std::get<1>(barInfo));
-	
+	this->updatePositionByTimeInSecond();
 }
 
 void PlayPosition::setPositionInQuarter(double time) {
-
+	juce::ScopedWriteLock locker(this->lock);
+	this->setPositionInSeconds(this->toSecond(time * this->timeFormat));
 }
 
 double PlayPosition::toSecond(double timeTick) const {
@@ -110,6 +114,16 @@ double PlayPosition::toTick(double timeSecond, short timeFormat) const {
 
 std::tuple<int, double> PlayPosition::toBar(double timeSecond, short /*timeFormat*/) const {
 	return utils::getBarBySecond(timeSecond, this->tempos);
+}
+
+void PlayPosition::updatePositionByTimeInSecond() {
+	double time = this->position.getTimeInSeconds().orFallback(0);
+	this->position.setTimeInSamples((int64_t)std::floor(time * this->sampleRate));
+	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
+
+	auto barInfo = this->toBar(time);
+	this->position.setBarCount(std::get<0>(barInfo));
+	this->position.setPpqPositionOfLastBarStart(std::get<1>(barInfo));
 }
 
 PlayPosition* PlayPosition::getInstance() {
