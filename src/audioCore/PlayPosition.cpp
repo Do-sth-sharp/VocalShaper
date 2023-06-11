@@ -94,7 +94,7 @@ double PlayPosition::toTick(double timeSecond) const {
 	return this->toTick(timeSecond, this->timeFormat);
 }
 
-std::tuple<int, double, double> PlayPosition::toBar(double timeSecond) const {
+std::tuple<int, double> PlayPosition::toBar(double timeSecond) const {
 	return this->toBar(timeSecond, this->timeFormat);
 }
 
@@ -108,7 +108,7 @@ double PlayPosition::toTick(double timeSecond, short timeFormat) const {
 		timeSecond, this->tempos, timeFormat);
 }
 
-std::tuple<int, double, double> PlayPosition::toBar(double timeSecond, short /*timeFormat*/) const {
+std::tuple<int, double> PlayPosition::toBar(double timeSecond, short /*timeFormat*/) const {
 	return utils::getBarBySecond(timeSecond, this->tempos);
 }
 

@@ -25,7 +25,7 @@ namespace utils {
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);
 
-	std::tuple<int, double, double> getBarBySecond(double time,
+	std::tuple<int, double> getBarBySecond(double time,
 		const juce::MidiMessageSequence& tempoEvents);
 }
 

@@ -25,10 +25,10 @@ public:
 
 	double toSecond(double timeTick) const;
 	double toTick(double timeSecond) const;
-	std::tuple<int, double, double> toBar(double timeSecond) const;
+	std::tuple<int, double> toBar(double timeSecond) const;
 	double toSecond(double timeTick, short timeFormat) const;
 	double toTick(double timeSecond, short timeFormat) const;
-	std::tuple<int, double, double> toBar(double timeSecond, short timeFormat) const;
+	std::tuple<int, double> toBar(double timeSecond, short timeFormat) const;
 
 private:
 	mutable juce::AudioPlayHead::PositionInfo position;
