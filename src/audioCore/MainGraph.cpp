@@ -1,6 +1,7 @@
 ﻿#include "MainGraph.h"
 
 #include "PlayPosition.h"
+#include "CloneableSourceManager.h"
 
 MainGraph::MainGraph() {
 	/** The Main Audio IO Node */
@@ -58,31 +59,39 @@ void MainGraph::setMIDIMessageHook(const std::function<void(const juce::MidiMess
 }
 
 void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
+	/** Play Head */
+	if (auto position = PlayPosition::getInstance()) {
+		position->setSampleRate(sampleRate);
+	}
+
+	/** Source */
+	CloneableSourceManager::getInstance()->setSampleRate(sampleRate);
+
 	/** Current Graph */
 	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+}
+
+void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {
+	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
 
 	/** Audio Source */
 	for (auto& i : this->audioSourceNodeList) {
 		auto src = i->getProcessor();
 		src->setPlayHead(PlayPosition::getInstance());
-		src->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 
 	/** Instrument */
 	for (auto& i : this->instrumentNodeList) {
 		auto instr = i->getProcessor();
 		instr->setPlayHead(PlayPosition::getInstance());
-		instr->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 
 	/** Track */
 	for (auto& i : this->trackNodeList) {
 		auto track = i->getProcessor();
 		track->setPlayHead(PlayPosition::getInstance());
-		track->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 }
-
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Call MIDI Hook */
@@ -100,4 +109,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Process Audio Block */
 	this->juce::AudioProcessorGraph::processBlock(audio, midi);
+
+	/** Add Position */
+	PlayPosition::getInstance()->next(audio.getNumSamples());
 }

@@ -306,13 +306,16 @@ PluginDock::PluginStateList PluginDock::getPluginList() const {
 }
 
 void PluginDock::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
-	/** PluginDock */
+	/** Plugin Dock */
 	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+}
+
+void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
+	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
 
 	/** Plugins */
 	for (auto& i : this->pluginNodeList) {
 		auto plugin = i->getProcessor();
 		plugin->setPlayHead(PlayPosition::getInstance());
-		plugin->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 }

@@ -24,6 +24,8 @@ public:
 	int getSourceNum() const;
 	const juce::CriticalSection& getLock() const;
 
+	void setSampleRate(double sampleRate);
+
 private:
 	juce::OwnedArray<CloneableSource, juce::CriticalSection> sourceList;
 

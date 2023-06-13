@@ -40,6 +40,7 @@ public:
 	PluginStateList getPluginList() const;
 
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

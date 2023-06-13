@@ -90,6 +90,15 @@ void PlayPosition::setPositionInQuarter(double time) {
 	this->setPositionInSeconds(this->toSecond(time * this->timeFormat));
 }
 
+void PlayPosition::next(int blockSize) {
+	juce::ScopedWriteLock locker(this->lock);
+	if (this->position.getIsPlaying()) {
+		double time = this->position.getTimeInSeconds().orFallback(0);
+		time += blockSize / this->sampleRate;
+		this->setPositionInSeconds(time);
+	}
+}
+
 double PlayPosition::toSecond(double timeTick) const {
 	return this->toSecond(timeTick, this->timeFormat);
 }

@@ -23,6 +23,7 @@ public:
 	void setLoopPointsInQuarter(const std::tuple<double, double>& points);
 	void setPositionInSeconds(double time);
 	void setPositionInQuarter(double time);
+	void next(int blockSize);
 
 	double toSecond(double timeTick) const;
 	double toTick(double timeSecond) const;

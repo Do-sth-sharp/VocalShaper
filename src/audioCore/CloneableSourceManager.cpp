@@ -39,6 +39,13 @@ const juce::CriticalSection& CloneableSourceManager::getLock() const {
 	return this->sourceList.getLock();
 }
 
+void CloneableSourceManager::setSampleRate(double sampleRate) {
+	juce::GenericScopedLock locker(this->getLock());
+	for (auto i : this->sourceList) {
+		i->setSampleRate(sampleRate);
+	}
+}
+
 CloneableSourceManager* CloneableSourceManager::getInstance() {
 	return CloneableSourceManager::instance
 		? CloneableSourceManager::instance

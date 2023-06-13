@@ -196,11 +196,14 @@ void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 
 	/** Prepare Current Graph */
 	this->AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+}
 
-	/** Prepare Plugins */
+void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
+	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
+
+	/** Plugins */
 	if (auto pluginDock = this->getPluginDock()) {
 		pluginDock->setPlayHead(PlayPosition::getInstance());
-		pluginDock->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	}
 }
 
