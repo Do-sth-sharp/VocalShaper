@@ -213,6 +213,20 @@ AUDIOCORE_FUNC(removeSource) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeSequencerTrack) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int index = luaL_checkinteger(L, 1);
+		graph->removeSource(index);
+
+		result += "Remove Sequencer Track: " + juce::String(index) + "\n";
+		result += "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -229,4 +243,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSource);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrack);
 }
