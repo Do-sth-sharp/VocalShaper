@@ -48,7 +48,6 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	this->audioOutputNode->getProcessor()->setBusesLayout(outputLayout);
 
 	/** Auto Remove Connections */
-	this->removeIllegalAudioI2SrcConnections();
 	this->removeIllegalAudioI2TrkConnections();
 	this->removeIllegalAudioTrk2OConnections();
 }

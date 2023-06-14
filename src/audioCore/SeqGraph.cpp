@@ -2,9 +2,9 @@
 
 #include "PlayPosition.h"
 
-void MainGraph::insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index) {
+void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 	/** Add To The Graph */
-	if (auto ptrNode = this->addNode(std::move(processor))) {
+	if (auto ptrNode = this->addNode(std::make_unique<SeqSourceProcessor>(type))) {
 		/** Limit Index */
 		if (index < 0 || index > this->audioSourceNodeList.size()) {
 			index = this->audioSourceNodeList.size();
@@ -28,26 +28,6 @@ void MainGraph::removeSource(int index) {
 
 	/** Get The Node Ptr Then Remove From The List */
 	auto ptrNode = this->audioSourceNodeList.removeAndReturn(index);
-
-	/** Remove MIDI Input Connection */
-	this->midiI2SrcConnectionList.removeIf(
-		[this, nodeID = ptrNode->nodeID](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.destination.nodeID == nodeID) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
-
-	/** Remove Audio Input Connection */
-	this->audioI2SrcConnectionList.removeIf(
-		[this, nodeID = ptrNode->nodeID](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.destination.nodeID == nodeID) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
 
 	/** Remove MIDI Instrument Connection */
 	this->midiSrc2InstrConnectionList.removeIf(
@@ -148,9 +128,10 @@ int MainGraph::getSourceNum() const {
 	return this->audioSourceNodeList.size();
 }
 
-juce::AudioProcessor* MainGraph::getSourceProcessor(int index) const {
+SeqSourceProcessor* MainGraph::getSourceProcessor(int index) const {
 	if (index < 0 || index >= this->audioSourceNodeList.size()) { return nullptr; }
-	return this->audioSourceNodeList.getUnchecked(index)->getProcessor();
+	return dynamic_cast<SeqSourceProcessor*>(
+		this->audioSourceNodeList.getUnchecked(index)->getProcessor());
 }
 
 int MainGraph::getInstrumentNum() const {
@@ -176,78 +157,6 @@ bool MainGraph::getInstrumentBypass(int index) const {
 		return node->isBypassed();
 	}
 	return false;
-}
-
-void MainGraph::setMIDII2SrcConnection(int sourceIndex) {
-	/** Limit Index */
-	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
-
-	/** Remove Current Connection */
-	this->removeMIDII2SrcConnection(sourceIndex);
-
-	/** Get Node ID */
-	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
-
-	/** Add Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->midiInputNode->nodeID, this->midiChannelIndex},
-	{nodeID, this->midiChannelIndex} };
-	this->addConnection(connection);
-	this->midiI2SrcConnectionList.add(connection);
-}
-
-void MainGraph::removeMIDII2SrcConnection(int sourceIndex) {
-	/** Limit Index */
-	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
-
-	/** Get Node ID */
-	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
-
-	/** Remove Connection */
-	this->midiI2SrcConnectionList.removeIf(
-		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.destination.nodeID == nodeID) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
-}
-
-void MainGraph::setAudioI2SrcConnection(int sourceIndex, int srcChannel, int dstChannel) {
-	/** Limit Index */
-	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
-	if (srcChannel < 0 || srcChannel >= this->getTotalNumInputChannels()) { return; }
-
-	/** Get Node ID */
-	auto ptrNode = this->audioSourceNodeList.getUnchecked(sourceIndex);
-	auto nodeID = ptrNode->nodeID;
-
-	/** Get Channels */
-	int nodeChannels = ptrNode->getProcessor()->getTotalNumInputChannels();
-	if (dstChannel < 0 || dstChannel >= nodeChannels) { return; }
-
-	/** Link Bus */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
-	if (!this->isConnected(connection)) {
-		this->addConnection(connection);
-		this->audioI2SrcConnectionList.add(connection);
-	}
-}
-
-void MainGraph::removeAudioI2SrcConnection(int sourceIndex, int srcChannel, int dstChannel) {
-	/** Limit Index */
-	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return; }
-
-	/** Get Node ID */
-	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
-
-	/** Remove Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
-	this->removeConnection(connection);
-	this->audioI2SrcConnectionList.removeAllInstancesOf(connection);
 }
 
 void MainGraph::setMIDII2InstrConnection(int instrIndex) {
@@ -325,32 +234,6 @@ void MainGraph::removeMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
 		});
 }
 
-bool MainGraph::isMIDII2SrcConnected(int sourceIndex) const {
-	/** Limit Index */
-	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
-
-	/** Get Node ID */
-	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
-
-	/** Find Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {nodeID, this->midiChannelIndex} };
-	return this->midiI2SrcConnectionList.contains(connection);
-}
-
-bool MainGraph::isAudioI2SrcConnected(int sourceIndex, int srcChannel, int dstChannel) const {
-	/** Limit Index */
-	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
-
-	/** Get Node ID */
-	auto nodeID = this->audioSourceNodeList.getUnchecked(sourceIndex)->nodeID;
-
-	/** Find Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
-	return this->audioI2SrcConnectionList.contains(connection);
-}
-
 bool MainGraph::isMIDII2InstrConnected(int instrIndex) const {
 	/** Limit Index */
 	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return false; }
@@ -377,15 +260,4 @@ bool MainGraph::isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const 
 	juce::AudioProcessorGraph::Connection connection =
 	{ {nodeID, this->midiChannelIndex}, {dstNodeID, this->midiChannelIndex} };
 	return this->midiSrc2InstrConnectionList.contains(connection);
-}
-
-void MainGraph::removeIllegalAudioI2SrcConnections() {
-	this->audioI2SrcConnectionList.removeIf(
-		[this](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.source.channelIndex >= this->getTotalNumInputChannels()) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
 }

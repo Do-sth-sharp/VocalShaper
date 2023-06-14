@@ -3,13 +3,14 @@
 #include <JuceHeader.h>
 #include "Track.h"
 #include "PluginDecorator.h"
+#include "SeqSourceProcessor.h"
 
 class MainGraph final : public juce::AudioProcessorGraph {
 public:
 	MainGraph();
 	~MainGraph() override;
 
-	void insertSource(std::unique_ptr<juce::AudioProcessor> processor, int index = -1);
+	void insertSource(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeSource(int index);
 	bool insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
 	void removeInstrument(int index);
@@ -17,7 +18,7 @@ public:
 	void removeTrack(int index);
 
 	int getSourceNum() const;
-	juce::AudioProcessor* getSourceProcessor(int index) const;
+	SeqSourceProcessor* getSourceProcessor(int index) const;
 	int getInstrumentNum() const;
 	PluginDecorator* getInstrumentProcessor(int index) const;
 	int getTrackNum() const;
@@ -25,10 +26,6 @@ public:
 	void setInstrumentBypass(int index, bool bypass);
 	bool getInstrumentBypass(int index) const;
 
-	void setMIDII2SrcConnection(int sourceIndex);
-	void removeMIDII2SrcConnection(int sourceIndex);
-	void setAudioI2SrcConnection(int sourceIndex, int srcChannel, int dstChannel);
-	void removeAudioI2SrcConnection(int sourceIndex, int srcChannel, int dstChannel);
 	void setMIDII2InstrConnection(int instrIndex);
 	void removeMIDII2InstrConnection(int instrIndex);
 	void setMIDISrc2InstrConnection(int sourceIndex, int instrIndex);
@@ -48,8 +45,6 @@ public:
 	void setAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
 	void removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
 
-	bool isMIDII2SrcConnected(int sourceIndex) const;
-	bool isAudioI2SrcConnected(int sourceIndex, int srcChannel, int dstChannel) const;
 	bool isMIDII2InstrConnected(int instrIndex) const;
 	bool isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const;
 	bool isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const;
@@ -91,8 +86,6 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> instrumentNodeList;
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackNodeList;
 
-	juce::Array<juce::AudioProcessorGraph::Connection> midiI2SrcConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioI2SrcConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> midiI2InstrConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> midiSrc2InstrConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> midiSrc2TrkConnectionList;
@@ -106,7 +99,6 @@ private:
 	std::function<void(const juce::MidiMessage&)> midiHook;
 	juce::ReadWriteLock hookLock;
 
-	void removeIllegalAudioI2SrcConnections();
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
 
