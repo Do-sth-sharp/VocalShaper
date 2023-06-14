@@ -421,6 +421,21 @@ AUDIOCORE_FUNC(setEffectMIDICCIntercept) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setSequencerTrackBypass) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int trackIndex = luaL_checkinteger(L, 1);
+		bool bypass = lua_toboolean(L, 2);
+
+		graph->setSourceBypass(trackIndex, bypass);
+
+		result += "Sequencer Track Bypass: [" + juce::String(trackIndex) + "] " + juce::String(graph->getSourceBypass(trackIndex) ? "ON" : "OFF") + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -446,4 +461,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamListenCC);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDICCIntercept);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectMIDICCIntercept);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackBypass);
 }

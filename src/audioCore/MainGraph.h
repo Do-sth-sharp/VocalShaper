@@ -23,6 +23,8 @@ public:
 	PluginDecorator* getInstrumentProcessor(int index) const;
 	int getTrackNum() const;
 	Track* getTrackProcessor(int index) const;
+	void setSourceBypass(int index, bool bypass);
+	bool getSourceBypass(int index) const;
 	void setInstrumentBypass(int index, bool bypass);
 	bool getInstrumentBypass(int index) const;
 

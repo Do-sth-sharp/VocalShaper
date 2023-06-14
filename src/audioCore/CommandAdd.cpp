@@ -330,6 +330,50 @@ AUDIOCORE_FUNC(addSequencerTrack) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addSequencerTrackMidiOutputToMixer) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		int dst = luaL_checkinteger(L, 2);
+		graph->setMIDISrc2TrkConnection(src, dst);
+
+		result += juce::String(src) + " - " + juce::String(dst) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(addSequencerTrackMidiOutputToInstr) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		int dst = luaL_checkinteger(L, 2);
+		graph->setMIDISrc2InstrConnection(src, dst);
+
+		result += juce::String(src) + " - " + juce::String(dst) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(addSequencerTrackOutput) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		int srcc = luaL_checkinteger(L, 2);
+		int dst = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+		graph->setAudioSrc2TrkConnection(src, dst, srcc, dstc);
+
+		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -346,4 +390,7 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addAudioSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMIDISource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrack);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToMixer);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToInstr);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
 }

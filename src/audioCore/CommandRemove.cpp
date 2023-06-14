@@ -227,6 +227,50 @@ AUDIOCORE_FUNC(removeSequencerTrack) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeSequencerTrackMidiOutputToMixer) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		int dst = luaL_checkinteger(L, 2);
+		graph->removeMIDISrc2TrkConnection(src, dst);
+
+		result += juce::String(src) + " - " + juce::String(dst) + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(removeSequencerTrackMidiOutputToInstr) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		int dst = luaL_checkinteger(L, 2);
+		graph->removeMIDISrc2InstrConnection(src, dst);
+
+		result += juce::String(src) + " - " + juce::String(dst) + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
+AUDIOCORE_FUNC(removeSequencerTrackOutput) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		int srcc = luaL_checkinteger(L, 2);
+		int dst = luaL_checkinteger(L, 3);
+		int dstc = luaL_checkinteger(L, 4);
+		graph->removeAudioSrc2TrkConnection(src, dst, srcc, dstc);
+
+		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -244,4 +288,7 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrack);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackMidiOutputToMixer);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackMidiOutputToInstr);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackOutput);
 }
