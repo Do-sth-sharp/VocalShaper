@@ -374,6 +374,24 @@ AUDIOCORE_FUNC(addSequencerTrackOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addSequencerSourceInstance) {
+	juce::String result;
+
+	int trackIndex = luaL_checkinteger(L, 1);
+	int srcIndex = luaL_checkinteger(L, 2);
+	double startTime = luaL_checknumber(L, 3);
+	double endTime = luaL_checknumber(L, 4);
+	double deviation = luaL_checknumber(L, 5);
+
+	AudioCore::getInstance()->addSequencerSourceInstance(trackIndex, srcIndex,
+		startTime, endTime, deviation);
+
+	result += "Add Sequencer Source Instance [" + juce::String(trackIndex) + "] : [" + juce::String(srcIndex) + "]\n";
+	result += "Total Sequencer Source Instance: " + juce::String(AudioCore::getInstance()->getSequencerSourceInstanceNum(trackIndex)) + "\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -393,4 +411,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToMixer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerSourceInstance);
 }

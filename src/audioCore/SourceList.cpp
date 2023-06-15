@@ -104,6 +104,13 @@ bool SourceList::add(const SourceList::SeqBlock& block) {
 	return true;
 }
 
+void SourceList::remove(int index) {
+	juce::GenericScopedLock locker(this->getLock());
+	if (index >= 0 && index < this->list.size()) {
+		this->list.remove(index);
+	}
+}
+
 const juce::CriticalSection& SourceList::getLock() const noexcept {
 	return this->list.getLock();
 }

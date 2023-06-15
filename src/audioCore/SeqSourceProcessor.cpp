@@ -11,6 +11,23 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	this->setChannelLayoutOfBus(false, 0, type);
 }
 
+bool SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {
+	return this->srcs.add(block);
+}
+
+void SeqSourceProcessor::removeSeq(int index) {
+	this->srcs.remove(index);
+}
+
+int SeqSourceProcessor::getSeqNum() const {
+	return this->srcs.size();
+}
+
+const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
+	juce::GenericScopedLock locker(this->srcs.getLock());
+	return this->srcs.get(index);
+}
+
 void SeqSourceProcessor::prepareToPlay(
 	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {}
 

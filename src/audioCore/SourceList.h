@@ -29,6 +29,7 @@ public:
 	const SeqBlock& getReference(int index) const;
 	int size() const;
 	bool add(const SeqBlock& block);
+	void remove(int index);
 	const juce::CriticalSection& getLock() const noexcept;
 
 private:

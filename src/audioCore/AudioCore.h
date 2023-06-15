@@ -87,6 +87,11 @@ public:
 	bool removeInstrument(int instrIndex);
 	void bypassInstrument(int instrIndex, bool bypass);
 
+	bool addSequencerSourceInstance(int trackIndex, int srcIndex,
+		double startTime, double endTime, double deviation);
+	void removeSequencerSourceInstance(int trackIndex, int index);
+	int getSequencerSourceInstanceNum(int trackIndex) const;
+
 	/**
 	 * @attention	Don't change plugin black list while searching plugin.
 	 */

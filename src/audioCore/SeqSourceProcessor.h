@@ -9,6 +9,11 @@ public:
 	SeqSourceProcessor() = delete;
 	SeqSourceProcessor(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
+	bool addSeq(const SourceList::SeqBlock& block);
+	void removeSeq(int index);
+	int getSeqNum() const;
+	const SourceList::SeqBlock getSeq(int index) const;
+
 public:
 	const juce::String getName() const override { return "SeqSource"; };
 
