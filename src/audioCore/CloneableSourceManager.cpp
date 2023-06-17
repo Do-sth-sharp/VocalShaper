@@ -5,6 +5,7 @@ bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
 	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
 
 	juce::GenericScopedLock locker(this->getLock());
+	src->prepareToPlay(this->sampleRate, this->bufferSize);
 	this->sourceList.add(std::move(src));
 	return true;
 }
@@ -39,10 +40,12 @@ const juce::CriticalSection& CloneableSourceManager::getLock() const {
 	return this->sourceList.getLock();
 }
 
-void CloneableSourceManager::setSampleRate(double sampleRate) {
+void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
 	juce::GenericScopedLock locker(this->getLock());
+	this->sampleRate = sampleRate;
+	this->bufferSize = bufferSize;
 	for (auto i : this->sourceList) {
-		i->setSampleRate(sampleRate);
+		i->prepareToPlay(sampleRate, bufferSize);
 	}
 }
 

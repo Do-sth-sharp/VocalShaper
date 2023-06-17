@@ -6,13 +6,15 @@ double CloneableAudioSource::getSourceSampleRate() const {
 
 void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double bufferDeviation,
 	double dataDeviation, double length) const {
+	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
+
 	juce::GenericScopedTryLock locker(this->lock);
 	if (locker.isLocked()) {
 		if (this->source && this->memorySource) {
 			this->memorySource->setNextReadPosition(dataDeviation * this->sourceSampleRate);
 			this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
-				&buffer, (int)std::floor(bufferDeviation* this->getSampleRate()),
-					(int)std::floor(length* this->getSampleRate())});
+				&buffer, (int)std::floor(bufferDeviation * this->getSampleRate()),
+					(int)std::floor(length * this->getSampleRate())});
 		}
 	}
 }
@@ -69,6 +71,7 @@ bool CloneableAudioSource::load(const juce::File& file) {
 
 	/** Set Sample Rate */
 	source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
+	source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
 
 	this->source = std::move(source);
 	return true;
@@ -100,6 +103,7 @@ void CloneableAudioSource::sampleRateChanged() {
 	juce::GenericScopedLock locker(this->lock);
 	if (this->source) {
 		this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
+		this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
 	}
 }
 

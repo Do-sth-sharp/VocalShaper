@@ -65,13 +65,18 @@ const juce::String CloneableSource::getName() const {
 	return this->name;
 }
 
-void CloneableSource::setSampleRate(double sampleRate) {
-	if (this->currentSampleRate == sampleRate) { return; }
+void CloneableSource::prepareToPlay(double sampleRate, int bufferSize) {
+	if (this->currentSampleRate == sampleRate && this->currentBufferSize == bufferSize) { return; }
 
 	this->currentSampleRate = sampleRate;
+	this->currentBufferSize = bufferSize;
 	this->sampleRateChanged();
 }
 
 double CloneableSource::getSampleRate() const {
 	return this->currentSampleRate;
+}
+
+int CloneableSource::getBufferSize() const {
+	return this->currentBufferSize;
 }

@@ -447,6 +447,26 @@ int AudioCore::getSequencerSourceInstanceNum(int trackIndex) const {
 	return -1;
 }
 
+void AudioCore::play() {
+	PlayPosition::getInstance()->transportPlay(true);
+}
+
+void AudioCore::stop() {
+	PlayPosition::getInstance()->transportPlay(false);
+}
+
+void AudioCore::rewind() {
+	PlayPosition::getInstance()->transportRewind();
+}
+
+void AudioCore::setPositon(double pos) {
+	PlayPosition::getInstance()->setPositionInSeconds(pos);
+}
+
+juce::Optional<juce::AudioPlayHead::PositionInfo> AudioCore::getPosition() const {
+	return PlayPosition::getInstance()->getPosition();
+}
+
 const juce::StringArray AudioCore::getPluginBlackList() const {
 	return this->audioPluginSearchThread->getBlackList();
 }

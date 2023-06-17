@@ -436,6 +436,17 @@ AUDIOCORE_FUNC(setSequencerTrackBypass) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setPlayPosition) {
+	juce::String result;
+
+	audioCore->setPositon(luaL_checknumber(L, 1));
+	auto pos = audioCore->getPosition();
+
+	result += "Set play position at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -462,4 +473,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDICCIntercept);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectMIDICCIntercept);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackBypass);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setPlayPosition);
 }

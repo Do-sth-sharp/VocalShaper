@@ -10,6 +10,9 @@
 #include "AudioIOList.h"
 
 class AudioDeviceChangeListener;
+namespace audioCommand {
+	class CommandBase;
+}
 
 class AudioCore final : private juce::DeletedAtShutdown {
 public:
@@ -92,6 +95,12 @@ public:
 	void removeSequencerSourceInstance(int trackIndex, int index);
 	int getSequencerSourceInstanceNum(int trackIndex) const;
 
+	void play();
+	void stop();
+	void rewind();
+	void setPositon(double pos);
+	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const;
+
 	/**
 	 * @attention	Don't change plugin black list while searching plugin.
 	 */
@@ -122,7 +131,7 @@ public:
 
 private:
 	friend class AudioDebugger;
-	friend class CommandBase;
+	friend class audioCommand::CommandBase;
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<MainGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;

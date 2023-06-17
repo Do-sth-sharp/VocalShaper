@@ -24,10 +24,12 @@ public:
 	int getSourceNum() const;
 	const juce::CriticalSection& getLock() const;
 
-	void setSampleRate(double sampleRate);
+	void prepareToPlay(double sampleRate, int bufferSize);
 
 private:
 	juce::OwnedArray<CloneableSource, juce::CriticalSection> sourceList;
+	double sampleRate = 0;
+	int bufferSize = 0;
 
 public:
 	static CloneableSourceManager* getInstance();

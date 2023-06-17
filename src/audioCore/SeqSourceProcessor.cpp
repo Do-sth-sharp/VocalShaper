@@ -70,7 +70,7 @@ void SeqSourceProcessor::processBlock(
 		auto index = this->srcs.match(startTime, endTime);
 
 		for (int i = std::get<0>(index);
-			i <= std::get<1>(index) && i < this->srcs.size(); i++) {
+			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
 			/** Get Block */
 			auto block = this->srcs.getUnchecked(i);
 

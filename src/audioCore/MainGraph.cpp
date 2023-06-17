@@ -64,7 +64,7 @@ void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 	}
 
 	/** Source */
-	CloneableSourceManager::getInstance()->setSampleRate(sampleRate);
+	CloneableSourceManager::getInstance()->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 
 	/** Current Graph */
 	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);

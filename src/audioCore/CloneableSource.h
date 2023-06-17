@@ -24,8 +24,9 @@ public:
 	void setName(const juce::String& name);
 	const juce::String getName() const;
 
-	void setSampleRate(double sampleRate);
+	void prepareToPlay(double sampleRate, int bufferSize);
 	double getSampleRate() const;
+	int getBufferSize() const;
 
 	template<IsCloneable SourceType = CloneableSource>
 	class SafePointer {
@@ -62,6 +63,7 @@ private:
 	const int id = -1;
 	juce::String name;
 	std::atomic<double> currentSampleRate = 0;
+	std::atomic_int currentBufferSize = 0;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource)

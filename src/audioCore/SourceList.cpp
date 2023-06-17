@@ -5,7 +5,7 @@ std::tuple<int, int> SourceList::match(double startTime, double endTime) const {
 	if (this->list.isEmpty()) { return { -1, -1 }; }
 
 	/** Search Range */
-	int sLow = 0, sHigh = this->list.size();
+	int sLow = 0, sHigh = this->list.size() - 1;
 
 	/** Result Var */
 	int start = this->lastIndex;
@@ -56,7 +56,7 @@ std::tuple<int, int> SourceList::match(double startTime, double endTime) const {
 	} while (false);
 	
 	/** Found Result */
-	int end = this->seqSearchEnd(start, this->list.size(), endTime);
+	int end = this->seqSearchEnd(start, this->list.size() - 1, endTime);
 
 	if (end <= -1) { return { -1, -1 }; }
 	return { start, this->lastIndex = end };
