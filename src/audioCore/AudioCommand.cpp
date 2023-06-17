@@ -11,11 +11,10 @@ AudioCommand::AudioCommand() {
 	lua_newtable(this->cState.get());
 
 	regCommandAdd(this->cState.get());
-	regCommandClear(this->cState.get());
+	regCommandOther(this->cState.get());
 	regCommandEcho(this->cState.get());
 	regCommandList(this->cState.get());
 	regCommandRemove(this->cState.get());
-	regCommandSearch(this->cState.get());
 	regCommandSet(this->cState.get());
 	regCommandLoad(this->cState.get());
 	regCommandSave(this->cState.get());

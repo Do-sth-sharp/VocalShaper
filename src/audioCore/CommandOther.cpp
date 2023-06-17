@@ -9,6 +9,14 @@ AUDIOCORE_FUNC(clearPlugin) {
 	return CommandFuncResult{ true, "Clear plugin list." };
 }
 
-void regCommandClear(lua_State* L) {
+AUDIOCORE_FUNC(searchPlugin) {
+	audioCore->clearPluginList();
+	audioCore->getPluginList();
+
+	return CommandFuncResult{ true, "Searching Audio Plugin..." };
+}
+
+void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, clearPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, searchPlugin);
 }

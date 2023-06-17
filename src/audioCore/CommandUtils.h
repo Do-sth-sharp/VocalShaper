@@ -86,11 +86,10 @@ protected:
 #define LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, n) LUA_ADD_AUDIOCORE_FUNC(L, #n, n)
 
 void regCommandAdd(lua_State* L);
-void regCommandClear(lua_State* L);
+void regCommandOther(lua_State* L);
 void regCommandEcho(lua_State* L);
 void regCommandList(lua_State* L);
 void regCommandRemove(lua_State* L);
-void regCommandSearch(lua_State* L);
 void regCommandSet(lua_State* L);
 void regCommandLoad(lua_State* L);
 void regCommandSave(lua_State* L);
