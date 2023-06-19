@@ -46,6 +46,7 @@ A JUCE-based(LUCE) Open Source DAW. **Under development, not released.**
 - MIDI IO
 - MIDI CC
 - MMC
+- Mackie Control (TODO)
 
 ## Get Source Code
 ### Windows
