@@ -98,6 +98,7 @@ public:
 	void play();
 	void stop();
 	void rewind();
+	void record(bool start);
 	void setPositon(double pos);
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const;
 

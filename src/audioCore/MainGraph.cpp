@@ -2,6 +2,7 @@
 
 #include "PlayPosition.h"
 #include "CloneableSourceManager.h"
+#include "AudioCore.h"
 
 MainGraph::MainGraph() {
 	/** The Main Audio IO Node */
@@ -102,6 +103,36 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 					[mes = m.getMessage(), hook = this->midiHook] {
 						hook(mes);
 					});
+			}
+		}
+	}
+
+	/** Transport MMC */
+	for (auto m : midi) {
+		auto mes = m.getMessage();
+		if (mes.isMidiMachineControlMessage()) {
+			switch (mes.getMidiMachineControlCommand())
+			{
+			case juce::MidiMessage::MidiMachineControlCommand::mmc_play:
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->play(); });
+				continue;
+			case juce::MidiMessage::MidiMachineControlCommand::mmc_pause:
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->stop(); });
+				continue;
+			case juce::MidiMessage::MidiMachineControlCommand::mmc_stop:
+				juce::MessageManager::callAsync([] {
+						AudioCore::getInstance()->stop();
+						AudioCore::getInstance()->rewind(); });
+				continue;
+			case juce::MidiMessage::MidiMachineControlCommand::mmc_rewind:
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->rewind(); });
+				continue;
+			case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStart:
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(true); });
+				continue;
+			case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStop:
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(false); });
+				continue;
 			}
 		}
 	}

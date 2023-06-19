@@ -459,6 +459,10 @@ void AudioCore::rewind() {
 	PlayPosition::getInstance()->transportRewind();
 }
 
+void AudioCore::record(bool start) {
+	/** TODO Transport Record */
+}
+
 void AudioCore::setPositon(double pos) {
 	PlayPosition::getInstance()->setPositionInSeconds(pos);
 }
