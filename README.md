@@ -57,3 +57,33 @@ git checkout develop
 git submodule update --init --recursive
 .\linkEnv.bat
 ```
+
+## Complie
+### Windows Debug (MSVC)
+```
+"%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
+set CC=cl
+set CXX=cl
+set ASM=cl
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -B out/build/x64-Debug .
+ninja -C out/build/x64-Debug -j 8 VocalShaper
+.\linkLibd.bat
+```
+
+### Windows Release (MSVC)
+```
+"%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
+set CC=cl
+set CXX=cl
+set ASM=cl
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -B out/build/x64-Release .
+ninja -C out/build/x64-Release -j 8 VocalShaper
+.\linkLib.bat
+```
+
+## Run
+### Windows
+```
+cd app
+VocalShaper
+```
