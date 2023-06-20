@@ -451,20 +451,37 @@ void AudioCore::play() {
 	PlayPosition::getInstance()->transportPlay(true);
 }
 
-void AudioCore::stop() {
+void AudioCore::pause() {
 	PlayPosition::getInstance()->transportPlay(false);
 }
 
+void AudioCore::stop() {
+	PlayPosition::getInstance()->transportPlay(false);
+	if (this->returnToStart) {
+		PlayPosition::getInstance()->setPositionInSeconds(this->playStartTime);
+	}
+}
+
 void AudioCore::rewind() {
+	this->playStartTime = 0;
 	PlayPosition::getInstance()->transportRewind();
 }
 
 void AudioCore::record(bool start) {
-	/** TODO Transport Record */
+	PlayPosition::getInstance()->transportRecord(start);
 }
 
 void AudioCore::setPositon(double pos) {
+	this->playStartTime = pos;
 	PlayPosition::getInstance()->setPositionInSeconds(pos);
+}
+
+void AudioCore::setReturnToPlayStartPosition(bool returnToStart) {
+	this->returnToStart = returnToStart;
+}
+
+bool AudioCore::getReturnToPlayStartPosition() const {
+	return this->returnToStart;
 }
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> AudioCore::getPosition() const {

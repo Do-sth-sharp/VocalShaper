@@ -117,12 +117,10 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 				juce::MessageManager::callAsync([] { AudioCore::getInstance()->play(); });
 				continue;
 			case juce::MidiMessage::MidiMachineControlCommand::mmc_pause:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->stop(); });
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->pause(); });
 				continue;
 			case juce::MidiMessage::MidiMachineControlCommand::mmc_stop:
-				juce::MessageManager::callAsync([] {
-						AudioCore::getInstance()->stop();
-						AudioCore::getInstance()->rewind(); });
+				juce::MessageManager::callAsync([] { AudioCore::getInstance()->stop(); });
 				continue;
 			case juce::MidiMessage::MidiMachineControlCommand::mmc_rewind:
 				juce::MessageManager::callAsync([] { AudioCore::getInstance()->rewind(); });

@@ -96,10 +96,13 @@ public:
 	int getSequencerSourceInstanceNum(int trackIndex) const;
 
 	void play();
+	void pause();
 	void stop();
 	void rewind();
 	void record(bool start);
 	void setPositon(double pos);
+	void setReturnToPlayStartPosition(bool returnToStart);
+	bool getReturnToPlayStartPosition() const;
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const;
 
 	/**
@@ -141,11 +144,14 @@ private:
 	std::unique_ptr<AudioPluginSearchThread> audioPluginSearchThread = nullptr;
 	std::unique_ptr<juce::AudioPlayHead> playHead = nullptr;
 
+	std::unique_ptr<AudioDeviceChangeListener> audioDeviceListener = nullptr;
+
+	bool returnToStart = true;
+	double playStartTime = 0;
+
 	friend class AudioDeviceChangeListener;
 	void initAudioDevice();
 	void updateAudioBuses();
-
-	std::unique_ptr<AudioDeviceChangeListener> audioDeviceListener = nullptr;
 
 public:
 	static AudioCore* getInstance();

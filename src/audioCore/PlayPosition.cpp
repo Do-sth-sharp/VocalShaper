@@ -27,11 +27,17 @@ bool PlayPosition::canControlTransport() {
 void PlayPosition::transportPlay(bool shouldStartPlaying) {
 	juce::ScopedWriteLock locker(this->lock);
 	this->position.setIsPlaying(shouldStartPlaying);
+	if (!shouldStartPlaying) {
+		this->position.setIsRecording(false);
+	}
 }
 
 void PlayPosition::transportRecord(bool shouldStartRecording) {
 	juce::ScopedWriteLock locker(this->lock);
 	this->position.setIsRecording(shouldStartRecording);
+	if (shouldStartRecording) {
+		this->position.setIsPlaying(true);
+	}
 }
 
 void PlayPosition::transportRewind() {
