@@ -11,10 +11,11 @@ void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double buf
 	juce::GenericScopedTryLock locker(this->lock);
 	if (locker.isLocked()) {
 		if (this->source && this->memorySource) {
-			this->memorySource->setNextReadPosition(dataDeviation * this->sourceSampleRate);
+			this->memorySource->setNextReadPosition(std::floor(dataDeviation * this->sourceSampleRate));
+			int startSample = (int)std::floor(bufferDeviation * this->getSampleRate());
 			this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
-				&buffer, (int)std::floor(bufferDeviation * this->getSampleRate()),
-					std::min(buffer.getNumSamples(), (int)std::ceil(length * this->getSampleRate()))});/**< Ceil then min with buffer size to ensure audio data fill the last point in buffer */
+				&buffer, startSample,
+					std::min(buffer.getNumSamples() - startSample, (int)std::ceil(length * this->getSampleRate()))});/**< Ceil then min with buffer size to ensure audio data fill the last point in buffer */
 		}
 	}
 }
