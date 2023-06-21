@@ -96,12 +96,19 @@ void PlayPosition::setPositionInQuarter(double time) {
 	this->setPositionInSeconds(this->toSecond(time * this->timeFormat));
 }
 
+void PlayPosition::setPositionInSamples(int64_t sampleNum) {
+	juce::ScopedWriteLock locker(this->lock);
+	this->position.setTimeInSamples(sampleNum);
+
+	this->updatePositionByTimeInSample();
+}
+
 void PlayPosition::next(int blockSize) {
 	juce::ScopedWriteLock locker(this->lock);
 	if (this->position.getIsPlaying()) {
-		double time = this->position.getTimeInSeconds().orFallback(0);
-		time += blockSize / this->sampleRate;
-		this->setPositionInSeconds(time);
+		uint64_t time = this->position.getTimeInSamples().orFallback(0);
+		time += blockSize;
+		this->setPositionInSamples(time);
 	}
 }
 
@@ -134,6 +141,17 @@ std::tuple<int, double> PlayPosition::toBar(double timeSecond, short /*timeForma
 void PlayPosition::updatePositionByTimeInSecond() {
 	double time = this->position.getTimeInSeconds().orFallback(0);
 	this->position.setTimeInSamples((int64_t)std::floor(time * this->sampleRate));
+	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
+
+	auto barInfo = this->toBar(time);
+	this->position.setBarCount(std::get<0>(barInfo));
+	this->position.setPpqPositionOfLastBarStart(std::get<1>(barInfo));
+}
+
+void PlayPosition::updatePositionByTimeInSample() {
+	uint64_t sample = this->position.getTimeInSamples().orFallback(0);
+	double time = sample / this->sampleRate;
+	this->position.setTimeInSeconds(time);
 	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
 
 	auto barInfo = this->toBar(time);

@@ -14,7 +14,7 @@ void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double buf
 			this->memorySource->setNextReadPosition(dataDeviation * this->sourceSampleRate);
 			this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
 				&buffer, (int)std::floor(bufferDeviation * this->getSampleRate()),
-					(int)std::floor(length * this->getSampleRate())});
+					std::min(buffer.getNumSamples(), (int)std::ceil(length * this->getSampleRate()))});/**< Ceil then min with buffer size to ensure audio data fill the last point in buffer */
 		}
 	}
 }

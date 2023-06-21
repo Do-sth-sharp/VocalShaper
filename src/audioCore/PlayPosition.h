@@ -23,6 +23,7 @@ public:
 	void setLoopPointsInQuarter(const std::tuple<double, double>& points);
 	void setPositionInSeconds(double time);
 	void setPositionInQuarter(double time);
+	void setPositionInSamples(int64_t sampleNum);
 	void next(int blockSize);
 
 	double toSecond(double timeTick) const;
@@ -40,6 +41,7 @@ private:
 	juce::ReadWriteLock lock;
 
 	void updatePositionByTimeInSecond();
+	void updatePositionByTimeInSample();
 
 public:
 	static PlayPosition* getInstance();
