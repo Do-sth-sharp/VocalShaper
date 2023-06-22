@@ -276,3 +276,12 @@ bool MainGraph::isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const 
 	{ {nodeID, this->midiChannelIndex}, {dstNodeID, this->midiChannelIndex} };
 	return this->midiSrc2InstrConnectionList.contains(connection);
 }
+
+void MainGraph::closeAllNote() {
+	for (auto& i : this->audioSourceNodeList) {
+		auto seqTrack = dynamic_cast<SeqSourceProcessor*>(i->getProcessor());
+		if (seqTrack) {
+			seqTrack->closeAllNote();
+		}
+	}
+}

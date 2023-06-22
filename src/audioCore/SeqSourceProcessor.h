@@ -14,6 +14,8 @@ public:
 	int getSeqNum() const;
 	const SourceList::SeqBlock getSeq(int index) const;
 
+	void closeAllNote();
+
 public:
 	const juce::String getName() const override { return "SeqSource"; };
 
@@ -41,6 +43,8 @@ public:
 private:
 	juce::AudioChannelSet audioChannels;
 	SourceList srcs;
+	std::set<std::tuple<int, int>> activeNoteSet;
+	std::atomic_bool noteCloseFlag = false;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)
 };

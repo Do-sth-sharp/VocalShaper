@@ -453,10 +453,12 @@ void AudioCore::play() {
 
 void AudioCore::pause() {
 	PlayPosition::getInstance()->transportPlay(false);
+	this->mainAudioGraph->closeAllNote();
 }
 
 void AudioCore::stop() {
 	PlayPosition::getInstance()->transportPlay(false);
+	this->mainAudioGraph->closeAllNote();
 	if (this->returnToStart) {
 		PlayPosition::getInstance()->setPositionInSeconds(this->playStartTime);
 	}
@@ -464,6 +466,7 @@ void AudioCore::stop() {
 
 void AudioCore::rewind() {
 	this->playStartTime = 0;
+	this->mainAudioGraph->closeAllNote();
 	PlayPosition::getInstance()->transportRewind();
 }
 
@@ -473,6 +476,7 @@ void AudioCore::record(bool start) {
 
 void AudioCore::setPositon(double pos) {
 	this->playStartTime = pos;
+	this->mainAudioGraph->closeAllNote();
 	PlayPosition::getInstance()->setPositionInSeconds(pos);
 }
 

@@ -28,6 +28,10 @@ const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
 	return this->srcs.get(index);
 }
 
+void SeqSourceProcessor::closeAllNote() {
+	this->noteCloseFlag = true;
+}
+
 void SeqSourceProcessor::prepareToPlay(
 	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {}
 
@@ -43,6 +47,16 @@ void SeqSourceProcessor::processBlock(
 
 	/** Clear MIDI Buffer */
 	midiMessages.clear();
+
+	/** Close Note */
+	if (this->noteCloseFlag) {
+		this->noteCloseFlag = false;
+
+		for (auto& i : this->activeNoteSet) {
+			midiMessages.addEvent(
+				juce::MidiMessage::noteOff(std::get<0>(i), std::get<1>(i)), 0);
+		}
+	}
 
 	/** Get Play Head */
 	auto playHead = dynamic_cast<PlayPosition*>(this->getPlayHead());
@@ -103,6 +117,17 @@ void SeqSourceProcessor::processBlock(
 					}
 				}
 			}
+		}
+	}
+
+	/** Set Note State */
+	for (auto i : midiMessages) {
+		auto mes = i.getMessage();
+		if (mes.isNoteOn(true)) {
+			this->activeNoteSet.insert({ mes.getChannel(), mes.getNoteNumber() });
+		}
+		else if (mes.isNoteOff(false)) {
+			this->activeNoteSet.erase({ mes.getChannel(), mes.getNoteNumber() });
 		}
 	}
 }

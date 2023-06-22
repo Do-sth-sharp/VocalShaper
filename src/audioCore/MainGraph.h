@@ -77,6 +77,8 @@ public:
 	 */
 	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook);
 
+	void closeAllNote();
+
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 
