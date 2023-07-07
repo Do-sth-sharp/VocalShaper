@@ -123,10 +123,10 @@ void SeqSourceProcessor::processBlock(
 	/** Set Note State */
 	for (auto i : midiMessages) {
 		auto mes = i.getMessage();
-		if (mes.isNoteOn(true)) {
+		if (mes.isNoteOn(false)) {
 			this->activeNoteSet.insert({ mes.getChannel(), mes.getNoteNumber() });
 		}
-		else if (mes.isNoteOff(false)) {
+		else if (mes.isNoteOff(true)) {
 			this->activeNoteSet.erase({ mes.getChannel(), mes.getNoteNumber() });
 		}
 	}
