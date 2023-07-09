@@ -51,6 +51,9 @@ AudioCore::AudioCore() {
 
 	/** Audio Plugin Manager */
 	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>();
+
+	/** Mackie Control Hub */
+	this->mackieHub = std::make_unique<MackieControlHub>();
 }
 
 AudioCore::~AudioCore() {

@@ -8,6 +8,7 @@
 #include "CloneableAudioSource.h"
 #include "CloneableMIDISource.h"
 #include "AudioIOList.h"
+#include "MackieControlHub.h"
 
 class AudioDeviceChangeListener;
 namespace audioCommand {
@@ -143,6 +144,7 @@ private:
 	std::unique_ptr<juce::Component> midiDebugger = nullptr;
 	std::unique_ptr<AudioPluginSearchThread> audioPluginSearchThread = nullptr;
 	std::unique_ptr<juce::AudioPlayHead> playHead = nullptr;
+	std::unique_ptr<MackieControlHub> mackieHub = nullptr;
 
 	std::unique_ptr<AudioDeviceChangeListener> audioDeviceListener = nullptr;
 
