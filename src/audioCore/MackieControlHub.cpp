@@ -122,12 +122,79 @@ int MackieControlHub::findOutputDevice(const juce::String& deviceIdentifier) con
 	return -1;
 }
 
-const juce::Array<juce::MidiDeviceInfo> MackieControlHub::getAvailableInputDevices() {
-	return juce::MidiInput::getAvailableDevices();
+juce::MidiInput* MackieControlHub::getInputDevice(int index) const {
+	juce::ScopedReadLock locker(this->deviceListLock);
+	if (index < 0 || index >= this->inputDevices.size()) { return nullptr; }
+
+	return std::get<0>(this->inputDevices.getReference(index)).get();
 }
 
-const juce::Array<juce::MidiDeviceInfo> MackieControlHub::getAvailableOutputDevices() {
-	return juce::MidiOutput::getAvailableDevices();
+juce::MidiOutput* MackieControlHub::getOutputDevice(int index) const {
+	juce::ScopedReadLock locker(this->deviceListLock);
+	if (index < 0 || index >= this->outputDevices.size()) { return nullptr; }
+
+	return std::get<0>(this->outputDevices.getReference(index)).get();
+}
+
+int MackieControlHub::getInputDeviceIndex(int index) const {
+	juce::ScopedReadLock locker(this->deviceListLock);
+	if (index < 0 || index >= this->inputDevices.size()) { return 0; }
+
+	return std::get<1>(this->inputDevices.getReference(index));
+}
+
+int MackieControlHub::getOutputDeviceIndex(int index) const {
+	juce::ScopedReadLock locker(this->deviceListLock);
+	if (index < 0 || index >= this->outputDevices.size()) { return 0; }
+
+	return std::get<1>(this->outputDevices.getReference(index));
+}
+
+bool MackieControlHub::setInputDeviceIndex(int index, int deviceIndex) {
+	juce::ScopedWriteLock locker(this->deviceListLock);
+	if (index < 0 || index >= this->inputDevices.size()) { return false; }
+
+	auto& [device, devIdx] = this->inputDevices.getReference(index);
+	devIdx = deviceIndex;
+	return true;
+}
+
+bool MackieControlHub::setOutputDeviceIndex(int index, int deviceIndex) {
+	juce::ScopedWriteLock locker(this->deviceListLock);
+	if (index < 0 || index >= this->outputDevices.size()) { return false; }
+
+	auto& [device, devIdx] = this->outputDevices.getReference(index);
+	devIdx = deviceIndex;
+	return true;
+}
+
+void MackieControlHub::removeUnavailableDevices(
+	const juce::Array<juce::MidiDeviceInfo>& inputDevices,
+	const juce::Array<juce::MidiDeviceInfo>& outputDeivces) {
+	/** Lock */
+	juce::ScopedWriteLock locker(this->deviceListLock);
+
+	/** Input */
+	for (int i = this->inputDevices.size() - 1; i >= 0; i--) {
+		auto& [device, devIdx] = this->inputDevices.getReference(i);
+
+		if (!inputDevices.contains(
+			juce::MidiDeviceInfo{device->getName(), device->getIdentifier()})) {
+			device->stop();
+			this->inputDevices.remove(i);
+		}
+	}
+
+	/** Output */
+	for (int i = this->outputDevices.size() - 1; i >= 0; i--) {
+		auto& [device, devIdx] = this->outputDevices.getReference(i);
+
+		if (!inputDevices.contains(
+			juce::MidiDeviceInfo{device->getName(), device->getIdentifier()})) {
+			device->stopBackgroundThread();
+			this->outputDevices.remove(i);
+		}
+	}
 }
 
 void MackieControlHub::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) {
