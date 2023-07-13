@@ -6,12 +6,14 @@ class MackieInputCallback;
 class MackieControlHub final : public juce::MidiInputCallback {
 public:
 	MackieControlHub() = default;
+	~MackieControlHub();
 
 	juce::MidiInput* openInputDevice(const juce::String& deviceIdentifier, int index = 0);
 	juce::MidiOutput* openOutputDevice(const juce::String& deviceIdentifier, int index = 0);
-
-	/** TODO Close Device */
-	/** TODO Find Device */
+	bool closeInputDevice(const juce::String& deviceIdentifier);
+	bool closeOutputDevice(const juce::String& deviceIdentifier);
+	int findInputDevice(const juce::String& deviceIdentifier) const;
+	int findOutputDevice(const juce::String& deviceIdentifier) const;
 	/** TODO Get Device */
 	/** TODO Set Device Index */
 	/** TODO Close Unavailable Devices */

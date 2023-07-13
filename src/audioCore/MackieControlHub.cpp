@@ -1,5 +1,19 @@
 #include "MackieControlHub.h"
 
+MackieControlHub::~MackieControlHub() {
+	juce::ScopedWriteLock locker(this->deviceListLock);
+
+	for (auto& [device, index] : this->inputDevices) {
+		device->stop();
+	}
+	for (auto& [device, index] : this->outputDevices) {
+		device->stopBackgroundThread();
+	}
+
+	this->inputDevices.clear();
+	this->outputDevices.clear();
+}
+
 juce::MidiInput* MackieControlHub::openInputDevice(const juce::String& deviceIdentifier, int index) {
 	/** Lock */
 	juce::ScopedWriteLock locker(this->deviceListLock);
@@ -17,6 +31,8 @@ juce::MidiInput* MackieControlHub::openInputDevice(const juce::String& deviceIde
 	if (ptrDevice) {
 		auto ptr = ptrDevice.get();
 		this->inputDevices.add(std::make_tuple(std::move(ptrDevice), index));
+
+		ptr->start();
 		return ptr;
 	}
 
@@ -40,10 +56,70 @@ juce::MidiOutput* MackieControlHub::openOutputDevice(const juce::String& deviceI
 	if (ptrDevice) {
 		auto ptr = ptrDevice.get();
 		this->outputDevices.add(std::make_tuple(std::move(ptrDevice), index));
+
+		ptr->startBackgroundThread();
 		return ptr;
 	}
 
 	return nullptr;
+}
+
+bool MackieControlHub::closeInputDevice(const juce::String& deviceIdentifier) {
+	/** Lock */
+	juce::ScopedWriteLock locker(this->deviceListLock);
+
+	/** Find Device */
+	auto deviceIndex = this->findInputDevice(deviceIdentifier);
+
+	/** Remove Device */
+	if (deviceIndex > -1) {
+		auto& [device, index] = this->inputDevices.getReference(deviceIndex);
+		device->stop();
+		this->inputDevices.remove(deviceIndex);
+		return true;
+	}
+
+	return false;
+}
+
+bool MackieControlHub::closeOutputDevice(const juce::String& deviceIdentifier) {
+	/** Lock */
+	juce::ScopedWriteLock locker(this->deviceListLock);
+
+	/** Find Device */
+	auto deviceIndex = this->findOutputDevice(deviceIdentifier);
+
+	/** Remove Device */
+	if (deviceIndex > -1) {
+		auto& [device, index] = this->outputDevices.getReference(deviceIndex);
+		device->stopBackgroundThread();
+		this->outputDevices.remove(deviceIndex);
+		return true;
+	}
+
+	return false;
+}
+
+int MackieControlHub::findInputDevice(const juce::String& deviceIdentifier) const {
+	juce::ScopedReadLock locker(this->deviceListLock);
+	for (int i = 0; i < this->inputDevices.size(); i++) {
+		auto& [device, index] = this->inputDevices.getReference(i);
+		if (device->getIdentifier() == deviceIdentifier) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int MackieControlHub::findOutputDevice(const juce::String& deviceIdentifier) const {
+	juce::ScopedReadLock locker(this->deviceListLock);
+	for (int i = 0; i < this->outputDevices.size(); i++) {
+		auto& [device, index] = this->outputDevices.getReference(i);
+		if (device->getIdentifier() == deviceIdentifier) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 const juce::Array<juce::MidiDeviceInfo> MackieControlHub::getAvailableInputDevices() {
