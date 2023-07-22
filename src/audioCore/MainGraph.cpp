@@ -13,10 +13,13 @@ MainGraph::MainGraph() {
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode));
 
-	/** The Main MIDI Input Node */
+	/** The Main MIDI IO Node */
 	this->midiInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
+	this->midiOutputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 }
 
 MainGraph::~MainGraph() {
@@ -56,6 +59,11 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 void MainGraph::setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook) {
 	juce::ScopedWriteLock locker(this->hookLock);
 	this->midiHook = hook;
+}
+
+void MainGraph::setMIDIOutput(juce::MidiOutput* output) {
+	juce::ScopedWriteLock locker(this->midiLock);
+	this->midiOutput = output;
 }
 
 void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
@@ -137,6 +145,14 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Process Audio Block */
 	this->juce::AudioProcessorGraph::processBlock(audio, midi);
+
+	/** MIDI Output */
+	{
+		juce::ScopedReadLock locker(this->midiLock);
+		if (this->midiOutput) {
+			this->midiOutput->sendBlockOfMessagesNow(midi);
+		}
+	}
 
 	/** Add Position */
 	PlayPosition::getInstance()->next(audio.getNumSamples());

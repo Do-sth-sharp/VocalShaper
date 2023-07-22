@@ -25,10 +25,13 @@ Track::Track(const juce::AudioChannelSet& type)
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode));
 
-	/** The Main MIDI Input Node Of The Track */
+	/** The Main MIDI IO Node Of The Track */
 	this->midiInputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
+	this->midiOutputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
 	/** Set Audio Input Node Channel Num */
 	juce::AudioProcessorGraph::BusesLayout inputLayout;
@@ -53,6 +56,10 @@ Track::Track(const juce::AudioChannelSet& type)
 	}
 	this->addConnection(
 		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->pluginDockNode->nodeID, this->midiChannelIndex} });
+
+	/** Connect MIDI IO Node */
+	this->addConnection(
+		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->midiOutputNode->nodeID, this->midiChannelIndex} });
 }
 
 bool Track::addAdditionalAudioBus() {

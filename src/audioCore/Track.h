@@ -35,7 +35,7 @@ public:
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
-	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
+	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioChannelSet audioChannels;
 
 	juce::AudioProcessorGraph::Node::Ptr pluginDockNode;

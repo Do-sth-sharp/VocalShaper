@@ -36,9 +36,25 @@ void MainGraph::removeTrack(int index) {
 	auto nodeID = ptrNode->nodeID;
 
 	/** Remove Input And Output Connections */
+	this->midiI2TrkConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
 	this->midiSrc2TrkConnectionList.removeIf(
 		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
 			if (element.destination.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+	this->midiTrk2OConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID) {
 				this->removeConnection(element);
 				return true;
 			}
@@ -247,6 +263,42 @@ void MainGraph::removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, 
 	this->audioTrk2TrkConnectionList.removeAllInstancesOf(connection);
 }
 
+void MainGraph::setMIDITrk2OConnection(int trackIndex) {
+	/** Limit Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Remove Current Connection */
+	this->removeMIDITrk2OConnection(trackIndex);
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+
+	/** Add Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, this->midiChannelIndex} ,
+		{this->midiOutputNode->nodeID, this->midiChannelIndex} };
+	this->addConnection(connection);
+	this->midiTrk2OConnectionList.add(connection);
+}
+
+void MainGraph::removeMIDITrk2OConnection(int trackIndex) {
+	/** Limit Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+
+	/** Remove Connection */
+	this->midiTrk2OConnectionList.removeIf(
+		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
+			if (element.source.nodeID == nodeID) {
+				this->removeConnection(element);
+				return true;
+			}
+			return false;
+		});
+}
+
 bool MainGraph::isMIDII2TrkConnected(int trackIndex) const {
 	/** Limit Index */
 	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return false; }
@@ -293,6 +345,19 @@ bool MainGraph::isAudioTrk2TrkConnected(int trackIndex, int dstTrackIndex, int s
 	juce::AudioProcessorGraph::Connection connection =
 	{ {nodeID, srcChannel}, {dstNodeID, dstChannel} };
 	return this->audioTrk2TrkConnectionList.contains(connection);
+}
+
+bool MainGraph::isMIDITrk2OConnected(int trackIndex) const {
+	/** Limit Index */
+	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return false; }
+
+	/** Get Node ID */
+	auto nodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
+
+	/** Find Connection */
+	juce::AudioProcessorGraph::Connection connection =
+	{ {nodeID, this->midiChannelIndex},{this->midiOutputNode->nodeID, this->midiChannelIndex} };
+	return this->midiTrk2OConnectionList.contains(connection);
 }
 
 MainGraph::TrackConnectionList MainGraph::getTrackInputFromTrackConnections(int index) {

@@ -202,6 +202,19 @@ AUDIOCORE_FUNC(removeMixerTrackMidiInput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(removeMixerTrackMidiOutput) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		graph->removeMIDITrk2OConnection(src);
+
+		result += juce::String(src) + " - " + "[MIDI Output]" + " (Removed)\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(removeSource) {
 	juce::String result;
 
@@ -300,6 +313,7 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackMidiOutputToMixer);

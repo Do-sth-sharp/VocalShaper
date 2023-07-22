@@ -44,3 +44,6 @@ AC.setEffectMIDICCIntercept(0, 0, true);
 AC.echoEffectParamCC(0, 0, 0);
 AC.echoEffectCCParam(0, 0, 17);
 AC.removeEffectParamCCConnection(0, 0, 17);
+
+-- Track MIDI Output
+AC.addMixerTrackMidiOutput(0);

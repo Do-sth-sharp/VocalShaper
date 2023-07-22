@@ -548,6 +548,10 @@ void AudioCore::updateAudioBuses() {
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
 
+		/** Set MIDI Output */
+		auto midiOutput = this->audioDeviceManager->getDefaultMidiOutput();
+		mainGraph->setMIDIOutput(midiOutput);
+
 		/** Change Main Graph SampleRate And Set Play Head */
 		mainGraph->setPlayHead(PlayPosition::getInstance());
 		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);

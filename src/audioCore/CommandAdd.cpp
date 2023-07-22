@@ -292,6 +292,19 @@ AUDIOCORE_FUNC(addMixerTrackMidiInput) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addMixerTrackMidiOutput) {
+	juce::String result;
+
+	if (auto graph = audioCore->getGraph()) {
+		int src = luaL_checkinteger(L, 1);
+		graph->setMIDITrk2OConnection(src);
+
+		result += juce::String(src) + " - " + "[MIDI Output]" + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(addAudioSource) {
 	juce::String result;
 
@@ -405,6 +418,7 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiInput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addAudioSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMIDISource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrack);

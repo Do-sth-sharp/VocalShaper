@@ -46,6 +46,8 @@ public:
 	void removeAudioTrk2OConnection(int trackIndex, int srcChannel, int dstChannel);
 	void setAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
 	void removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
+	void setMIDITrk2OConnection(int trackIndex);
+	void removeMIDITrk2OConnection(int trackIndex);
 
 	bool isMIDII2InstrConnected(int instrIndex) const;
 	bool isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const;
@@ -56,6 +58,7 @@ public:
 	bool isAudioI2TrkConnected(int trackIndex, int srcChannel, int dstChannel) const;
 	bool isAudioTrk2OConnected(int trackIndex, int srcChannel, int dstChannel) const;
 	bool isAudioTrk2TrkConnected(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) const;
+	bool isMIDITrk2OConnected(int trackIndex) const;
 
 	using TrackConnection = std::tuple<int, int, int, int>;
 	using TrackConnectionList = juce::Array<TrackConnection>;
@@ -77,6 +80,8 @@ public:
 	 */
 	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook);
 
+	void setMIDIOutput(juce::MidiOutput* output);
+
 	void closeAllNote();
 
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -84,7 +89,7 @@ public:
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
-	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
+	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> audioSourceNodeList;
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> instrumentNodeList;
@@ -99,9 +104,13 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Connection> audioI2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2OConnectionList;
+	juce::Array<juce::AudioProcessorGraph::Connection> midiTrk2OConnectionList;
 
 	std::function<void(const juce::MidiMessage&)> midiHook;
 	juce::ReadWriteLock hookLock;
+
+	juce::MidiOutput* midiOutput = nullptr;
+	juce::ReadWriteLock midiLock;
 
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
