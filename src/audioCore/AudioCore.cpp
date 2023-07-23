@@ -29,9 +29,8 @@ AudioCore::AudioCore() {
 	/** Main Graph Player */
 	this->mainGraphPlayer = std::make_unique<juce::AudioProcessorPlayer>();
 
-	/** Audio Device Listener */
-	this->audioDeviceListener = std::make_unique<AudioDeviceChangeListener>(this);
-	this->audioDeviceManager->addChangeListener(this->audioDeviceListener.get());
+	/** Mackie Control Hub */
+	this->mackieHub = std::make_unique<MackieControlHub>();
 
 	/** Audio Debug */
 	this->audioDebugger = std::make_unique<AudioDebugger>(this);
@@ -46,14 +45,15 @@ AudioCore::AudioCore() {
 			}
 		});
 
-	/** Init Audio Device */
-	this->initAudioDevice();
-
 	/** Audio Plugin Manager */
 	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>();
 
-	/** Mackie Control Hub */
-	this->mackieHub = std::make_unique<MackieControlHub>();
+	/** Audio Device Listener */
+	this->audioDeviceListener = std::make_unique<AudioDeviceChangeListener>(this);
+	this->audioDeviceManager->addChangeListener(this->audioDeviceListener.get());
+
+	/** Init Audio Device */
+	this->initAudioDevice();
 }
 
 AudioCore::~AudioCore() {
@@ -523,6 +523,10 @@ MainGraph* AudioCore::getGraph() const {
 	return this->mainAudioGraph.get();
 }
 
+MackieControlHub* AudioCore::getMackie() const {
+	return this->mackieHub.get();
+}
+
 void AudioCore::initAudioDevice() {
 	/** Init With Default Device */
 	this->audioDeviceManager->initialise(1, 2, nullptr, true);
@@ -557,7 +561,7 @@ void AudioCore::updateAudioBuses() {
 		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);
 	}
 
-	/* Add MIDI Callback  */
+	/**   Add MIDI Callback  */
 	{
 		auto midiInputDevice = juce::MidiInput::getAvailableDevices();
 		for (auto& i : midiInputDevice) {
@@ -570,6 +574,13 @@ void AudioCore::updateAudioBuses() {
 					i.identifier, this->mainGraphPlayer.get());
 			}
 		}
+	}
+
+	/** Update Mackie Control Devices */
+	{
+		auto input = juce::MidiInput::getAvailableDevices();
+		auto output = juce::MidiOutput::getAvailableDevices();
+		this->mackieHub->removeUnavailableDevices(input, output);
 	}
 }
 

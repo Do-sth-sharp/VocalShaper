@@ -133,6 +133,7 @@ public:
 	void removeFromPluginSearchPath(const juce::String& path) const;
 
 	MainGraph* getGraph() const;
+	MackieControlHub* getMackie() const;
 
 private:
 	friend class AudioDebugger;
