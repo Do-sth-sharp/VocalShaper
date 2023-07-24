@@ -3,6 +3,7 @@
 #include "CloneableSourceManager.h"
 #include "CloneableAudioSource.h"
 #include "CloneableMIDISource.h"
+#include "CloneableSynthSource.h"
 
 SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
@@ -100,6 +101,13 @@ void SeqSourceProcessor::processBlock(
 
 					if (hotEndTime > hotStartTime) {
 						if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+							/** Copy Audio Data */
+							p->readData(buffer,
+								hotStartTime - startTime,
+								hotStartTime - (std::get<0>(block) + std::get<2>(block)),
+								hotEndTime - hotStartTime);
+						}
+						else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
 							/** Copy Audio Data */
 							p->readData(buffer,
 								hotStartTime - startTime,
