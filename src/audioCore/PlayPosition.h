@@ -2,11 +2,10 @@
 
 #include <JuceHeader.h>
 
-class PlayPosition final : public juce::AudioPlayHead,
-	private juce::DeletedAtShutdown {
+class MovablePlayHead : public juce::AudioPlayHead {
 public:
-	PlayPosition() = default;
-	~PlayPosition()override = default;
+	MovablePlayHead() = default;
+	~MovablePlayHead() override = default;
 
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const override;
 	const juce::ReadWriteLock& getLock() const;
@@ -33,7 +32,9 @@ public:
 	double toTick(double timeSecond, short timeFormat) const;
 	std::tuple<int, double> toBar(double timeSecond, short timeFormat) const;
 
-private:
+	juce::MidiMessageSequence& getTempoSequence();
+
+protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
 	juce::MidiMessageSequence tempos;
 	std::atomic_short timeFormat = 480;
@@ -42,6 +43,16 @@ private:
 
 	void updatePositionByTimeInSecond();
 	void updatePositionByTimeInSample();
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MovablePlayHead)
+};
+
+class PlayPosition final : public MovablePlayHead,
+	private juce::DeletedAtShutdown {
+public:
+	PlayPosition() = default;
+	~PlayPosition() override = default;
 
 public:
 	static PlayPosition* getInstance();

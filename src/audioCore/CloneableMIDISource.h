@@ -23,7 +23,5 @@ private:
 	juce::MidiFile buffer;
 	juce::ReadWriteLock lock;
 
-	static void convertSecondsToTicks(juce::MidiFile& file);
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableMIDISource)
 };

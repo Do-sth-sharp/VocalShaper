@@ -2,6 +2,11 @@
 
 #include "Utils.h"
 
+CloneableSynthSource::CloneableSynthSource()
+    : CloneableSource() {
+    this->synthThread = std::make_unique<SynthRenderThread>(this);
+}
+
 int CloneableSynthSource::getTrackNum() const {
     return this->buffer.getNumTracks();
 }
@@ -30,18 +35,35 @@ int CloneableSynthSource::getChannelNum() const {
     return this->audioBuffer.getNumChannels();
 }
 
+void CloneableSynthSource::setSynthesizer(
+    std::unique_ptr<juce::AudioPluginInstance> synthesizer) {
+    /** Stop Render */
+    this->synthThread->stopThread(3000);
+
+    this->synthesizer = std::move(synthesizer);
+}
+
+void CloneableSynthSource::stopSynth() {
+    this->synthThread->stopThread(3000);
+}
+
 void CloneableSynthSource::synth() {
+    /** Stop Render */
+    this->synthThread->stopThread(3000);
+
     /** Lock Buffer */
     juce::ScopedReadLock locker(this->lock);
     juce::GenericScopedLock audioLocker(this->audioLock);
 
     /** Prepare Audio Buffer */
     this->sourceSampleRate = this->getSampleRate();
+    this->sampleRateChanged();
     this->audioBuffer.setSize(
         this->audioChannels, this->getLength() * this->sourceSampleRate,
         false, true, true);
 
-    /** TODO Synth */
+    /** Start Render */
+    this->synthThread->startThread();
 }
 
 bool CloneableSynthSource::clone(const CloneableSource* src) {

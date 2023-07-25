@@ -9,6 +9,8 @@ namespace utils {
 	std::tuple<int, int> getChannelIndexAndNumOfBus(
 		const juce::AudioProcessor* processor, int busIndex, bool isInput);
 
+	void convertSecondsToTicks(juce::MidiFile& file);
+
 	double convertSecondsToTicks(double time,
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);

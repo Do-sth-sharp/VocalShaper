@@ -25,6 +25,27 @@ namespace utils {
 		return std::make_tuple(index, num);
 	}
 
+	void convertSecondsToTicks(juce::MidiFile& file) {
+		/** Get Tempo Events */
+		juce::MidiMessageSequence tempoSeq;
+		file.findAllTempoEvents(tempoSeq);
+		file.findAllTimeSigEvents(tempoSeq);
+
+		auto timeFormat = file.getTimeFormat();
+		if (timeFormat != 0)
+		{
+			for (int i = 0; i < file.getNumTracks(); i++) {
+				if (auto track = file.getTrack(i)) {
+					for (int j = track->getNumEvents(); --j >= 0;)
+					{
+						auto& m = track->getEventPointer(j)->message;
+						m.setTimeStamp(utils::convertSecondsToTicks(m.getTimeStamp(), tempoSeq, timeFormat));
+					}
+				}
+			}
+		}
+	}
+
 	double convertSecondsToTicks(double time,
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat) {

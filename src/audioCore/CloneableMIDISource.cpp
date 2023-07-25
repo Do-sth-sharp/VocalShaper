@@ -72,7 +72,7 @@ bool CloneableMIDISource::save(const juce::File& file) const {
     /** Copy Data */
     juce::ScopedWriteLock locker(this->lock);
     juce::MidiFile midiFile{ this->buffer };
-    CloneableMIDISource::convertSecondsToTicks(midiFile);
+    utils::convertSecondsToTicks(midiFile);
 
 	/** Write MIDI File */
 	return midiFile.writeTo(stream);
@@ -83,25 +83,4 @@ double CloneableMIDISource::getLength() const {
 
 	/** Get Time In Seconds */
     return this->buffer.getLastTimestamp();
-}
-
-void CloneableMIDISource::convertSecondsToTicks(juce::MidiFile& file) {
-    /** Get Tempo Events */
-    juce::MidiMessageSequence tempoSeq;
-    file.findAllTempoEvents(tempoSeq);
-    file.findAllTimeSigEvents(tempoSeq);
-
-    auto timeFormat = file.getTimeFormat();
-    if (timeFormat != 0)
-    {
-        for (int i = 0; i < file.getNumTracks(); i++) {
-            if (auto track = file.getTrack(i)) {
-                for (int j = track->getNumEvents(); --j >= 0;)
-                {
-                    auto& m = track->getEventPointer(j)->message;
-                    m.setTimeStamp(utils::convertSecondsToTicks(m.getTimeStamp(), tempoSeq, timeFormat));
-                }
-            }
-        }
-    }
 }

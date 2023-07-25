@@ -2,10 +2,11 @@
 
 #include <JuceHeader.h>
 #include "CloneableSource.h"
+#include "SynthRenderThread.h"
 
 class CloneableSynthSource final : public CloneableSource {
 public:
-	CloneableSynthSource() = default;
+	CloneableSynthSource();
 	~CloneableSynthSource() override = default;
 
 	int getTrackNum() const;
@@ -15,6 +16,8 @@ public:
 		double dataDeviation, double length) const;
 	int getChannelNum() const;
 
+	void setSynthesizer(std::unique_ptr<juce::AudioPluginInstance> synthesizer);
+	void stopSynth();
 	void synth();
 
 private:
@@ -36,6 +39,10 @@ private:
 
 	double tailTime = 2;
 	const int audioChannels = 1;
+
+	friend class SynthRenderThread;
+	std::unique_ptr<SynthRenderThread> synthThread = nullptr;
+	std::unique_ptr<juce::AudioPluginInstance> synthesizer = nullptr;
 
 	static void convertSecondsToTicks(juce::MidiFile& file);
 
