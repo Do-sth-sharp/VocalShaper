@@ -19,6 +19,7 @@ void SynthRenderThread::run() {
 	if (!parent->synthesizer) { return; }
 	double sampleRate = parent->getSourceSampleRate();
 	int bufferSize = parent->getBufferSize();
+	int channelNum = parent->audioBuffer.getNumChannels();
 	parent->synthesizer->prepareToPlay(sampleRate, bufferSize);
 
 	/** Get MIDI Data */
@@ -39,11 +40,43 @@ void SynthRenderThread::run() {
 
 	/** Render Audio Data */
 	double audioLength = parent->getLength();
-	int clipSize = (audioLength * sampleRate) / bufferSize;
-	for (int i = 0; !this->threadShouldExit() && (i <= clipSize); i++) {
-		/** TODO Get MIDI Data */
-		/** TODO Call Process Block */
-		/** TODO Set Play Head */
+	playHead->transportPlay(true);
+	int clipNum = (audioLength * sampleRate) / bufferSize;
+	for (int i = 0; !this->threadShouldExit() && (i <= clipNum); i++) {
+		/** Clip Time */
+		auto playPosition = playHead->getPosition();
+		double startTime = playPosition->getTimeInSeconds().orFallback(0);
+		double endTime = startTime + bufferSize / sampleRate;
+		int64_t startPos = playPosition->getTimeInSamples().orFallback(0);
+
+		/** Get MIDI Data */
+		juce::MidiMessageSequence midiMessages;
+		for (int j = 0; j < midiData.getNumTracks(); j++) {
+			auto track = midiData.getTrack(j);
+			if (track) {
+				midiMessages.addSequence(midiMessages, 0, startTime, endTime);
+			}
+		}
+		juce::MidiBuffer midiBuffer;
+		for (auto j : midiMessages) {
+			auto& message = j->message;
+			double time = message.getTimeStamp();
+			midiBuffer.addEvent(message, time * sampleRate);
+		}
+
+		/** Call Process Block */
+		juce::AudioBuffer<float> audioBuffer(channelNum, bufferSize);
+		parent->synthesizer->processBlock(audioBuffer, midiBuffer);
+		
+		/** Copy Audio Data */
+		for (int j = 0; j < channelNum; j++) {
+			parent->audioBuffer.copyFrom(
+				j, startPos, audioBuffer.getReadPointer(j),
+				(i == (clipNum - 1)) ? ((uint64_t)(audioLength * sampleRate) % clipNum) : bufferSize);
+		}
+
+		/** Set Play Head */
+		playHead->next(bufferSize);
 	}
 
 	/** Reset Play Head */
