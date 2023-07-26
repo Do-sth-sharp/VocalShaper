@@ -16,3 +16,6 @@
 [submodule "libMackieControl"]
 	path = libMackieControl
 	url = https://github.com/Do-sth-sharp/libMackieControl.git
+[submodule "SynthEngineDemo"]
+	path = SynthEngineDemo
+	url = https://github.com/Do-sth-sharp/SynthEngineDemo.git

@@ -31,7 +31,10 @@ set (VST_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst2-sdk-for-vst3sdk")
 set (VST3_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst3sdk")
 set (ARA_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ARA_SDK")
 
+set (SYNTH_ENGINE_DEMO_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/app/synth-engines")
+
 add_subdirectory (LUCE-cpp)
+add_subdirectory (SynthEngineDemo)
 
 # Mackie Control
 set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
@@ -55,6 +58,6 @@ add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC})
 target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH})
 target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1")
 target_link_libraries (VocalShaper PRIVATE libLUCE)
-add_dependencies (VocalShaper libLUCE PluginSearcher)
+add_dependencies (VocalShaper libLUCE PluginSearcher SynthEngineDemo)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
