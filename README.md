@@ -13,7 +13,6 @@ A JUCE-based(LUCE) Open Source DAW. **Under development, not released.**
 - VST3
 - LV2
 - AU (TODO)
-- ARA
 
 ### Audio Drivers
 - WASAPI

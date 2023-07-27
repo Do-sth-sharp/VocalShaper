@@ -10,9 +10,6 @@
 [submodule "vst2-sdk-for-vst3sdk"]
 	path = vst2-sdk-for-vst3sdk
 	url = https://github.com/Do-sth-sharp/vst2-sdk-for-vst3sdk.git
-[submodule "ARA_SDK"]
-	path = ARA_SDK
-	url = https://github.com/Celemony/ARA_SDK.git
 [submodule "libMackieControl"]
 	path = libMackieControl
 	url = https://github.com/Do-sth-sharp/libMackieControl.git

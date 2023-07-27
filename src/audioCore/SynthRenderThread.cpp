@@ -79,6 +79,9 @@ void SynthRenderThread::run() {
 		playHead->next(bufferSize);
 	}
 
+	/** Release Source */
+	parent->synthesizer->releaseResources();
+
 	/** Reset Play Head */
 	parent->synthesizer->setPlayHead(nullptr);
 }
