@@ -16,3 +16,6 @@
 [submodule "SynthEngineDemo"]
 	path = SynthEngineDemo
 	url = https://github.com/Do-sth-sharp/SynthEngineDemo.git
+[submodule "libDMDA"]
+	path = libDMDA
+	url = https://github.com/Do-sth-sharp/libDMDA.git

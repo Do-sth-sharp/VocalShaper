@@ -39,6 +39,10 @@ add_subdirectory (SynthEngineDemo)
 set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
 file (GLOB_RECURSE MACKIECONTROL_SRC "${MACKIECONTROL_SRC_PATH}/*.cpp")
 
+# DMDA
+set (DMDA_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libDMDA")
+set (DMDA_SRC "${DMDA_SRC_PATH}/DMDA.cpp")
+
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
@@ -53,8 +57,8 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMA
 
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC "./src/*.cpp" "./src/*.rc")
-add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC})
-target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH})
+add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
+target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH})
 target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1")
 target_link_libraries (VocalShaper PRIVATE libLUCE)
 add_dependencies (VocalShaper libLUCE PluginSearcher SynthEngineDemo)

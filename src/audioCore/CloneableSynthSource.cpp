@@ -1,5 +1,6 @@
 #include "CloneableSynthSource.h"
 
+#include <DMDA.h>
 #include "Utils.h"
 
 CloneableSynthSource::CloneableSynthSource()
@@ -41,6 +42,11 @@ void CloneableSynthSource::setSynthesizer(
     this->synthThread->stopThread(3000);
 
     this->synthesizer = std::move(synthesizer);
+
+    /** DMDA Hand Shake */
+    DMDA::PluginHandler handShakeHandler(
+        [](DMDA::Context* context) { context->handShake(); });
+    this->synthesizer->getExtensions(handShakeHandler);
 }
 
 void CloneableSynthSource::stopSynth() {
