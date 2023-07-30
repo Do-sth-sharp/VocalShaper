@@ -38,7 +38,15 @@ void SynthRenderThread::run() {
 	midiData.findAllTimeSigEvents(playHead->getTempoSequence());
 	parent->synthesizer->setPlayHead(playHead.get());
 
-	/** TODO DMDA Update Context Data */
+	/** DMDA Update Context Data */
+	DMDA::PluginHandler contextDataHandler(
+		[&midiData](DMDA::Context* context) { 
+			if (auto ptrContext = dynamic_cast<DMDA::MidiFileContext*>(context)) {
+				juce::ScopedWriteLock locker(ptrContext->getLock());
+				ptrContext->getData() = midiData;
+			}
+		});
+	parent->synthesizer->getExtensions(contextDataHandler);
 
 	/** Render Audio Data */
 	double audioLength = parent->getLength();
