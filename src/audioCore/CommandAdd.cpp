@@ -327,6 +327,17 @@ AUDIOCORE_FUNC(addMIDISource) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addSynthSource) {
+	juce::String result;
+
+	if (auto manager = CloneableSourceManager::getInstance()) {
+		manager->addSource(std::unique_ptr<CloneableSource>(new CloneableSynthSource));
+		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(addSequencerTrack) {
 	juce::String result;
 
@@ -421,6 +432,7 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addAudioSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMIDISource);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSynthSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToMixer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToInstr);

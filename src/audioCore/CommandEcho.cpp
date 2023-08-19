@@ -446,6 +446,12 @@ AUDIOCORE_FUNC(echoSource) {
 				result += "Type: MIDI\n";
 				result += "Track Num: " + juce::String(ptr->getTrackNum()) + "\n";
 			}
+			else if (auto ptr = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+				result += "Type: Synth\n";
+				result += "Source SampleRate: " + juce::String(ptr->getSourceSampleRate()) + "\n";
+				result += "Channel Num: " + juce::String(ptr->getChannelNum()) + "\n";
+				result += "Track Num: " + juce::String(ptr->getTrackNum()) + "\n";
+			}
 			else {
 				result += "Type: Unknown\n";
 			}

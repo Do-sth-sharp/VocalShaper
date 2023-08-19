@@ -17,9 +17,14 @@ AC.setSequencerTrackBypass(0, false);
 -- Add Source
 AC.addAudioSource();
 AC.addMIDISource();
+AC.addSynthSource();
 
 -- Remove Source
 AC.removeSource(0);
+
+-- Get Source Info
+AC.echoSourceNum();
+AC.echoSource(0);
 
 -- Load Source
 AC.loadSource(0, "./test.wav");
