@@ -36,24 +36,19 @@ void PluginLoadThread::run() {
 			this->list.pop();
 		}
 
-		/** Load Plugin */
+		/** Load Plugin Async */
 		auto& [pluginDescription, callback, sampleRate, blockSize] = task;
-		juce::String errorMessage;
-		auto pluginInstance = this->pluginFormatManager->createPluginInstance(
-			pluginDescription, sampleRate, blockSize, errorMessage);
+		auto asyncCallback =
+			[callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
+			if (p) {
+				callback(std::move(p));
+				return;
+			}
 
-		/** Error Message */
-		if (!pluginInstance) {
 			/** Handle Error */
-			continue;
-		}
-
-		/** Invoke Callback */
-		auto instanceHandler = [callback, instance =
-			std::shared_ptr<juce::AudioPluginInstance>(pluginInstance.release())] () mutable {
-			callback(std::unique_ptr<juce::AudioPluginInstance>(instance.get()));
-			instance.reset();
+			jassertfalse;
 		};
-		juce::MessageManager::callAsync(instanceHandler);
+		this->pluginFormatManager->createPluginInstanceAsync(
+			pluginDescription, sampleRate, blockSize, asyncCallback);
 	}
 }
