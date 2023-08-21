@@ -22,6 +22,7 @@ private:
 	juce::CriticalSection lock;
 
 	std::unique_ptr<juce::AudioPluginFormatManager> pluginFormatManager;
+	std::unique_ptr<juce::MessageListener> messageHelper = nullptr;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginLoadThread)
 };
