@@ -13,7 +13,7 @@ public:
 		const PluginLoadCallback& callback);
 
 private:
-	std::unique_ptr<juce::AudioPluginFormatManager> pluginFormatManager;
+	std::unique_ptr<PluginLoadThread> loadThread = nullptr;
 
 public:
 	static PluginLoader* getInstance();

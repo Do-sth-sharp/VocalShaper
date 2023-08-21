@@ -3,8 +3,7 @@
 #include "Utils.h"
 
 PluginLoader::PluginLoader() {
-	this->pluginFormatManager = std::make_unique<juce::AudioPluginFormatManager>();
-	this->pluginFormatManager->addDefaultFormats();
+	this->loadThread = std::make_unique<PluginLoadThread>();
 }
 
 void PluginLoader::loadPlugin(
@@ -19,21 +18,8 @@ void PluginLoader::loadPlugin(
 	double sampleRate = mainGraph->getSampleRate();
 	int bufferSize = mainGraph->getBlockSize();
 
-	/** Create Callback */
-	auto asyncCallback =
-		[callback] (std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& e) {
-		if (p) {
-			callback(std::move(p));
-			return;
-		}
-
-		/** Load Plugin Error */
-		UNUSED(e);
-		jassertfalse;
-	};
-
-	/** Create Instance */
-	this->pluginFormatManager->createPluginInstanceAsync(pluginInfo, sampleRate, bufferSize, asyncCallback);
+	/** Create Task */
+	this->loadThread->load(pluginInfo, callback, sampleRate, bufferSize);
 }
 
 PluginLoader* PluginLoader::getInstance() {
