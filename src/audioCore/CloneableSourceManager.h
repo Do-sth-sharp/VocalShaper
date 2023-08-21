@@ -24,6 +24,11 @@ public:
 	int getSourceNum() const;
 	const juce::CriticalSection& getLock() const;
 
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool setSourceSynthesizer(int index, const juce::String& identifier);
+
 	void prepareToPlay(double sampleRate, int bufferSize);
 
 private:

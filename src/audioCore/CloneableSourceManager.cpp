@@ -1,5 +1,7 @@
 #include "CloneableSourceManager.h"
 #include "AudioIOList.h"
+#include "AudioCore.h"
+#include "PluginLoader.h"
 
 bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
 	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
@@ -38,6 +40,30 @@ int CloneableSourceManager::getSourceNum() const {
 
 const juce::CriticalSection& CloneableSourceManager::getLock() const {
 	return this->sourceList.getLock();
+}
+
+bool CloneableSourceManager::setSourceSynthesizer(
+	int index, const juce::String& identifier) {
+	auto source = this->getSource(index);
+	if (!dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+		return false;
+	}
+
+	if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
+		auto loadCallback =
+			[index, source](std::unique_ptr<juce::AudioPluginInstance> ptr) {
+			if (ptr) {
+				if (auto src =
+					dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+					src->setSynthesizer(std::move(ptr));
+				}
+			}
+		};
+
+		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
+		return true;
+	}
+	return false;
 }
 
 void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
