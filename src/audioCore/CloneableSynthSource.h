@@ -17,6 +17,7 @@ public:
 	int getChannelNum() const;
 
 	void setSynthesizer(std::unique_ptr<juce::AudioPluginInstance> synthesizer);
+	const juce::String getSynthesizerName() const;
 	void stopSynth();
 	void synth();
 

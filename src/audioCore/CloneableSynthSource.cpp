@@ -49,6 +49,13 @@ void CloneableSynthSource::setSynthesizer(
     this->synthesizer->getExtensions(handShakeHandler);
 }
 
+const juce::String CloneableSynthSource::getSynthesizerName() const {
+    if (this->synthesizer) {
+        return this->synthesizer->getName();
+    }
+    return juce::String{};
+}
+
 void CloneableSynthSource::stopSynth() {
     this->synthThread->stopThread(3000);
 }

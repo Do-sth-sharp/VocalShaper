@@ -451,6 +451,7 @@ AUDIOCORE_FUNC(echoSource) {
 				result += "Source SampleRate: " + juce::String(ptr->getSourceSampleRate()) + "\n";
 				result += "Channel Num: " + juce::String(ptr->getChannelNum()) + "\n";
 				result += "Track Num: " + juce::String(ptr->getTrackNum()) + "\n";
+				result += "Synthesizer: " + ptr->getSynthesizerName() + "\n";
 			}
 			else {
 				result += "Type: Unknown\n";
