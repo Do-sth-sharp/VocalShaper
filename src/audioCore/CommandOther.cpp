@@ -81,6 +81,20 @@ AUDIOCORE_FUNC(stopRecord) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(synthSource) {
+	juce::String result;
+
+	int srcIndex = luaL_checkinteger(L, 1);
+	if (CloneableSourceManager::getInstance()->synthSource(srcIndex)) {
+		result += "Start synth source: [" + juce::String(srcIndex) + "]\n";
+	}
+	else {
+		result += "Can't start synth source: [" + juce::String(srcIndex) + "]\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, clearPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, searchPlugin);
@@ -90,4 +104,5 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, rewind);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, startRecord);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, stopRecord);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, synthSource);
 }

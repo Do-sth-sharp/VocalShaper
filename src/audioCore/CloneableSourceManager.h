@@ -28,6 +28,10 @@ public:
 	* @attention	You must call this from message thread.
 	*/
 	bool setSourceSynthesizer(int index, const juce::String& identifier);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool synthSource(int index);
 
 	void prepareToPlay(double sampleRate, int bufferSize);
 

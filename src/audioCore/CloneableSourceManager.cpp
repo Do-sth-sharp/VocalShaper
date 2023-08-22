@@ -66,6 +66,16 @@ bool CloneableSourceManager::setSourceSynthesizer(
 	return false;
 }
 
+bool CloneableSourceManager::synthSource(int index) {
+	auto source = this->getSource(index);
+	if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+		src->synth();
+		return true;
+	}
+
+	return false;
+}
+
 void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
 	juce::GenericScopedLock locker(this->getLock());
 	this->sampleRate = sampleRate;
