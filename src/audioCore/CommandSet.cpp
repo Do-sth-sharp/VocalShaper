@@ -457,6 +457,21 @@ AUDIOCORE_FUNC(setReturnToStart) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(setSourceSynthesizer) {
+	juce::String result;
+
+	int srcIndex = luaL_checkinteger(L, 1);
+	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 2));
+	if (CloneableSourceManager::getInstance()->setSourceSynthesizer(srcIndex, pid)) {
+		result += "Set synthesizer: [" + juce::String(srcIndex) + "] " + pid + "\n";
+	}
+	else {
+		result += "Can't set synthesizer: [" + juce::String(srcIndex) + "] " + pid + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -485,4 +500,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setPlayPosition);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setReturnToStart);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSourceSynthesizer);
 }

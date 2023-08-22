@@ -34,6 +34,12 @@ AC.loadSourceAsync(0, "./test.wav");
 AC.saveSource(0, "./test.wav");
 AC.saveSourceAsync(0, "./test.wav");
 
+-- Set Synthesizer
+AC.setSourceSynthesizer(0, "VST3-SynthEngineDemo-768e251b-8e107a81");
+
+-- Synth
+AC.synth(0);
+
 -- Add Instance
 AC.addSequencerSourceInstance(0, 0, 0, 10, 0);
 
