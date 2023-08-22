@@ -210,9 +210,12 @@ AUDIOCORE_FUNC(addEffect) {
 	int trackIndex = luaL_checkinteger(L, 1);
 	int effectIndex = luaL_checkinteger(L, 2);
 	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 3));
-	AudioCore::getInstance()->addEffect(pid, trackIndex, effectIndex);
-
-	result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
+	if (AudioCore::getInstance()->addEffect(pid, trackIndex, effectIndex)) {
+		result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
+	}
+	else {
+		result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
+	}
 
 	return CommandFuncResult{ true, result };
 }
@@ -243,9 +246,12 @@ AUDIOCORE_FUNC(addInstr) {
 
 	int instrIndex = luaL_checkinteger(L, 1);
 	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 2));
-	AudioCore::getInstance()->addInstrument(pid, instrIndex);
-
-	result += "Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + "\n";
+	if (AudioCore::getInstance()->addInstrument(pid, instrIndex)) {
+		result += "Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + "\n";
+	}
+	else {
+		result += "Can't Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + "\n";
+	}
 
 	return CommandFuncResult{ true, result };
 }
