@@ -39,7 +39,7 @@ private:
 	double sourceSampleRate = 0;
 
 	double tailTime = 2;
-	const int audioChannels = 1;
+	int audioChannels = 1;
 
 	friend class SynthRenderThread;
 	std::unique_ptr<SynthRenderThread> synthThread = nullptr;

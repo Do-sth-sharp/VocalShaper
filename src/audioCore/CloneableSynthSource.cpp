@@ -41,7 +41,13 @@ void CloneableSynthSource::setSynthesizer(
     /** Stop Render */
     this->synthThread->stopThread(3000);
 
+    /** Set Synthesizer */
     this->synthesizer = std::move(synthesizer);
+
+    /** Set Channels */
+    this->audioChannels = std::max(
+        this->synthesizer->getTotalNumInputChannels(),
+        this->synthesizer->getTotalNumOutputChannels());
 
     /** DMDA Hand Shake */
     DMDA::PluginHandler handShakeHandler(
