@@ -69,11 +69,37 @@ void CloneableSynthSource::synth() {
     juce::GenericScopedLock audioLocker(this->audioLock);
 
     /** Prepare Audio Buffer */
-    this->sourceSampleRate = this->getSampleRate();
-    this->sampleRateChanged();
-    this->audioBuffer.setSize(
-        this->audioChannels, this->getLength() * this->sourceSampleRate,
-        false, true, true);
+    {
+        /** Clear Audio Source */
+        this->source = nullptr;
+        this->memorySource = nullptr;
+
+        /** Source Buffer */
+        this->sourceSampleRate = this->getSampleRate();
+        this->sampleRateChanged();
+        this->audioBuffer.setSize(
+            this->audioChannels, this->getLength() * this->sourceSampleRate,
+            false, true, true);
+
+        /** Create Audio Source */
+        this->memorySource = std::make_unique<juce::MemoryAudioSource>(
+            this->audioBuffer, false, false);
+        auto source = std::make_unique<juce::ResamplingAudioSource>(
+            this->memorySource.get(), false, this->audioBuffer.getNumChannels());
+
+        /** Set Sample Rate */
+        source->setResamplingRatio(1);
+        source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
+
+        this->source = std::move(source);
+    }
+
+    /** Prepare Synthesizer */
+    {
+        double sampleRate = this->getSourceSampleRate();
+        int bufferSize = this->getBufferSize();
+        this->synthesizer->prepareToPlay(sampleRate, bufferSize);
+    }
 
     /** Start Render */
     this->synthThread->startThread();
