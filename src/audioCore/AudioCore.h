@@ -1,15 +1,15 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "AudioPluginSearchThread.h"
+#include "plugin/AudioPluginSearchThread.h"
 #include "AudioConfig.h"
-#include "MainGraph.h"
-#include "CloneableSourceManager.h"
-#include "CloneableAudioSource.h"
-#include "CloneableMIDISource.h"
-#include "CloneableSynthSource.h"
-#include "AudioIOList.h"
-#include "MackieControlHub.h"
+#include "graph/MainGraph.h"
+#include "source/CloneableSourceManager.h"
+#include "source/CloneableAudioSource.h"
+#include "source/CloneableMIDISource.h"
+#include "source/CloneableSynthSource.h"
+#include "source/AudioIOList.h"
+#include "misc/MackieControlHub.h"
 
 class AudioDeviceChangeListener;
 namespace audioCommand {

@@ -1,7 +1,7 @@
 #include "CloneableSynthSource.h"
 
 #include <DMDA.h>
-#include "Utils.h"
+#include "../Utils.h"
 
 CloneableSynthSource::CloneableSynthSource()
     : CloneableSource() {

@@ -1,7 +1,7 @@
 #include "PlayPosition.h"
 
 #include <chrono>
-#include "Utils.h"
+#include "../Utils.h"
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> MovablePlayHead::getPosition() const {
 	juce::ScopedReadLock locker(this->lock);

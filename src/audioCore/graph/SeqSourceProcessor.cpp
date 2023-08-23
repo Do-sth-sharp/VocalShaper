@@ -1,9 +1,9 @@
 ﻿#include "SeqSourceProcessor.h"
-#include "PlayPosition.h"
-#include "CloneableSourceManager.h"
-#include "CloneableAudioSource.h"
-#include "CloneableMIDISource.h"
-#include "CloneableSynthSource.h"
+#include "../misc/PlayPosition.h"
+#include "../source/CloneableSourceManager.h"
+#include "../source/CloneableAudioSource.h"
+#include "../source/CloneableMIDISource.h"
+#include "../source/CloneableSynthSource.h"
 
 SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	: audioChannels(type) {

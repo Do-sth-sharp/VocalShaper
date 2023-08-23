@@ -1,6 +1,6 @@
 #include "MainGraph.h"
 
-#include "PlayPosition.h"
+#include "../misc/PlayPosition.h"
 
 void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */

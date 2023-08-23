@@ -1,6 +1,6 @@
 ﻿#include "Track.h"
 
-#include "PlayPosition.h"
+#include "../misc/PlayPosition.h"
 
 Track::Track(const juce::AudioChannelSet& type)
 	: audioChannels(type) {

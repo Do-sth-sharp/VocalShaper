@@ -1,6 +1,6 @@
 #include "CloneableMIDISource.h"
 
-#include "Utils.h"
+#include "../Utils.h"
 
 void CloneableMIDISource::readData(
     juce::MidiBuffer& buffer, double baseTime,

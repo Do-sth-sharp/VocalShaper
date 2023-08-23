@@ -1,5 +1,5 @@
 ﻿#include "PluginDock.h"
-#include "PlayPosition.h"
+#include "../misc/PlayPosition.h"
 
 PluginDock::PluginDock(const juce::AudioChannelSet& type) 
 	: audioChannels(type) {

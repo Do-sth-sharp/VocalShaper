@@ -1,6 +1,6 @@
 #include "PluginLoader.h"
-#include "AudioCore.h"
-#include "Utils.h"
+#include "../AudioCore.h"
+#include "../Utils.h"
 
 PluginLoader::PluginLoader() {
 	this->loadThread = std::make_unique<PluginLoadThread>();

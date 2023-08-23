@@ -3,8 +3,8 @@
 #include <DMDA.h>
 
 #include "CloneableSynthSource.h"
-#include "PlayPosition.h"
-#include "Utils.h"
+#include "../misc/PlayPosition.h"
+#include "../Utils.h"
 
 SynthRenderThread::SynthRenderThread(CloneableSynthSource* parent)
 	: Thread("Synth Render Thread"), parent(parent) {}

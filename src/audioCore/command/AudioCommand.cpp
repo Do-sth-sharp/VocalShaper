@@ -1,5 +1,5 @@
 ﻿#include "AudioCommand.h"
-#include "AudioCore.h"
+#include "../AudioCore.h"
 #include "CommandUtils.h"
 
 AudioCommand::AudioCommand() {

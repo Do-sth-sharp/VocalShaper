@@ -1,7 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "CloneableSource.h"
+#include "../source/CloneableSource.h"
 
 class SourceList final {
 public:

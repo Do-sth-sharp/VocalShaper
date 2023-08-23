@@ -1,8 +1,8 @@
 ﻿#include "MainGraph.h"
 
-#include "PlayPosition.h"
-#include "CloneableSourceManager.h"
-#include "AudioCore.h"
+#include "../misc/PlayPosition.h"
+#include "../source/CloneableSourceManager.h"
+#include "../AudioCore.h"
 
 MainGraph::MainGraph() {
 	/** The Main Audio IO Node */

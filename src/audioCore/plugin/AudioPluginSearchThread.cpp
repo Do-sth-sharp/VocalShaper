@@ -1,5 +1,5 @@
 ﻿#include "AudioPluginSearchThread.h"
-#include "AudioConfig.h"
+#include "../AudioConfig.h"
 
 /** Plugin Searcher Path */
 #if JUCE_WINDOWS

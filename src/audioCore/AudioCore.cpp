@@ -1,9 +1,9 @@
 ﻿#include "AudioCore.h"
 
-#include "AudioDebugger.h"
-#include "MIDIDebugger.h"
-#include "PluginLoader.h"
-#include "PlayPosition.h"
+#include "debug/AudioDebugger.h"
+#include "debug/MIDIDebugger.h"
+#include "plugin/PluginLoader.h"
+#include "misc/PlayPosition.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:

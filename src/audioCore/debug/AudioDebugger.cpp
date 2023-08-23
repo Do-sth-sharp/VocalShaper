@@ -1,6 +1,6 @@
 ﻿#include "AudioDebugger.h"
-#include "AudioCore.h"
-#include "AudioCommand.h"
+#include "../AudioCore.h"
+#include "../command/AudioCommand.h"
 
 AudioDebugger::AudioDebugger(AudioCore* parent)
 	: parent(parent) {

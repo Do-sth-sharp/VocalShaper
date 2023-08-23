@@ -1,7 +1,7 @@
 #include "CloneableSourceManager.h"
 #include "AudioIOList.h"
-#include "AudioCore.h"
-#include "PluginLoader.h"
+#include "../AudioCore.h"
+#include "../plugin/PluginLoader.h"
 
 bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
 	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
