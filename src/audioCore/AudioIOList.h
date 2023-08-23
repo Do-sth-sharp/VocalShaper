@@ -10,13 +10,15 @@ public:
 
 	void load(int index, juce::String path);
 	void save(int index, juce::String path);
+	void exportt(int index, juce::String path);
 	bool isTask(int index) const;
 
 private:
 	void run() override;
 
 private:
-	using IOTask = std::tuple<bool, int, juce::String>;
+	enum class TaskType { Load, Save, Export };
+	using IOTask = std::tuple<TaskType, int, juce::String>;
 	mutable std::queue<IOTask> list;
 	juce::CriticalSection lock;
 	std::atomic_int currentIndex = -1;

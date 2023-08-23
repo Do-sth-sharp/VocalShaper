@@ -41,6 +41,10 @@ bool CloneableSource::saveAs(const juce::File& file) const {
 	return false;
 }
 
+bool CloneableSource::exportAs(const juce::File& file) const {
+	return this->exportt(file);
+}
+
 double CloneableSource::getSourceLength() const {
 	return this->getLength();
 }

@@ -15,7 +15,7 @@ AudioIOList::~AudioIOList() {
 void AudioIOList::load(int index, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(false, index, path));
+	this->list.push(std::make_tuple(TaskType::Load, index, path));
 
 	this->startThread();
 }
@@ -23,7 +23,15 @@ void AudioIOList::load(int index, juce::String path) {
 void AudioIOList::save(int index, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(true, index, path));
+	this->list.push(std::make_tuple(TaskType::Save, index, path));
+
+	this->startThread();
+}
+
+void AudioIOList::exportt(int index, juce::String path) {
+	juce::GenericScopedLock locker(this->lock);
+
+	this->list.push(std::make_tuple(TaskType::Export, index, path));
 
 	this->startThread();
 }
@@ -67,13 +75,19 @@ void AudioIOList::run() {
 		if (auto src = CloneableSourceManager::getInstance()->getSource(this->currentIndex)) {
 			juce::File file 
 				= juce::File::getCurrentWorkingDirectory().getChildFile(std::get<2>(task));
-			if (std::get<0>(task)) {
-				/** Write */
-				src->saveAs(file);
-			}
-			else {
+			switch (std::get<0>(task)) {
+			case TaskType::Load:
 				/** Read */
 				src->loadFrom(file);
+				break;
+			case TaskType::Save:
+				/** Write */
+				src->saveAs(file);
+				break;
+			case TaskType::Export:
+				/** Export */
+				src->exportAs(file);
+				break;
 			}
 		}
 

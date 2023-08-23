@@ -15,6 +15,7 @@ public:
 	bool cloneFrom(const CloneableSource* src);
 	bool loadFrom(const juce::File& file);
 	bool saveAs(const juce::File& file) const;
+	bool exportAs(const juce::File& file) const;
 	double getSourceLength() const;
 
 	bool checkSaved() const;
@@ -54,6 +55,7 @@ protected:
 	virtual bool clone(const CloneableSource* src) = 0;
 	virtual bool load(const juce::File& file) = 0;
 	virtual bool save(const juce::File& file) const = 0;
+	virtual bool exportt(const juce::File& file) const { return false; };
 	virtual double getLength() const = 0;
 	virtual void sampleRateChanged() {};
 

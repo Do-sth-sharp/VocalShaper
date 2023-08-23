@@ -25,6 +25,7 @@ private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;
 	bool save(const juce::File& file) const override;
+	bool exportt(const juce::File& file) const override;
 	double getLength() const override;
 	void sampleRateChanged() override;
 

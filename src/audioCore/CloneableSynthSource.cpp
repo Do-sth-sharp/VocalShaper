@@ -161,6 +161,11 @@ bool CloneableSynthSource::save(const juce::File& file) const {
     return midiFile.writeTo(stream);
 }
 
+bool CloneableSynthSource::exportt(const juce::File& file) const {
+    /** TODO Export */
+    return true;
+}
+
 double CloneableSynthSource::getLength() const {
     juce::ScopedReadLock locker(this->lock);
 
