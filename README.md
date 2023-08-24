@@ -1,9 +1,9 @@
-# VocalShaper [![forthebadge](https://forthebadge.com/images/badges/works-on-my-machine.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/made-with-c-plus-plus.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/fixed-bugs.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/open-source.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/powered-by-black-magic.svg)](https://forthebadge.com)
+# VocalShaper [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/works-on-my-machine.svg)](https://github.com/BraveUX/for-the-badge/)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/built-with-love.svg)](https://github.com/BraveUX/for-the-badge/)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/made-with-c-plus-plus.svg)](https://github.com/BraveUX/for-the-badge/)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/fixed-bugs.svg)](https://github.com/BraveUX/for-the-badge/)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/open-source.svg)](https://github.com/BraveUX/for-the-badge/)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/powered-by-black-magic.svg)](https://github.com/BraveUX/for-the-badge/)
   
 A JUCE-based(LUCE) Open Source DAW. **Under development, not released.**  
 
