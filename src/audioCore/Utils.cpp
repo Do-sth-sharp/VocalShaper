@@ -370,4 +370,62 @@ namespace utils {
 
 		return { 0, 0. };
 	}
+
+	class SingletonAudioFormatManager : public juce::AudioFormatManager,
+		private juce::DeletedAtShutdown {
+	public:
+		SingletonAudioFormatManager();
+
+	public:
+		static SingletonAudioFormatManager* getInstance();
+
+	private:
+		static SingletonAudioFormatManager* instance;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingletonAudioFormatManager)
+	};
+
+	SingletonAudioFormatManager::SingletonAudioFormatManager()
+		: AudioFormatManager() {
+		this->registerBasicFormats();
+	}
+
+	SingletonAudioFormatManager* SingletonAudioFormatManager::instance = nullptr;
+
+	SingletonAudioFormatManager* SingletonAudioFormatManager::getInstance() {
+		return SingletonAudioFormatManager::instance ? SingletonAudioFormatManager::instance : SingletonAudioFormatManager::instance = new SingletonAudioFormatManager();
+	}
+
+	juce::AudioFormat* findAudioFormat(const juce::File& file) {
+		return SingletonAudioFormatManager::getInstance()->findFormatForFileExtension(file.getFileExtension());
+	}
+
+	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file) {
+		auto format = utils::findAudioFormat(file);
+		if (!format) { return nullptr; }
+
+		return std::unique_ptr<juce::AudioFormatReader>(format->createReaderFor(new juce::FileInputStream(file), true));
+	}
+
+	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
+		double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
+		int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex) {
+		auto format = utils::findAudioFormat(file);
+		if (!format) { return nullptr; }
+
+		auto outStream = new juce::FileOutputStream(file);
+		if (outStream->openedOk()) {
+			outStream->setPosition(0);
+			outStream->truncate();
+		}
+
+		auto writer = format->createWriterFor(outStream,
+			sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
+		if (!writer) {
+			delete outStream;
+			return nullptr;
+		}
+
+		return std::unique_ptr<juce::AudioFormatWriter>(writer);
+	}
 }

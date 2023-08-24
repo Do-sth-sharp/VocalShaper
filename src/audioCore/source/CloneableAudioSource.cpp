@@ -1,5 +1,7 @@
 #include "CloneableAudioSource.h"
 
+#include "../Utils.h"
+
 double CloneableAudioSource::getSourceSampleRate() const {
 	return this->sourceSampleRate;
 }
@@ -54,7 +56,7 @@ bool CloneableAudioSource::load(const juce::File& file) {
 	juce::GenericScopedLock locker(this->lock);
 
 	/** Create Audio Reader */
-	auto audioReader = CloneableAudioSource::createAudioReader(file);
+	auto audioReader = utils::createAudioReader(file);
 	if (!audioReader) { return false; }
 
 	/** Clear Audio Source */
@@ -84,7 +86,7 @@ bool CloneableAudioSource::save(const juce::File& file) const {
 	if (!this->source) { return false; }
 
 	/** Create Audio Writer */
-	auto audioWriter = CloneableAudioSource::createAudioWriter(file,
+	auto audioWriter = utils::createAudioWriter(file,
 		this->sourceSampleRate, juce::AudioChannelSet::canonicalChannelSet(this->buffer.getNumChannels()),
 		this->bitsPerSample, this->metadataValues, this->qualityOptionIndex);
 	if (!audioWriter) { return false; }
@@ -106,37 +108,4 @@ void CloneableAudioSource::sampleRateChanged() {
 		this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 		this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
 	}
-}
-
-juce::AudioFormat* CloneableAudioSource::findAudioFormat(const juce::File& file) {
-	return SingletonAudioFormatManager::getInstance()->findFormatForFileExtension(file.getFileExtension());
-}
-
-std::unique_ptr<juce::AudioFormatReader> CloneableAudioSource::createAudioReader(const juce::File& file) {
-	auto format = CloneableAudioSource::findAudioFormat(file);
-	if (!format) { return nullptr; }
-
-	return std::unique_ptr<juce::AudioFormatReader>(format->createReaderFor(new juce::FileInputStream(file), true));
-}
-
-std::unique_ptr<juce::AudioFormatWriter> CloneableAudioSource::createAudioWriter(const juce::File& file,
-	double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
-	int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex) {
-	auto format = CloneableAudioSource::findAudioFormat(file);
-	if (!format) { return nullptr; }
-
-	auto outStream = new juce::FileOutputStream(file);
-	if (outStream->openedOk()) {
-		outStream->setPosition(0);
-		outStream->truncate();
-	}
-
-	auto writer = format->createWriterFor(outStream,
-		sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
-	if (!writer) {
-		delete outStream;
-		return nullptr;
-	}
-
-	return std::unique_ptr<juce::AudioFormatWriter>(writer);
 }

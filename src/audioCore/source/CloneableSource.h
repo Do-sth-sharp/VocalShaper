@@ -2,20 +2,6 @@
 
 #include <JuceHeader.h>
 
-class SingletonAudioFormatManager : public juce::AudioFormatManager,
-	private juce::DeletedAtShutdown {
-public:
-	SingletonAudioFormatManager();
-
-public:
-	static SingletonAudioFormatManager* getInstance();
-
-private:
-	static SingletonAudioFormatManager* instance;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingletonAudioFormatManager)
-};
-
 class CloneableSource;
 template<typename T>
 concept IsCloneable = std::derived_from<T, CloneableSource>;

@@ -1,16 +1,5 @@
 #include "CloneableSource.h"
 
-SingletonAudioFormatManager::SingletonAudioFormatManager()
-	: AudioFormatManager() {
-	this->registerBasicFormats();
-}
-
-SingletonAudioFormatManager* SingletonAudioFormatManager::instance = nullptr;
-
-SingletonAudioFormatManager* SingletonAudioFormatManager::getInstance() {
-	return SingletonAudioFormatManager::instance ? SingletonAudioFormatManager::instance : SingletonAudioFormatManager::instance = new SingletonAudioFormatManager();
-}
-
 std::atomic_int CloneableSource::globalCounter = 0;
 
 CloneableSource::CloneableSource(const juce::String& name)

@@ -32,11 +32,5 @@ private:
 	juce::StringPairArray metadataValues;
 	int qualityOptionIndex = 0;
 
-	static juce::AudioFormat* findAudioFormat(const juce::File& file);
-	static std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
-	static std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
-		double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
-		int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex);
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableAudioSource)
 };

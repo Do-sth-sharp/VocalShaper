@@ -155,7 +155,7 @@ bool CloneableSynthSource::save(const juce::File& file) const {
     /** Copy Data */
     juce::ScopedWriteLock locker(this->lock);
     juce::MidiFile midiFile{ this->buffer };
-    CloneableSynthSource::convertSecondsToTicks(midiFile);
+    utils::convertSecondsToTicks(midiFile);
 
     /** Write MIDI File */
     return midiFile.writeTo(stream);
@@ -179,51 +179,4 @@ void CloneableSynthSource::sampleRateChanged() {
         this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
         this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
     }
-}
-
-void CloneableSynthSource::convertSecondsToTicks(juce::MidiFile& file) {
-    /** Get Tempo Events */
-    juce::MidiMessageSequence tempoSeq;
-    file.findAllTempoEvents(tempoSeq);
-    file.findAllTimeSigEvents(tempoSeq);
-
-    auto timeFormat = file.getTimeFormat();
-    if (timeFormat != 0)
-    {
-        for (int i = 0; i < file.getNumTracks(); i++) {
-            if (auto track = file.getTrack(i)) {
-                for (int j = track->getNumEvents(); --j >= 0;)
-                {
-                    auto& m = track->getEventPointer(j)->message;
-                    m.setTimeStamp(utils::convertSecondsToTicks(m.getTimeStamp(), tempoSeq, timeFormat));
-                }
-            }
-        }
-    }
-}
-
-juce::AudioFormat* CloneableSynthSource::findAudioFormat(const juce::File& file) {
-    return SingletonAudioFormatManager::getInstance()->findFormatForFileExtension(file.getFileExtension());
-}
-
-std::unique_ptr<juce::AudioFormatWriter> CloneableSynthSource::createAudioWriter(const juce::File& file,
-    double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
-    int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex) {
-    auto format = CloneableSynthSource::findAudioFormat(file);
-    if (!format) { return nullptr; }
-
-    auto outStream = new juce::FileOutputStream(file);
-    if (outStream->openedOk()) {
-        outStream->setPosition(0);
-        outStream->truncate();
-    }
-
-    auto writer = format->createWriterFor(outStream,
-        sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
-    if (!writer) {
-        delete outStream;
-        return nullptr;
-    }
-
-    return std::unique_ptr<juce::AudioFormatWriter>(writer);
 }
