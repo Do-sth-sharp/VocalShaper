@@ -47,6 +47,10 @@ private:
 	std::unique_ptr<juce::AudioPluginInstance> synthesizer = nullptr;
 
 	static void convertSecondsToTicks(juce::MidiFile& file);
+	static juce::AudioFormat* findAudioFormat(const juce::File& file);
+	static std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
+		double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
+		int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSynthSource)
 };

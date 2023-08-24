@@ -201,3 +201,29 @@ void CloneableSynthSource::convertSecondsToTicks(juce::MidiFile& file) {
         }
     }
 }
+
+juce::AudioFormat* CloneableSynthSource::findAudioFormat(const juce::File& file) {
+    return SingletonAudioFormatManager::getInstance()->findFormatForFileExtension(file.getFileExtension());
+}
+
+std::unique_ptr<juce::AudioFormatWriter> CloneableSynthSource::createAudioWriter(const juce::File& file,
+    double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
+    int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex) {
+    auto format = CloneableSynthSource::findAudioFormat(file);
+    if (!format) { return nullptr; }
+
+    auto outStream = new juce::FileOutputStream(file);
+    if (outStream->openedOk()) {
+        outStream->setPosition(0);
+        outStream->truncate();
+    }
+
+    auto writer = format->createWriterFor(outStream,
+        sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
+    if (!writer) {
+        delete outStream;
+        return nullptr;
+    }
+
+    return std::unique_ptr<juce::AudioFormatWriter>(writer);
+}

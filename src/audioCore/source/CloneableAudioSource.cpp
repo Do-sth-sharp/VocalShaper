@@ -108,31 +108,6 @@ void CloneableAudioSource::sampleRateChanged() {
 	}
 }
 
-class SingletonAudioFormatManager : public juce::AudioFormatManager,
-	private juce::DeletedAtShutdown {
-public:
-	SingletonAudioFormatManager();
-
-public:
-	static SingletonAudioFormatManager* getInstance();
-
-private:
-	static SingletonAudioFormatManager* instance;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SingletonAudioFormatManager)
-};
-
-SingletonAudioFormatManager::SingletonAudioFormatManager()
-	: AudioFormatManager() {
-	this->registerBasicFormats();
-}
-
-SingletonAudioFormatManager* SingletonAudioFormatManager::instance = nullptr;
-
-SingletonAudioFormatManager* SingletonAudioFormatManager::getInstance() {
-	return SingletonAudioFormatManager::instance ? SingletonAudioFormatManager::instance : SingletonAudioFormatManager::instance = new SingletonAudioFormatManager();
-}
-
 juce::AudioFormat* CloneableAudioSource::findAudioFormat(const juce::File& file) {
 	return SingletonAudioFormatManager::getInstance()->findFormatForFileExtension(file.getFileExtension());
 }
