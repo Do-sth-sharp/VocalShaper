@@ -32,30 +32,6 @@ void AudioConfig::setDeadPluginListPath(const juce::String& path) {
 	AudioConfig::getInstance()->deadPluginListPath = path;
 }
 
-const int AudioConfig::getAudioSaveBitsPerSample() {
-	return AudioConfig::getInstance()->audioSaveBitsPerSample;
-}
-
-const juce::StringPairArray AudioConfig::getAudioSaveMetaData() {
-	return AudioConfig::getInstance()->audioSaveMetaData;
-}
-
-const int AudioConfig::getAudioSaveQualityOptionIndex() {
-	return AudioConfig::getInstance()->audioSaveQualityOptionIndex;
-}
-
-void AudioConfig::setAudioSaveBitsPerSample(int value) {
-	AudioConfig::getInstance()->audioSaveBitsPerSample = value;
-}
-
-void AudioConfig::setAudioSaveMetaData(const juce::StringPairArray& data) {
-	AudioConfig::getInstance()->audioSaveMetaData = data;
-}
-
-void AudioConfig::setAudioSaveQualityOptionIndex(int value) {
-	AudioConfig::getInstance()->audioSaveQualityOptionIndex = value;
-}
-
 AudioConfig* AudioConfig::getInstance() {
 	return AudioConfig::instance ? AudioConfig::instance : (AudioConfig::instance = new AudioConfig());
 }

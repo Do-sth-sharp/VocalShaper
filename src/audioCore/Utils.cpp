@@ -371,6 +371,46 @@ namespace utils {
 		return { 0, 0. };
 	}
 
+	const int AudioSaveConfig::getBitsPerSample(const juce::String& format) const {
+		auto it = this->bitsPerSample.find(format);
+		return (it != this->bitsPerSample.end())
+			? it->second : 24;
+	}
+
+	const juce::StringPairArray AudioSaveConfig::getMetaData(const juce::String& format) const {
+		auto it = this->metaData.find(format);
+		return (it != this->metaData.end())
+			? it->second : juce::StringPairArray{};
+	}
+
+	const int AudioSaveConfig::getQualityOptionIndex(const juce::String& format) const {
+		auto it = this->bitsPerSample.find(format);
+		return (it != this->bitsPerSample.end())
+			? it->second : 0;
+	}
+
+	void AudioSaveConfig::setBitsPerSample(const juce::String& format, int value) {
+		this->bitsPerSample[format] = value;
+	}
+
+	void AudioSaveConfig::setMetaData(
+		const juce::String& format, const juce::StringPairArray& data) {
+		this->metaData[format] = data;
+	}
+
+	void AudioSaveConfig::setQualityOptionIndex(
+		const juce::String& format, int value) {
+		AudioSaveConfig::getInstance()->qualityOptionIndex[format] = value;
+	}
+
+	AudioSaveConfig* AudioSaveConfig::getInstance() {
+		return AudioSaveConfig::instance
+			? AudioSaveConfig::instance
+			: (AudioSaveConfig::instance = new AudioSaveConfig);
+	}
+
+	AudioSaveConfig* AudioSaveConfig::instance = nullptr;
+
 	class SingletonAudioFormatManager : public juce::AudioFormatManager,
 		private juce::DeletedAtShutdown {
 	public:
