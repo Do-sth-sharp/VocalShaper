@@ -372,34 +372,43 @@ namespace utils {
 	}
 
 	const int AudioSaveConfig::getBitsPerSample(const juce::String& format) const {
+		juce::ScopedReadLock locker(this->lock);
+		
 		auto it = this->bitsPerSample.find(format);
 		return (it != this->bitsPerSample.end())
 			? it->second : 24;
 	}
 
 	const juce::StringPairArray AudioSaveConfig::getMetaData(const juce::String& format) const {
+		juce::ScopedReadLock locker(this->lock);
+		
 		auto it = this->metaData.find(format);
 		return (it != this->metaData.end())
 			? it->second : juce::StringPairArray{};
 	}
 
 	const int AudioSaveConfig::getQualityOptionIndex(const juce::String& format) const {
+		juce::ScopedReadLock locker(this->lock);
+		
 		auto it = this->bitsPerSample.find(format);
 		return (it != this->bitsPerSample.end())
 			? it->second : 0;
 	}
 
 	void AudioSaveConfig::setBitsPerSample(const juce::String& format, int value) {
+		juce::ScopedWriteLock locker(this->lock);
 		this->bitsPerSample[format] = value;
 	}
 
 	void AudioSaveConfig::setMetaData(
 		const juce::String& format, const juce::StringPairArray& data) {
+		juce::ScopedWriteLock locker(this->lock);
 		this->metaData[format] = data;
 	}
 
 	void AudioSaveConfig::setQualityOptionIndex(
 		const juce::String& format, int value) {
+		juce::ScopedWriteLock locker(this->lock);
 		AudioSaveConfig::getInstance()->qualityOptionIndex[format] = value;
 	}
 
