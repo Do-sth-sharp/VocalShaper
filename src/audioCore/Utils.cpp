@@ -390,8 +390,8 @@ namespace utils {
 	const int AudioSaveConfig::getQualityOptionIndex(const juce::String& format) const {
 		juce::ScopedReadLock locker(this->lock);
 		
-		auto it = this->bitsPerSample.find(format);
-		return (it != this->bitsPerSample.end())
+		auto it = this->qualityOptionIndex.find(format);
+		return (it != this->qualityOptionIndex.end())
 			? it->second : 0;
 	}
 
