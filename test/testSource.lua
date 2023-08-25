@@ -45,3 +45,8 @@ AC.addSequencerSourceInstance(0, 0, 0, 10, 0);
 
 -- Remove Instance
 AC.removeSequencerSourceInstance(0, 0);
+
+-- Audio Save Config
+AC.setAudioSaveBitsPerSample("WAV file", 32);
+AC.setAudioSaveMetaData("WAV file", { ["bwav description"] = "test description", ["bwav origination date"] = "2023-08-26", ["bwav origination time"] = "00:42:00" });
+AC.setAudioSaveQualityOptionIndex("WAV file", 0);
