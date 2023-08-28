@@ -34,6 +34,10 @@ AC.loadSourceAsync(0, "./test.wav");
 AC.saveSource(0, "./test.wav");
 AC.saveSourceAsync(0, "./test.wav");
 
+-- Export Source
+AC.exportSource(0, "./test.wav");
+AC.exportSourceAsync(0, "./test.wav");
+
 -- Set Synthesizer
 AC.setSourceSynthesizer(0, "VST3-SynthEngineDemo-768e251b-8e107a81");
 

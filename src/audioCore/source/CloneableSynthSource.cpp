@@ -147,10 +147,10 @@ bool CloneableSynthSource::load(const juce::File& file) {
 
 bool CloneableSynthSource::save(const juce::File& file) const {
     /** Create Output Stream */
-    juce::FileOutputStream stream(file);
-    if (stream.failedToOpen()) { return false; }
-    stream.setPosition(0);
-    stream.truncate();
+    auto stream = std::make_unique<juce::FileOutputStream>(file);
+    if (stream->failedToOpen()) { return false; }
+    stream->setPosition(0);
+    stream->truncate();
 
     /** Copy Data */
     juce::ScopedWriteLock locker(this->lock);
@@ -158,11 +158,31 @@ bool CloneableSynthSource::save(const juce::File& file) const {
     utils::convertSecondsToTicks(midiFile);
 
     /** Write MIDI File */
-    return midiFile.writeTo(stream);
+    if (!midiFile.writeTo(*(stream.get()))) {
+        stream = nullptr;
+        file.deleteFile();
+        return false;
+    }
+
+    return true;
 }
 
 bool CloneableSynthSource::exportt(const juce::File& file) const {
-    /** TODO Export */
+    juce::GenericScopedLock locker(this->audioLock);
+
+    if (!this->source) { return false; }
+
+    /** Create Audio Writer */
+    auto audioWriter = utils::createAudioWriter(file, this->getSampleRate(),
+        juce::AudioChannelSet::canonicalChannelSet(this->audioBuffer.getNumChannels()));
+    if (!audioWriter) { return false; }
+
+    /** Write Data */
+    int sampleNum = std::ceil(
+        this->audioBuffer.getNumSamples() / this->source->getResamplingRatio());
+    audioWriter->writeFromAudioSource(
+        *(this->source.get()), sampleNum, this->getBufferSize());
+
     return true;
 }
 

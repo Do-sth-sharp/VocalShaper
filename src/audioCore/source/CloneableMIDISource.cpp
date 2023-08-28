@@ -64,18 +64,24 @@ bool CloneableMIDISource::load(const juce::File& file) {
 
 bool CloneableMIDISource::save(const juce::File& file) const {
     /** Create Output Stream */
-	juce::FileOutputStream stream(file);
-	if (stream.failedToOpen()) { return false; }
-    stream.setPosition(0);
-    stream.truncate();
+    auto stream = std::make_unique<juce::FileOutputStream>(file);
+    if (stream->failedToOpen()) { return false; }
+    stream->setPosition(0);
+    stream->truncate();
 
     /** Copy Data */
     juce::ScopedWriteLock locker(this->lock);
     juce::MidiFile midiFile{ this->buffer };
     utils::convertSecondsToTicks(midiFile);
 
-	/** Write MIDI File */
-	return midiFile.writeTo(stream);
+    /** Write MIDI File */
+    if (!midiFile.writeTo(*(stream.get()))) {
+        stream = nullptr;
+        file.deleteFile();
+        return false;
+    }
+
+    return true;
 }
 
 double CloneableMIDISource::getLength() const {

@@ -479,6 +479,7 @@ namespace utils {
 			sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
 		if (!writer) {
 			delete outStream;
+			file.deleteFile();
 			return nullptr;
 		}
 
