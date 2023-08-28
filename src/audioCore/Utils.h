@@ -57,8 +57,7 @@ namespace utils {
 	juce::AudioFormat* findAudioFormat(const juce::File& file);
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
-		double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
-		int bitsPerSample, const juce::StringPairArray& metadataValues, int qualityOptionIndex);
+		double sampleRateToUse, const juce::AudioChannelSet& channelLayout);
 }
 
 #define UNUSED(var) (void)var

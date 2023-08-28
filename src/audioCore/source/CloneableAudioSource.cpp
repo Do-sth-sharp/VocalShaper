@@ -86,9 +86,8 @@ bool CloneableAudioSource::save(const juce::File& file) const {
 	if (!this->source) { return false; }
 
 	/** Create Audio Writer */
-	auto audioWriter = utils::createAudioWriter(file,
-		this->sourceSampleRate, juce::AudioChannelSet::canonicalChannelSet(this->buffer.getNumChannels()),
-		this->bitsPerSample, this->metadataValues, this->qualityOptionIndex);
+	auto audioWriter = utils::createAudioWriter(file, this->sourceSampleRate,
+		juce::AudioChannelSet::canonicalChannelSet(this->buffer.getNumChannels()));
 	if (!audioWriter) { return false; }
 
 	/** Write Data */

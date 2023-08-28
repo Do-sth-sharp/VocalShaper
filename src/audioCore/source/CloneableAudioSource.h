@@ -28,9 +28,5 @@ private:
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;
 
-	int bitsPerSample = 32;
-	juce::StringPairArray metadataValues;
-	int qualityOptionIndex = 0;
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableAudioSource)
 };
