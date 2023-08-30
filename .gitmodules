@@ -19,3 +19,6 @@
 [submodule "libDMDA"]
 	path = libDMDA
 	url = https://github.com/Do-sth-sharp/libDMDA.git
+[submodule "cmake-lame"]
+	path = cmake-lame
+	url = https://github.com/Do-sth-sharp/cmake-lame.git
