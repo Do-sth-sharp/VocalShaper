@@ -54,7 +54,7 @@ namespace utils {
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioSaveConfig)
 	};
 
-	juce::AudioFormat* findAudioFormat(const juce::File& file);
+	juce::AudioFormat* findAudioFormat(const juce::File& file, bool isWrite);
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
 		double sampleRateToUse, const juce::AudioChannelSet& channelLayout);

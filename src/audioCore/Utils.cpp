@@ -6,6 +6,17 @@
 /** To Fix Symbol Export Of juce::AudioProcessorParameterGroup */
 //#include <juce_audio_processors/processors/juce_AudioProcessorParameterGroup.cpp>
 
+/** LAME Path */
+#if JUCE_WINDOWS
+#define LAMEPath "./lame.exe"
+#elif JUCE_LINUX
+#define LAMEPath "./lame"
+#elif JUCE_MAC
+#define LAMEPath "./lame"
+#else
+#define LAMEPath "./lame"
+#endif // JUCE_WINDOWS
+
 namespace utils {
 	std::tuple<int, int> getChannelIndexAndNumOfBus(
 		const juce::AudioProcessor* processor, int busIndex, bool isInput) {
@@ -425,8 +436,13 @@ namespace utils {
 	public:
 		SingletonAudioFormatManager();
 
+		juce::AudioFormat* getLAMEEncoderFormat() const;
+
 	public:
 		static SingletonAudioFormatManager* getInstance();
+
+	private:
+		std::unique_ptr<juce::AudioFormat> LAMEFormat = nullptr;
 
 	private:
 		static SingletonAudioFormatManager* instance;
@@ -436,7 +452,18 @@ namespace utils {
 
 	SingletonAudioFormatManager::SingletonAudioFormatManager()
 		: AudioFormatManager() {
+		/** Basic Formats */
 		this->registerBasicFormats();
+
+		/** LAME Encoder */
+		juce::File LAMEExecutable = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+			.getParentDirectory().getChildFile(LAMEPath);
+		this->LAMEFormat = std::unique_ptr<juce::AudioFormat>(
+			new juce::LAMEEncoderAudioFormat(LAMEExecutable));
+	}
+
+	juce::AudioFormat* SingletonAudioFormatManager::getLAMEEncoderFormat() const {
+		return this->LAMEFormat.get();
 	}
 
 	SingletonAudioFormatManager* SingletonAudioFormatManager::instance = nullptr;
@@ -445,12 +472,23 @@ namespace utils {
 		return SingletonAudioFormatManager::instance ? SingletonAudioFormatManager::instance : SingletonAudioFormatManager::instance = new SingletonAudioFormatManager();
 	}
 
-	juce::AudioFormat* findAudioFormat(const juce::File& file) {
-		return SingletonAudioFormatManager::getInstance()->findFormatForFileExtension(file.getFileExtension());
+	juce::AudioFormat* findAudioFormat(const juce::File& file, bool isWrite) {
+		auto extension = file.getFileExtension();
+
+		if (isWrite) {
+			auto LAMEFormat =
+				SingletonAudioFormatManager::getInstance()->getLAMEEncoderFormat();
+			if (LAMEFormat && LAMEFormat->getFileExtensions().contains(extension)) {
+				return LAMEFormat;
+			}
+		}
+
+		return SingletonAudioFormatManager::getInstance()
+			->findFormatForFileExtension(extension);
 	}
 
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file) {
-		auto format = utils::findAudioFormat(file);
+		auto format = utils::findAudioFormat(file, false);
 		if (!format) { return nullptr; }
 
 		return std::unique_ptr<juce::AudioFormatReader>(format->createReaderFor(new juce::FileInputStream(file), true));
@@ -458,7 +496,7 @@ namespace utils {
 
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
 		double sampleRateToUse, const juce::AudioChannelSet& channelLayout) {
-		auto format = utils::findAudioFormat(file);
+		auto format = utils::findAudioFormat(file, true);
 		if (!format) { return nullptr; }
 
 		juce::String formatName = format->getFormatName();
