@@ -180,6 +180,7 @@ bool CloneableSynthSource::exportt(const juce::File& file) const {
     /** Write Data */
     int sampleNum = std::ceil(
         this->audioBuffer.getNumSamples() / this->source->getResamplingRatio());
+    this->memorySource->setNextReadPosition(0);
     audioWriter->writeFromAudioSource(
         *(this->source.get()), sampleNum, this->getBufferSize());
 
