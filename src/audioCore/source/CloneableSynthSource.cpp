@@ -170,7 +170,7 @@ bool CloneableSynthSource::save(const juce::File& file) const {
 bool CloneableSynthSource::exportt(const juce::File& file) const {
     juce::GenericScopedLock locker(this->audioLock);
 
-    if (!this->source) { return false; }
+    if ((!this->source) || (!this->memorySource)) { return false; }
 
     /** Create Audio Writer */
     auto audioWriter = utils::createAudioWriter(file, this->getSampleRate(),
