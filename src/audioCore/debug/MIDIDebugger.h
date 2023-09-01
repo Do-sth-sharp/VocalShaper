@@ -8,7 +8,7 @@ public:
 
 	void resized() override;
 
-	void addMessage(const juce::MidiMessage& message);
+	void addMessage(const juce::MidiMessage& message, bool input = true);
 
 	void setMaxNum(int num = 30);
 	int getMaxNum() const;

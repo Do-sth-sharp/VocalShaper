@@ -15,7 +15,7 @@ void MIDIDebugger::resized() {
 	this->messageOutput->setBounds(this->getLocalBounds());
 }
 
-void MIDIDebugger::addMessage(const juce::MidiMessage& message) {
+void MIDIDebugger::addMessage(const juce::MidiMessage& message, bool input) {
 	juce::String text;
 	text += message.getDescription();
 	text += " | ";
