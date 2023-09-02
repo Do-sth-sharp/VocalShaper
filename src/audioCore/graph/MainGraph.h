@@ -78,7 +78,7 @@ public:
 	/**
 	 * @brief	Set the MIDI Message Hook.
 	 */
-	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook);
+	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&, bool)> hook);
 
 	void setMIDIOutput(juce::MidiOutput* output);
 
@@ -106,7 +106,7 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2OConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> midiTrk2OConnectionList;
 
-	std::function<void(const juce::MidiMessage&)> midiHook;
+	std::function<void(const juce::MidiMessage&, bool)> midiHook;
 	juce::ReadWriteLock hookLock;
 
 	juce::MidiOutput* midiOutput = nullptr;

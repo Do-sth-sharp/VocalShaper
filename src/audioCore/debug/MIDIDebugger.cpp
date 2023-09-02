@@ -15,11 +15,13 @@ void MIDIDebugger::resized() {
 	this->messageOutput->setBounds(this->getLocalBounds());
 }
 
-void MIDIDebugger::addMessage(const juce::MidiMessage& message, bool input) {
+void MIDIDebugger::addMessage(const juce::MidiMessage& message, bool isInput) {
 	juce::String text;
+	text += isInput ? "[I] " : "[O] ";
 	text += message.getDescription();
 	text += " | ";
-	text += juce::String::toHexString(message.getRawData(), message.getRawDataSize(), 1);
+	text += juce::String::toHexString(
+		message.getRawData(), message.getRawDataSize(), 1);
 	text += "\n";
 	juce::MessageManager::callAsync(
 		[output = juce::Component::SafePointer(this->messageOutput.get()),

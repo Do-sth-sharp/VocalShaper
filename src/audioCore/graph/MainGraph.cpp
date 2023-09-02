@@ -56,7 +56,8 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	this->removeIllegalAudioTrk2OConnections();
 }
 
-void MainGraph::setMIDIMessageHook(const std::function<void(const juce::MidiMessage&)> hook) {
+void MainGraph::setMIDIMessageHook(
+	const std::function<void(const juce::MidiMessage&, bool)> hook) {
 	juce::ScopedWriteLock locker(this->hookLock);
 	this->midiHook = hook;
 }
@@ -109,7 +110,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 			for (auto m : midi) {
 				juce::MessageManager::callAsync(
 					[mes = m.getMessage(), hook = this->midiHook] {
-						hook(mes);
+						hook(mes, true);
 					});
 			}
 		}
@@ -150,7 +151,18 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	{
 		juce::ScopedReadLock locker(this->midiLock);
 		if (this->midiOutput) {
+			/** Send Message */
 			this->midiOutput->sendBlockOfMessagesNow(midi);
+
+			/** Call MIDI Hook */
+			if (this->midiHook) {
+				for (auto m : midi) {
+					juce::MessageManager::callAsync(
+						[mes = m.getMessage(), hook = this->midiHook] {
+							hook(mes, false);
+						});
+				}
+			}
 		}
 	}
 

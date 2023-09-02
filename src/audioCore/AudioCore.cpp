@@ -39,9 +39,9 @@ AudioCore::AudioCore() {
 	this->midiDebugger = std::make_unique<MIDIDebugger>();
 	this->mainAudioGraph->setMIDIMessageHook(
 		[debugger = juce::Component::SafePointer(dynamic_cast<MIDIDebugger*>(this->midiDebugger.get()))] 
-		(const juce::MidiMessage& mes) {
+		(const juce::MidiMessage& mes, bool isInput) {
 			if (debugger) {
-				debugger->addMessage(mes);
+				debugger->addMessage(mes, isInput);
 			}
 		});
 
