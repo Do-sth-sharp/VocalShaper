@@ -90,6 +90,7 @@ public:
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
+	juce::AudioProcessorGraph::Node::Ptr recorderNode;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> audioSourceNodeList;
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> instrumentNodeList;

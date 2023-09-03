@@ -3,6 +3,7 @@
 #include "../misc/PlayPosition.h"
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
+#include "SourceRecordProcessor.h"
 
 MainGraph::MainGraph() {
 	/** The Main Audio IO Node */
@@ -20,6 +21,13 @@ MainGraph::MainGraph() {
 	this->midiOutputNode = this->addNode(
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
+
+	/** The Source Recorder Node */
+	this->recorderNode = this->addNode(std::make_unique<SourceRecordProcessor>());
+
+	/** Link MIDI Input To Recorder */
+	this->addConnection({ {this->midiInputNode->nodeID, this->midiChannelIndex},
+		{this->recorderNode->nodeID, this->midiChannelIndex} });
 }
 
 MainGraph::~MainGraph() {
@@ -54,6 +62,29 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	/** Auto Remove Connections */
 	this->removeIllegalAudioI2TrkConnections();
 	this->removeIllegalAudioTrk2OConnections();
+
+	/** Remove Recorder Input */
+	{
+		int inputChannels =
+			this->recorderNode->getProcessor()->getTotalNumInputChannels();
+		for (int i = 0; i < inputChannels; i++) {
+			this->removeConnection(
+				{ {this->audioInputNode->nodeID, i},
+				{this->recorderNode->nodeID, i} });
+		}
+	}
+
+	/** Set Layout of Recorder */
+	this->recorderNode->getProcessor()->setBusesLayout(inputLayout);
+
+	/** Add Recorder Input */
+	{
+		for (int i = 0; i < inputChannelNum; i++) {
+			this->addConnection(
+				{ {this->audioInputNode->nodeID, i},
+				{this->recorderNode->nodeID, i} });
+		}
+	}
 }
 
 void MainGraph::setMIDIMessageHook(
@@ -83,22 +114,25 @@ void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
 
+	/** Recorder */
+	this->recorderNode->getProcessor()->setPlayHead(newPlayHead);
+
 	/** Audio Source */
 	for (auto& i : this->audioSourceNodeList) {
 		auto src = i->getProcessor();
-		src->setPlayHead(PlayPosition::getInstance());
+		src->setPlayHead(newPlayHead);
 	}
 
 	/** Instrument */
 	for (auto& i : this->instrumentNodeList) {
 		auto instr = i->getProcessor();
-		instr->setPlayHead(PlayPosition::getInstance());
+		instr->setPlayHead(newPlayHead);
 	}
 
 	/** Track */
 	for (auto& i : this->trackNodeList) {
 		auto track = i->getProcessor();
-		track->setPlayHead(PlayPosition::getInstance());
+		track->setPlayHead(newPlayHead);
 	}
 }
 
