@@ -39,14 +39,14 @@ add_subdirectory (cmake-lame)
 
 # Mackie Control
 set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
-file (GLOB_RECURSE MACKIECONTROL_SRC "${MACKIECONTROL_SRC_PATH}/*.cpp")
+file (GLOB_RECURSE MACKIECONTROL_SRC CONFIGURE_DEPENDS "${MACKIECONTROL_SRC_PATH}/*.cpp")
 
 # DMDA
 set (DMDA_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libDMDA")
 set (DMDA_SRC "${DMDA_SRC_PATH}/DMDA.cpp")
 
 # Plugin Searcher Target
-file (GLOB_RECURSE PLUGINSEARCHER_SRC "./pluginSearcher/*.cpp")
+file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
 if (MSVC)
     target_compile_definitions (PluginSearcher PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
@@ -58,7 +58,7 @@ add_dependencies (PluginSearcher libJUCE)
 set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
 
 # Main Target
-file (GLOB_RECURSE VOCALSHAPER_SRC "./src/*.cpp" "./src/*.rc")
+file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
 target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH})
 target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1")
