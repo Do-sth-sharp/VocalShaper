@@ -2,9 +2,19 @@
 
 #include <JuceHeader.h>
 
+#include "../source/CloneableSource.h"
+
 class SourceRecordProcessor final : public juce::AudioProcessor {
 public:
 	SourceRecordProcessor();
+
+	using ChannelConnection = std::tuple<int, int>;
+	using ChannelConnectionList = juce::Array<ChannelConnection>;
+
+	void addTask(CloneableSource::SafePointer<> source, ChannelConnectionList channels);
+	void removeTask(int index);
+	int getTaskNum() const;
+	std::tuple<CloneableSource::SafePointer<>, ChannelConnectionList> getTask(int index) const;
 
 public:
 	const juce::String getName() const override { return "Source Recorder"; };
@@ -31,5 +41,11 @@ public:
 	double getTailLengthSeconds() const override;
 
 private:
+	using RecorderTask = std::tuple<
+		std::shared_ptr<juce::ScopedWriteLock>,
+		CloneableSource::SafePointer<>, ChannelConnectionList>;
+	juce::Array<RecorderTask> tasks;
+	juce::ReadWriteLock taskLock;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceRecordProcessor)
 };

@@ -20,7 +20,7 @@ void CloneableSynthSource::readData(juce::AudioBuffer<float>& buffer, double buf
     double dataDeviation, double length) const {
     if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
-    juce::GenericScopedTryLock locker(this->audioLock);
+    juce::ScopedTryReadLock locker(this->audioLock);
     if (locker.isLocked()) {
         if (this->source && this->memorySource) {
             this->memorySource->setNextReadPosition(std::floor(dataDeviation * this->sourceSampleRate));
@@ -72,7 +72,7 @@ void CloneableSynthSource::synth() {
 
     /** Lock Buffer */
     juce::ScopedReadLock locker(this->lock);
-    juce::GenericScopedLock audioLocker(this->audioLock);
+    juce::ScopedWriteLock audioLocker(this->audioLock);
 
     /** Prepare Audio Buffer */
     {
@@ -109,6 +109,10 @@ void CloneableSynthSource::synth() {
 
     /** Start Render */
     this->synthThread->startThread();
+}
+
+juce::ReadWriteLock& CloneableSynthSource::getRecorderLock() const {
+    return this->audioLock;
 }
 
 bool CloneableSynthSource::clone(const CloneableSource* src) {
@@ -168,7 +172,7 @@ bool CloneableSynthSource::save(const juce::File& file) const {
 }
 
 bool CloneableSynthSource::exportt(const juce::File& file) const {
-    juce::GenericScopedLock locker(this->audioLock);
+    juce::ScopedReadLock locker(this->audioLock);
 
     if ((!this->source) || (!this->memorySource)) { return false; }
 
@@ -195,7 +199,7 @@ double CloneableSynthSource::getLength() const {
 }
 
 void CloneableSynthSource::sampleRateChanged() {
-    juce::GenericScopedLock locker(this->audioLock);
+    juce::ScopedWriteLock locker(this->audioLock);
     if (this->source) {
         this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
         this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());

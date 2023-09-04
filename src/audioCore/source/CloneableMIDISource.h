@@ -13,6 +13,9 @@ public:
 		double startTime, double endTime) const;
 	int getTrackNum() const;
 
+public:
+	juce::ReadWriteLock& getRecorderLock() const override;
+
 private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;
@@ -21,7 +24,7 @@ private:
 
 private:
 	juce::MidiFile buffer;
-	juce::ReadWriteLock lock;
+	mutable juce::ReadWriteLock lock;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableMIDISource)
 };

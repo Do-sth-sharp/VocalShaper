@@ -14,6 +14,9 @@ public:
 		double dataDeviation, double length) const;
 	int getChannelNum() const;
 
+public:
+	juce::ReadWriteLock& getRecorderLock() const override;
+
 private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;
@@ -23,7 +26,7 @@ private:
 
 private:
 	juce::AudioSampleBuffer buffer;
-	juce::CriticalSection lock;
+	mutable juce::ReadWriteLock lock;
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;

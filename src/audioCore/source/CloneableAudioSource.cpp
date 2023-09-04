@@ -10,7 +10,7 @@ void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double buf
 	double dataDeviation, double length) const {
 	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
-	juce::GenericScopedTryLock locker(this->lock);
+	juce::ScopedTryReadLock locker(this->lock);
 	if (locker.isLocked()) {
 		if (this->source && this->memorySource) {
 			this->memorySource->setNextReadPosition(std::floor(dataDeviation * this->sourceSampleRate));
@@ -26,8 +26,12 @@ int CloneableAudioSource::getChannelNum() const {
 	return this->buffer.getNumChannels();
 }
 
+juce::ReadWriteLock& CloneableAudioSource::getRecorderLock() const {
+	return this->lock;
+}
+
 bool CloneableAudioSource::clone(const CloneableSource* src) {
-	juce::GenericScopedLock locker(this->lock);
+	juce::ScopedWriteLock locker(this->lock);
 
 	/** Check Source Type */
 	auto ptrSrc = dynamic_cast<const CloneableAudioSource*>(src);
@@ -53,7 +57,7 @@ bool CloneableAudioSource::clone(const CloneableSource* src) {
 }
 
 bool CloneableAudioSource::load(const juce::File& file) {
-	juce::GenericScopedLock locker(this->lock);
+	juce::ScopedWriteLock locker(this->lock);
 
 	/** Create Audio Reader */
 	auto audioReader = utils::createAudioReader(file);
@@ -81,7 +85,7 @@ bool CloneableAudioSource::load(const juce::File& file) {
 }
 
 bool CloneableAudioSource::save(const juce::File& file) const {
-	juce::GenericScopedLock locker(this->lock);
+	juce::ScopedReadLock locker(this->lock);
 
 	if (!this->source) { return false; }
 
@@ -97,12 +101,12 @@ bool CloneableAudioSource::save(const juce::File& file) const {
 }
 
 double CloneableAudioSource::getLength() const {
-	juce::GenericScopedLock locker(this->lock);
+	juce::ScopedReadLock locker(this->lock);
 	return this->buffer.getNumSamples() / this->sourceSampleRate;
 }
 
 void CloneableAudioSource::sampleRateChanged() {
-	juce::GenericScopedLock locker(this->lock);
+	juce::ScopedWriteLock locker(this->lock);
 	if (this->source) {
 		this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 		this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());

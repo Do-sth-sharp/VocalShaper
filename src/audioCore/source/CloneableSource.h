@@ -51,6 +51,9 @@ public:
 		juce::WeakReference<CloneableSource> weakRef;
 	};
 
+public:
+	virtual juce::ReadWriteLock& getRecorderLock() const = 0;
+
 protected:
 	virtual bool clone(const CloneableSource* src) = 0;
 	virtual bool load(const juce::File& file) = 0;

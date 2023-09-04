@@ -5,27 +5,33 @@
 void CloneableMIDISource::readData(
     juce::MidiBuffer& buffer, double baseTime,
     double startTime, double endTime) const {
-    juce::ScopedReadLock locker(this->lock);
+    juce::ScopedTryReadLock locker(this->lock);
 
-    /** Get MIDI Data */
-    juce::MidiMessageSequence total;
-    for (int i = 0; i < this->buffer.getNumTracks(); i++) {
-        auto track = this->buffer.getTrack(i);
-        if (track) {
-            total.addSequence(*track, 0, startTime, endTime);
+    if (locker.isLocked()) {
+        /** Get MIDI Data */
+        juce::MidiMessageSequence total;
+        for (int i = 0; i < this->buffer.getNumTracks(); i++) {
+            auto track = this->buffer.getTrack(i);
+            if (track) {
+                total.addSequence(*track, 0, startTime, endTime);
+            }
         }
-    }
 
-    /** Copy Data */
-    for (auto i : total) {
-        auto& message = i->message;
-        double time = message.getTimeStamp();
-        buffer.addEvent(message, std::floor((time + baseTime) * this->getSampleRate()));
+        /** Copy Data */
+        for (auto i : total) {
+            auto& message = i->message;
+            double time = message.getTimeStamp();
+            buffer.addEvent(message, std::floor((time + baseTime) * this->getSampleRate()));
+        }
     }
 }
 
 int CloneableMIDISource::getTrackNum() const {
     return this->buffer.getNumTracks();
+}
+
+juce::ReadWriteLock& CloneableMIDISource::getRecorderLock() const {
+    return this->lock;
 }
 
 bool CloneableMIDISource::clone(const CloneableSource* src) {
