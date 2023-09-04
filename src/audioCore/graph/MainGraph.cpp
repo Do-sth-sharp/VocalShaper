@@ -100,7 +100,7 @@ void MainGraph::setMIDIOutput(juce::MidiOutput* output) {
 
 void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Play Head */
-	if (auto position = PlayPosition::getInstance()) {
+	if (auto position = dynamic_cast<PlayPosition*>(this->getPlayHead())) {
 		position->setSampleRate(sampleRate);
 	}
 
@@ -201,5 +201,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	}
 
 	/** Add Position */
-	PlayPosition::getInstance()->next(audio.getNumSamples());
+	if (auto position = dynamic_cast<PlayPosition*>(this->getPlayHead())) {
+		position->next(audio.getNumSamples());
+	}
 }

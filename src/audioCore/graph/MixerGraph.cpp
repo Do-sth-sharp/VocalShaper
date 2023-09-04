@@ -1,7 +1,5 @@
 #include "MainGraph.h"
 
-#include "../misc/PlayPosition.h"
-
 void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
 	if (auto ptrNode = this->addNode(std::make_unique<Track>(type))) {
@@ -19,7 +17,7 @@ void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 			{ptrNode->nodeID, this->midiChannelIndex} });
 
 		/** Prepare To Play */
-		ptrNode->getProcessor()->setPlayHead(PlayPosition::getInstance());
+		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 	}
 	else {

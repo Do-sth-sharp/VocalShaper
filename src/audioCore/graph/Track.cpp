@@ -1,7 +1,5 @@
 ﻿#include "Track.h"
 
-#include "../misc/PlayPosition.h"
-
 Track::Track(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
 	/** Set Effects */
@@ -210,7 +208,7 @@ void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 
 	/** Plugins */
 	if (auto pluginDock = this->getPluginDock()) {
-		pluginDock->setPlayHead(PlayPosition::getInstance());
+		pluginDock->setPlayHead(newPlayHead);
 	}
 }
 

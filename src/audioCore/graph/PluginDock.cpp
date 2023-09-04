@@ -1,5 +1,4 @@
 ﻿#include "PluginDock.h"
-#include "../misc/PlayPosition.h"
 
 PluginDock::PluginDock(const juce::AudioChannelSet& type) 
 	: audioChannels(type) {
@@ -111,7 +110,7 @@ bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> process
 		this->pluginNodeList.insert(index, ptrNode);
 
 		/** Prepare To Play */
-		ptrNode->getProcessor()->setPlayHead(PlayPosition::getInstance());
+		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 		return true;
@@ -316,6 +315,6 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	/** Plugins */
 	for (auto& i : this->pluginNodeList) {
 		auto plugin = i->getProcessor();
-		plugin->setPlayHead(PlayPosition::getInstance());
+		plugin->setPlayHead(newPlayHead);
 	}
 }
