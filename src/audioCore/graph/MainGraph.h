@@ -86,6 +86,7 @@ public:
 
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
+	double getTailLengthSeconds() const override;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

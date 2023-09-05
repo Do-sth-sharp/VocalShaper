@@ -136,6 +136,14 @@ void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	}
 }
 
+double MainGraph::getTailLengthSeconds() const {
+	double result = 0;
+	for (auto& t : this->audioSourceNodeList) {
+		result = std::max(t->getProcessor()->getTailLengthSeconds(), result);
+	}
+	return result;
+}
+
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Call MIDI Hook */
 	{

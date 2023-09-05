@@ -4,6 +4,7 @@
 #include "debug/MIDIDebugger.h"
 #include "plugin/PluginLoader.h"
 #include "misc/PlayPosition.h"
+#include "misc/PlayWatcher.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -54,12 +55,16 @@ AudioCore::AudioCore() {
 
 	/** Init Audio Device */
 	this->initAudioDevice();
+
+	/** Start Play Watcher */
+	PlayWatcher::getInstance()->startTimer(1000);
 }
 
 AudioCore::~AudioCore() {
 	this->audioDeviceManager->removeAllChangeListeners();
 	this->audioDeviceManager->removeAudioCallback(this->mainGraphPlayer.get());
 	this->mainGraphPlayer->setProcessor(nullptr);
+	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
 	AudioIOList::releaseInstance();
 	CloneableSourceManager::releaseInstance();
