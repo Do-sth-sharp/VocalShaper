@@ -8,15 +8,10 @@ class SourceRecordProcessor final : public juce::AudioProcessor {
 public:
 	SourceRecordProcessor();
 
-	using ChannelConnection = std::tuple<int, int>;
-	using ChannelConnectionList = juce::Array<ChannelConnection>;
-
-	void addTask(CloneableSource::SafePointer<> source,
-		ChannelConnectionList channels, double offset);
+	void addTask(CloneableSource::SafePointer<> source, double offset);
 	void removeTask(int index);
 	int getTaskNum() const;
-	std::tuple<CloneableSource::SafePointer<>, ChannelConnectionList, double>
-		getTask(int index) const;
+	std::tuple<CloneableSource::SafePointer<>, double> getTask(int index) const;
 
 public:
 	const juce::String getName() const override { return "Source Recorder"; };
@@ -43,9 +38,8 @@ public:
 	double getTailLengthSeconds() const override;
 
 private:
-	using RecorderTask = std::tuple<
-		std::shared_ptr<juce::ScopedWriteLock>,
-		CloneableSource::SafePointer<>, ChannelConnectionList, double>;
+	using RecorderTask = std::tuple<std::shared_ptr<juce::ScopedWriteLock>,
+		CloneableSource::SafePointer<>, double>;
 	juce::Array<RecorderTask> tasks;
 	juce::ReadWriteLock taskLock;
 

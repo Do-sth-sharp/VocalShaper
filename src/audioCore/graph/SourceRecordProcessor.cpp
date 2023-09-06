@@ -4,13 +4,10 @@
 #include "../source/CloneableMIDISource.h"
 #include "../source/CloneableSynthSource.h"
 
-SourceRecordProcessor::SourceRecordProcessor() {
-	/** TODO */
-}
+SourceRecordProcessor::SourceRecordProcessor() {}
 
 void SourceRecordProcessor::addTask(
-	CloneableSource::SafePointer<> source,
-	SourceRecordProcessor::ChannelConnectionList channels, double offset) {
+	CloneableSource::SafePointer<> source, double offset) {
 	juce::ScopedWriteLock locker(this->taskLock);
 
 	/** Check Source */
@@ -20,10 +17,26 @@ void SourceRecordProcessor::addTask(
 	this->tasks.removeIf([&source](RecorderTask& t)
 		{ return std::get<1>(t) == source; });
 
+	/** Lock Task */
+	auto taskLocker =
+		std::make_shared<juce::ScopedWriteLock>(source->getRecorderLock());
+
+	/** Prepare Task */
+	if (auto src = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
+		/** Audio Source */
+		src->prepareToRecord(this->getTotalNumInputChannels(),
+			this->getSampleRate(), this->getBlockSize());
+	}
+	else if (auto src = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
+		/** TODO MIDI Source */
+	}
+	else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+		/** TODO Synth Source */
+	}
+
 	/** Add Task */
 	return this->tasks.add(
-		{ std::make_shared<juce::ScopedWriteLock>(source->getRecorderLock()),
-		source, channels, offset });
+		{ taskLocker, source, offset });
 }
 
 void SourceRecordProcessor::removeTask(int index) {
@@ -36,16 +49,16 @@ int SourceRecordProcessor::getTaskNum() const {
 	return this->tasks.size();
 }
 
-std::tuple<CloneableSource::SafePointer<>, SourceRecordProcessor::ChannelConnectionList, double>
+std::tuple<CloneableSource::SafePointer<>, double>
 	SourceRecordProcessor::getTask(int index) const {
 	juce::ScopedReadLock locker(this->taskLock);
-	auto& [l, source, channels, offset] = this->tasks.getReference(index);
-	return { source, channels, offset };
+	auto& [l, source, offset] = this->tasks.getReference(index);
+	return { source, offset };
 }
 
 void SourceRecordProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
-	/** TODO */
+	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
 }
 
 void SourceRecordProcessor::processBlock(
@@ -61,14 +74,17 @@ void SourceRecordProcessor::processBlock(
 	if (!playPosition->getIsPlaying() || !playPosition->getIsRecording()) { return; }
 
 	/** Check Each Task */
-	for (auto& task : this->tasks) {
+	for (auto& [l, source, offset] : this->tasks) {
 		/** Get Task Info */
-		auto& [l, source, channels, offset] = task;
-		if (offset > playPosition->getTimeInSeconds()) { continue; }
+		if (offset - buffer.getNumSamples() / this->getSampleRate() >
+			playPosition->getTimeInSeconds().orFallback(0)) { continue; }
+		double startPos =
+			playPosition->getTimeInSeconds().orFallback(0) - offset;
 
 		/** Copy Data */
 		if (auto src = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
-			/** TODO Audio Source */
+			/** Audio Source */
+			src->writeData(buffer, startPos);
 		}
 		else if (auto src = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
 			/** TODO MIDI Source */

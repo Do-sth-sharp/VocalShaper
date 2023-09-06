@@ -25,6 +25,11 @@ private:
 	void sampleRateChanged() override;
 
 private:
+	friend class SourceRecordProcessor;
+	void prepareToRecord(int channelNum, double sampleRate, int bufferSize);
+	void writeData(const juce::AudioBuffer<float>& buffer, double offset);
+
+private:
 	juce::AudioSampleBuffer buffer;
 	mutable juce::ReadWriteLock lock;
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;

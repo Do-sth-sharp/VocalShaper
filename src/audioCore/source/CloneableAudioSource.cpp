@@ -112,3 +112,41 @@ void CloneableAudioSource::sampleRateChanged() {
 		this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
 	}
 }
+
+void CloneableAudioSource::prepareToRecord(
+	int channelNum, double sampleRate, int bufferSize) {
+	if (this->getSourceSampleRate() != sampleRate) {
+		this->buffer.clear();
+	}
+
+	this->buffer.setSize(
+		channelNum, this->buffer.getNumSamples(), true, false, true);
+
+	this->prepareToPlay(sampleRate, bufferSize);
+}
+
+void CloneableAudioSource::writeData(
+	const juce::AudioBuffer<float>& buffer, double offset)	{
+	/** Get Time */
+	int startSample = offset * this->getSampleRate();
+	int srcStartSample = 0;
+	int length = buffer.getNumSamples();
+	if (startSample < 0) {
+		srcStartSample -= startSample;
+		length -= srcStartSample;
+		startSample = 0;
+	}
+
+	/** Length Limit */
+	if (startSample > this->buffer.getNumSamples() - length) {
+		length = this->buffer.getNumSamples() - startSample;
+	}
+
+	/** CopyData */
+	for (int i = 0; i < buffer.getNumChannels(); i++) {
+		if (auto rptr = buffer.getReadPointer(i)) {
+			this->buffer.copyFrom(
+				i, startSample, &(rptr)[srcStartSample], length);
+		}
+	}
+}
