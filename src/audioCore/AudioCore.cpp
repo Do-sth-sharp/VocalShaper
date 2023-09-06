@@ -430,12 +430,12 @@ void AudioCore::bypassInstrument(int instrIndex, bool bypass) {
 }
 
 bool AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
-	double startTime, double endTime, double deviation) {
+	double startTime, double endTime, double offset) {
 	juce::GenericScopedLock srcLocker(CloneableSourceManager::getInstance()->getLock());
 	
 	if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
 		if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
-			return seqTrack->addSeq({ startTime, endTime, deviation, ptrSrc });
+			return seqTrack->addSeq({ startTime, endTime, offset, ptrSrc });
 		}
 	}
 

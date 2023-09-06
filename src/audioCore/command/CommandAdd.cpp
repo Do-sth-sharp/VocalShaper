@@ -411,10 +411,10 @@ AUDIOCORE_FUNC(addSequencerSourceInstance) {
 	int srcIndex = luaL_checkinteger(L, 2);
 	double startTime = luaL_checknumber(L, 3);
 	double endTime = luaL_checknumber(L, 4);
-	double deviation = luaL_checknumber(L, 5);
+	double offset = luaL_checknumber(L, 5);
 
 	AudioCore::getInstance()->addSequencerSourceInstance(trackIndex, srcIndex,
-		startTime, endTime, deviation);
+		startTime, endTime, offset);
 
 	result += "Add Sequencer Source Instance [" + juce::String(trackIndex) + "] : [" + juce::String(srcIndex) + "]\n";
 	result += "Total Sequencer Source Instance: " + juce::String(AudioCore::getInstance()->getSequencerSourceInstanceNum(trackIndex)) + "\n";

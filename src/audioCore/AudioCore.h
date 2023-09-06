@@ -93,7 +93,7 @@ public:
 	void bypassInstrument(int instrIndex, bool bypass);
 
 	bool addSequencerSourceInstance(int trackIndex, int srcIndex,
-		double startTime, double endTime, double deviation);
+		double startTime, double endTime, double offset);
 	void removeSequencerSourceInstance(int trackIndex, int index);
 	int getSequencerSourceInstanceNum(int trackIndex) const;
 

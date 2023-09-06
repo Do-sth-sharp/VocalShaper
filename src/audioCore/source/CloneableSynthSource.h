@@ -12,8 +12,8 @@ public:
 	int getTrackNum() const;
 
 	double getSourceSampleRate() const;
-	void readData(juce::AudioBuffer<float>& buffer, double bufferDeviation,
-		double dataDeviation, double length) const;
+	void readData(juce::AudioBuffer<float>& buffer, double bufferOffset,
+		double dataOffset, double length) const;
 	int getChannelNum() const;
 
 	void setSynthesizer(std::unique_ptr<juce::AudioPluginInstance> synthesizer);
