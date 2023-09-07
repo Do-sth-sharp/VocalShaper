@@ -96,3 +96,7 @@ double CloneableMIDISource::getLength() const {
 	/** Get Time In Seconds */
     return this->buffer.getLastTimestamp();
 }
+
+void CloneableMIDISource::prepareToRecord() {
+    /** Nothing To Prepare */
+}

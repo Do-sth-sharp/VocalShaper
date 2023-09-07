@@ -23,6 +23,10 @@ private:
 	double getLength() const override;
 
 private:
+	friend class SourceRecordProcessor;
+	void prepareToRecord();
+
+private:
 	juce::MidiFile buffer;
 	mutable juce::ReadWriteLock lock;
 

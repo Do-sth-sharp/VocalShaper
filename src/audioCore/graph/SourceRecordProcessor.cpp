@@ -28,7 +28,8 @@ void SourceRecordProcessor::addTask(
 			this->getSampleRate(), this->getBlockSize());
 	}
 	else if (auto src = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
-		/** TODO MIDI Source */
+		/** MIDI Source */
+		src->prepareToRecord();
 	}
 	else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
 		/** TODO Synth Source */
@@ -59,6 +60,8 @@ std::tuple<CloneableSource::SafePointer<>, double>
 void SourceRecordProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** TODO Update Source Sample Rate And Buffer Size */
 }
 
 void SourceRecordProcessor::processBlock(
