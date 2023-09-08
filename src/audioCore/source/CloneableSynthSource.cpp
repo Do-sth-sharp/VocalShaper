@@ -205,3 +205,10 @@ void CloneableSynthSource::sampleRateChanged() {
         this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
     }
 }
+
+void CloneableSynthSource::prepareToRecord() {
+    /** Clear Audio Source */
+    juce::ScopedWriteLock locker(this->audioLock);
+    this->source = nullptr;
+    this->memorySource = nullptr;
+}

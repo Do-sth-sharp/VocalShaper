@@ -33,6 +33,10 @@ private:
 	void sampleRateChanged() override;
 
 private:
+	friend class SourceRecordProcessor;
+	void prepareToRecord();
+
+private:
 	juce::MidiFile buffer;
 	juce::ReadWriteLock lock;
 

@@ -32,7 +32,8 @@ void SourceRecordProcessor::addTask(
 		src->prepareToRecord();
 	}
 	else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-		/** TODO Synth Source */
+		/** Synth Source */
+		src->prepareToRecord();
 	}
 
 	/** Add Task */
