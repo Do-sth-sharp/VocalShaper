@@ -91,7 +91,8 @@ void SourceRecordProcessor::processBlock(
 			src->writeData(buffer, startPos);
 		}
 		else if (auto src = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
-			/** TODO MIDI Source */
+			/** MIDI Source */
+			src->writeData(midiMessages, startPos);
 		}
 		else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
 			/** TODO Synth Source */
