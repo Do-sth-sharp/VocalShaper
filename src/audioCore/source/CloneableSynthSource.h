@@ -35,6 +35,7 @@ private:
 private:
 	friend class SourceRecordProcessor;
 	void prepareToRecord();
+	void writeData(const juce::MidiBuffer& buffer, double offset);
 
 private:
 	juce::MidiFile buffer;

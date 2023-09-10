@@ -211,4 +211,19 @@ void CloneableSynthSource::prepareToRecord() {
     juce::ScopedWriteLock locker(this->audioLock);
     this->source = nullptr;
     this->memorySource = nullptr;
+
+    /** Add New Track */
+    this->buffer.addTrack(juce::MidiMessageSequence{});
+}
+
+void CloneableSynthSource::writeData(const juce::MidiBuffer& buffer, double offset) {
+    if (auto track = const_cast<juce::MidiMessageSequence*>(
+        this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
+        for (const auto& m : buffer) {
+            double timeAdjustment = m.samplePosition / this->getSampleRate() + offset;
+            if (timeAdjustment >= 0) {
+                track->addEvent(m.getMessage(), timeAdjustment);
+            }
+        }
+    }
 }
