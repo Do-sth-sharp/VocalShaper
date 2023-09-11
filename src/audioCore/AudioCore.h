@@ -97,6 +97,10 @@ public:
 	void removeSequencerSourceInstance(int trackIndex, int index);
 	int getSequencerSourceInstanceNum(int trackIndex) const;
 
+	bool addRecorderSourceInstance(int srcIndex, double offset);
+	void removeRecorderSourceInstance(int index);
+	int getRecorderSourceInstanceNum() const;
+
 	void play();
 	void pause();
 	void stop();

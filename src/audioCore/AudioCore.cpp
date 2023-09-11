@@ -455,6 +455,32 @@ int AudioCore::getSequencerSourceInstanceNum(int trackIndex) const {
 	return -1;
 }
 
+bool AudioCore::addRecorderSourceInstance(int srcIndex, double offset) {
+	juce::GenericScopedLock srcLocker(CloneableSourceManager::getInstance()->getLock());
+
+	if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
+		if (auto recorder = this->mainAudioGraph->getRecorder()) {
+			recorder->addTask(ptrSrc, offset);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void AudioCore::removeRecorderSourceInstance(int index) {
+	if (auto recorder = this->mainAudioGraph->getRecorder()) {
+		recorder->removeTask(index);
+	}
+}
+
+int AudioCore::getRecorderSourceInstanceNum() const {
+	if (auto recorder = this->mainAudioGraph->getRecorder()) {
+		return recorder->getTaskNum();
+	}
+	return -1;
+}
+
 void AudioCore::play() {
 	PlayPosition::getInstance()->transportPlay(true);
 }

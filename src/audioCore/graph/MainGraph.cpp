@@ -144,6 +144,10 @@ double MainGraph::getTailLengthSeconds() const {
 	return result;
 }
 
+SourceRecordProcessor* MainGraph::getRecorder() const {
+	return dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor());
+}
+
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Call MIDI Hook */
 	{

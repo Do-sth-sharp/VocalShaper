@@ -4,6 +4,7 @@
 #include "Track.h"
 #include "PluginDecorator.h"
 #include "SeqSourceProcessor.h"
+#include "SourceRecordProcessor.h"
 
 class MainGraph final : public juce::AudioProcessorGraph {
 public:
@@ -87,6 +88,8 @@ public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 	double getTailLengthSeconds() const override;
+
+	SourceRecordProcessor* getRecorder() const;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

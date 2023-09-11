@@ -422,6 +422,20 @@ AUDIOCORE_FUNC(addSequencerSourceInstance) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(addRecordererSourceInstance) {
+	juce::String result;
+
+	int srcIndex = luaL_checkinteger(L, 1);
+	double offset = luaL_checknumber(L, 2);
+
+	AudioCore::getInstance()->addRecorderSourceInstance(srcIndex, offset);
+
+	result += "Add Recorder Source Instance [" + juce::String(srcIndex) + "]\n";
+	result += "Total Recorder Source Instance: " + juce::String(AudioCore::getInstance()->getRecorderSourceInstanceNum()) + "\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -444,4 +458,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerSourceInstance);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addRecordererSourceInstance);
 }
