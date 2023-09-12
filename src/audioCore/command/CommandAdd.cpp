@@ -422,7 +422,7 @@ AUDIOCORE_FUNC(addSequencerSourceInstance) {
 	return CommandFuncResult{ true, result };
 }
 
-AUDIOCORE_FUNC(addRecordererSourceInstance) {
+AUDIOCORE_FUNC(addRecorderSourceInstance) {
 	juce::String result;
 
 	int srcIndex = luaL_checkinteger(L, 1);
@@ -458,5 +458,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerSourceInstance);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addRecordererSourceInstance);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addRecorderSourceInstance);
 }
