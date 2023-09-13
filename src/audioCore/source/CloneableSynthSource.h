@@ -21,9 +21,6 @@ public:
 	void stopSynth();
 	void synth();
 
-public:
-	juce::ReadWriteLock& getRecorderLock() const override;
-
 private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;
@@ -34,7 +31,10 @@ private:
 
 private:
 	friend class SourceRecordProcessor;
-	void prepareToRecord();
+	void prepareToRecord(
+		int inputChannels, double sampleRate,
+		int blockSize, bool updateOnly) override;
+	void recordingFinished() override;
 	void writeData(const juce::MidiBuffer& buffer, double offset);
 
 private:

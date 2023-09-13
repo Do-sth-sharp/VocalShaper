@@ -8,6 +8,7 @@ double CloneableAudioSource::getSourceSampleRate() const {
 
 void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double bufferOffset,
 	double dataOffset, double length) const {
+	if (this->checkRecording()) { return; }
 	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
 	juce::ScopedTryReadLock locker(this->lock);
@@ -26,11 +27,11 @@ int CloneableAudioSource::getChannelNum() const {
 	return this->buffer.getNumChannels();
 }
 
-juce::ReadWriteLock& CloneableAudioSource::getRecorderLock() const {
-	return this->lock;
-}
-
 bool CloneableAudioSource::clone(const CloneableSource* src) {
+	/** Check Not Recording */
+	if (this->checkRecording()) { return false; }
+
+	/** Lock */
 	juce::ScopedWriteLock locker(this->lock);
 
 	/** Check Source Type */
@@ -57,6 +58,10 @@ bool CloneableAudioSource::clone(const CloneableSource* src) {
 }
 
 bool CloneableAudioSource::load(const juce::File& file) {
+	/** Check Not Recording */
+	if (this->checkRecording()) { return false; }
+
+	/** Lock */
 	juce::ScopedWriteLock locker(this->lock);
 
 	/** Create Audio Reader */
@@ -87,8 +92,6 @@ bool CloneableAudioSource::load(const juce::File& file) {
 bool CloneableAudioSource::save(const juce::File& file) const {
 	juce::ScopedReadLock locker(this->lock);
 
-	if (!this->source) { return false; }
-
 	/** Create Audio Writer */
 	auto audioWriter = utils::createAudioWriter(file, this->sourceSampleRate,
 		juce::AudioChannelSet::canonicalChannelSet(this->buffer.getNumChannels()));
@@ -114,39 +117,51 @@ void CloneableAudioSource::sampleRateChanged() {
 }
 
 void CloneableAudioSource::prepareToRecord(
-	int channelNum, double sampleRate, int bufferSize) {
+	int inputChannels, double sampleRate, int blockSize, bool /*updateOnly*/) {
+	juce::ScopedWriteLock locker(this->lock);
+
 	if (this->getSourceSampleRate() != sampleRate) {
 		this->buffer.clear();
 	}
 
 	this->buffer.setSize(
-		channelNum, this->buffer.getNumSamples(), true, false, true);
+		inputChannels, this->buffer.getNumSamples(), true, false, true);
 
-	this->prepareToPlay(sampleRate, bufferSize);
+	this->prepareToPlay(sampleRate, blockSize);
+}
+
+void CloneableAudioSource::recordingFinished() {
+	/** Nothing To Do */
 }
 
 void CloneableAudioSource::writeData(
 	const juce::AudioBuffer<float>& buffer, double offset)	{
-	/** Get Time */
-	int startSample = offset * this->getSampleRate();
-	int srcStartSample = 0;
-	int length = buffer.getNumSamples();
-	if (startSample < 0) {
-		srcStartSample -= startSample;
-		length -= srcStartSample;
-		startSample = 0;
-	}
+	/** Lock */
+	juce::ScopedTryWriteLock locker(this->lock);
+	if (locker.isLocked()) {
+		/** Get Time */
+		int startSample = offset * this->getSampleRate();
+		int srcStartSample = 0;
+		int length = buffer.getNumSamples();
+		if (startSample < 0) {
+			srcStartSample -= startSample;
+			length -= srcStartSample;
+			startSample = 0;
+		}
 
-	/** Length Limit */
-	if (startSample > this->buffer.getNumSamples() - length) {
-		length = this->buffer.getNumSamples() - startSample;
-	}
+		/** Increase BufferLength */
+		if (startSample > this->buffer.getNumSamples() - length) {
+			int newLength = startSample + length;
+			this->buffer.setSize(
+				this->buffer.getNumChannels(), newLength, true, false, true);
+		}
 
-	/** CopyData */
-	for (int i = 0; i < buffer.getNumChannels(); i++) {
-		if (auto rptr = buffer.getReadPointer(i)) {
-			this->buffer.copyFrom(
-				i, startSample, &(rptr)[srcStartSample], length);
+		/** CopyData */
+		for (int i = 0; i < buffer.getNumChannels(); i++) {
+			if (auto rptr = buffer.getReadPointer(i)) {
+				this->buffer.copyFrom(
+					i, startSample, &(rptr)[srcStartSample], length);
+			}
 		}
 	}
 }

@@ -51,8 +51,21 @@ public:
 		juce::WeakReference<CloneableSource> weakRef;
 	};
 
+private:
+	friend class SourceRecordProcessor;
+	void prepareToRecordInternal(
+		int inputChannels, double sampleRate,
+		int blockSize, bool updateOnly = false);
+	void recordingFinishedInternal();
+
 public:
-	virtual juce::ReadWriteLock& getRecorderLock() const = 0;
+	bool checkRecording() const;
+
+protected:
+	virtual void prepareToRecord(
+		int inputChannels, double sampleRate,
+		int blockSize, bool updateOnly) {};
+	virtual void recordingFinished() {};
 
 protected:
 	virtual bool clone(const CloneableSource* src) = 0;
@@ -69,6 +82,7 @@ private:
 	juce::String name;
 	std::atomic<double> currentSampleRate = 0;
 	std::atomic_int currentBufferSize = 0;
+	std::atomic_bool isRecording = false;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource)

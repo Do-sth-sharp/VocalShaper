@@ -84,3 +84,20 @@ double CloneableSource::getSampleRate() const {
 int CloneableSource::getBufferSize() const {
 	return this->currentBufferSize;
 }
+
+void CloneableSource::prepareToRecordInternal(
+	int inputChannels, double sampleRate,
+	int blockSize, bool updateOnly) {
+	this->isRecording = true;
+	this->prepareToRecord(
+		inputChannels, sampleRate, blockSize, updateOnly);
+}
+
+void CloneableSource::recordingFinishedInternal() {
+	this->recordingFinished();
+	this->isRecording = false;
+}
+
+bool CloneableSource::checkRecording() const {
+	return this->isRecording;
+}

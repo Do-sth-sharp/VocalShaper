@@ -6,6 +6,12 @@
 
 SourceRecordProcessor::SourceRecordProcessor() {}
 
+SourceRecordProcessor::~SourceRecordProcessor() {
+	while (this->getTaskNum() > 0) {
+		this->removeTask(0);
+	}
+}
+
 void SourceRecordProcessor::addTask(
 	CloneableSource::SafePointer<> source, double offset) {
 	juce::ScopedWriteLock locker(this->taskLock);
@@ -15,35 +21,22 @@ void SourceRecordProcessor::addTask(
 
 	/** Source Already Exists */
 	this->tasks.removeIf([&source](RecorderTask& t)
-		{ return std::get<1>(t) == source; });
-
-	/** Lock Task */
-	auto taskLocker =
-		std::make_shared<juce::ScopedWriteLock>(source->getRecorderLock());
+		{ return std::get<0>(t) == source; });
 
 	/** Prepare Task */
-	if (auto src = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
-		/** Audio Source */
-		src->prepareToRecord(this->getTotalNumInputChannels(),
-			this->getSampleRate(), this->getBlockSize());
-	}
-	else if (auto src = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
-		/** MIDI Source */
-		src->prepareToRecord();
-	}
-	else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-		/** Synth Source */
-		src->prepareToRecord();
-	}
-
+	source->prepareToRecordInternal(this->getTotalNumInputChannels(),
+		this->getSampleRate(), this->getBlockSize());
+	
 	/** Add Task */
-	return this->tasks.add(
-		{ taskLocker, source, offset });
+	return this->tasks.add({ source, offset });
 }
 
 void SourceRecordProcessor::removeTask(int index) {
 	juce::ScopedWriteLock locker(this->taskLock);
-	this->tasks.remove(index);
+	auto [src, offset] = this->tasks.removeAndReturn(index);
+	if (src) {
+		src->recordingFinishedInternal();
+	}
 }
 
 int SourceRecordProcessor::getTaskNum() const {
@@ -54,7 +47,7 @@ int SourceRecordProcessor::getTaskNum() const {
 std::tuple<CloneableSource::SafePointer<>, double>
 	SourceRecordProcessor::getTask(int index) const {
 	juce::ScopedReadLock locker(this->taskLock);
-	auto& [l, source, offset] = this->tasks.getReference(index);
+	auto& [source, offset] = this->tasks.getReference(index);
 	return { source, offset };
 }
 
@@ -62,7 +55,14 @@ void SourceRecordProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
 
-	/** TODO Update Source Sample Rate And Buffer Size */
+	/** Update Source Sample Rate And Buffer Size */
+	juce::ScopedReadLock locker(this->taskLock);
+	for (auto& [source, offset] : this->tasks) {
+		if (source) {
+			source->prepareToRecordInternal(this->getTotalNumInputChannels(),
+				this->getSampleRate(), this->getBlockSize(), true);
+		}
+	}
 }
 
 void SourceRecordProcessor::processBlock(
@@ -78,7 +78,7 @@ void SourceRecordProcessor::processBlock(
 	if (!playPosition->getIsPlaying() || !playPosition->getIsRecording()) { return; }
 
 	/** Check Each Task */
-	for (auto& [l, source, offset] : this->tasks) {
+	for (auto& [source, offset] : this->tasks) {
 		/** Get Task Info */
 		if (offset - buffer.getNumSamples() / this->getSampleRate() >
 			playPosition->getTimeInSeconds().orFallback(0)) { continue; }
@@ -95,7 +95,8 @@ void SourceRecordProcessor::processBlock(
 			src->writeData(midiMessages, startPos);
 		}
 		else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-			/** TODO Synth Source */
+			/** Synth Source */
+			src->writeData(midiMessages, startPos);
 		}
 	}
 }

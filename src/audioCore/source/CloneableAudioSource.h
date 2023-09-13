@@ -14,9 +14,6 @@ public:
 		double dataOffset, double length) const;
 	int getChannelNum() const;
 
-public:
-	juce::ReadWriteLock& getRecorderLock() const override;
-
 private:
 	bool clone(const CloneableSource* src) override;
 	bool load(const juce::File& file) override;
@@ -26,7 +23,10 @@ private:
 
 private:
 	friend class SourceRecordProcessor;
-	void prepareToRecord(int channelNum, double sampleRate, int bufferSize);
+	void prepareToRecord(
+		int inputChannels, double sampleRate,
+		int blockSize, bool updateOnly) override;
+	void recordingFinished() override;
 	void writeData(const juce::AudioBuffer<float>& buffer, double offset);
 
 private:

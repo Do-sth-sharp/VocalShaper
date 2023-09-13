@@ -7,6 +7,7 @@
 class SourceRecordProcessor final : public juce::AudioProcessor {
 public:
 	SourceRecordProcessor();
+	~SourceRecordProcessor();
 
 	void addTask(CloneableSource::SafePointer<> source, double offset);
 	void removeTask(int index);
@@ -38,8 +39,7 @@ public:
 	double getTailLengthSeconds() const override;
 
 private:
-	using RecorderTask = std::tuple<std::shared_ptr<juce::ScopedWriteLock>,
-		CloneableSource::SafePointer<>, double>;
+	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, double>;
 	juce::Array<RecorderTask> tasks;
 	juce::ReadWriteLock taskLock;
 

@@ -5,6 +5,8 @@
 void CloneableMIDISource::readData(
 	juce::MidiBuffer& buffer, double baseTime,
 	double startTime, double endTime) const {
+	if (this->checkRecording()) { return; }
+
 	juce::ScopedTryReadLock locker(this->lock);
 
 	if (locker.isLocked()) {
@@ -30,11 +32,10 @@ int CloneableMIDISource::getTrackNum() const {
 	return this->buffer.getNumTracks();
 }
 
-juce::ReadWriteLock& CloneableMIDISource::getRecorderLock() const {
-	return this->lock;
-}
-
 bool CloneableMIDISource::clone(const CloneableSource* src) {
+	/** Check Not Recording */
+	if (this->checkRecording()) { return false; }
+
 	/** Check Source Type */
 	auto ptrSrc = dynamic_cast<const CloneableMIDISource*>(src);
 	if (!ptrSrc) { return false; }
@@ -50,6 +51,9 @@ bool CloneableMIDISource::clone(const CloneableSource* src) {
 }
 
 bool CloneableMIDISource::load(const juce::File& file) {
+	/** Check Not Recording */
+	if (this->checkRecording()) { return false; }
+
 	/** Create Input Stream */
 	juce::FileInputStream stream(file);
 	if (stream.failedToOpen()) { return false; }
@@ -97,19 +101,35 @@ double CloneableMIDISource::getLength() const {
 	return this->buffer.getLastTimestamp();
 }
 
-void CloneableMIDISource::prepareToRecord() {
-	/** Add New Track */
-	this->buffer.addTrack(juce::MidiMessageSequence{});
+void CloneableMIDISource::prepareToRecord(
+	int /*inputChannels*/, double /*sampleRate*/,
+	int /*blockSize*/, bool updateOnly) {
+	if (!updateOnly) {
+		/** Lock */
+		juce::ScopedWriteLock locker(this->lock);
+
+		/** Add New Track */
+		this->buffer.addTrack(juce::MidiMessageSequence{});
+	}
+}
+
+void CloneableMIDISource::recordingFinished() {
+	/** Nothing To Do */
 }
 
 void CloneableMIDISource::writeData(
 	const juce::MidiBuffer& buffer, double offset) {
-	if (auto track = const_cast<juce::MidiMessageSequence*>(
-		this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
-		for (const auto& m : buffer) {
-			double timeAdjustment = m.samplePosition / this->getSampleRate() + offset;
-			if (timeAdjustment >= 0) {
-				track->addEvent(m.getMessage(), timeAdjustment);
+	/** Lock */
+	juce::ScopedTryWriteLock locker(this->lock);
+	if (locker.isLocked()) {
+		/** Write To The Last Track */
+		if (auto track = const_cast<juce::MidiMessageSequence*>(
+			this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
+			for (const auto& m : buffer) {
+				double timeAdjustment = m.samplePosition / this->getSampleRate() + offset;
+				if (timeAdjustment >= 0) {
+					track->addEvent(m.getMessage(), timeAdjustment);
+				}
 			}
 		}
 	}
