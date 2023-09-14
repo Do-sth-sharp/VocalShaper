@@ -32,22 +32,20 @@ int CloneableMIDISource::getTrackNum() const {
 	return this->buffer.getNumTracks();
 }
 
-bool CloneableMIDISource::clone(const CloneableSource* src) {
-	/** Check Not Recording */
-	if (this->checkRecording()) { return false; }
+std::unique_ptr<CloneableSource> CloneableMIDISource::clone() const {
+	/** Lock */
+	juce::ScopedTryReadLock locker(this->lock);
+	if (locker.isLocked()) {
+		/** Create New Source */
+		auto dst = std::unique_ptr<CloneableMIDISource>();
 
-	/** Check Source Type */
-	auto ptrSrc = dynamic_cast<const CloneableMIDISource*>(src);
-	if (!ptrSrc) { return false; }
+		/** Copy MIDI Data */
+		dst->buffer = this->buffer;
 
-	/** Copy MIDI Data */
-	{
-		juce::ScopedWriteLock locker0(this->lock);
-		juce::ScopedReadLock locker1(ptrSrc->lock);
-		this->buffer = ptrSrc->buffer;
+		/** Move Result */
+		return std::move(std::unique_ptr<CloneableSource>(dst.release()));
 	}
-
-	return true;
+	return nullptr;
 }
 
 bool CloneableMIDISource::load(const juce::File& file) {

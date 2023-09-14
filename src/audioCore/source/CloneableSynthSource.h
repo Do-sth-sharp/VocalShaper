@@ -22,7 +22,7 @@ public:
 	void synth();
 
 private:
-	bool clone(const CloneableSource* src) override;
+	std::unique_ptr<CloneableSource> clone() const override;
 	bool load(const juce::File& file) override;
 	bool save(const juce::File& file) const override;
 	bool exportt(const juce::File& file) const override;
@@ -39,7 +39,7 @@ private:
 
 private:
 	juce::MidiFile buffer;
-	juce::ReadWriteLock lock;
+	mutable juce::ReadWriteLock lock;
 
 	juce::AudioSampleBuffer audioBuffer;
 	mutable juce::ReadWriteLock audioLock;

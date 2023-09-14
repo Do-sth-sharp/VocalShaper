@@ -6,23 +6,15 @@ CloneableSource::CloneableSource(const juce::String& name)
 	: id(CloneableSource::globalCounter++), name(name) {
 }
 
-CloneableSource::CloneableSource(const CloneableSource* src, const juce::String& name)
-	: CloneableSource(name) {
-	this->cloneFrom(src);
-}
+std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
+	if (auto dst = this->clone()) {
+		dst->name = this->name;
+		dst->isSaved = (bool)this->isSaved;
+		dst->currentSampleRate = (double)this->currentSampleRate;
 
-bool CloneableSource::cloneFrom(const CloneableSource* src) {
-	double sampleRateTemp = this->currentSampleRate;
-	this->currentSampleRate = (double)src->currentSampleRate;
-
-	if (this->clone(src)) {
-		this->name = src->name;
-		this->isSaved = (bool)src->isSaved;
-		return true;
+		return std::move(dst);
 	}
-
-	this->currentSampleRate = sampleRateTemp;
-	return false;
+	return nullptr;
 }
 
 bool CloneableSource::loadFrom(const juce::File& file) {

@@ -14,7 +14,7 @@ public:
 	int getTrackNum() const;
 
 private:
-	bool clone(const CloneableSource* src) override;
+	std::unique_ptr<CloneableSource> clone() const override;
 	bool load(const juce::File& file) override;
 	bool save(const juce::File& file) const override;
 	double getLength() const override;

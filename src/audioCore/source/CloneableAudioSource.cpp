@@ -27,34 +27,28 @@ int CloneableAudioSource::getChannelNum() const {
 	return this->buffer.getNumChannels();
 }
 
-bool CloneableAudioSource::clone(const CloneableSource* src) {
-	/** Check Not Recording */
-	if (this->checkRecording()) { return false; }
-
+std::unique_ptr<CloneableSource> CloneableAudioSource::clone() const {
 	/** Lock */
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedTryReadLock locker(this->lock);
+	if (locker.isLocked()) {
+		/** Create New Source */
+		auto dst = std::unique_ptr<CloneableAudioSource>();
 
-	/** Check Source Type */
-	auto ptrSrc = dynamic_cast<const CloneableAudioSource*>(src);
-	if (!ptrSrc) { return false; }
+		/** Copy Data */
+		dst->buffer = this->buffer;
+		dst->sourceSampleRate = this->sourceSampleRate;
 
-	/** Clear Audio Source */
-	this->source = nullptr;
-	this->memorySource = nullptr;
+		/** Create Audio Source */
+		dst->memorySource = std::make_unique<juce::MemoryAudioSource>(dst->buffer, false, false);
+		dst->source = std::make_unique<juce::ResamplingAudioSource>(dst->memorySource.get(), false, dst->buffer.getNumChannels());
 
-	/** Copy Data */
-	this->buffer = ptrSrc->buffer;
-	this->sourceSampleRate = ptrSrc->sourceSampleRate;
+		/** Set Sample Rate */
+		dst->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 
-	/** Create Audio Source */
-	this->memorySource = std::make_unique<juce::MemoryAudioSource>(this->buffer, false, false);
-	auto source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
-
-	/** Set Sample Rate */
-	source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
-
-	this->source = std::move(source);
-	return true;
+		/** Move Result */
+		return std::move(std::unique_ptr<CloneableSource>(dst.release()));
+	}
+	return nullptr;
 }
 
 bool CloneableAudioSource::load(const juce::File& file) {

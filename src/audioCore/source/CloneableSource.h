@@ -9,10 +9,9 @@ concept IsCloneable = std::derived_from<T, CloneableSource>;
 class CloneableSource {
 public:
 	CloneableSource(const juce::String& name = juce::String{});
-	CloneableSource(const CloneableSource* src, const juce::String& name = juce::String{});
 	virtual ~CloneableSource() = default;
 
-	bool cloneFrom(const CloneableSource* src);
+	std::unique_ptr<CloneableSource> cloneThis() const;
 	bool loadFrom(const juce::File& file);
 	bool saveAs(const juce::File& file) const;
 	bool exportAs(const juce::File& file) const;
@@ -68,7 +67,7 @@ protected:
 	virtual void recordingFinished() {};
 
 protected:
-	virtual bool clone(const CloneableSource* src) = 0;
+	virtual std::unique_ptr<CloneableSource> clone() const = 0;
 	virtual bool load(const juce::File& file) = 0;
 	virtual bool save(const juce::File& file) const = 0;
 	virtual bool exportt(const juce::File& file) const { return false; };
