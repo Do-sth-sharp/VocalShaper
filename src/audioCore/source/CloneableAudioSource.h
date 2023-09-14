@@ -27,7 +27,7 @@ private:
 		int inputChannels, double sampleRate,
 		int blockSize, bool updateOnly) override;
 	void recordingFinished() override;
-	void writeData(const juce::AudioBuffer<float>& buffer, double offset);
+	void writeData(const juce::AudioBuffer<float>& buffer, int offset);
 
 private:
 	juce::AudioSampleBuffer buffer;

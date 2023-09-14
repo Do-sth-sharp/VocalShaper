@@ -110,15 +110,30 @@ void CloneableMIDISource::prepareToRecord(
 
 		/** Add New Track */
 		this->buffer.addTrack(juce::MidiMessageSequence{});
+
+		/** Set Flag */
+		this->changed();
 	}
 }
 
 void CloneableMIDISource::recordingFinished() {
-	/** Nothing To Do */
+	/** Lock */
+	juce::ScopedWriteLock locker(this->lock);
+
+	/** Match Notes */
+	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
+		if (auto track =
+			const_cast<juce::MidiMessageSequence*>(this->buffer.getTrack(i))) {
+			track->updateMatchedPairs();
+		}
+	}
+
+	/** Set Flag */
+	this->changed();
 }
 
 void CloneableMIDISource::writeData(
-	const juce::MidiBuffer& buffer, double offset) {
+	const juce::MidiBuffer& buffer, int offset) {
 	/** Lock */
 	juce::ScopedTryWriteLock locker(this->lock);
 	if (locker.isLocked()) {
@@ -126,11 +141,14 @@ void CloneableMIDISource::writeData(
 		if (auto track = const_cast<juce::MidiMessageSequence*>(
 			this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
 			for (const auto& m : buffer) {
-				double timeAdjustment = m.samplePosition / this->getSampleRate() + offset;
+				double timeAdjustment = (m.samplePosition + offset) / this->getSampleRate();
 				if (timeAdjustment >= 0) {
 					track->addEvent(m.getMessage(), timeAdjustment);
 				}
 			}
+
+			/** Set Flag */
+			this->changed();
 		}
 	}
 }

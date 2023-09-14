@@ -35,7 +35,7 @@ private:
 		int inputChannels, double sampleRate,
 		int blockSize, bool updateOnly) override;
 	void recordingFinished() override;
-	void writeData(const juce::MidiBuffer& buffer, double offset);
+	void writeData(const juce::MidiBuffer& buffer, int offset);
 
 private:
 	juce::MidiFile buffer;

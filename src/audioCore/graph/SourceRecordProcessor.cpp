@@ -80,10 +80,11 @@ void SourceRecordProcessor::processBlock(
 	/** Check Each Task */
 	for (auto& [source, offset] : this->tasks) {
 		/** Get Task Info */
-		if (offset - buffer.getNumSamples() / this->getSampleRate() >
-			playPosition->getTimeInSeconds().orFallback(0)) { continue; }
-		double startPos =
-			playPosition->getTimeInSeconds().orFallback(0) - offset;
+		int offsetPos = std::floor(offset * this->getSampleRate());
+		if (static_cast<long long>(offsetPos - buffer.getNumSamples()) >
+			playPosition->getTimeInSamples().orFallback(0)) { continue; }
+		int startPos =
+			playPosition->getTimeInSamples().orFallback(0) - offsetPos;
 
 		/** Copy Data */
 		if (auto src = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
