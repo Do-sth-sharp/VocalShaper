@@ -64,3 +64,8 @@ app/lua/luce/**
 
 # App Datas
 app/data/**
+app/*.mid
+app/*.wav
+app/*.mp3
+app/*.flac
+app/*.ogg
