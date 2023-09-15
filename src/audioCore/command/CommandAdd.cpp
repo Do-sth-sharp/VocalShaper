@@ -311,13 +311,28 @@ AUDIOCORE_FUNC(addMixerTrackMidiOutput) {
 	return CommandFuncResult{ true, result };
 }
 
+#include "../source/CloneableSourceManagerTemplates.h"
+
 AUDIOCORE_FUNC(addAudioSource) {
 	juce::String result;
 
-	if (auto manager = CloneableSourceManager::getInstance()) {
-		manager->addSource(std::unique_ptr<CloneableSource>(new CloneableAudioSource));
-		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
+	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
+		juce::String sourcePath = juce::String::fromUTF8(lua_tostring(L, 1));
+
+		CloneableSourceManager::getInstance()
+			->createNewSourceThenLoadAsync<CloneableAudioSource>(sourcePath);
 	}
+	else {
+		double sampleRate = luaL_checknumber(L, 1);
+		int channelNum = luaL_checkinteger(L, 2);
+		double length = luaL_checknumber(L, 3);
+
+		CloneableSourceManager::getInstance()
+			->createNewSource<CloneableAudioSource>(
+				sampleRate, channelNum, length);
+	}
+
+	result += "Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n";
 
 	return CommandFuncResult{ true, result };
 }
@@ -325,10 +340,18 @@ AUDIOCORE_FUNC(addAudioSource) {
 AUDIOCORE_FUNC(addMIDISource) {
 	juce::String result;
 
-	if (auto manager = CloneableSourceManager::getInstance()) {
-		manager->addSource(std::unique_ptr<CloneableSource>(new CloneableMIDISource));
-		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
+	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
+		juce::String sourcePath = juce::String::fromUTF8(lua_tostring(L, 1));
+
+		CloneableSourceManager::getInstance()
+			->createNewSourceThenLoadAsync<CloneableMIDISource>(sourcePath);
 	}
+	else {
+		CloneableSourceManager::getInstance()
+			->createNewSource<CloneableMIDISource>();
+	}
+
+	result += "Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n";
 
 	return CommandFuncResult{ true, result };
 }
@@ -336,10 +359,18 @@ AUDIOCORE_FUNC(addMIDISource) {
 AUDIOCORE_FUNC(addSynthSource) {
 	juce::String result;
 
-	if (auto manager = CloneableSourceManager::getInstance()) {
-		manager->addSource(std::unique_ptr<CloneableSource>(new CloneableSynthSource));
-		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
+	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
+		juce::String sourcePath = juce::String::fromUTF8(lua_tostring(L, 1));
+
+		CloneableSourceManager::getInstance()
+			->createNewSourceThenLoadAsync<CloneableSynthSource>(sourcePath);
 	}
+	else {
+		CloneableSourceManager::getInstance()
+			->createNewSource<CloneableSynthSource>();
+	}
+
+	result += "Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n";
 
 	return CommandFuncResult{ true, result };
 }

@@ -12,6 +12,7 @@ public:
 	virtual ~CloneableSource() = default;
 
 	std::unique_ptr<CloneableSource> cloneThis() const;
+	void initThis(double sampleRate = 48000, int channelNum = 2, int sampleNum = 0);
 	bool loadFrom(const juce::File& file);
 	bool saveAs(const juce::File& file) const;
 	bool exportAs(const juce::File& file) const;
@@ -73,6 +74,7 @@ protected:
 	virtual bool exportt(const juce::File& file) const { return false; };
 	virtual double getLength() const = 0;
 	virtual void sampleRateChanged() {};
+	virtual void init(double sampleRate, int channelNum, int sampleNum) {};
 
 private:
 	static std::atomic_int globalCounter;

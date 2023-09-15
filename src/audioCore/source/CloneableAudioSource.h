@@ -20,6 +20,7 @@ private:
 	bool save(const juce::File& file) const override;
 	double getLength() const override;
 	void sampleRateChanged() override;
+	void init(double sampleRate, int channelNum, int sampleNum) override;
 
 private:
 	friend class SourceRecordProcessor;

@@ -431,14 +431,14 @@ void AudioCore::bypassInstrument(int instrIndex, bool bypass) {
 
 bool AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
 	double startTime, double endTime, double offset) {
-	juce::GenericScopedLock srcLocker(CloneableSourceManager::getInstance()->getLock());
-	
-	if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
-		if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
-			return seqTrack->addSeq({ startTime, endTime, offset, ptrSrc });
+	juce::ScopedTryReadLock srcLocker(CloneableSourceManager::getInstance()->getLock());
+	if (srcLocker.isLocked()) {
+		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
+			if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
+				return seqTrack->addSeq({ startTime, endTime, offset, ptrSrc });
+			}
 		}
 	}
-
 	return false;
 }
 
@@ -456,15 +456,15 @@ int AudioCore::getSequencerSourceInstanceNum(int trackIndex) const {
 }
 
 bool AudioCore::addRecorderSourceInstance(int srcIndex, double offset) {
-	juce::GenericScopedLock srcLocker(CloneableSourceManager::getInstance()->getLock());
-
-	if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
-		if (auto recorder = this->mainAudioGraph->getRecorder()) {
-			recorder->addTask(ptrSrc, offset);
-			return true;
+	juce::ScopedTryReadLock srcLocker(CloneableSourceManager::getInstance()->getLock());
+	if (srcLocker.isLocked()) {
+		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
+			if (auto recorder = this->mainAudioGraph->getRecorder()) {
+				recorder->addTask(ptrSrc, offset);
+				return true;
+			}
 		}
 	}
-
 	return false;
 }
 

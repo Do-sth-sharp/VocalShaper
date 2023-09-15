@@ -4,72 +4,160 @@
 #include "../plugin/PluginLoader.h"
 
 bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
-	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
-
-	juce::GenericScopedLock locker(this->getLock());
-	src->prepareToPlay(this->sampleRate, this->bufferSize);
-	this->sourceList.add(std::move(src));
-	return true;
-}
-
-bool CloneableSourceManager::removeSource(CloneableSource* src) {
-	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
-
-	juce::GenericScopedLock locker(this->getLock());
-	this->sourceList.removeObject(src, true);
-	return true;
-}
-
-bool CloneableSourceManager::removeSource(int index) {
-	AUDIOCORE_ENSURE_IO_NOT_RUNNING(false);
-
-	juce::GenericScopedLock locker(this->getLock());
-	this->sourceList.remove(index, true);
-	return true;
-}
-
-CloneableSource::SafePointer<> CloneableSourceManager::getSource(int index) const {
-	juce::GenericScopedLock locker(this->getLock());
-	return this->sourceList[index];
-}
-
-int CloneableSourceManager::getSourceNum() const {
-	juce::GenericScopedLock locker(this->getLock());
-	return this->sourceList.size();
-}
-
-const juce::CriticalSection& CloneableSourceManager::getLock() const {
-	return this->sourceList.getLock();
-}
-
-bool CloneableSourceManager::setSourceSynthesizer(
-	int index, const juce::String& identifier) {
-	auto source = this->getSource(index);
-	if (!dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-		return false;
-	}
-
-	if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
-		auto loadCallback =
-			[index, source](std::unique_ptr<juce::AudioPluginInstance> ptr) {
-			if (ptr) {
-				if (auto src =
-					dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-					src->setSynthesizer(std::move(ptr));
-				}
-			}
-		};
-
-		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
+	juce::ScopedTryWriteLock locker(this->getLock());
+	if (locker.isLocked()) {
+		src->prepareToPlay(this->sampleRate, this->bufferSize);
+		this->sourceList.add(std::move(src));
 		return true;
 	}
 	return false;
 }
 
+bool CloneableSourceManager::removeSource(CloneableSource* src) {
+	juce::ScopedTryWriteLock locker(this->getLock());
+	if (locker.isLocked()) {
+		this->sourceList.removeObject(src, true);
+		return true;
+	}
+	return false;
+}
+
+bool CloneableSourceManager::removeSource(int index) {
+	juce::ScopedTryWriteLock locker(this->getLock());
+	if (locker.isLocked()) {
+		this->sourceList.remove(index, true);
+		return true;
+	}
+	return false;
+}
+
+CloneableSource::SafePointer<> CloneableSourceManager::getSource(int index) const {
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (locker.isLocked()) {
+		return this->sourceList[index];
+	}
+	return nullptr;
+}
+
+int CloneableSourceManager::getSourceNum() const {
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (locker.isLocked()) {
+		return this->sourceList.size();
+	}
+	return 0;
+}
+
+juce::ReadWriteLock& CloneableSourceManager::getLock() const {
+	return this->lock;
+}
+
+bool CloneableSourceManager::setSourceSynthesizer(
+	int index, const juce::String& identifier) {
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (locker.isLocked()) {
+		auto source = this->getSource(index);
+		if (!dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+			return false;
+		}
+
+		if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
+			auto loadCallback =
+				[index, source](std::unique_ptr<juce::AudioPluginInstance> ptr) {
+				if (ptr) {
+					if (auto src =
+						dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+						src->setSynthesizer(std::move(ptr));
+					}
+				}
+				};
+
+			PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
+			return true;
+		}
+	}
+	return false;
+}
+
 bool CloneableSourceManager::synthSource(int index) {
-	auto source = this->getSource(index);
-	if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-		src->synth();
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (locker.isLocked()) {
+		auto source = this->getSource(index);
+		if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+			src->synth();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CloneableSourceManager::cloneSource(int index) {
+	/** Lock */
+	juce::ScopedTryWriteLock locker(this->getLock());
+	if (locker.isLocked()) {
+		/** Clone */
+		if (auto source = this->getSource(index)) {
+			if (auto ptr = source->cloneThis()) {
+				return this->addSource(std::move(ptr));
+			}
+		}
+	}
+	return false;
+}
+
+bool CloneableSourceManager::saveSource(
+	int index, const juce::String& path) const {
+	/** Lock */
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (!locker.isLocked()) { return false; }
+
+	/** Get Source */
+	if (auto src = this->getSource(index)) {
+		return src->saveAs(
+			juce::File::getCurrentWorkingDirectory().getChildFile(path));
+	}
+
+	return false;
+}
+
+bool CloneableSourceManager::saveSourceAsync(
+	int index, const juce::String& path) const {
+	/** Lock */
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (!locker.isLocked()) { return false; }
+
+	/** Get Source */
+	if (auto src = this->getSource(index)) {
+		AudioIOList::getInstance()->save(src, path);
+		return true;
+	}
+
+	return false;
+}
+
+bool CloneableSourceManager::exportSource(
+	int index, const juce::String& path) const {
+	/** Lock */
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (!locker.isLocked()) { return false; }
+
+	/** Get Source */
+	if (auto src = this->getSource(index)) {
+		return src->exportAs(
+			juce::File::getCurrentWorkingDirectory().getChildFile(path));
+	}
+
+	return false;
+}
+
+bool CloneableSourceManager::exportSourceAsync(
+	int index, const juce::String& path) const {
+	/** Lock */
+	juce::ScopedTryReadLock locker(this->getLock());
+	if (!locker.isLocked()) { return false; }
+
+	/** Get Source */
+	if (auto src = this->getSource(index)) {
+		AudioIOList::getInstance()->exportt(src, path);
 		return true;
 	}
 
@@ -77,7 +165,7 @@ bool CloneableSourceManager::synthSource(int index) {
 }
 
 void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
-	juce::GenericScopedLock locker(this->getLock());
+	juce::ScopedWriteLock locker(this->getLock());
 	this->sampleRate = sampleRate;
 	this->bufferSize = bufferSize;
 	for (auto i : this->sourceList) {

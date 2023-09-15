@@ -110,6 +110,32 @@ void CloneableAudioSource::sampleRateChanged() {
 	}
 }
 
+void CloneableAudioSource::init(double sampleRate, int channelNum, int sampleNum) {
+	/** Check Not Recording */
+	if (this->checkRecording()) { return; }
+
+	/** Lock */
+	juce::ScopedWriteLock locker(this->lock);
+
+	/** Clear Audio Source */
+	this->source = nullptr;
+	this->memorySource = nullptr;
+
+	/** Create Buffer */
+	this->buffer = juce::AudioSampleBuffer{ channelNum, sampleNum };
+	this->sourceSampleRate = sampleRate;
+
+	/** Create Audio Source */
+	this->memorySource = std::make_unique<juce::MemoryAudioSource>(this->buffer, false, false);
+	auto source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
+
+	/** Set Sample Rate */
+	source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
+	source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
+
+	this->source = std::move(source);
+}
+
 void CloneableAudioSource::prepareToRecord(
 	int inputChannels, double sampleRate, int blockSize, bool /*updateOnly*/) {
 	/** Lock */
@@ -118,7 +144,7 @@ void CloneableAudioSource::prepareToRecord(
 	/** Clear Buffer If Sample Rate Mismatch */
 	if (this->getSourceSampleRate() != sampleRate) {
 		this->sourceSampleRate = sampleRate;
-		this->buffer.clear();
+		this->buffer.setSize(this->buffer.getNumChannels(), 0, false, false, true);
 	}
 
 	/** Clear Audio Source */
@@ -127,7 +153,8 @@ void CloneableAudioSource::prepareToRecord(
 
 	/** Init Buffer */
 	this->buffer.setSize(
-		inputChannels, this->buffer.getNumSamples(), true, false, true);
+		std::max(inputChannels, this->buffer.getNumChannels()),
+		this->buffer.getNumSamples(), true, false, true);
 
 	/** Set Flag */
 	this->changed();
@@ -168,7 +195,7 @@ void CloneableAudioSource::writeData(
 		}
 
 		/** CopyData */
-		for (int i = 0; i < buffer.getNumChannels(); i++) {
+		for (int i = 0; i < buffer.getNumChannels() && i < this->buffer.getNumChannels(); i++) {
 			if (auto rptr = buffer.getReadPointer(i)) {
 				this->buffer.copyFrom(
 					i, startSample, &(rptr)[srcStartSample], length);

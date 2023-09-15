@@ -22,7 +22,7 @@ public:
 	bool removeSource(int index);
 	CloneableSource::SafePointer<> getSource(int index) const;
 	int getSourceNum() const;
-	const juce::CriticalSection& getLock() const;
+	juce::ReadWriteLock& getLock() const;
 
 	/**
 	* @attention	You must call this from message thread.
@@ -33,10 +33,48 @@ public:
 	*/
 	bool synthSource(int index);
 
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool cloneSource(int index);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	template<IsCloneable T>
+	bool createNewSource(
+		double sampleRate = 48000, int channelNum = 2, double length = 0);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	template<IsCloneable T>
+	bool createNewSourceThenLoad(const juce::String& path);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	template<IsCloneable T>
+	bool createNewSourceThenLoadAsync(const juce::String& path);
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool saveSource(int index, const juce::String& path) const;
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool saveSourceAsync(int index, const juce::String& path) const;
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool exportSource(int index, const juce::String& path) const;
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool exportSourceAsync(int index, const juce::String& path) const;
+
 	void prepareToPlay(double sampleRate, int bufferSize);
 
 private:
 	juce::OwnedArray<CloneableSource, juce::CriticalSection> sourceList;
+	mutable juce::ReadWriteLock lock;
 	double sampleRate = 0;
 	int bufferSize = 0;
 

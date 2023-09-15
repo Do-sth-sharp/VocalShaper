@@ -17,6 +17,11 @@ std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
 	return nullptr;
 }
 
+void CloneableSource::initThis(
+	double sampleRate, int channelNum, int sampleNum) {
+	this->init(sampleRate, channelNum, sampleNum);
+}
+
 bool CloneableSource::loadFrom(const juce::File& file) {
 	if (this->load(file)) {
 		this->isSaved = true;

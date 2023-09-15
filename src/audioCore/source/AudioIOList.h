@@ -2,26 +2,28 @@
 
 #include <JuceHeader.h>
 
+#include "CloneableSource.h"
+
 class AudioIOList final : public juce::Thread,
 	private juce::DeletedAtShutdown {
 public:
 	AudioIOList();
 	~AudioIOList();
 
-	void load(int index, juce::String path);
-	void save(int index, juce::String path);
-	void exportt(int index, juce::String path);
-	bool isTask(int index) const;
+	void load(CloneableSource::SafePointer<> ptr, juce::String path);
+	void save(CloneableSource::SafePointer<> ptr, juce::String path);
+	void exportt(CloneableSource::SafePointer<> ptr, juce::String path);
+	bool isTask(CloneableSource::SafePointer<> ptr) const;
 
 private:
 	void run() override;
 
 private:
 	enum class TaskType { Load, Save, Export };
-	using IOTask = std::tuple<TaskType, int, juce::String>;
+	using IOTask = std::tuple<TaskType, CloneableSource::SafePointer<>, juce::String>;
 	mutable std::queue<IOTask> list;
 	juce::CriticalSection lock;
-	std::atomic_int currentIndex = -1;
+	std::atomic<CloneableSource*> currentTask = nullptr;
 
 public:
 	static AudioIOList* getInstance();
@@ -32,9 +34,3 @@ private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioIOList)
 };
-
-#define AUDIOCORE_ENSURE_IO_NOT_RUNNING(ret) \
-	do { \
-		JUCE_ASSERT_MESSAGE_THREAD; \
-		if (AudioIOList::getInstance()->isThreadRunning()) { return ret; } \
-	} while (false)

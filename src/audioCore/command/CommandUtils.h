@@ -95,6 +95,3 @@ void regCommandEcho(lua_State* L);
 void regCommandList(lua_State* L);
 void regCommandRemove(lua_State* L);
 void regCommandSet(lua_State* L);
-void regCommandLoad(lua_State* L);
-void regCommandSave(lua_State* L);
-void regCommandExport(lua_State* L);

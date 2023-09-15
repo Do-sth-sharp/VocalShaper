@@ -12,39 +12,41 @@ AudioIOList::~AudioIOList() {
 	}
 }
 
-void AudioIOList::load(int index, juce::String path) {
+void AudioIOList::load(CloneableSource::SafePointer<> ptr, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(TaskType::Load, index, path));
+	if (!ptr) { return; }
+	this->list.push(std::make_tuple(TaskType::Load, ptr, path));
 
 	this->startThread();
 }
 
-void AudioIOList::save(int index, juce::String path) {
+void AudioIOList::save(CloneableSource::SafePointer<> ptr, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(TaskType::Save, index, path));
+	this->list.push(std::make_tuple(TaskType::Save, ptr, path));
 
 	this->startThread();
 }
 
-void AudioIOList::exportt(int index, juce::String path) {
+void AudioIOList::exportt(CloneableSource::SafePointer<> ptr, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(TaskType::Export, index, path));
+	this->list.push(std::make_tuple(TaskType::Export, ptr, path));
 
 	this->startThread();
 }
 
-bool AudioIOList::isTask(int index) const {
+bool AudioIOList::isTask(CloneableSource::SafePointer<> ptr) const {
 	juce::GenericScopedLock locker(this->lock);
-	if (this->currentIndex == index) { return true; }
+	if (!ptr) { return false; }
+	if (this->currentTask == ptr) { return true; }
 	
 	int size = this->list.size();
 	for (int i = 0; i < size; i++) {
 		auto& task = this->list.front();
 
-		if (std::get<1>(task) == index) { return true; }
+		if (std::get<1>(task) == ptr) { return true; }
 
 		this->list.push(task);
 		this->list.pop();
@@ -55,6 +57,10 @@ bool AudioIOList::isTask(int index) const {
 
 void AudioIOList::run() {
 	while (!this->threadShouldExit()) {
+		/** Lock Source List */
+		juce::ScopedReadLock listLocker(
+			CloneableSourceManager::getInstance()->getLock());
+
 		/** Get Next Task */
 		IOTask task;
 		{
@@ -67,32 +73,34 @@ void AudioIOList::run() {
 			task = this->list.front();
 			this->list.pop();
 
-			/** Get Current Index */
-			this->currentIndex = std::get<1>(task);
+			/** Get Current Task */
+			this->currentTask = std::get<1>(task);
 		}
 
 		/** Process Task */
-		if (auto src = CloneableSourceManager::getInstance()->getSource(this->currentIndex)) {
-			juce::File file 
-				= juce::File::getCurrentWorkingDirectory().getChildFile(std::get<2>(task));
-			switch (std::get<0>(task)) {
-			case TaskType::Load:
-				/** Read */
-				src->loadFrom(file);
-				break;
-			case TaskType::Save:
-				/** Write */
-				src->saveAs(file);
-				break;
-			case TaskType::Export:
-				/** Export */
-				src->exportAs(file);
-				break;
+		{
+			if (auto src = static_cast<CloneableSource*>(this->currentTask)) {
+				juce::File file
+					= juce::File::getCurrentWorkingDirectory().getChildFile(std::get<2>(task));
+				switch (std::get<0>(task)) {
+				case TaskType::Load:
+					/** Read */
+					src->loadFrom(file);
+					break;
+				case TaskType::Save:
+					/** Write */
+					src->saveAs(file);
+					break;
+				case TaskType::Export:
+					/** Export */
+					src->exportAs(file);
+					break;
+				}
 			}
 		}
 
 		/** Task End */
-		this->currentIndex = -1;
+		this->currentTask = nullptr;
 	}
 }
 

@@ -78,49 +78,51 @@ void SeqSourceProcessor::processBlock(
 
 	/** Copy Source Data */
 	{
-		juce::GenericScopedLock managerLocker(CloneableSourceManager::getInstance()->getLock());
-		juce::GenericScopedLock srcLocker(this->srcs.getLock());
+		juce::ScopedTryReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
+		if (managerLocker.isLocked()) {
+			juce::GenericScopedLock srcLocker(this->srcs.getLock());
 
-		/** Find Hot Block */
-		auto index = this->srcs.match(startTime, endTime);
+			/** Find Hot Block */
+			auto index = this->srcs.match(startTime, endTime);
 
-		for (int i = std::get<0>(index);
-			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
-			/** Get Block */
-			auto block = this->srcs.getUnchecked(i);
+			for (int i = std::get<0>(index);
+				i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
+				/** Get Block */
+				auto block = this->srcs.getUnchecked(i);
 
-			if (CloneableSource::SafePointer<> ptr = std::get<3>(block)) {
-				/** Caculate Time */
-				double dataStartTime = std::get<0>(block) + std::max(std::get<2>(block), 0.);
-				double dataEndTime =
-					std::min(std::get<1>(block), std::get<0>(block) + std::get<2>(block) + ptr->getSourceLength());
+				if (CloneableSource::SafePointer<> ptr = std::get<3>(block)) {
+					/** Caculate Time */
+					double dataStartTime = std::get<0>(block) + std::max(std::get<2>(block), 0.);
+					double dataEndTime =
+						std::min(std::get<1>(block), std::get<0>(block) + std::get<2>(block) + ptr->getSourceLength());
 
-				if (dataEndTime > dataStartTime) {
-					double hotStartTime = std::max(startTime, dataStartTime);
-					double hotEndTime = std::min(endTime, dataEndTime);
+					if (dataEndTime > dataStartTime) {
+						double hotStartTime = std::max(startTime, dataStartTime);
+						double hotEndTime = std::min(endTime, dataEndTime);
 
-					if (hotEndTime > hotStartTime) {
-						if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-							/** Copy Audio Data */
-							p->readData(buffer,
-								hotStartTime - startTime,
-								hotStartTime - (std::get<0>(block) + std::get<2>(block)),
-								hotEndTime - hotStartTime);
-						}
-						else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-							/** Copy Audio Data */
-							p->readData(buffer,
-								hotStartTime - startTime,
-								hotStartTime - (std::get<0>(block) + std::get<2>(block)),
-								hotEndTime - hotStartTime);
-						}
-						else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-							/** Copy MIDI Message */
-							double dataTime = std::get<0>(block) + std::get<2>(block);
-							p->readData(midiMessages,
-								dataTime - startTime,
-								hotStartTime - dataTime,
-								hotEndTime - dataTime);
+						if (hotEndTime > hotStartTime) {
+							if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+								/** Copy Audio Data */
+								p->readData(buffer,
+									hotStartTime - startTime,
+									hotStartTime - (std::get<0>(block) + std::get<2>(block)),
+									hotEndTime - hotStartTime);
+							}
+							else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+								/** Copy Audio Data */
+								p->readData(buffer,
+									hotStartTime - startTime,
+									hotStartTime - (std::get<0>(block) + std::get<2>(block)),
+									hotEndTime - hotStartTime);
+							}
+							else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
+								/** Copy MIDI Message */
+								double dataTime = std::get<0>(block) + std::get<2>(block);
+								p->readData(midiMessages,
+									dataTime - startTime,
+									hotStartTime - dataTime,
+									hotEndTime - dataTime);
+							}
 						}
 					}
 				}
