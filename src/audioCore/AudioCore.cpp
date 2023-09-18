@@ -5,6 +5,7 @@
 #include "plugin/PluginLoader.h"
 #include "misc/PlayPosition.h"
 #include "misc/PlayWatcher.h"
+#include "misc/Renderer.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -66,6 +67,7 @@ AudioCore::~AudioCore() {
 	this->mainGraphPlayer->setProcessor(nullptr);
 	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
+	Renderer::releaseInstance();
 	AudioIOList::releaseInstance();
 	CloneableSourceManager::releaseInstance();
 }

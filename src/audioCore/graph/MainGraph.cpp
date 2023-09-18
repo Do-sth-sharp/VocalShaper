@@ -1,6 +1,7 @@
 ﻿#include "MainGraph.h"
 
 #include "../misc/PlayPosition.h"
+#include "../misc/Renderer.h"
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "SourceRecordProcessor.h"
@@ -149,8 +150,11 @@ SourceRecordProcessor* MainGraph::getRecorder() const {
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
+	/** Render State */
+	bool isRendering = Renderer::getInstance()->getRendering();
+
 	/** Call MIDI Hook */
-	{
+	if(!isRendering) {
 		juce::ScopedReadLock locker(this->hookLock);
 		if (this->midiHook) {
 			for (auto m : midi) {
@@ -163,38 +167,52 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	}
 
 	/** Transport MMC */
-	for (auto m : midi) {
-		auto mes = m.getMessage();
-		if (mes.isMidiMachineControlMessage()) {
-			switch (mes.getMidiMachineControlCommand())
-			{
-			case juce::MidiMessage::MidiMachineControlCommand::mmc_play:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->play(); });
-				continue;
-			case juce::MidiMessage::MidiMachineControlCommand::mmc_pause:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->pause(); });
-				continue;
-			case juce::MidiMessage::MidiMachineControlCommand::mmc_stop:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->stop(); });
-				continue;
-			case juce::MidiMessage::MidiMachineControlCommand::mmc_rewind:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->rewind(); });
-				continue;
-			case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStart:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(true); });
-				continue;
-			case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStop:
-				juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(false); });
-				continue;
+	if (!isRendering) {
+		for (auto m : midi) {
+			auto mes = m.getMessage();
+			if (mes.isMidiMachineControlMessage()) {
+				switch (mes.getMidiMachineControlCommand())
+				{
+				case juce::MidiMessage::MidiMachineControlCommand::mmc_play:
+					juce::MessageManager::callAsync([] { AudioCore::getInstance()->play(); });
+					continue;
+				case juce::MidiMessage::MidiMachineControlCommand::mmc_pause:
+					juce::MessageManager::callAsync([] { AudioCore::getInstance()->pause(); });
+					continue;
+				case juce::MidiMessage::MidiMachineControlCommand::mmc_stop:
+					juce::MessageManager::callAsync([] { AudioCore::getInstance()->stop(); });
+					continue;
+				case juce::MidiMessage::MidiMachineControlCommand::mmc_rewind:
+					juce::MessageManager::callAsync([] { AudioCore::getInstance()->rewind(); });
+					continue;
+				case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStart:
+					juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(true); });
+					continue;
+				case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStop:
+					juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(false); });
+					continue;
+				}
 			}
 		}
+	}
+
+	/** Truncate Input */
+	if (isRendering) {
+		audio.setSize(audio.getNumChannels(), audio.getNumSamples(), false, true, true);
+		midi.clear();
 	}
 
 	/** Process Audio Block */
 	this->juce::AudioProcessorGraph::processBlock(audio, midi);
 
+	/** Truncate Output */
+	if (isRendering) {
+		audio.setSize(audio.getNumChannels(), audio.getNumSamples(), false, true, true);
+		midi.clear();
+	}
+
 	/** MIDI Output */
-	{
+	if (!isRendering) {
 		juce::ScopedReadLock locker(this->midiLock);
 		if (this->midiOutput) {
 			/** Send Message */
