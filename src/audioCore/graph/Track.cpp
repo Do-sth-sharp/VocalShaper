@@ -1,5 +1,7 @@
 ﻿#include "Track.h"
 
+#include "../misc/Renderer.h"
+
 Track::Track(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
 	/** Set Effects */
@@ -236,4 +238,14 @@ void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& mid
 
 	/** Process Slider */
 	this->slider.process(juce::dsp::ProcessContextReplacing<float>(block));
+
+	/** Render */
+	if (Renderer::getInstance()->getRendering()) {
+		if (auto playHead = this->getPlayHead()) {
+			auto pos = playHead->getPosition();
+			int64_t offset = pos->getTimeInSamples().orFallback(0);
+
+			Renderer::getInstance()->writeData(this, buffer, offset);
+		}
+	}
 }
