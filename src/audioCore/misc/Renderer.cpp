@@ -2,6 +2,38 @@
 
 #include "../Utils.h"
 
+class RenderThread final : public juce::Thread {
+public:
+	RenderThread() = delete;
+	RenderThread(Renderer* renderer);
+
+public:
+	void run() override;
+
+private:
+	Renderer* renderer = nullptr;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RenderThread)
+};
+
+RenderThread::RenderThread(Renderer* renderer)
+	: Thread("Render Thread"), renderer(renderer) {}
+
+void RenderThread::run() {
+	/** TODO */
+}
+
+Renderer::Renderer() {
+	/** Render Thread */
+	this->renderThread = std::unique_ptr<juce::Thread>(new RenderThread(this));
+}
+
+Renderer::~Renderer() {
+	if (this->renderThread) {
+		this->renderThread->stopThread(3000);
+	}
+}
+
 void Renderer::setRendering(bool rendering) {
 	this->rendering = rendering;
 }
@@ -60,6 +92,11 @@ void Renderer::saveFile(const juce::File& dir,
 
 		/** Write Data */
 		writer->writeFromAudioSampleBuffer(buffer, 0, buffer.getNumSamples());
+
+		/** Stop */
+		if (juce::Thread::currentThreadShouldExit()) {
+			break;
+		}
 	}
 }
 

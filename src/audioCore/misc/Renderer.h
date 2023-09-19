@@ -6,7 +6,8 @@ class Track;
 
 class Renderer final : private juce::DeletedAtShutdown {
 public:
-	Renderer() = default;
+	Renderer();
+	~Renderer() override;
 
 	void setRendering(bool rendering);
 	bool getRendering() const;
@@ -32,6 +33,7 @@ private:
 	int bufferSize = 0;
 	std::map<const Track*, std::tuple<
 		int, juce::AudioChannelSet, juce::AudioBuffer<float>>> buffers;
+	std::unique_ptr<juce::Thread> renderThread = nullptr;
 
 public:
 	static Renderer* getInstance();
