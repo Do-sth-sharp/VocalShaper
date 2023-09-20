@@ -552,6 +552,12 @@ void AudioCore::removeFromPluginSearchPath(const juce::String& path) const {
 	this->audioPluginSearchThread->removeFromSearchPath(path);
 }
 
+void AudioCore::setIsolation(bool isolation) {
+	this->mainGraphPlayer->setProcessor(
+		isolation ? nullptr : this->mainAudioGraph.get());
+	this->mainAudioGraph->setNonRealtime(isolation);
+}
+
 MainGraph* AudioCore::getGraph() const {
 	return this->mainAudioGraph.get();
 }
@@ -594,7 +600,7 @@ void AudioCore::updateAudioBuses() {
 		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);
 	}
 
-	/**   Add MIDI Callback  */
+	/** Add MIDI Callback */
 	{
 		auto midiInputDevice = juce::MidiInput::getAvailableDevices();
 		for (auto& i : midiInputDevice) {

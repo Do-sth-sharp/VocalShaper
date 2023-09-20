@@ -137,6 +137,8 @@ public:
 	 */
 	void removeFromPluginSearchPath(const juce::String& path) const;
 
+	void setIsolation(bool isolation);
+
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;
 

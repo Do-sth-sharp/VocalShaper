@@ -9,13 +9,20 @@ public:
 	Renderer();
 	~Renderer() override;
 
-	void setRendering(bool rendering);
-	bool getRendering() const;
-
 	using RenderTask = std::tuple<const Track*, int, juce::AudioChannelSet>;
 	using RenderTaskList = juce::Array<RenderTask>;
 
+	bool start(const RenderTaskList& tasks);
+
+	bool getRendering() const;
+
 	void updateSampleRateAndBufferSize(double sampleRate, int bufferSize);
+
+private:
+	friend class RenderThread;
+
+	void setRendering(bool rendering);
+
 	void prepareToRender(const RenderTaskList& tasks);
 	void saveFile(const juce::File& dir,
 		const juce::String& name, const juce::String& extension);

@@ -1,17 +1,25 @@
 #include "Renderer.h"
 
+#include "../AudioCore.h"
 #include "../Utils.h"
+#include "PlayPosition.h"
 
 class RenderThread final : public juce::Thread {
 public:
 	RenderThread() = delete;
 	RenderThread(Renderer* renderer);
 
+	void prepare(const juce::File& dir,
+		const juce::String& name, const juce::String& extension);
+
 public:
 	void run() override;
 
 private:
-	Renderer* renderer = nullptr;
+	Renderer* const renderer = nullptr;
+	juce::File dir;
+	juce::String name = "untitled";
+	juce::String extension = ".wav";
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RenderThread)
 };
@@ -19,8 +27,59 @@ private:
 RenderThread::RenderThread(Renderer* renderer)
 	: Thread("Render Thread"), renderer(renderer) {}
 
+void RenderThread::prepare(const juce::File& dir,
+	const juce::String& name, const juce::String& extension) {
+	if (this->isThreadRunning()) { return; }
+	this->dir = dir;
+	this->name = name;
+	this->extension = extension;
+}
+
 void RenderThread::run() {
-	/** TODO */
+	/** Check Renderer */
+	if (!this->renderer) { return; }
+
+	/** Get Main Graph */
+	auto mainGraph = AudioCore::getInstance()->getGraph();
+	if (!mainGraph) { return; }
+
+	/** Isolate Main Graph */
+	AudioCore::getInstance()->setIsolation(true);
+
+	/** Rendering Mode */
+	this->renderer->setRendering(true);
+
+	/** Get Total Time */
+	double totalLength = mainGraph->getTailLengthSeconds();
+
+	/** Reset Play Position */
+	PlayPosition::getInstance()->setPositionInSamples(0);
+
+	/** Render Each Block */
+	while (PlayPosition::getInstance()->getPosition()
+		->getTimeInSeconds().orFallback(0) < totalLength) {
+		/** Stop */
+		if (juce::Thread::currentThreadShouldExit()) {
+			break;
+		}
+
+		/** Render */
+		juce::AudioSampleBuffer audio;
+		juce::MidiBuffer midi;
+		mainGraph->processBlock(audio, midi);
+	}
+
+	/** Reset Rendering Mode */
+	this->renderer->setRendering(false);
+
+	/** Unisolate Main Graph */
+	AudioCore::getInstance()->setIsolation(false);
+
+	/** Save Audio */
+	this->renderer->saveFile(this->dir, this->name, this->extension);
+
+	/** Clear Buffer */
+	this->renderer->releaseBuffer();
 }
 
 Renderer::Renderer() {
@@ -34,12 +93,23 @@ Renderer::~Renderer() {
 	}
 }
 
-void Renderer::setRendering(bool rendering) {
-	this->rendering = rendering;
+bool Renderer::start(const RenderTaskList& tasks) {
+	/** Thread Is Already Started */
+	if (this->renderThread->isThreadRunning()) {
+		return false;
+	}
+
+	/** Set Tasks */
+	this->prepareToRender(tasks);
+
+	/** Start Now */
+	this->renderThread->startThread();
+
+	return true;
 }
 
-bool Renderer::getRendering() const {
-	return this->rendering;
+void Renderer::setRendering(bool rendering) {
+	this->rendering = rendering;
 }
 
 void Renderer::updateSampleRateAndBufferSize(
@@ -56,6 +126,10 @@ void Renderer::updateSampleRateAndBufferSize(
 		}
 	}
 	this->bufferSize = bufferSize;
+}
+
+bool Renderer::getRendering() const {
+	return this->rendering;
 }
 
 void Renderer::prepareToRender(const RenderTaskList& tasks) {
@@ -77,6 +151,11 @@ void Renderer::saveFile(const juce::File& dir,
 
 	/** Save Each Buffer */
 	for (auto& i : this->buffers) {
+		/** Stop */
+		if (juce::Thread::currentThreadShouldExit()) {
+			break;
+		}
+
 		/** Get Buffer */
 		auto& [id, channels, buffer] = i.second;
 		
@@ -92,11 +171,6 @@ void Renderer::saveFile(const juce::File& dir,
 
 		/** Write Data */
 		writer->writeFromAudioSampleBuffer(buffer, 0, buffer.getNumSamples());
-
-		/** Stop */
-		if (juce::Thread::currentThreadShouldExit()) {
-			break;
-		}
 	}
 }
 

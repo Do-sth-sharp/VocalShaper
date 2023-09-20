@@ -106,10 +106,16 @@ void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 	}
 
 	/** Source */
-	CloneableSourceManager::getInstance()->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	CloneableSourceManager::getInstance()->prepareToPlay(
+		sampleRate, maximumExpectedSamplesPerBlock);
+
+	/** Renderer */
+	Renderer::getInstance()->updateSampleRateAndBufferSize(
+		sampleRate, maximumExpectedSamplesPerBlock);
 
 	/** Current Graph */
-	this->juce::AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	this->juce::AudioProcessorGraph::prepareToPlay(
+		sampleRate, maximumExpectedSamplesPerBlock);
 }
 
 void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {

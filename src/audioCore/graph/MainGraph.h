@@ -120,6 +120,7 @@ private:
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
 
+	friend class RenderThread;
 	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGraph)
