@@ -94,11 +94,6 @@ void MainGraph::setMIDIMessageHook(
 	this->midiHook = hook;
 }
 
-void MainGraph::setMIDIOutput(juce::MidiOutput* output) {
-	juce::ScopedWriteLock locker(this->midiLock);
-	this->midiOutput = output;
-}
-
 void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Play Head */
 	if (auto position = dynamic_cast<PlayPosition*>(this->getPlayHead())) {
@@ -220,18 +215,12 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	/** MIDI Output */
 	if (!isRendering) {
 		juce::ScopedReadLock locker(this->midiLock);
-		if (this->midiOutput) {
-			/** Send Message */
-			this->midiOutput->sendBlockOfMessagesNow(midi);
-
-			/** Call MIDI Hook */
-			if (this->midiHook) {
-				for (auto m : midi) {
-					juce::MessageManager::callAsync(
-						[mes = m.getMessage(), hook = this->midiHook] {
-							hook(mes, false);
-						});
-				}
+		if (this->midiHook) {
+			for (auto m : midi) {
+				juce::MessageManager::callAsync(
+					[mes = m.getMessage(), hook = this->midiHook] {
+						hook(mes, false);
+					});
 			}
 		}
 	}

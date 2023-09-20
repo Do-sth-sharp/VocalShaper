@@ -81,8 +81,6 @@ public:
 	 */
 	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&, bool)> hook);
 
-	void setMIDIOutput(juce::MidiOutput* output);
-
 	void closeAllNote();
 
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -114,7 +112,6 @@ private:
 	std::function<void(const juce::MidiMessage&, bool)> midiHook;
 	juce::ReadWriteLock hookLock;
 
-	juce::MidiOutput* midiOutput = nullptr;
 	juce::ReadWriteLock midiLock;
 
 	void removeIllegalAudioI2TrkConnections();

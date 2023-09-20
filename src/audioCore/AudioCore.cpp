@@ -591,10 +591,6 @@ void AudioCore::updateAudioBuses() {
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
 
-		/** Set MIDI Output */
-		auto midiOutput = this->audioDeviceManager->getDefaultMidiOutput();
-		mainGraph->setMIDIOutput(midiOutput);
-
 		/** Change Main Graph SampleRate And Set Play Head */
 		mainGraph->setPlayHead(PlayPosition::getInstance());
 		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);
@@ -613,6 +609,12 @@ void AudioCore::updateAudioBuses() {
 					i.identifier, this->mainGraphPlayer.get());
 			}
 		}
+	}
+
+	/** Set MIDI Output */
+	{
+		auto midiOutput = this->audioDeviceManager->getDefaultMidiOutput();
+		this->mainGraphPlayer->setMidiOutput(midiOutput);
 	}
 
 	/** Update Mackie Control Devices */
