@@ -12,7 +12,8 @@ public:
 	using RenderTask = std::tuple<const Track*, int, juce::AudioChannelSet>;
 	using RenderTaskList = juce::Array<RenderTask>;
 
-	bool start(const RenderTaskList& tasks);
+	bool start(const juce::Array<int>& tracks, const juce::String& path,
+		const juce::String& name, const juce::String& extension);
 
 	bool getRendering() const;
 

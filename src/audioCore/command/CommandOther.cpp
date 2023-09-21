@@ -181,6 +181,40 @@ AUDIOCORE_FUNC(exportSourceAsync) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(renderNow) {
+	juce::String result;
+
+	juce::String path = juce::String::fromUTF8(luaL_checkstring(L, 1));
+	juce::String name = juce::String::fromUTF8(luaL_checkstring(L, 2));
+	juce::String extension = juce::String::fromUTF8(luaL_checkstring(L, 3));
+	
+	juce::Array<int> tracks;
+	lua_pushvalue(L, 4);
+	lua_pushnil(L);
+	while (lua_next(L, -2)) {
+		tracks.add(luaL_checkinteger(L, -1));
+		lua_pop(L, 1);
+	}
+	lua_pop(L, 1);
+
+	if (AudioCore::getInstance()->renderNow(tracks, path, name, extension)) {
+		result += "Start rendering:\n";
+		result += "    Path: " + path + "\n";
+		result += "    Name: " + name + "\n";
+		result += "    Format: " + extension + "\n";
+		result += "    Tracks: ";
+		for (auto& i : tracks) {
+			result += juce::String(i) + " ";
+		}
+		result += "\n";
+	}
+	else {
+		result += "Can't start to render. Maybe rendering is already started!\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, clearPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, searchPlugin);
@@ -196,4 +230,5 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveSourceAsync);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, exportSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, exportSourceAsync);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, renderNow);
 }

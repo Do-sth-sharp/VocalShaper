@@ -43,9 +43,6 @@ void RenderThread::run() {
 	auto mainGraph = AudioCore::getInstance()->getGraph();
 	if (!mainGraph) { return; }
 
-	/** Isolate Main Graph */
-	AudioCore::getInstance()->setIsolation(true);
-
 	/** Rendering Mode */
 	this->renderer->setRendering(true);
 
@@ -56,6 +53,11 @@ void RenderThread::run() {
 	PlayPosition::getInstance()->setPositionInSamples(0);
 
 	/** Render Each Block */
+	juce::GenericScopedLock graphLocker(mainGraph->getCallbackLock());
+	//mainGraph->setRateAndBufferSizeDetails(
+	//	this->renderer->sampleRate, this->renderer->bufferSize);
+	mainGraph->prepareToPlay(
+		this->renderer->sampleRate, this->renderer->bufferSize);
 	while (PlayPosition::getInstance()->getPosition()
 		->getTimeInSeconds().orFallback(0) < totalLength) {
 		/** Stop */
@@ -64,7 +66,7 @@ void RenderThread::run() {
 		}
 
 		/** Render */
-		juce::AudioSampleBuffer audio;
+		juce::AudioSampleBuffer audio(1, this->renderer->bufferSize);
 		juce::MidiBuffer midi;
 		mainGraph->processBlock(audio, midi);
 	}
@@ -73,8 +75,9 @@ void RenderThread::run() {
 	this->renderer->setRendering(false);
 
 	/** Unisolate Main Graph */
-	AudioCore::getInstance()->setIsolation(false);
-
+	juce::MessageManager::callAsync(
+		[] {AudioCore::getInstance()->setIsolation(false); });
+	
 	/** Save Audio */
 	this->renderer->saveFile(this->dir, this->name, this->extension);
 
@@ -93,14 +96,52 @@ Renderer::~Renderer() {
 	}
 }
 
-bool Renderer::start(const RenderTaskList& tasks) {
+bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
+	const juce::String& name, const juce::String& extension) {
 	/** Thread Is Already Started */
 	if (this->renderThread->isThreadRunning()) {
 		return false;
 	}
 
+	/** Get Tasks */
+	auto graph = AudioCore::getInstance()->getGraph();
+	if (!graph) { return false; }
+
+	Renderer::RenderTaskList tasks;
+	for (auto& i : tracks) {
+		if (i >= 0 && i < graph->getTrackNum()) {
+			if (auto track = graph->getTrackProcessor(i)) {
+				tasks.add({ track, i, track->getAudioChannelSet() });
+			}
+		}
+	}
+
+	/** Prepare Path */
+	juce::File dir
+		= juce::File::getCurrentWorkingDirectory().getChildFile(path);
+	if (!dir.isDirectory()) {
+		return false;
+	}
+
+	/** Prepare Thread */
+	if (auto thread = dynamic_cast<RenderThread*>(this->renderThread.get())) {
+		thread->prepare(dir, name, extension);
+	}
+	else {
+		return false;
+	}
+
 	/** Set Tasks */
 	this->prepareToRender(tasks);
+
+	/** Isolate Main Graph */
+	AudioCore::getInstance()->setIsolation(true);
+
+	/** Set Play Head State */
+	AudioCore::getInstance()->record(false);
+	AudioCore::getInstance()->stop();
+	AudioCore::getInstance()->setPositon(0);
+	AudioCore::getInstance()->play();
 
 	/** Start Now */
 	this->renderThread->startThread();
@@ -117,13 +158,16 @@ void Renderer::updateSampleRateAndBufferSize(
 	juce::GenericScopedLock locker(this->lock);
 
 	if (this->sampleRate != sampleRate) {
-		this->sampleRate = sampleRate;
-
 		/** Clear Buffer */
 		for (auto& i : this->buffers) {
 			auto& [id, channels, buffer] = i.second;
-			buffer.setSize(channels.size(), 0, false, true, true);
+
+			int newSize =
+				std::ceil(buffer.getNumSamples() * (sampleRate / this->sampleRate));
+			buffer.setSize(channels.size(), newSize, false, true, true);
 		}
+
+		this->sampleRate = sampleRate;
 	}
 	this->bufferSize = bufferSize;
 }
@@ -137,10 +181,15 @@ void Renderer::prepareToRender(const RenderTaskList& tasks) {
 
 	this->releaseBuffer();
 
+	auto graph = AudioCore::getInstance()->getGraph();
+	double totalLength = graph ? graph->getTailLengthSeconds() : 0;
+	int bufferSize = std::ceil(totalLength * this->sampleRate);
+
 	for (auto& [ptr, id, channels] : tasks) {
+		juce::AudioBuffer<float> buffer;
+		buffer.setSize(channels.size(), bufferSize, false, true, true);
 		this->buffers.insert(std::make_pair(
-			ptr, std::make_tuple(id, channels,
-				juce::AudioBuffer<float>{ channels.size(), 0 })));
+			ptr, std::make_tuple(id, channels, buffer)));
 	}
 }
 
@@ -193,9 +242,9 @@ void Renderer::writeData(const Track* trackPtr,
 	auto& dstBuffer = std::get<2>(bufferIt->second);
 
 	/** Increase Buffer Size */
-	if (dstBuffer.getNumSamples() - buffer.getNumChannels() < offset) {
+	if (dstBuffer.getNumSamples() - buffer.getNumSamples() < offset) {
 		dstBuffer.setSize(dstBuffer.getNumChannels(),
-			offset + buffer.getNumChannels(), true, false, true);
+			offset + buffer.getNumSamples(), true, false, true);
 	}
 
 	/** Copy Data */

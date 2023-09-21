@@ -137,7 +137,14 @@ public:
 	 */
 	void removeFromPluginSearchPath(const juce::String& path) const;
 
+	/**
+	 * @attention	For Renderer Only.
+	 */
 	void setIsolation(bool isolation);
+
+	bool renderNow(const juce::Array<int>& tracks, const juce::String& path,
+		const juce::String& name, const juce::String& extension);
+	bool isRendering() const;
 
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;

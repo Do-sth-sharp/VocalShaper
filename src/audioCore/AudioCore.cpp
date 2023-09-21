@@ -555,7 +555,15 @@ void AudioCore::removeFromPluginSearchPath(const juce::String& path) const {
 void AudioCore::setIsolation(bool isolation) {
 	this->mainGraphPlayer->setProcessor(
 		isolation ? nullptr : this->mainAudioGraph.get());
-	this->mainAudioGraph->setNonRealtime(isolation);
+}
+
+bool AudioCore::renderNow(const juce::Array<int>& tracks, const juce::String& path,
+	const juce::String& name, const juce::String& extension) {
+	return Renderer::getInstance()->start(tracks, path, name, extension);
+}
+
+bool AudioCore::isRendering() const {
+	return Renderer::getInstance()->getRendering();
 }
 
 MainGraph* AudioCore::getGraph() const {
