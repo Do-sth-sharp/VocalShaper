@@ -69,3 +69,4 @@ app/*.wav
 app/*.mp3
 app/*.flac
 app/*.ogg
+app/*.pkf
