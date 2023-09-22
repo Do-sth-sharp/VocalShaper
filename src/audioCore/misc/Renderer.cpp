@@ -54,10 +54,6 @@ void RenderThread::run() {
 
 	/** Render Each Block */
 	juce::GenericScopedLock graphLocker(mainGraph->getCallbackLock());
-	//mainGraph->setRateAndBufferSizeDetails(
-	//	this->renderer->sampleRate, this->renderer->bufferSize);
-	mainGraph->prepareToPlay(
-		this->renderer->sampleRate, this->renderer->bufferSize);
 	while (PlayPosition::getInstance()->getPosition()
 		->getTimeInSeconds().orFallback(0) < totalLength) {
 		/** Stop */
@@ -137,16 +133,36 @@ bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 	/** Isolate Main Graph */
 	AudioCore::getInstance()->setIsolation(true);
 
-	/** Set Play Head State */
+	/** Clear Play Head State */
 	AudioCore::getInstance()->record(false);
 	AudioCore::getInstance()->stop();
+
+	/** Prepare Main Graph */
+	{
+		juce::GenericScopedLock locker(this->lock);
+		graph->prepareToPlay(this->sampleRate, this->bufferSize);
+	}
+
+	/** Process Block To Close All MIDI Notes */
+	{
+		juce::AudioSampleBuffer audio(1, this->bufferSize);
+		juce::MidiBuffer midi;
+		graph->processBlock(audio, midi);
+	}
+
+	/** Set Play Head State */
 	AudioCore::getInstance()->setPositon(0);
 	AudioCore::getInstance()->play();
 
-	/** Start Now */
-	this->renderThread->startThread();
+	/** Start Async */
+	juce::MessageManager::callAsync(
+		[] {Renderer::getInstance()->startThreadInternal(); });
 
 	return true;
+}
+
+void Renderer::startThreadInternal() {
+	this->renderThread->startThread();
 }
 
 void Renderer::setRendering(bool rendering) {

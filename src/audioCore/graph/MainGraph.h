@@ -117,6 +117,7 @@ private:
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
 
+	friend class Renderer;
 	friend class RenderThread;
 	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;
 

@@ -14,6 +14,10 @@ public:
 
 	bool start(const juce::Array<int>& tracks, const juce::String& path,
 		const juce::String& name, const juce::String& extension);
+	/**
+	 * For internal use only.
+	 */
+	void startThreadInternal();
 
 	bool getRendering() const;
 
