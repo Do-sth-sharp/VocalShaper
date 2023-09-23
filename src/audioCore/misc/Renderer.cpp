@@ -43,6 +43,18 @@ void RenderThread::run() {
 	auto mainGraph = AudioCore::getInstance()->getGraph();
 	if (!mainGraph) { return; }
 
+	/** Reset Play Head State */
+	AudioCore::getInstance()->stop();
+
+	/** TODO Buffer Audio */
+	{
+		double bufferArea = this->renderer->audioBufferArea;
+	}
+
+	/** Set Play Head State */
+	AudioCore::getInstance()->setPositon(0);
+	AudioCore::getInstance()->play();
+
 	/** Rendering Mode */
 	this->renderer->setRendering(true);
 
@@ -149,10 +161,6 @@ bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 		juce::MidiBuffer midi;
 		graph->processBlock(audio, midi);
 	}
-
-	/** Set Play Head State */
-	AudioCore::getInstance()->setPositon(0);
-	AudioCore::getInstance()->play();
 
 	/** Start Async */
 	juce::MessageManager::callAsync(

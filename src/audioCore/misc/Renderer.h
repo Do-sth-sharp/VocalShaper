@@ -41,6 +41,7 @@ private:
 private:
 	std::atomic_bool rendering = false;
 	juce::CriticalSection lock;
+	const double audioBufferArea = 2;
 	double sampleRate = 0;
 	int bufferSize = 0;
 	std::map<const Track*, std::tuple<
