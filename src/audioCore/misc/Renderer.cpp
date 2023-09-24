@@ -49,6 +49,20 @@ void RenderThread::run() {
 	/** TODO Buffer Audio */
 	{
 		double bufferArea = this->renderer->audioBufferArea;
+		int bufferLength = bufferArea * this->renderer->sampleRate;
+		int bufferBlockNum = std::ceil(bufferLength / this->renderer->bufferSize);
+
+		for (int i = 0; i < bufferBlockNum; i++) {
+			/** Stop */
+			if (juce::Thread::currentThreadShouldExit()) {
+				break;
+			}
+
+			/** Render */
+			juce::AudioSampleBuffer audio(1, this->renderer->bufferSize);
+			juce::MidiBuffer midi;
+			mainGraph->processBlock(audio, midi);
+		}
 	}
 
 	/** Set Play Head State */
