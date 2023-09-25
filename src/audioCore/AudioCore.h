@@ -172,6 +172,7 @@ private:
 
 public:
 	static AudioCore* getInstance();
+	static AudioCore* getInstanceWithoutCreate();
 	static void releaseInstance();
 
 private:

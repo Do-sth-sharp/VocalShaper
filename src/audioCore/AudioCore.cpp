@@ -62,12 +62,12 @@ AudioCore::AudioCore() {
 }
 
 AudioCore::~AudioCore() {
+	Renderer::releaseInstance();
 	this->audioDeviceManager->removeAllChangeListeners();
 	this->audioDeviceManager->removeAudioCallback(this->mainGraphPlayer.get());
 	this->mainGraphPlayer->setProcessor(nullptr);
 	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
-	Renderer::releaseInstance();
 	AudioIOList::releaseInstance();
 	CloneableSourceManager::releaseInstance();
 }
@@ -635,6 +635,10 @@ void AudioCore::updateAudioBuses() {
 
 AudioCore* AudioCore::getInstance() {
 	return AudioCore::instance ? AudioCore::instance : (AudioCore::instance = new AudioCore());
+}
+
+AudioCore* AudioCore::getInstanceWithoutCreate() {
+	return AudioCore::instance;
 }
 
 void AudioCore::releaseInstance() {

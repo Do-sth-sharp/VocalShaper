@@ -98,7 +98,11 @@ void RenderThread::run() {
 
 	/** Unisolate Main Graph */
 	juce::MessageManager::callAsync(
-		[] {AudioCore::getInstance()->setIsolation(false); });
+		[] {
+			if (auto ac = AudioCore::getInstanceWithoutCreate()) {
+				ac->stop();
+				ac->setIsolation(false);
+			}});
 	
 	/** Save Audio */
 	this->renderer->saveFile(this->dir, this->name, this->extension);
