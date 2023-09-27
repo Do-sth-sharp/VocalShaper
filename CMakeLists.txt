@@ -32,10 +32,12 @@ set (VST3_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst3sdk")
 
 set (SYNTH_ENGINE_DEMO_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/app/synth-engines")
 set (LAME_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
+set (VSP4_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
 
 add_subdirectory (LUCE-cpp)
 add_subdirectory (SynthEngineDemo)
 add_subdirectory (cmake-lame)
+add_subdirectory (VocalShaperProject4)
 
 # Mackie Control
 set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
@@ -61,8 +63,8 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMA
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
 target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH})
-target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1")
-target_link_libraries (VocalShaper PRIVATE libLUCE)
+target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1" "VSP4_DLL=1")
+target_link_libraries (VocalShaper PRIVATE libLUCE libvsp4)
 add_dependencies (VocalShaper libLUCE PluginSearcher SynthEngineDemo lame)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")

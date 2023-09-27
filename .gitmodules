@@ -22,3 +22,6 @@
 [submodule "cmake-lame"]
 	path = cmake-lame
 	url = https://github.com/Do-sth-sharp/cmake-lame.git
+[submodule "VocalShaperProject4"]
+	path = VocalShaperProject4
+	url = https://github.com/Do-sth-sharp/VocalShaperProject4.git
