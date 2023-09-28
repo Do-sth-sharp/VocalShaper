@@ -5,6 +5,9 @@
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "SourceRecordProcessor.h"
+#include <VSP4.h>
+
+using namespace org::vocalsharp::vocalshaper;
 
 MainGraph::MainGraph() {
 	/** The Main Audio IO Node */
@@ -148,6 +151,20 @@ double MainGraph::getTailLengthSeconds() const {
 
 SourceRecordProcessor* MainGraph::getRecorder() const {
 	return dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor());
+}
+
+bool MainGraph::parse(const google::protobuf::Message* data) {
+	auto mes = dynamic_cast<const vsp4::MainGraph*>(data);
+	if (!mes) { return false; }
+
+	/** TODO Parse */
+
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> MainGraph::serialize() const {
+	/** TODO Serialize */
+	return nullptr;
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {

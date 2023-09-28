@@ -5,8 +5,10 @@
 #include "PluginDecorator.h"
 #include "SeqSourceProcessor.h"
 #include "SourceRecordProcessor.h"
+#include "../project/Serializable.h"
 
-class MainGraph final : public juce::AudioProcessorGraph {
+class MainGraph final : public juce::AudioProcessorGraph,
+	public Serializable {
 public:
 	MainGraph();
 	~MainGraph() override;
@@ -88,6 +90,10 @@ public:
 	double getTailLengthSeconds() const override;
 
 	SourceRecordProcessor* getRecorder() const;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<const google::protobuf::Message> serialize() const override;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

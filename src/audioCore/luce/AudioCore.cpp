@@ -1,5 +1,6 @@
 ﻿#include "AudioCore.h"
 #include "../AudioCore.h"
+#include <google/protobuf/message_lite.h>
 
 namespace luce {
 	LUCE_METHOD(getAllAudioInputDeviceList) {
@@ -142,6 +143,7 @@ namespace luce {
 
 	LUCE_METHOD(shutdown) {
 		AudioCore::releaseInstance();
+		google::protobuf::ShutdownProtobufLibrary();
 		return 0;
 	}
 
