@@ -3,8 +3,10 @@
 #include <JuceHeader.h>
 
 #include "PluginDecorator.h"
+#include "../project/Serializable.h"
 
-class PluginDock final : public juce::AudioProcessorGraph {
+class PluginDock final : public juce::AudioProcessorGraph,
+	public Serializable {
 public:
 	PluginDock() = delete;
 	PluginDock(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
@@ -41,6 +43,10 @@ public:
 
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<const google::protobuf::Message> serialize() const override;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

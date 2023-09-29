@@ -148,3 +148,13 @@ double SeqSourceProcessor::getTailLengthSeconds() const {
 	int size = this->srcs.size();
 	return (size > 0) ? std::get<1>(this->srcs.getUnchecked(size - 1)) : 0;
 }
+
+bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> SeqSourceProcessor::serialize() const {
+	/** TODO */
+	return nullptr;
+}

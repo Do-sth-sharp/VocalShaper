@@ -3,8 +3,10 @@
 #include <JuceHeader.h>
 
 #include "SourceList.h"
+#include "../project/Serializable.h"
 
-class SeqSourceProcessor final : public juce::AudioProcessor {
+class SeqSourceProcessor final : public juce::AudioProcessor,
+	public Serializable {
 public:
 	SeqSourceProcessor() = delete;
 	SeqSourceProcessor(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
@@ -39,6 +41,10 @@ public:
 	void setStateInformation(const void* data, int sizeInBytes) override {};
 
 	double getTailLengthSeconds() const override;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<const google::protobuf::Message> serialize() const override;
 
 private:
 	juce::AudioChannelSet audioChannels;

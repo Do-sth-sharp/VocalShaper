@@ -303,6 +303,16 @@ void PluginDecorator::updateTrackProperties(
 	this->plugin->updateTrackProperties(properties);
 }
 
+bool PluginDecorator::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> PluginDecorator::serialize() const {
+	/** TODO */
+	return nullptr;
+}
+
 void PluginDecorator::numChannelsChanged() {
 	//this->updatePluginBuses();
 }

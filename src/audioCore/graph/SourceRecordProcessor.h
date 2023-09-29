@@ -3,8 +3,10 @@
 #include <JuceHeader.h>
 
 #include "../source/CloneableSource.h"
+#include "../project/Serializable.h"
 
-class SourceRecordProcessor final : public juce::AudioProcessor {
+class SourceRecordProcessor final : public juce::AudioProcessor,
+	public Serializable {
 public:
 	SourceRecordProcessor();
 	~SourceRecordProcessor();
@@ -37,6 +39,10 @@ public:
 	void setStateInformation(const void* data, int sizeInBytes) override {};
 
 	double getTailLengthSeconds() const override;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<const google::protobuf::Message> serialize() const override;
 
 private:
 	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, double>;

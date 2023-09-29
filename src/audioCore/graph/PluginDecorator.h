@@ -1,8 +1,10 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "../project/Serializable.h"
 
-class PluginDecorator final : public juce::AudioProcessor {
+class PluginDecorator final : public juce::AudioProcessor,
+	public Serializable {
 public:
 	PluginDecorator() = delete;
 	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin);
@@ -91,6 +93,10 @@ public:
 		juce::AudioProcessor::CurveData::Type) const override;
 	void updateTrackProperties(
 		const juce::AudioProcessor::TrackProperties& properties) override;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<const google::protobuf::Message> serialize() const override;
 
 private:
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;

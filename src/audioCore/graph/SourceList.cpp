@@ -115,6 +115,16 @@ const juce::CriticalSection& SourceList::getLock() const noexcept {
 	return this->list.getLock();
 }
 
+bool SourceList::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> SourceList::serialize() const {
+	/** TODO */
+	return nullptr;
+}
+
 int SourceList::binarySearchInsert(int low, int high, double t) const {
 	while (low <= high) {
 		int mid = low + (high - low) / 2;

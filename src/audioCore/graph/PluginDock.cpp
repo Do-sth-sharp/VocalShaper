@@ -318,3 +318,13 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 		plugin->setPlayHead(newPlayHead);
 	}
 }
+
+bool PluginDock::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> PluginDock::serialize() const {
+	/** TODO */
+	return nullptr;
+}

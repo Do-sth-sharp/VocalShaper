@@ -2,8 +2,9 @@
 
 #include <JuceHeader.h>
 #include "../source/CloneableSource.h"
+#include "../project/Serializable.h"
 
-class SourceList final {
+class SourceList final : public Serializable {
 public:
 	SourceList() = default;
 
@@ -31,6 +32,10 @@ public:
 	bool add(const SeqBlock& block);
 	void remove(int index);
 	const juce::CriticalSection& getLock() const noexcept;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<const google::protobuf::Message> serialize() const override;
 
 private:
 	juce::Array<SeqBlock, juce::CriticalSection> list;

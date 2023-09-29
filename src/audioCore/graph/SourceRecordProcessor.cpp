@@ -108,3 +108,13 @@ double SourceRecordProcessor::getTailLengthSeconds() const {
 	}
 	return 0;
 }
+
+bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> SourceRecordProcessor::serialize() const {
+	/** TODO */
+	return nullptr;
+}

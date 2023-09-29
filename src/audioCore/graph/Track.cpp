@@ -214,6 +214,16 @@ void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	}
 }
 
+bool Track::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return true;
+}
+
+std::unique_ptr<const google::protobuf::Message> Track::serialize() const {
+	/** TODO */
+	return nullptr;
+}
+
 bool Track::canAddBus(bool isInput) const {
 	return isInput;
 }
