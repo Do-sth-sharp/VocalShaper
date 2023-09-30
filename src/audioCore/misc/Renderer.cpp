@@ -46,7 +46,7 @@ void RenderThread::run() {
 	/** Reset Play Head State */
 	AudioCore::getInstance()->stop();
 
-	/** TODO Buffer Audio */
+	/** Buffer Audio */
 	{
 		double bufferArea = this->renderer->audioBufferArea;
 		int bufferLength = bufferArea * this->renderer->sampleRate;
