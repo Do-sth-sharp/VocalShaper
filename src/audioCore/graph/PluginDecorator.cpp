@@ -51,7 +51,7 @@ int PluginDecorator::getMIDIChannel() const {
 
 const juce::Array<juce::AudioProcessorParameter*>& PluginDecorator::getPluginParamList() const {
 	juce::ScopedReadLock locker(this->pluginLock);
-	if (!this->plugin) { return {}; }
+	if (!this->plugin) { static juce::Array<juce::AudioProcessorParameter*> empty; return empty; }
 	return this->plugin->getParameters();
 }
 

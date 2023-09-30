@@ -32,6 +32,27 @@ public:
 	void setMIDICCIntercept(bool midiCCShouldIntercept);
 	bool getMIDICCIntercept() const;
 
+	class SafePointer {
+	private:
+		juce::WeakReference<PluginDecorator> weakRef;
+
+	public:
+		SafePointer() = default;
+		SafePointer(PluginDecorator* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (PluginDecorator* newSource) { weakRef = newSource; return *this; };
+
+		PluginDecorator* getPlugin() const noexcept { return dynamic_cast<PluginDecorator*> (weakRef.get()); };
+		operator PluginDecorator* () const noexcept { return getPlugin(); };
+		PluginDecorator* operator->() const noexcept { return getPlugin(); };
+		void deleteAndZero() { delete getPlugin(); };
+
+		bool operator== (PluginDecorator* component) const noexcept { return weakRef == component; };
+		bool operator!= (PluginDecorator* component) const noexcept { return weakRef != component; };
+	};
+
 public:
 	const juce::String getName() const override;
 	juce::StringArray getAlternateDisplayNames() const override;
@@ -123,5 +144,6 @@ private:
 
 	void parseMIDICC(juce::MidiBuffer& midiMessages);
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDecorator)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)
 };
