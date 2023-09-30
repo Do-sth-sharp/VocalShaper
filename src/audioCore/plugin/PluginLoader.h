@@ -13,6 +13,8 @@ public:
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
 		CloneableSource::SafePointer<CloneableSynthSource> ptr);
 
+	bool isRunning() const;
+
 private:
 	std::unique_ptr<PluginLoadThread> loadThread = nullptr;
 

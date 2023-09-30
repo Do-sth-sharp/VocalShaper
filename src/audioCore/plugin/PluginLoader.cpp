@@ -39,6 +39,10 @@ void PluginLoader::loadPlugin(const juce::PluginDescription& pluginInfo,
 		{ PluginLoadThread::DstPointer::Type::Synth, nullptr, ptr }, sampleRate, bufferSize);
 }
 
+bool PluginLoader::isRunning() const {
+	return this->loadThread->isThreadRunning();
+}
+
 PluginLoader* PluginLoader::getInstance() {
 	return PluginLoader::instance ? PluginLoader::instance : (PluginLoader::instance = new PluginLoader());
 }

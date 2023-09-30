@@ -3,6 +3,8 @@
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include "PlayPosition.h"
+#include "../source/AudioIOList.h"
+#include "../plugin/PluginLoader.h"
 
 class RenderThread final : public juce::Thread {
 public:
@@ -124,6 +126,10 @@ Renderer::~Renderer() {
 
 bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 	const juce::String& name, const juce::String& extension) {
+	/** Async Protection */
+	if (AudioIOList::getInstance()->isThreadRunning()) { return false; }
+	if (PluginLoader::getInstance()->isRunning()) { return false; }
+
 	/** Thread Is Already Started */
 	if (this->renderThread->isThreadRunning()) {
 		return false;
