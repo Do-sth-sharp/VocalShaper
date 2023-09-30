@@ -1,25 +1,40 @@
 #include "PluginDecorator.h"
 
-PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin)
-	: plugin(std::move(plugin)) {
-	jassert(this->plugin);
-
+PluginDecorator::PluginDecorator() {
 	for (int i = 0; i < this->paramCCList.size(); i++) {
 		this->paramCCList[i] = -1;
 	}
+}
+
+PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin)
+	: PluginDecorator() {
+	this->setPlugin(std::move(plugin));
+}
+
+void PluginDecorator::setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugin) {
+	{
+		juce::ScopedWriteLock locker(this->pluginLock);
+		this->plugin = std::move(plugin);
+	}
 
 	this->initFlag = true;
-
 	this->syncBusesFromPlugin();
-
 	this->initFlag = false;
+
+	this->plugin->setPlayHead(this->getPlayHead());
+	this->plugin->setNonRealtime(this->isNonRealtime());
+	this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 }
 
 bool PluginDecorator::canPluginAddBus(bool isInput) const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->canAddBus(isInput);
 }
 
 bool PluginDecorator::canPluginRemoveBus(bool isInput) const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->canRemoveBus(isInput);
 }
 
@@ -35,6 +50,8 @@ int PluginDecorator::getMIDIChannel() const {
 }
 
 const juce::Array<juce::AudioProcessorParameter*>& PluginDecorator::getPluginParamList() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return {}; }
 	return this->plugin->getParameters();
 }
 
@@ -125,23 +142,34 @@ bool PluginDecorator::getMIDICCIntercept() const {
 }
 
 const juce::String PluginDecorator::getName() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return ""; }
 	return this->plugin->getName();
 }
 
 juce::StringArray PluginDecorator::getAlternateDisplayNames() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return {}; }
 	return this->plugin->getAlternateDisplayNames();
 }
 
 void PluginDecorator::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
+	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 }
 
 void PluginDecorator::releaseResources() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->releaseResources();
 }
 
 void PluginDecorator::memoryWarningReceived() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->memoryWarningReceived();
 }
 
@@ -151,7 +179,12 @@ void PluginDecorator::processBlock(
 	this->parseMIDICC(midiMessages);
 	PluginDecorator::interceptMIDICCMessage(this->midiCCShouldIntercept, midiMessages);
 
-	this->plugin->processBlock(buffer, midiMessages);
+	{
+		juce::ScopedTryReadLock locker(this->pluginLock);
+		if (locker.isLocked() && this->plugin) {
+			this->plugin->processBlock(buffer, midiMessages);
+		}
+	}
 
 	PluginDecorator::interceptMIDIMessage(this->midiShouldOutput, midiMessages);
 }
@@ -162,19 +195,30 @@ void PluginDecorator::processBlock(
 	this->parseMIDICC(midiMessages);
 	PluginDecorator::interceptMIDICCMessage(this->midiCCShouldIntercept, midiMessages);
 
-	this->plugin->processBlock(buffer, midiMessages);
+	{
+		juce::ScopedTryReadLock locker(this->pluginLock);
+		if (locker.isLocked() && this->plugin) {
+			this->plugin->processBlock(buffer, midiMessages);
+		}
+	}
 
 	PluginDecorator::interceptMIDIMessage(this->midiShouldOutput, midiMessages);
 }
 
 void PluginDecorator::processBlockBypassed(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
-	this->plugin->processBlockBypassed(buffer, midiMessages);
+	juce::ScopedTryReadLock locker(this->pluginLock);
+	if (locker.isLocked() && this->plugin) {
+		this->plugin->processBlockBypassed(buffer, midiMessages);
+	}
 }
 
 void PluginDecorator::processBlockBypassed(
 	juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
-	this->plugin->processBlockBypassed(buffer, midiMessages);
+	juce::ScopedTryReadLock locker(this->pluginLock);
+	if (locker.isLocked() && this->plugin) {
+		this->plugin->processBlockBypassed(buffer, midiMessages);
+	}
 }
 
 bool PluginDecorator::canAddBus(bool isInput) const {
@@ -186,85 +230,128 @@ bool PluginDecorator::canRemoveBus(bool isInput) const {
 }
 
 bool PluginDecorator::supportsDoublePrecisionProcessing() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->supportsDoublePrecisionProcessing();
 }
 
 double PluginDecorator::getTailLengthSeconds() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return 0; }
 	return this->plugin->getTailLengthSeconds();
 }
 
 bool PluginDecorator::acceptsMidi() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->acceptsMidi();
 }
 
 bool PluginDecorator::producesMidi() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->producesMidi();
 }
 
 bool PluginDecorator::supportsMPE() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->supportsMPE();
 }
 
 bool PluginDecorator::isMidiEffect() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->isMidiEffect();
 }
 
 void PluginDecorator::reset() {
 	this->juce::AudioProcessor::reset();
-	this->plugin->reset();
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (this->plugin) {
+		this->plugin->reset();
+	}
 }
 
 juce::AudioProcessorParameter* PluginDecorator::getBypassParameter() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return nullptr; }
 	return this->plugin->getBypassParameter();
 }
 
 void PluginDecorator::setNonRealtime(bool isNonRealtime) noexcept {
 	this->juce::AudioProcessor::setNonRealtime(isNonRealtime);
-	this->plugin->setNonRealtime(isNonRealtime);
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (this->plugin) {
+		this->plugin->setNonRealtime(isNonRealtime);
+	}
 }
 
 juce::AudioProcessorEditor* PluginDecorator::createEditor() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return nullptr; }
 	return this->plugin->createEditorIfNeeded();
 }
 
 bool PluginDecorator::hasEditor() const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return false; }
 	return this->plugin->hasEditor();
 }
 
 void PluginDecorator::refreshParameterList() {
 	this->juce::AudioProcessor::refreshParameterList();
-	this->plugin->refreshParameterList();
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (this->plugin) {
+		this->plugin->refreshParameterList();
+	}
 }
 
 int PluginDecorator::getNumPrograms() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return 0; }
 	return this->plugin->getNumPrograms();
 }
 
 int PluginDecorator::getCurrentProgram() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return -1; }
 	return this->plugin->getCurrentProgram();
 }
 
 void PluginDecorator::setCurrentProgram(int index) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->setCurrentProgram(index);
 }
 
 const juce::String PluginDecorator::getProgramName(int index) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return ""; }
 	return this->plugin->getProgramName(index);
 }
 
 void PluginDecorator::changeProgramName(int index, const juce::String& newName) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->changeProgramName(index, newName);
 }
 
 void PluginDecorator::getStateInformation(juce::MemoryBlock& destData) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->getStateInformation(destData);
 }
 
 void PluginDecorator::setStateInformation(const void* data, int sizeInBytes) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->setStateInformation(data, sizeInBytes);
 }
 
 void PluginDecorator::setCurrentProgramStateInformation(const void* data, int sizeInBytes) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->setCurrentProgramStateInformation(data, sizeInBytes);
 }
 
@@ -273,33 +360,46 @@ void PluginDecorator::processorLayoutsChanged() {
 }
 
 void PluginDecorator::addListener(juce::AudioProcessorListener* newListener) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->addListener(newListener);
 }
 
 void PluginDecorator::removeListener(juce::AudioProcessorListener* listenerToRemove) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->removeListener(listenerToRemove);
 }
 
 void PluginDecorator::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	this->juce::AudioProcessor::setPlayHead(newPlayHead);
-	this->plugin->setPlayHead(newPlayHead);
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (this->plugin) {
+		this->plugin->setPlayHead(newPlayHead);
+	}
 }
 
 juce::int32 PluginDecorator::getAAXPluginIDForMainBusConfig(
 	const juce::AudioChannelSet& mainInputLayout,
 	const juce::AudioChannelSet& mainOutputLayout,
 	bool idForAudioSuite) const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return 0; }
 	return this->plugin->getAAXPluginIDForMainBusConfig(
 		mainInputLayout, mainOutputLayout, idForAudioSuite);
 }
 
 juce::AudioProcessor::CurveData PluginDecorator::getResponseCurve(
 	juce::AudioProcessor::CurveData::Type type) const {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return juce::AudioProcessor::CurveData{}; }
 	return this->plugin->getResponseCurve(type);
 }
 
 void PluginDecorator::updateTrackProperties(
 	const juce::AudioProcessor::TrackProperties& properties) {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	this->plugin->updateTrackProperties(properties);
 }
 
@@ -322,7 +422,9 @@ void PluginDecorator::numBusesChanged() {
 }
 
 void PluginDecorator::updatePluginBuses() {
+	juce::ScopedReadLock locker(this->pluginLock);
 	if (this->initFlag) { return; }
+	if (!this->plugin) { return; }
 
 	auto currentBusesLayout = this->getBusesLayout();
 	auto pluginBusesLayout = this->plugin->getBusesLayout();
@@ -361,6 +463,9 @@ void PluginDecorator::updatePluginBuses() {
 }
 
 void PluginDecorator::syncBusesFromPlugin() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
+
 	auto currentBusesLayout = this->getBusesLayout();
 	auto pluginBusesLayout = this->plugin->getBusesLayout();
 
@@ -398,6 +503,8 @@ void PluginDecorator::syncBusesFromPlugin() {
 }
 
 void PluginDecorator::syncBusesNumFromPlugin() {
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	if (this->initFlag) { return; }
 
 	auto currentBusesLayout = this->getBusesLayout();
@@ -489,6 +596,8 @@ void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
 	}
 
 	/** Set Param Value */
+	juce::ScopedReadLock locker(this->pluginLock);
+	if (!this->plugin) { return; }
 	auto& paramList = this->plugin->getParameters();
 	for (auto& i : paramTemp) {
 		auto param = paramList[i.first];

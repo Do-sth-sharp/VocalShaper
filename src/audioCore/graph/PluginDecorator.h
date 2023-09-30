@@ -6,8 +6,10 @@
 class PluginDecorator final : public juce::AudioProcessor,
 	public Serializable {
 public:
-	PluginDecorator() = delete;
+	PluginDecorator();
 	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin);
+
+	void setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugin);
 
 	bool canPluginAddBus(bool isInput) const;
 	bool canPluginRemoveBus(bool isInput) const;
@@ -100,6 +102,7 @@ public:
 
 private:
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
+	juce::ReadWriteLock pluginLock;
 	bool initFlag = false;
 	std::atomic_int midiChannel = 1;
 	std::array<std::atomic_int, 128> paramCCList;
