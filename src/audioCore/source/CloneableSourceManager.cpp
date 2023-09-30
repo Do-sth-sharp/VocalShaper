@@ -56,23 +56,12 @@ bool CloneableSourceManager::setSourceSynthesizer(
 	juce::ScopedTryReadLock locker(this->getLock());
 	if (locker.isLocked()) {
 		auto source = this->getSource(index);
-		if (!dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-			return false;
-		}
-
-		if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
-			auto loadCallback =
-				[index, source](std::unique_ptr<juce::AudioPluginInstance> ptr) {
-				if (ptr) {
-					if (auto src =
-						dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-						src->setSynthesizer(std::move(ptr));
-					}
-				}
-				};
-
-			PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
-			return true;
+		if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+			if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
+				PluginLoader::getInstance()->loadPlugin(*(des.get()),
+					CloneableSource::SafePointer<CloneableSynthSource>(src));
+				return true;
+			}
 		}
 	}
 	return false;

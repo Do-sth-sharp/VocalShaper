@@ -65,10 +65,10 @@ PluginLoadThread::~PluginLoadThread() {
 }
 
 void PluginLoadThread::load(const juce::PluginDescription& pluginInfo,
-	const PluginLoadCallback& callback, double sampleRate, int blockSize) {
+	DstPointer ptr, double sampleRate, int blockSize) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(pluginInfo, callback, sampleRate, blockSize));
+	this->list.push(std::make_tuple(pluginInfo, ptr, sampleRate, blockSize));
 
 	this->startThread();
 }
@@ -89,11 +89,25 @@ void PluginLoadThread::run() {
 		}
 
 		/** Prepare Plugin Load */
-		auto& [pluginDescription, callback, sampleRate, blockSize] = task;
+		auto& [pluginDescription, ptr, sampleRate, blockSize] = task;
 		auto asyncCallback =
-			[callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
+			[ptr](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
 			if (p) {
-				callback(std::move(p));
+				switch (ptr.type){
+				case DstPointer::Type::Plugin:
+					if (auto plugin = ptr.pluginPtr.getPlugin()) {
+						plugin->setPlugin(std::move(p));
+					}
+					break;
+				case DstPointer::Type::Synth:
+					if (auto source = ptr.synthPtr.getSource()) {
+						source->setSynthesizer(std::move(p));
+					}
+					break;
+				default:
+					jassertfalse;
+					break;
+				}
 				return;
 			}
 

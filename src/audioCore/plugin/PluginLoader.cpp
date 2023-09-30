@@ -8,7 +8,7 @@ PluginLoader::PluginLoader() {
 
 void PluginLoader::loadPlugin(
 	const juce::PluginDescription& pluginInfo,
-	const PluginLoader::PluginLoadCallback& callback) {
+	PluginDecorator::SafePointer ptr) {
 	/** Get Audio Config */
 	auto mainGraph = AudioCore::getInstance()->getGraph();
 	if (!mainGraph) {
@@ -19,7 +19,24 @@ void PluginLoader::loadPlugin(
 	int bufferSize = mainGraph->getBlockSize();
 
 	/** Create Task */
-	this->loadThread->load(pluginInfo, callback, sampleRate, bufferSize);
+	this->loadThread->load(pluginInfo,
+		{ PluginLoadThread::DstPointer::Type::Plugin, ptr, nullptr }, sampleRate, bufferSize);
+}
+
+void PluginLoader::loadPlugin(const juce::PluginDescription& pluginInfo,
+	CloneableSource::SafePointer<CloneableSynthSource> ptr) {
+	/** Get Audio Config */
+	auto mainGraph = AudioCore::getInstance()->getGraph();
+	if (!mainGraph) {
+		jassertfalse;
+		return;
+	}
+	double sampleRate = mainGraph->getSampleRate();
+	int bufferSize = mainGraph->getBlockSize();
+
+	/** Create Task */
+	this->loadThread->load(pluginInfo,
+		{ PluginLoadThread::DstPointer::Type::Synth, nullptr, ptr }, sampleRate, bufferSize);
 }
 
 PluginLoader* PluginLoader::getInstance() {

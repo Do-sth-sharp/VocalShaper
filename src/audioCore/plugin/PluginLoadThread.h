@@ -1,23 +1,28 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "../graph/PluginDecorator.h"
+#include "../source/CloneableSynthSource.h"
 
 class PluginLoadThread final : public juce::Thread {
 public:
 	PluginLoadThread();
 	~PluginLoadThread() override;
 
-	using PluginLoadCallback =
-		std::function<void(std::unique_ptr<juce::AudioPluginInstance>)>;
+	struct DstPointer {
+		enum class Type { Plugin, Synth } type;
+		PluginDecorator::SafePointer pluginPtr;
+		CloneableSource::SafePointer<CloneableSynthSource> synthPtr;
+	};
 	void load(const juce::PluginDescription& pluginInfo,
-		const PluginLoadCallback& callback, double sampleRate, int blockSize);
+		DstPointer ptr, double sampleRate, int blockSize);
 
 private:
 	void run() override;
 
 private:
 	using PluginLoadTask =
-		std::tuple<juce::PluginDescription, PluginLoadCallback, double, int>;
+		std::tuple<juce::PluginDescription, DstPointer, double, int>;
 	std::queue<PluginLoadTask> list;
 	juce::CriticalSection lock;
 

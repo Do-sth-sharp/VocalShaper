@@ -48,10 +48,29 @@ PluginDock::~PluginDock() {
 	}
 }
 
-bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
+PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
+	if (auto ptr = this->insertPlugin(index)) {
+		ptr->setPlugin(std::move(processor));
+		return ptr;
+	}
+	else {
+		jassertfalse;
+		return nullptr;
+	}
+}
+
+PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(std::move(processor)));
+	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(this->audioChannels));
 	if (ptrNode) {
+		/** Set Bus Num */
+		{
+			int additionalBusNum = this->getBusCount(true) - 1;
+			for (int i = 0; i < additionalBusNum; i++) {
+				ptrNode->getProcessor()->addBus(true);
+			}
+		}
+
 		/** Limit Index */
 		if (index < 0 || index > this->pluginNodeList.size()) {
 			index = this->pluginNodeList.size();
@@ -84,7 +103,7 @@ bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> process
 			/** Check Channels */
 			if (pluginInputChannels < mainBusChannels || pluginOutputChannels < mainBusChannels) {
 				this->removeNode(ptrNode->nodeID);
-				return false;
+				return nullptr;
 			}
 
 			/** Remove Connection Between Hot Spot Nodes */
@@ -113,11 +132,11 @@ bool PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> process
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
-		return true;
+		return PluginDecorator::SafePointer{ dynamic_cast<PluginDecorator*>(ptrNode->getProcessor()) };
 	}
 	else {
 		jassertfalse;
-		return false;
+		return nullptr;
 	}
 }
 
@@ -217,6 +236,11 @@ bool PluginDock::addAdditionalAudioBus() {
 	inputLayout.outputBuses = inputLayout.inputBuses;
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
+	/** Set Bus Num Of Plugins */
+	for (auto& p : this->pluginNodeList) {
+		p->getProcessor()->addBus(true);
+	}
+
 	return true;
 }
 
@@ -243,6 +267,11 @@ bool PluginDock::removeAdditionalAudioBus() {
 		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
 	inputLayout.outputBuses = inputLayout.inputBuses;
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+
+	/** Set Bus Num Of Plugins */
+	for (auto& p : this->pluginNodeList) {
+		p->getProcessor()->removeBus(true);
+	}
 
 	/** Auto Remove Connection */
 	this->removeIllegalConnections();

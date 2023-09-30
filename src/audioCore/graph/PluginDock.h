@@ -15,7 +15,11 @@ public:
 	/**
 	 * @brief	Insert a plugin onto the plugin dock.
 	 */
-	bool insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
+	PluginDecorator::SafePointer insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
+	/**
+	 * @brief	Insert a plugin onto the plugin dock without init.
+	 */
+	PluginDecorator::SafePointer insertPlugin(int index = -1);
 	/**
 	 * @brief	Remove a plugin from the plugin dock.
 	 */

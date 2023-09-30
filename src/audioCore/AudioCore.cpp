@@ -345,19 +345,16 @@ const std::unique_ptr<juce::PluginDescription> AudioCore::findPlugin(const juce:
 
 bool AudioCore::addEffect(const juce::String& identifier, int trackIndex, int effectIndex) {
 	if (auto des = this->findPlugin(identifier, false)) {
-		auto loadCallback = 
-			[trackIndex, effectIndex, graph = this->getGraph()] (std::unique_ptr<juce::AudioPluginInstance> ptr) {
-			if (graph && ptr) {
-				if (auto track = graph->getTrackProcessor(trackIndex)) {
-					if (auto pluginDock = track->getPluginDock()) {
-						pluginDock->insertPlugin(std::move(ptr), effectIndex);
+		if (auto graph = this->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					if (auto ptr = pluginDock->insertPlugin(effectIndex)) {
+						PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+						return true;
 					}
 				}
 			}
-		};
-
-		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
-		return true;
+		}
 	}
 	return false;
 }
@@ -395,17 +392,15 @@ void AudioCore::bypassEffect(int trackIndex, int effectIndex, bool bypass) {
 	}
 }
 
-bool AudioCore::addInstrument(const juce::String& identifier, int instrIndex) {
+bool AudioCore::addInstrument(const juce::String& identifier,
+	int instrIndex, const juce::AudioChannelSet& type) {
 	if (auto des = this->findPlugin(identifier, true)) {
-		auto loadCallback =
-			[instrIndex, graph = this->getGraph()](std::unique_ptr<juce::AudioPluginInstance> ptr) {
-			if (graph && ptr) {
-				graph->insertInstrument(std::move(ptr), instrIndex);
+		if (auto graph = this->getGraph()) {
+			if (auto ptr = graph->insertInstrument(instrIndex, type)) {
+				PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+				return true;
 			}
-		};
-
-		PluginLoader::getInstance()->loadPlugin(*(des.get()), loadCallback);
-		return true;
+		}
 	}
 	return false;
 }

@@ -15,7 +15,11 @@ public:
 
 	void insertSource(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeSource(int index);
-	bool insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
+	PluginDecorator::SafePointer insertInstrument(
+		std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1,
+		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	PluginDecorator::SafePointer insertInstrument(int index = -1,
+		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeInstrument(int index);
 	void insertTrack(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeTrack(int index);

@@ -245,12 +245,15 @@ AUDIOCORE_FUNC(addInstr) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
-	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 2));
-	if (AudioCore::getInstance()->addInstrument(pid, instrIndex)) {
-		result += "Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + "\n";
+	int instrType = luaL_checkinteger(L, 2);
+	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 3));
+
+	auto pluginType = getChannelSet(instrType);
+	if (AudioCore::getInstance()->addInstrument(pid, instrIndex, pluginType)) {
+		result += "Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + " : " + pluginType.getDescription() + "\n";
 	}
 	else {
-		result += "Can't Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + "\n";
+		result += "Can't Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + " : " + pluginType.getDescription() + "\n";
 	}
 
 	return CommandFuncResult{ true, result };

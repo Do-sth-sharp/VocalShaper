@@ -8,9 +8,10 @@ public:
 	PluginLoader();
 	~PluginLoader() override = default;
 
-	using PluginLoadCallback = PluginLoadThread::PluginLoadCallback;
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
-		const PluginLoadCallback& callback);
+		PluginDecorator::SafePointer ptr);
+	void loadPlugin(const juce::PluginDescription& pluginInfo,
+		CloneableSource::SafePointer<CloneableSynthSource> ptr);
 
 private:
 	std::unique_ptr<PluginLoadThread> loadThread = nullptr;

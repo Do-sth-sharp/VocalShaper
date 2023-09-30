@@ -1,29 +1,48 @@
 #include "PluginDecorator.h"
 
-PluginDecorator::PluginDecorator() {
+PluginDecorator::PluginDecorator(const juce::AudioChannelSet& type)
+	: audioChannels(type) {
+	/** Channels */
+	juce::AudioProcessorGraph::BusesLayout layout;
+	layout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(type.size()));
+	layout.outputBuses.add(
+		juce::AudioChannelSet::discreteChannels(type.size()));
+	this->setBusesLayout(layout);
+
+	/** MIDI CC */
 	for (int i = 0; i < this->paramCCList.size(); i++) {
 		this->paramCCList[i] = -1;
 	}
 }
 
-PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin)
-	: PluginDecorator() {
+PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
+	const juce::AudioChannelSet& type)
+	: PluginDecorator(type) {
 	this->setPlugin(std::move(plugin));
 }
 
 void PluginDecorator::setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugin) {
+	if (!plugin) { return; }
+
 	{
 		juce::ScopedWriteLock locker(this->pluginLock);
-		this->plugin = std::move(plugin);
-	}
+		juce::ScopedWriteLock bufferLocker(this->bufferLock);
 
-	this->initFlag = true;
-	this->syncBusesFromPlugin();
-	this->initFlag = false;
+		this->plugin = std::move(plugin);
+
+		int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());
+		this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
+		if (this->plugin->supportsDoublePrecisionProcessing()) {
+			this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
+		}
+	}
 
 	this->plugin->setPlayHead(this->getPlayHead());
 	this->plugin->setNonRealtime(this->isNonRealtime());
 	this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+	//this->updatePluginBuses();
 }
 
 bool PluginDecorator::canPluginAddBus(bool isInput) const {
@@ -156,8 +175,17 @@ juce::StringArray PluginDecorator::getAlternateDisplayNames() const {
 void PluginDecorator::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
+
+	juce::ScopedWriteLock bufferLocker(this->bufferLock);
 	juce::ScopedReadLock locker(this->pluginLock);
 	if (!this->plugin) { return; }
+
+	int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());
+	this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
+	if (this->plugin->supportsDoublePrecisionProcessing()) {
+		this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
+	}
+
 	this->plugin->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
 }
 
@@ -181,8 +209,20 @@ void PluginDecorator::processBlock(
 
 	{
 		juce::ScopedTryReadLock locker(this->pluginLock);
-		if (locker.isLocked() && this->plugin) {
-			this->plugin->processBlock(buffer, midiMessages);
+		juce::ScopedTryReadLock bufferLocker(this->bufferLock);
+		if (locker.isLocked() && bufferLocker.isLocked() && this->plugin && this->buffer) {
+			this->buffer->clear();
+			this->buffer->setSize(this->buffer->getNumChannels(), buffer.getNumSamples(), true, false, true);
+
+			for (int i = 0; i < buffer.getNumChannels() && i < this->buffer->getNumChannels(); i++) {
+				this->buffer->copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
+			}
+
+			this->plugin->processBlock(*(this->buffer.get()), midiMessages);
+
+			for (int i = 0; i < buffer.getNumChannels() && i < this->buffer->getNumChannels(); i++) {
+				buffer.copyFrom(i, 0, this->buffer->getReadPointer(i), buffer.getNumSamples());
+			}
 		}
 	}
 
@@ -197,8 +237,20 @@ void PluginDecorator::processBlock(
 
 	{
 		juce::ScopedTryReadLock locker(this->pluginLock);
-		if (locker.isLocked() && this->plugin) {
-			this->plugin->processBlock(buffer, midiMessages);
+		juce::ScopedTryReadLock bufferLocker(this->bufferLock);
+		if (locker.isLocked() && bufferLocker.isLocked() && this->plugin && this->doubleBuffer) {
+			this->doubleBuffer->clear();
+			this->doubleBuffer->setSize(this->doubleBuffer->getNumChannels(), buffer.getNumSamples(), true, false, true);
+
+			for (int i = 0; i < buffer.getNumChannels() && i < this->doubleBuffer->getNumChannels(); i++) {
+				this->doubleBuffer->copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
+			}
+
+			this->plugin->processBlock(*(this->doubleBuffer.get()), midiMessages);
+
+			for (int i = 0; i < buffer.getNumChannels() && i < this->doubleBuffer->getNumChannels(); i++) {
+				buffer.copyFrom(i, 0, this->doubleBuffer->getReadPointer(i), buffer.getNumSamples());
+			}
 		}
 	}
 
@@ -243,7 +295,7 @@ double PluginDecorator::getTailLengthSeconds() const {
 
 bool PluginDecorator::acceptsMidi() const {
 	juce::ScopedReadLock locker(this->pluginLock);
-	if (!this->plugin) { return false; }
+	if (!this->plugin) { return true; }
 	return this->plugin->acceptsMidi();
 }
 
@@ -418,12 +470,11 @@ void PluginDecorator::numChannelsChanged() {
 }
 
 void PluginDecorator::numBusesChanged() {
-	this->syncBusesNumFromPlugin();
+	//this->updatePluginBuses();
 }
 
 void PluginDecorator::updatePluginBuses() {
 	juce::ScopedReadLock locker(this->pluginLock);
-	if (this->initFlag) { return; }
 	if (!this->plugin) { return; }
 
 	auto currentBusesLayout = this->getBusesLayout();
@@ -460,82 +511,6 @@ void PluginDecorator::updatePluginBuses() {
 	}
 
 	this->plugin->setBusesLayout(currentBusesLayout);
-}
-
-void PluginDecorator::syncBusesFromPlugin() {
-	juce::ScopedReadLock locker(this->pluginLock);
-	if (!this->plugin) { return; }
-
-	auto currentBusesLayout = this->getBusesLayout();
-	auto pluginBusesLayout = this->plugin->getBusesLayout();
-
-	if (pluginBusesLayout == currentBusesLayout) {
-		return;
-	}
-
-	int inputBusNumDefer =
-		currentBusesLayout.inputBuses.size() - pluginBusesLayout.inputBuses.size();
-	int outputBusNumDefer =
-		currentBusesLayout.outputBuses.size() - pluginBusesLayout.outputBuses.size();
-
-	if (inputBusNumDefer > 0) {
-		for (int i = 0; i < inputBusNumDefer; i++) {
-			this->removeBus(true);
-		}
-	}
-	else if (inputBusNumDefer < 0) {
-		for (int i = 0; i < -inputBusNumDefer; i++) {
-			this->addBus(true);
-		}
-	}
-	if (outputBusNumDefer > 0) {
-		for (int i = 0; i < outputBusNumDefer; i++) {
-			this->removeBus(false);
-		}
-	}
-	else if (outputBusNumDefer < 0) {
-		for (int i = 0; i < -outputBusNumDefer; i++) {
-			this->addBus(false);
-		}
-	}
-
-	this->setBusesLayout(pluginBusesLayout);
-}
-
-void PluginDecorator::syncBusesNumFromPlugin() {
-	juce::ScopedReadLock locker(this->pluginLock);
-	if (!this->plugin) { return; }
-	if (this->initFlag) { return; }
-
-	auto currentBusesLayout = this->getBusesLayout();
-	auto pluginBusesLayout = this->plugin->getBusesLayout();
-
-	if (pluginBusesLayout == currentBusesLayout) {
-		return;
-	}
-
-	int inputBusNumDefer =
-		currentBusesLayout.inputBuses.size() - pluginBusesLayout.inputBuses.size();
-	int outputBusNumDefer =
-		currentBusesLayout.outputBuses.size() - pluginBusesLayout.outputBuses.size();
-
-	bool flagChanged = false;
-
-	if ((inputBusNumDefer > 0 && (!this->canPluginAddBus(true)))
-		|| (inputBusNumDefer < 0 && (!this->canPluginRemoveBus(true)))) {
-		currentBusesLayout.inputBuses.resize(pluginBusesLayout.inputBuses.size());
-		flagChanged = true;
-	}
-
-	if ((outputBusNumDefer > 0 && (!this->canPluginAddBus(false)))
-		|| (outputBusNumDefer < 0 && (!this->canPluginRemoveBus(false)))) {
-		currentBusesLayout.outputBuses.resize(pluginBusesLayout.outputBuses.size());
-		flagChanged = true;
-	}
-
-	if (flagChanged) {
-		this->setBusesLayout(currentBusesLayout);
-	}
 }
 
 void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages) {

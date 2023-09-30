@@ -6,8 +6,10 @@
 class PluginDecorator final : public juce::AudioProcessor,
 	public Serializable {
 public:
-	PluginDecorator();
-	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin);
+	PluginDecorator() = delete;
+	PluginDecorator(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
+		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
 	void setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugin);
 
@@ -123,20 +125,21 @@ public:
 
 private:
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
+	std::unique_ptr<juce::AudioBuffer<float>> buffer = nullptr;
+	std::unique_ptr<juce::AudioBuffer<double>> doubleBuffer = nullptr;
 	juce::ReadWriteLock pluginLock;
-	bool initFlag = false;
+	juce::ReadWriteLock bufferLock;
 	std::atomic_int midiChannel = 1;
 	std::array<std::atomic_int, 128> paramCCList;
 	std::atomic_int paramListenningCC = -1;
 	std::atomic_bool midiShouldOutput = false;
 	std::atomic_bool midiCCShouldIntercept = true;
+	juce::AudioChannelSet audioChannels;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;
 
 	void updatePluginBuses();
-	void syncBusesFromPlugin();
-	void syncBusesNumFromPlugin();
 
 	static void filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages);
 	static void interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages);

@@ -87,7 +87,8 @@ public:
 	bool removeEffect(int trackIndex, int effectIndex);
 	void bypassEffect(int trackIndex, int effectIndex, bool bypass);
 
-	bool addInstrument(const juce::String& identifier, int instrIndex);
+	bool addInstrument(const juce::String& identifier, int instrIndex,
+		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	PluginDecorator* getInstrument(int instrIndex) const;
 	bool removeInstrument(int instrIndex);
 	void bypassInstrument(int instrIndex, bool bypass);

@@ -61,9 +61,23 @@ void MainGraph::removeSource(int index) {
 	this->removeNode(ptrNode->nodeID);
 }
 
-bool MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
+PluginDecorator::SafePointer MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor,
+	int index, const juce::AudioChannelSet& type) {
 	/** Add To The Graph */
-	if (auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(std::move(processor)))) {
+	if (auto ptr = this->insertInstrument(index, type)) {
+		ptr->setPlugin(std::move(processor));
+		return ptr;
+	}
+	else {
+		jassertfalse;
+		return nullptr;
+	}
+}
+
+PluginDecorator::SafePointer MainGraph::insertInstrument(int index,
+	const juce::AudioChannelSet& type) {
+	/** Add To The Graph */
+	if (auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(type))) {
 		/** Limit Index */
 		if (index < 0 || index > this->instrumentNodeList.size()) {
 			index = this->instrumentNodeList.size();
@@ -76,11 +90,11 @@ bool MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> proc
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
-		return true;
+		return PluginDecorator::SafePointer{ dynamic_cast<PluginDecorator*>(ptrNode->getProcessor()) };
 	}
 	else {
 		jassertfalse;
-		return false;
+		return nullptr;
 	}
 }
 
