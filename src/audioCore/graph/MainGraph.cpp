@@ -162,7 +162,7 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<const google::protobuf::Message> MainGraph::serialize() const {
+std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 	/** TODO Serialize */
 	return nullptr;
 }

@@ -15,7 +15,8 @@ public:
 	/**
 	 * @brief	Insert a plugin onto the plugin dock.
 	 */
-	PluginDecorator::SafePointer insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1);
+	PluginDecorator::SafePointer insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,
+		const juce::String& identifier, int index = -1);
 	/**
 	 * @brief	Insert a plugin onto the plugin dock without init.
 	 */
@@ -50,7 +51,7 @@ public:
 
 public:
 	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<const google::protobuf::Message> serialize() const override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

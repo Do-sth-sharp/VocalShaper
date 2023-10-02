@@ -91,12 +91,13 @@ void PluginLoadThread::run() {
 		/** Prepare Plugin Load */
 		auto& [pluginDescription, ptr, sampleRate, blockSize] = task;
 		auto asyncCallback =
-			[ptr](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
+			[ptr, pluginDescription](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
 			if (p) {
+				auto identifier = pluginDescription.createIdentifierString();
 				switch (ptr.type){
 				case DstPointer::Type::Plugin:
 					if (auto plugin = ptr.pluginPtr.getPlugin()) {
-						plugin->setPlugin(std::move(p));
+						plugin->setPlugin(std::move(p), identifier);
 					}
 					break;
 				case DstPointer::Type::Synth:

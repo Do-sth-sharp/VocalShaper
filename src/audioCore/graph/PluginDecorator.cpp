@@ -1,4 +1,6 @@
 #include "PluginDecorator.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 PluginDecorator::PluginDecorator(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
@@ -17,12 +19,14 @@ PluginDecorator::PluginDecorator(const juce::AudioChannelSet& type)
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
+	const juce::String& identifier,
 	const juce::AudioChannelSet& type)
 	: PluginDecorator(type) {
-	this->setPlugin(std::move(plugin));
+	this->setPlugin(std::move(plugin), identifier);
 }
 
-void PluginDecorator::setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugin) {
+void PluginDecorator::setPlugin(
+	std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier) {
 	if (!plugin) { return; }
 
 	{
@@ -30,6 +34,7 @@ void PluginDecorator::setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugi
 		juce::ScopedWriteLock bufferLocker(this->bufferLock);
 
 		this->plugin = std::move(plugin);
+		this->pluginIdentifier = pluginIdentifier;
 
 		int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());
 		this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
@@ -460,9 +465,42 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<const google::protobuf::Message> PluginDecorator::serialize() const {
-	/** TODO */
-	return nullptr;
+std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
+	auto mes = std::make_unique<vsp4::Plugin>();
+	juce::ScopedReadLock locker(this->pluginLock);
+
+	/** Plugin Info */
+	if (this->plugin) {
+		mes->mutable_info()->set_id(this->pluginIdentifier.toStdString());
+	}
+
+	/** Plugin State */
+	if (this->plugin) {
+		auto state = mes->mutable_state();
+
+		juce::MemoryBlock data;
+		this->plugin->getStateInformation(data);
+		state->set_data(data.getData(), data.getSize());
+
+		state->set_midichannel(this->midiChannel);
+		state->set_midioutput(this->midiShouldOutput);
+		state->set_midiintercept(this->midiCCShouldIntercept);
+
+		auto paramCCLinks = state->mutable_paramcclinks();
+		for (int i = 0; i < this->paramCCList.size(); i++) {
+			if (this->paramCCList[i] >= 0) {
+				paramCCLinks->insert(std::make_pair(i, (uint32_t)this->paramCCList[i]));
+			}
+		}
+	}
+
+	/** Plugin Bypassed */
+	/** Use isBypassed method of AudioProcessorGraph::Node. */
+	// if (auto bypass = this->getBypassParameter()) {
+	// 	mes->set_bypassed(bypass->getValue());
+	// }
+	
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 void PluginDecorator::numChannelsChanged() {

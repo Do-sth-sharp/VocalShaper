@@ -16,7 +16,8 @@ public:
 	void insertSource(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeSource(int index);
 	PluginDecorator::SafePointer insertInstrument(
-		std::unique_ptr<juce::AudioPluginInstance> processor, int index = -1,
+		std::unique_ptr<juce::AudioPluginInstance> processor,
+		const juce::String& identifier, int index = -1,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	PluginDecorator::SafePointer insertInstrument(int index = -1,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
@@ -97,7 +98,7 @@ public:
 
 public:
 	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<const google::protobuf::Message> serialize() const override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;

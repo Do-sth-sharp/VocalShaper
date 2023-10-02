@@ -114,7 +114,7 @@ bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<const google::protobuf::Message> SourceRecordProcessor::serialize() const {
+std::unique_ptr<google::protobuf::Message> SourceRecordProcessor::serialize() const {
 	/** TODO */
 	return nullptr;
 }

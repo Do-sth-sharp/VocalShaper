@@ -1,4 +1,6 @@
 ﻿#include "PluginDock.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 PluginDock::PluginDock(const juce::AudioChannelSet& type) 
 	: audioChannels(type) {
@@ -48,9 +50,10 @@ PluginDock::~PluginDock() {
 	}
 }
 
-PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor, int index) {
+PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,
+	const juce::String& identifier, int index) {
 	if (auto ptr = this->insertPlugin(index)) {
-		ptr->setPlugin(std::move(processor));
+		ptr->setPlugin(std::move(processor), identifier);
 		return ptr;
 	}
 	else {
@@ -353,7 +356,24 @@ bool PluginDock::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<const google::protobuf::Message> PluginDock::serialize() const {
-	/** TODO */
-	return nullptr;
+std::unique_ptr<google::protobuf::Message> PluginDock::serialize() const {
+	auto mes = std::unique_ptr<vsp4::PluginDock>();
+
+	auto plugins = mes->mutable_plugins();
+	for (auto& i : this->pluginNodeList) {
+		if (auto plugin = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
+			if (auto item = plugin->serialize()) {
+				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
+					plu->set_bypassed(i->isBypassed());
+
+					plugins->AddAllocated(dynamic_cast<vsp4::Plugin*>(item.release()));
+				}
+			}
+			else {
+				return nullptr;
+			}
+		}
+	}
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }

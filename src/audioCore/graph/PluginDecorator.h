@@ -9,9 +9,11 @@ public:
 	PluginDecorator() = delete;
 	PluginDecorator(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
+		const juce::String& identifier, 
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
-	void setPlugin(std::unique_ptr<juce::AudioPluginInstance> plugin);
+	void setPlugin(
+		std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier);
 
 	bool canPluginAddBus(bool isInput) const;
 	bool canPluginRemoveBus(bool isInput) const;
@@ -121,10 +123,11 @@ public:
 
 public:
 	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<const google::protobuf::Message> serialize() const override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
+	juce::String pluginIdentifier;
 	std::unique_ptr<juce::AudioBuffer<float>> buffer = nullptr;
 	std::unique_ptr<juce::AudioBuffer<double>> doubleBuffer = nullptr;
 	juce::ReadWriteLock pluginLock;

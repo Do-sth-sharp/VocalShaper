@@ -120,7 +120,7 @@ bool SourceList::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<const google::protobuf::Message> SourceList::serialize() const {
+std::unique_ptr<google::protobuf::Message> SourceList::serialize() const {
 	/** TODO */
 	return nullptr;
 }

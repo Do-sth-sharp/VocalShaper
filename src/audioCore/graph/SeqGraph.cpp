@@ -62,10 +62,10 @@ void MainGraph::removeSource(int index) {
 }
 
 PluginDecorator::SafePointer MainGraph::insertInstrument(std::unique_ptr<juce::AudioPluginInstance> processor,
-	int index, const juce::AudioChannelSet& type) {
+	const juce::String& identifier, int index, const juce::AudioChannelSet& type) {
 	/** Add To The Graph */
 	if (auto ptr = this->insertInstrument(index, type)) {
-		ptr->setPlugin(std::move(processor));
+		ptr->setPlugin(std::move(processor), identifier);
 		return ptr;
 	}
 	else {

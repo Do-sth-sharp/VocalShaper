@@ -219,7 +219,7 @@ bool Track::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<const google::protobuf::Message> Track::serialize() const {
+std::unique_ptr<google::protobuf::Message> Track::serialize() const {
 	/** TODO */
 	return nullptr;
 }

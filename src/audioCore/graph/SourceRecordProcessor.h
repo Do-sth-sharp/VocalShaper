@@ -42,7 +42,7 @@ public:
 
 public:
 	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<const google::protobuf::Message> serialize() const override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, double>;
