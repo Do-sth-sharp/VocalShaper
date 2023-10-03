@@ -1,6 +1,9 @@
 ﻿#include "Track.h"
 
 #include "../misc/Renderer.h"
+#include "../Utils.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 Track::Track(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
@@ -103,7 +106,7 @@ bool Track::addAdditionalAudioBus() {
 
 bool Track::removeAdditionalAudioBus() {
 	/** Check Channel Num */
-	if (this->getTotalNumInputChannels() - this->audioChannels.size() >= this->audioChannels.size()) {
+	if (this->getTotalNumInputChannels() - this->audioChannels.size() <= this->audioChannels.size()) {
 		return false;
 	}
 
@@ -134,6 +137,10 @@ bool Track::removeAdditionalAudioBus() {
 	this->removeIllegalConnections();
 
 	return true;
+}
+
+int Track::getAdditionalAudioBusNum() const {
+	return this->getTotalNumInputChannels() / this->audioChannels.size() - 1;
 }
 
 void Track::setMute(bool mute) {
@@ -174,6 +181,22 @@ void Track::setSlider(float slider) {
 float Track::getSlider() const {
 	auto& sliderDsp = this->slider.get<0>();
 	return sliderDsp.getGainLinear();
+}
+
+void Track::setTrackName(const juce::String& name) {
+	this->trackName = name;
+}
+
+const juce::String Track::getTrackName() const {
+	return this->trackName;
+}
+
+void Track::setTrackColor(const juce::Colour& color) {
+	this->trackColor = color;
+}
+
+const juce::Colour Track::getTrackColor() const {
+	return this->trackColor;
 }
 
 const juce::AudioChannelSet& Track::getAudioChannelSet() const {
@@ -220,8 +243,24 @@ bool Track::parse(const google::protobuf::Message* data) {
 }
 
 std::unique_ptr<google::protobuf::Message> Track::serialize() const {
-	/** TODO */
-	return nullptr;
+	auto mes = std::make_unique<vsp4::MixerTrack>();
+
+	mes->set_type(static_cast<vsp4::TrackType>(utils::getTrackType(this->audioChannels)));
+	auto info = mes->mutable_info();
+	info->set_name(this->getTrackName().toStdString());
+	info->set_color(this->getTrackColor().getARGB());
+	mes->set_additionalbuses(this->getAdditionalAudioBusNum());
+
+	auto plugins = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())->serialize();
+	if (!dynamic_cast<vsp4::PluginDock*>(plugins.get())) { return nullptr; }
+	mes->set_allocated_effects(dynamic_cast<vsp4::PluginDock*>(plugins.release()));
+
+	mes->set_muted(this->getMute());
+	mes->set_gain(this->getGain());
+	mes->set_panner(this->getPan());
+	mes->set_slider(this->getSlider());
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 bool Track::canAddBus(bool isInput) const {

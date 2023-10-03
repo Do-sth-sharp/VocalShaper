@@ -18,6 +18,7 @@ public:
 	 * @brief	Remove the last audio input bus from the track.
 	 */
 	bool removeAdditionalAudioBus();
+	int getAdditionalAudioBusNum() const;
 
 	void setMute(bool mute);
 	bool getMute() const;
@@ -27,6 +28,11 @@ public:
 	float getPan() const;
 	void setSlider(float slider);
 	float getSlider() const;
+
+	void setTrackName(const juce::String& name);
+	const juce::String getTrackName() const;
+	void setTrackColor(const juce::Colour& color);
+	const juce::Colour getTrackColor() const;
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 
@@ -51,6 +57,9 @@ private:
 	std::atomic<bool> isMute = false;
 
 	float panValue = 0.0;
+
+	juce::String trackName;
+	juce::Colour trackColor;
 
 private:
 	bool canAddBus(bool isInput) const override;
