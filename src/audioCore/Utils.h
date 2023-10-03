@@ -58,6 +58,54 @@ namespace utils {
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
 		double sampleRateToUse, const juce::AudioChannelSet& channelLayout);
+
+	enum class TrackType {
+		DISABLED = 0,
+		MONO = 10,
+		STEREO = 20,
+		LCR = 30,
+		LRS = 31,
+		LCRS = 40,
+		SUR_5_0 = 50,
+		SUR_5_1 = 51,
+		SUR_5_0_2 = 502,
+		SUR_5_1_2 = 512,
+		SUR_5_0_4 = 504,
+		SUR_5_1_4 = 514,
+		SUR_6_0 = 60,
+		SUR_6_1 = 61,
+		SUR_6_0_M = 600,
+		SUR_6_1_M = 610,
+		SUR_7_0 = 70,
+		SUR_7_0_SDSS = 700,
+		SUR_7_1 = 71,
+		SUR_7_1_SDSS = 710,
+		SUR_7_0_2 = 702,
+		SUR_7_1_2 = 712,
+		SUR_7_0_4 = 704,
+		SUR_7_1_4 = 714,
+		SUR_7_0_6 = 706,
+		SUR_7_1_6 = 716,
+		SUR_9_0_4 = 904,
+		SUR_9_1_4 = 914,
+		SUR_9_0_6 = 906,
+		SUR_9_1_6 = 916,
+		QUADRAPHONIC = 4000,
+		PENTAGONAL = 5000,
+		HEXAGONAL = 6000,
+		OCTAGONAL = 8000,
+		AMBISONIC_0 = 100,
+		AMBISONIC_1 = 101,
+		AMBISONIC_2 = 102,
+		AMBISONIC_3 = 103,
+		AMBISONIC_4 = 104,
+		AMBISONIC_5 = 105,
+		AMBISONIC_6 = 106,
+		AMBISONIC_7 = 107
+	};
+
+	const juce::AudioChannelSet getChannelSet(TrackType type);
+	TrackType getTrackType(const juce::AudioChannelSet& channels);
 }
 
 #define UNUSED(var) (void)var
