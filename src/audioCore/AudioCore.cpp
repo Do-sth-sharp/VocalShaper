@@ -432,7 +432,7 @@ bool AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
 	if (srcLocker.isLocked()) {
 		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
 			if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
-				return seqTrack->addSeq({ startTime, endTime, offset, ptrSrc });
+				return seqTrack->addSeq({ startTime, endTime, offset, ptrSrc, srcIndex });
 			}
 		}
 	}

@@ -10,7 +10,7 @@ public:
 
 	using SeqBlock = std::tuple<
 		double, double, double,
-		CloneableSource::SafePointer<>>;
+		CloneableSource::SafePointer<>, int>;
 
 	/**
 	 * @attention Call this only on audio thread. Get the lock before use this method.

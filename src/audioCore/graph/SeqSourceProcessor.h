@@ -16,6 +16,11 @@ public:
 	int getSeqNum() const;
 	const SourceList::SeqBlock getSeq(int index) const;
 
+	void setTrackName(const juce::String& name);
+	const juce::String getTrackName() const;
+	void setTrackColor(const juce::Colour& color);
+	const juce::Colour getTrackColor() const;
+
 	void closeAllNote();
 
 public:
@@ -51,6 +56,9 @@ private:
 	SourceList srcs;
 	std::set<std::tuple<int, int>> activeNoteSet;
 	std::atomic_bool noteCloseFlag = false;
+
+	juce::String trackName;
+	juce::Colour trackColor;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)
 };

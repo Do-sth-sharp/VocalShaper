@@ -4,6 +4,9 @@
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
 #include "../source/CloneableSynthSource.h"
+#include "../Utils.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
@@ -27,6 +30,22 @@ int SeqSourceProcessor::getSeqNum() const {
 const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
 	juce::GenericScopedLock locker(this->srcs.getLock());
 	return this->srcs.get(index);
+}
+
+void SeqSourceProcessor::setTrackName(const juce::String& name) {
+	this->trackName = name;
+}
+
+const juce::String SeqSourceProcessor::getTrackName() const {
+	return this->trackName;
+}
+
+void SeqSourceProcessor::setTrackColor(const juce::Colour& color) {
+	this->trackColor = color;
+}
+
+const juce::Colour SeqSourceProcessor::getTrackColor() const {
+	return this->trackColor;
 }
 
 void SeqSourceProcessor::closeAllNote() {
@@ -155,6 +174,16 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 }
 
 std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const {
-	/** TODO */
-	return nullptr;
+	auto mes = std::make_unique<vsp4::SeqTrack>();
+
+	mes->set_type(static_cast<vsp4::TrackType>(utils::getTrackType(this->audioChannels)));
+	auto info = mes->mutable_info();
+	info->set_name(this->getTrackName().toStdString());
+	info->set_color(this->getTrackColor().getARGB());
+
+	auto srcs = this->srcs.serialize();
+	if (!dynamic_cast<vsp4::SourceInstanceList*>(srcs.get())) { return nullptr; }
+	mes->set_allocated_sources(dynamic_cast<vsp4::SourceInstanceList*>(srcs.release()));
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }

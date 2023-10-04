@@ -1,4 +1,6 @@
 #include "SourceList.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 std::tuple<int, int> SourceList::match(double startTime, double endTime) const {
 	/** Empty */
@@ -121,8 +123,20 @@ bool SourceList::parse(const google::protobuf::Message* data) {
 }
 
 std::unique_ptr<google::protobuf::Message> SourceList::serialize() const {
-	/** TODO */
-	return nullptr;
+	auto mes = std::make_unique<vsp4::SourceInstanceList>();
+
+	juce::GenericScopedLock locker(this->getLock());
+	auto list = mes->mutable_sources();
+	for (auto& [startTime, endTime, offset, ptr, index] : this->list) {
+		auto instance = std::make_unique<vsp4::SeqSourceInstance>();
+		instance->set_index(index);
+		instance->set_startpos(startTime);
+		instance->set_endpos(endTime);
+		instance->set_offset(offset);
+		list->AddAllocated(instance.release());
+	}
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 int SourceList::binarySearchInsert(int low, int high, double t) const {
