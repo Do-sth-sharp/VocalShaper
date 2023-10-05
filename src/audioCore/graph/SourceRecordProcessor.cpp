@@ -3,6 +3,8 @@
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
 #include "../source/CloneableSynthSource.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 SourceRecordProcessor::SourceRecordProcessor() {}
 
@@ -13,7 +15,7 @@ SourceRecordProcessor::~SourceRecordProcessor() {
 }
 
 void SourceRecordProcessor::addTask(
-	CloneableSource::SafePointer<> source, double offset) {
+	CloneableSource::SafePointer<> source, int srcIndex, double offset) {
 	juce::ScopedWriteLock locker(this->taskLock);
 
 	/** Check Source */
@@ -28,12 +30,12 @@ void SourceRecordProcessor::addTask(
 		this->getSampleRate(), this->getBlockSize());
 	
 	/** Add Task */
-	return this->tasks.add({ source, offset });
+	return this->tasks.add({ source, srcIndex, offset });
 }
 
 void SourceRecordProcessor::removeTask(int index) {
 	juce::ScopedWriteLock locker(this->taskLock);
-	auto [src, offset] = this->tasks.removeAndReturn(index);
+	auto [src, srcIndex, offset] = this->tasks.removeAndReturn(index);
 	if (src) {
 		src->recordingFinishedInternal();
 	}
@@ -47,7 +49,7 @@ int SourceRecordProcessor::getTaskNum() const {
 std::tuple<CloneableSource::SafePointer<>, double>
 	SourceRecordProcessor::getTask(int index) const {
 	juce::ScopedReadLock locker(this->taskLock);
-	auto& [source, offset] = this->tasks.getReference(index);
+	auto& [source, srcIndex, offset] = this->tasks.getReference(index);
 	return { source, offset };
 }
 
@@ -57,7 +59,7 @@ void SourceRecordProcessor::prepareToPlay(
 
 	/** Update Source Sample Rate And Buffer Size */
 	juce::ScopedReadLock locker(this->taskLock);
-	for (auto& [source, offset] : this->tasks) {
+	for (auto& [source, srcIndex, offset] : this->tasks) {
 		if (source) {
 			source->prepareToRecordInternal(this->getTotalNumInputChannels(),
 				this->getSampleRate(), this->getBlockSize(), true);
@@ -78,7 +80,7 @@ void SourceRecordProcessor::processBlock(
 	if (!playPosition->getIsPlaying() || !playPosition->getIsRecording()) { return; }
 
 	/** Check Each Task */
-	for (auto& [source, offset] : this->tasks) {
+	for (auto& [source, srcIndex, offset] : this->tasks) {
 		/** Get Task Info */
 		int offsetPos = std::floor(offset * this->getSampleRate());
 		if (static_cast<long long>(offsetPos - buffer.getNumSamples()) >
@@ -115,6 +117,16 @@ bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
 }
 
 std::unique_ptr<google::protobuf::Message> SourceRecordProcessor::serialize() const {
-	/** TODO */
-	return nullptr;
+	auto mes = std::make_unique<vsp4::Recorder>();
+
+	auto list = mes->mutable_sources();
+	juce::ScopedReadLock locker(this->taskLock);
+	for (auto& [source, srcIndex, offset] : this->tasks) {
+		auto smes = std::make_unique<vsp4::SourceRecorderInstance>();
+		smes->set_index(srcIndex);
+		smes->set_offset(offset);
+		list->AddAllocated(smes.release());
+	}
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }

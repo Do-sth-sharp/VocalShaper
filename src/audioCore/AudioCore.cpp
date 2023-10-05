@@ -457,7 +457,7 @@ bool AudioCore::addRecorderSourceInstance(int srcIndex, double offset) {
 	if (srcLocker.isLocked()) {
 		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
 			if (auto recorder = this->mainAudioGraph->getRecorder()) {
-				recorder->addTask(ptrSrc, offset);
+				recorder->addTask(ptrSrc, srcIndex, offset);
 				return true;
 			}
 		}

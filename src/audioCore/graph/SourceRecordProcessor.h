@@ -11,7 +11,7 @@ public:
 	SourceRecordProcessor();
 	~SourceRecordProcessor();
 
-	void addTask(CloneableSource::SafePointer<> source, double offset);
+	void addTask(CloneableSource::SafePointer<> source, int srcIndex, double offset);
 	void removeTask(int index);
 	int getTaskNum() const;
 	std::tuple<CloneableSource::SafePointer<>, double> getTask(int index) const;
@@ -45,7 +45,7 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, double>;
+	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, int, double>;
 	juce::Array<RecorderTask> tasks;
 	juce::ReadWriteLock taskLock;
 

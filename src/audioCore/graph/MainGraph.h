@@ -128,6 +128,10 @@ private:
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
 
+	int findSource(const SeqSourceProcessor* ptr) const;
+	int findInstr(const PluginDecorator* ptr) const;
+	int findTrack(const Track* ptr) const;
+
 	friend class Renderer;
 	friend class RenderThread;
 	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;

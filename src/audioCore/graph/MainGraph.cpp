@@ -163,8 +163,185 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 }
 
 std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
-	/** TODO Serialize */
-	return nullptr;
+	auto mes = std::make_unique<vsp4::MainGraph>();
+
+	auto seqTracks = mes->mutable_seqtracks();
+	for (auto& i : this->audioSourceNodeList) {
+		if (auto track = dynamic_cast<SeqSourceProcessor*>(i->getProcessor())) {
+			auto tmes = track->serialize();
+			if (!dynamic_cast<vsp4::SeqTrack*>(tmes.get())) { return nullptr; }
+			dynamic_cast<vsp4::SeqTrack*>(tmes.get())->set_bypassed(i->isBypassed());
+			seqTracks->AddAllocated(dynamic_cast<vsp4::SeqTrack*>(tmes.release()));
+		}
+	}
+
+	auto instrs = mes->mutable_instrs();
+	for (auto& i : this->instrumentNodeList) {
+		if (auto instr = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
+			auto imes = instr->serialize();
+			if (!dynamic_cast<vsp4::Plugin*>(imes.get())) { return nullptr; }
+			dynamic_cast<vsp4::Plugin*>(imes.get())->set_bypassed(i->isBypassed());
+			instrs->AddAllocated(dynamic_cast<vsp4::Plugin*>(imes.release()));
+		}
+	}
+
+	auto mixTracks = mes->mutable_mixertracks();
+	for (auto& i : this->trackNodeList) {
+		if (auto track = dynamic_cast<Track*>(i->getProcessor())) {
+			auto tmes = track->serialize();
+			if (!dynamic_cast<vsp4::MixerTrack*>(tmes.get())) { return nullptr; }
+			dynamic_cast<vsp4::MixerTrack*>(tmes.get())->set_bypassed(i->isBypassed());
+			mixTracks->AddAllocated(dynamic_cast<vsp4::MixerTrack*>(tmes.release()));
+		}
+	}
+
+	auto connections = mes->mutable_connections();
+	
+	auto midiI2Instr = connections->mutable_midii2instr();
+	for (auto& i : this->midiI2InstrConnectionList) {
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		if (!dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::MIDIInputConnection>();
+		cmes->set_dst(this->findInstr(dynamic_cast<PluginDecorator*>(dstNode->getProcessor())));
+
+		midiI2Instr->AddAllocated(cmes.release());
+	}
+
+	auto midiSrc2Instr = connections->mutable_midisrc2instr();
+	for (auto& i : this->midiSrc2InstrConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		if (!srcNode || !dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::MIDISendConnection>();
+		cmes->set_src(this->findSource(dynamic_cast<SeqSourceProcessor*>(srcNode->getProcessor())));
+		cmes->set_dst(this->findInstr(dynamic_cast<PluginDecorator*>(dstNode->getProcessor())));
+
+		midiSrc2Instr->AddAllocated(cmes.release());
+	}
+
+	auto midiSrc2Track = connections->mutable_midisrc2track();
+	for (auto& i : this->midiSrc2TrkConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		if (!srcNode || !dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::MIDISendConnection>();
+		cmes->set_src(this->findSource(dynamic_cast<SeqSourceProcessor*>(srcNode->getProcessor())));
+		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
+
+		midiSrc2Track->AddAllocated(cmes.release());
+	}
+
+	auto audioSrc2Track = connections->mutable_audiosrc2track();
+	for (auto& i : this->audioSrc2TrkConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		int srcChannel = i.source.channelIndex;
+		int dstChannel = i.destination.channelIndex;
+		if (!srcNode || !dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::AudioSendConnection>();
+		cmes->set_src(this->findSource(dynamic_cast<SeqSourceProcessor*>(srcNode->getProcessor())));
+		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
+		cmes->set_srcchannel(srcChannel);
+		cmes->set_dstchannel(dstChannel);
+
+		audioSrc2Track->AddAllocated(cmes.release());
+	}
+
+	auto audioInstr2Track = connections->mutable_audioinstr2track();
+	for (auto& i : this->audioInstr2TrkConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		int srcChannel = i.source.channelIndex;
+		int dstChannel = i.destination.channelIndex;
+		if (!srcNode || !dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::AudioSendConnection>();
+		cmes->set_src(this->findInstr(dynamic_cast<PluginDecorator*>(srcNode->getProcessor())));
+		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
+		cmes->set_srcchannel(srcChannel);
+		cmes->set_dstchannel(dstChannel);
+
+		audioInstr2Track->AddAllocated(cmes.release());
+	}
+
+	auto midiI2Track = connections->mutable_midii2track();
+	for (auto& i : this->midiI2TrkConnectionList) {
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		if (!dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::MIDIInputConnection>();
+		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
+
+		midiI2Track->AddAllocated(cmes.release());
+	}
+
+	auto audioI2Track = connections->mutable_audioi2track();
+	for (auto& i : this->audioI2TrkConnectionList) {
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		int srcChannel = i.source.channelIndex;
+		int dstChannel = i.destination.channelIndex;
+		if (!dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::AudioInputConnection>();
+		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
+		cmes->set_srcchannel(srcChannel);
+		cmes->set_dstchannel(dstChannel);
+
+		audioI2Track->AddAllocated(cmes.release());
+	}
+
+	auto audioTrack2O = connections->mutable_audiotrack2o();
+	for (auto& i : this->audioTrk2OConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		int srcChannel = i.source.channelIndex;
+		int dstChannel = i.destination.channelIndex;
+		if (!srcNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::AudioOutputConnection>();
+		cmes->set_src(this->findTrack(dynamic_cast<Track*>(srcNode->getProcessor())));
+		cmes->set_srcchannel(srcChannel);
+		cmes->set_dstchannel(dstChannel);
+
+		audioTrack2O->AddAllocated(cmes.release());
+	}
+
+	auto audioTrack2Track = connections->mutable_audiotrack2track();
+	for (auto& i : this->audioTrk2TrkConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		int srcChannel = i.source.channelIndex;
+		int dstChannel = i.destination.channelIndex;
+		if (!srcNode || !dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::AudioSendConnection>();
+		cmes->set_src(this->findTrack(dynamic_cast<Track*>(srcNode->getProcessor())));
+		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
+		cmes->set_srcchannel(srcChannel);
+		cmes->set_dstchannel(dstChannel);
+
+		audioTrack2Track->AddAllocated(cmes.release());
+	}
+
+	auto midiTrack2O = connections->mutable_miditrack2o();
+	for (auto& i : this->midiTrk2OConnectionList) {
+		auto srcNode = this->getNodeForId(i.source.nodeID);
+		if (!srcNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::MIDIOutputConnection>();
+		cmes->set_src(this->findTrack(dynamic_cast<Track*>(srcNode->getProcessor())));
+
+		midiTrack2O->AddAllocated(cmes.release());
+	}
+
+	auto recorder = dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor())->serialize();
+	if (!dynamic_cast<vsp4::Recorder*>(recorder.get())) { return nullptr; }
+	mes->set_allocated_recorder(dynamic_cast<vsp4::Recorder*>(recorder.release()));
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
