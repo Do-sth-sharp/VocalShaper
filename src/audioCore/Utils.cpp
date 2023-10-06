@@ -17,6 +17,8 @@
 #define LAMEPath "./lame"
 #endif // JUCE_WINDOWS
 
+#include "Platform.h"
+
 namespace utils {
 	std::tuple<int, int> getChannelIndexAndNumOfBus(
 		const juce::AudioProcessor* processor, int busIndex, bool isInput) {
@@ -384,7 +386,7 @@ namespace utils {
 
 	const int AudioSaveConfig::getBitsPerSample(const juce::String& format) const {
 		juce::ScopedReadLock locker(this->lock);
-		
+
 		auto it = this->bitsPerSample.find(format);
 		return (it != this->bitsPerSample.end())
 			? it->second : 24;
@@ -392,7 +394,7 @@ namespace utils {
 
 	const juce::StringPairArray AudioSaveConfig::getMetaData(const juce::String& format) const {
 		juce::ScopedReadLock locker(this->lock);
-		
+
 		auto it = this->metaData.find(format);
 		return (it != this->metaData.end())
 			? it->second : juce::StringPairArray{};
@@ -400,7 +402,7 @@ namespace utils {
 
 	const int AudioSaveConfig::getQualityOptionIndex(const juce::String& format) const {
 		juce::ScopedReadLock locker(this->lock);
-		
+
 		auto it = this->qualityOptionIndex.find(format);
 		return (it != this->qualityOptionIndex.end())
 			? it->second : 0;
@@ -777,5 +779,46 @@ namespace utils {
 		}
 
 		return static_cast<TrackType>(-1);
+	}
+
+	uint32_t getCurrentTime() {
+		return juce::Time::currentTimeMillis() / 1000;
+	}
+
+	juce::String getAudioPlatformName() {
+		return VS_AUDIO_PLATFORM_NAME;
+	}
+
+	juce::String getAudioPlatformVersion() {
+		return VS_AUDIO_PLATFORM_VERSION;
+	}
+
+	juce::String getAudioPlatformComplieTime() {
+		return __DATE__ " " __TIME__;
+	}
+
+	juce::String getSystemNameAndVersion() {
+		return juce::SystemStats::getOperatingSystemName();
+	}
+
+	juce::String getReleaseBranch() {
+		return VS_RELEASE_BRANCH;
+	}
+
+	juce::String getReleaseName() {
+		return VS_RELEASE_NAME;
+	}
+
+	juce::String createPlatformInfoString() {
+		return getAudioPlatformName() + ", "
+			+ getAudioPlatformVersion() + ", "
+			+ getAudioPlatformComplieTime() + "; "
+			+ getReleaseBranch() + ", "
+			+ getReleaseName() + "; "
+			+ getSystemNameAndVersion();
+	}
+
+	juce::String getUserName() {
+		return juce::SystemStats::getLogonName();
 	}
 }
