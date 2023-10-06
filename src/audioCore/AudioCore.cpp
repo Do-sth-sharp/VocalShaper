@@ -6,6 +6,7 @@
 #include "misc/PlayPosition.h"
 #include "misc/PlayWatcher.h"
 #include "misc/Renderer.h"
+#include "project/ProjectInfoData.h"
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -56,6 +57,9 @@ AudioCore::AudioCore() {
 
 	/** Init Audio Device */
 	this->initAudioDevice();
+
+	/** Init Project */
+	ProjectInfoData::getInstance()->init();
 
 	/** Start Play Watcher */
 	PlayWatcher::getInstance()->startTimer(1000);
