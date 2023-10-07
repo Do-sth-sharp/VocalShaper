@@ -781,6 +781,22 @@ namespace utils {
 		return static_cast<TrackType>(-1);
 	}
 
+	int versionCompare(const Version& v1, const Version& v2) {
+		auto& [major1, minor1, patch1] = v1;
+		auto& [major2, minor2, patch2] = v2;
+
+		if (major1 > major2) { return 1; }
+		else if (major1 < major2) { return -1; }
+
+		if (minor1 > minor2) { return 1; }
+		else if (minor1 < minor2) { return -1; }
+
+		if (patch1 > patch2) { return 1; }
+		else if (patch1 < patch2) { return -1; }
+
+		return 0;
+	}
+
 	uint32_t getCurrentTime() {
 		return juce::Time::currentTimeMillis() / 1000;
 	}
@@ -789,8 +805,23 @@ namespace utils {
 		return VS_AUDIO_PLATFORM_NAME;
 	}
 
-	juce::String getAudioPlatformVersion() {
-		return VS_AUDIO_PLATFORM_VERSION;
+	Version getAudioPlatformVersion() {
+		return Version{
+			VS_MAJOR_VERSION,
+			VS_MINOR_VERSION,
+			VS_PATCH_VERSION };
+	}
+
+	Version getAudioPlatformVersionMinimumSupported() {
+		return Version{
+			VS_MINIMUM_SUPPORTED_MAJOR_VERSION,
+			VS_MINIMUM_SUPPORTED_MINOR_VERSION,
+			VS_MINIMUM_SUPPORTED_PATCH_VERSION };
+	}
+
+	juce::String getAudioPlatformVersionString() {
+		auto [major, minor, patch] = getAudioPlatformVersion();
+		return juce::String(major) + "." + juce::String(minor) + "." + juce::String(patch);
 	}
 
 	juce::String getAudioPlatformComplieTime() {
@@ -811,7 +842,7 @@ namespace utils {
 
 	juce::String createPlatformInfoString() {
 		return getAudioPlatformName() + ", "
-			+ getAudioPlatformVersion() + ", "
+			+ getAudioPlatformVersionString() + ", "
 			+ getAudioPlatformComplieTime() + "; "
 			+ getReleaseBranch() + ", "
 			+ getReleaseName() + "; "
@@ -820,5 +851,21 @@ namespace utils {
 
 	juce::String getUserName() {
 		return juce::SystemStats::getLogonName();
+	}
+
+	juce::String getSourceDefaultPathForAudio(int id) {
+		return "./srcs/" + juce::String(id) + ".wav";
+	}
+
+	juce::String getSourceDefaultPathForMIDI(int id) {
+		return "./srcs/" + juce::String(id) + ".mid";
+	}
+
+	bool projectVersionHighEnough(const Version& version) {
+		return versionCompare(version, getAudioPlatformVersionMinimumSupported()) >= 0;
+	}
+
+	bool projectVersionLowEnough(const Version& version) {
+		return versionCompare(version, getAudioPlatformVersion()) <= 0;
 	}
 }

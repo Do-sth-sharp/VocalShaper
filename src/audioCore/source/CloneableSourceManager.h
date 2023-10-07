@@ -2,8 +2,10 @@
 
 #include <JuceHeader.h>
 #include "CloneableSource.h"
+#include "../project/Serializable.h"
 
-class CloneableSourceManager final : private juce::DeletedAtShutdown {
+class CloneableSourceManager final 
+	: private juce::DeletedAtShutdown, public Serializable {
 public:
 	CloneableSourceManager() = default;
 	~CloneableSourceManager() override = default;
@@ -71,6 +73,10 @@ public:
 	bool exportSourceAsync(int index, const juce::String& path) const;
 
 	void prepareToPlay(double sampleRate, int bufferSize);
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	juce::OwnedArray<CloneableSource, juce::CriticalSection> sourceList;

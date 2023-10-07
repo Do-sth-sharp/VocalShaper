@@ -2,6 +2,8 @@
 #include "AudioIOList.h"
 #include "../AudioCore.h"
 #include "../plugin/PluginLoader.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
 	juce::ScopedTryWriteLock locker(this->getLock());
@@ -160,6 +162,25 @@ void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
 	for (auto i : this->sourceList) {
 		i->prepareToPlay(sampleRate, bufferSize);
 	}
+}
+
+bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return false;
+}
+
+std::unique_ptr<google::protobuf::Message> CloneableSourceManager::serialize() const {
+	auto mes = std::make_unique<vsp4::SourceList>();
+
+	juce::ScopedReadLock locker(this->getLock());
+	auto list = mes->mutable_sources();
+	for (auto i : this->sourceList) {
+		auto smes = i->serialize();
+		if (!dynamic_cast<vsp4::Source*>(smes.get())) { return nullptr; }
+		list->AddAllocated(dynamic_cast<vsp4::Source*>(smes.release()));
+	}
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 CloneableSourceManager* CloneableSourceManager::getInstance() {

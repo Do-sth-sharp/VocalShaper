@@ -14,6 +14,10 @@ public:
 		double dataOffset, double length) const;
 	int getChannelNum() const;
 
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
+
 private:
 	std::unique_ptr<CloneableSource> clone() const override;
 	bool load(const juce::File& file) override;

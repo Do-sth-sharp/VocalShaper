@@ -16,10 +16,16 @@ public:
 		double dataOffset, double length) const;
 	int getChannelNum() const;
 
-	void setSynthesizer(std::unique_ptr<juce::AudioPluginInstance> synthesizer);
+	void setSynthesizer(
+		std::unique_ptr<juce::AudioPluginInstance> synthesizer,
+		const juce::String& identifier);
 	const juce::String getSynthesizerName() const;
 	void stopSynth();
 	void synth();
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	std::unique_ptr<CloneableSource> clone() const override;
@@ -53,6 +59,7 @@ private:
 	friend class SynthRenderThread;
 	std::unique_ptr<SynthRenderThread> synthThread = nullptr;
 	std::unique_ptr<juce::AudioPluginInstance> synthesizer = nullptr;
+	juce::String pluginIdentifier;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSynthSource)
 };

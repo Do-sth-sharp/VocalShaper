@@ -10,13 +10,15 @@
 #include "source/CloneableSynthSource.h"
 #include "source/AudioIOList.h"
 #include "misc/MackieControlHub.h"
+#include "project/Serializable.h"
 
 class AudioDeviceChangeListener;
 namespace audioCommand {
 	class CommandBase;
 }
 
-class AudioCore final : private juce::DeletedAtShutdown {
+class AudioCore final 
+	: private juce::DeletedAtShutdown, public Serializable {
 public:
 	AudioCore();
 	~AudioCore() override;
@@ -149,6 +151,10 @@ public:
 
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;
+
+public:
+	bool parse(const google::protobuf::Message* data) override;
+	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
 	friend class AudioDebugger;

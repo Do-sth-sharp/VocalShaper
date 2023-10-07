@@ -1,12 +1,13 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "../project/Serializable.h"
 
 class CloneableSource;
 template<typename T>
 concept IsCloneable = std::derived_from<T, CloneableSource>;
 
-class CloneableSource {
+class CloneableSource : public Serializable {
 public:
 	CloneableSource(const juce::String& name = juce::String{});
 	virtual ~CloneableSource() = default;

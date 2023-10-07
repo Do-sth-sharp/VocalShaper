@@ -102,7 +102,7 @@ void PluginLoadThread::run() {
 					break;
 				case DstPointer::Type::Synth:
 					if (auto source = ptr.synthPtr.getSource()) {
-						source->setSynthesizer(std::move(p));
+						source->setSynthesizer(std::move(p), identifier);
 					}
 					break;
 				default:

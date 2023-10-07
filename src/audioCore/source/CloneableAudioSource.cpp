@@ -1,6 +1,8 @@
 #include "CloneableAudioSource.h"
 
 #include "../Utils.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 double CloneableAudioSource::getSourceSampleRate() const {
 	return this->sourceSampleRate;
@@ -25,6 +27,21 @@ void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double buf
 
 int CloneableAudioSource::getChannelNum() const {
 	return this->buffer.getNumChannels();
+}
+
+bool CloneableAudioSource::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return false;
+}
+
+std::unique_ptr<google::protobuf::Message> CloneableAudioSource::serialize() const {
+	auto mes = std::make_unique<vsp4::Source>();
+
+	mes->set_type(vsp4::Source_Type_AUDIO);
+	mes->set_name(this->getName().toStdString());
+	mes->set_path(utils::getSourceDefaultPathForAudio(this->getId()).toStdString());
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 std::unique_ptr<CloneableSource> CloneableAudioSource::clone() const {

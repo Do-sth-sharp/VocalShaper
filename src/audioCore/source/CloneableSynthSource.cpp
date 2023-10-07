@@ -2,6 +2,8 @@
 
 #include <DMDA.h>
 #include "../Utils.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 CloneableSynthSource::CloneableSynthSource()
 	: CloneableSource() {
@@ -38,12 +40,14 @@ int CloneableSynthSource::getChannelNum() const {
 }
 
 void CloneableSynthSource::setSynthesizer(
-	std::unique_ptr<juce::AudioPluginInstance> synthesizer) {
+	std::unique_ptr<juce::AudioPluginInstance> synthesizer,
+	const juce::String& identifier) {
 	/** Stop Render */
 	this->synthThread->stopThread(3000);
 
 	/** Set Synthesizer */
 	this->synthesizer = std::move(synthesizer);
+	this->pluginIdentifier = identifier;
 
 	/** Set Channels */
 	this->audioChannels = std::max(
@@ -110,6 +114,31 @@ void CloneableSynthSource::synth() {
 
 	/** Start Render */
 	this->synthThread->startThread();
+}
+
+bool CloneableSynthSource::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return false;
+}
+
+std::unique_ptr<google::protobuf::Message> CloneableSynthSource::serialize() const {
+	auto mes = std::make_unique<vsp4::Source>();
+
+	mes->set_type(vsp4::Source_Type_SYNTH);
+	mes->set_name(this->getName().toStdString());
+	mes->set_path(utils::getSourceDefaultPathForMIDI(this->getId()).toStdString());
+	
+	if (this->synthesizer) {
+		auto plugin = std::make_unique<vsp4::Plugin>();
+		plugin->mutable_info()->set_id(this->pluginIdentifier.toStdString());
+		juce::MemoryBlock pluginData;
+		this->synthesizer->getStateInformation(pluginData);
+		plugin->mutable_state()->set_data(
+			pluginData.getData(), pluginData.getSize());
+		mes->set_allocated_synthesizer(plugin.release());
+	}
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 std::unique_ptr<CloneableSource> CloneableSynthSource::clone() const {

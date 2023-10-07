@@ -7,6 +7,9 @@
 #include "misc/PlayWatcher.h"
 #include "misc/Renderer.h"
 #include "project/ProjectInfoData.h"
+#include "Utils.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 class AudioDeviceChangeListener : public juce::ChangeListener {
 public:
@@ -571,6 +574,35 @@ MainGraph* AudioCore::getGraph() const {
 
 MackieControlHub* AudioCore::getMackie() const {
 	return this->mackieHub.get();
+}
+
+bool AudioCore::parse(const google::protobuf::Message* data) {
+	/** TODO */
+	return false;
+}
+
+std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {
+	auto mes = std::make_unique<vsp4::Project>();
+
+	auto info = ProjectInfoData::getInstance()->serialize();
+	if (!dynamic_cast<vsp4::ProjectInfo*>(info.get())) { return nullptr; }
+	mes->set_allocated_info(dynamic_cast<vsp4::ProjectInfo*>(info.release()));
+
+	auto [majorVer, minorVer, patchVer] = utils::getAudioPlatformVersion();
+	auto version = mes->mutable_version();
+	version->set_major(majorVer);
+	version->set_minor(minorVer);
+	version->set_patch(patchVer);
+
+	auto sources = CloneableSourceManager::getInstance()->serialize();
+	if (!dynamic_cast<vsp4::SourceList*>(sources.get())) { return nullptr; }
+	mes->set_allocated_sources(dynamic_cast<vsp4::SourceList*>(sources.release()));
+
+	auto graph = this->mainAudioGraph->serialize();
+	if (!dynamic_cast<vsp4::MainGraph*>(graph.get())) { return nullptr; }
+	mes->set_allocated_graph(dynamic_cast<vsp4::MainGraph*>(graph.release()));
+
+	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
 void AudioCore::initAudioDevice() {

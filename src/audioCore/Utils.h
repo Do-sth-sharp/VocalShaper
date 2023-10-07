@@ -107,15 +107,26 @@ namespace utils {
 	const juce::AudioChannelSet getChannelSet(TrackType type);
 	TrackType getTrackType(const juce::AudioChannelSet& channels);
 
+	using Version = std::tuple<uint32_t, uint32_t, uint32_t>;
+	int versionCompare(const Version& v1, const Version& v2);
+
 	uint32_t getCurrentTime();
 	juce::String getAudioPlatformName();
-	juce::String getAudioPlatformVersion();
+	Version getAudioPlatformVersion();
+	Version getAudioPlatformVersionMinimumSupported();
+	juce::String getAudioPlatformVersionString();
 	juce::String getAudioPlatformComplieTime();
 	juce::String getSystemNameAndVersion();
 	juce::String getReleaseBranch();
 	juce::String getReleaseName();
 	juce::String createPlatformInfoString();
 	juce::String getUserName();
+
+	juce::String getSourceDefaultPathForAudio(int id);
+	juce::String getSourceDefaultPathForMIDI(int id);
+
+	bool projectVersionHighEnough(const Version& version);
+	bool projectVersionLowEnough(const Version& version);
 }
 
 #define UNUSED(var) (void)var
