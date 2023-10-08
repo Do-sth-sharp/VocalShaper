@@ -5,27 +5,44 @@ using namespace org::vocalsharp::vocalshaper;
 
 void ProjectInfoData::init() {
 	/** Time */
-	this->createTime = utils::getCurrentTime();
-	this->lastSavedTime = 0;
-	this->spentTime = 0;
-	this->lastUpdateTime = this->createTime;
+	this->content.createTime = utils::getCurrentTime();
+	this->content.lastSavedTime = 0;
+	this->content.spentTime = 0;
+	this->content.lastUpdateTime = this->content.createTime;
 
 	/** Platform */
-	this->createPlatform = utils::createPlatformInfoString();
-	this->lastSavedPlatform = "";
+	this->content.createPlatform = utils::createPlatformInfoString();
+	this->content.lastSavedPlatform = "";
 
 	/** Author */
-	this->authors = { utils::getUserName() };
+	this->content.authors = { utils::getUserName() };
 }
 
 void ProjectInfoData::update() {
 	/** Time */
-	this->lastSavedTime = utils::getCurrentTime();
-	this->spentTime = (this->lastSavedTime - this->lastUpdateTime);
-	this->lastUpdateTime = lastSavedTime;
+	this->content.lastSavedTime = utils::getCurrentTime();
+	this->content.spentTime = (this->content.lastSavedTime - this->content.lastUpdateTime);
+	this->content.lastUpdateTime = this->content.lastSavedTime;
 
 	/** Platform */
-	this->lastSavedPlatform = utils::createPlatformInfoString();
+	this->content.lastSavedPlatform = utils::createPlatformInfoString();
+}
+
+void ProjectInfoData::push() {
+	this->traceback.push(this->content);
+}
+
+void ProjectInfoData::pop() {
+	if (this->traceback.size() > 0) {
+		this->content = this->traceback.top();
+		this->traceback.pop();
+	}
+}
+
+void ProjectInfoData::release() {
+	while (this->traceback.size() > 0) {
+		this->traceback.pop();
+	}
 }
 
 bool ProjectInfoData::parse(const google::protobuf::Message* data) {
@@ -33,22 +50,22 @@ bool ProjectInfoData::parse(const google::protobuf::Message* data) {
 	if (!mes) { return false; }
 
 	/** Time */
-	this->createTime = mes->createdtime();
-	this->lastSavedTime = mes->lastsavedtime();
-	this->spentTime = mes->spenttime();
-	this->lastUpdateTime = utils::getCurrentTime();
+	this->content.createTime = mes->createdtime();
+	this->content.lastSavedTime = mes->lastsavedtime();
+	this->content.spentTime = mes->spenttime();
+	this->content.lastUpdateTime = utils::getCurrentTime();
 
 	/** Platform */
-	this->createPlatform = mes->createdplatform();
-	this->lastSavedPlatform = mes->lastsavedplatform();
+	this->content.createPlatform = mes->createdplatform();
+	this->content.lastSavedPlatform = mes->lastsavedplatform();
 
 	/** Authors */
-	this->authors.clear();
+	this->content.authors.clear();
 	for (auto& author : mes->authors()) {
-		this->authors.add(author);
+		this->content.authors.add(author);
 	}
-	if ((this->authors.size() < 1) || (*this->authors.end()) != utils::getUserName()) {
-		this->authors.add(utils::getUserName());
+	if ((this->content.authors.size() < 1) || (*this->content.authors.end()) != utils::getUserName()) {
+		this->content.authors.add(utils::getUserName());
 	}
 
 	return true;
@@ -57,15 +74,15 @@ bool ProjectInfoData::parse(const google::protobuf::Message* data) {
 std::unique_ptr<google::protobuf::Message> ProjectInfoData::serialize() const {
 	auto mes = std::make_unique<vsp4::ProjectInfo>();
 
-	mes->set_createdtime(this->createTime);
-	mes->set_lastsavedtime(this->lastSavedTime);
-	mes->set_spenttime(this->spentTime);
+	mes->set_createdtime(this->content.createTime);
+	mes->set_lastsavedtime(this->content.lastSavedTime);
+	mes->set_spenttime(this->content.spentTime);
 
-	mes->set_createdplatform(this->createPlatform.toStdString());
-	mes->set_lastsavedplatform(this->lastSavedPlatform.toStdString());
+	mes->set_createdplatform(this->content.createPlatform.toStdString());
+	mes->set_lastsavedplatform(this->content.lastSavedPlatform.toStdString());
 
 	auto authors = mes->mutable_authors();
-	for (auto& s : this->authors) {
+	for (auto& s : this->content.authors) {
 		authors->Add(s.toStdString());
 	}
 

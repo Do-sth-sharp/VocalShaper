@@ -357,7 +357,7 @@ bool PluginDock::parse(const google::protobuf::Message* data) {
 }
 
 std::unique_ptr<google::protobuf::Message> PluginDock::serialize() const {
-	auto mes = std::unique_ptr<vsp4::PluginDock>();
+	auto mes = std::make_unique<vsp4::PluginDock>();
 
 	auto plugins = mes->mutable_plugins();
 	for (auto& i : this->pluginNodeList) {

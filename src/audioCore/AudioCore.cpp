@@ -576,6 +576,56 @@ MackieControlHub* AudioCore::getMackie() const {
 	return this->mackieHub.get();
 }
 
+bool AudioCore::save(const juce::String& path) {
+	/** Get Save Dir */
+	juce::File projFile = juce::File::getCurrentWorkingDirectory().getChildFile(path);
+	juce::File projDir = projFile.getParentDirectory();
+	projDir.createDirectory();
+
+	/** Update Project Info */
+	ProjectInfoData::getInstance()->push();
+	ProjectInfoData::getInstance()->update();
+
+	/** Lock Sources */
+	juce::ScopedReadLock locker(CloneableSourceManager::getInstance()->getLock());
+
+	/** Get Project Data */
+	auto mes = this->serialize();
+	if (!dynamic_cast<vsp4::Project*>(mes.get())) { ProjectInfoData::getInstance()->pop(); return false; };
+	auto proj = std::unique_ptr<vsp4::Project>(dynamic_cast<vsp4::Project*>(mes.release()));
+
+	juce::MemoryBlock projData;
+	projData.setSize(proj->ByteSizeLong());
+	if (!proj->SerializeToArray(projData.getData(), projData.getSize())) { ProjectInfoData::getInstance()->pop(); return false; }
+
+	/** Save Sources */
+	auto& srcList = proj->sources().sources();
+	for (int i = 0; i < srcList.size(); i++) {
+		juce::String srcPath = srcList.Get(i).path();
+		juce::File srcFile = projDir.getChildFile(srcPath);
+		srcFile.getParentDirectory().createDirectory();
+
+		CloneableSourceManager::getInstance()->saveSourceAsync(i, srcFile.getFullPathName());
+	}
+	
+	/** Write Project File */
+	juce::FileOutputStream projStream(projFile);
+	if (!projStream.openedOk()) { ProjectInfoData::getInstance()->pop(); return false; }
+	projStream.setPosition(0);
+	projStream.truncate();
+	if (!projStream.write(projData.getData(), projData.getSize())) { ProjectInfoData::getInstance()->pop(); return false; }
+
+	/** Set Working Directory */
+	projDir.setAsCurrentWorkingDirectory();
+	ProjectInfoData::getInstance()->release();
+	return true;
+}
+
+bool AudioCore::load(const juce::String& path) {
+	/** TODO */
+	return false;
+}
+
 bool AudioCore::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return false;

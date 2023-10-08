@@ -152,6 +152,9 @@ public:
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;
 
+	bool save(const juce::String& path);
+	bool load(const juce::String& path);
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;

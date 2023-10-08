@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <stack>
 #include "Serializable.h"
 
 class ProjectInfoData final : public Serializable,
@@ -11,14 +12,21 @@ public:
 	void init();
 	void update();
 
+	void push();
+	void pop();
+	void release();
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	uint32_t createTime = 0, lastSavedTime = 0, spentTime = 0, lastUpdateTime = 0;
-	juce::String createPlatform, lastSavedPlatform;
-	juce::StringArray authors;
+	struct Content final {
+		uint32_t createTime = 0, lastSavedTime = 0, spentTime = 0, lastUpdateTime = 0;
+		juce::String createPlatform, lastSavedPlatform;
+		juce::StringArray authors;
+	} content;
+	std::stack<Content> traceback;
 
 public:
 	static ProjectInfoData* getInstance();
