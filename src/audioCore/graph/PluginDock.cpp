@@ -351,6 +351,21 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	}
 }
 
+void PluginDock::clearGraph() {
+	for (auto& i : this->pluginNodeList) {
+		this->removeNode(i->nodeID);
+	}
+	this->pluginNodeList.clear();
+
+	this->removeIllegalConnections();
+
+	int mainBusChannels = this->getMainBusNumInputChannels();
+	for (int i = 0; i < mainBusChannels; i++) {
+		this->addConnection(
+			{ {this->audioInputNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
+	}
+}
+
 bool PluginDock::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return true;

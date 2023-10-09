@@ -16,6 +16,8 @@ public:
 	int getTaskNum() const;
 	std::tuple<CloneableSource::SafePointer<>, double> getTask(int index) const;
 
+	void clearGraph();
+
 public:
 	const juce::String getName() const override { return "Source Recorder"; };
 

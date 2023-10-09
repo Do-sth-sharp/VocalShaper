@@ -53,6 +53,11 @@ std::tuple<CloneableSource::SafePointer<>, double>
 	return { source, offset };
 }
 
+void SourceRecordProcessor::clearGraph() {
+	juce::ScopedWriteLock locker(this->taskLock);
+	this->tasks.clear();
+}
+
 void SourceRecordProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);

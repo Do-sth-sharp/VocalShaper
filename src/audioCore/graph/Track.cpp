@@ -237,6 +237,24 @@ void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	}
 }
 
+void Track::clearGraph() {
+	auto plugins = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
+	if (plugins) {
+		plugins->clearGraph();
+	}
+
+	while (this->getAdditionalAudioBusNum()>0) {
+		this->removeAdditionalAudioBus();
+	}
+
+	this->setTrackName(juce::String{});
+	this->setTrackColor(juce::Colour{});
+	this->setMute(false);
+	this->setGain(0);
+	this->setPan(0);
+	this->setSlider(1);
+}
+
 bool Track::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return true;

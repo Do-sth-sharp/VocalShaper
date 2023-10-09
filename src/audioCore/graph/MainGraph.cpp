@@ -153,6 +153,78 @@ SourceRecordProcessor* MainGraph::getRecorder() const {
 	return dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor());
 }
 
+void MainGraph::clearGraph() {
+	auto recorder = dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor());
+	if (recorder) {
+		recorder->clearGraph();
+	}
+
+	for (auto& i : this->midiI2InstrConnectionList) {
+		this->removeConnection(i);
+	}
+	this->midiI2InstrConnectionList.clear();
+
+	for (auto& i : this->midiSrc2InstrConnectionList) {
+		this->removeConnection(i);
+	}
+	this->midiSrc2InstrConnectionList.clear();
+
+	for (auto& i : this->midiSrc2TrkConnectionList) {
+		this->removeConnection(i);
+	}
+	this->midiSrc2TrkConnectionList.clear();
+
+	for (auto& i : this->audioSrc2TrkConnectionList) {
+		this->removeConnection(i);
+	}
+	this->audioSrc2TrkConnectionList.clear();
+
+	for (auto& i : this->audioInstr2TrkConnectionList) {
+		this->removeConnection(i);
+	}
+	this->audioInstr2TrkConnectionList.clear();
+
+	for (auto& i : this->midiI2TrkConnectionList) {
+		this->removeConnection(i);
+	}
+	this->midiI2TrkConnectionList.clear();
+
+	for (auto& i : this->audioI2TrkConnectionList) {
+		this->removeConnection(i);
+	}
+	this->audioI2TrkConnectionList.clear();
+
+	for (auto& i : this->audioTrk2TrkConnectionList) {
+		this->removeConnection(i);
+	}
+	this->audioTrk2TrkConnectionList.clear();
+
+	for (auto& i : this->audioTrk2OConnectionList) {
+		this->removeConnection(i);
+	}
+	this->audioTrk2OConnectionList.clear();
+
+	for (auto& i : this->midiTrk2OConnectionList) {
+		this->removeConnection(i);
+	}
+	this->midiTrk2OConnectionList.clear();
+
+	for (auto& i : this->trackNodeList) {
+		this->removeNode(i->nodeID);
+	}
+	this->trackNodeList.clear();
+
+	for (auto& i : this->instrumentNodeList) {
+		this->removeNode(i->nodeID);
+	}
+	this->instrumentNodeList.clear();
+
+	for (auto& i : this->audioSourceNodeList) {
+		this->removeNode(i->nodeID);
+	}
+	this->audioSourceNodeList.clear();
+}
+
 bool MainGraph::parse(const google::protobuf::Message* data) {
 	auto mes = dynamic_cast<const vsp4::MainGraph*>(data);
 	if (!mes) { return false; }
