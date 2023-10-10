@@ -31,7 +31,8 @@ void PluginSearcher::start() {
 	auto searchPathList = this->getSearchPath();
 	juce::FileSearchPath searchPath;
 	for (auto& s : searchPathList) {
-		searchPath.addPath(s);
+		searchPath.addPath(juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+			.getChildFile(s).getFullPathName());
 	}
 
 	/** Get Black List */
@@ -42,7 +43,8 @@ void PluginSearcher::start() {
 
 	/** Get Dead List Path */
 	juce::File deadListFile =
-		juce::File::getCurrentWorkingDirectory().getChildFile(this->deadPluginListPath);
+		juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+		.getChildFile(this->deadPluginListPath);
 	if (!deadListFile.exists()) {
 		deadListFile.createDirectory();
 	}
