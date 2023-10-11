@@ -6,6 +6,12 @@ CloneableSource::CloneableSource(const juce::String& name)
 	: id(CloneableSource::globalCounter++), name(name) {
 }
 
+CloneableSource::CloneableSource(
+	int id, const juce::String& name)
+	: id(std::max(id, (int)CloneableSource::globalCounter)), name(name) {
+	CloneableSource::globalCounter = this->id + 1;
+}
+
 std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
 	if (auto dst = this->clone()) {
 		dst->name = this->name;
@@ -80,6 +86,10 @@ double CloneableSource::getSampleRate() const {
 
 int CloneableSource::getBufferSize() const {
 	return this->currentBufferSize;
+}
+
+void CloneableSource::resetIdCounter() {
+	CloneableSource::globalCounter = 0;
 }
 
 void CloneableSource::prepareToRecordInternal(

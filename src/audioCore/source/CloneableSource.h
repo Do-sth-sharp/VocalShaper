@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "../project/Serializable.h"
 
+class CloneableSourceManager;
 class CloneableSource;
 template<typename T>
 concept IsCloneable = std::derived_from<T, CloneableSource>;
@@ -10,6 +11,7 @@ concept IsCloneable = std::derived_from<T, CloneableSource>;
 class CloneableSource : public Serializable {
 public:
 	CloneableSource(const juce::String& name = juce::String{});
+	CloneableSource(int id, const juce::String& name = juce::String{});
 	virtual ~CloneableSource() = default;
 
 	std::unique_ptr<CloneableSource> cloneThis() const;
@@ -51,6 +53,10 @@ public:
 	private:
 		juce::WeakReference<CloneableSource> weakRef;
 	};
+
+private:
+	friend class CloneableSourceManager;
+	static void resetIdCounter();
 
 private:
 	friend class SourceRecordProcessor;
