@@ -15,4 +15,5 @@ AC.stopRecord();
 AC.renderNow("./", "test", ".wav", { 0, 1, 2 });
 
 -- Project
-AC.save("D:/music/vsp4/test/testProj.vsp4");
+AC.newProject();
+AC.save("C:/Music/vsp4/test/testProj.vsp4");

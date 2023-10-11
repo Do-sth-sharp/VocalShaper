@@ -627,7 +627,18 @@ bool AudioCore::load(const juce::String& path) {
 }
 
 void AudioCore::newProj() {
+	/** Check Renderer */
+	if (Renderer::getInstance()->getRendering()) { return; }
+
+	/** Reset PlayHead */
+	this->record(false);
+	this->stop();
+	this->rewind();
+
+	/** Reset Project Info */
 	ProjectInfoData::getInstance()->init();
+
+	/** Reset Graph */
 	this->clearGraph();
 }
 

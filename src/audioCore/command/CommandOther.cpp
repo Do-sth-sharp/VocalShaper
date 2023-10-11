@@ -215,6 +215,15 @@ AUDIOCORE_FUNC(renderNow) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(newProject) {
+	juce::String result;
+
+	AudioCore::getInstance()->newProj();
+	result += "Reset project to empty!\n";
+
+	return CommandFuncResult{ true, result };
+}
+
 AUDIOCORE_FUNC(save) {
 	juce::String result;
 
@@ -245,5 +254,6 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, exportSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, exportSourceAsync);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, renderNow);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, newProject);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, save);
 }
