@@ -168,6 +168,13 @@ double SeqSourceProcessor::getTailLengthSeconds() const {
 	return (size > 0) ? std::get<1>(this->srcs.getUnchecked(size - 1)) : 0;
 }
 
+void SeqSourceProcessor::clearGraph() {
+	this->setTrackName(juce::String{});
+	this->setTrackColor(juce::Colour{});
+
+	this->srcs.clearGraph();
+}
+
 bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return true;

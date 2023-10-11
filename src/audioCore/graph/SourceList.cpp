@@ -117,6 +117,12 @@ const juce::CriticalSection& SourceList::getLock() const noexcept {
 	return this->list.getLock();
 }
 
+void SourceList::clearGraph() {
+	juce::GenericScopedLock locker(this->getLock());
+	this->list.clear();
+	this->lastIndex = -1;
+}
+
 bool SourceList::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return true;

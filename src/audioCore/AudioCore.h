@@ -154,6 +154,9 @@ public:
 
 	bool save(const juce::String& path);
 	bool load(const juce::String& path);
+	void newProj();
+
+	void clearGraph();
 
 public:
 	bool parse(const google::protobuf::Message* data) override;

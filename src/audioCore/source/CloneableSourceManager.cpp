@@ -164,6 +164,11 @@ void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
 	}
 }
 
+void CloneableSourceManager::clearGraph() {
+	juce::ScopedWriteLock locker(this->getLock());
+	this->sourceList.clear(true);
+}
+
 bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return false;

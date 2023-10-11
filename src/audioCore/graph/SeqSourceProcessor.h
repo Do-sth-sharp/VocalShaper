@@ -47,6 +47,8 @@ public:
 
 	double getTailLengthSeconds() const override;
 
+	void clearGraph();
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;

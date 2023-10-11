@@ -33,6 +33,8 @@ public:
 	void remove(int index);
 	const juce::CriticalSection& getLock() const noexcept;
 
+	void clearGraph();
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;

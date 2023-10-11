@@ -626,6 +626,19 @@ bool AudioCore::load(const juce::String& path) {
 	return false;
 }
 
+void AudioCore::newProj() {
+	ProjectInfoData::getInstance()->init();
+	this->clearGraph();
+}
+
+void AudioCore::clearGraph() {
+	/** Clear MainGraph */
+	this->mainAudioGraph->clearGraph();
+
+	/** Clear Sources */
+	CloneableSourceManager::getInstance()->clearGraph();
+}
+
 bool AudioCore::parse(const google::protobuf::Message* data) {
 	/** TODO */
 	return false;
