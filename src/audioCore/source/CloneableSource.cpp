@@ -72,6 +72,14 @@ const juce::String CloneableSource::getName() const {
 	return this->name;
 }
 
+void CloneableSource::setPath(const juce::String& path) {
+	this->path = path;
+}
+
+const juce::String CloneableSource::getPath() const {
+	return this->path;
+}
+
 void CloneableSource::prepareToPlay(double sampleRate, int bufferSize) {
 	if (this->currentSampleRate == sampleRate && this->currentBufferSize == bufferSize) { return; }
 

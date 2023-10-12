@@ -152,9 +152,9 @@ public:
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;
 
-	bool save(const juce::String& path);
+	bool save(const juce::String& name);
 	bool load(const juce::String& path);
-	void newProj();
+	bool newProj(const juce::String& workingPath);
 
 	void clearGraph();
 

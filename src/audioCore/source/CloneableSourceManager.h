@@ -49,12 +49,12 @@ public:
 	* @attention	You must call this from message thread.
 	*/
 	template<IsCloneable T>
-	bool createNewSourceThenLoad(const juce::String& path);
+	bool createNewSourceThenLoad(const juce::String& path, bool copy);
 	/**
 	* @attention	You must call this from message thread.
 	*/
 	template<IsCloneable T>
-	bool createNewSourceThenLoadAsync(const juce::String& path);
+	bool createNewSourceThenLoadAsync(const juce::String& path, bool copy);
 	/**
 	* @attention	You must call this from message thread.
 	*/

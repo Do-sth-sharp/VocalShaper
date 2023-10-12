@@ -150,7 +150,7 @@ bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 
 	/** Prepare Path */
 	juce::File dir
-		= juce::File::getCurrentWorkingDirectory().getChildFile(path);
+		= utils::getProjectDir().getChildFile(path);
 	if (!dir.isDirectory()) {
 		return false;
 	}

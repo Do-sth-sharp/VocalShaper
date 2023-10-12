@@ -853,12 +853,19 @@ namespace utils {
 		return juce::SystemStats::getLogonName();
 	}
 
-	juce::String getSourceDefaultPathForAudio(int id) {
-		return "./srcs/" + juce::String(id) + ".wav";
+	juce::String getLegalFileName(const juce::String& name) {
+		return name.replaceCharacters(
+			"\\/:*?\"<>|", "_________");
 	}
 
-	juce::String getSourceDefaultPathForMIDI(int id) {
-		return "./srcs/" + juce::String(id) + ".mid";
+	juce::String getSourceDefaultPathForAudio(int id, const juce::String& name) {
+		juce::String legalName = getLegalFileName(name);
+		return "./" + juce::String(id) + "_" + legalName + ".wav";
+	}
+
+	juce::String getSourceDefaultPathForMIDI(int id, const juce::String& name) {
+		juce::String legalName = getLegalFileName(name);
+		return "./" + juce::String(id) + "_" + legalName + ".mid";
 	}
 
 	bool projectVersionHighEnough(const Version& version) {
@@ -867,5 +874,27 @@ namespace utils {
 
 	bool projectVersionLowEnough(const Version& version) {
 		return versionCompare(version, getAudioPlatformVersion()) <= 0;
+	}
+
+	static juce::File projectDirectory;
+
+	juce::File getProjectDir() {
+		return projectDirectory;
+	}
+
+	bool setProjectDir(const juce::File& dir) {
+		if (!dir.isDirectory()) { return false; }
+		projectDirectory = dir;
+		return true;
+	}
+
+	juce::File getSourceFile(const juce::String& path) {
+		return utils::getProjectDir().getChildFile(path);
+	}
+
+	juce::File getDefaultWorkingDir() {
+		return juce::File::getSpecialLocation(
+			juce::File::SpecialLocationType::userDocumentsDirectory)
+			.getChildFile("./VocalShaperProjectTemp/");
 	}
 }

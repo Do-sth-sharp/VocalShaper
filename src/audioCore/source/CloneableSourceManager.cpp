@@ -2,6 +2,7 @@
 #include "AudioIOList.h"
 #include "../AudioCore.h"
 #include "../plugin/PluginLoader.h"
+#include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -103,8 +104,10 @@ bool CloneableSourceManager::saveSource(
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
-		return src->saveAs(
-			juce::File::getCurrentWorkingDirectory().getChildFile(path));
+		if (src->saveAs(utils::getSourceFile(path))) {
+			src->setPath(path);
+			return true;
+		}
 	}
 
 	return false;
@@ -133,8 +136,7 @@ bool CloneableSourceManager::exportSource(
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
-		return src->exportAs(
-			juce::File::getCurrentWorkingDirectory().getChildFile(path));
+		return src->exportAs(utils::getSourceFile(path));
 	}
 
 	return false;

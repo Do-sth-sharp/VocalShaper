@@ -15,9 +15,9 @@ AC.setSequencerTrackBypass(0, true);
 AC.setSequencerTrackBypass(0, false);
 
 -- Add Source
-AC.addAudioSource("./test.wav");
-AC.addMIDISource("./test.mid");
-AC.addSynthSource("./test.mid");
+AC.addAudioSource("./test.wav", true);
+AC.addMIDISource("./test.mid", true);
+AC.addSynthSource("./test.mid", true);
 AC.addAudioSource(48000, 2, 10.0);
 AC.addMIDISource();
 AC.addSynthSource();

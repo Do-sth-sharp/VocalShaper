@@ -218,8 +218,13 @@ AUDIOCORE_FUNC(renderNow) {
 AUDIOCORE_FUNC(newProject) {
 	juce::String result;
 
-	AudioCore::getInstance()->newProj();
-	result += "Reset project to empty!\n";
+	juce::String path = juce::String::fromUTF8(luaL_checkstring(L, 1));
+	if (AudioCore::getInstance()->newProj(path)) {
+		result += "Create new project at: " + path + "\n";
+	}
+	else {
+		result += "Can't create new project at: " + path + "\n";
+	}
 
 	return CommandFuncResult{ true, result };
 }
@@ -227,12 +232,12 @@ AUDIOCORE_FUNC(newProject) {
 AUDIOCORE_FUNC(save) {
 	juce::String result;
 
-	juce::String path = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	if (AudioCore::getInstance()->save(path)) {
-		result += "Saved project data to: " + path + "\n";
+	juce::String name = juce::String::fromUTF8(luaL_checkstring(L, 1));
+	if (AudioCore::getInstance()->save(name)) {
+		result += "Saved project data to: " + name + "\n";
 	}
 	else {
-		result += "Can't save project data to: " + path + "\n";
+		result += "Can't save project data to: " + name + "\n";
 	}
 
 	return CommandFuncResult{ true, result };

@@ -64,6 +64,12 @@ AudioCore::AudioCore() {
 	/** Init Project */
 	ProjectInfoData::getInstance()->init();
 
+	/** Set Working Directory */
+	juce::File defaultWorkingDir = utils::getDefaultWorkingDir();
+	defaultWorkingDir.createDirectory();
+	utils::setProjectDir(defaultWorkingDir);
+
+
 	/** Start Play Watcher */
 	PlayWatcher::getInstance()->startTimer(1000);
 }
@@ -576,9 +582,11 @@ MackieControlHub* AudioCore::getMackie() const {
 	return this->mackieHub.get();
 }
 
-bool AudioCore::save(const juce::String& path) {
+bool AudioCore::save(const juce::String& name) {
 	/** Get Save Dir */
-	juce::File projFile = juce::File::getCurrentWorkingDirectory().getChildFile(path);
+	juce::String legalName = utils::getLegalFileName(name);
+	juce::File projFile = utils::getProjectDir()
+		.getChildFile("./" + legalName + ".vsp4");
 	juce::File projDir = projFile.getParentDirectory();
 	projDir.createDirectory();
 
@@ -602,10 +610,13 @@ bool AudioCore::save(const juce::String& path) {
 	auto& srcList = proj->sources().sources();
 	for (int i = 0; i < srcList.size(); i++) {
 		juce::String srcPath = srcList.Get(i).path();
-		juce::File srcFile = projDir.getChildFile(srcPath);
+		juce::File srcFile = utils::getSourceFile(srcPath);
 		srcFile.getParentDirectory().createDirectory();
 
-		CloneableSourceManager::getInstance()->saveSourceAsync(i, srcFile.getFullPathName());
+		auto src = CloneableSourceManager::getInstance()->getSource(i);
+		if (src && !src->checkSaved()) {
+			CloneableSourceManager::getInstance()->saveSourceAsync(i, srcFile.getFullPathName());
+		}
 	}
 	
 	/** Write Project File */
@@ -615,8 +626,7 @@ bool AudioCore::save(const juce::String& path) {
 	projStream.truncate();
 	if (!projStream.write(projData.getData(), projData.getSize())) { ProjectInfoData::getInstance()->pop(); return false; }
 
-	/** Set Working Directory */
-	projDir.setAsCurrentWorkingDirectory();
+	/** Release Project Info Temp */
 	ProjectInfoData::getInstance()->release();
 	return true;
 }
@@ -626,9 +636,9 @@ bool AudioCore::load(const juce::String& path) {
 	return false;
 }
 
-void AudioCore::newProj() {
+bool AudioCore::newProj(const juce::String& workingPath) {
 	/** Check Renderer */
-	if (Renderer::getInstance()->getRendering()) { return; }
+	if (Renderer::getInstance()->getRendering()) { return false; }
 
 	/** Reset PlayHead */
 	this->record(false);
@@ -640,6 +650,13 @@ void AudioCore::newProj() {
 
 	/** Reset Graph */
 	this->clearGraph();
+
+	/** Set Working Dir */
+	juce::File workingDir = juce::File::getSpecialLocation(
+		juce::File::SpecialLocationType::userHomeDirectory)
+		.getChildFile(workingPath);
+	return workingDir.createDirectory()
+		&& utils::setProjectDir(workingDir);
 }
 
 void AudioCore::clearGraph() {

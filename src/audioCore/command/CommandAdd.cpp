@@ -198,9 +198,10 @@ AUDIOCORE_FUNC(addAudioSource) {
 
 	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
 		juce::String sourcePath = juce::String::fromUTF8(lua_tostring(L, 1));
+		bool copyFile = lua_toboolean(L, 2);
 
 		CloneableSourceManager::getInstance()
-			->createNewSourceThenLoadAsync<CloneableAudioSource>(sourcePath);
+			->createNewSourceThenLoadAsync<CloneableAudioSource>(sourcePath, copyFile);
 	}
 	else {
 		double sampleRate = luaL_checknumber(L, 1);
@@ -222,9 +223,10 @@ AUDIOCORE_FUNC(addMIDISource) {
 
 	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
 		juce::String sourcePath = juce::String::fromUTF8(lua_tostring(L, 1));
+		bool copyFile = lua_toboolean(L, 2);
 
 		CloneableSourceManager::getInstance()
-			->createNewSourceThenLoadAsync<CloneableMIDISource>(sourcePath);
+			->createNewSourceThenLoadAsync<CloneableMIDISource>(sourcePath, copyFile);
 	}
 	else {
 		CloneableSourceManager::getInstance()
@@ -241,9 +243,10 @@ AUDIOCORE_FUNC(addSynthSource) {
 
 	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
 		juce::String sourcePath = juce::String::fromUTF8(lua_tostring(L, 1));
+		bool copyFile = lua_toboolean(L, 2);
 
 		CloneableSourceManager::getInstance()
-			->createNewSourceThenLoadAsync<CloneableSynthSource>(sourcePath);
+			->createNewSourceThenLoadAsync<CloneableSynthSource>(sourcePath, copyFile);
 	}
 	else {
 		CloneableSourceManager::getInstance()

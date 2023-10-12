@@ -2,6 +2,7 @@
 
 #include "CloneableSourceManager.h"
 #include "CloneableAudioSource.h"
+#include "../Utils.h"
 
 AudioIOList::AudioIOList()
 	: Thread("Audio Source IO List") {}
@@ -12,11 +13,12 @@ AudioIOList::~AudioIOList() {
 	}
 }
 
-void AudioIOList::load(CloneableSource::SafePointer<> ptr, juce::String path) {
+void AudioIOList::load(CloneableSource::SafePointer<> ptr, juce::String path, bool copy) {
 	juce::GenericScopedLock locker(this->lock);
 
 	if (!ptr) { return; }
-	this->list.push(std::make_tuple(TaskType::Load, ptr, path));
+	this->list.push(std::make_tuple(
+		copy ? TaskType::CopyLoad : TaskType::Load, ptr, path));
 
 	this->startThread();
 }
@@ -81,20 +83,45 @@ void AudioIOList::run() {
 		{
 			if (auto src = static_cast<CloneableSource*>(this->currentTask)) {
 				juce::File file
-					= juce::File::getCurrentWorkingDirectory().getChildFile(std::get<2>(task));
+					= utils::getSourceFile(std::get<2>(task));
+				bool result = false;
 				switch (std::get<0>(task)) {
 				case TaskType::Load:
 					/** Read */
-					src->loadFrom(file);
+					result = src->loadFrom(file);
+					if (result) {
+						src->setPath(std::get<2>(task));
+					}
 					break;
 				case TaskType::Save:
 					/** Write */
-					src->saveAs(file);
+					result = src->saveAs(file);
+					if (result) {
+						src->setPath(std::get<2>(task));
+					}
 					break;
 				case TaskType::Export:
 					/** Export */
-					src->exportAs(file);
+					result = src->exportAs(file);
 					break;
+				case TaskType::CopyLoad:
+					/** Copy */
+					juce::String dstPath = "./" + file.getFileName();
+					juce::File dstFile = utils::getSourceFile(dstPath);
+					if (file.getFullPathName() != dstFile.getFullPathName()) {
+						file.copyFileTo(dstFile);
+					}
+
+					/** Read */
+					result = src->loadFrom(dstFile);
+					if (result) {
+						src->setPath(dstPath);
+					}
+					break;
+				}
+
+				if (result) {
+					//src->setPath(std::get<2>(task));
 				}
 			}
 		}

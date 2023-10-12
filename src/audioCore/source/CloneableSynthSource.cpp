@@ -126,7 +126,11 @@ std::unique_ptr<google::protobuf::Message> CloneableSynthSource::serialize() con
 
 	mes->set_type(vsp4::Source_Type_SYNTH);
 	mes->set_name(this->getName().toStdString());
-	mes->set_path(utils::getSourceDefaultPathForMIDI(this->getId()).toStdString());
+	juce::String path = this->getPath();
+	mes->set_path(
+		juce::String{ path.isNotEmpty() ? path
+		: utils::getSourceDefaultPathForMIDI(
+			this->getId(), this->getName()) }.toStdString());
 	
 	if (this->synthesizer) {
 		auto plugin = std::make_unique<vsp4::Plugin>();
