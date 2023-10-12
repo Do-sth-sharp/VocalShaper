@@ -8,7 +8,7 @@ PluginLoader::PluginLoader() {
 
 void PluginLoader::loadPlugin(
 	const juce::PluginDescription& pluginInfo,
-	PluginDecorator::SafePointer ptr) {
+	PluginDecorator::SafePointer ptr, const Callback& callback) {
 	/** Get Audio Config */
 	auto mainGraph = AudioCore::getInstance()->getGraph();
 	if (!mainGraph) {
@@ -20,11 +20,11 @@ void PluginLoader::loadPlugin(
 
 	/** Create Task */
 	this->loadThread->load(pluginInfo,
-		{ PluginLoadThread::DstPointer::Type::Plugin, ptr, nullptr }, sampleRate, bufferSize);
+		{ PluginLoadThread::DstPointer::Type::Plugin, ptr, nullptr }, callback, sampleRate, bufferSize);
 }
 
 void PluginLoader::loadPlugin(const juce::PluginDescription& pluginInfo,
-	CloneableSource::SafePointer<CloneableSynthSource> ptr) {
+	CloneableSource::SafePointer<CloneableSynthSource> ptr, const Callback& callback) {
 	/** Get Audio Config */
 	auto mainGraph = AudioCore::getInstance()->getGraph();
 	if (!mainGraph) {
@@ -36,7 +36,7 @@ void PluginLoader::loadPlugin(const juce::PluginDescription& pluginInfo,
 
 	/** Create Task */
 	this->loadThread->load(pluginInfo,
-		{ PluginLoadThread::DstPointer::Type::Synth, nullptr, ptr }, sampleRate, bufferSize);
+		{ PluginLoadThread::DstPointer::Type::Synth, nullptr, ptr }, callback, sampleRate, bufferSize);
 }
 
 bool PluginLoader::isRunning() const {

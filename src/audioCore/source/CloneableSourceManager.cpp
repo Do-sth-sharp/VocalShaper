@@ -173,8 +173,57 @@ void CloneableSourceManager::clearGraph() {
 }
 
 bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
-	/** TODO */
-	return false;
+	auto mes = dynamic_cast<const vsp4::SourceList*>(data);
+	if (!mes) { return false; }
+
+	juce::ScopedWriteLock locker(this->getLock());
+
+	/** Clear List */
+	this->clearGraph();
+
+	/** Load Each Source */
+	auto& list = mes->sources();
+	for (auto& i : list) {
+		juce::String path = i.path();
+
+		switch (i.type()) {
+		case vsp4::Source_Type_AUDIO:
+			if (!this->createNewSourceThenLoadAsync<CloneableAudioSource>(path, false)) { continue; }
+			break;
+		case vsp4::Source_Type_MIDI:
+			if (!this->createNewSourceThenLoadAsync<CloneableMIDISource>(path, false)) { continue; }
+			break;
+		case vsp4::Source_Type_SYNTH:
+			if (!this->createNewSourceThenLoadAsync<CloneableSynthSource>(path, false)) { continue; }
+			break;
+		}
+
+		auto ptrSrc = this->getSource(this->getSourceNum() - 1);
+		if (!ptrSrc) { continue; }
+
+		ptrSrc->setId(i.id());
+		ptrSrc->setName(i.name());
+		ptrSrc->setPath(i.path());
+
+		if ((i.type() == vsp4::Source_Type_SYNTH) 
+			&& i.has_synthesizer()) {
+			auto& plugin = i.synthesizer();
+
+			auto callback = [plugin, index = this->getSourceNum() - 1] {
+				auto src = CloneableSourceManager::getInstance()->getSource(index);
+				auto synthSource = dynamic_cast<CloneableSynthSource*>(src.getSource());
+				if (!synthSource) { return; }
+				synthSource->parse(&plugin);
+			};
+
+			auto pluginDes = AudioCore::getInstance()->findPlugin(plugin.info().id(), true);
+			PluginLoader::getInstance()->loadPlugin(
+				*(pluginDes.get()), CloneableSource::SafePointer<CloneableSynthSource>(
+					dynamic_cast<CloneableSynthSource*>(ptrSrc.getSource())), callback);
+		}
+	}
+
+	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableSourceManager::serialize() const {

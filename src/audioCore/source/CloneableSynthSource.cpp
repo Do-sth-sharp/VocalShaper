@@ -117,14 +117,24 @@ void CloneableSynthSource::synth() {
 }
 
 bool CloneableSynthSource::parse(const google::protobuf::Message* data) {
-	/** TODO */
-	return false;
+	auto mes = dynamic_cast<const vsp4::Plugin*>(data);
+	if (!mes) { return false; }
+
+	/** Set Synthesizer State */
+	if (!this->synthesizer) { return false; }
+	if (mes->info().id() != this->pluginIdentifier.toStdString()) { return false; }
+	auto& pluginData = mes->state().data();
+	this->synthesizer->setStateInformation(
+		pluginData.c_str(), pluginData.size());
+
+	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableSynthSource::serialize() const {
 	auto mes = std::make_unique<vsp4::Source>();
 
 	mes->set_type(vsp4::Source_Type_SYNTH);
+	mes->set_id(this->getId());
 	mes->set_name(this->getName().toStdString());
 	juce::String path = this->getPath();
 	mes->set_path(

@@ -59,6 +59,7 @@ public:
 private:
 	friend class CloneableSourceManager;
 	static void resetIdCounter();
+	void setId(int id);
 
 private:
 	friend class SourceRecordProcessor;
@@ -88,7 +89,7 @@ protected:
 private:
 	static std::atomic_int globalCounter;
 	mutable std::atomic_bool isSaved = true;
-	const int id = -1;
+	int id = -1;
 	juce::String name;
 	juce::String path;
 	std::atomic<double> currentSampleRate = 0;

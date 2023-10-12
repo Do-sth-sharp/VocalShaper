@@ -632,8 +632,38 @@ bool AudioCore::save(const juce::String& name) {
 }
 
 bool AudioCore::load(const juce::String& path) {
-	/** TODO */
-	return false;
+	/** Check Renderer */
+	if (Renderer::getInstance()->getRendering()) { return false; }
+
+	/** Load Project File */
+	juce::File projFile = utils::getDefaultWorkingDir().getChildFile(path);
+	if (!projFile.existsAsFile()) { return false; }
+	juce::FileInputStream projStream(projFile);
+	if (!projStream.openedOk()) { return false; }
+	juce::MemoryBlock projData;
+	projData.setSize(projStream.getTotalLength());
+	if (!projStream.read(projData.getData(), projData.getSize())) { return false; }
+
+	/** Parse Project */
+	auto proj = std::make_unique<vsp4::Project>();
+	if (!proj->ParseFromArray(projData.getData(), projData.getSize())) { return false; }
+
+	/** Check Project Version */
+	auto& projVer = proj->version();
+	if (!utils::projectVersionHighEnough(
+		{ projVer.major(), projVer.minor(), projVer.patch() })) {
+		return false;
+	}
+	if (!utils::projectVersionLowEnough(
+		{ projVer.major(), projVer.minor(), projVer.patch() })) {
+		return false;
+	}
+
+	/** Set Working Directory */
+	juce::File projDir = projFile.getParentDirectory();
+	utils::setProjectDir(projDir);
+
+	return this->parse(proj.get());
 }
 
 bool AudioCore::newProj(const juce::String& workingPath) {
@@ -668,8 +698,20 @@ void AudioCore::clearGraph() {
 }
 
 bool AudioCore::parse(const google::protobuf::Message* data) {
-	/** TODO */
-	return false;
+	auto mes = dynamic_cast<const vsp4::Project*>(data);
+	if (!mes) { return false; }
+
+	/** Set Info */
+	ProjectInfoData::getInstance()->init();
+	if (!ProjectInfoData::getInstance()->parse(&(mes->info()))) { return false; }
+
+	/** Load Sources */
+	if (!CloneableSourceManager::getInstance()->parse(&(mes->sources()))) { return false; }
+
+	/** Load Graph */
+	if (!this->mainAudioGraph->parse(&(mes->graph()))) { return false; }
+
+	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {

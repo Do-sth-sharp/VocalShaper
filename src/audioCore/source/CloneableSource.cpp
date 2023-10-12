@@ -8,8 +8,8 @@ CloneableSource::CloneableSource(const juce::String& name)
 
 CloneableSource::CloneableSource(
 	int id, const juce::String& name)
-	: id(std::max(id, (int)CloneableSource::globalCounter)), name(name) {
-	CloneableSource::globalCounter = this->id + 1;
+	: name(name) {
+	this->setId(id);
 }
 
 std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
@@ -98,6 +98,12 @@ int CloneableSource::getBufferSize() const {
 
 void CloneableSource::resetIdCounter() {
 	CloneableSource::globalCounter = 0;
+}
+
+void CloneableSource::setId(int id) {
+	if (this->id == id) { return; }
+	this->id = std::max(id, (int)CloneableSource::globalCounter);
+	CloneableSource::globalCounter = this->id + 1;
 }
 
 void CloneableSource::prepareToRecordInternal(

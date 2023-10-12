@@ -35,14 +35,15 @@ int CloneableMIDISource::getTrackNum() const {
 }
 
 bool CloneableMIDISource::parse(const google::protobuf::Message* data) {
-	/** TODO */
-	return false;
+	/** Nothing To Do, Never Invoked */
+	return dynamic_cast<const vsp4::Source*>(data);
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableMIDISource::serialize() const {
 	auto mes = std::make_unique<vsp4::Source>();
 
 	mes->set_type(vsp4::Source_Type_MIDI);
+	mes->set_id(this->getId());
 	mes->set_name(this->getName().toStdString());
 	juce::String path = this->getPath();
 	mes->set_path(

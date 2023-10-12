@@ -243,6 +243,20 @@ AUDIOCORE_FUNC(save) {
 	return CommandFuncResult{ true, result };
 }
 
+AUDIOCORE_FUNC(load) {
+	juce::String result;
+
+	juce::String path = juce::String::fromUTF8(luaL_checkstring(L, 1));
+	if (AudioCore::getInstance()->load(path)) {
+		result += "Load project data from: " + path + "\n";
+	}
+	else {
+		result += "Can't load project data from: " + path + "\n";
+	}
+
+	return CommandFuncResult{ true, result };
+}
+
 void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, clearPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, searchPlugin);
@@ -261,4 +275,5 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, renderNow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, newProject);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, save);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, load);
 }

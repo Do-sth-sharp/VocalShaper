@@ -8,10 +8,13 @@ public:
 	PluginLoader();
 	~PluginLoader() override = default;
 
+	using Callback = PluginLoadThread::Callback;
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
-		PluginDecorator::SafePointer ptr);
+		PluginDecorator::SafePointer ptr,
+		const Callback& callback = [] {});
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
-		CloneableSource::SafePointer<CloneableSynthSource> ptr);
+		CloneableSource::SafePointer<CloneableSynthSource> ptr,
+		const Callback& callback = [] {});
 
 	bool isRunning() const;
 
