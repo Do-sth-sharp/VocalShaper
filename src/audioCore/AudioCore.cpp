@@ -659,6 +659,11 @@ bool AudioCore::load(const juce::String& path) {
 		return false;
 	}
 
+	/** Reset PlayHead */
+	this->record(false);
+	this->stop();
+	this->rewind();
+
 	/** Set Working Directory */
 	juce::File projDir = projFile.getParentDirectory();
 	utils::setProjectDir(projDir);
