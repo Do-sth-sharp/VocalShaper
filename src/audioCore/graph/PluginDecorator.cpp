@@ -1,4 +1,5 @@
 #include "PluginDecorator.h"
+#include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -470,9 +471,12 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 	juce::ScopedReadLock locker(this->pluginLock);
 
 	/** Plugin Info */
+	auto info = mes->mutable_info();
 	if (this->plugin) {
-		mes->mutable_info()->set_id(this->pluginIdentifier.toStdString());
+		info->set_id(this->pluginIdentifier.toStdString());
 	}
+	info->set_decoratortype(static_cast<vsp4::TrackType>(
+		utils::getTrackType(this->audioChannels)));
 
 	/** Plugin State */
 	if (this->plugin) {

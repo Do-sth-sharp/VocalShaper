@@ -4,6 +4,7 @@
 #include "../misc/Renderer.h"
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
+#include "../Utils.h"
 #include "SourceRecordProcessor.h"
 #include <VSP4.h>
 
@@ -229,7 +230,97 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 	auto mes = dynamic_cast<const vsp4::MainGraph*>(data);
 	if (!mes) { return false; }
 
-	/** TODO Parse */
+	this->clearGraph();
+
+	auto& seqTracks = mes->seqtracks();
+	for (auto& i : seqTracks) {
+		this->insertSource(-1, utils::getChannelSet(static_cast<utils::TrackType>(i.type())));
+		if (auto sourceNode = this->audioSourceNodeList.getLast()) {
+			sourceNode->setBypassed(i.bypassed());
+			if (auto source = dynamic_cast<SeqSourceProcessor*>(sourceNode->getProcessor())) {
+				if (!source->parse(&i)) { return false; }
+			}
+		}
+	}
+
+	auto& instrs = mes->instrs();
+	for (auto& i : instrs) {
+		this->insertInstrument(-1, utils::getChannelSet(static_cast<utils::TrackType>(i.info().decoratortype())));
+		if (auto instrNode = this->instrumentNodeList.getLast()) {
+			instrNode->setBypassed(i.bypassed());
+			if (auto instr = dynamic_cast<PluginDecorator*>(instrNode->getProcessor())) {
+				if (!instr->parse(&i)) { return false; }
+			}
+		}
+	}
+
+	auto& mixTracks = mes->mixertracks();
+	for (auto& i : mixTracks) {
+		this->insertTrack(-1, utils::getChannelSet(static_cast<utils::TrackType>(i.type())));
+		if (auto trackNode = this->trackNodeList.getLast()) {
+			trackNode->setBypassed(i.bypassed());
+			if (auto track = dynamic_cast<Track*>(trackNode->getProcessor())) {
+				if (!track->parse(&i)) { return false; }
+			}
+		}
+	}
+
+	auto& connections = mes->connections();
+
+	auto& midiI2Instr = connections.midii2instr();
+	for (auto& i : midiI2Instr) {
+		this->setMIDII2InstrConnection(i.dst());
+	}
+
+	auto& midiSrc2Instr = connections.midisrc2instr();
+	for (auto& i : midiSrc2Instr) {
+		this->setMIDISrc2InstrConnection(i.src(), i.dst());
+	}
+
+	auto& midiSrc2Track = connections.midisrc2track();
+	for (auto& i : midiSrc2Track) {
+		this->setMIDISrc2TrkConnection(i.src(), i.dst());
+	}
+
+	auto& audioSrc2Track = connections.audiosrc2track();
+	for (auto& i : audioSrc2Track) {
+		this->setAudioSrc2TrkConnection(i.src(), i.dst(), i.srcchannel(), i.dstchannel());
+	}
+
+	auto& audioInstr2Track = connections.audioinstr2track();
+	for (auto& i : audioInstr2Track) {
+		this->setAudioInstr2TrkConnection(i.src(), i.dst(), i.srcchannel(), i.dstchannel());
+	}
+
+	auto& midiI2Track = connections.midii2track();
+	for (auto& i : midiI2Track) {
+		this->setMIDII2TrkConnection(i.dst());
+	}
+
+	auto& audioI2Track = connections.audioi2track();
+	for (auto& i : audioI2Track) {
+		this->setAudioI2TrkConnection(i.dst(), i.srcchannel(), i.dstchannel());
+	}
+
+	auto& audioTrack2O = connections.audiotrack2o();
+	for (auto& i : audioTrack2O) {
+		this->setAudioTrk2OConnection(i.src(), i.srcchannel(), i.dstchannel());
+	}
+
+	auto& audioTrack2Track = connections.audiotrack2track();
+	for (auto& i : audioTrack2Track) {
+		this->setAudioTrk2TrkConnection(i.src(), i.dst(), i.srcchannel(), i.dstchannel());
+	}
+
+	auto& midiTrack2O = connections.miditrack2o();
+	for (auto& i : midiTrack2O) {
+		this->setMIDITrk2OConnection(i.src());
+	}
+
+	if (!dynamic_cast<SourceRecordProcessor*>(
+		this->recorderNode->getProcessor())->parse(&(mes->recorder()))) {
+		return false;
+	}
 
 	return true;
 }
