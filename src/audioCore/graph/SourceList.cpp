@@ -1,4 +1,5 @@
-#include "SourceList.h"
+﻿#include "SourceList.h"
+#include "../source/CloneableSourceManager.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -124,7 +125,16 @@ void SourceList::clearGraph() {
 }
 
 bool SourceList::parse(const google::protobuf::Message* data) {
-	/** TODO */
+	auto mes = dynamic_cast<const vsp4::SourceInstanceList*>(data);
+	if (!mes) { return false; }
+
+	auto& list = mes->sources();
+	for (auto& i : list) {
+		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
+			this->add({ i.startpos(), i.endpos(), i.offset(), ptrSrc, i.index() });
+		}
+	}
+
 	return true;
 }
 

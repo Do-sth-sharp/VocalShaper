@@ -176,7 +176,16 @@ void SeqSourceProcessor::clearGraph() {
 }
 
 bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
-	/** TODO */
+	auto mes = dynamic_cast<const vsp4::SeqTrack*>(data);
+	if (!mes) { return false; }
+
+	auto& info = mes->info();
+	this->setTrackName(info.name());
+	this->setTrackColor(juce::Colour{ info.color() });
+
+	auto& sources = mes->sources();
+	if (!this->srcs.parse(&sources)) { return false; }
+
 	return true;
 }
 
