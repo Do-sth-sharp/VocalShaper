@@ -3,6 +3,7 @@
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
 #include "../source/CloneableSynthSource.h"
+#include "../source/CloneableSourceManager.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -117,7 +118,18 @@ double SourceRecordProcessor::getTailLengthSeconds() const {
 }
 
 bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
-	/** TODO */
+	auto mes = dynamic_cast<const vsp4::Recorder*>(data);
+	if (!mes) { return false; }
+
+	this->clearGraph();
+
+	auto& list = mes->sources();
+	for (auto& i : list) {
+		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
+			this->addTask(ptrSrc, i.index(), i.offset());
+		}
+	}
+
 	return true;
 }
 
