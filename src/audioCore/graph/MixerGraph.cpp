@@ -1,4 +1,4 @@
-#include "MainGraph.h"
+﻿#include "MainGraph.h"
 
 void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
@@ -602,24 +602,6 @@ void MainGraph::removeIllegalAudioTrk2OConnections() {
 			}
 			return false;
 		});
-}
-
-int MainGraph::findSource(const SeqSourceProcessor* ptr) const {
-	for (int i = 0; i < this->audioSourceNodeList.size(); i++) {
-		if (this->audioSourceNodeList.getUnchecked(i)->getProcessor() == ptr) {
-			return i;
-		}
-	}
-	return -1;
-}
-
-int MainGraph::findInstr(const PluginDecorator* ptr) const {
-	for (int i = 0; i < this->instrumentNodeList.size(); i++) {
-		if (this->instrumentNodeList.getUnchecked(i)->getProcessor() == ptr) {
-			return i;
-		}
-	}
-	return -1;
 }
 
 int MainGraph::findTrack(const Track* ptr) const {

@@ -64,5 +64,7 @@ private:
 
 	juce::Array<juce::AudioProcessorGraph::Connection> additionalConnectionList;
 
+	int findPlugin(const PluginDecorator* ptr) const;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDock)
 };

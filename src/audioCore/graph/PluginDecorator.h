@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "../project/Serializable.h"
@@ -7,9 +7,10 @@ class PluginDecorator final : public juce::AudioProcessor,
 	public Serializable {
 public:
 	PluginDecorator() = delete;
-	PluginDecorator(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	PluginDecorator(bool isInstr = false, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
-		const juce::String& identifier, 
+		const juce::String& identifier,
+		bool isInstr = false,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
 	void setPlugin(
@@ -35,6 +36,9 @@ public:
 
 	void setMIDICCIntercept(bool midiCCShouldIntercept);
 	bool getMIDICCIntercept() const;
+
+	void setMIDIOutput(bool midiShouldOutput);
+	bool getMIDIOutput() const;
 
 	class SafePointer {
 	private:
@@ -138,6 +142,7 @@ private:
 	std::atomic_bool midiShouldOutput = false;
 	std::atomic_bool midiCCShouldIntercept = true;
 	juce::AudioChannelSet audioChannels;
+	const bool isInstr = false;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;

@@ -1,10 +1,13 @@
-#include "PluginDecorator.h"
+﻿#include "PluginDecorator.h"
+#include "../plugin/PluginLoader.h"
+#include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-PluginDecorator::PluginDecorator(const juce::AudioChannelSet& type)
-	: audioChannels(type) {
+PluginDecorator::PluginDecorator(bool isInstr,
+	const juce::AudioChannelSet& type)
+	: isInstr(isInstr), audioChannels(type) {
 	/** Channels */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
@@ -21,8 +24,8 @@ PluginDecorator::PluginDecorator(const juce::AudioChannelSet& type)
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
 	const juce::String& identifier,
-	const juce::AudioChannelSet& type)
-	: PluginDecorator(type) {
+	bool isInstr, const juce::AudioChannelSet& type)
+	: PluginDecorator(isInstr, type) {
 	this->setPlugin(std::move(plugin), identifier);
 }
 
@@ -164,6 +167,14 @@ void PluginDecorator::setMIDICCIntercept(bool midiCCShouldIntercept) {
 
 bool PluginDecorator::getMIDICCIntercept() const {
 	return this->midiCCShouldIntercept;
+}
+
+void PluginDecorator::setMIDIOutput(bool midiShouldOutput) {
+	this->midiShouldOutput = midiShouldOutput;
+}
+
+bool PluginDecorator::getMIDIOutput() const {
+	return midiShouldOutput;
 }
 
 const juce::String PluginDecorator::getName() const {
@@ -462,7 +473,39 @@ void PluginDecorator::updateTrackProperties(
 }
 
 bool PluginDecorator::parse(const google::protobuf::Message* data) {
-	/** TODO */
+	auto mes = dynamic_cast<const vsp4::Plugin*>(data);
+	if (!mes) { return false; }
+
+	auto& info = mes->info();
+	if (this->audioChannels != utils::getChannelSet(
+		static_cast<utils::TrackType>(info.decoratortype()))) {
+		return false;
+	}
+
+	auto& state = mes->state();
+
+	auto ptrPlugin = PluginDecorator::SafePointer(this);
+	auto callback = [state, ptrPlugin] {
+		if (!ptrPlugin) { return; }
+
+		ptrPlugin->setMIDIChannel(state.midichannel());
+		ptrPlugin->setMIDIOutput(state.midioutput());
+		ptrPlugin->setMIDICCIntercept(state.midiintercept());
+		
+		auto& params = state.paramcclinks();
+		for (auto& i : params) {
+			ptrPlugin->connectParamCC(i.second, i.first);
+		}
+
+		auto& pluginData = state.data();
+		ptrPlugin->setStateInformation(
+			pluginData.c_str(), pluginData.size());
+	};
+
+	auto pluginDes = AudioCore::getInstance()->findPlugin(info.id(), this->isInstr);
+	PluginLoader::getInstance()->loadPlugin(
+		*(pluginDes.get()), ptrPlugin, callback);
+
 	return true;
 }
 
@@ -486,9 +529,9 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 		this->plugin->getStateInformation(data);
 		state->set_data(data.getData(), data.getSize());
 
-		state->set_midichannel(this->midiChannel);
-		state->set_midioutput(this->midiShouldOutput);
-		state->set_midiintercept(this->midiCCShouldIntercept);
+		state->set_midichannel(this->getMIDIChannel());
+		state->set_midioutput(this->getMIDIOutput());
+		state->set_midiintercept(this->getMIDICCIntercept());
 
 		auto paramCCLinks = state->mutable_paramcclinks();
 		for (int i = 0; i < this->paramCCList.size(); i++) {

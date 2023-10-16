@@ -243,7 +243,7 @@ void Track::clearGraph() {
 		plugins->clearGraph();
 	}
 
-	while (this->getAdditionalAudioBusNum()>0) {
+	while (this->getAdditionalAudioBusNum() > 0) {
 		this->removeAdditionalAudioBus();
 	}
 
@@ -256,7 +256,31 @@ void Track::clearGraph() {
 }
 
 bool Track::parse(const google::protobuf::Message* data) {
-	/** TODO */
+	auto mes = dynamic_cast<const vsp4::MixerTrack*>(data);
+	if (!mes) { return false; }
+
+	this->clearGraph();
+
+	auto& info = mes->info();
+	this->setTrackName(info.name());
+	this->setTrackColor(juce::Colour{ info.color() });
+
+	uint32_t additionalBusNum = mes->additionalbuses();
+	for (int i = 0; i < additionalBusNum; i++) {
+		this->addAdditionalAudioBus();
+	}
+
+	auto& plugins = mes->effects();
+	if (!dynamic_cast<PluginDock*>(
+		this->pluginDockNode->getProcessor())->parse(&plugins)) {
+		return false;
+	}
+
+	this->setMute(mes->muted());
+	this->setGain(mes->gain());
+	this->setPan(mes->panner());
+	this->setSlider(mes->slider());
+
 	return true;
 }
 

@@ -1,4 +1,4 @@
-#include "MainGraph.h"
+﻿#include "MainGraph.h"
 
 void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 	/** Add To The Graph */
@@ -77,7 +77,7 @@ PluginDecorator::SafePointer MainGraph::insertInstrument(std::unique_ptr<juce::A
 PluginDecorator::SafePointer MainGraph::insertInstrument(int index,
 	const juce::AudioChannelSet& type) {
 	/** Add To The Graph */
-	if (auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(type))) {
+	if (auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(true, type))) {
 		/** Limit Index */
 		if (index < 0 || index > this->instrumentNodeList.size()) {
 			index = this->instrumentNodeList.size();
@@ -296,4 +296,22 @@ void MainGraph::closeAllNote() {
 			seqTrack->closeAllNote();
 		}
 	}
+}
+
+int MainGraph::findSource(const SeqSourceProcessor* ptr) const {
+	for (int i = 0; i < this->audioSourceNodeList.size(); i++) {
+		if (this->audioSourceNodeList.getUnchecked(i)->getProcessor() == ptr) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int MainGraph::findInstr(const PluginDecorator* ptr) const {
+	for (int i = 0; i < this->instrumentNodeList.size(); i++) {
+		if (this->instrumentNodeList.getUnchecked(i)->getProcessor() == ptr) {
+			return i;
+		}
+	}
+	return -1;
 }

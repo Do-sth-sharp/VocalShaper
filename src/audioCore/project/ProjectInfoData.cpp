@@ -1,4 +1,4 @@
-#include "ProjectInfoData.h"
+﻿#include "ProjectInfoData.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -64,7 +64,7 @@ bool ProjectInfoData::parse(const google::protobuf::Message* data) {
 	for (auto& author : mes->authors()) {
 		this->content.authors.add(author);
 	}
-	if ((this->content.authors.size() < 1) || (*this->content.authors.end()) != utils::getUserName()) {
+	if ((this->content.authors.size() < 1) || (*(this->content.authors.end() - 1)) != utils::getUserName()) {
 		this->content.authors.add(utils::getUserName());
 	}
 

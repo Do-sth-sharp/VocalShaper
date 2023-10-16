@@ -64,7 +64,7 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::Audi
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(this->audioChannels));
+	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(false, this->audioChannels));
 	if (ptrNode) {
 		/** Set Bus Num */
 		{
@@ -352,6 +352,11 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 }
 
 void PluginDock::clearGraph() {
+	for (auto& i : this->additionalConnectionList) {
+		this->removeConnection(i);
+	}
+	this->additionalConnectionList.clear();
+
 	for (auto& i : this->pluginNodeList) {
 		this->removeNode(i->nodeID);
 	}
@@ -367,7 +372,27 @@ void PluginDock::clearGraph() {
 }
 
 bool PluginDock::parse(const google::protobuf::Message* data) {
-	/** TODO */
+	auto mes = dynamic_cast<const vsp4::PluginDock*>(data);
+	if (!mes) { return false; }
+
+	this->clearGraph();
+
+	auto& plugins = mes->plugins();
+	for (auto& i : plugins) {
+		this->insertPlugin(-1);
+		if (auto pluginNode = this->pluginNodeList.getLast()) {
+			pluginNode->setBypassed(i.bypassed());
+			if (auto plugin = dynamic_cast<PluginDecorator*>(pluginNode->getProcessor())) {
+				if (!plugin->parse(&i)) { return false; }
+			}
+		}
+	}
+
+	auto& connections = mes->connections();
+	for (auto& i : connections) {
+		this->addAdditionalBusConnection(i.dst(), i.srcchannel(), i.dstchannel());
+	}
+
 	return true;
 }
 
@@ -390,5 +415,29 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize() const {
 		}
 	}
 
+	auto connections = mes->mutable_connections();
+	for (auto& i : this->additionalConnectionList) {
+		auto dstNode = this->getNodeForId(i.destination.nodeID);
+		int srcChannel = i.source.channelIndex;
+		int dstChannel = i.destination.channelIndex;
+		if (!dstNode) { return nullptr; }
+
+		auto cmes = std::make_unique<vsp4::AudioInputConnection>();
+		cmes->set_dst(this->findPlugin(dynamic_cast<PluginDecorator*>(dstNode->getProcessor())));
+		cmes->set_srcchannel(srcChannel);
+		cmes->set_dstchannel(dstChannel);
+
+		connections->AddAllocated(cmes.release());
+	}
+
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
+}
+
+int PluginDock::findPlugin(const PluginDecorator* ptr) const {
+	for (int i = 0; i < this->pluginNodeList.size(); i++) {
+		if (this->pluginNodeList.getUnchecked(i)->getProcessor() == ptr) {
+			return i;
+		}
+	}
+	return -1;
 }
