@@ -1,9 +1,9 @@
-#include "CloneableSource.h"
+﻿#include "CloneableSource.h"
 
 std::atomic_int CloneableSource::globalCounter = 0;
 
 CloneableSource::CloneableSource(const juce::String& name)
-	: id(CloneableSource::globalCounter++), name(name) {
+	: CloneableSource(CloneableSource::globalCounter, name) {
 }
 
 CloneableSource::CloneableSource(
