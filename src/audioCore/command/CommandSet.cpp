@@ -1,4 +1,4 @@
-#include "CommandUtils.h"
+﻿#include "CommandUtils.h"
 
 #include "../Utils.h"
 
@@ -175,6 +175,10 @@ AUDIOCORE_FUNC(setEffectWindow) {
 			}
 			editor->setVisible(visible);
 
+			if (visible) {
+				editor->centreWithSize(editor->getWidth(), editor->getHeight());
+			}
+
 			result += "Plugin Window: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 		}
 	}
@@ -212,6 +216,10 @@ AUDIOCORE_FUNC(setInstrWindow) {
 					juce::ComponentPeer::windowHasDropShadow);
 			}
 			editor->setVisible(visible);
+
+			if (visible) {
+				editor->centreWithSize(editor->getWidth(), editor->getHeight());
+			}
 
 			result += "Plugin Window: [" + juce::String(instrIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 		}
