@@ -69,7 +69,6 @@ AudioCore::AudioCore() {
 	defaultWorkingDir.createDirectory();
 	utils::setProjectDir(defaultWorkingDir);
 
-
 	/** Start Play Watcher */
 	PlayWatcher::getInstance()->startTimer(1000);
 }
