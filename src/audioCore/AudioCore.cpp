@@ -7,6 +7,7 @@
 #include "misc/PlayWatcher.h"
 #include "misc/Renderer.h"
 #include "project/ProjectInfoData.h"
+#include "action/ActionDispatcher.h"
 #include "Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -50,6 +51,16 @@ AudioCore::AudioCore() {
 				debugger->addMessage(mes, isInput);
 			}
 		});
+
+	/** Actions */
+	ActionDispatcher::getInstance()->setOutput(
+		[debugger = juce::Component::SafePointer{ this->audioDebugger.get() }]
+		(const juce::String& mes) {
+			if (auto ptr = dynamic_cast<AudioDebugger*>(debugger.getComponent())) {
+				ptr->output(mes);
+			}
+		}
+	);
 
 	/** Audio Plugin Manager */
 	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>();

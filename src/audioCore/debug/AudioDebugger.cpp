@@ -29,29 +29,23 @@ AudioDebugger::AudioDebugger(AudioCore* parent)
 	this->commandInput->setPopupMenuEnabled(false);
 	this->commandInput->onReturnKey =
 		[input = this->commandInput.get(),
-		output = juce::Component::SafePointer(this->commandOutput.get())] {
+		debugger = juce::Component::SafePointer(this)] {
 		auto str = input->getText();
 		input->clear();
-		AudioCommand::getInstance()->processCommandAsync(str, [output](const AudioCommand::CommandResult& result) {
-			if (output) {
-				auto currentText = output->getText();
-				output->moveCaretToEnd();
-				if (currentText.isNotEmpty() && currentText.getLastCharacter() != '\n') {
-					output->insertTextAtCaret("\n");
-				}
+		if (debugger) {
+			debugger->output(">>>" + str + "\n");
+		}
 
-				output->insertTextAtCaret(">>>" + std::get<1>(result) + "\n");
+		AudioCommand::getInstance()->processCommandAsync(str, [debugger](const AudioCommand::CommandResult& result) {
+			if (debugger) {
 				if (std::get<0>(result)) {
-					output->insertTextAtCaret(std::get<2>(result));
+					debugger->output(std::get<2>(result));
 				}
 				else {
-					output->insertTextAtCaret("<<<FAILED!!!>>>\n");
-					output->insertTextAtCaret(std::get<2>(result));
+					debugger->output("<<<FAILED!!!>>>\n");
+					debugger->output(std::get<2>(result));
 				}
-				if (!output->isEmpty() && std::get<2>(result).getLastCharacter() != '\n') {
-					output->insertTextAtCaret("\n");
-				}
-				output->insertTextAtCaret("\n");
+				debugger->output("\n");
 			}
 		});
 	};
@@ -75,4 +69,18 @@ void AudioDebugger::paint(juce::Graphics& g) {
 
 void AudioDebugger::userTriedToCloseWindow() {
 	this->setVisible(false);
+}
+
+void AudioDebugger::output(const juce::String& mes) {
+	auto currentText = this->commandOutput->getText();
+	this->commandOutput->moveCaretToEnd();
+	if (currentText.isNotEmpty() && currentText.getLastCharacter() != '\n') {
+		this->commandOutput->insertTextAtCaret("\n");
+	}
+
+	this->commandOutput->insertTextAtCaret(mes);
+
+	if (mes.isNotEmpty() && mes.getLastCharacter() != '\n') {
+		this->commandOutput->insertTextAtCaret("\n");
+	}
 }

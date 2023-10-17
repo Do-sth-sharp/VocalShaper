@@ -14,6 +14,8 @@ public:
 
 	void userTriedToCloseWindow() override;
 
+	void output(const juce::String& mes);
+
 private:
 	AudioCore* const parent = nullptr;
 
