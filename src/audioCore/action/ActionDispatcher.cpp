@@ -11,13 +11,12 @@ const juce::UndoManager& ActionDispatcher::getActionManager() const {
 }
 
 bool ActionDispatcher::dispatch(std::unique_ptr<ActionBase> action) {
-	auto ptrAction = action.release();
-	if (!ptrAction) { return false; }
+	if (!action) { return false; }
 
-	if (auto undoable = dynamic_cast<ActionUndoableBase*>(ptrAction)) {
-		return this->manager->perform(undoable);
+	if (dynamic_cast<ActionUndoableBase*>(action.get())) {
+		return this->manager->perform(dynamic_cast<ActionUndoableBase*>(action.release()));
 	}
-	return ptrAction->doAction();
+	return action->doAction();
 }
 
 void ActionDispatcher::setOutput(const OutputCallback& callback) {
