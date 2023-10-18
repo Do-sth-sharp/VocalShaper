@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "../AudioCore.h"
+#include "../action/ActionDispatcher.h"
+#include "../action/Actions.h"
 #include <lua.hpp>
 
 namespace audioCommand {

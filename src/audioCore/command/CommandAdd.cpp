@@ -1,84 +1,49 @@
-#include "CommandUtils.h"
+﻿#include "CommandUtils.h"
 #include "../Utils.h"
 
 AUDIOCORE_FUNC(addPluginBlackList) {
-	if (audioCore->pluginSearchThreadIsRunning()) {
-		return CommandFuncResult{ false, "Don't change plugin black list while searching plugin." };
-	}
-
-	audioCore->addToPluginBlackList(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-	return CommandFuncResult{ true, "Add to plugin black list." };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddPluginBlackList{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addPluginSearchPath) {
-	if (audioCore->pluginSearchThreadIsRunning()) {
-		return CommandFuncResult{ false, "Don't change plugin search path while searching plugin." };
-	}
-
-	audioCore->addToPluginSearchPath(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-	return CommandFuncResult{ true, "Add to plugin search path." };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddPluginSearchPath{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addMixerTrack) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int trackTypeArg = luaL_checkinteger(L, 2);
-		juce::AudioChannelSet trackType = utils::getChannelSet(static_cast<utils::TrackType>(trackTypeArg));
-
-		graph->insertTrack(luaL_checkinteger(L, 1), trackType);
-
-		result += "Add Mixer Track: [" + juce::String(trackTypeArg) + "]" + trackType.getDescription() + "\n";
-		result += "Total Mixer Track Num: " + juce::String(graph->getTrackNum()) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddMixerTrack{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addMixerTrackSend) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		int srcc = luaL_checkinteger(L, 2);
-		int dst = luaL_checkinteger(L, 3);
-		int dstc = luaL_checkinteger(L, 4);
-		graph->setAudioTrk2TrkConnection(src, dst, srcc, dstc);
-
-		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddMixerTrackSend{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addMixerTrackInputFromDevice) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int srcc = luaL_checkinteger(L, 1);
-		int dst = luaL_checkinteger(L, 2);
-		int dstc = luaL_checkinteger(L, 3);
-		graph->setAudioI2TrkConnection(dst, srcc, dstc);
-
-		result += "[Device] " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddMixerTrackInputFromDevice{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addMixerTrackOutput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		int srcc = luaL_checkinteger(L, 2);
-		int dstc = luaL_checkinteger(L, 3);
-		graph->setAudioTrk2OConnection(src, srcc, dstc);
-
-		result += juce::String(src) + ", " + juce::String(srcc) + " - " + "[Device] " + juce::String(dstc) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddMixerTrackOutput{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addEffect) {
