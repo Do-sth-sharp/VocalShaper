@@ -136,3 +136,83 @@ bool ActionAddMixerTrackOutput::undo() {
 	}
 	return false;
 }
+
+ActionAddEffect::ActionAddEffect(
+	int track, int effect, const juce::String& pid)
+	: track(track), effect(effect), pid(pid) {}
+
+bool ActionAddEffect::doAction() {
+	if (AudioCore::getInstance()->addEffect(this->pid, this->track, this->effect)) {
+		this->output("Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+		return true;
+	}
+	
+	this->output("Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+	return false;
+}
+
+bool ActionAddEffect::undo() {
+	if (AudioCore::getInstance()->removeEffect(this->track, this->effect)) {
+		this->output("Undo Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+		return true;
+	}
+
+	this->output("Can't Undo Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+	return false;
+}
+
+ActionAddEffectAdditionalInput::ActionAddEffectAdditionalInput(
+	int track, int effect, int srcc, int dstc)
+	: track(track), effect(effect), srcc(srcc), dstc(dstc) {}
+
+bool ActionAddEffectAdditionalInput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->addAdditionalBusConnection(this->effect, this->srcc, this->dstc);
+
+				this->output("Link Plugin Channel: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + juce::String(this->srcc) + " - " + juce::String(this->dstc) + "\n");
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionAddEffectAdditionalInput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->removeAdditionalBusConnection(this->effect, this->srcc, this->dstc);
+
+				this->output("Undo Link Plugin Channel: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + juce::String(this->srcc) + " - " + juce::String(this->dstc) + "\n");
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+ActionAddInstr::ActionAddInstr(
+	int index, int type, const juce::String& pid)
+	: index(index), type(type), pid(pid) {}
+
+bool ActionAddInstr::doAction() {
+	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(this->type));
+	if (AudioCore::getInstance()->addInstrument(this->pid, this->index, pluginType)) {
+		this->output("Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
+		return true;
+	}
+	this->output("Can't Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
+	return false;
+}
+
+bool ActionAddInstr::undo() {
+	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(this->type));
+	if (AudioCore::getInstance()->removeInstrument(this->index)) {
+		this->output("Undo Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
+		return true;
+	}
+	this->output("Can't Undo Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
+	return false;
+}

@@ -47,58 +47,27 @@ AUDIOCORE_FUNC(addMixerTrackOutput) {
 }
 
 AUDIOCORE_FUNC(addEffect) {
-	juce::String result;
-
-	int trackIndex = luaL_checkinteger(L, 1);
-	int effectIndex = luaL_checkinteger(L, 2);
-	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 3));
-	if (AudioCore::getInstance()->addEffect(pid, trackIndex, effectIndex)) {
-		result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
-	}
-	else {
-		result += "Insert Plugin: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + pid + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddEffect{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		juce::String::fromUTF8(luaL_checkstring(L, 3)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addEffectAdditionalInput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int trackIndex = luaL_checkinteger(L, 1);
-		int effectIndex = luaL_checkinteger(L, 2);
-		int srcc = luaL_checkinteger(L, 3);
-		int dstc = luaL_checkinteger(L, 4);
-
-		if (auto track = graph->getTrackProcessor(trackIndex)) {
-			if (auto pluginDock = track->getPluginDock()) {
-				pluginDock->addAdditionalBusConnection(effectIndex, srcc, dstc);
-
-				result += "Link Plugin Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(srcc) + " - " + juce::String(dstc) + "\n";
-			}
-		}
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddEffectAdditionalInput{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addInstr) {
-	juce::String result;
-
-	int instrIndex = luaL_checkinteger(L, 1);
-	int instrType = luaL_checkinteger(L, 2);
-	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 3));
-
-	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(instrType));
-	if (AudioCore::getInstance()->addInstrument(pid, instrIndex, pluginType)) {
-		result += "Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + " : " + pluginType.getDescription() + "\n";
-	}
-	else {
-		result += "Can't Insert Plugin: [" + juce::String(instrIndex) + "] " + pid + " : " + pluginType.getDescription() + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionAddInstr{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		juce::String::fromUTF8(luaL_checkstring(L, 3)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(addInstrOutput) {

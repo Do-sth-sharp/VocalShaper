@@ -86,3 +86,50 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrackOutput)
 };
+
+class ActionAddEffect final : public ActionUndoableBase {
+public:
+	ActionAddEffect() = delete;
+	ActionAddEffect(
+		int track, int effect, const juce::String& pid);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, effect;
+	const juce::String pid;
+
+	JUCE_LEAK_DETECTOR(ActionAddEffect)
+};
+
+class ActionAddEffectAdditionalInput final : public ActionUndoableBase {
+public:
+	ActionAddEffectAdditionalInput() = delete;
+	ActionAddEffectAdditionalInput(
+		int track, int effect, int srcc, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, effect, srcc, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionAddEffectAdditionalInput)
+};
+
+class ActionAddInstr final : public ActionUndoableBase {
+public:
+	ActionAddInstr() = delete;
+	ActionAddInstr(
+		int index, int type, const juce::String& pid);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int index, type;
+	const juce::String pid;
+
+	JUCE_LEAK_DETECTOR(ActionAddInstr)
+};
