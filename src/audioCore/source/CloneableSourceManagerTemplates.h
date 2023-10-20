@@ -1,11 +1,10 @@
-#include "CloneableSourceManager.h"
+﻿#include "CloneableSourceManager.h"
 
 template<IsCloneable T>
 bool CloneableSourceManager::createNewSource(
 	double sampleRate, int channelNum, double length) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedWriteLock locker(this->getLock());
 
 	/** Create */
 	auto source = std::unique_ptr<CloneableSource>(new T);
@@ -24,8 +23,7 @@ template<IsCloneable T>
 bool CloneableSourceManager::createNewSourceThenLoad(
 	const juce::String& path, bool copy) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedWriteLock locker(this->getLock());
 
 	/** Create */
 	auto source = std::unique_ptr<CloneableSource>(new T);
@@ -59,8 +57,7 @@ template<IsCloneable T>
 bool CloneableSourceManager::createNewSourceThenLoadAsync(
 	const juce::String& path, bool copy) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedWriteLock locker(this->getLock());
 
 	/** Create */
 	auto source = std::unique_ptr<CloneableSource>(new T);

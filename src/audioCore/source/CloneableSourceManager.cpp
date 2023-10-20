@@ -1,4 +1,4 @@
-#include "CloneableSourceManager.h"
+﻿#include "CloneableSourceManager.h"
 #include "AudioIOList.h"
 #include "../AudioCore.h"
 #include "../plugin/PluginLoader.h"
@@ -7,47 +7,32 @@
 using namespace org::vocalsharp::vocalshaper;
 
 bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (locker.isLocked()) {
-		src->prepareToPlay(this->sampleRate, this->bufferSize);
-		this->sourceList.add(std::move(src));
-		return true;
-	}
-	return false;
+	juce::ScopedWriteLock locker(this->getLock());
+	src->prepareToPlay(this->sampleRate, this->bufferSize);
+	this->sourceList.add(std::move(src));
+	return true;
 }
 
 bool CloneableSourceManager::removeSource(CloneableSource* src) {
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (locker.isLocked()) {
-		this->sourceList.removeObject(src, true);
-		return true;
-	}
-	return false;
+	juce::ScopedWriteLock locker(this->getLock());
+	this->sourceList.removeObject(src, true);
+	return true;
 }
 
 bool CloneableSourceManager::removeSource(int index) {
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (locker.isLocked()) {
-		this->sourceList.remove(index, true);
-		return true;
-	}
-	return false;
+	juce::ScopedWriteLock locker(this->getLock());
+	this->sourceList.remove(index, true);
+	return true;
 }
 
 CloneableSource::SafePointer<> CloneableSourceManager::getSource(int index) const {
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (locker.isLocked()) {
-		return this->sourceList[index];
-	}
-	return nullptr;
+	juce::ScopedReadLock locker(this->getLock());
+	return this->sourceList[index];
 }
 
 int CloneableSourceManager::getSourceNum() const {
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (locker.isLocked()) {
-		return this->sourceList.size();
-	}
-	return 0;
+	juce::ScopedReadLock locker(this->getLock());
+	return this->sourceList.size();
 }
 
 juce::ReadWriteLock& CloneableSourceManager::getLock() const {
@@ -56,41 +41,36 @@ juce::ReadWriteLock& CloneableSourceManager::getLock() const {
 
 bool CloneableSourceManager::setSourceSynthesizer(
 	int index, const juce::String& identifier) {
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (locker.isLocked()) {
-		auto source = this->getSource(index);
-		if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-			if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
-				PluginLoader::getInstance()->loadPlugin(*(des.get()),
-					CloneableSource::SafePointer<CloneableSynthSource>(src));
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-bool CloneableSourceManager::synthSource(int index) {
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (locker.isLocked()) {
-		auto source = this->getSource(index);
-		if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-			src->synth();
+	juce::ScopedReadLock locker(this->getLock());
+	auto source = this->getSource(index);
+	if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+		if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
+			PluginLoader::getInstance()->loadPlugin(*(des.get()),
+				CloneableSource::SafePointer<CloneableSynthSource>(src));
 			return true;
 		}
 	}
 	return false;
 }
 
+bool CloneableSourceManager::synthSource(int index) {
+	juce::ScopedReadLock locker(this->getLock());
+	auto source = this->getSource(index);
+	if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
+		src->synth();
+		return true;
+	}
+	return false;
+}
+
 bool CloneableSourceManager::cloneSource(int index) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(this->getLock());
-	if (locker.isLocked()) {
-		/** Clone */
-		if (auto source = this->getSource(index)) {
-			if (auto ptr = source->cloneThis()) {
-				return this->addSource(std::move(ptr));
-			}
+	juce::ScopedWriteLock locker(this->getLock());
+	
+	/** Clone */
+	if (auto source = this->getSource(index)) {
+		if (auto ptr = source->cloneThis()) {
+			return this->addSource(std::move(ptr));
 		}
 	}
 	return false;
@@ -99,8 +79,7 @@ bool CloneableSourceManager::cloneSource(int index) {
 bool CloneableSourceManager::saveSource(
 	int index, const juce::String& path) const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedReadLock locker(this->getLock());
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
@@ -116,8 +95,7 @@ bool CloneableSourceManager::saveSource(
 bool CloneableSourceManager::saveSourceAsync(
 	int index, const juce::String& path) const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedReadLock locker(this->getLock());
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
@@ -131,8 +109,7 @@ bool CloneableSourceManager::saveSourceAsync(
 bool CloneableSourceManager::exportSource(
 	int index, const juce::String& path) const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedReadLock locker(this->getLock());
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
@@ -145,8 +122,7 @@ bool CloneableSourceManager::exportSource(
 bool CloneableSourceManager::exportSourceAsync(
 	int index, const juce::String& path) const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(this->getLock());
-	if (!locker.isLocked()) { return false; }
+	juce::ScopedReadLock locker(this->getLock());
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
