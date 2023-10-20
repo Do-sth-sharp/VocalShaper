@@ -449,7 +449,7 @@ void AudioCore::bypassInstrument(int instrIndex, bool bypass) {
 	}
 }
 
-bool AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
+int AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
 	double startTime, double endTime, double offset) {
 	juce::ScopedTryReadLock srcLocker(CloneableSourceManager::getInstance()->getLock());
 	if (srcLocker.isLocked()) {
@@ -459,7 +459,7 @@ bool AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
 			}
 		}
 	}
-	return false;
+	return -1;
 }
 
 void AudioCore::removeSequencerSourceInstance(int trackIndex, int index) {

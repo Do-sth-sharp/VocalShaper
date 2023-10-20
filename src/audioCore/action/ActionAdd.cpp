@@ -3,6 +3,8 @@
 #include "../AudioCore.h"
 #include "../Utils.h"
 
+#include "../source/CloneableSourceManagerTemplates.h"
+
 ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
 	: plugin(plugin) {}
 
@@ -215,4 +217,375 @@ bool ActionAddInstr::undo() {
 	}
 	this->output("Can't Undo Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
 	return false;
+}
+
+ActionAddInstrOutput::ActionAddInstrOutput(
+	int src, int srcc, int dst, int dstc)
+	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
+
+bool ActionAddInstrOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioInstr2TrkConnection(this->src, this->dst, this->srcc, this->dstc);
+
+		this->output(juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddInstrOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioInstr2TrkConnection(this->src, this->dst, this->srcc, this->dstc);
+
+		this->output("Undo " + juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddInstrMidiInput::ActionAddInstrMidiInput(int dst)
+	: dst(dst) {}
+
+bool ActionAddInstrMidiInput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDII2InstrConnection(this->dst);
+
+		this->output(juce::String("[MIDI Input]") + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddInstrMidiInput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDII2InstrConnection(this->dst);
+
+		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddMixerTrackMidiInput::ActionAddMixerTrackMidiInput(int dst)
+	: dst(dst) {}
+
+bool ActionAddMixerTrackMidiInput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDII2TrkConnection(this->dst);
+
+		this->output(juce::String("[MIDI Input]") + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddMixerTrackMidiInput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDII2TrkConnection(this->dst);
+
+		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddMixerTrackMidiOutput::ActionAddMixerTrackMidiOutput(int src)
+	: src(src) {}
+
+bool ActionAddMixerTrackMidiOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDITrk2OConnection(this->src);
+
+		this->output(juce::String(this->src) + " - " + "[MIDI Output]" + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddMixerTrackMidiOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDITrk2OConnection(this->src);
+
+		this->output("Undo " + juce::String(this->src) + " - " + "[MIDI Output]" + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddAudioSourceThenLoad::ActionAddAudioSourceThenLoad(
+	const juce::String& path, bool copy)
+	: path(path), copy(copy) {}
+
+bool ActionAddAudioSourceThenLoad::doAction() {
+	CloneableSourceManager::getInstance()
+		->createNewSourceThenLoadAsync<CloneableAudioSource>(this->path, this->copy);
+
+	this->output("Add Audio Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddAudioSourceThenLoad::undo() {
+	CloneableSourceManager::getInstance()
+		->removeSource(CloneableSourceManager::getInstance()->getSourceNum() - 1);
+
+	this->output("Undo Add Audio Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+ActionAddAudioSourceThenInit::ActionAddAudioSourceThenInit(
+	double sampleRate, int channels, double length)
+	: sampleRate(sampleRate), channels(channels), length(length) {}
+
+bool ActionAddAudioSourceThenInit::doAction() {
+	CloneableSourceManager::getInstance()
+		->createNewSource<CloneableAudioSource>(
+			this->sampleRate, this->channels, this->length);
+
+	this->output("Add Audio Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddAudioSourceThenInit::undo() {
+	CloneableSourceManager::getInstance()
+		->removeSource(CloneableSourceManager::getInstance()->getSourceNum() - 1);
+
+	this->output("Undo Add Audio Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+ActionAddMidiSourceThenLoad::ActionAddMidiSourceThenLoad(
+	const juce::String& path, bool copy)
+	: path(path), copy(copy) {}
+
+bool ActionAddMidiSourceThenLoad::doAction() {
+	CloneableSourceManager::getInstance()
+		->createNewSourceThenLoadAsync<CloneableMIDISource>(this->path, this->copy);
+
+	this->output("Add MIDI Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddMidiSourceThenLoad::undo() {
+	CloneableSourceManager::getInstance()
+		->removeSource(CloneableSourceManager::getInstance()->getSourceNum() - 1);
+
+	this->output("Undo Add MIDI Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+ActionAddMidiSourceThenInit::ActionAddMidiSourceThenInit() {}
+
+bool ActionAddMidiSourceThenInit::doAction() {
+	CloneableSourceManager::getInstance()
+		->createNewSource<CloneableMIDISource>();
+
+	this->output("Add MIDI Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddMidiSourceThenInit::undo() {
+	CloneableSourceManager::getInstance()
+		->removeSource(CloneableSourceManager::getInstance()->getSourceNum() - 1);
+
+	this->output("Undo Add MIDI Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+ActionAddSynthSourceThenLoad::ActionAddSynthSourceThenLoad(
+	const juce::String& path, bool copy)
+	: path(path), copy(copy) {}
+
+bool ActionAddSynthSourceThenLoad::doAction() {
+	CloneableSourceManager::getInstance()
+		->createNewSourceThenLoadAsync<CloneableSynthSource>(this->path, this->copy);
+
+	this->output("Add Synth Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddSynthSourceThenLoad::undo() {
+	CloneableSourceManager::getInstance()
+		->removeSource(CloneableSourceManager::getInstance()->getSourceNum() - 1);
+
+	this->output("Undo Add Synth Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+ActionAddSynthSourceThenInit::ActionAddSynthSourceThenInit() {}
+
+bool ActionAddSynthSourceThenInit::doAction() {
+	CloneableSourceManager::getInstance()
+		->createNewSource<CloneableSynthSource>();
+
+	this->output("Add Synth Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddSynthSourceThenInit::undo() {
+	CloneableSourceManager::getInstance()
+		->removeSource(CloneableSourceManager::getInstance()->getSourceNum() - 1);
+
+	this->output("Undo Add Synth Source.\n"
+		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
+	return true;
+}
+
+ActionAddSequencerTrack::ActionAddSequencerTrack(
+	int index, int type)
+	: index(index), type(type) {}
+
+bool ActionAddSequencerTrack::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		juce::AudioChannelSet trackType = utils::getChannelSet(
+			static_cast<utils::TrackType>(this->type));
+
+		graph->insertSource(this->index, trackType);
+
+		this->output("Add Sequencer Track: [" + juce::String(this->type) + "]" + trackType.getDescription() + "\n"
+			+ "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddSequencerTrack::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		juce::AudioChannelSet trackType = utils::getChannelSet(
+			static_cast<utils::TrackType>(this->type));
+
+		graph->removeSource(this->index);
+
+		this->output("Undo Add Sequencer Track: [" + juce::String(this->type) + "]" + trackType.getDescription() + "\n"
+			+ "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddSequencerTrackMidiOutputToMixer::ActionAddSequencerTrackMidiOutputToMixer(
+	int src, int dst)
+	: src(src), dst(dst) {}
+
+bool ActionAddSequencerTrackMidiOutputToMixer::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDISrc2TrkConnection(this->src, this->dst);
+
+		this->output(juce::String(this->src) + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddSequencerTrackMidiOutputToMixer::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDISrc2TrkConnection(this->src, this->dst);
+
+		this->output("Undo " + juce::String(this->src) + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddSequencerTrackMidiOutputToInstr::ActionAddSequencerTrackMidiOutputToInstr(
+	int src, int dst)
+	: src(src), dst(dst) {}
+
+bool ActionAddSequencerTrackMidiOutputToInstr::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDISrc2InstrConnection(this->src, this->dst);
+
+		this->output(juce::String(this->src) + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddSequencerTrackMidiOutputToInstr::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDISrc2InstrConnection(this->src, this->dst);
+
+		this->output("Undo " + juce::String(this->src) + " - " + juce::String(this->dst) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddSequencerTrackOutput::ActionAddSequencerTrackOutput(
+	int src, int srcc, int dst, int dstc)
+	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
+
+bool ActionAddSequencerTrackOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioSrc2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output(juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionAddSequencerTrackOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioSrc2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output("Undo " + juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionAddSequencerSourceInstance::ActionAddSequencerSourceInstance(
+	int track, int src, double start, double end, double offset)
+	: track(track), src(src), start(start), end(end), offset(offset) {}
+
+bool ActionAddSequencerSourceInstance::doAction() {
+	this->index = AudioCore::getInstance()->addSequencerSourceInstance(
+		this->track, this->src, this->start, this->end, this->offset);
+
+	this->output("Add Sequencer Source Instance [" + juce::String(this->track) + "] : [" + juce::String(this->src) + "]\n"
+		+ "Total Sequencer Source Instance: " + juce::String(AudioCore::getInstance()->getSequencerSourceInstanceNum(this->track)) + "\n");
+	return true;
+}
+
+bool ActionAddSequencerSourceInstance::undo() {
+	AudioCore::getInstance()->removeSequencerSourceInstance(
+		this->track, this->index);
+
+	this->output("Undo Add Sequencer Source Instance [" + juce::String(this->track) + "] : [" + juce::String(this->src) + "]\n"
+		+ "Total Sequencer Source Instance: " + juce::String(AudioCore::getInstance()->getSequencerSourceInstanceNum(this->track)) + "\n");
+	return true;
+}
+
+ActionAddRecorderSourceInstance::ActionAddRecorderSourceInstance(
+	int src, double offset)
+	: src(src), offset(offset) {}
+
+bool ActionAddRecorderSourceInstance::doAction() {
+	AudioCore::getInstance()->addRecorderSourceInstance(this->src, this->offset);
+
+	this->output("Add Recorder Source Instance [" + juce::String(this->src) + "]\n"
+		+ "Total Recorder Source Instance: " + juce::String(AudioCore::getInstance()->getRecorderSourceInstanceNum()) + "\n");
+	return true;
+}
+
+bool ActionAddRecorderSourceInstance::undo() {
+	AudioCore::getInstance()->removeRecorderSourceInstance(
+		AudioCore::getInstance()->getRecorderSourceInstanceNum() - 1);
+
+	this->output("Undo Add Recorder Source Instance [" + juce::String(this->src) + "]\n"
+		+ "Total Recorder Source Instance: " + juce::String(AudioCore::getInstance()->getRecorderSourceInstanceNum()) + "\n");
+	return true;
 }

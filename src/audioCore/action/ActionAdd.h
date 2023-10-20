@@ -133,3 +133,239 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionAddInstr)
 };
+
+class ActionAddInstrOutput final : public ActionUndoableBase {
+public:
+	ActionAddInstrOutput() = delete;
+	ActionAddInstrOutput(
+		int src, int srcc, int dst, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, srcc, dst, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionAddInstrOutput)
+};
+
+class ActionAddInstrMidiInput final : public ActionUndoableBase {
+public:
+	ActionAddInstrMidiInput() = delete;
+	ActionAddInstrMidiInput(int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int dst;
+
+	JUCE_LEAK_DETECTOR(ActionAddInstrMidiInput)
+};
+
+class ActionAddMixerTrackMidiInput final : public ActionUndoableBase {
+public:
+	ActionAddMixerTrackMidiInput() = delete;
+	ActionAddMixerTrackMidiInput(int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int dst;
+
+	JUCE_LEAK_DETECTOR(ActionAddMixerTrackMidiInput)
+};
+
+class ActionAddMixerTrackMidiOutput final : public ActionUndoableBase {
+public:
+	ActionAddMixerTrackMidiOutput() = delete;
+	ActionAddMixerTrackMidiOutput(int src);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src;
+
+	JUCE_LEAK_DETECTOR(ActionAddMixerTrackMidiOutput)
+};
+
+class ActionAddAudioSourceThenLoad final : public ActionUndoableBase {
+public:
+	ActionAddAudioSourceThenLoad() = delete;
+	ActionAddAudioSourceThenLoad(
+		const juce::String& path, bool copy);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const juce::String path;
+	const bool copy;
+
+	JUCE_LEAK_DETECTOR(ActionAddAudioSourceThenLoad)
+};
+
+class ActionAddAudioSourceThenInit final : public ActionUndoableBase {
+public:
+	ActionAddAudioSourceThenInit() = delete;
+	ActionAddAudioSourceThenInit(
+		double sampleRate, int channels, double length);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const double sampleRate, length;
+	const int channels;
+
+	JUCE_LEAK_DETECTOR(ActionAddAudioSourceThenInit)
+};
+
+class ActionAddMidiSourceThenLoad final : public ActionUndoableBase {
+public:
+	ActionAddMidiSourceThenLoad() = delete;
+	ActionAddMidiSourceThenLoad(
+		const juce::String& path, bool copy);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const juce::String path;
+	const bool copy;
+
+	JUCE_LEAK_DETECTOR(ActionAddMidiSourceThenLoad)
+};
+
+class ActionAddMidiSourceThenInit final : public ActionUndoableBase {
+public:
+	ActionAddMidiSourceThenInit();
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	JUCE_LEAK_DETECTOR(ActionAddMidiSourceThenInit)
+};
+
+class ActionAddSynthSourceThenLoad final : public ActionUndoableBase {
+public:
+	ActionAddSynthSourceThenLoad() = delete;
+	ActionAddSynthSourceThenLoad(
+		const juce::String& path, bool copy);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const juce::String path;
+	const bool copy;
+
+	JUCE_LEAK_DETECTOR(ActionAddSynthSourceThenLoad)
+};
+
+class ActionAddSynthSourceThenInit final : public ActionUndoableBase {
+public:
+	ActionAddSynthSourceThenInit();
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	JUCE_LEAK_DETECTOR(ActionAddSynthSourceThenInit)
+};
+
+class ActionAddSequencerTrack final : public ActionUndoableBase {
+public:
+	ActionAddSequencerTrack() = delete;
+	ActionAddSequencerTrack(
+		int index, int type);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int index, type;
+
+	JUCE_LEAK_DETECTOR(ActionAddSequencerTrack)
+};
+
+class ActionAddSequencerTrackMidiOutputToMixer final : public ActionUndoableBase {
+public:
+	ActionAddSequencerTrackMidiOutputToMixer() = delete;
+	ActionAddSequencerTrackMidiOutputToMixer(
+		int src, int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, dst;
+
+	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackMidiOutputToMixer)
+};
+
+class ActionAddSequencerTrackMidiOutputToInstr final : public ActionUndoableBase {
+public:
+	ActionAddSequencerTrackMidiOutputToInstr() = delete;
+	ActionAddSequencerTrackMidiOutputToInstr(
+		int src, int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, dst;
+
+	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackMidiOutputToInstr)
+};
+
+class ActionAddSequencerTrackOutput final : public ActionUndoableBase {
+public:
+	ActionAddSequencerTrackOutput() = delete;
+	ActionAddSequencerTrackOutput(
+		int src, int srcc, int dst, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, srcc, dst, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackOutput)
+};
+
+class ActionAddSequencerSourceInstance final : public ActionUndoableBase {
+public:
+	ActionAddSequencerSourceInstance() = delete;
+	ActionAddSequencerSourceInstance(
+		int track, int src, double start, double end, double offset);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, src;
+	const double start, end, offset;
+	int index = -1;
+
+	JUCE_LEAK_DETECTOR(ActionAddSequencerSourceInstance)
+};
+
+class ActionAddRecorderSourceInstance final : public ActionUndoableBase {
+public:
+	ActionAddRecorderSourceInstance() = delete;
+	ActionAddRecorderSourceInstance(
+		int src, double offset);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src;
+	const double offset;
+
+	JUCE_LEAK_DETECTOR(ActionAddRecorderSourceInstance)
+};

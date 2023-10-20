@@ -82,29 +82,29 @@ int SourceList::size() const {
 	return this->list.size();
 }
 
-bool SourceList::add(const SourceList::SeqBlock& block) {
+int SourceList::add(const SourceList::SeqBlock& block) {
 	/** Get Lock */
 	juce::GenericScopedLock locker(this->getLock());
 
 	/** Get Insert Place */
 	int index = this->list.isEmpty()
 		? 0 : this->binarySearchInsert(0, this->list.size() - 1, std::get<0>(block));
-	if (index < 0) { jassertfalse; return false; }
+	if (index < 0) { jassertfalse; return -1; }
 
 	/** Check Overlap */
 	if ((index - 1) < this->list.size() && (index - 1) >= 0) {
 		auto& last = this->list.getReference(index - 1);
-		if (std::get<0>(block) < std::get<1>(last)) { return false; }
+		if (std::get<0>(block) < std::get<1>(last)) { return -1; }
 	}
 	if (index < this->list.size() && index >= 0) {
 		auto& next = this->list.getReference(index);
-		if (std::get<0>(next) < std::get<1>(block)) { return false; }
+		if (std::get<0>(next) < std::get<1>(block)) { return -1; }
 	}
 
 	/** Insert Block */
 	this->list.insert(index, block);
 
-	return true;
+	return index;
 }
 
 void SourceList::remove(int index) {

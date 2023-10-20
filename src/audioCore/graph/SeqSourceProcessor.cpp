@@ -15,7 +15,7 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	this->setChannelLayoutOfBus(false, 0, type);
 }
 
-bool SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {
+int SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {
 	return this->srcs.add(block);
 }
 
