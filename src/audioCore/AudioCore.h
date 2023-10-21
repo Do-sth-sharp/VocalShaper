@@ -151,6 +151,7 @@ public:
 
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;
+	juce::AudioDeviceManager* getDevice() const;
 
 	bool save(const juce::String& name);
 	bool load(const juce::String& path);

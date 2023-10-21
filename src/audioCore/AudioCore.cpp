@@ -592,6 +592,10 @@ MackieControlHub* AudioCore::getMackie() const {
 	return this->mackieHub.get();
 }
 
+juce::AudioDeviceManager* AudioCore::getDevice() const {
+	return this->audioDeviceManager.get();
+}
+
 bool AudioCore::save(const juce::String& name) {
 	/** Get Save Dir */
 	juce::String legalName = utils::getLegalFileName(name);
