@@ -177,7 +177,9 @@ bool ActionEchoMixerTrackInfo::doAction() {
 			for (int i = 0; i < inputFromSequencerConnectiones.size(); i++) {
 				auto connection = inputFromSequencerConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
-					+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+					+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
+					+ " - "
+					+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
 					+ "\n";
 			}
 
@@ -186,7 +188,9 @@ bool ActionEchoMixerTrackInfo::doAction() {
 			for (int i = 0; i < inputFromInstrumentConnectiones.size(); i++) {
 				auto connection = inputFromInstrumentConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
-					+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+					+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
+					+ " - "
+					+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
 					+ "\n";
 			}
 
@@ -195,7 +199,9 @@ bool ActionEchoMixerTrackInfo::doAction() {
 			for (int i = 0; i < inputFromDeviceConnectiones.size(); i++) {
 				auto connection = inputFromDeviceConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
-					+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+					+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
+					+ " - "
+					+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
 					+ "\n";
 			}
 
@@ -217,7 +223,9 @@ bool ActionEchoMixerTrackInfo::doAction() {
 			for (int i = 0; i < outputToDeviceConnectiones.size(); i++) {
 				auto connection = outputToDeviceConnectiones.getUnchecked(i);
 				result += "\t[" + juce::String(i) + "] "
-					+ juce::String(std::get<1>(connection)) + " - " + juce::String(std::get<3>(connection))
+					+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
+					+ " - "
+					+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
 					+ "\n";
 			}
 

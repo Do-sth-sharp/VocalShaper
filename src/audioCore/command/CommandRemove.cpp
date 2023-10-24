@@ -1,21 +1,17 @@
-#include "CommandUtils.h"
+﻿#include "CommandUtils.h"
 
 AUDIOCORE_FUNC(removePluginBlackList) {
-	if (audioCore->pluginSearchThreadIsRunning()) {
-		return CommandFuncResult{ false, "Don't change plugin black list while searching plugin." };
-	}
-
-	audioCore->removeFromPluginBlackList(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-	return CommandFuncResult{ true, "Remove from plugin black list." };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemovePluginBlackList{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removePluginSearchPath) {
-	if (audioCore->pluginSearchThreadIsRunning()) {
-		return CommandFuncResult{ false, "Don't change plugin search path while searching plugin." };
-	}
-
-	audioCore->removeFromPluginSearchPath(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-	return CommandFuncResult{ true, "Remove from plugin search path." };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemovePluginSearchPath{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeMixerTrack) {
