@@ -6,6 +6,7 @@
 #include "SeqSourceProcessor.h"
 #include "SourceRecordProcessor.h"
 #include "../project/Serializable.h"
+#include "../Utils.h"
 
 class MainGraph final : public juce::AudioProcessorGraph,
 	public Serializable {
@@ -35,6 +36,8 @@ public:
 	bool getSourceBypass(int index) const;
 	void setInstrumentBypass(int index, bool bypass);
 	bool getInstrumentBypass(int index) const;
+	void setTrackBypass(int index, bool bypass);
+	bool getTrackBypass(int index) const;
 
 	void setMIDII2InstrConnection(int instrIndex);
 	void removeMIDII2InstrConnection(int instrIndex);
@@ -68,15 +71,16 @@ public:
 	bool isAudioTrk2TrkConnected(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) const;
 	bool isMIDITrk2OConnected(int trackIndex) const;
 
-	using TrackConnection = std::tuple<int, int, int, int>;
-	using TrackConnectionList = juce::Array<TrackConnection>;
+	utils::AudioConnectionList getTrackInputFromTrackConnections(int index) const;
+	utils::AudioConnectionList getTrackInputFromSrcConnections(int index) const;
+	utils::AudioConnectionList getTrackInputFromInstrConnections(int index) const;
+	utils::AudioConnectionList getTrackInputFromDeviceConnections(int index) const;
+	utils::AudioConnectionList getTrackOutputToTrackConnections(int index) const;
+	utils::AudioConnectionList getTrackOutputToDeviceConnections(int index) const;
 
-	TrackConnectionList getTrackInputFromTrackConnections(int index);
-	TrackConnectionList getTrackInputFromSrcConnections(int index);
-	TrackConnectionList getTrackInputFromInstrConnections(int index);
-	TrackConnectionList getTrackInputFromDeviceConnections(int index);
-	TrackConnectionList getTrackOutputToTrackConnections(int index);
-	TrackConnectionList getTrackOutputToDeviceConnections(int index);
+	utils::MidiConnectionList getTrackMidiInputFromSrcConnections(int index) const;
+	utils::MidiConnectionList getTrackMidiInputFromDeviceConnections(int index) const;
+	utils::MidiConnectionList getTrackMidiOutputToDeviceConnections(int index) const;
 
 	/**
 	 * @brief	Set the input and output channel number of current audio device.

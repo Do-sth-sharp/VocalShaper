@@ -133,6 +133,12 @@ namespace utils {
 	bool setProjectDir(const juce::File& dir);
 	juce::File getSourceFile(const juce::String& path);
 	juce::File getDefaultWorkingDir();
+
+	using AudioConnection = std::tuple<int, int, int, int>;
+	using AudioConnectionList = juce::Array<AudioConnection>;
+
+	using MidiConnection = std::tuple<int, int>;
+	using MidiConnectionList = juce::Array<MidiConnection>;
 }
 
 #define UNUSED(var) (void)var
