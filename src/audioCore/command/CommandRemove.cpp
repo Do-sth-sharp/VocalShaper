@@ -15,17 +15,10 @@ AUDIOCORE_FUNC(removePluginSearchPath) {
 }
 
 AUDIOCORE_FUNC(removeMixerTrack) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int index = luaL_checkinteger(L, 1);
-		graph->removeTrack(index);
-
-		result += "Remove Mixer Track: " + juce::String(index) + "\n";
-		result += "Total Mixer Track Num: " + juce::String(graph->getTrackNum()) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveMixerTrack{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeMixerTrackSend) {

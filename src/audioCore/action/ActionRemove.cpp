@@ -81,6 +81,64 @@ bool ActionRemoveMixerTrack::doAction() {
 }
 
 bool ActionRemoveMixerTrack::undo() {
-	/** TODO */
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		/** Prepare Track State */
+		auto state = std::make_unique<vsp4::MixerTrack>();
+		if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+			return false;
+		}
+
+		/** Add Track */
+		graph->insertTrack(this->index,
+			utils::getChannelSet(static_cast<utils::TrackType>(state->type())));
+		
+		/** Recover Track State */
+		auto track = graph->getTrackProcessor(this->index);
+		graph->setTrackBypass(this->index, state->bypassed());
+		track->parse(state.get());
+
+		/** Recover Connections */
+		for (auto [src, srcc, dst, dstc] : this->audioT2Trk) {
+			graph->setAudioTrk2TrkConnection(src, dst, srcc, dstc);
+		}
+
+		for (auto [src, srcc, dst, dstc] : this->audioSrc2Trk) {
+			graph->setAudioSrc2TrkConnection(src, dst, srcc, dstc);
+		}
+
+		for (auto [src, srcc, dst, dstc] : this->audioInstr2Trk) {
+			graph->setAudioInstr2TrkConnection(src, dst, srcc, dstc);
+		}
+
+		for (auto [src, srcc, dst, dstc] : this->audioI2Trk) {
+			graph->setAudioI2TrkConnection(dst, srcc, dstc);
+		}
+
+		for (auto [src, srcc, dst, dstc] : this->audioTrk2T) {
+			graph->setAudioTrk2TrkConnection(src, dst, srcc, dstc);
+		}
+
+		for (auto [src, srcc, dst, dstc] : this->audioTrk2O) {
+			graph->setAudioTrk2OConnection(src, srcc, dstc);
+		}
+
+		for (auto [src, dst] : this->midiI2Trk) {
+			graph->setMIDII2TrkConnection(dst);
+		}
+
+		for (auto [src, dst] : this->midiSrc2Trk) {
+			graph->setMIDISrc2TrkConnection(src, dst);
+		}
+
+		for (auto [src, dst] : this->midiTrk2O) {
+			graph->setMIDITrk2OConnection(src);
+		}
+
+		juce::String result;
+		result += "Undo Remove Mixer Track: " + juce::String(this->index) + "\n";
+		result += "Total Mixer Track Num: " + juce::String(graph->getTrackNum()) + "\n";
+		this->output(result);
+		return true;
+	}
 	return false;
 }
