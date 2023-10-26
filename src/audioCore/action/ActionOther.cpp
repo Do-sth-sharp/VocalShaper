@@ -1,17 +1,18 @@
 ﻿#include "ActionOther.h"
 
 #include "../AudioCore.h"
+#include "../plugin/Plugin.h"
 #include "../Utils.h"
 
 ActionClearPlugin::ActionClearPlugin() {}
 
 bool ActionClearPlugin::doAction() {
-	if (AudioCore::getInstance()->pluginSearchThreadIsRunning()) {
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't clear plugin list while searching plugin.");
 		return false;
 	}
 
-	AudioCore::getInstance()->clearPluginTemporary();
+	Plugin::getInstance()->clearPluginTemporary();
 
 	this->output("Clear plugin list.");
 	return true;
@@ -20,8 +21,8 @@ bool ActionClearPlugin::doAction() {
 ActionSearchPlugin::ActionSearchPlugin() {}
 
 bool ActionSearchPlugin::doAction() {
-	AudioCore::getInstance()->clearPluginList();
-	AudioCore::getInstance()->getPluginList();
+	Plugin::getInstance()->clearPluginList();
+	Plugin::getInstance()->getPluginList();
 
 	this->output("Searching Audio Plugin...");
 	return true;

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "plugin/AudioPluginSearchThread.h"
 #include "AudioConfig.h"
 #include "graph/MainGraph.h"
 #include "source/CloneableSourceManager.h"
@@ -30,13 +29,6 @@ public:
 	void setMIDIDebuggerMaxNum(int num);
 	int getMIDIDebuggerMaxNum() const;
 
-	const juce::StringArray getPluginTypeList() const;
-	const std::tuple<bool, juce::KnownPluginList&> getPluginList() const;
-	void clearPluginList();
-	void clearPluginTemporary();
-	bool pluginSearchThreadIsRunning() const;
-	const std::unique_ptr<juce::PluginDescription> findPlugin(const juce::String& identifier, bool isInstrument = false) const;
-
 	bool addInstrument(const juce::String& identifier, int instrIndex,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	PluginDecorator* getInstrument(int instrIndex) const;
@@ -61,32 +53,6 @@ public:
 	void setReturnToPlayStartPosition(bool returnToStart);
 	bool getReturnToPlayStartPosition() const;
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const;
-
-	/**
-	 * @attention	Don't change plugin black list while searching plugin.
-	 */
-	const juce::StringArray getPluginBlackList() const;
-	/**
-	 * @attention	Don't change plugin black list while searching plugin.
-	 */
-	void addToPluginBlackList(const juce::String& plugin) const;
-	/**
-	 * @attention	Don't change plugin black list while searching plugin.
-	 */
-	void removeFromPluginBlackList(const juce::String& plugin) const;
-
-	/**
-	 * @attention	Don't change plugin search path while searching plugin.
-	 */
-	const juce::StringArray getPluginSearchPath() const;
-	/**
-	 * @attention	Don't change plugin search path while searching plugin.
-	 */
-	void addToPluginSearchPath(const juce::String& path) const;
-	/**
-	 * @attention	Don't change plugin search path while searching plugin.
-	 */
-	void removeFromPluginSearchPath(const juce::String& path) const;
 
 	/**
 	 * @attention	For Renderer Only.
@@ -117,7 +83,6 @@ private:
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;
 	std::unique_ptr<juce::Component> midiDebugger = nullptr;
-	std::unique_ptr<AudioPluginSearchThread> audioPluginSearchThread = nullptr;
 	std::unique_ptr<juce::AudioPlayHead> playHead = nullptr;
 	std::unique_ptr<MackieControlHub> mackieHub = nullptr;
 

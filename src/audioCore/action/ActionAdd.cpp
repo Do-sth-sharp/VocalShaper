@@ -1,6 +1,7 @@
 ﻿#include "ActionAdd.h"
 
 #include "../AudioCore.h"
+#include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
 #include "../Utils.h"
 
@@ -10,12 +11,12 @@ ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
 	: plugin(plugin) {}
 
 bool ActionAddPluginBlackList::doAction() {
-	if (AudioCore::getInstance()->pluginSearchThreadIsRunning()) {
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't change plugin black list while searching plugin.");
 		return false;
 	}
 
-	AudioCore::getInstance()->addToPluginBlackList(this->plugin);
+	Plugin::getInstance()->addToPluginBlackList(this->plugin);
 	this->output("Add to plugin black list.");
 	return true;
 }
@@ -24,12 +25,12 @@ ActionAddPluginSearchPath::ActionAddPluginSearchPath(const juce::String& path)
 	: path(path) {}
 
 bool ActionAddPluginSearchPath::doAction() {
-	if (AudioCore::getInstance()->pluginSearchThreadIsRunning()) {
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't change plugin search path while searching plugin.");
 		return false;
 	}
 
-	AudioCore::getInstance()->addToPluginSearchPath(this->path);
+	Plugin::getInstance()->addToPluginSearchPath(this->path);
 	this->output("Add to plugin search path.");
 	return true;
 }
@@ -145,7 +146,7 @@ ActionAddEffect::ActionAddEffect(
 	: track(track), effect(effect), pid(pid) {}
 
 bool ActionAddEffect::doAction() {
-	if (auto des = AudioCore::getInstance()->findPlugin(this->pid, false)) {
+	if (auto des = Plugin::getInstance()->findPlugin(this->pid, false)) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getTrackProcessor(this->track)) {
 				if (auto pluginDock = track->getPluginDock()) {

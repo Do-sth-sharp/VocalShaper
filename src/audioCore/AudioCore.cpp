@@ -3,6 +3,7 @@
 #include "debug/AudioDebugger.h"
 #include "debug/MIDIDebugger.h"
 #include "plugin/PluginLoader.h"
+#include "plugin/Plugin.h"
 #include "misc/PlayPosition.h"
 #include "misc/PlayWatcher.h"
 #include "misc/Renderer.h"
@@ -60,9 +61,6 @@ AudioCore::AudioCore() {
 		}
 	);
 
-	/** Audio Plugin Manager */
-	this->audioPluginSearchThread = std::make_unique<AudioPluginSearchThread>();
-
 	/** Audio Device Listener */
 	this->audioDeviceListener = std::make_unique<AudioDeviceChangeListener>(this);
 	Device::getInstance()->addChangeListener(this->audioDeviceListener.get());
@@ -91,6 +89,7 @@ AudioCore::~AudioCore() {
 	PlayPosition::releaseInstance();
 	AudioIOList::releaseInstance();
 	CloneableSourceManager::releaseInstance();
+	Plugin::releaseInstance();
 }
 
 juce::Component* AudioCore::getAudioDebugger() const {
@@ -114,47 +113,9 @@ int AudioCore::getMIDIDebuggerMaxNum() const {
 	return -1;
 }
 
-const juce::StringArray AudioCore::getPluginTypeList() const {
-	auto formatList = this->audioPluginSearchThread->getFormats();
-
-	juce::StringArray result;
-	for (auto i : formatList) {
-		result.add(i->getName());
-	}
-
-	return result;
-}
-
-const std::tuple<bool, juce::KnownPluginList&> AudioCore::getPluginList() const {
-	return this->audioPluginSearchThread->getPluginList();
-}
-
-void AudioCore::clearPluginList() {
-	this->audioPluginSearchThread->clearList();
-}
-
-void AudioCore::clearPluginTemporary() {
-	this->audioPluginSearchThread->clearTemporary();
-}
-
-bool AudioCore::pluginSearchThreadIsRunning() const {
-	return this->audioPluginSearchThread->isThreadRunning();
-}
-
-const std::unique_ptr<juce::PluginDescription> AudioCore::findPlugin(const juce::String& identifier, bool isInstrument) const {
-	auto& list = std::get<1>(this->getPluginList());
-
-	auto ptr = list.getTypeForIdentifierString(identifier);
-	if (ptr && ptr->isInstrument == isInstrument) {
-		return std::move(ptr);
-	}
-
-	return nullptr;
-}
-
 bool AudioCore::addInstrument(const juce::String& identifier,
 	int instrIndex, const juce::AudioChannelSet& type) {
-	if (auto des = this->findPlugin(identifier, true)) {
+	if (auto des = Plugin::getInstance()->findPlugin(identifier, true)) {
 		if (auto graph = this->getGraph()) {
 			if (auto ptr = graph->insertInstrument(instrIndex, type)) {
 				PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
@@ -281,30 +242,6 @@ bool AudioCore::getReturnToPlayStartPosition() const {
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> AudioCore::getPosition() const {
 	return PlayPosition::getInstance()->getPosition();
-}
-
-const juce::StringArray AudioCore::getPluginBlackList() const {
-	return this->audioPluginSearchThread->getBlackList();
-}
-
-void AudioCore::addToPluginBlackList(const juce::String& plugin) const {
-	this->audioPluginSearchThread->addToBlackList(plugin);
-}
-
-void AudioCore::removeFromPluginBlackList(const juce::String& plugin) const {
-	this->audioPluginSearchThread->removeFromBlackList(plugin);
-}
-
-const juce::StringArray AudioCore::getPluginSearchPath() const {
-	return this->audioPluginSearchThread->getSearchPath();
-}
-
-void AudioCore::addToPluginSearchPath(const juce::String& path) const {
-	this->audioPluginSearchThread->addToSearchPath(path);
-}
-
-void AudioCore::removeFromPluginSearchPath(const juce::String& path) const {
-	this->audioPluginSearchThread->removeFromSearchPath(path);
 }
 
 void AudioCore::setIsolation(bool isolation) {

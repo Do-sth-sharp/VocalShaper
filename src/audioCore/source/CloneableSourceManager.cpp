@@ -1,6 +1,7 @@
 ﻿#include "CloneableSourceManager.h"
 #include "AudioIOList.h"
 #include "../AudioCore.h"
+#include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -44,7 +45,7 @@ bool CloneableSourceManager::setSourceSynthesizer(
 	juce::ScopedReadLock locker(this->getLock());
 	auto source = this->getSource(index);
 	if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-		if (auto des = AudioCore::getInstance()->findPlugin(identifier, true)) {
+		if (auto des = Plugin::getInstance()->findPlugin(identifier, true)) {
 			PluginLoader::getInstance()->loadPlugin(*(des.get()),
 				CloneableSource::SafePointer<CloneableSynthSource>(src));
 			return true;
@@ -192,7 +193,7 @@ bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
 				synthSource->parse(&plugin);
 			};
 
-			auto pluginDes = AudioCore::getInstance()->findPlugin(plugin.info().id(), true);
+			auto pluginDes = Plugin::getInstance()->findPlugin(plugin.info().id(), true);
 			PluginLoader::getInstance()->loadPlugin(
 				*(pluginDes.get()), CloneableSource::SafePointer<CloneableSynthSource>(
 					dynamic_cast<CloneableSynthSource*>(ptrSrc.getSource())), callback);

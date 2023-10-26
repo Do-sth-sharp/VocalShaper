@@ -2,6 +2,7 @@
 
 #include "../AudioCore.h"
 #include "../misc/Device.h"
+#include "../plugin/Plugin.h"
 #include "../Utils.h"
 
 ActionListDeviceAudio::ActionListDeviceAudio() {}
@@ -139,7 +140,7 @@ bool ActionListPluginBlackList::doAction() {
 	result += "Plugin Black List\n";
 	result += "========================================================================\n";
 
-	auto blackList = AudioCore::getInstance()->getPluginBlackList();
+	auto blackList = Plugin::getInstance()->getPluginBlackList();
 	for (auto& s : blackList) {
 		result += s + "\n";
 	}
@@ -158,7 +159,7 @@ bool ActionListPluginSearchPath::doAction() {
 	result += "Plugin Search Path\n";
 	result += "========================================================================\n";
 
-	auto searchPath = AudioCore::getInstance()->getPluginSearchPath();
+	auto searchPath = Plugin::getInstance()->getPluginSearchPath();
 	for (auto& s : searchPath) {
 		result += s + "\n";
 	}
@@ -171,7 +172,7 @@ bool ActionListPluginSearchPath::doAction() {
 ActionListPlugin::ActionListPlugin() {}
 
 bool ActionListPlugin::doAction() {
-	auto listResult = AudioCore::getInstance()->getPluginList();
+	auto listResult = Plugin::getInstance()->getPluginList();
 	if (!std::get<0>(listResult)) {
 		this->output("Searching Audio Plugin...");
 		return true;

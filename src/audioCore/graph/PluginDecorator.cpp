@@ -1,4 +1,5 @@
 ﻿#include "PluginDecorator.h"
+#include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
@@ -502,7 +503,7 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 			pluginData.c_str(), pluginData.size());
 	};
 
-	auto pluginDes = AudioCore::getInstance()->findPlugin(info.id(), this->isInstr);
+	auto pluginDes = Plugin::getInstance()->findPlugin(info.id(), this->isInstr);
 	PluginLoader::getInstance()->loadPlugin(
 		*(pluginDes.get()), ptrPlugin, callback);
 

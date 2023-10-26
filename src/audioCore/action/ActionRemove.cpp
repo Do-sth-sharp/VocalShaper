@@ -1,6 +1,7 @@
 ﻿#include "ActionRemove.h"
 
 #include "../AudioCore.h"
+#include "../plugin/Plugin.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -10,12 +11,12 @@ ActionRemovePluginBlackList::ActionRemovePluginBlackList(
 	: path(path) {}
 
 bool ActionRemovePluginBlackList::doAction() {
-	if (AudioCore::getInstance()->pluginSearchThreadIsRunning()) {
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't change plugin black list while searching plugin.");
 		return false;
 	}
 
-	AudioCore::getInstance()->removeFromPluginBlackList(this->path);
+	Plugin::getInstance()->removeFromPluginBlackList(this->path);
 	
 	this->output("Remove from plugin black list.");
 	return true;
@@ -26,12 +27,12 @@ ActionRemovePluginSearchPath::ActionRemovePluginSearchPath(
 	: path(path) {}
 
 bool ActionRemovePluginSearchPath::doAction() {
-	if (AudioCore::getInstance()->pluginSearchThreadIsRunning()) {
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't change plugin search path while searching plugin.");
 		return false;
 	}
 
-	AudioCore::getInstance()->removeFromPluginSearchPath(this->path);
+	Plugin::getInstance()->removeFromPluginSearchPath(this->path);
 	
 	this->output("Remove from plugin search path.");
 	return true;
