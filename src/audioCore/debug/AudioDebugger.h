@@ -6,8 +6,7 @@ class AudioCore;
 
 class AudioDebugger final : public juce::Component {
 public:
-	AudioDebugger() = delete;
-	AudioDebugger(AudioCore* parent);
+	AudioDebugger();
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
@@ -17,8 +16,6 @@ public:
 	void output(const juce::String& mes);
 
 private:
-	AudioCore* const parent = nullptr;
-
 	std::unique_ptr<juce::AudioDeviceSelectorComponent> deviceSelector = nullptr;
 	std::unique_ptr<juce::TextEditor> commandInput = nullptr, commandOutput = nullptr;
 

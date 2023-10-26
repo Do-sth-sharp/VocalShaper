@@ -1,21 +1,22 @@
 ﻿#include "CommandUtils.h"
 
+#include "../misc/Device.h"
 #include "../Utils.h"
 
 AUDIOCORE_FUNC(setDeviceAudioType) {
 	juce::String result;
-	audioCore->setCurrentAudioDeviceType(juce::String::fromUTF8(luaL_checkstring(L, 1)));
+	Device::getInstance()->setCurrentAudioDeviceType(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 
-	result += "Current Audio Device Type: " + getAudioDeviceManager(audioCore)->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + audioCore->getAudioOutputDeviceName() + "\n";
+	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
+	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
+	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
 
 	return CommandFuncResult{ true, result };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioInput) {
 	juce::String result;
-	auto err = audioCore->setAudioInputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
+	auto err = Device::getInstance()->setAudioInputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 	if (err.isNotEmpty()) {
 		result += err;
 		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
@@ -23,16 +24,16 @@ AUDIOCORE_FUNC(setDeviceAudioInput) {
 		}
 	}
 
-	result += "Current Audio Device Type: " + getAudioDeviceManager(audioCore)->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + audioCore->getAudioOutputDeviceName() + "\n";
+	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
+	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
+	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
 
 	return CommandFuncResult{ true, result };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioOutput) {
 	juce::String result;
-	auto err = audioCore->setAudioOutputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
+	auto err = Device::getInstance()->setAudioOutputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 	if (err.isNotEmpty()) {
 		result += err;
 		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
@@ -40,16 +41,16 @@ AUDIOCORE_FUNC(setDeviceAudioOutput) {
 		}
 	}
 
-	result += "Current Audio Device Type: " + getAudioDeviceManager(audioCore)->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + audioCore->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + audioCore->getAudioOutputDeviceName() + "\n";
+	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
+	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
+	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
 
 	return CommandFuncResult{ true, result };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioSampleRate) {
 	juce::String result;
-	auto err = audioCore->setAudioSampleRate(luaL_checknumber(L, 1));
+	auto err = Device::getInstance()->setAudioSampleRate(luaL_checknumber(L, 1));
 	if (err.isNotEmpty()) {
 		result += err;
 		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
@@ -57,14 +58,14 @@ AUDIOCORE_FUNC(setDeviceAudioSampleRate) {
 		}
 	}
 
-	result += "Current Audio Sample Rate: " + juce::String(audioCore->getAudioSampleRate()) + "\n";
+	result += "Current Audio Sample Rate: " + juce::String(Device::getInstance()->getAudioSampleRate()) + "\n";
 
 	return CommandFuncResult{ true, result };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioBufferSize) {
 	juce::String result;
-	auto err = audioCore->setAudioBufferSize(luaL_checkinteger(L, 1));
+	auto err = Device::getInstance()->setAudioBufferSize(luaL_checkinteger(L, 1));
 	if (err.isNotEmpty()) {
 		result += err;
 		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
@@ -72,7 +73,7 @@ AUDIOCORE_FUNC(setDeviceAudioBufferSize) {
 		}
 	}
 
-	result += "Current Audio Buffer Size: " + juce::String(audioCore->getAudioBufferSize()) + "\n";
+	result += "Current Audio Buffer Size: " + juce::String(Device::getInstance()->getAudioBufferSize()) + "\n";
 
 	return CommandFuncResult{ true, result };
 }
@@ -81,8 +82,8 @@ AUDIOCORE_FUNC(setDeviceMIDIInput) {
 	juce::String result;
 
 	juce::String device = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	audioCore->setMIDIInputDeviceEnabled(device, lua_toboolean(L, 2));
-	result += "MIDI Input Device: " + device + " - " + (audioCore->getMIDIInputDeviceEnabled(device) ? "ON" : "OFF") + "\n";
+	Device::getInstance()->setMIDIInputDeviceEnabled(device, lua_toboolean(L, 2));
+	result += "MIDI Input Device: " + device + " - " + (Device::getInstance()->getMIDIInputDeviceEnabled(device) ? "ON" : "OFF") + "\n";
 
 	return CommandFuncResult{ true, result };
 }
@@ -91,7 +92,7 @@ AUDIOCORE_FUNC(setDeviceMIDIOutput) {
 	juce::String result;
 
 	juce::String device = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	audioCore->setMIDIOutputDevice(device);
+	Device::getInstance()->setMIDIOutputDevice(device);
 	result += "MIDI Output Device: " + device + "\n";
 
 	return CommandFuncResult{ true, result };

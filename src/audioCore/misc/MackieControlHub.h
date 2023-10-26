@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <JuceHeader.h>
 #include <MackieControl.h>
 
@@ -30,6 +30,7 @@ public:
 	void removeUnavailableDevices(
 		const juce::Array<juce::MidiDeviceInfo>& inputDevices,
 		const juce::Array<juce::MidiDeviceInfo>& outputDeivces);
+	void removeUnavailableDevices();
 
 public:
 	void sendMackieControlMessage(

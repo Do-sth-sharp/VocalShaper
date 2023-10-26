@@ -1,10 +1,11 @@
 ﻿#include "AudioCore.h"
 #include "../AudioCore.h"
+#include "../misc/Device.h"
 #include <google/protobuf/message_lite.h>
 
 namespace luce {
 	LUCE_METHOD(getAllAudioInputDeviceList) {
-		auto list = AudioCore::getAllAudioInputDeviceList();
+		auto list = Device::getAllAudioInputDeviceList();
 
 		lua_newtable(L);
 
@@ -18,7 +19,7 @@ namespace luce {
 	}
 
 	LUCE_METHOD(getAllAudioOutputDeviceList) {
-		auto list = AudioCore::getAllAudioOutputDeviceList();
+		auto list = Device::getAllAudioOutputDeviceList();
 
 		lua_newtable(L);
 
@@ -32,49 +33,42 @@ namespace luce {
 	}
 
 	LUCE_METHOD(setAudioInputDevice) {
-		auto audioCore = AudioCore::getInstance();
-		audioCore->setAudioInputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
+		Device::getInstance()->setAudioInputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 		return 0;
 	}
 
 	LUCE_METHOD(setAudioOutputDevice) {
-		auto audioCore = AudioCore::getInstance();
-		audioCore->setAudioOutputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
+		Device::getInstance()->setAudioOutputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 		return 0;
 	}
 
 	LUCE_METHOD(getAudioInputDeviceName) {
-		auto audioCore = AudioCore::getInstance();
-		lua_pushstring(L, audioCore->getAudioInputDeviceName().toStdString().c_str());
+		lua_pushstring(L, Device::getInstance()->getAudioInputDeviceName().toStdString().c_str());
 		return 1;
 	}
 
 	LUCE_METHOD(getAudioOutputDeviceName) {
-		auto audioCore = AudioCore::getInstance();
-		lua_pushstring(L, audioCore->getAudioOutputDeviceName().toStdString().c_str());
+		lua_pushstring(L, Device::getInstance()->getAudioOutputDeviceName().toStdString().c_str());
 		return 1;
 	}
 
 	LUCE_METHOD(setCurrentAudioDeviceType) {
-		auto audioCore = AudioCore::getInstance();
-		audioCore->setCurrentAudioDeviceType(juce::String::fromUTF8(luaL_checkstring(L, 1)));
+		Device::getInstance()->setCurrentAudioDeviceType(juce::String::fromUTF8(luaL_checkstring(L, 1)));
 		return 0;
 	}
 	
 	LUCE_METHOD(getCurrentAudioDeivceType) {
-		auto audioCore = AudioCore::getInstance();
-		lua_pushstring(L, audioCore->getCurrentAudioDeivceType().toStdString().c_str());
+		lua_pushstring(L, Device::getInstance()->getCurrentAudioDeivceType().toStdString().c_str());
 		return 1;
 	}
 
 	LUCE_METHOD(playTestSound) {
-		auto audioCore = AudioCore::getInstance();
-		audioCore->playTestSound();
+		Device::getInstance()->playTestSound();
 		return 0;
 	}
 
 	LUCE_METHOD(getAllMIDIInputDeviceList) {
-		auto list = AudioCore::getAllMIDIInputDeviceList();
+		auto list = Device::getAllMIDIInputDeviceList();
 
 		lua_newtable(L);
 
@@ -88,7 +82,7 @@ namespace luce {
 	}
 
 	LUCE_METHOD(getAllMIDIOutputDeviceList) {
-		auto list = AudioCore::getAllMIDIOutputDeviceList();
+		auto list = Device::getAllMIDIOutputDeviceList();
 
 		lua_newtable(L);
 

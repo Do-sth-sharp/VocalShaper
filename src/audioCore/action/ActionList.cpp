@@ -1,6 +1,7 @@
 ﻿#include "ActionList.h"
 
 #include "../AudioCore.h"
+#include "../misc/Device.h"
 #include "../Utils.h"
 
 ActionListDeviceAudio::ActionListDeviceAudio() {}
@@ -8,7 +9,7 @@ ActionListDeviceAudio::ActionListDeviceAudio() {}
 bool ActionListDeviceAudio::doAction() {
 	juce::String result;
 
-	auto& deviceTypes = AudioCore::getInstance()->getDevice()->getAvailableDeviceTypes();
+	auto& deviceTypes = Device::getInstance()->getAvailableDeviceTypes();
 	for (auto& i : deviceTypes) {
 		i->scanForDevices();
 	}
@@ -104,8 +105,8 @@ ActionListDeviceMidi::ActionListDeviceMidi() {}
 bool ActionListDeviceMidi::doAction() {
 	juce::String result;
 
-	auto midiInputList = juce::MidiInput::getAvailableDevices();
-	auto midiOutputList = juce::MidiOutput::getAvailableDevices();
+	auto midiInputList = Device::getAllMIDIInputDevices();
+	auto midiOutputList = Device::getAllMIDIOutputDevices();
 
 	result += "========================================================================\n";
 	result += "MIDI Device List\n";

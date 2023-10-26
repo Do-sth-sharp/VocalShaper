@@ -14,10 +14,6 @@ namespace audioCommand {
 		using CommandFuncResult = std::tuple<bool, juce::String>;
 		virtual CommandFuncResult func(AudioCore*, lua_State*) = 0;
 
-		static juce::AudioDeviceManager* getAudioDeviceManager(AudioCore* ac) {
-			return ac->audioDeviceManager.get();
-		};
-
 		int interface(lua_State* L) {
 			if (!L) { return 0; };
 			AudioCore* ac = AudioCore::getInstance();

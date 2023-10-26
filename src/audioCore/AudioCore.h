@@ -24,53 +24,6 @@ public:
 	~AudioCore() override;
 
 public:
-	enum class AudioDeviceType {
-		CoreAudio,
-		IOSAudio,
-		WASAPIShared,
-		WASAPIExclusive,
-		WASAPISharedLowLatency,
-		DirectSound,
-		ASIO,
-		ALSA,
-		JACK,
-		Android,
-		OpenSLES,
-		Oboe,
-		Bela
-	};
-
-	static const juce::StringArray getAudioDeviceList(AudioDeviceType type, bool isInput = false);
-	static const juce::StringArray getAllAudioDeviceList(bool isInput = false);
-
-	static const juce::StringArray getAllAudioInputDeviceList();
-	static const juce::StringArray getAllAudioOutputDeviceList();
-
-	const juce::String setAudioInputDevice(const juce::String& deviceName);
-	const juce::String setAudioOutputDevice(const juce::String& deviceName);
-	const juce::String getAudioInputDeviceName() const;
-	const juce::String getAudioOutputDeviceName() const;
-
-	void setCurrentAudioDeviceType(const juce::String& typeName);
-	const juce::String getCurrentAudioDeivceType() const;
-
-	const juce::String setAudioSampleRate(double value);
-	const juce::String setAudioBufferSize(int value);
-	double getAudioSampleRate() const;
-	int getAudioBufferSize() const;
-
-	void playTestSound() const;
-
-	void setMIDIInputDeviceEnabled(const juce::String& deviceID, bool enabled);
-	void setMIDIOutputDevice(const juce::String& deviceID);
-	bool getMIDIInputDeviceEnabled(const juce::String& deviceID) const;
-	const juce::String getMIDIOutputDevice() const;
-
-	static const juce::StringArray getAllMIDIDeviceList(bool isInput = false);
-
-	static const juce::StringArray getAllMIDIInputDeviceList();
-	static const juce::StringArray getAllMIDIOutputDeviceList();
-
 	juce::Component* getAudioDebugger() const;
 	juce::Component* getMIDIDebugger() const;
 
@@ -146,7 +99,6 @@ public:
 
 	MainGraph* getGraph() const;
 	MackieControlHub* getMackie() const;
-	juce::AudioDeviceManager* getDevice() const;
 
 	bool save(const juce::String& name);
 	bool load(const juce::String& path);
@@ -161,7 +113,6 @@ public:
 private:
 	friend class AudioDebugger;
 	friend class audioCommand::CommandBase;
-	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	std::unique_ptr<MainGraph> mainAudioGraph = nullptr;
 	std::unique_ptr<juce::AudioProcessorPlayer> mainGraphPlayer = nullptr;
 	std::unique_ptr<juce::Component> audioDebugger = nullptr;

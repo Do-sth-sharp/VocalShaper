@@ -1,6 +1,7 @@
 ﻿#include "ActionEcho.h"
 
 #include "../AudioCore.h"
+#include "../misc/Device.h"
 #include "../Utils.h"
 
 ActionEchoDeviceAudio::ActionEchoDeviceAudio() {}
@@ -8,9 +9,9 @@ ActionEchoDeviceAudio::ActionEchoDeviceAudio() {}
 bool ActionEchoDeviceAudio::doAction() {
 	juce::String result;
 
-	auto setup = AudioCore::getInstance()->getDevice()->getAudioDeviceSetup();
-	auto currentDevice = AudioCore::getInstance()->getDevice()->getCurrentAudioDevice();
-	auto currentType = AudioCore::getInstance()->getDevice()->getCurrentAudioDeviceType();
+	auto setup = Device::getInstance()->getAudioDeviceSetup();
+	auto currentDevice = Device::getInstance()->getCurrentAudioDevice();
+	auto currentType = Device::getInstance()->getCurrentAudioDeviceType();
 
 	result += "========================================================================\n";
 	result += "Current Audio Device Information\n";
@@ -48,8 +49,8 @@ ActionEchoDeviceMidi::ActionEchoDeviceMidi() {}
 bool ActionEchoDeviceMidi::doAction() {
 	juce::String result;
 
-	auto midiInputList = juce::MidiInput::getAvailableDevices();
-	auto midiOutputDevice = AudioCore::getInstance()->getDevice()->getDefaultMidiOutput();
+	auto midiInputList = Device::getAllMIDIInputDevices();
+	auto midiOutputDevice = Device::getInstance()->getDefaultMidiOutput();
 
 	result += "========================================================================\n";
 	result += "Current MIDI Device Information\n";
@@ -57,7 +58,7 @@ bool ActionEchoDeviceMidi::doAction() {
 	result += "MIDI Input Devices:\n";
 	for (int i = 0; i < midiInputList.size(); i++) {
 		auto& device = midiInputList.getReference(i);
-		result += "    [" + juce::String(i) + "] " + device.name + " - " + (AudioCore::getInstance()->getDevice()->isMidiInputDeviceEnabled(device.identifier) ? "ON" : "OFF") + "\n";
+		result += "    [" + juce::String(i) + "] " + device.name + " - " + (Device::getInstance()->isMidiInputDeviceEnabled(device.identifier) ? "ON" : "OFF") + "\n";
 		result += "        " + device.identifier + "\n";
 	}
 	result += "========================================================================\n";

@@ -1,4 +1,4 @@
-#include "MackieControlHub.h"
+﻿#include "MackieControlHub.h"
 
 MackieControlHub::~MackieControlHub() {
 	juce::ScopedWriteLock locker(this->deviceListLock);
@@ -218,6 +218,12 @@ void MackieControlHub::removeUnavailableDevices(
 			this->outputDevices.remove(i);
 		}
 	}
+}
+
+void MackieControlHub::removeUnavailableDevices() {
+	auto input = juce::MidiInput::getAvailableDevices();
+	auto output = juce::MidiOutput::getAvailableDevices();
+	this->removeUnavailableDevices(input, output);
 }
 
 void MackieControlHub::sendMackieControlMessage(
