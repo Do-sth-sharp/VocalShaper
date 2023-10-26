@@ -162,24 +162,30 @@ AUDIOCORE_FUNC(setEffectWindow) {
 
 	int trackIndex = luaL_checkinteger(L, 1);
 	int effectIndex = luaL_checkinteger(L, 2);
-	if (auto plugin = AudioCore::getInstance()->getEffect(trackIndex, effectIndex)) {
-		if (auto editor = plugin->createEditorIfNeeded()) {
-			bool visible = lua_toboolean(L, 3);
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto plugin = pluginDock->getPluginProcessor(effectIndex)) {
+					if (auto editor = plugin->createEditorIfNeeded()) {
+						bool visible = lua_toboolean(L, 3);
 
-			if (visible) {
-				editor->setName(plugin->getName());
-				editor->addToDesktop(
-					juce::ComponentPeer::windowAppearsOnTaskbar |
-					juce::ComponentPeer::windowHasTitleBar |
-					juce::ComponentPeer::windowHasDropShadow);
+						if (visible) {
+							editor->setName(plugin->getName());
+							editor->addToDesktop(
+								juce::ComponentPeer::windowAppearsOnTaskbar |
+								juce::ComponentPeer::windowHasTitleBar |
+								juce::ComponentPeer::windowHasDropShadow);
+						}
+						editor->setVisible(visible);
+
+						if (visible) {
+							editor->centreWithSize(editor->getWidth(), editor->getHeight());
+						}
+
+						result += "Plugin Window: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
+					}
+				}
 			}
-			editor->setVisible(visible);
-
-			if (visible) {
-				editor->centreWithSize(editor->getWidth(), editor->getHeight());
-			}
-
-			result += "Plugin Window: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 		}
 	}
 
@@ -193,9 +199,15 @@ AUDIOCORE_FUNC(setEffectBypass) {
 	int effectIndex = luaL_checkinteger(L, 2);
 	bool bypass = lua_toboolean(L, 3);
 
-	AudioCore::getInstance()->bypassEffect(trackIndex, effectIndex, bypass);
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(trackIndex)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->setPluginBypass(effectIndex, bypass);
 
-	result += "Plugin Bypass: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+				result += "Plugin Bypass: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+			}
+		}
+	}
 
 	return CommandFuncResult{ true, result };
 }

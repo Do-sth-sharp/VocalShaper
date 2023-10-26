@@ -1,6 +1,7 @@
 ﻿#include "ActionAdd.h"
 
 #include "../AudioCore.h"
+#include "../plugin/PluginLoader.h"
 #include "../Utils.h"
 
 #include "../source/CloneableSourceManagerTemplates.h"
@@ -144,19 +145,35 @@ ActionAddEffect::ActionAddEffect(
 	: track(track), effect(effect), pid(pid) {}
 
 bool ActionAddEffect::doAction() {
-	if (AudioCore::getInstance()->addEffect(this->pid, this->track, this->effect)) {
-		this->output("Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
-		return true;
+	if (auto des = AudioCore::getInstance()->findPlugin(this->pid, false)) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(this->track)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					if (auto ptr = pluginDock->insertPlugin(this->effect)) {
+						PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+
+						this->output("Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+						return true;
+					}
+				}
+			}
+		}
 	}
-	
-	this->output("Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+
+	this->output("Can't Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
 	return false;
 }
 
 bool ActionAddEffect::undo() {
-	if (AudioCore::getInstance()->removeEffect(this->track, this->effect)) {
-		this->output("Undo Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
-		return true;
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->removePlugin(this->effect);
+
+				this->output("Undo Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
+				return true;
+			}
+		}
 	}
 
 	this->output("Can't Undo Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
