@@ -142,3 +142,149 @@ bool ActionRemoveMixerTrack::undo() {
 	}
 	return false;
 }
+
+ActionRemoveMixerTrackSend::ActionRemoveMixerTrackSend(
+	int src, int srcc, int dst, int dstc)
+	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
+
+bool ActionRemoveMixerTrackSend::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioTrk2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output(juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveMixerTrackSend::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioTrk2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output("Undo " + juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveMixerTrackInputFromDevice::ActionRemoveMixerTrackInputFromDevice(
+	int srcc, int dst, int dstc)
+	: srcc(srcc), dst(dst), dstc(dstc) {}
+
+bool ActionRemoveMixerTrackInputFromDevice::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioI2TrkConnection(
+			this->dst, this->srcc, this->dstc);
+
+		this->output("[Device] " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveMixerTrackInputFromDevice::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioI2TrkConnection(
+			this->dst, this->srcc, this->dstc);
+
+		this->output("Undo [Device] " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveMixerTrackOutput::ActionRemoveMixerTrackOutput(
+	int src, int srcc, int dstc)
+	: src(src), srcc(srcc), dstc(dstc) {}
+
+bool ActionRemoveMixerTrackOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioTrk2OConnection(
+			this->src, this->srcc, this->dstc);
+
+		this->output(juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + "[Device] " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveMixerTrackOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioTrk2OConnection(
+			this->src, this->srcc, this->dstc);
+
+		this->output("Undo " + juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + "[Device] " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveEffect::ActionRemoveEffect(
+	int track, int effect)
+	: track(track), effect(effect) {}
+
+bool ActionRemoveEffect::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto dock = track->getPluginDock()) {
+				/** Check Effect */
+				if (this->effect < 0 || this->effect >= dock->getPluginNum()) { return false; }
+
+				/** Save Connections */
+				this->additional = dock->getPluginAdditionalBusConnections(this->effect);
+
+				/** Save Effect State */
+				auto effect = dock->getPluginProcessor(this->effect);
+				if (!effect) { return false; }
+				auto state = effect->serialize();
+
+				auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
+				if (!statePtr) { return false; }
+				statePtr->set_bypassed(dock->getPluginBypass(this->effect));
+
+				this->data.setSize(state->ByteSizeLong());
+				state->SerializeToArray(this->data.getData(), this->data.getSize());
+
+				/** Remove Effect */
+				dock->removePlugin(this->effect);
+
+				this->output("Remove Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "]" + "\n");
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionRemoveEffect::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto dock = track->getPluginDock()) {
+				/** Prepare Effect State */
+				auto state = std::make_unique<vsp4::Plugin>();
+				if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+					return false;
+				}
+
+				/** Add Effect */
+				dock->insertPlugin(this->effect);
+
+				/** Recover Effect State */
+				auto effect = dock->getPluginProcessor(this->effect);
+				dock->setPluginBypass(this->effect, state->bypassed());
+				effect->parse(state.get());
+
+				/** Recover Connections */
+				for (auto [src, srcc, dst, dstc] : this->additional) {
+					dock->addAdditionalBusConnection(dst, srcc, dstc);
+				}
+
+				this->output("Undo Remove Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "]" + "\n");
+				return true;
+			}
+		}
+	}
+	return false;
+}

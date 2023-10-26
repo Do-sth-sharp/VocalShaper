@@ -215,6 +215,14 @@ void PluginDock::setPluginBypass(int index, bool bypass) {
 	}
 }
 
+bool PluginDock::getPluginBypass(int index) const {
+	if (index < 0 || index >= this->pluginNodeList.size()) { return false; }
+	if (auto node = this->pluginNodeList.getUnchecked(index)) {
+		return node->isBypassed();
+	}
+	return false;
+}
+
 bool PluginDock::addAdditionalAudioBus() {
 	/** Check Channel Num */
 	if (this->getTotalNumInputChannels() + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
@@ -369,6 +377,40 @@ void PluginDock::clearGraph() {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
 	}
+}
+
+utils::AudioConnectionList PluginDock::getPluginAdditionalBusConnections(int index) const {
+	/** Check Index */
+	if (index < 0 || index >= this->pluginNodeList.size()) {
+		return utils::AudioConnectionList{};
+	}
+
+	/** Get Current Track ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->pluginNodeList.getUnchecked(index)->nodeID;
+	utils::AudioConnectionList resultList;
+
+	for (auto& i : this->additionalConnectionList) {
+		if (i.destination.nodeID == currentID) {
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				-1, i.source.channelIndex, index, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(utils::AudioConnection& first, utils::AudioConnection& second) {
+			if (std::get<3>(first) == std::get<3>(second)) {
+				return std::get<1>(first) - std::get<1>(second);
+			}
+			return std::get<3>(first) - std::get<3>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
 }
 
 bool PluginDock::parse(const google::protobuf::Message* data) {

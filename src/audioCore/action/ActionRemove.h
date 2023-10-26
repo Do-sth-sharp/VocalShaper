@@ -53,3 +53,66 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrack)
 };
+
+class ActionRemoveMixerTrackSend final : public ActionUndoableBase {
+public:
+	ActionRemoveMixerTrackSend() = delete;
+	ActionRemoveMixerTrackSend(
+		int src, int srcc, int dst, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, srcc, dst, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackSend)
+};
+
+class ActionRemoveMixerTrackInputFromDevice final : public ActionUndoableBase {
+public:
+	ActionRemoveMixerTrackInputFromDevice() = delete;
+	ActionRemoveMixerTrackInputFromDevice(
+		int srcc, int dst, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int srcc, dst, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackInputFromDevice)
+};
+
+class ActionRemoveMixerTrackOutput final : public ActionUndoableBase {
+public:
+	ActionRemoveMixerTrackOutput() = delete;
+	ActionRemoveMixerTrackOutput(
+		int src, int srcc, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, srcc, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackOutput)
+};
+
+class ActionRemoveEffect final : public ActionUndoableBase {
+public:
+	ActionRemoveEffect() = delete;
+	ActionRemoveEffect(
+		int track, int effect);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, effect;
+
+	utils::AudioConnectionList additional;
+	juce::MemoryBlock data;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveEffect)
+};

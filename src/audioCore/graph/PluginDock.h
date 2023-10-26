@@ -4,6 +4,7 @@
 
 #include "PluginDecorator.h"
 #include "../project/Serializable.h"
+#include "../Utils.h"
 
 class PluginDock final : public juce::AudioProcessorGraph,
 	public Serializable {
@@ -29,6 +30,7 @@ public:
 	int getPluginNum() const;
 	PluginDecorator* getPluginProcessor(int index) const;
 	void setPluginBypass(int index, bool bypass);
+	bool getPluginBypass(int index) const;
 
 	/**
 	 * @brief	Add an audio input bus onto the plugin dock.
@@ -50,6 +52,8 @@ public:
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 
 	void clearGraph();
+
+	utils::AudioConnectionList getPluginAdditionalBusConnections(int index) const;
 
 public:
 	bool parse(const google::protobuf::Message* data) override;
