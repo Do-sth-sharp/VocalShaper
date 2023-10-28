@@ -289,3 +289,158 @@ bool ActionRemoveEffect::undo() {
 	}
 	return false;
 }
+
+ActionRemoveEffectAdditionalInput::ActionRemoveEffectAdditionalInput(
+	int track, int effect, int srcc, int dstc)
+	: track(track), effect(effect), srcc(srcc), dstc(dstc) {}
+
+bool ActionRemoveEffectAdditionalInput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->removeAdditionalBusConnection(this->effect, this->srcc, this->dstc);
+
+				this->output("Unlink Plugin Channel: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + juce::String(this->srcc) + " - " + juce::String(this->dstc) + "\n");
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionRemoveEffectAdditionalInput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->addAdditionalBusConnection(this->effect, this->srcc, this->dstc);
+
+				this->output("Undo Unlink Plugin Channel: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + juce::String(this->srcc) + " - " + juce::String(this->dstc) + "\n");
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+ActionRemoveInstr::ActionRemoveInstr(int index)
+	: index(index) {}
+
+bool ActionRemoveInstr::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		/** Check Instr */
+		if (this->index < 0 || this->index >= graph->getInstrumentNum()) { return false; }
+
+		/** Save Connections */
+		this->audioInstr2Trk = graph->getInstrOutputToTrackConnections(this->index);
+		this->midiSrc2Instr = graph->getInstrMidiInputFromSrcConnections(this->index);
+		this->midiI2Instr = graph->getInstrMidiInputFromDeviceConnections(this->index);
+
+		/** Save Instr State */
+		auto instr = graph->getInstrumentProcessor(this->index);
+		if (!instr) { return false; }
+		auto state = instr->serialize();
+
+		auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
+		if (!statePtr) { return false; }
+		statePtr->set_bypassed(graph->getInstrumentBypass(this->index));
+
+		this->data.setSize(state->ByteSizeLong());
+		state->SerializeToArray(this->data.getData(), this->data.getSize());
+
+		/** Remove Instr */
+		graph->removeInstrument(this->index);
+
+		this->output("Remove Instrument: [" + juce::String(this->index) + "]" + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveInstr::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		/** Prepare Instr State */
+		auto state = std::make_unique<vsp4::Plugin>();
+		if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+			return false;
+		}
+
+		/** Add Instr */
+		graph->insertInstrument(this->index,
+			utils::getChannelSet(static_cast<utils::TrackType>(state->info().decoratortype())));
+
+		/** Recover Instr State */
+		auto instr = graph->getInstrumentProcessor(this->index);
+		graph->setInstrumentBypass(this->index, state->bypassed());
+		instr->parse(state.get());
+
+		/** Recover Connections */
+		for (auto [src, srcc, dst, dstc] : this->audioInstr2Trk) {
+			graph->setAudioInstr2TrkConnection(src, dst, srcc, dstc);
+		}
+
+		for (auto [src, dst] : this->midiSrc2Instr) {
+			graph->setMIDISrc2InstrConnection(src, dst);
+		}
+
+		for (auto [src, dst] : this->midiI2Instr) {
+			graph->setMIDII2InstrConnection(dst);
+		}
+
+		this->output("Undo Remove Instrument: [" + juce::String(this->index) + "]" + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveInstrOutput::ActionRemoveInstrOutput(
+	int src, int srcc, int dst, int dstc)
+	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
+
+bool ActionRemoveInstrOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioInstr2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output(juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+
+	return false;
+}
+
+bool ActionRemoveInstrOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioInstr2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output("Undo " + juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+
+	return false;
+}
+
+ActionRemoveInstrMidiInput::ActionRemoveInstrMidiInput(int dst)
+	: dst(dst) {}
+
+bool ActionRemoveInstrMidiInput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDII2InstrConnection(this->dst);
+
+		this->output(juce::String("[MIDI Input]") + " - " + juce::String(this->dst) + " (Removed)\n");
+		return true;
+	}
+
+	return false;
+}
+
+bool ActionRemoveInstrMidiInput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDII2InstrConnection(this->dst);
+
+		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(this->dst) + " (Removed)\n");
+		return true;
+	}
+
+	return false;
+}

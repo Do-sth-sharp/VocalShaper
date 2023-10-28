@@ -113,40 +113,6 @@ int AudioCore::getMIDIDebuggerMaxNum() const {
 	return -1;
 }
 
-bool AudioCore::addInstrument(const juce::String& identifier,
-	int instrIndex, const juce::AudioChannelSet& type) {
-	if (auto des = Plugin::getInstance()->findPlugin(identifier, true)) {
-		if (auto graph = this->getGraph()) {
-			if (auto ptr = graph->insertInstrument(instrIndex, type)) {
-				PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-PluginDecorator* AudioCore::getInstrument(int instrIndex) const {
-	if (auto graph = this->getGraph()) {
-		return graph->getInstrumentProcessor(instrIndex);
-	}
-	return nullptr;
-}
-
-bool AudioCore::removeInstrument(int instrIndex) {
-	if (auto graph = this->getGraph()) {
-		graph->removeInstrument(instrIndex);
-		return true;
-	}
-	return false;
-}
-
-void AudioCore::bypassInstrument(int instrIndex, bool bypass) {
-	if (auto graph = this->getGraph()) {
-		graph->setInstrumentBypass(instrIndex, bypass);
-	}
-}
-
 int AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
 	double startTime, double endTime, double offset) {
 	juce::ScopedTryReadLock srcLocker(CloneableSourceManager::getInstance()->getLock());

@@ -219,20 +219,30 @@ ActionAddInstr::ActionAddInstr(
 
 bool ActionAddInstr::doAction() {
 	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(this->type));
-	if (AudioCore::getInstance()->addInstrument(this->pid, this->index, pluginType)) {
-		this->output("Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
-		return true;
+	if (auto des = Plugin::getInstance()->findPlugin(this->pid, true)) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto ptr = graph->insertInstrument(this->index, pluginType)) {
+				PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+
+				this->output("Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
+				return true;
+			}
+		}
 	}
+
 	this->output("Can't Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
 	return false;
 }
 
 bool ActionAddInstr::undo() {
 	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(this->type));
-	if (AudioCore::getInstance()->removeInstrument(this->index)) {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeInstrument(this->index);
+
 		this->output("Undo Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
 		return true;
 	}
+	
 	this->output("Can't Undo Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
 	return false;
 }

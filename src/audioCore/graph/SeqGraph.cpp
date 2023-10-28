@@ -289,6 +289,116 @@ bool MainGraph::isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const 
 	return this->midiSrc2InstrConnectionList.contains(connection);
 }
 
+utils::AudioConnectionList MainGraph::getInstrOutputToTrackConnections(int index) const {
+	/** Check Index */
+	if (index < 0 || index >= this->instrumentNodeList.size()) {
+		return utils::AudioConnectionList{};
+	}
+
+	/** Get Current Instr ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->instrumentNodeList.getUnchecked(index)->nodeID;
+	utils::AudioConnectionList resultList;
+
+	for (auto& i : this->audioInstr2TrkConnectionList) {
+		if (i.source.nodeID == currentID) {
+			/** Get Destination Track Index */
+			int destIndex = this->trackNodeList.indexOf(
+				this->getNodeForId(i.destination.nodeID));
+			if (destIndex < 0 || destIndex >= this->trackNodeList.size()) {
+				continue;
+			}
+
+			/** Add To Result */
+			resultList.add(std::make_tuple(
+				index, i.source.channelIndex, destIndex, i.destination.channelIndex));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(utils::AudioConnection& first, utils::AudioConnection& second) {
+			if (std::get<1>(first) == std::get<1>(second)) {
+				if (std::get<2>(first) == std::get<2>(second)) {
+					return std::get<3>(first) - std::get<3>(second);
+				}
+				return std::get<2>(first) - std::get<2>(second);
+			}
+			return std::get<1>(first) - std::get<1>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
+utils::MidiConnectionList MainGraph::getInstrMidiInputFromSrcConnections(int index) const {
+	/** Check Index */
+	if (index < 0 || index >= this->instrumentNodeList.size()) {
+		return utils::MidiConnectionList{};
+	}
+
+	/** Get Current Instr ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->instrumentNodeList.getUnchecked(index)->nodeID;
+	utils::MidiConnectionList resultList;
+
+	for (auto& i : this->midiSrc2InstrConnectionList) {
+		if (i.destination.nodeID == currentID) {
+			/** Get Source Track Index */
+			int sourceIndex = this->audioSourceNodeList.indexOf(
+				this->getNodeForId(i.source.nodeID));
+			if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) {
+				continue;
+			}
+
+			/** Add To Result */
+			resultList.add(std::make_tuple(sourceIndex, index));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(utils::MidiConnection& first, utils::MidiConnection& second) {
+			return std::get<0>(first) - std::get<0>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+utils::MidiConnectionList MainGraph::getInstrMidiInputFromDeviceConnections(int index) const {
+	/** Check Index */
+	if (index < 0 || index >= this->instrumentNodeList.size()) {
+		return utils::MidiConnectionList{};
+	}
+
+	/** Get Current Instr ID */
+	juce::AudioProcessorGraph::NodeID currentID
+		= this->instrumentNodeList.getUnchecked(index)->nodeID;
+	utils::MidiConnectionList resultList;
+
+	for (auto& i : this->midiI2InstrConnectionList) {
+		if (i.destination.nodeID == currentID) {
+			/** Add To Result */
+			resultList.add(std::make_tuple(-1, index));
+		}
+	}
+
+	/** Sort Result */
+	class SortComparator {
+	public:
+		int compareElements(utils::MidiConnection& first, utils::MidiConnection& second) {
+			return std::get<0>(first) - std::get<0>(second);
+		}
+	} comparator;
+	resultList.sort(comparator, true);
+
+	return resultList;
+}
+
 void MainGraph::closeAllNote() {
 	for (auto& i : this->audioSourceNodeList) {
 		auto seqTrack = dynamic_cast<SeqSourceProcessor*>(i->getProcessor());

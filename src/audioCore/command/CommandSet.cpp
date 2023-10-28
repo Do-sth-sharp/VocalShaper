@@ -217,24 +217,26 @@ AUDIOCORE_FUNC(setInstrWindow) {
 	juce::String result;
 
 	int instrIndex = luaL_checkinteger(L, 1);
-	if (auto plugin = AudioCore::getInstance()->getInstrument(instrIndex)) {
-		if (auto editor = plugin->createEditorIfNeeded()) {
-			bool visible = lua_toboolean(L, 2);
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto plugin = graph->getInstrumentProcessor(instrIndex)) {
+			if (auto editor = plugin->createEditorIfNeeded()) {
+				bool visible = lua_toboolean(L, 2);
 
-			if (visible) {
-				editor->setName(plugin->getName());
-				editor->addToDesktop(
-					juce::ComponentPeer::windowAppearsOnTaskbar |
-					juce::ComponentPeer::windowHasTitleBar |
-					juce::ComponentPeer::windowHasDropShadow);
+				if (visible) {
+					editor->setName(plugin->getName());
+					editor->addToDesktop(
+						juce::ComponentPeer::windowAppearsOnTaskbar |
+						juce::ComponentPeer::windowHasTitleBar |
+						juce::ComponentPeer::windowHasDropShadow);
+				}
+				editor->setVisible(visible);
+
+				if (visible) {
+					editor->centreWithSize(editor->getWidth(), editor->getHeight());
+				}
+
+				result += "Plugin Window: [" + juce::String(instrIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 			}
-			editor->setVisible(visible);
-
-			if (visible) {
-				editor->centreWithSize(editor->getWidth(), editor->getHeight());
-			}
-
-			result += "Plugin Window: [" + juce::String(instrIndex) + "] " + juce::String(visible ? "ON" : "OFF") + "\n";
 		}
 	}
 
@@ -247,9 +249,11 @@ AUDIOCORE_FUNC(setInstrBypass) {
 	int instrIndex = luaL_checkinteger(L, 1);
 	bool bypass = lua_toboolean(L, 2);
 
-	AudioCore::getInstance()->bypassInstrument(instrIndex, bypass);
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setInstrumentBypass(instrIndex, bypass);
 
-	result += "Plugin Bypass: [" + juce::String(instrIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+		result += "Plugin Bypass: [" + juce::String(instrIndex) + "] " + juce::String(bypass ? "ON" : "OFF") + "\n";
+	}
 
 	return CommandFuncResult{ true, result };
 }

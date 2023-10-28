@@ -53,64 +53,33 @@ AUDIOCORE_FUNC(removeEffect) {
 }
 
 AUDIOCORE_FUNC(removeEffectAdditionalInput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int trackIndex = luaL_checkinteger(L, 1);
-		int effectIndex = luaL_checkinteger(L, 2);
-		int srcc = luaL_checkinteger(L, 3);
-		int dstc = luaL_checkinteger(L, 4);
-
-		if (auto track = graph->getTrackProcessor(trackIndex)) {
-			if (auto pluginDock = track->getPluginDock()) {
-				pluginDock->removeAdditionalBusConnection(effectIndex, srcc, dstc);
-
-				result += "Unlink Plugin Channel: [" + juce::String(trackIndex) + ", " + juce::String(effectIndex) + "] " + juce::String(srcc) + " - " + juce::String(dstc) + "\n";
-			}
-		}
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveEffectAdditionalInput{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeInstr) {
-	juce::String result;
-
-	int instrIndex = luaL_checkinteger(L, 1);
-	AudioCore::getInstance()->removeInstrument(instrIndex);
-
-	result += "Remove Plugin: [" + juce::String(instrIndex) + "]" + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveInstr{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeInstrOutput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		int srcc = luaL_checkinteger(L, 2);
-		int dst = luaL_checkinteger(L, 3);
-		int dstc = luaL_checkinteger(L, 4);
-		graph->removeAudioInstr2TrkConnection(src, dst, srcc, dstc);
-
-		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveInstrOutput{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeInstrMidiInput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int dst = luaL_checkinteger(L, 1);
-		graph->removeMIDII2InstrConnection(dst);
-
-		result += juce::String("[MIDI Input]") + " - " + juce::String(dst) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveInstrMidiInput{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeInstrParamCCConnection) {

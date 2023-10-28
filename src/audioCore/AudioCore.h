@@ -29,12 +29,6 @@ public:
 	void setMIDIDebuggerMaxNum(int num);
 	int getMIDIDebuggerMaxNum() const;
 
-	bool addInstrument(const juce::String& identifier, int instrIndex,
-		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
-	PluginDecorator* getInstrument(int instrIndex) const;
-	bool removeInstrument(int instrIndex);
-	void bypassInstrument(int instrIndex, bool bypass);
-
 	int addSequencerSourceInstance(int trackIndex, int srcIndex,
 		double startTime, double endTime, double offset);
 	void removeSequencerSourceInstance(int trackIndex, int index);

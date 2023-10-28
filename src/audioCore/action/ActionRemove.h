@@ -116,3 +116,66 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveEffect)
 };
+
+class ActionRemoveEffectAdditionalInput final : public ActionUndoableBase {
+public:
+	ActionRemoveEffectAdditionalInput() = delete;
+	ActionRemoveEffectAdditionalInput(
+		int track, int effect, int srcc, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, effect, srcc, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveEffectAdditionalInput)
+};
+
+class ActionRemoveInstr final : public ActionUndoableBase {
+public:
+	ActionRemoveInstr() = delete;
+	ActionRemoveInstr(int index);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int index;
+
+	utils::AudioConnectionList audioInstr2Trk;
+	utils::MidiConnectionList midiSrc2Instr;
+	utils::MidiConnectionList midiI2Instr;
+	juce::MemoryBlock data;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveInstr)
+};
+
+class ActionRemoveInstrOutput final : public ActionUndoableBase {
+public:
+	ActionRemoveInstrOutput() = delete;
+	ActionRemoveInstrOutput(
+		int src, int srcc, int dst, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, srcc, dst, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveInstrOutput)
+};
+
+class ActionRemoveInstrMidiInput final : public ActionUndoableBase {
+public:
+	ActionRemoveInstrMidiInput() = delete;
+	ActionRemoveInstrMidiInput(int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int dst;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveInstrMidiInput)
+};
