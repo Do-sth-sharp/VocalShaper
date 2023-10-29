@@ -179,3 +179,63 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstrMidiInput)
 };
+
+class ActionRemoveInstrParamCCConnection final : public ActionUndoableBase {
+public:
+	ActionRemoveInstrParamCCConnection() = delete;
+	ActionRemoveInstrParamCCConnection(
+		int instr, int cc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int instr, cc;
+	int param = -1;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveInstrParamCCConnection)
+};
+
+class ActionRemoveEffectParamCCConnection final : public ActionUndoableBase {
+public:
+	ActionRemoveEffectParamCCConnection() = delete;
+	ActionRemoveEffectParamCCConnection(
+		int track, int effect, int cc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, effect, cc;
+	int param = -1;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveEffectParamCCConnection)
+};
+
+class ActionRemoveMixerTrackMidiInput final : public ActionUndoableBase {
+public:
+	ActionRemoveMixerTrackMidiInput() = delete;
+	ActionRemoveMixerTrackMidiInput(int index);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int index;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiInput)
+};
+
+class ActionRemoveMixerTrackMidiOutput final : public ActionUndoableBase {
+public:
+	ActionRemoveMixerTrackMidiOutput() = delete;
+	ActionRemoveMixerTrackMidiOutput(int index);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int index;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiOutput)
+};

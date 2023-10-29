@@ -444,3 +444,117 @@ bool ActionRemoveInstrMidiInput::undo() {
 
 	return false;
 }
+
+ActionRemoveInstrParamCCConnection::ActionRemoveInstrParamCCConnection(
+	int instr, int cc)
+	: instr(instr), cc(cc) {}
+
+bool ActionRemoveInstrParamCCConnection::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
+			this->param = instr->getCCParamConnection(this->cc);
+
+			instr->removeCCParamConnection(this->cc);
+
+			this->output("Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(this->cc) + "\n");
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ActionRemoveInstrParamCCConnection::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
+			instr->connectParamCC(this->param, this->cc);
+
+			this->output("Undo Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(this->cc) + "\n");
+			return true;
+		}
+	}
+	return false;
+}
+
+ActionRemoveEffectParamCCConnection::ActionRemoveEffectParamCCConnection(
+	int track, int effect, int cc)
+	: track(track), effect(effect), cc(cc) {}
+
+bool ActionRemoveEffectParamCCConnection::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+					this->param = effect->getCCParamConnection(this->cc);
+
+					effect->removeCCParamConnection(this->cc);
+
+					this->output("Remove Effect Param MIDI CC Connection: " "MIDI CC " + juce::String(this->cc) + "\n");
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionRemoveEffectParamCCConnection::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track)) {
+			if (auto pluginDock = track->getPluginDock()) {
+				if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+					effect->connectParamCC(this->param, this->cc);
+
+					this->output("Undo Remove Effect Param MIDI CC Connection: " "MIDI CC " + juce::String(this->cc) + "\n");
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+ActionRemoveMixerTrackMidiInput::ActionRemoveMixerTrackMidiInput(int index)
+	: index(index) {}
+
+bool ActionRemoveMixerTrackMidiInput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDII2TrkConnection(this->index);
+
+		this->output(juce::String("[MIDI Input]") + " - " + juce::String(this->index) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveMixerTrackMidiInput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDII2TrkConnection(this->index);
+
+		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(this->index) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveMixerTrackMidiOutput::ActionRemoveMixerTrackMidiOutput(int index)
+	: index(index) {}
+
+bool ActionRemoveMixerTrackMidiOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDITrk2OConnection(this->index);
+
+		this->output(juce::String(this->index) + " - " + "[MIDI Output]" + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveMixerTrackMidiOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDITrk2OConnection(this->index);
+
+		this->output("Undo " + juce::String(this->index) + " - " + "[MIDI Output]" + " (Removed)\n");
+		return true;
+	}
+	return false;
+}

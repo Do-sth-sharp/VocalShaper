@@ -118,7 +118,7 @@ void PluginDecorator::setParamValue(int index, float value) {
 
 void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
 	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
-	if (paramIndex < 0 || paramIndex >= this->getPluginParamList().size()) { return; }
+	if (paramIndex < -1 || paramIndex >= this->getPluginParamList().size()) { return; }
 
 	auto currentCC = this->getParamCCConnection(paramIndex);
 	if (currentCC > -1) {

@@ -83,66 +83,32 @@ AUDIOCORE_FUNC(removeInstrMidiInput) {
 }
 
 AUDIOCORE_FUNC(removeInstrParamCCConnection) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int instrIndex = luaL_checkinteger(L, 1);
-		int CCIndex = luaL_checkinteger(L, 2);
-
-		if (auto instr = graph->getInstrumentProcessor(instrIndex)) {
-			instr->removeCCParamConnection(CCIndex);
-			result += "Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(CCIndex) + "\n";
-		}
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveInstrParamCCConnection{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeEffectParamCCConnection) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int trackIndex = luaL_checkinteger(L, 1);
-		int effectIndex = luaL_checkinteger(L, 2);
-		int CCIndex = luaL_checkinteger(L, 3);
-
-		if (auto track = graph->getTrackProcessor(trackIndex)) {
-			if (auto pluginDock = track->getPluginDock()) {
-				if (auto effect = pluginDock->getPluginProcessor(effectIndex)) {
-					effect->removeCCParamConnection(CCIndex);
-					result += "Remove Effect Param MIDI CC Connection: " "MIDI CC " + juce::String(CCIndex) + "\n";
-				}
-			}
-		}
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveEffectParamCCConnection{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeMixerTrackMidiInput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int dst = luaL_checkinteger(L, 1);
-		graph->removeMIDII2TrkConnection(dst);
-
-		result += juce::String("[MIDI Input]") + " - " + juce::String(dst) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveMixerTrackMidiInput{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeMixerTrackMidiOutput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		graph->removeMIDITrk2OConnection(src);
-
-		result += juce::String(src) + " - " + "[MIDI Output]" + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveMixerTrackMidiOutput{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeSource) {
