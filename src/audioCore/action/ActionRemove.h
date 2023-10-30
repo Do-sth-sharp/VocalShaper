@@ -239,3 +239,80 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiOutput)
 };
+
+class ActionRemoveSource final : public ActionBase {
+public:
+	ActionRemoveSource() = delete;
+	ActionRemoveSource(int index);
+
+	bool doAction() override;
+
+private:
+	const int index;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSource)
+};
+
+class ActionRemoveSequencerTrack final : public ActionUndoableBase {
+public:
+	ActionRemoveSequencerTrack() = delete;
+	ActionRemoveSequencerTrack(int index);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int index;
+
+	utils::AudioConnectionList audioSrc2Trk;
+	utils::MidiConnectionList midiSrc2Instr;
+	utils::MidiConnectionList midiSrc2Trk;
+	juce::MemoryBlock data;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrack)
+};
+
+class ActionRemoveSequencerTrackMidiOutputToMixer final : public ActionUndoableBase {
+public:
+	ActionRemoveSequencerTrackMidiOutputToMixer() = delete;
+	ActionRemoveSequencerTrackMidiOutputToMixer(
+		int src, int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, dst;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToMixer)
+};
+
+class ActionRemoveSequencerTrackMidiOutputToInstr final : public ActionUndoableBase {
+public:
+	ActionRemoveSequencerTrackMidiOutputToInstr() = delete;
+	ActionRemoveSequencerTrackMidiOutputToInstr(
+		int src, int dst);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, dst;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToInstr)
+};
+
+class ActionRemoveSequencerTrackOutput final : public ActionUndoableBase {
+public:
+	ActionRemoveSequencerTrackOutput() = delete;
+	ActionRemoveSequencerTrackOutput(
+		int src, int srcc, int dst, int dstc);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int src, srcc, dst, dstc;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
+};

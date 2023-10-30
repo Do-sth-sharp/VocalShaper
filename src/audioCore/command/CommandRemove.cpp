@@ -112,72 +112,39 @@ AUDIOCORE_FUNC(removeMixerTrackMidiOutput) {
 }
 
 AUDIOCORE_FUNC(removeSource) {
-	juce::String result;
-
-	if (auto manager = CloneableSourceManager::getInstance()) {
-		manager->removeSource(luaL_checkinteger(L, 1));
-		result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSource{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeSequencerTrack) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int index = luaL_checkinteger(L, 1);
-		graph->removeSource(index);
-
-		result += "Remove Sequencer Track: " + juce::String(index) + "\n";
-		result += "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeSequencerTrackMidiOutputToMixer) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		int dst = luaL_checkinteger(L, 2);
-		graph->removeMIDISrc2TrkConnection(src, dst);
-
-		result += juce::String(src) + " - " + juce::String(dst) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackMidiOutputToMixer{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeSequencerTrackMidiOutputToInstr) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		int dst = luaL_checkinteger(L, 2);
-		graph->removeMIDISrc2InstrConnection(src, dst);
-
-		result += juce::String(src) + " - " + juce::String(dst) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackMidiOutputToInstr{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeSequencerTrackOutput) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int src = luaL_checkinteger(L, 1);
-		int srcc = luaL_checkinteger(L, 2);
-		int dst = luaL_checkinteger(L, 3);
-		int dstc = luaL_checkinteger(L, 4);
-		graph->removeAudioSrc2TrkConnection(src, dst, srcc, dstc);
-
-		result += juce::String(src) + ", " + juce::String(srcc) + " - " + juce::String(dst) + ", " + juce::String(dstc) + " (Removed)\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackOutput{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeSequencerSourceInstance) {

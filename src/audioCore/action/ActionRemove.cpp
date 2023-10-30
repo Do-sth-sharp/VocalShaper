@@ -558,3 +558,165 @@ bool ActionRemoveMixerTrackMidiOutput::undo() {
 	}
 	return false;
 }
+
+ActionRemoveSource::ActionRemoveSource(int index)
+	: index(index) {}
+
+bool ActionRemoveSource::doAction() {
+	if (auto manager = CloneableSourceManager::getInstance()) {
+		manager->removeSource(this->index);
+		this->output("Total Source Num: " + juce::String(manager->getSourceNum()) + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveSequencerTrack::ActionRemoveSequencerTrack(int index)
+	: index(index) {}
+
+bool ActionRemoveSequencerTrack::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		/** Check Track */
+		if (this->index < 0 || this->index >= graph->getSourceNum()) { return false; }
+
+		/** Save Connections */
+		this->audioSrc2Trk = graph->getSourceOutputToTrackConnections(this->index);
+		this->midiSrc2Instr = graph->getSourceMidiOutputToInstrConnections(this->index);
+		this->midiSrc2Trk = graph->getSourceMidiOutputToTrackConnections(this->index);
+
+		/** Save Track State */
+		auto track = graph->getSourceProcessor(this->index);
+		if (!track) { return false; }
+		auto state = track->serialize();
+
+		auto statePtr = dynamic_cast<vsp4::SeqTrack*>(state.get());
+		if (!statePtr) { return false; }
+		statePtr->set_bypassed(graph->getSourceBypass(this->index));
+
+		this->data.setSize(state->ByteSizeLong());
+		state->SerializeToArray(this->data.getData(), this->data.getSize());
+
+		/** Remove Track */
+		graph->removeSource(this->index);
+
+		juce::String result;
+		result += "Remove Sequencer Track: " + juce::String(this->index) + "\n";
+		result += "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n";
+		return true;
+	}
+
+	return false;
+}
+
+bool ActionRemoveSequencerTrack::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		/** Prepare Track State */
+		auto state = std::make_unique<vsp4::SeqTrack>();
+		if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+			return false;
+		}
+
+		/** Add Track */
+		graph->insertSource(this->index,
+			utils::getChannelSet(static_cast<utils::TrackType>(state->type())));
+
+		/** Recover Track State */
+		auto track = graph->getSourceProcessor(this->index);
+		graph->setSourceBypass(this->index, state->bypassed());
+		track->parse(state.get());
+
+		/** Recover Connections */
+		for (auto [src, srcc, dst, dstc] : this->audioSrc2Trk) {
+			graph->setAudioSrc2TrkConnection(src, dst, srcc, dstc);
+		}
+		
+		for (auto [src, dst] : this->midiSrc2Instr) {
+			graph->setMIDISrc2InstrConnection(src, dst);
+		}
+
+		for (auto [src, dst] : this->midiSrc2Trk) {
+			graph->setMIDISrc2TrkConnection(src, dst);
+		}
+
+		juce::String result;
+		result += "Undo Remove Sequencer Track: " + juce::String(this->index) + "\n";
+		result += "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n";
+		this->output(result);
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveSequencerTrackMidiOutputToMixer::ActionRemoveSequencerTrackMidiOutputToMixer(
+	int src, int dst)
+	: src(src), dst(dst) {}
+
+bool ActionRemoveSequencerTrackMidiOutputToMixer::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDISrc2TrkConnection(this->src, this->dst);
+
+		this->output(juce::String(this->src) + " - " + juce::String(this->dst) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveSequencerTrackMidiOutputToMixer::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDISrc2TrkConnection(this->src, this->dst);
+
+		this->output("Undo " + juce::String(this->src) + " - " + juce::String(this->dst) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveSequencerTrackMidiOutputToInstr::ActionRemoveSequencerTrackMidiOutputToInstr(
+	int src, int dst)
+	: src(src), dst(dst) {}
+
+bool ActionRemoveSequencerTrackMidiOutputToInstr::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeMIDISrc2InstrConnection(this->src, this->dst);
+
+		this->output(juce::String(this->src) + " - " + juce::String(this->dst) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveSequencerTrackMidiOutputToInstr::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setMIDISrc2InstrConnection(this->src, this->dst);
+
+		this->output("Undo " + juce::String(this->src) + " - " + juce::String(this->dst) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+ActionRemoveSequencerTrackOutput::ActionRemoveSequencerTrackOutput(
+	int src, int srcc, int dst, int dstc)
+	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
+
+bool ActionRemoveSequencerTrackOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->removeAudioSrc2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output(juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionRemoveSequencerTrackOutput::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setAudioSrc2TrkConnection(
+			this->src, this->dst, this->srcc, this->dstc);
+
+		this->output("Undo " + juce::String(this->src) + ", " + juce::String(this->srcc) + " - " + juce::String(this->dst) + ", " + juce::String(this->dstc) + " (Removed)\n");
+		return true;
+	}
+	return false;
+}

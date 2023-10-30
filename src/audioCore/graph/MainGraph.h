@@ -87,6 +87,11 @@ public:
 	utils::MidiConnectionList getInstrMidiInputFromSrcConnections(int index) const;
 	utils::MidiConnectionList getInstrMidiInputFromDeviceConnections(int index) const;
 
+	utils::AudioConnectionList getSourceOutputToTrackConnections(int index) const;
+
+	utils::MidiConnectionList getSourceMidiOutputToInstrConnections(int index) const;
+	utils::MidiConnectionList getSourceMidiOutputToTrackConnections(int index) const;
+
 	/**
 	 * @brief	Set the input and output channel number of current audio device.
 	 */
