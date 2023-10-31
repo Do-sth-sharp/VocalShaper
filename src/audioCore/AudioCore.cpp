@@ -113,58 +113,6 @@ int AudioCore::getMIDIDebuggerMaxNum() const {
 	return -1;
 }
 
-int AudioCore::addSequencerSourceInstance(int trackIndex, int srcIndex,
-	double startTime, double endTime, double offset) {
-	juce::ScopedTryReadLock srcLocker(CloneableSourceManager::getInstance()->getLock());
-	if (srcLocker.isLocked()) {
-		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
-			if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
-				return seqTrack->addSeq({ startTime, endTime, offset, ptrSrc, srcIndex });
-			}
-		}
-	}
-	return -1;
-}
-
-void AudioCore::removeSequencerSourceInstance(int trackIndex, int index) {
-	if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
-		seqTrack->removeSeq(index);
-	}
-}
-
-int AudioCore::getSequencerSourceInstanceNum(int trackIndex) const {
-	if (auto seqTrack = this->mainAudioGraph->getSourceProcessor(trackIndex)) {
-		return seqTrack->getSeqNum();
-	}
-	return -1;
-}
-
-bool AudioCore::addRecorderSourceInstance(int srcIndex, double offset) {
-	juce::ScopedTryReadLock srcLocker(CloneableSourceManager::getInstance()->getLock());
-	if (srcLocker.isLocked()) {
-		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(srcIndex)) {
-			if (auto recorder = this->mainAudioGraph->getRecorder()) {
-				recorder->addTask(ptrSrc, srcIndex, offset);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void AudioCore::removeRecorderSourceInstance(int index) {
-	if (auto recorder = this->mainAudioGraph->getRecorder()) {
-		recorder->removeTask(index);
-	}
-}
-
-int AudioCore::getRecorderSourceInstanceNum() const {
-	if (auto recorder = this->mainAudioGraph->getRecorder()) {
-		return recorder->getTaskNum();
-	}
-	return -1;
-}
-
 void AudioCore::play() {
 	PlayPosition::getInstance()->transportPlay(true);
 }

@@ -148,30 +148,17 @@ AUDIOCORE_FUNC(removeSequencerTrackOutput) {
 }
 
 AUDIOCORE_FUNC(removeSequencerSourceInstance) {
-	juce::String result;
-
-	int trackIndex = luaL_checkinteger(L, 1);
-	int seqIndex = luaL_checkinteger(L, 2);
-
-	AudioCore::getInstance()->removeSequencerSourceInstance(trackIndex, seqIndex);
-
-	result += "Remove Sequencer Source Instance [" + juce::String(trackIndex) + ", " + juce::String(seqIndex) + "]\n";
-	result += "Total Sequencer Source Instance: " + juce::String(AudioCore::getInstance()->getSequencerSourceInstanceNum(trackIndex)) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerSourceInstance{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(removeRecorderSourceInstance) {
-	juce::String result;
-
-	int seqIndex = luaL_checkinteger(L, 1);
-
-	AudioCore::getInstance()->removeRecorderSourceInstance(seqIndex);
-
-	result += "Remove Recorder Source Instance [" + juce::String(seqIndex) + "]\n";
-	result += "Total Recorder Source Instance: " + juce::String(AudioCore::getInstance()->getRecorderSourceInstanceNum()) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveRecorderSourceInstance{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 void regCommandRemove(lua_State* L) {

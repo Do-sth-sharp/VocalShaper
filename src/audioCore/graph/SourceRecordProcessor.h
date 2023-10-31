@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 
@@ -11,10 +11,11 @@ public:
 	SourceRecordProcessor();
 	~SourceRecordProcessor();
 
-	void addTask(CloneableSource::SafePointer<> source, int srcIndex, double offset);
+	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, int, double>;
+	void insertTask(const RecorderTask& task, int index = -1);
 	void removeTask(int index);
 	int getTaskNum() const;
-	std::tuple<CloneableSource::SafePointer<>, double> getTask(int index) const;
+	const RecorderTask getTask(int index) const;
 
 	void clearGraph();
 
@@ -47,7 +48,6 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, int, double>;
 	juce::Array<RecorderTask> tasks;
 	juce::ReadWriteLock taskLock;
 

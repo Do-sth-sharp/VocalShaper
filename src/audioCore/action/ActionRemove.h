@@ -316,3 +316,38 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
 };
+
+class ActionRemoveSequencerSourceInstance final : public ActionUndoableBase {
+public:
+	ActionRemoveSequencerSourceInstance() = delete;
+	ActionRemoveSequencerSourceInstance(
+		int track, int seq);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track, seq;
+
+	int index;
+	double start, end, offset;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerSourceInstance)
+};
+
+class ActionRemoveRecorderSourceInstance final : public ActionUndoableBase {
+public:
+	ActionRemoveRecorderSourceInstance() = delete;
+	ActionRemoveRecorderSourceInstance(int seq);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int seq;
+
+	int index;
+	double offset;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveRecorderSourceInstance)
+};

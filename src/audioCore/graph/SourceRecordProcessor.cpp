@@ -1,4 +1,4 @@
-#include "SourceRecordProcessor.h"
+﻿#include "SourceRecordProcessor.h"
 
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
@@ -15,9 +15,10 @@ SourceRecordProcessor::~SourceRecordProcessor() {
 	}
 }
 
-void SourceRecordProcessor::addTask(
-	CloneableSource::SafePointer<> source, int srcIndex, double offset) {
+void SourceRecordProcessor::insertTask(
+	const SourceRecordProcessor::RecorderTask& task, int index) {
 	juce::ScopedWriteLock locker(this->taskLock);
+	auto& [source, srcIndex, offset] = task;
 
 	/** Check Source */
 	if (!source) { return; }
@@ -31,7 +32,7 @@ void SourceRecordProcessor::addTask(
 		this->getSampleRate(), this->getBlockSize());
 	
 	/** Add Task */
-	return this->tasks.add({ source, srcIndex, offset });
+	return this->tasks.insert(index, { source, srcIndex, offset });
 }
 
 void SourceRecordProcessor::removeTask(int index) {
@@ -47,11 +48,10 @@ int SourceRecordProcessor::getTaskNum() const {
 	return this->tasks.size();
 }
 
-std::tuple<CloneableSource::SafePointer<>, double>
+const SourceRecordProcessor::RecorderTask
 	SourceRecordProcessor::getTask(int index) const {
 	juce::ScopedReadLock locker(this->taskLock);
-	auto& [source, srcIndex, offset] = this->tasks.getReference(index);
-	return { source, offset };
+	return this->tasks.getReference(index);
 }
 
 void SourceRecordProcessor::clearGraph() {
@@ -126,7 +126,7 @@ bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
 	auto& list = mes->sources();
 	for (auto& i : list) {
 		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
-			this->addTask(ptrSrc, i.index(), i.offset());
+			this->insertTask({ ptrSrc, i.index(), i.offset() });
 		}
 	}
 

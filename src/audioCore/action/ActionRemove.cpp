@@ -720,3 +720,82 @@ bool ActionRemoveSequencerTrackOutput::undo() {
 	}
 	return false;
 }
+
+ActionRemoveSequencerSourceInstance::ActionRemoveSequencerSourceInstance(
+	int track, int seq)
+	: track(track), seq(seq) {}
+
+bool ActionRemoveSequencerSourceInstance::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto seqTrack = graph->getSourceProcessor(this->track)) {
+			std::tie(this->start, this->end, this->offset, std::ignore, this->index)
+				= seqTrack->getSeq(this->seq);
+
+			seqTrack->removeSeq(this->seq);
+
+			juce::String result;
+			result += "Remove Sequencer Source Instance [" + juce::String(this->track) + ", " + juce::String(this->seq) + "]\n";
+			result += "Total Sequencer Source Instance: " + juce::String(seqTrack->getSeqNum()) + "\n";
+			this->output(result);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ActionRemoveSequencerSourceInstance::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto seqTrack = graph->getSourceProcessor(this->track)) {
+			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(this->index);
+			if (!ptrSrc) { return false; }
+
+			seqTrack->addSeq({ this->start, this->end, this->offset, ptrSrc, this->index });
+
+			juce::String result;
+			result += "Undo Remove Sequencer Source Instance [" + juce::String(this->track) + ", " + juce::String(this->seq) + "]\n";
+			result += "Total Sequencer Source Instance: " + juce::String(seqTrack->getSeqNum()) + "\n";
+			this->output(result);
+			return true;
+		}
+	}
+	return false;
+}
+
+ActionRemoveRecorderSourceInstance::ActionRemoveRecorderSourceInstance(int seq)
+	: seq(seq) {}
+
+bool ActionRemoveRecorderSourceInstance::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto recorder = graph->getRecorder()) {
+			std::tie(std::ignore, this->index, this->offset)
+				= recorder->getTask(this->seq);
+
+			recorder->removeTask(this->seq);
+
+			juce::String result;
+			result += "Remove Recorder Source Instance [" + juce::String(this->seq) + "]\n";
+			result += "Total Recorder Source Instance: " + juce::String(recorder->getTaskNum()) + "\n";
+			this->output(result);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ActionRemoveRecorderSourceInstance::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto recorder = graph->getRecorder()) {
+			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(this->index);
+			if (!ptrSrc) { return false; }
+
+			recorder->insertTask({ ptrSrc, this->index, this->offset }, this->seq);
+
+			juce::String result;
+			result += "Undo Remove Recorder Source Instance [" + juce::String(this->seq) + "]\n";
+			result += "Total Recorder Source Instance: " + juce::String(recorder->getTaskNum()) + "\n";
+			this->output(result);
+			return true;
+		}
+	}
+	return false;
+}
