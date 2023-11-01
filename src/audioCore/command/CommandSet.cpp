@@ -4,14 +4,10 @@
 #include "../Utils.h"
 
 AUDIOCORE_FUNC(setDeviceAudioType) {
-	juce::String result;
-	Device::getInstance()->setCurrentAudioDeviceType(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-
-	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioType{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioInput) {
