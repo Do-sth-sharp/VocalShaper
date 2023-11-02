@@ -11,96 +11,52 @@ AUDIOCORE_FUNC(setDeviceAudioType) {
 }
 
 AUDIOCORE_FUNC(setDeviceAudioInput) {
-	juce::String result;
-	auto err = Device::getInstance()->setAudioInputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
-	}
-
-	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioInput{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioOutput) {
-	juce::String result;
-	auto err = Device::getInstance()->setAudioOutputDevice(juce::String::fromUTF8(luaL_checkstring(L, 1)));
-	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
-	}
-
-	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioOutput{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioSampleRate) {
-	juce::String result;
-	auto err = Device::getInstance()->setAudioSampleRate(luaL_checknumber(L, 1));
-	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
-	}
-
-	result += "Current Audio Sample Rate: " + juce::String(Device::getInstance()->getAudioSampleRate()) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioSampleRate{
+		luaL_checknumber(L, 1)});
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioBufferSize) {
-	juce::String result;
-	auto err = Device::getInstance()->setAudioBufferSize(luaL_checkinteger(L, 1));
-	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
-	}
-
-	result += "Current Audio Buffer Size: " + juce::String(Device::getInstance()->getAudioBufferSize()) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioBufferSize{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceMIDIInput) {
-	juce::String result;
-
-	juce::String device = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	Device::getInstance()->setMIDIInputDeviceEnabled(device, lua_toboolean(L, 2));
-	result += "MIDI Input Device: " + device + " - " + (Device::getInstance()->getMIDIInputDeviceEnabled(device) ? "ON" : "OFF") + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceMidiInput{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)), (bool)lua_toboolean(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceMIDIOutput) {
-	juce::String result;
-
-	juce::String device = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	Device::getInstance()->setMIDIOutputDevice(device);
-	result += "MIDI Output Device: " + device + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceMidiOutput{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setMIDIDebuggerMaxNum) {
-	juce::String result;
-
-	audioCore->setMIDIDebuggerMaxNum(luaL_checkinteger(L, 1));
-	result += "MIDI Debugger Max Num: " + juce::String(audioCore->getMIDIDebuggerMaxNum()) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetMidiDebuggerMaxNum{
+		(int)luaL_checkinteger(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setMixerTrackGain) {
