@@ -1,4 +1,4 @@
--- Create A Stereo Track
+﻿-- Create A Stereo Track
 AC.addMixerTrack(-1, -1);
 AC.addMixerTrackInputFromDevice(0, 0, 0);
 AC.addMixerTrackInputFromDevice(0, 0, 1);
@@ -39,7 +39,6 @@ AC.removeMixerTrackMidiInput(0);
 AC.setEffectMIDIChannel(0, 0, 0);
 
 -- Effect Plugin Param MIDI CC
-AC.setEffectParamListenCC(0, 0, 0);
 AC.setEffectMIDICCIntercept(0, 0, true);
 AC.echoEffectParamCC(0, 0, 0);
 AC.echoEffectCCParam(0, 0, 17);

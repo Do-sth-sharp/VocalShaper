@@ -32,7 +32,7 @@ public:
 	int getCCParamConnection(int CCIndex) const;
 	int getParamCCConnection(int paramIndex) const;
 	void removeCCParamConnection(int CCIndex);
-	void setParamCCListenning(int paramIndex);
+	//void setParamCCListenning(int paramIndex);
 
 	void setMIDICCIntercept(bool midiCCShouldIntercept);
 	bool getMIDICCIntercept() const;
@@ -138,7 +138,7 @@ private:
 	juce::ReadWriteLock bufferLock;
 	std::atomic_int midiChannel = 1;
 	std::array<std::atomic_int, 128> paramCCList;
-	std::atomic_int paramListenningCC = -1;
+	//std::atomic_int paramListenningCC = -1;
 	std::atomic_bool midiShouldOutput = false;
 	std::atomic_bool midiCCShouldIntercept = true;
 	juce::AudioChannelSet audioChannels;
