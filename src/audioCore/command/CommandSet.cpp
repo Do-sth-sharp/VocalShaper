@@ -173,29 +173,17 @@ AUDIOCORE_FUNC(setEffectMIDICCIntercept) {
 }
 
 AUDIOCORE_FUNC(setSequencerTrackBypass) {
-	juce::String result;
-
-	if (auto graph = audioCore->getGraph()) {
-		int trackIndex = luaL_checkinteger(L, 1);
-		bool bypass = lua_toboolean(L, 2);
-
-		graph->setSourceBypass(trackIndex, bypass);
-
-		result += "Sequencer Track Bypass: [" + juce::String(trackIndex) + "] " + juce::String(graph->getSourceBypass(trackIndex) ? "ON" : "OFF") + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackBypass{
+		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setPlayPosition) {
-	juce::String result;
-
-	audioCore->setPositon(luaL_checknumber(L, 1));
-	auto pos = audioCore->getPosition();
-
-	result += "Set play position at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetPlayPosition{
+		luaL_checknumber(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setReturnToStart) {
@@ -209,18 +197,10 @@ AUDIOCORE_FUNC(setReturnToStart) {
 }
 
 AUDIOCORE_FUNC(setSourceSynthesizer) {
-	juce::String result;
-
-	int srcIndex = luaL_checkinteger(L, 1);
-	juce::String pid = juce::String::fromUTF8(luaL_checkstring(L, 2));
-	if (CloneableSourceManager::getInstance()->setSourceSynthesizer(srcIndex, pid)) {
-		result += "Set synthesizer: [" + juce::String(srcIndex) + "] " + pid + "\n";
-	}
-	else {
-		result += "Can't set synthesizer: [" + juce::String(srcIndex) + "] " + pid + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSourceSynthesizer{
+		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setAudioSaveBitsPerSample) {

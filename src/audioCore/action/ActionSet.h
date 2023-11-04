@@ -374,3 +374,62 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
 };
+
+class ActionSetSequencerTrackBypass final : public ActionUndoableBase {
+public:
+	ActionSetSequencerTrackBypass() = delete;
+	ActionSetSequencerTrackBypass(
+		int track, bool bypass);
+
+	bool doAction() override;
+	bool undo() override;
+
+private:
+	const int track;
+	const bool bypass;
+
+	bool oldBypass = false;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackBypass)
+};
+
+class ActionSetPlayPosition final : public ActionBase {
+public:
+	ActionSetPlayPosition() = delete;
+	ActionSetPlayPosition(double pos);
+
+	bool doAction() override;
+
+private:
+	const double pos;
+
+	JUCE_LEAK_DETECTOR(ActionSetPlayPosition)
+};
+
+class ActionSetReturnToStart final : public ActionBase {
+public:
+	ActionSetReturnToStart() = delete;
+	ActionSetReturnToStart(bool returnToStart);
+
+	bool doAction() override;
+
+private:
+	const bool returnToStart;
+
+	JUCE_LEAK_DETECTOR(ActionSetReturnToStart)
+};
+
+class ActionSetSourceSynthesizer final : public ActionBase {
+public:
+	ActionSetSourceSynthesizer() = delete;
+	ActionSetSourceSynthesizer(
+		int index, const juce::String& pid);
+
+	bool doAction() override;
+
+private:
+	const int index;
+	const juce::String pid;
+
+	JUCE_LEAK_DETECTOR(ActionSetSourceSynthesizer)
+};

@@ -641,3 +641,63 @@ bool ActionSetEffectMidiCCIntercept::undo() {
 	}
 	return false;
 }
+
+ActionSetSequencerTrackBypass::ActionSetSequencerTrackBypass(
+	int track, bool bypass)
+	: track(track), bypass(bypass) {}
+
+bool ActionSetSequencerTrackBypass::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		this->oldBypass = graph->getSourceBypass(this->track);
+
+		graph->setSourceBypass(this->track, this->bypass);
+
+		this->output("Sequencer Track Bypass: [" + juce::String(this->track) + "] " + juce::String(graph->getSourceBypass(this->track) ? "ON" : "OFF") + "\n");
+		return true;
+	}
+	return false;
+}
+
+bool ActionSetSequencerTrackBypass::undo() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		graph->setSourceBypass(this->track, this->oldBypass);
+
+		this->output("Undo Sequencer Track Bypass: [" + juce::String(this->track) + "] " + juce::String(graph->getSourceBypass(this->track) ? "ON" : "OFF") + "\n");
+		return true;
+	}
+	return false;
+}
+
+ActionSetPlayPosition::ActionSetPlayPosition(double pos)
+	: pos(pos) {}
+
+bool ActionSetPlayPosition::doAction() {
+	AudioCore::getInstance()->setPositon(this->pos);
+
+	auto pos = AudioCore::getInstance()->getPosition();
+	this->output("Set play position at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n");
+	return true;
+}
+
+ActionSetReturnToStart::ActionSetReturnToStart(bool returnToStart)
+	: returnToStart(returnToStart) {}
+
+bool ActionSetReturnToStart::doAction() {
+	AudioCore::getInstance()->setReturnToPlayStartPosition(this->returnToStart);
+
+	this->output("Set return to start position on play stop: " + juce::String(AudioCore::getInstance()->getReturnToPlayStartPosition() ? "ON" : "OFF") + "\n");
+	return true;
+}
+
+ActionSetSourceSynthesizer::ActionSetSourceSynthesizer(
+	int index, const juce::String& pid)
+	: index(index), pid(pid) {}
+
+bool ActionSetSourceSynthesizer::doAction() {
+	if (CloneableSourceManager::getInstance()->setSourceSynthesizer(this->index, this->pid)) {
+		this->output("Set synthesizer: [" + juce::String(this->index) + "] " + this->pid + "\n");
+		return true;
+	}
+	this->output("Can't set synthesizer: [" + juce::String(this->index) + "] " + this->pid + "\n");
+	return false;
+}
