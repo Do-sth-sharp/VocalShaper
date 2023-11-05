@@ -150,6 +150,11 @@ ActionRemoveMixerTrackSend::ActionRemoveMixerTrackSend(
 
 bool ActionRemoveMixerTrackSend::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isAudioTrk2TrkConnected(
+			this->src, this->dst, this->srcc, this->dstc)) {
+			return false;
+		}
+
 		graph->removeAudioTrk2TrkConnection(
 			this->src, this->dst, this->srcc, this->dstc);
 
@@ -176,6 +181,11 @@ ActionRemoveMixerTrackInputFromDevice::ActionRemoveMixerTrackInputFromDevice(
 
 bool ActionRemoveMixerTrackInputFromDevice::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isAudioI2TrkConnected(
+			this->dst, this->srcc, this->dstc)) {
+			return false;
+		}
+
 		graph->removeAudioI2TrkConnection(
 			this->dst, this->srcc, this->dstc);
 
@@ -202,6 +212,11 @@ ActionRemoveMixerTrackOutput::ActionRemoveMixerTrackOutput(
 
 bool ActionRemoveMixerTrackOutput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isAudioTrk2OConnected(
+			this->src, this->srcc, this->dstc)) {
+			return false;
+		}
+
 		graph->removeAudioTrk2OConnection(
 			this->src, this->srcc, this->dstc);
 
@@ -298,6 +313,11 @@ bool ActionRemoveEffectAdditionalInput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
+				if (!pluginDock->isAdditionalBusConnected(
+					this->effect, this->srcc, this->dstc)) {
+					return false;
+				}
+
 				pluginDock->removeAdditionalBusConnection(this->effect, this->srcc, this->dstc);
 
 				this->output("Unlink Plugin Channel: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + juce::String(this->srcc) + " - " + juce::String(this->dstc) + "\n");
@@ -398,6 +418,11 @@ ActionRemoveInstrOutput::ActionRemoveInstrOutput(
 
 bool ActionRemoveInstrOutput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isAudioInstr2TrkConnected(
+			this->src, this->dst, this->srcc, this->dstc)) {
+			return false;
+		}
+
 		graph->removeAudioInstr2TrkConnection(
 			this->src, this->dst, this->srcc, this->dstc);
 
@@ -425,6 +450,10 @@ ActionRemoveInstrMidiInput::ActionRemoveInstrMidiInput(int dst)
 
 bool ActionRemoveInstrMidiInput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isMIDII2InstrConnected(this->dst)) {
+			return false;
+		}
+
 		graph->removeMIDII2InstrConnection(this->dst);
 
 		this->output(juce::String("[MIDI Input]") + " - " + juce::String(this->dst) + " (Removed)\n");
@@ -518,6 +547,10 @@ ActionRemoveMixerTrackMidiInput::ActionRemoveMixerTrackMidiInput(int index)
 
 bool ActionRemoveMixerTrackMidiInput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isMIDII2TrkConnected(this->index)) {
+			return false;
+		}
+
 		graph->removeMIDII2TrkConnection(this->index);
 
 		this->output(juce::String("[MIDI Input]") + " - " + juce::String(this->index) + " (Removed)\n");
@@ -541,6 +574,10 @@ ActionRemoveMixerTrackMidiOutput::ActionRemoveMixerTrackMidiOutput(int index)
 
 bool ActionRemoveMixerTrackMidiOutput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isMIDITrk2OConnected(this->index)) {
+			return false;
+		}
+
 		graph->removeMIDITrk2OConnection(this->index);
 
 		this->output(juce::String(this->index) + " - " + "[MIDI Output]" + " (Removed)\n");
@@ -653,6 +690,10 @@ ActionRemoveSequencerTrackMidiOutputToMixer::ActionRemoveSequencerTrackMidiOutpu
 
 bool ActionRemoveSequencerTrackMidiOutputToMixer::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isMIDISrc2TrkConnected(this->src, this->dst)) {
+			return false;
+		}
+
 		graph->removeMIDISrc2TrkConnection(this->src, this->dst);
 
 		this->output(juce::String(this->src) + " - " + juce::String(this->dst) + " (Removed)\n");
@@ -677,6 +718,10 @@ ActionRemoveSequencerTrackMidiOutputToInstr::ActionRemoveSequencerTrackMidiOutpu
 
 bool ActionRemoveSequencerTrackMidiOutputToInstr::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isMIDISrc2InstrConnected(this->src, this->dst)) {
+			return false;
+		}
+
 		graph->removeMIDISrc2InstrConnection(this->src, this->dst);
 
 		this->output(juce::String(this->src) + " - " + juce::String(this->dst) + " (Removed)\n");
@@ -701,6 +746,11 @@ ActionRemoveSequencerTrackOutput::ActionRemoveSequencerTrackOutput(
 
 bool ActionRemoveSequencerTrackOutput::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (!graph->isAudioSrc2TrkConnected(
+			this->src, this->dst, this->srcc, this->dstc)) {
+			return false;
+		}
+
 		graph->removeAudioSrc2TrkConnection(
 			this->src, this->dst, this->srcc, this->dstc);
 
@@ -728,6 +778,10 @@ ActionRemoveSequencerSourceInstance::ActionRemoveSequencerSourceInstance(
 bool ActionRemoveSequencerSourceInstance::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto seqTrack = graph->getSourceProcessor(this->track)) {
+			if (this->seq < 0 || this->seq >= seqTrack->getSeqNum()) {
+				return false;
+			}
+
 			std::tie(this->start, this->end, this->offset, std::ignore, this->index)
 				= seqTrack->getSeq(this->seq);
 
@@ -767,6 +821,10 @@ ActionRemoveRecorderSourceInstance::ActionRemoveRecorderSourceInstance(int seq)
 bool ActionRemoveRecorderSourceInstance::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto recorder = graph->getRecorder()) {
+			if (this->seq < 0 || this->seq >= recorder->getTaskNum()) {
+				return false;
+			}
+
 			std::tie(std::ignore, this->index, this->offset)
 				= recorder->getTask(this->seq);
 

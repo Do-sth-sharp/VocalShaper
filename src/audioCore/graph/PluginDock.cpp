@@ -333,6 +333,27 @@ void PluginDock::removeAdditionalBusConnection(int pluginIndex, int srcChannel, 
 	this->additionalConnectionList.removeAllInstancesOf(connection);
 }
 
+bool PluginDock::isAdditionalBusConnected(int pluginIndex, int srcChannel, int dstChannel) const {
+	/** Limit Index */
+	if (pluginIndex < 0 || pluginIndex >= this->pluginNodeList.size()) {
+		return false;
+	}
+
+	/** Get Node ID */
+	auto nodeID = this->pluginNodeList.getUnchecked(pluginIndex)->nodeID;
+
+	/** Check Connection */
+	for (auto& i : this->additionalConnectionList) {
+		if (i.source.channelIndex == srcChannel &&
+			i.destination.nodeID == nodeID &&
+			i.destination.channelIndex == dstChannel) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 PluginDock::PluginStateList PluginDock::getPluginList() const {
 	PluginDock::PluginStateList result;
 

@@ -43,6 +43,7 @@ public:
 
 	void addAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel);
 	void removeAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel);
+	bool isAdditionalBusConnected(int pluginIndex, int srcChannel, int dstChannel) const;
 
 	using PluginState = std::tuple<juce::String, bool>;
 	using PluginStateList = juce::Array<PluginState>;
