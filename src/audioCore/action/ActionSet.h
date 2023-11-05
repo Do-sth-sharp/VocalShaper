@@ -433,3 +433,48 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetSourceSynthesizer)
 };
+
+class ActionSetAudioSaveBitsPerSample final : public ActionBase {
+public:
+	ActionSetAudioSaveBitsPerSample() = delete;
+	ActionSetAudioSaveBitsPerSample(
+		const juce::String& format, int bitPerSample);
+
+	bool doAction() override;
+
+private:
+	const juce::String format;
+	const int bitPerSample;
+
+	JUCE_LEAK_DETECTOR(ActionSetAudioSaveBitsPerSample)
+};
+
+class ActionSetAudioSaveMetaData final : public ActionBase {
+public:
+	ActionSetAudioSaveMetaData() = delete;
+	ActionSetAudioSaveMetaData(
+		const juce::String& format, const juce::StringPairArray& metaData);
+
+	bool doAction() override;
+
+private:
+	const juce::String format;
+	const juce::StringPairArray metaData;
+
+	JUCE_LEAK_DETECTOR(ActionSetAudioSaveMetaData)
+};
+
+class ActionSetAudioSaveQualityOptionIndex final : public ActionBase {
+public:
+	ActionSetAudioSaveQualityOptionIndex() = delete;
+	ActionSetAudioSaveQualityOptionIndex(
+		const juce::String& format, int quality);
+
+	bool doAction() override;
+
+private:
+	const juce::String format;
+	const int quality;
+
+	JUCE_LEAK_DETECTOR(ActionSetAudioSaveQualityOptionIndex)
+};

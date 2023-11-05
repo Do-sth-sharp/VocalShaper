@@ -187,13 +187,10 @@ AUDIOCORE_FUNC(setPlayPosition) {
 }
 
 AUDIOCORE_FUNC(setReturnToStart) {
-	juce::String result;
-
-	audioCore->setReturnToPlayStartPosition(lua_toboolean(L, 1));
-
-	result += "Set return to start position on play stop: " + juce::String(AudioCore::getInstance()->getReturnToPlayStartPosition() ? "ON" : "OFF") + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetReturnToStart{
+		(bool)lua_toboolean(L, 1) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setSourceSynthesizer) {
@@ -204,22 +201,13 @@ AUDIOCORE_FUNC(setSourceSynthesizer) {
 }
 
 AUDIOCORE_FUNC(setAudioSaveBitsPerSample) {
-	juce::String result;
-
-	juce::String format = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	int bitsPerSample = luaL_checkinteger(L, 2);
-
-	utils::AudioSaveConfig::getInstance()->setBitsPerSample(format, bitsPerSample);
-	
-	result += "Set audio save bits per sample: [" + format + "] " 
-		+ juce::String(utils::AudioSaveConfig::getInstance()->getBitsPerSample(format)) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveBitsPerSample{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setAudioSaveMetaData) {
-	juce::String result;
-
 	juce::String format = juce::String::fromUTF8(luaL_checkstring(L, 1));
 	juce::StringPairArray metaData;
 
@@ -233,31 +221,17 @@ AUDIOCORE_FUNC(setAudioSaveMetaData) {
 	}
 	lua_pop(L, 1);
 
-	utils::AudioSaveConfig::getInstance()->setMetaData(format, metaData);
-
-	metaData = utils::AudioSaveConfig::getInstance()->getMetaData(format);
-	auto& metaKeys = metaData.getAllKeys();
-	result += "Set audio save meta data: [" + format + "]\n";
-	for (auto& i : metaKeys) {
-		result += "    " + i + " : " + metaData.getValue(i, "") + "\n";
-	}
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveMetaData{
+		format, metaData });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setAudioSaveQualityOptionIndex) {
-	juce::String result;
-
-	juce::String format = juce::String::fromUTF8(luaL_checkstring(L, 1));
-	int qualityOptionIndex = luaL_checkinteger(L, 2);
-
-	utils::AudioSaveConfig::getInstance()
-		->setQualityOptionIndex(format, qualityOptionIndex);
-
-	result += "Set audio save quality option index: [" + format + "] "
-		+ juce::String(utils::AudioSaveConfig::getInstance()->getQualityOptionIndex(format)) + "\n";
-
-	return CommandFuncResult{ true, result };
+	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveQualityOptionIndex{
+		juce::String::fromUTF8(luaL_checkstring(L, 1)), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
 }
 
 void regCommandSet(lua_State* L) {

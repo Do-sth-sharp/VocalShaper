@@ -701,3 +701,49 @@ bool ActionSetSourceSynthesizer::doAction() {
 	this->output("Can't set synthesizer: [" + juce::String(this->index) + "] " + this->pid + "\n");
 	return false;
 }
+
+ActionSetAudioSaveBitsPerSample::ActionSetAudioSaveBitsPerSample(
+	const juce::String& format, int bitPerSample)
+	: format(format), bitPerSample(bitPerSample) {}
+
+bool ActionSetAudioSaveBitsPerSample::doAction() {
+	utils::AudioSaveConfig::getInstance()->setBitsPerSample(
+		this->format, this->bitPerSample);
+
+	this->output("Set audio save bits per sample: [" + this->format + "] "
+		+ juce::String(utils::AudioSaveConfig::getInstance()->getBitsPerSample(this->format)) + "\n");
+	return true;
+}
+
+ActionSetAudioSaveMetaData::ActionSetAudioSaveMetaData(
+	const juce::String& format, const juce::StringPairArray& metaData)
+	: format(format), metaData(metaData) {}
+
+bool ActionSetAudioSaveMetaData::doAction() {
+	utils::AudioSaveConfig::getInstance()->setMetaData(
+		this->format, this->metaData);
+
+	auto metaData = utils::AudioSaveConfig::getInstance()->getMetaData(this->format);
+	auto& metaKeys = metaData.getAllKeys();
+
+	juce::String result;
+	result += "Set audio save meta data: [" + this->format + "]\n";
+	for (auto& i : metaKeys) {
+		result += "    " + i + " : " + metaData.getValue(i, "") + "\n";
+	}
+	this->output(result);
+	return true;
+}
+
+ActionSetAudioSaveQualityOptionIndex::ActionSetAudioSaveQualityOptionIndex(
+	const juce::String& format, int quality)
+	: format(format), quality(quality) {}
+
+bool ActionSetAudioSaveQualityOptionIndex::doAction() {
+	utils::AudioSaveConfig::getInstance()
+		->setQualityOptionIndex(this->format, this->quality);
+
+	this->output("Set audio save quality option index: [" + this->format + "] "
+		+ juce::String(utils::AudioSaveConfig::getInstance()->getQualityOptionIndex(this->format)) + "\n");
+	return true;
+}
