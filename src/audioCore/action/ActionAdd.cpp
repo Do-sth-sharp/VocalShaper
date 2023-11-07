@@ -1,4 +1,5 @@
 ﻿#include "ActionAdd.h"
+#include "ActionUtils.h"
 
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
@@ -11,10 +12,10 @@ ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
 	: plugin(plugin) {}
 
 bool ActionAddPluginBlackList::doAction() {
-	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
-		this->output("Don't change plugin black list while searching plugin.");
-		return false;
-	}
+	ACTION_CHECK_PLUGIN_LOADING(
+		"Don't do this while loading plugin.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change plugin black list while searching plugin.");
 
 	Plugin::getInstance()->addToPluginBlackList(this->plugin);
 	this->output("Add to plugin black list.");
@@ -25,10 +26,10 @@ ActionAddPluginSearchPath::ActionAddPluginSearchPath(const juce::String& path)
 	: path(path) {}
 
 bool ActionAddPluginSearchPath::doAction() {
-	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
-		this->output("Don't change plugin search path while searching plugin.");
-		return false;
-	}
+	ACTION_CHECK_PLUGIN_LOADING(
+		"Don't do this while loading plugin.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change plugin search path while searching plugin.");
 
 	Plugin::getInstance()->addToPluginSearchPath(this->path);
 	this->output("Add to plugin search path.");
