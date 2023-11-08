@@ -1,4 +1,5 @@
 ﻿#include "ActionRemove.h"
+#include "ActionUtils.h"
 
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
@@ -11,6 +12,11 @@ ActionRemovePluginBlackList::ActionRemovePluginBlackList(
 	: path(path) {}
 
 bool ActionRemovePluginBlackList::doAction() {
+	ACTION_CHECK_PLUGIN_LOADING(
+		"Don't do this while loading plugin.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change plugin black list while searching plugin.");
+
 	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't change plugin black list while searching plugin.");
 		return false;
@@ -27,6 +33,11 @@ ActionRemovePluginSearchPath::ActionRemovePluginSearchPath(
 	: path(path) {}
 
 bool ActionRemovePluginSearchPath::doAction() {
+	ACTION_CHECK_PLUGIN_LOADING(
+		"Don't do this while loading plugin.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change plugin black list while searching plugin.");
+
 	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
 		this->output("Don't change plugin search path while searching plugin.");
 		return false;
@@ -42,6 +53,9 @@ ActionRemoveMixerTrack::ActionRemoveMixerTrack(int index)
 	: index(index) {}
 
 bool ActionRemoveMixerTrack::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Check Track */
 		if (this->index < 0 || this->index >= graph->getTrackNum()) { return false; }
@@ -82,6 +96,9 @@ bool ActionRemoveMixerTrack::doAction() {
 }
 
 bool ActionRemoveMixerTrack::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Prepare Track State */
 		auto state = std::make_unique<vsp4::MixerTrack>();
@@ -149,6 +166,9 @@ ActionRemoveMixerTrackSend::ActionRemoveMixerTrackSend(
 	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
 
 bool ActionRemoveMixerTrackSend::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isAudioTrk2TrkConnected(
 			this->src, this->dst, this->srcc, this->dstc)) {
@@ -165,6 +185,9 @@ bool ActionRemoveMixerTrackSend::doAction() {
 }
 
 bool ActionRemoveMixerTrackSend::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setAudioTrk2TrkConnection(
 			this->src, this->dst, this->srcc, this->dstc);
@@ -180,6 +203,9 @@ ActionRemoveMixerTrackInputFromDevice::ActionRemoveMixerTrackInputFromDevice(
 	: srcc(srcc), dst(dst), dstc(dstc) {}
 
 bool ActionRemoveMixerTrackInputFromDevice::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isAudioI2TrkConnected(
 			this->dst, this->srcc, this->dstc)) {
@@ -196,6 +222,9 @@ bool ActionRemoveMixerTrackInputFromDevice::doAction() {
 }
 
 bool ActionRemoveMixerTrackInputFromDevice::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setAudioI2TrkConnection(
 			this->dst, this->srcc, this->dstc);
@@ -211,6 +240,9 @@ ActionRemoveMixerTrackOutput::ActionRemoveMixerTrackOutput(
 	: src(src), srcc(srcc), dstc(dstc) {}
 
 bool ActionRemoveMixerTrackOutput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isAudioTrk2OConnected(
 			this->src, this->srcc, this->dstc)) {
@@ -227,6 +259,9 @@ bool ActionRemoveMixerTrackOutput::doAction() {
 }
 
 bool ActionRemoveMixerTrackOutput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setAudioTrk2OConnection(
 			this->src, this->srcc, this->dstc);
@@ -242,6 +277,9 @@ ActionRemoveEffect::ActionRemoveEffect(
 	: track(track), effect(effect) {}
 
 bool ActionRemoveEffect::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto dock = track->getPluginDock()) {
@@ -275,6 +313,13 @@ bool ActionRemoveEffect::doAction() {
 }
 
 bool ActionRemoveEffect::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_PLUGIN_LOADING(
+		"Don't do this while loading plugin.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change plugin black list while searching plugin.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto dock = track->getPluginDock()) {
@@ -310,6 +355,9 @@ ActionRemoveEffectAdditionalInput::ActionRemoveEffectAdditionalInput(
 	: track(track), effect(effect), srcc(srcc), dstc(dstc) {}
 
 bool ActionRemoveEffectAdditionalInput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
@@ -329,6 +377,9 @@ bool ActionRemoveEffectAdditionalInput::doAction() {
 }
 
 bool ActionRemoveEffectAdditionalInput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
@@ -346,6 +397,9 @@ ActionRemoveInstr::ActionRemoveInstr(int index)
 	: index(index) {}
 
 bool ActionRemoveInstr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Check Instr */
 		if (this->index < 0 || this->index >= graph->getInstrumentNum()) { return false; }
@@ -377,6 +431,13 @@ bool ActionRemoveInstr::doAction() {
 }
 
 bool ActionRemoveInstr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_PLUGIN_LOADING(
+		"Don't do this while loading plugin.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change plugin black list while searching plugin.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Prepare Instr State */
 		auto state = std::make_unique<vsp4::Plugin>();
@@ -417,6 +478,9 @@ ActionRemoveInstrOutput::ActionRemoveInstrOutput(
 	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
 
 bool ActionRemoveInstrOutput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isAudioInstr2TrkConnected(
 			this->src, this->dst, this->srcc, this->dstc)) {
@@ -434,6 +498,9 @@ bool ActionRemoveInstrOutput::doAction() {
 }
 
 bool ActionRemoveInstrOutput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setAudioInstr2TrkConnection(
 			this->src, this->dst, this->srcc, this->dstc);
@@ -449,6 +516,9 @@ ActionRemoveInstrMidiInput::ActionRemoveInstrMidiInput(int dst)
 	: dst(dst) {}
 
 bool ActionRemoveInstrMidiInput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isMIDII2InstrConnected(this->dst)) {
 			return false;
@@ -464,6 +534,9 @@ bool ActionRemoveInstrMidiInput::doAction() {
 }
 
 bool ActionRemoveInstrMidiInput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setMIDII2InstrConnection(this->dst);
 
@@ -479,6 +552,9 @@ ActionRemoveInstrParamCCConnection::ActionRemoveInstrParamCCConnection(
 	: instr(instr), cc(cc) {}
 
 bool ActionRemoveInstrParamCCConnection::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
 			this->param = instr->getCCParamConnection(this->cc);
@@ -493,6 +569,9 @@ bool ActionRemoveInstrParamCCConnection::doAction() {
 }
 
 bool ActionRemoveInstrParamCCConnection::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
 			instr->connectParamCC(this->param, this->cc);
@@ -509,6 +588,9 @@ ActionRemoveEffectParamCCConnection::ActionRemoveEffectParamCCConnection(
 	: track(track), effect(effect), cc(cc) {}
 
 bool ActionRemoveEffectParamCCConnection::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
@@ -527,6 +609,9 @@ bool ActionRemoveEffectParamCCConnection::doAction() {
 }
 
 bool ActionRemoveEffectParamCCConnection::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
@@ -546,6 +631,9 @@ ActionRemoveMixerTrackMidiInput::ActionRemoveMixerTrackMidiInput(int index)
 	: index(index) {}
 
 bool ActionRemoveMixerTrackMidiInput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isMIDII2TrkConnected(this->index)) {
 			return false;
@@ -560,6 +648,9 @@ bool ActionRemoveMixerTrackMidiInput::doAction() {
 }
 
 bool ActionRemoveMixerTrackMidiInput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setMIDII2TrkConnection(this->index);
 
@@ -573,6 +664,9 @@ ActionRemoveMixerTrackMidiOutput::ActionRemoveMixerTrackMidiOutput(int index)
 	: index(index) {}
 
 bool ActionRemoveMixerTrackMidiOutput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isMIDITrk2OConnected(this->index)) {
 			return false;
@@ -587,6 +681,9 @@ bool ActionRemoveMixerTrackMidiOutput::doAction() {
 }
 
 bool ActionRemoveMixerTrackMidiOutput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setMIDITrk2OConnection(this->index);
 
@@ -600,6 +697,11 @@ ActionRemoveSource::ActionRemoveSource(int index)
 	: index(index) {}
 
 bool ActionRemoveSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_SOURCE_IO_RUNNING(
+		"Don't do this while source IO running.");
+
 	if (auto manager = CloneableSourceManager::getInstance()) {
 		manager->removeSource(this->index);
 		this->output("Total Source Num: " + juce::String(manager->getSourceNum()) + "\n");
@@ -612,6 +714,9 @@ ActionRemoveSequencerTrack::ActionRemoveSequencerTrack(int index)
 	: index(index) {}
 
 bool ActionRemoveSequencerTrack::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Check Track */
 		if (this->index < 0 || this->index >= graph->getSourceNum()) { return false; }
@@ -646,6 +751,9 @@ bool ActionRemoveSequencerTrack::doAction() {
 }
 
 bool ActionRemoveSequencerTrack::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Prepare Track State */
 		auto state = std::make_unique<vsp4::SeqTrack>();
@@ -689,6 +797,9 @@ ActionRemoveSequencerTrackMidiOutputToMixer::ActionRemoveSequencerTrackMidiOutpu
 	: src(src), dst(dst) {}
 
 bool ActionRemoveSequencerTrackMidiOutputToMixer::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isMIDISrc2TrkConnected(this->src, this->dst)) {
 			return false;
@@ -703,6 +814,9 @@ bool ActionRemoveSequencerTrackMidiOutputToMixer::doAction() {
 }
 
 bool ActionRemoveSequencerTrackMidiOutputToMixer::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setMIDISrc2TrkConnection(this->src, this->dst);
 
@@ -717,6 +831,9 @@ ActionRemoveSequencerTrackMidiOutputToInstr::ActionRemoveSequencerTrackMidiOutpu
 	: src(src), dst(dst) {}
 
 bool ActionRemoveSequencerTrackMidiOutputToInstr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isMIDISrc2InstrConnected(this->src, this->dst)) {
 			return false;
@@ -731,6 +848,9 @@ bool ActionRemoveSequencerTrackMidiOutputToInstr::doAction() {
 }
 
 bool ActionRemoveSequencerTrackMidiOutputToInstr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setMIDISrc2InstrConnection(this->src, this->dst);
 
@@ -745,6 +865,9 @@ ActionRemoveSequencerTrackOutput::ActionRemoveSequencerTrackOutput(
 	: src(src), srcc(srcc), dst(dst), dstc(dstc) {}
 
 bool ActionRemoveSequencerTrackOutput::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (!graph->isAudioSrc2TrkConnected(
 			this->src, this->dst, this->srcc, this->dstc)) {
@@ -761,6 +884,9 @@ bool ActionRemoveSequencerTrackOutput::doAction() {
 }
 
 bool ActionRemoveSequencerTrackOutput::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setAudioSrc2TrkConnection(
 			this->src, this->dst, this->srcc, this->dstc);
@@ -776,6 +902,11 @@ ActionRemoveSequencerSourceInstance::ActionRemoveSequencerSourceInstance(
 	: track(track), seq(seq) {}
 
 bool ActionRemoveSequencerSourceInstance::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_SOURCE_IO_RUNNING(
+		"Don't do this while source IO running.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto seqTrack = graph->getSourceProcessor(this->track)) {
 			if (this->seq < 0 || this->seq >= seqTrack->getSeqNum()) {
@@ -798,6 +929,11 @@ bool ActionRemoveSequencerSourceInstance::doAction() {
 }
 
 bool ActionRemoveSequencerSourceInstance::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_SOURCE_IO_RUNNING(
+		"Don't do this while source IO running.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto seqTrack = graph->getSourceProcessor(this->track)) {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(this->index);
@@ -819,6 +955,11 @@ ActionRemoveRecorderSourceInstance::ActionRemoveRecorderSourceInstance(int seq)
 	: seq(seq) {}
 
 bool ActionRemoveRecorderSourceInstance::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_SOURCE_IO_RUNNING(
+		"Don't do this while source IO running.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto recorder = graph->getRecorder()) {
 			if (this->seq < 0 || this->seq >= recorder->getTaskNum()) {
@@ -841,6 +982,11 @@ bool ActionRemoveRecorderSourceInstance::doAction() {
 }
 
 bool ActionRemoveRecorderSourceInstance::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_SOURCE_IO_RUNNING(
+		"Don't do this while source IO running.");
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto recorder = graph->getRecorder()) {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(this->index);
