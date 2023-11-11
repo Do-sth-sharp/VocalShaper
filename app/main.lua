@@ -1,7 +1,6 @@
 ﻿require "luce.Debug"
 require "luce.Colours"
 require "luce.FlowComponent"
-require "luce.FlowWindow"
 require "luce.ResizableWindow"
 
 luce.initialise = function(commandLineParameters)
@@ -59,8 +58,8 @@ luce.initialise = function(commandLineParameters)
 	midiDebugger = require("ui.MIDIDebugger")
 
 	-- Auto Layout Flow Components
-	luce.FlowWindow.layout("./layouts/" .. conf.layout .. ".json",
-		toolBar, resourceView, patternView, trackView, audioDebugger, midiDebugger)
+	luce.FlowWindow.autoLayout("./layouts/" .. conf.layout .. ".json",
+		{ toolBar, resourceView, patternView, trackView, audioDebugger, midiDebugger })
 
 	-- Set Main Window Full Screen
 	local windowNum = luce.FlowWindow.getWindowNum()
@@ -68,6 +67,11 @@ luce.initialise = function(commandLineParameters)
 		local mainWindow = luce.FlowWindow.getWindow(0)
 		mainWindow:setFullScreen(true)
 	end
+
+	-- Test Layout Save
+	--[[ luce.FlowWindow.saveLayout("./layouts/test.json",
+		{ toolBar, resourceView, patternView, trackView, audioDebugger, midiDebugger })
+	--]]
 end
 
 luce.shutdown = function()

@@ -1,27 +1,21 @@
 ﻿{
+	"toolBar": {
+		"id": 0,
+		"size": 0.075
+	},
 	"window": [
 		{
 			"grid": {
-				"vertical": true,
-				"size": [ 0.1, 0.9 ],
+				"vertical": false,
+				"size": [ 0.2, 0.8 ],
 				"unit": [
 					{
 						"vertical": false,
-						"id": [ 0 ]
+						"id": [ 1, 2 ]
 					},
 					{
-						"vertical": false,
-						"size": [ 0.2, 0.8 ],
-						"unit": [
-							{
-								"vertical": false,
-								"id": [ 1, 2 ]
-							},
-							{
-								"vertical": true,
-								"id": [ 3 ]
-							}
-						]
+						"vertical": true,
+						"id": [ 3 ]
 					}
 				]
 			}
