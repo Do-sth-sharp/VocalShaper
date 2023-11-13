@@ -1,4 +1,4 @@
-# Prerequisites
+﻿# Prerequisites
 *.d
 
 # Compiled Object files
@@ -63,7 +63,10 @@ app/RemixIcon/**
 app/lua/luce/**
 
 # App Datas
-app/data/**
+app/data/audio/plugins.xml
+app/data/audio/pluginPaths.txt
+app/data/audio/blackPlugins.txt
+app/data/audio/deadPlugins/**
 app/*.mid
 app/*.wav
 app/*.mp3

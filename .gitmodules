@@ -1,6 +1,3 @@
-[submodule "LUCE-cpp"]
-	path = LUCE-cpp
-	url = https://github.com/FangCunWuChang/LUCE-cpp.git
 [submodule "RemixIcon"]
 	path = RemixIcon
 	url = https://github.com/Remix-Design/RemixIcon.git
@@ -25,3 +22,12 @@
 [submodule "VocalShaperProject4"]
 	path = VocalShaperProject4
 	url = https://github.com/Do-sth-sharp/VocalShaperProject4.git
+[submodule "JUCE"]
+	path = JUCE
+	url = https://github.com/juce-framework/JUCE.git
+[submodule "lua"]
+	path = lua
+	url = https://github.com/lua/lua.git
+[submodule "FlowUI"]
+	path = FlowUI
+	url = https://github.com/FangCunWuChang/FlowUI.git

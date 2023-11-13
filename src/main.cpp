@@ -1,10 +1,20 @@
-﻿#include <LUCE.h>
+﻿#include <JuceHeader.h>
 #include "audioCore/AC_API.h"
 
-LUCE_APPLICATION("VocalShaper", "0.0.1", false, "main.lua", {
-			luce::loadCore(L);
-			luce::loadGUI(L);
-			luce::loadGraphics(L);
-			luce::loadFlowUI(L);
-			luce::loadAudioCore(L);
-	});
+class MainApplication : public juce::JUCEApplication {
+public:
+	const juce::String getApplicationName() override {
+		return utils::getAudioPlatformName(); };
+	const juce::String getApplicationVersion() override {
+		return utils::getAudioPlatformVersionString(); };
+	bool moreThanOneInstanceAllowed() override { return false; };
+
+	void initialise(const juce::String& commandLineParameters) override {
+		//TODO
+	};
+	void shutdown() override {
+		//TODO
+	};
+};
+
+START_JUCE_APPLICATION(MainApplication)

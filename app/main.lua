@@ -6,7 +6,8 @@ require "luce.ResizableWindow"
 luce.initialise = function(commandLineParameters)
 	-- Load Config And Theme
 	conf = require("ui.Config")
-	ui = require("ui.themes." .. conf.theme)
+	--confFile = io.open("./data/config/startup.json", "r")
+	--ui = require("ui.themes." .. conf.theme)
 
 	-- Set Audio Config
 	luce.AudioCore.setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt")

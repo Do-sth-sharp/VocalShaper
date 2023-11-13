@@ -26,18 +26,22 @@ set (JUCE_CUSTOM_VST3_SDK ON)
 set (JUCE_USE_MP3AUDIOFORMAT ON)
 set (JUCE_USE_LAME_AUDIO_FORMAT ON)
 
+set (JUCE_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/JUCE")
 set (ASIO_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asiosdk_2.3.3_2019-06-14/common")
 set (VST_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst2-sdk-for-vst3sdk")
 set (VST3_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst3sdk")
 
+set (JUCE_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
 set (SYNTH_ENGINE_DEMO_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/app/synth-engines")
 set (LAME_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
 set (VSP4_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
+set (FLOWUI_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
 
-add_subdirectory (LUCE-cpp)
+add_subdirectory (JuceLibraryCode)
 add_subdirectory (SynthEngineDemo)
 add_subdirectory (cmake-lame)
 add_subdirectory (VocalShaperProject4)
+add_subdirectory (FlowUI)
 
 # Mackie Control
 set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
@@ -46,6 +50,13 @@ file (GLOB_RECURSE MACKIECONTROL_SRC CONFIGURE_DEPENDS "${MACKIECONTROL_SRC_PATH
 # DMDA
 set (DMDA_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libDMDA")
 set (DMDA_SRC "${DMDA_SRC_PATH}/DMDA.cpp")
+
+# Lua Target
+add_library (libLua SHARED lua/onelua.c)
+target_compile_definitions (libLua PUBLIC "LUA_BUILD_AS_DLL=1")
+target_include_directories (libLua PUBLIC "lua")
+
+set_target_properties (libLua PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
 
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
@@ -62,9 +73,13 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMA
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
-target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH})
-target_compile_definitions (VocalShaper PRIVATE "LUCE_DLL=1" "VSP4_DLL=1")
-target_link_libraries (VocalShaper PRIVATE libLUCE libvsp4)
-add_dependencies (VocalShaper libLUCE PluginSearcher SynthEngineDemo lame)
+target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH} "./src")
+target_compile_definitions (VocalShaper PRIVATE "VSP4_DLL=1")
+target_compile_definitions (VocalShaper PRIVATE "JUCE_DONT_DECLARE_PROJECTINFO=1")
+if (MSVC)
+    target_compile_definitions (VocalShaper PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
+endif (MSVC)
+target_link_libraries (VocalShaper PRIVATE libJUCE libFlowUI libLua libvsp4)
+add_dependencies (VocalShaper libJUCE libFlowUI libLua PluginSearcher SynthEngineDemo lame)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
