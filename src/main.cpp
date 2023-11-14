@@ -5,6 +5,7 @@
 #include "ui/misc/ColorMap.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
+#include "ui/lookAndFeel/LookAndFeelFactory.h"
 
 class MainApplication : public juce::JUCEApplication {
 private:
@@ -67,65 +68,33 @@ public:
 
 		/** Set FlowUI Color */
 		flowUI::FlowStyle::setTitleBackgroundColor(
-			ColorMap::getInstance()->get("ThemeColorB3"));
+			ColorMap::getInstance()->get("ThemeColorB2"));
 		flowUI::FlowStyle::setTitleHighlightColor(
-			ColorMap::getInstance()->get("ThemeColorB4"));
+			ColorMap::getInstance()->get("ThemeColorB1"));
 		flowUI::FlowStyle::setTitleBorderColor(
 			ColorMap::getInstance()->get("ThemeColorA2"));
 		flowUI::FlowStyle::setTitleSplitColor(
-			ColorMap::getInstance()->get("ThemeColorD4"));
+			ColorMap::getInstance()->get("ThemeColorB7"));
 		flowUI::FlowStyle::setTitleTextColor(
-			ColorMap::getInstance()->get("ThemeColorD2"));
+			ColorMap::getInstance()->get("ThemeColorB10"));
 		flowUI::FlowStyle::setTitleTextHighlightColor(
-			ColorMap::getInstance()->get("ThemeColorD1"));
+			ColorMap::getInstance()->get("ThemeColorB10"));
 
 		flowUI::FlowStyle::setResizerColor(
-			ColorMap::getInstance()->get("ThemeColorA1"));
+			ColorMap::getInstance()->get("ThemeColorB3"));
 
 		flowUI::FlowStyle::setContainerBorderColor(
-			ColorMap::getInstance()->get("ThemeColorB1"));
+			ColorMap::getInstance()->get("ThemeColorB3"));
 
 		flowUI::FlowStyle::setButtonIconColor(
-			ColorMap::getInstance()->get("ThemeColorD2"));
+			ColorMap::getInstance()->get("ThemeColorB9"));
 		flowUI::FlowStyle::setButtonIconBackgroundColor(
-			ColorMap::getInstance()->get("ThemeColorD4"));
+			ColorMap::getInstance()->get("ThemeColorB7").withAlpha(0.3f));
 		flowUI::FlowStyle::setAdsorbColor(
-			ColorMap::getInstance()->get("ThemeColorE3"));
+			ColorMap::getInstance()->get("ThemeColorA2").withAlpha(0.3f));
 
-		/** Set Menu Color */
-		auto& laf = juce::Desktop::getInstance().getDefaultLookAndFeel();
-		laf.setColour(juce::PopupMenu::ColourIds::backgroundColourId,
-			ColorMap::getInstance()->get("ThemeColorB4"));
-		laf.setColour(juce::PopupMenu::ColourIds::textColourId,
-			ColorMap::getInstance()->get("ThemeColorD2"));
-		laf.setColour(juce::PopupMenu::ColourIds::headerTextColourId,
-			ColorMap::getInstance()->get("ThemeColorD2"));
-		laf.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId,
-			ColorMap::getInstance()->get("ThemeColorB3"));
-		laf.setColour(juce::PopupMenu::ColourIds::highlightedTextColourId,
-			ColorMap::getInstance()->get("ThemeColorD2"));
-
-		/** Set Alert Color */
-		laf.setColour(juce::AlertWindow::ColourIds::backgroundColourId,
-			ColorMap::getInstance()->get("ThemeColorB3"));
-		laf.setColour(juce::AlertWindow::ColourIds::textColourId,
-			ColorMap::getInstance()->get("ThemeColorD2"));
-		laf.setColour(juce::AlertWindow::ColourIds::outlineColourId,
-			ColorMap::getInstance()->get("ThemeColorB3"));
-		laf.setColour(juce::TextButton::ColourIds::buttonColourId,
-			ColorMap::getInstance()->get("ThemeColorA2"));
-		laf.setColour(juce::TextButton::ColourIds::buttonOnColourId,
-			ColorMap::getInstance()->get("ThemeColorA2"));
-		laf.setColour(juce::TextButton::ColourIds::textColourOffId,
-			ColorMap::getInstance()->get("ThemeColorD1"));
-		laf.setColour(juce::TextButton::ColourIds::textColourOnId,
-			ColorMap::getInstance()->get("ThemeColorD1"));
-		laf.setColour(juce::ComboBox::ColourIds::outlineColourId,
-			juce::Colour::fromRGBA(0, 0, 0, 0));
-
-		/** Set Window Background Color */
-		laf.setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-			ColorMap::getInstance()->get("ThemeColorB2"));
+		/** Init Default LookAndFeel */
+		LookAndFeelFactory::getInstance()->initialise();
 
 		/** Set FlowUI Button Icon */
 		flowUI::FlowStyle::setButtonLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
@@ -173,7 +142,7 @@ public:
 			fontStream->read(ptrFontData.get(), fontSize);
 
 			auto ptrTypeface = juce::Typeface::createSystemTypefaceFor(ptrFontData.get(), fontSize);
-			laf.setDefaultSansSerifTypeface(ptrTypeface);
+			LookAndFeelFactory::getInstance()->setDefaultSansSerifTypeface(ptrTypeface);
 		}
 
 		/** Create Components */
