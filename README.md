@@ -66,7 +66,6 @@ set CXX=cl
 set ASM=cl
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -B out/build/x64-Debug .
 ninja -C out/build/x64-Debug -j 8 VocalShaper
-.\linkLibd.bat
 ```
 
 ### Windows Release (MSVC)
@@ -77,7 +76,6 @@ set CXX=cl
 set ASM=cl
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -B out/build/x64-Release .
 ninja -C out/build/x64-Release -j 8 VocalShaper
-.\linkLib.bat
 ```
 
 ## Run
