@@ -5,7 +5,7 @@
 [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/open-source.svg)](https://github.com/BraveUX/for-the-badge/)
 [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/powered-by-black-magic.svg)](https://github.com/BraveUX/for-the-badge/)
   
-A JUCE-based(LUCE) Open Source DAW. **Under development, not released.**  
+A JUCE-based Open Source DAW. **Under development, not released.**  
 
 ## Supported Technologies
 ### Audio Plugins
