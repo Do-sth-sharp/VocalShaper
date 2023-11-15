@@ -7,17 +7,12 @@
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
 #include "ui/component/ToolBar.h"
+#include "ui/component/Splash.h"
+#include "ui/component/CompManager.h"
 
 class MainApplication : public juce::JUCEApplication {
 private:
-	std::unique_ptr<flowUI::FlowComponent>
-		startMenu = nullptr,
-		resourceView = nullptr,
-		patternView = nullptr,
-		trackView = nullptr;
-	std::unique_ptr<AudioDebuggerComponent> audioDebugger = nullptr;
-	std::unique_ptr<MidiDebuggerComponent> midiDebugger = nullptr;
-	std::unique_ptr<ToolBar> toolBar = nullptr;
+	std::unique_ptr<Splash> splash = nullptr;
 
 public:
 	const juce::String getApplicationName() override {
@@ -27,7 +22,13 @@ public:
 	bool moreThanOneInstanceAllowed() override { return false; };
 
 	void initialise(const juce::String& commandLineParameters) override {
+		/** Show Splash */
+		this->splash = std::make_unique<Splash>();
+		this->splash->setVisible(true);
+
 		/** Get Config */
+		this->splash->showMessage("Load StartUp Configs...");
+
 		juce::File configFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
 			.getParentDirectory().getChildFile("./data/config/startup.json");
 		auto configData = juce::JSON::parse(configFile);
@@ -39,109 +40,188 @@ public:
 		}
 
 		/** Set Audio Config */
-		quickAPI::setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt");
-		quickAPI::setPluginListTemporaryFilePath("./data/audio/plugins.xml");
-		quickAPI::setPluginBlackListFilePath("./data/audio/blackPlugins.txt");
-		quickAPI::setDeadPluginListPath("./data/audio/deadPlugins");
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Set Audio Configs..."); }
 
-		{
-			/** Get Color Map */
-			juce::String themeName = configData["theme"].toString();
-			juce::File colorMapFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
-				.getParentDirectory().getChildFile("./themes/" + themeName + "/colors.json");
-			auto colorMapData = juce::JSON::parse(colorMapFile);
-			if (!colorMapData.isObject()) {
-				juce::AlertWindow::showMessageBox(
-					juce::MessageBoxIconType::WarningIcon, "VocalShaper Fatal Error",
-					"Can't load theme!");
-				juce::JUCEApplication::quit();
+				quickAPI::setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt");
+				quickAPI::setPluginListTemporaryFilePath("./data/audio/plugins.xml");
+				quickAPI::setPluginBlackListFilePath("./data/audio/blackPlugins.txt");
+				quickAPI::setDeadPluginListPath("./data/audio/deadPlugins");
 			}
+		);
+		
+		/** Load Theme Colors */
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get()),
+			themeName = configData["theme"].toString()] {
+				if (splash) { splash->showMessage("Load Theme Colors..."); }
 
-			/** Set Global Color Map */
-			if (auto pColorObj = colorMapData.getDynamicObject()) {
-				auto& colorSet = pColorObj->getProperties();
-				for (auto& i : colorSet) {
-					ColorMap::getInstance()->set(
-						i.name.toString(), ColorMap::fromString(i.value.toString()));
+				/** Get Color Map */
+				juce::File colorMapFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+					.getParentDirectory().getChildFile("./themes/" + themeName + "/colors.json");
+				auto colorMapData = juce::JSON::parse(colorMapFile);
+				if (!colorMapData.isObject()) {
+					juce::AlertWindow::showMessageBox(
+						juce::MessageBoxIconType::WarningIcon, "VocalShaper Fatal Error",
+						"Can't load theme!");
+					juce::JUCEApplication::quit();
+				}
+
+				/** Set Global Color Map */
+				if (auto pColorObj = colorMapData.getDynamicObject()) {
+					auto& colorSet = pColorObj->getProperties();
+					for (auto& i : colorSet) {
+						ColorMap::getInstance()->set(
+							i.name.toString(), ColorMap::fromString(i.value.toString()));
+					}
 				}
 			}
-		}
+		);
 
 		/** Init Default LookAndFeel */
-		LookAndFeelFactory::getInstance()->initialise();
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Init Default LooakAndFeel..."); }
+
+				LookAndFeelFactory::getInstance()->initialise();
+			}
+		);
 
 		/** Set FlowUI Button Icon */
-		flowUI::FlowStyle::setButtonLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
-		flowUI::FlowStyle::setButtonRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
-		flowUI::FlowStyle::setButtonTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
-		flowUI::FlowStyle::setButtonBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
-		flowUI::FlowStyle::setButtonAdsorbCenterIcon("./RemixIcon/Editor/link.svg");
-		flowUI::FlowStyle::setButtonAdsorbLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
-		flowUI::FlowStyle::setButtonAdsorbRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
-		flowUI::FlowStyle::setButtonAdsorbTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
-		flowUI::FlowStyle::setButtonAdsorbBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Set FlowUI Button Icons..."); }
+
+				flowUI::FlowStyle::setButtonLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
+				flowUI::FlowStyle::setButtonRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
+				flowUI::FlowStyle::setButtonTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
+				flowUI::FlowStyle::setButtonBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
+				flowUI::FlowStyle::setButtonAdsorbCenterIcon("./RemixIcon/Editor/link.svg");
+				flowUI::FlowStyle::setButtonAdsorbLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
+				flowUI::FlowStyle::setButtonAdsorbRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
+				flowUI::FlowStyle::setButtonAdsorbTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
+				flowUI::FlowStyle::setButtonAdsorbBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
+			}
+		);
 
 		/** Set Flow Window Icon */
-		flowUI::FlowWindowHub::setIcon("./rc/logo.png");
-		flowUI::FlowWindowHub::setOpenGL(true);
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Config FlowUI Window..."); }
+
+				flowUI::FlowWindowHub::setIcon("./rc/logo.png");
+				flowUI::FlowWindowHub::setOpenGL(true);
+			}
+		);
 
 		/** Load UI Translate */
-		{
-			juce::File transDir = juce::File::getSpecialLocation(
-				juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-				.getChildFile("./translates/" + configData["language"].toString() + "/");
-			auto transList = transDir.findChildFiles(juce::File::findFiles, true, "*.txt");
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get()),
+			transName = configData["language"].toString()] {
+				if (splash) { splash->showMessage("Load UI Translations..."); }
 
-			if (transList.size() > 0) {
-				auto trans = new juce::LocalisedStrings(transList.getReference(0), true);
+				juce::File transDir = juce::File::getSpecialLocation(
+					juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
+					.getChildFile("./translates/" + transName + "/");
+				auto transList = transDir.findChildFiles(juce::File::findFiles, true, "*.txt");
 
-				for (int i = 1; i < transList.size(); i++) {
-					trans->addStrings(juce::LocalisedStrings(transList.getReference(i), true));
+				if (transList.size() > 0) {
+					auto trans = new juce::LocalisedStrings(transList.getReference(0), true);
+
+					for (int i = 1; i < transList.size(); i++) {
+						trans->addStrings(juce::LocalisedStrings(transList.getReference(i), true));
+					}
+
+					juce::LocalisedStrings::setCurrentMappings(trans);
 				}
-
-				juce::LocalisedStrings::setCurrentMappings(trans);
 			}
-		}
+		);
 
 		/** Set UI Font */
-		{
-			juce::File fontFile = juce::File::getSpecialLocation(
-				juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-				.getChildFile("./fonts/" + configData["font"].toString() + ".ttf");
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get()),
+			fontName = configData["font"].toString()] {
+				if (splash) { splash->showMessage("Set UI Fonts..."); }
 
-			auto fontSize = fontFile.getSize();
-			auto ptrFontData = std::unique_ptr<char[]>(new char[fontSize]);
+				juce::File fontFile = juce::File::getSpecialLocation(
+					juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
+					.getChildFile("./fonts/" + fontName + ".ttf");
 
-			auto fontStream = fontFile.createInputStream();
-			fontStream->read(ptrFontData.get(), fontSize);
+				auto fontSize = fontFile.getSize();
+				auto ptrFontData = std::unique_ptr<char[]>(new char[fontSize]);
 
-			auto ptrTypeface = juce::Typeface::createSystemTypefaceFor(ptrFontData.get(), fontSize);
-			LookAndFeelFactory::getInstance()->setDefaultSansSerifTypeface(ptrTypeface);
-		}
+				auto fontStream = fontFile.createInputStream();
+				fontStream->read(ptrFontData.get(), fontSize);
+
+				auto ptrTypeface = juce::Typeface::createSystemTypefaceFor(ptrFontData.get(), fontSize);
+				LookAndFeelFactory::getInstance()->setDefaultSansSerifTypeface(ptrTypeface);
+			}
+		);
 
 		/** Create Components */
-		this->startMenu = std::make_unique<flowUI::FlowComponent>(TRANS("StartMenu"));
-		this->toolBar = std::make_unique<ToolBar>();
-		this->resourceView = std::make_unique<flowUI::FlowComponent>(TRANS("Resource"));
-		this->patternView = std::make_unique<flowUI::FlowComponent>(TRANS("Pattern"));
-		this->trackView = std::make_unique<flowUI::FlowComponent>(TRANS("Track"));
-		this->audioDebugger = std::make_unique<AudioDebuggerComponent>();
-		this->midiDebugger = std::make_unique<MidiDebuggerComponent>();
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Create Components..."); }
+
+				CompManager::getInstance()->set(CompManager::CompType::StartMenu,
+					std::make_unique<flowUI::FlowComponent>(TRANS("StartMenu")));
+				CompManager::getInstance()->set(CompManager::CompType::ToolBar,
+					std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
+				CompManager::getInstance()->set(CompManager::CompType::ResourceView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Resource")));
+				CompManager::getInstance()->set(CompManager::CompType::PatternView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Pattern")));
+				CompManager::getInstance()->set(CompManager::CompType::TrackView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
+				CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
+					std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
+				CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,
+					std::unique_ptr<flowUI::FlowComponent>(new MidiDebuggerComponent));
+			}
+		);
 
 		/** Auto Layout */
-		flowUI::FlowWindowHub::autoLayout(
-			"./layouts/" + configData["layout"].toString() + ".json",
-			juce::Array<flowUI::FlowComponent*>{
-				this->toolBar.get(), this->resourceView.get(),
-				this->patternView.get(), this->trackView.get(),
-				this->audioDebugger.get(), this->midiDebugger.get()});
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get()),
+			layoutName = configData["layout"].toString()] {
+				if (splash) { splash->showMessage("Auto Layout Components..."); }
+
+				flowUI::FlowWindowHub::autoLayout(
+					"./layouts/" + layoutName + ".json",
+					juce::Array<flowUI::FlowComponent*>{
+						CompManager::getInstance()->get(CompManager::CompType::ToolBar),
+						CompManager::getInstance()->get(CompManager::CompType::ResourceView),
+						CompManager::getInstance()->get(CompManager::CompType::PatternView),
+						CompManager::getInstance()->get(CompManager::CompType::TrackView),
+						CompManager::getInstance()->get(CompManager::CompType::AudioDebugger),
+						CompManager::getInstance()->get(CompManager::CompType::MidiDebugger),
+				});
+			}
+		);
 
 		/** Set Main Window Size */
-		if (flowUI::FlowWindowHub::getSize() > 0) {
-			if (auto window = flowUI::FlowWindowHub::getWindow(0)) {
-				window->setFullScreen(true);
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Set Main Window Size..."); }
+
+				if (flowUI::FlowWindowHub::getSize() > 0) {
+					if (auto window = flowUI::FlowWindowHub::getWindow(0)) {
+						window->setFullScreen(true);
+					}
+				}
 			}
-		}
+		);
+
+		/** Hide Splash */
+		juce::MessageManager::callAsync(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) {
+					splash->showMessage("Ready.");
+					splash->ready();
+				}
+			}
+		);
 	};
 
 	void shutdown() override {
@@ -149,13 +229,7 @@ public:
 		flowUI::FlowWindowHub::shutdown();
 
 		/** Release Components */
-		this->startMenu = nullptr;
-		this->toolBar = nullptr;
-		this->resourceView = nullptr;
-		this->patternView = nullptr;
-		this->trackView = nullptr;
-		this->audioDebugger = nullptr;
-		this->midiDebugger = nullptr;
+		CompManager::releaseInstance();
 
 		/** ShutDown Backend */
 		shutdownAudioCore();
