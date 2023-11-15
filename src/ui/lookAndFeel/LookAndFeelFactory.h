@@ -9,6 +9,11 @@ public:
 	void initialise();
 	void setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface);
 
+	juce::LookAndFeel_V4* forToolBar() const;
+
+private:
+	std::unique_ptr<juce::LookAndFeel_V4> toolBarLAF = nullptr;
+
 public:
 	static LookAndFeelFactory* getInstance();
 	static void releaseInstance();

@@ -6,17 +6,18 @@
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
+#include "ui/component/ToolBar.h"
 
 class MainApplication : public juce::JUCEApplication {
 private:
 	std::unique_ptr<flowUI::FlowComponent>
 		startMenu = nullptr,
-		toolBar = nullptr,
 		resourceView = nullptr,
 		patternView = nullptr,
 		trackView = nullptr;
 	std::unique_ptr<AudioDebuggerComponent> audioDebugger = nullptr;
 	std::unique_ptr<MidiDebuggerComponent> midiDebugger = nullptr;
+	std::unique_ptr<ToolBar> toolBar = nullptr;
 
 public:
 	const juce::String getApplicationName() override {
@@ -65,33 +66,6 @@ public:
 				}
 			}
 		}
-
-		/** Set FlowUI Color */
-		flowUI::FlowStyle::setTitleBackgroundColor(
-			ColorMap::getInstance()->get("ThemeColorB2"));
-		flowUI::FlowStyle::setTitleHighlightColor(
-			ColorMap::getInstance()->get("ThemeColorB1"));
-		flowUI::FlowStyle::setTitleBorderColor(
-			ColorMap::getInstance()->get("ThemeColorA2"));
-		flowUI::FlowStyle::setTitleSplitColor(
-			ColorMap::getInstance()->get("ThemeColorB7"));
-		flowUI::FlowStyle::setTitleTextColor(
-			ColorMap::getInstance()->get("ThemeColorB10"));
-		flowUI::FlowStyle::setTitleTextHighlightColor(
-			ColorMap::getInstance()->get("ThemeColorB10"));
-
-		flowUI::FlowStyle::setResizerColor(
-			ColorMap::getInstance()->get("ThemeColorB3"));
-
-		flowUI::FlowStyle::setContainerBorderColor(
-			ColorMap::getInstance()->get("ThemeColorB3"));
-
-		flowUI::FlowStyle::setButtonIconColor(
-			ColorMap::getInstance()->get("ThemeColorB9"));
-		flowUI::FlowStyle::setButtonIconBackgroundColor(
-			ColorMap::getInstance()->get("ThemeColorB7").withAlpha(0.3f));
-		flowUI::FlowStyle::setAdsorbColor(
-			ColorMap::getInstance()->get("ThemeColorA2").withAlpha(0.3f));
 
 		/** Init Default LookAndFeel */
 		LookAndFeelFactory::getInstance()->initialise();
@@ -147,7 +121,7 @@ public:
 
 		/** Create Components */
 		this->startMenu = std::make_unique<flowUI::FlowComponent>(TRANS("StartMenu"));
-		this->toolBar = std::make_unique<flowUI::FlowComponent>(TRANS("ToolBar"));
+		this->toolBar = std::make_unique<ToolBar>();
 		this->resourceView = std::make_unique<flowUI::FlowComponent>(TRANS("Resource"));
 		this->patternView = std::make_unique<flowUI::FlowComponent>(TRANS("Pattern"));
 		this->trackView = std::make_unique<flowUI::FlowComponent>(TRANS("Track"));
@@ -171,7 +145,19 @@ public:
 	};
 
 	void shutdown() override {
+		/** ShutDown FlowUI */
 		flowUI::FlowWindowHub::shutdown();
+
+		/** Release Components */
+		this->startMenu = nullptr;
+		this->toolBar = nullptr;
+		this->resourceView = nullptr;
+		this->patternView = nullptr;
+		this->trackView = nullptr;
+		this->audioDebugger = nullptr;
+		this->midiDebugger = nullptr;
+
+		/** ShutDown Backend */
 		shutdownAudioCore();
 		google::protobuf::ShutdownProtobufLibrary();
 	};

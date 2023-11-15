@@ -1,5 +1,6 @@
 ﻿#include "LookAndFeelFactory.h"
 #include "../misc/ColorMap.h"
+#include <FlowUI.h>
 
 void LookAndFeelFactory::initialise() {
 	auto& laf = juce::Desktop::getInstance().getDefaultLookAndFeel();
@@ -37,11 +38,47 @@ void LookAndFeelFactory::initialise() {
 	/** Set Window Background Color */
 	laf.setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
+
+	/** Set FlowUI Color */
+	flowUI::FlowStyle::setTitleBackgroundColor(
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	flowUI::FlowStyle::setTitleHighlightColor(
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	flowUI::FlowStyle::setTitleBorderColor(
+		ColorMap::getInstance()->get("ThemeColorA2"));
+	flowUI::FlowStyle::setTitleSplitColor(
+		ColorMap::getInstance()->get("ThemeColorB7"));
+	flowUI::FlowStyle::setTitleTextColor(
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	flowUI::FlowStyle::setTitleTextHighlightColor(
+		ColorMap::getInstance()->get("ThemeColorB10"));
+
+	flowUI::FlowStyle::setResizerColor(
+		ColorMap::getInstance()->get("ThemeColorB3"));
+
+	flowUI::FlowStyle::setContainerBorderColor(
+		ColorMap::getInstance()->get("ThemeColorB3"));
+
+	flowUI::FlowStyle::setButtonIconColor(
+		ColorMap::getInstance()->get("ThemeColorB9"));
+	flowUI::FlowStyle::setButtonIconBackgroundColor(
+		ColorMap::getInstance()->get("ThemeColorB7").withAlpha(0.3f));
+	flowUI::FlowStyle::setAdsorbColor(
+		ColorMap::getInstance()->get("ThemeColorA2").withAlpha(0.3f));
+
+	/** ToolBar */
+	this->toolBarLAF = std::make_unique<juce::LookAndFeel_V4>();
+	this->toolBarLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
 	auto& laf = juce::Desktop::getInstance().getDefaultLookAndFeel();
 	laf.setDefaultSansSerifTypeface(typeface);
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forToolBar() const {
+	return this->toolBarLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {
