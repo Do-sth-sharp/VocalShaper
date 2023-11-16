@@ -1,0 +1,8 @@
+﻿{
+  "picture": "./rc/Pinellia.png",
+  "background": "#fdf1da",
+  "illustrator": "Anonymous",
+  "cut": [ 0.15, 0.125, 0.7, 0.702 ],
+  "centrePos": [ 0.725, 0.525 ],
+  "scale": 0.475
+}

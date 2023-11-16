@@ -19,7 +19,12 @@ private:
 	bool isReady = false;
 	juce::String mesStr, platStr, verStr, relStr;
 	std::unique_ptr<juce::Image> logo;
-	juce::Typeface::Ptr titleType, textType;
+	juce::Typeface::Ptr titleType, subTitleType, textType;
+
+	juce::String illustStr;
+	juce::Colour picBackGroundColor;
+	std::unique_ptr<juce::Image> relImg;
+	juce::Point<double> imgCentrePoint;
 
 	class CloseTimer final : public juce::Timer {
 		Splash* splash = nullptr;

@@ -3,6 +3,7 @@
 #include <FlowUI.h>
 #include <google/protobuf/message_lite.h>
 #include "ui/misc/ColorMap.h"
+#include "ui/misc/InitTaskList.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -40,10 +41,13 @@ public:
 		}
 
 		/** Set Audio Config */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set Audio Configs..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
 				quickAPI::setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt");
 				quickAPI::setPluginListTemporaryFilePath("./data/audio/plugins.xml");
 				quickAPI::setPluginBlackListFilePath("./data/audio/blackPlugins.txt");
@@ -52,11 +56,13 @@ public:
 		);
 		
 		/** Load Theme Colors */
-		juce::MessageManager::callAsync(
-			[splash = Splash::SafePointer<Splash>(this->splash.get()),
-			themeName = configData["theme"].toString()] {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Load Theme Colors..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[themeName = configData["theme"].toString()] {
 				/** Get Color Map */
 				juce::File colorMapFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
 					.getParentDirectory().getChildFile("./themes/" + themeName + "/colors.json");
@@ -80,19 +86,25 @@ public:
 		);
 
 		/** Init Default LookAndFeel */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Init Default LooakAndFeel..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
 				LookAndFeelFactory::getInstance()->initialise();
 			}
 		);
 
 		/** Set FlowUI Button Icon */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set FlowUI Button Icons..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
 				flowUI::FlowStyle::setButtonLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
 				flowUI::FlowStyle::setButtonRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
 				flowUI::FlowStyle::setButtonTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
@@ -106,21 +118,26 @@ public:
 		);
 
 		/** Set Flow Window Icon */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Config FlowUI Window..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
 				flowUI::FlowWindowHub::setIcon("./rc/logo.png");
 				flowUI::FlowWindowHub::setOpenGL(true);
 			}
 		);
 
 		/** Load UI Translate */
-		juce::MessageManager::callAsync(
-			[splash = Splash::SafePointer<Splash>(this->splash.get()),
-			transName = configData["language"].toString()] {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Load UI Translations..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[transName = configData["language"].toString()] {
 				juce::File transDir = juce::File::getSpecialLocation(
 					juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
 					.getChildFile("./translates/" + transName + "/");
@@ -139,11 +156,13 @@ public:
 		);
 
 		/** Set UI Font */
-		juce::MessageManager::callAsync(
-			[splash = Splash::SafePointer<Splash>(this->splash.get()),
-			fontName = configData["font"].toString()] {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set UI Fonts..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[fontName = configData["font"].toString()] {
 				juce::File fontFile = juce::File::getSpecialLocation(
 					juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
 					.getChildFile("./fonts/" + fontName + ".ttf");
@@ -160,10 +179,13 @@ public:
 		);
 
 		/** Create Components */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Create Components..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
 				CompManager::getInstance()->set(CompManager::CompType::StartMenu,
 					std::make_unique<flowUI::FlowComponent>(TRANS("StartMenu")));
 				CompManager::getInstance()->set(CompManager::CompType::ToolBar,
@@ -182,11 +204,13 @@ public:
 		);
 
 		/** Auto Layout */
-		juce::MessageManager::callAsync(
-			[splash = Splash::SafePointer<Splash>(this->splash.get()),
-			layoutName = configData["layout"].toString()] {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Auto Layout Components..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[layoutName = configData["layout"].toString()] {
 				flowUI::FlowWindowHub::autoLayout(
 					"./layouts/" + layoutName + ".json",
 					juce::Array<flowUI::FlowComponent*>{
@@ -201,10 +225,13 @@ public:
 		);
 
 		/** Set Main Window Size */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set Main Window Size..."); }
-
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
 				if (flowUI::FlowWindowHub::getSize() > 0) {
 					if (auto window = flowUI::FlowWindowHub::getWindow(0)) {
 						window->setFullScreen(true);
@@ -214,7 +241,7 @@ public:
 		);
 
 		/** Hide Splash */
-		juce::MessageManager::callAsync(
+		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) {
 					splash->showMessage("Ready.");
@@ -222,6 +249,9 @@ public:
 				}
 			}
 		);
+
+		/** Run Init */
+		InitTaskList::getInstance()->runNow();
 	};
 
 	void shutdown() override {
