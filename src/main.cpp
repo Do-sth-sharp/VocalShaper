@@ -125,6 +125,7 @@ public:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
+				flowUI::FlowWindowHub::setTitle(utils::getAudioPlatformName());
 				flowUI::FlowWindowHub::setIcon("./rc/logo.png");
 				flowUI::FlowWindowHub::setOpenGL(true);
 			}
