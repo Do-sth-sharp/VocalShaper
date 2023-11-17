@@ -8,3 +8,5 @@ countries: cn
 "Track" = "轨道"
 "AudioDebugger" = "音频调试器"
 "MIDIDebugger" = "MIDI调试器"
+
+"Main Button" = "主按钮"

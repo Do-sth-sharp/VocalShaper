@@ -70,6 +70,17 @@ void LookAndFeelFactory::initialise() {
 	this->toolBarLAF = std::make_unique<juce::LookAndFeel_V4>();
 	this->toolBarLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
+
+	/** Main Button */
+	this->mainButtonLAF = std::make_unique<juce::LookAndFeel_V4>();
+	this->mainButtonLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
+		ColorMap::getInstance()->get("ThemeColorA2"));
+	this->mainButtonLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
+		ColorMap::getInstance()->get("ThemeColorA2"));
+	this->mainButtonLAF->setColour(juce::DrawableButton::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->mainButtonLAF->setColour(juce::DrawableButton::ColourIds::textColourOnId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -79,6 +90,10 @@ void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typefac
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forToolBar() const {
 	return this->toolBarLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forMainButton() const {
+	return this->mainButtonLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {
