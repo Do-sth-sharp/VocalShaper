@@ -10,6 +10,7 @@
 #include "ui/component/ToolBar.h"
 #include "ui/component/Splash.h"
 #include "ui/component/CompManager.h"
+#include "ui/menuAndCommand/CommandManager.h"
 
 class MainApplication : public juce::JUCEApplication {
 private:
@@ -204,6 +205,18 @@ public:
 			}
 		);
 
+		/** Init Commands */
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Init Command Manager..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				CommandManager::getInstance()->init();
+			}
+		);
+
 		/** Auto Layout */
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -258,6 +271,9 @@ public:
 	void shutdown() override {
 		/** ShutDown FlowUI */
 		flowUI::FlowWindowHub::shutdown();
+
+		/** Release Commands */
+		CommandManager::releaseInstance();
 
 		/** Release Components */
 		CompManager::releaseInstance();

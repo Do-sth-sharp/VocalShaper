@@ -1,5 +1,6 @@
 ﻿#include "ToolBar.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../menuAndCommand/MainMenu.h"
 #include <IconManager.h>
 
 ToolBar::ToolBar()
@@ -16,8 +17,8 @@ ToolBar::ToolBar()
 	this->mainButton->setWantsKeyboardFocus(false);
 	this->mainButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->mainButton->setConnectedEdges(juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
-	this->mainButton->onClick = [] {
-		/** TODO Show Main Menu */
+	this->mainButton->onClick = [this] {
+		this->showMainMenu();
 	};
 	this->addAndMakeVisible(this->mainButton.get());
 
@@ -48,4 +49,9 @@ void ToolBar::paint(juce::Graphics& g) {
 	g.setColour(laf.findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId));
 	g.fillAll();
+}
+
+void ToolBar::showMainMenu() const {
+	auto menu = MainMenu::getInstance()->create();
+	menu.showAt(this->mainButton.get());
 }

@@ -10,3 +10,11 @@ countries: cn
 "MIDIDebugger" = "MIDI调试器"
 
 "Main Button" = "主按钮"
+
+"File" = "文件"
+"Edit" = "编辑"
+"View" = "视图"
+"Project" = "项目"
+"Control" = "控制"
+"Config" = "配置"
+"Misc" = "其它"

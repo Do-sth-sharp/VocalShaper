@@ -1,6 +1,6 @@
 ﻿#include "Splash.h"
 #include "../misc/ColorMap.h"
-#include <audioCore/AC_API.h>
+#include "../../audioCore/AC_API.h"
 
 Splash::Splash() : Component() {
 	/** Size */
