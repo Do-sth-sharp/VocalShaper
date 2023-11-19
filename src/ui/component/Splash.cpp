@@ -29,6 +29,7 @@ Splash::Splash() : Component() {
 	this->platStr = utils::getAudioPlatformName();
 	this->verStr = "v" + utils::getAudioPlatformVersionString() + " build " + utils::getAudioPlatformComplieTime();
 	this->relStr = utils::getReleaseName();
+	this->fraStr = "Made with JUCE.";
 
 	/** Images */
 	this->logo = std::make_unique<juce::Image>(
@@ -208,13 +209,23 @@ void Splash::paint(juce::Graphics& g) {
 
 	/** Version */
 	juce::Rectangle<int> versionRect(
-		backGroundRect.getWidth() * 0.055, backGroundRect.getHeight() * 0.7,
+		backGroundRect.getWidth() * 0.055, backGroundRect.getHeight() * 0.65,
 		backGroundRect.getWidth() * 0.35, textFontHeight);
 
 	g.setFont(textFont);
 	g.setColour(textColor);
 	//g.drawRect(versionRect);
 	g.drawFittedText(this->verStr, versionRect, juce::Justification::centredLeft, 1, 1.f);
+
+	/** Framework Name */
+	juce::Rectangle<int> frameworkRect(
+		backGroundRect.getWidth() * 0.055, backGroundRect.getHeight() * 0.7,
+		backGroundRect.getWidth() * 0.35, textFontHeight);
+
+	g.setFont(textFont);
+	g.setColour(textColor);
+	//g.drawRect(frameworkRect);
+	g.drawFittedText(this->fraStr, frameworkRect, juce::Justification::centredLeft, 1, 1.f);
 
 	/** Illustrator */
 	juce::Rectangle<int> illustRect(
