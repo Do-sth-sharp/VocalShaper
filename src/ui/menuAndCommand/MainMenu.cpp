@@ -23,7 +23,17 @@ juce::PopupMenu MainMenu::create() const {
 juce::PopupMenu MainMenu::createFile() const {
 	juce::PopupMenu menu;
 
-	/** TODO */
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::NewProject);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::OpenProject);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::SaveProject);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::LoadSource);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::SaveSource);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::ExportSource);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Render);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::CloseEditor);
 
 	return menu;
 }

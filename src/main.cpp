@@ -214,6 +214,7 @@ public:
 		InitTaskList::getInstance()->add(
 			[] {
 				CommandManager::getInstance()->init();
+				flowUI::FlowWindowHub::addKeyListener(CommandManager::getInstance()->getKeyMappings());
 			}
 		);
 

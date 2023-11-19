@@ -1,5 +1,7 @@
 ﻿#include "GUICommandTarget.h"
 #include "CommandTypes.h"
+#include "../../audioCore/AC_API.h"
+#include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
 	return nullptr;
@@ -7,17 +9,31 @@ juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
 
 void GUICommandTarget::getAllCommands(
 	juce::Array<juce::CommandID>& commands) {
-	/** TODO */
+	commands = {
+		(juce::CommandID)(GUICommandType::CloseEditor)
+	};
 }
 
 void GUICommandTarget::getCommandInfo(
 	juce::CommandID commandID, juce::ApplicationCommandInfo& result) {
-	/** TODO */
+	switch ((GUICommandType)(commandID)) {
+	case GUICommandType::CloseEditor:
+		result.setInfo(TRANS("Close Editor"), TRANS("Close and exit VocalShaper."), TRANS("File"), 0);
+		result.setActive(!quickAPI::checkRendering());
+		break;
+	}
 }
 
 bool GUICommandTarget::perform(
 	const juce::ApplicationCommandTarget::InvocationInfo& info) {
-	/** TODO */
+	switch ((GUICommandType)(info.commandID)) {
+	case GUICommandType::CloseEditor:
+		if (flowUI::FlowWindowHub::getAppExitHook()()) {
+			juce::JUCEApplication::getInstance()->systemRequestedQuit();
+		}
+		return true;
+	}
+
 	return false;
 }
 
