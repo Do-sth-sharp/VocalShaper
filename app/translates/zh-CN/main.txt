@@ -1,6 +1,11 @@
 ﻿language: Chinese
 countries: cn
  
+"Yes" = "是"
+"No" = "否"
+"OK" = "确认"
+"cancel" = "取消"
+
 "StartMenu" = "开始菜单"
 "ToolBar" = "工具栏"
 "Resource" = "资源"
@@ -38,3 +43,5 @@ countries: cn
 "Close Editor" = "关闭编辑器"
 
 "Close and exit VocalShaper." = "关闭并退出VocalShaper。"
+
+"Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"

@@ -218,6 +218,26 @@ public:
 			}
 		);
 
+		/** Init Core Hooks */
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Init Core Hooks..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				flowUI::FlowWindowHub::setAppExitHook([]() -> bool {
+					if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
+						return true;
+					}
+
+					return juce::AlertWindow::showOkCancelBox(
+						juce::MessageBoxIconType::QuestionIcon, TRANS("Close Editor"),
+						TRANS("Discard unsaved changes and exit?"));
+				});
+			}
+		);
+
 		/** Auto Layout */
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {

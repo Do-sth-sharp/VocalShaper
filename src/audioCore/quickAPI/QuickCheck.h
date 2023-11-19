@@ -7,4 +7,7 @@ namespace quickAPI {
 	bool checkSourceIORunning();
 	bool checkPluginLoading();
 	bool checkPluginSearching();
+
+	bool checkProjectSaved();
+	bool checkSourcesSaved();
 }
