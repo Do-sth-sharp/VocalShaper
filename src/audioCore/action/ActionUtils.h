@@ -6,6 +6,7 @@
 #include "../source/AudioIOList.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
+#include "../project/ProjectInfoData.h"
 
 
 #define ACTION_CHECK_RENDERING(s) \
@@ -38,4 +39,9 @@
 			this->output(s); \
 			return false; \
 		} \
+	} while(false)
+
+#define ACTION_UNSAVE_PROJECT() \
+	do { \
+		ProjectInfoData::getInstance()->unsave(); \
 	} while(false)

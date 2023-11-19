@@ -16,6 +16,9 @@ void ProjectInfoData::init() {
 
 	/** Author */
 	this->content.authors = { utils::getUserName() };
+
+	/** Saved */
+	this->content.saved = true;
 }
 
 void ProjectInfoData::update() {
@@ -26,6 +29,9 @@ void ProjectInfoData::update() {
 
 	/** Platform */
 	this->content.lastSavedPlatform = utils::createPlatformInfoString();
+
+	/** Saved */
+	this->content.saved = true;
 }
 
 void ProjectInfoData::push() {
@@ -43,6 +49,14 @@ void ProjectInfoData::release() {
 	while (this->traceback.size() > 0) {
 		this->traceback.pop();
 	}
+}
+
+bool ProjectInfoData::checkSaved() const {
+	return this->content.saved;
+}
+
+void ProjectInfoData::unsave() {
+	this->content.saved = false;
 }
 
 bool ProjectInfoData::parse(const google::protobuf::Message* data) {

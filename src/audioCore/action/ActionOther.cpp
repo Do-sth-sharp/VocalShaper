@@ -138,6 +138,8 @@ bool ActionCloneSource::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto manager = CloneableSourceManager::getInstance()) {
 		if (CloneableSourceManager::getInstance()
 			->cloneSource(this->index)) {

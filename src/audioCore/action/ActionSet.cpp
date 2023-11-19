@@ -162,6 +162,8 @@ bool ActionSetMixerTrackGain::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			this->oldValue = track->getGain();
@@ -181,6 +183,8 @@ bool ActionSetMixerTrackGain::doAction() {
 bool ActionSetMixerTrackGain::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -204,6 +208,8 @@ bool ActionSetMixerTrackPan::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			this->oldValue = track->getPan();
@@ -223,6 +229,8 @@ bool ActionSetMixerTrackPan::doAction() {
 bool ActionSetMixerTrackPan::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -246,6 +254,8 @@ bool ActionSetMixerTrackSlider::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			this->oldValue = track->getSlider();
@@ -265,6 +275,8 @@ bool ActionSetMixerTrackSlider::doAction() {
 bool ActionSetMixerTrackSlider::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -321,6 +333,8 @@ bool ActionSetEffectBypass::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
@@ -339,6 +353,8 @@ bool ActionSetEffectBypass::doAction() {
 bool ActionSetEffectBypass::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -390,6 +406,8 @@ bool ActionSetInstrBypass::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		this->oldBypass = graph->getInstrumentBypass(this->instr);
 
@@ -404,6 +422,8 @@ bool ActionSetInstrBypass::doAction() {
 bool ActionSetInstrBypass::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setInstrumentBypass(this->instr, this->oldBypass);
@@ -422,6 +442,8 @@ bool ActionSetInstrMidiChannel::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
 			this->oldChannel = instr->getMIDIChannel();
@@ -438,6 +460,8 @@ bool ActionSetInstrMidiChannel::doAction() {
 bool ActionSetInstrMidiChannel::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
@@ -457,6 +481,8 @@ ActionSetEffectMidiChannel::ActionSetEffectMidiChannel(
 bool ActionSetEffectMidiChannel::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -478,6 +504,8 @@ bool ActionSetEffectMidiChannel::doAction() {
 bool ActionSetEffectMidiChannel::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -502,6 +530,8 @@ bool ActionSetInstrParamValue::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
 			this->oldValue = instr->getParamValue(this->param);
@@ -518,6 +548,8 @@ bool ActionSetInstrParamValue::doAction() {
 bool ActionSetInstrParamValue::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
@@ -537,6 +569,8 @@ ActionSetEffectParamValue::ActionSetEffectParamValue(
 bool ActionSetEffectParamValue::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -558,6 +592,8 @@ bool ActionSetEffectParamValue::doAction() {
 bool ActionSetEffectParamValue::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -582,6 +618,8 @@ bool ActionSetInstrParamConnectToCC::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
 			this->oldCC = instr->getParamCCConnection(this->param);
@@ -599,6 +637,8 @@ bool ActionSetInstrParamConnectToCC::doAction() {
 bool ActionSetInstrParamConnectToCC::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
@@ -622,6 +662,8 @@ bool ActionSetEffectParamConnectToCC::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
@@ -643,6 +685,8 @@ bool ActionSetEffectParamConnectToCC::doAction() {
 bool ActionSetEffectParamConnectToCC::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -670,6 +714,8 @@ bool ActionSetInstrMidiCCIntercept::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
 			this->oldIntercept = instr->getMIDICCIntercept();
@@ -686,6 +732,8 @@ bool ActionSetInstrMidiCCIntercept::doAction() {
 bool ActionSetInstrMidiCCIntercept::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
@@ -705,6 +753,8 @@ ActionSetEffectMidiCCIntercept::ActionSetEffectMidiCCIntercept(
 bool ActionSetEffectMidiCCIntercept::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -726,6 +776,8 @@ bool ActionSetEffectMidiCCIntercept::doAction() {
 bool ActionSetEffectMidiCCIntercept::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
@@ -750,6 +802,8 @@ bool ActionSetSequencerTrackBypass::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		this->oldBypass = graph->getSourceBypass(this->track);
 
@@ -764,6 +818,8 @@ bool ActionSetSequencerTrackBypass::doAction() {
 bool ActionSetSequencerTrackBypass::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setSourceBypass(this->track, this->oldBypass);
@@ -808,6 +864,8 @@ ActionSetSourceSynthesizer::ActionSetSourceSynthesizer(
 bool ActionSetSourceSynthesizer::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (CloneableSourceManager::getInstance()->setSourceSynthesizer(this->index, this->pid)) {
 		this->output("Set synthesizer: [" + juce::String(this->index) + "] " + this->pid + "\n");

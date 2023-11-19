@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include <stack>
@@ -16,6 +16,9 @@ public:
 	void pop();
 	void release();
 
+	bool checkSaved() const;
+	void unsave();
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
@@ -25,6 +28,7 @@ private:
 		uint32_t createTime = 0, lastSavedTime = 0, spentTime = 0, lastUpdateTime = 0;
 		juce::String createPlatform, lastSavedPlatform;
 		juce::StringArray authors;
+		bool saved = true;
 	} content;
 	std::stack<Content> traceback;
 
