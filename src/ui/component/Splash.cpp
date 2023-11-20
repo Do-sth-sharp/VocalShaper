@@ -69,15 +69,12 @@ Splash::Splash() : Component() {
 			(int)((double)(cutArray->getUnchecked(2)) * relImgTemp->getWidth()),
 			(int)((double)(cutArray->getUnchecked(3)) * relImgTemp->getHeight()) };
 		}
-		double scale = 1.0;
 		if (splashConfig["scale"].isDouble()) {
-			scale = (double)(splashConfig["scale"]);
+			this->imgScale = (double)(splashConfig["scale"]);
 		}
 
 		this->relImg = std::make_unique<juce::Image>(
-			relImgTemp->getClippedImage(cutArea).rescaled(
-				cutArea.getWidth() * scale, cutArea.getHeight() * scale,
-				juce::Graphics::highResamplingQuality));
+			relImgTemp->getClippedImage(cutArea));
 	}
 
 	/** Typefaces */
@@ -156,10 +153,12 @@ void Splash::paint(juce::Graphics& g) {
 	 
 	/** Image */
 	if (this->relImg) {
+		double scale = (backGroundRect.getHeight() * this->imgScale) / this->relImg->getHeight();
+
 		juce::Rectangle<int> imgRect(
-			backGroundRect.getWidth() * this->imgCentrePoint.getX() - (this->relImg->getWidth() / 2),
-			backGroundRect.getHeight() * this->imgCentrePoint.getY() - (this->relImg->getHeight() / 2),
-			this->relImg->getWidth(), this->relImg->getHeight());
+			backGroundRect.getWidth() * this->imgCentrePoint.getX() - (this->relImg->getWidth() * scale / 2),
+			backGroundRect.getHeight() * this->imgCentrePoint.getY() - (this->relImg->getHeight() * scale / 2),
+			this->relImg->getWidth() * scale, this->relImg->getHeight() * scale);
 		g.drawImageWithin(*(this->relImg.get()),
 			imgRect.getX(), imgRect.getY(),
 			imgRect.getWidth(), imgRect.getHeight(),

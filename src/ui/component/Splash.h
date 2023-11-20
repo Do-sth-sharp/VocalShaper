@@ -25,6 +25,7 @@ private:
 	juce::Colour picBackGroundColor;
 	std::unique_ptr<juce::Image> relImg;
 	juce::Point<double> imgCentrePoint;
+	double imgScale = 1.0;
 
 	class CloseTimer final : public juce::Timer {
 		Splash* splash = nullptr;
