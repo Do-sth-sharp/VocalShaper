@@ -62,13 +62,13 @@ bool CoreCommandTarget::perform(
 	const juce::ApplicationCommandTarget::InvocationInfo& info) {
 	switch ((CoreCommandType)(info.commandID)) {
 	case CoreCommandType::NewProject:
-		/** TODO */
+		this->newProject();
 		return true;
 	case CoreCommandType::OpenProject:
-		/** TODO */
+		this->openProject();
 		return true;
 	case CoreCommandType::SaveProject:
-		/** TODO */
+		this->saveProject();
 		return true;
 	case CoreCommandType::LoadSource:
 		/** TODO */
@@ -85,6 +85,63 @@ bool CoreCommandTarget::perform(
 	}
 
 	return false;
+}
+
+void CoreCommandTarget::newProject() const {
+	if (!this->checkForSave()) { return; }
+
+	juce::File defaultPath = quickAPI::getProjectDir();
+	juce::FileChooser chooser(TRANS("New Project"), defaultPath);
+	if (chooser.browseForDirectory()) {
+		juce::File projDir = chooser.getResult();
+
+		auto action = std::unique_ptr<ActionBase>(new ActionNewProject{
+		projDir.getFullPathName() });
+		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
+}
+
+void CoreCommandTarget::openProject() const {
+	if (!this->checkForSave()) { return; }
+
+	juce::File defaultPath = quickAPI::getProjectDir();
+	juce::FileChooser chooser(TRANS("Open Project"), defaultPath, "*.vsp4");
+	if (chooser.browseForFileToOpen()) {
+		juce::File projFile = chooser.getResult();
+
+		auto action = std::unique_ptr<ActionBase>(new ActionLoad{
+		projFile.getFullPathName() });
+		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
+}
+
+void CoreCommandTarget::saveProject() const {
+	juce::File defaultPath = quickAPI::getProjectDir();
+	juce::FileChooser chooser(TRANS("Save Project"), defaultPath, "*.vsp4");
+	if (chooser.browseForFileToSave(true)) {
+		juce::File projFile = chooser.getResult();
+
+		if (projFile.getParentDirectory() != defaultPath) {
+			juce::AlertWindow::showMessageBox(
+				juce::MessageBoxIconType::WarningIcon, TRANS("Save Project"),
+				TRANS("The project file must be in the root of working directory!"));
+			return;
+		}
+
+		auto action = std::unique_ptr<ActionBase>(new ActionSave{
+		projFile.getFileNameWithoutExtension() });
+		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
+}
+
+bool CoreCommandTarget::checkForSave() const {
+	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
+		return true;
+	}
+
+	return juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Project Warning"),
+		TRANS("Discard unsaved changes and continue?"));
 }
 
 CoreCommandTarget* CoreCommandTarget::getInstance() {

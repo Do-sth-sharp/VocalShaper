@@ -9,4 +9,8 @@ namespace quickAPI {
 	juce::Component* getMidiDebugger() {
 		return AudioCore::getInstance()->getMIDIDebugger();
 	}
+
+	const juce::File getProjectDir() {
+		return utils::getProjectDir();
+	}
 }

@@ -13,6 +13,14 @@ public:
 	void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
 	bool perform(const juce::ApplicationCommandTarget::InvocationInfo& info) override;
 
+private:
+	void newProject() const;
+	void openProject() const;
+	void saveProject() const;
+
+private:
+	bool checkForSave() const;
+
 public:
 	static CoreCommandTarget* getInstance();
 	static void releaseInstance();
