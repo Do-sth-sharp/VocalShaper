@@ -6,6 +6,7 @@ enum class CoreCommandType : int {
 	SaveProject,
 
 	LoadSource,
+	LoadSynthSource,
 	SaveSource,
 	ExportSource,
 

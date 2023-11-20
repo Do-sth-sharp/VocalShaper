@@ -14,6 +14,7 @@ void CoreCommandTarget::getAllCommands(
 		(juce::CommandID)(CoreCommandType::OpenProject),
 		(juce::CommandID)(CoreCommandType::SaveProject),
 		(juce::CommandID)(CoreCommandType::LoadSource),
+		(juce::CommandID)(CoreCommandType::LoadSynthSource),
 		(juce::CommandID)(CoreCommandType::SaveSource),
 		(juce::CommandID)(CoreCommandType::ExportSource),
 		(juce::CommandID)(CoreCommandType::Render)
@@ -41,6 +42,10 @@ void CoreCommandTarget::getCommandInfo(
 		break;
 	case CoreCommandType::LoadSource:
 		result.setInfo(TRANS("Load Playing Source"), TRANS("Load a playing source from disk."), TRANS("File"), 0);
+		result.setActive(!quickAPI::checkRendering());
+		break;
+	case CoreCommandType::LoadSynthSource:
+		result.setInfo(TRANS("Load Playing Source (Synth)"), TRANS("Load a synth source from disk."), TRANS("File"), 0);
 		result.setActive(!quickAPI::checkRendering());
 		break;
 	case CoreCommandType::SaveSource:
@@ -71,7 +76,10 @@ bool CoreCommandTarget::perform(
 		this->saveProject();
 		return true;
 	case CoreCommandType::LoadSource:
-		/** TODO */
+		this->loadSource();
+		return true;
+	case CoreCommandType::LoadSynthSource:
+		this->loadSynthSource();
 		return true;
 	case CoreCommandType::SaveSource:
 		/** TODO */
@@ -131,6 +139,62 @@ void CoreCommandTarget::saveProject() const {
 		auto action = std::unique_ptr<ActionBase>(new ActionSave{
 		projFile.getFileNameWithoutExtension() });
 		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
+}
+
+void CoreCommandTarget::loadSource() const {
+	juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
+#if JUCE_WINDOWS
+	audioFormats.addArray({ "*.wmv", "*.asf", "*.wm", "*.wma" });
+#endif
+#if JUCE_MAC
+	audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
+#endif
+	juce::StringArray midiFormats{ "*.mid" };
+
+	juce::File defaultPath = quickAPI::getProjectDir();
+	juce::FileChooser chooser(TRANS("Load Playing Source"), defaultPath,
+		audioFormats.joinIntoString(",") + ";" + midiFormats.joinIntoString(","));
+	if (chooser.browseForMultipleFilesToOpen()) {
+		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
+			juce::MessageBoxIconType::QuestionIcon, TRANS("Load Playing Source"),
+			TRANS("Copy source files to working directory?"));
+		if (shouldCopy == 0) { return; }
+
+		auto files = chooser.getResults();
+		for (auto& i : files) {
+			if (midiFormats.contains("*" + i.getFileExtension())) {
+				auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenLoad{
+					i.getFullPathName(), shouldCopy == 1 });
+				ActionDispatcher::getInstance()->dispatch(std::move(action));
+			}
+			else {
+				auto action = std::unique_ptr<ActionBase>(new ActionAddAudioSourceThenLoad{
+					i.getFullPathName(), shouldCopy == 1 });
+				ActionDispatcher::getInstance()->dispatch(std::move(action));
+			}
+		}
+	}
+}
+
+void CoreCommandTarget::loadSynthSource() const {
+	juce::StringArray midiFormats{ "*.mid" };
+
+	juce::File defaultPath = quickAPI::getProjectDir();
+	juce::FileChooser chooser(TRANS("Load Playing Source (Synth)"), defaultPath,
+		midiFormats.joinIntoString(","));
+	if (chooser.browseForMultipleFilesToOpen()) {
+		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
+			juce::MessageBoxIconType::QuestionIcon, TRANS("Load Playing Source (Synth)"),
+			TRANS("Copy source files to working directory?"));
+		if (shouldCopy == 0) { return; }
+
+		auto files = chooser.getResults();
+		for (auto& i : files) {
+			auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenLoad{
+					i.getFullPathName(), shouldCopy == 1 });
+			ActionDispatcher::getInstance()->dispatch(std::move(action));
+		}
 	}
 }
 

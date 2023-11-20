@@ -28,6 +28,7 @@ juce::PopupMenu MainMenu::createFile() const {
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::SaveProject);
 	menu.addSeparator();
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::LoadSource);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::LoadSynthSource);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::SaveSource);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::ExportSource);
 	menu.addSeparator();

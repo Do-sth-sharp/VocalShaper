@@ -17,6 +17,8 @@ private:
 	void newProject() const;
 	void openProject() const;
 	void saveProject() const;
+	void loadSource() const;
+	void loadSynthSource() const;
 
 private:
 	bool checkForSave() const;
