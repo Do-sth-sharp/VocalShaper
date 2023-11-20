@@ -208,6 +208,15 @@ bool CoreCommandTarget::checkForSave() const {
 		TRANS("Discard unsaved changes and continue?"));
 }
 
+int CoreCommandTarget::switchForSource() const {
+	/** Get Source List */
+	auto sourceList = quickAPI::getSourceNames();
+	if (sourceList.isEmpty()) { return -1; }
+
+	/** TODO Show Source Chooser */
+	return -1;
+}
+
 CoreCommandTarget* CoreCommandTarget::getInstance() {
 	return CoreCommandTarget::instance ? CoreCommandTarget::instance
 		: (CoreCommandTarget::instance = new CoreCommandTarget{});

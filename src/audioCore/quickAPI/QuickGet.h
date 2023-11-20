@@ -7,4 +7,6 @@ namespace quickAPI {
 	juce::Component* getMidiDebugger();
 
 	const juce::File getProjectDir();
+
+	const juce::StringArray getSourceNames();
 }

@@ -22,6 +22,7 @@ private:
 
 private:
 	bool checkForSave() const;
+	int switchForSource() const;
 
 public:
 	static CoreCommandTarget* getInstance();

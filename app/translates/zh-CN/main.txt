@@ -4,7 +4,7 @@ countries: cn
 "Yes" = "是"
 "No" = "否"
 "OK" = "确认"
-"cancel" = "取消"
+"Cancel" = "取消"
 
 "StartMenu" = "开始菜单"
 "ToolBar" = "工具栏"
