@@ -211,10 +211,36 @@ bool CoreCommandTarget::checkForSave() const {
 int CoreCommandTarget::switchForSource() const {
 	/** Get Source List */
 	auto sourceList = quickAPI::getSourceNames();
-	if (sourceList.isEmpty()) { return -1; }
+	if (sourceList.isEmpty()) {
+		juce::AlertWindow::showMessageBox(
+			juce::MessageBoxIconType::WarningIcon, TRANS("Source Selector"),
+			TRANS("The source list is empty!"));
+		return -1;
+	}
+	for (int i = 0; i < sourceList.size(); i++) {
+		auto& str = sourceList.getReference(i);
+		str = "[" + juce::String(i) + "] " + str;
+	}
 
-	/** TODO Show Source Chooser */
-	return -1;
+	/** Show Source Chooser */
+	auto chooserWindow = std::make_unique<juce::AlertWindow>(
+		TRANS("Source Selector"), TRANS("Select a source in the list:"),
+		juce::MessageBoxIconType::QuestionIcon);
+	chooserWindow->addButton(TRANS("OK"), 1);
+	chooserWindow->addButton(TRANS("Cancel"), 0);
+	chooserWindow->addComboBox(TRANS("Selector"), sourceList);
+
+#if JUCE_MODAL_LOOPS_PERMITTED
+	if (chooserWindow->runModalLoop() != 1) { return -1; }
+#else //JUCE_MODAL_LOOPS_PERMITTED
+#error "You must enable the JUCE_MODAL_LOOPS_PERMITTED macro!"
+#endif //JUCE_MODAL_LOOPS_PERMITTED
+
+	auto combo = chooserWindow->getComboBoxComponent(TRANS("Selector"));
+	int cRes = combo->getSelectedItemIndex();
+
+	if (cRes < 0 || cRes >= sourceList) { return -1; }
+	return cRes;
 }
 
 CoreCommandTarget* CoreCommandTarget::getInstance() {

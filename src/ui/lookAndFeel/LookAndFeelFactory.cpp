@@ -35,6 +35,20 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::ComboBox::ColourIds::outlineColourId,
 		juce::Colour::fromRGBA(0, 0, 0, 0));
 
+	/** Set Combo Color */
+	laf.setColour(juce::ComboBox::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::ComboBox::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::ComboBox::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::ComboBox::ColourIds::buttonColourId,
+		ColorMap::getInstance()->get("ThemeColorA2"));
+	laf.setColour(juce::ComboBox::ColourIds::arrowColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::ComboBox::ColourIds::focusedOutlineColourId,
+		ColorMap::getInstance()->get("ThemeColorA1"));
+
 	/** Set Window Background Color */
 	laf.setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));

@@ -25,7 +25,7 @@ namespace quickAPI {
 
 			juce::String name = ptr->getName();
 			if (name.isEmpty()) {
-				name = juce::File{ ptr->getPath() }.getFileName();
+				name = utils::getProjectDir().getChildFile(ptr->getPath()).getFileName();
 			}
 			result.add(name);
 		}

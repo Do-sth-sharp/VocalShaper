@@ -15,6 +15,7 @@ countries: cn
 "MIDIDebugger" = "MIDI调试器"
 
 "Main Button" = "主按钮"
+"Selector" = "选择器"
 
 "File" = "文件"
 "Edit" = "编辑"
@@ -47,8 +48,11 @@ countries: cn
 "Close and exit VocalShaper." = "关闭并退出VocalShaper。"
 
 "Project Warning" = "项目警告"
+"Source Selector" = "源选择器"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
 "The project file must be in the root of working directory!" = "项目文件必须在工作目录根内！"
 "Copy source files to working directory?" = "复制源文件到工作目录？"
+"Select a source in the list:" = "在列表中选择一个源："
+"The source list is empty!" = "源列表为空！"
