@@ -10,4 +10,8 @@ namespace quickAPI {
 
 	bool checkProjectSaved();
 	bool checkSourcesSaved();
+
+	bool checkForAudioSource(int index);
+	bool checkForMidiSource(int index);
+	bool checkForSynthSource(int index);
 }

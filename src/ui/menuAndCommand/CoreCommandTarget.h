@@ -19,10 +19,12 @@ private:
 	void saveProject() const;
 	void loadSource() const;
 	void loadSynthSource() const;
+	void saveSource() const;
+	void exportSource() const;
 
 private:
 	bool checkForSave() const;
-	int switchForSource() const;
+	void selectForSource(const std::function<void(int)>& callback) const;
 
 public:
 	static CoreCommandTarget* getInstance();

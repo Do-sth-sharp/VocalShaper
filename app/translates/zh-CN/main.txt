@@ -56,3 +56,4 @@ countries: cn
 "Copy source files to working directory?" = "复制源文件到工作目录？"
 "Select a source in the list:" = "在列表中选择一个源："
 "The source list is empty!" = "源列表为空！"
+"Saving the source outside of the working directory may cause dependency problem with project files. Continue?" = "将源保存至工作目录外有可能会导致项目文件依赖问题。继续？"

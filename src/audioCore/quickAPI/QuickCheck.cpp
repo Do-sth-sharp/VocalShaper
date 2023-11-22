@@ -2,6 +2,9 @@
 #include "../misc/Renderer.h"
 #include "../source/AudioIOList.h"
 #include "../source/CloneableSourceManager.h"
+#include "../source/CloneableAudioSource.h"
+#include "../source/CloneableMIDISource.h"
+#include "../source/CloneableSynthSource.h"
 #include "../plugin/PluginLoader.h"
 #include "../plugin/Plugin.h"
 #include "../project/ProjectInfoData.h"
@@ -37,5 +40,20 @@ namespace quickAPI {
 			}
 		}
 		return true;
+	}
+
+	bool checkForAudioSource(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		return dynamic_cast<CloneableAudioSource*>(ptr.getSource());
+	}
+
+	bool checkForMidiSource(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		return dynamic_cast<CloneableMIDISource*>(ptr.getSource());
+	}
+
+	bool checkForSynthSource(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		return dynamic_cast<CloneableSynthSource*>(ptr.getSource());
 	}
 }

@@ -164,6 +164,8 @@ bool ActionSaveSource::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	ACTION_UNSAVE_PROJECT();
+
 	if (auto manager = CloneableSourceManager::getInstance()) {
 		if (CloneableSourceManager::getInstance()
 			->saveSource(this->index, this->path)) {
@@ -182,6 +184,8 @@ ActionSaveSourceAsync::ActionSaveSourceAsync(
 bool ActionSaveSourceAsync::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
 		CloneableSourceManager::getInstance()

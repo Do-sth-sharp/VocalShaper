@@ -82,10 +82,10 @@ bool CoreCommandTarget::perform(
 		this->loadSynthSource();
 		return true;
 	case CoreCommandType::SaveSource:
-		/** TODO */
+		this->saveSource();
 		return true;
 	case CoreCommandType::ExportSource:
-		/** TODO */
+		this->exportSource();
 		return true;
 	case CoreCommandType::Render:
 		/** TODO */
@@ -198,6 +198,49 @@ void CoreCommandTarget::loadSynthSource() const {
 	}
 }
 
+void CoreCommandTarget::saveSource() const {
+	auto callback = [](int index) {
+		if (index == -1) { return; }
+
+		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
+#if JUCE_WINDOWS
+		audioFormats.addArray({ "*.wmv", "*.asf", "*.wm", "*.wma" });
+#endif
+#if JUCE_MAC
+		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
+#endif
+		juce::StringArray midiFormats{ "*.mid" };
+
+		auto& formats = quickAPI::checkForAudioSource(index)
+			? audioFormats : midiFormats;
+
+		juce::File defaultPath = quickAPI::getProjectDir();
+		juce::FileChooser chooser(TRANS("Save Playing Source"), defaultPath,
+			formats.joinIntoString(","));
+		if (chooser.browseForFileToSave(true)) {
+			auto file = chooser.getResult();
+
+			if (!file.isAChildOf(defaultPath)) {
+				if (!juce::AlertWindow::showOkCancelBox(
+					juce::MessageBoxIconType::QuestionIcon, TRANS("Save Playing Source"),
+					TRANS("Saving the source outside of the working directory may cause dependency problem with project files. Continue?"))) {
+					return;
+				}
+			}
+
+			auto action = std::unique_ptr<ActionBase>(new ActionSaveSourceAsync{
+			index, file.getFullPathName() });
+			ActionDispatcher::getInstance()->dispatch(std::move(action));
+		}
+	};
+
+	this->selectForSource(callback);
+}
+
+void CoreCommandTarget::exportSource() const {
+	/** TODO */
+}
+
 bool CoreCommandTarget::checkForSave() const {
 	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
 		return true;
@@ -208,14 +251,15 @@ bool CoreCommandTarget::checkForSave() const {
 		TRANS("Discard unsaved changes and continue?"));
 }
 
-int CoreCommandTarget::switchForSource() const {
+void CoreCommandTarget::selectForSource(const std::function<void(int)>& callback) const {
 	/** Get Source List */
 	auto sourceList = quickAPI::getSourceNames();
 	if (sourceList.isEmpty()) {
 		juce::AlertWindow::showMessageBox(
 			juce::MessageBoxIconType::WarningIcon, TRANS("Source Selector"),
 			TRANS("The source list is empty!"));
-		return -1;
+		callback(-1);
+		return;
 	}
 	for (int i = 0; i < sourceList.size(); i++) {
 		auto& str = sourceList.getReference(i);
@@ -223,24 +267,24 @@ int CoreCommandTarget::switchForSource() const {
 	}
 
 	/** Show Source Chooser */
-	auto chooserWindow = std::make_unique<juce::AlertWindow>(
+	auto chooserWindow = new juce::AlertWindow{
 		TRANS("Source Selector"), TRANS("Select a source in the list:"),
-		juce::MessageBoxIconType::QuestionIcon);
+		juce::MessageBoxIconType::QuestionIcon };
 	chooserWindow->addButton(TRANS("OK"), 1);
 	chooserWindow->addButton(TRANS("Cancel"), 0);
 	chooserWindow->addComboBox(TRANS("Selector"), sourceList);
 
-#if JUCE_MODAL_LOOPS_PERMITTED
-	if (chooserWindow->runModalLoop() != 1) { return -1; }
-#else //JUCE_MODAL_LOOPS_PERMITTED
-#error "You must enable the JUCE_MODAL_LOOPS_PERMITTED macro!"
-#endif //JUCE_MODAL_LOOPS_PERMITTED
-
 	auto combo = chooserWindow->getComboBoxComponent(TRANS("Selector"));
-	int cRes = combo->getSelectedItemIndex();
+	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo, callback, size = sourceList.size()](int result) {
+			if (result != 1) { callback(-1); return; }
 
-	if (cRes < 0 || cRes >= sourceList) { return -1; }
-	return cRes;
+			int index = combo->getSelectedItemIndex();
+			if (index < 0 || index >= size) { callback(-1); return; }
+
+			callback(index);
+		}
+	), true);
 }
 
 CoreCommandTarget* CoreCommandTarget::getInstance() {
