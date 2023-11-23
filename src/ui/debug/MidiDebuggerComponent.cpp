@@ -2,7 +2,7 @@
 #include "../../audioCore/AC_API.h"
 
 MidiDebuggerComponent::MidiDebuggerComponent()
-	: FlowComponent(TRANS("MIDIDebugger")) {
+	: FlowComponent(TRANS("MIDI Debugger")) {
 	this->comp = quickAPI::getMidiDebugger();
 	this->addAndMakeVisible(this->comp);
 }

@@ -2,7 +2,7 @@
 #include "../../audioCore/AC_API.h"
 
 AudioDebuggerComponent::AudioDebuggerComponent()
-	: FlowComponent(TRANS("AudioDebugger")) {
+	: FlowComponent(TRANS("Audio Debugger")) {
 	this->comp = quickAPI::getAudioDebugger();
 	this->addAndMakeVisible(this->comp);
 }

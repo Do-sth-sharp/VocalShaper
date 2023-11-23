@@ -13,6 +13,7 @@ CoreCommandTarget::CoreCommandTarget() {
 	this->trackListBox->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forListBox());
 	this->trackListBox->setMultipleSelectionEnabled(true);
+	//this->trackListBox->setClickingTogglesRowSelection(true);/**< For Touching */
 }
 
 CoreCommandTarget::~CoreCommandTarget() {
@@ -393,7 +394,7 @@ void CoreCommandTarget::selectForMixerTracks(
 
 	/** Show Track Chooser */
 	auto chooserWindow = new juce::AlertWindow{
-		TRANS("Mixer Track Selector"), TRANS("Select tracks in the list:"),
+		TRANS("Mixer Track Selector"), TRANS("Select tracks in the list: (Use Ctrl and Shift keys to select multiple items)"),
 		juce::MessageBoxIconType::QuestionIcon };
 	chooserWindow->addButton(TRANS("OK"), 1);
 	chooserWindow->addButton(TRANS("Cancel"), 0);

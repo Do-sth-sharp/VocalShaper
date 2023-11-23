@@ -4,7 +4,7 @@
 #include <IconManager.h>
 
 ToolBar::ToolBar()
-	: FlowComponent(TRANS("ToolBar")) {
+	: FlowComponent(TRANS("Tool Bar")) {
 	/** ToolBar LookAndFeel */
 	this->setLookAndFeel(LookAndFeelFactory::getInstance()->forToolBar());
 

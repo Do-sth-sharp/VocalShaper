@@ -89,7 +89,7 @@ public:
 		/** Init Default LookAndFeel */
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
-				if (splash) { splash->showMessage("Init Default LooakAndFeel..."); }
+				if (splash) { splash->showMessage("Init Default LookAndFeel..."); }
 			}
 		);
 		InitTaskList::getInstance()->add(
@@ -189,7 +189,7 @@ public:
 		InitTaskList::getInstance()->add(
 			[] {
 				CompManager::getInstance()->set(CompManager::CompType::StartMenu,
-					std::make_unique<flowUI::FlowComponent>(TRANS("StartMenu")));
+					std::make_unique<flowUI::FlowComponent>(TRANS("Start Menu")));
 				CompManager::getInstance()->set(CompManager::CompType::ToolBar,
 					std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
 				CompManager::getInstance()->set(CompManager::CompType::ResourceView,
