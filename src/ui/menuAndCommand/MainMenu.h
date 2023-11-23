@@ -9,8 +9,6 @@ public:
 	juce::PopupMenu create() const;
 
 private:
-	mutable std::unique_ptr<juce::PopupMenu> menuTemp = nullptr;
-
 	juce::PopupMenu createFile() const;
 	juce::PopupMenu createEdit() const;
 	juce::PopupMenu createView() const;

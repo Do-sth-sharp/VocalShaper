@@ -74,7 +74,7 @@ void CoreCommandTarget::getCommandInfo(
 		break;
 	case CoreCommandType::Render:
 		result.setInfo(TRANS("Render"), TRANS("Render the tracks in current project to audio files on disk."), TRANS("File"), 0);
-		result.setActive(!quickAPI::checkRendering());
+		result.setActive(!(quickAPI::checkRendering() || quickAPI::checkSourceIORunning()));
 		break;
 	}
 }

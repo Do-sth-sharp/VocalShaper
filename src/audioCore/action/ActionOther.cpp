@@ -242,6 +242,8 @@ ActionRenderNow::ActionRenderNow(
 bool ActionRenderNow::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+	ACTION_CHECK_SOURCE_IO_RUNNING(
+		"Don't do this while source IO running.");
 
 	if (AudioCore::getInstance()->renderNow(
 		this->tracks, this->path, this->name, this->extension)) {

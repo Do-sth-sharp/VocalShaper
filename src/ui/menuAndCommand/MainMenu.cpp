@@ -4,20 +4,18 @@
 #include "CommandTypes.h"
 
 juce::PopupMenu MainMenu::create() const {
-	if (this->menuTemp) { return *(this->menuTemp.get()); }
+	juce::PopupMenu menu;
 
-	this->menuTemp = std::make_unique<juce::PopupMenu>();
+	menu.addSectionHeader(utils::getAudioPlatformName());
+	menu.addSubMenu(TRANS("File"), this->createFile());
+	menu.addSubMenu(TRANS("Edit"), this->createEdit());
+	menu.addSubMenu(TRANS("View"), this->createView());
+	menu.addSubMenu(TRANS("Project"), this->createProject());
+	menu.addSubMenu(TRANS("Control"), this->createControl());
+	menu.addSubMenu(TRANS("Config"), this->createConfig());
+	menu.addSubMenu(TRANS("Misc"), this->createMisc());
 
-	this->menuTemp->addSectionHeader(utils::getAudioPlatformName());
-	this->menuTemp->addSubMenu(TRANS("File"), this->createFile());
-	this->menuTemp->addSubMenu(TRANS("Edit"), this->createEdit());
-	this->menuTemp->addSubMenu(TRANS("View"), this->createView());
-	this->menuTemp->addSubMenu(TRANS("Project"), this->createProject());
-	this->menuTemp->addSubMenu(TRANS("Control"), this->createControl());
-	this->menuTemp->addSubMenu(TRANS("Config"), this->createConfig());
-	this->menuTemp->addSubMenu(TRANS("Misc"), this->createMisc());
-
-	return *(this->menuTemp.get());
+	return menu;
 }
 
 juce::PopupMenu MainMenu::createFile() const {
