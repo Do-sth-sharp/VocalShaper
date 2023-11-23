@@ -11,10 +11,12 @@ public:
 
 	juce::LookAndFeel_V4* forToolBar() const;
 	juce::LookAndFeel_V4* forMainButton() const;
+	juce::LookAndFeel_V4* forListBox() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel_V4> toolBarLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> mainButtonLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> listBoxLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

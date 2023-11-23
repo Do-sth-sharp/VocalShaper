@@ -95,6 +95,19 @@ void LookAndFeelFactory::initialise() {
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->mainButtonLAF->setColour(juce::DrawableButton::ColourIds::textColourOnId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
+
+	/** List Box */
+	this->listBoxLAF = std::make_unique<juce::LookAndFeel_V4>();
+	this->listBoxLAF->setColour(juce::ListBox::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->listBoxLAF->setColour(juce::ListBox::ColourIds::backgroundColourId + 1,
+		ColorMap::getInstance()->get("ThemeColorA1"));/**< Background On */
+	this->listBoxLAF->setColour(juce::ListBox::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->listBoxLAF->setColour(juce::ListBox::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
+	this->listBoxLAF->setColour(juce::ListBox::ColourIds::textColourId + 1,
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Text On */
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -108,6 +121,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forToolBar() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forMainButton() const {
 	return this->mainButtonLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forListBox() const {
+	return this->listBoxLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

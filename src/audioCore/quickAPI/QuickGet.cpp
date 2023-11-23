@@ -32,4 +32,26 @@ namespace quickAPI {
 
 		return result;
 	}
+
+	const juce::Array<TrackInfo> getMixerTrackInfos() {
+		juce::Array<TrackInfo> result;
+
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			int size = graph->getTrackNum();
+			for (int i = 0; i < size; i++) {
+				auto track = graph->getTrackProcessor(i);
+				if (!track) {
+					result.add({ "", "" });
+					continue;
+				}
+				
+				auto& trackType = track->getAudioChannelSet();
+				auto trackName = track->getTrackName();
+				if (trackName.isEmpty()) { trackName = "untitled"; }
+				result.add({ trackName, trackType.getDescription() });
+			}
+		}
+
+		return result;
+	}
 }

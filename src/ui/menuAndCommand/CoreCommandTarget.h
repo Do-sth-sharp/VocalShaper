@@ -6,7 +6,8 @@ class CoreCommandTarget final
 	: public juce::ApplicationCommandTarget,
 	private juce::DeletedAtShutdown {
 public:
-	CoreCommandTarget() = default;
+	CoreCommandTarget();
+	~CoreCommandTarget();
 
 	juce::ApplicationCommandTarget* getNextCommandTarget() override;
 	void getAllCommands(juce::Array<juce::CommandID>& commands) override;
@@ -21,10 +22,16 @@ private:
 	void loadSynthSource() const;
 	void saveSource() const;
 	void exportSource() const;
+	void render() const;
 
 private:
 	bool checkForSave() const;
 	void selectForSource(const std::function<void(int)>& callback) const;
+	void selectForMixerTracks(
+		const std::function<void(const juce::Array<int>&)>& callback) const;
+
+	std::unique_ptr<juce::ListBox> trackListBox = nullptr;
+	std::unique_ptr<juce::ListBoxModel> trackListBoxModel = nullptr;
 
 public:
 	static CoreCommandTarget* getInstance();

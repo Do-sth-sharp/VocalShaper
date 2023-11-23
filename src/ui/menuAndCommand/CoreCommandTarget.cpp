@@ -1,7 +1,23 @@
 ﻿#include "CoreCommandTarget.h"
 #include "GUICommandTarget.h"
 #include "CommandTypes.h"
+#include "../dataModel/TrackListBoxModel.h"
+#include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../../audioCore/AC_API.h"
+
+CoreCommandTarget::CoreCommandTarget() {
+	/** Track List Box */
+	this->trackListBoxModel = std::unique_ptr<juce::ListBoxModel>(new TrackListBoxModel);
+	this->trackListBox = std::make_unique<juce::ListBox>(
+		TRANS("Track List"), this->trackListBoxModel.get());
+	this->trackListBox->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forListBox());
+	this->trackListBox->setMultipleSelectionEnabled(true);
+}
+
+CoreCommandTarget::~CoreCommandTarget() {
+	this->trackListBox->setModel(nullptr);
+}
 
 juce::ApplicationCommandTarget* CoreCommandTarget::getNextCommandTarget() {
 	return GUICommandTarget::getInstance();
@@ -88,7 +104,7 @@ bool CoreCommandTarget::perform(
 		this->exportSource();
 		return true;
 	case CoreCommandType::Render:
-		/** TODO */
+		this->render();
 		return true;
 	}
 
@@ -128,6 +144,9 @@ void CoreCommandTarget::saveProject() const {
 	juce::FileChooser chooser(TRANS("Save Project"), defaultPath, "*.vsp4");
 	if (chooser.browseForFileToSave(true)) {
 		juce::File projFile = chooser.getResult();
+		if (projFile.getFileExtension().isEmpty()) {
+			projFile = projFile.withFileExtension("vsp4");
+		}
 
 		if (projFile.getParentDirectory() != defaultPath) {
 			juce::AlertWindow::showMessageBox(
@@ -203,22 +222,22 @@ void CoreCommandTarget::saveSource() const {
 		if (index == -1) { return; }
 
 		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
-#if JUCE_WINDOWS
-		audioFormats.addArray({ "*.wmv", "*.asf", "*.wm", "*.wma" });
-#endif
 #if JUCE_MAC
 		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
 #endif
 		juce::StringArray midiFormats{ "*.mid" };
 
-		auto& formats = quickAPI::checkForAudioSource(index)
-			? audioFormats : midiFormats;
+		bool isAudio = quickAPI::checkForAudioSource(index);
+		auto& formats = isAudio ? audioFormats : midiFormats;
 
 		juce::File defaultPath = quickAPI::getProjectDir();
 		juce::FileChooser chooser(TRANS("Save Playing Source"), defaultPath,
 			formats.joinIntoString(","));
 		if (chooser.browseForFileToSave(true)) {
 			auto file = chooser.getResult();
+			if (file.getFileExtension().isEmpty()) {
+				file = file.withFileExtension(isAudio ? "wav" : "mid");
+			}
 
 			if (!file.isAChildOf(defaultPath)) {
 				if (!juce::AlertWindow::showOkCancelBox(
@@ -238,7 +257,73 @@ void CoreCommandTarget::saveSource() const {
 }
 
 void CoreCommandTarget::exportSource() const {
-	/** TODO */
+	auto callback = [](int index) {
+		if (index == -1) { return; }
+
+		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
+#if JUCE_MAC
+		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
+#endif
+
+		if (!quickAPI::checkForSynthSource(index)) {
+			juce::AlertWindow::showMessageBox(
+				juce::MessageBoxIconType::WarningIcon, TRANS("Export Synth Source"),
+				TRANS("The selected source is not a synth source!"));
+			return;
+		}
+
+		juce::File defaultPath = quickAPI::getProjectDir();
+		juce::FileChooser chooser(TRANS("Export Synth Source"), defaultPath,
+			audioFormats.joinIntoString(","));
+		if (chooser.browseForFileToSave(true)) {
+			auto file = chooser.getResult();
+			if (file.getFileExtension().isEmpty()) {
+				file = file.withFileExtension("wav");
+			}
+
+			auto action = std::unique_ptr<ActionBase>(new ActionExportSourceAsync{
+			index, file.getFullPathName() });
+			ActionDispatcher::getInstance()->dispatch(std::move(action));
+		}
+	};
+
+	this->selectForSource(callback);
+}
+
+void CoreCommandTarget::render() const {
+	auto callback = [](const juce::Array<int>& tracks) {
+		if (tracks.isEmpty()) { return; }
+
+		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
+#if JUCE_MAC
+		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
+#endif
+
+		juce::File defaultPath = quickAPI::getProjectDir();
+		juce::FileChooser chooser(TRANS("Render"), defaultPath,
+			audioFormats.joinIntoString(","));
+		if (chooser.browseForFileToSave(false)) {
+			auto file = chooser.getResult();
+			if (file.getFileExtension().isEmpty()) {
+				file = file.withFileExtension("wav");
+			}
+
+			auto dir = file.getParentDirectory();
+			if (!dir.findChildFiles(juce::File::TypesOfFileToFind::findFilesAndDirectories, false).isEmpty()) {
+				if (!juce::AlertWindow::showOkCancelBox(
+					juce::MessageBoxIconType::QuestionIcon, TRANS("Render"),
+					TRANS("The selected directory is not empty, which may cause existing files to be overwritten. Continue?"))) {
+					return;
+				}
+			}
+
+			auto action = std::unique_ptr<ActionBase>(new ActionRenderNow{
+				dir.getFullPathName(), file.getFileNameWithoutExtension(), file.getFileExtension(), tracks});
+			ActionDispatcher::getInstance()->dispatch(std::move(action));
+		}
+	};
+
+	this->selectForMixerTracks(callback);
 }
 
 bool CoreCommandTarget::checkForSave() const {
@@ -283,6 +368,62 @@ void CoreCommandTarget::selectForSource(const std::function<void(int)>& callback
 			if (index < 0 || index >= size) { callback(-1); return; }
 
 			callback(index);
+		}
+	), true);
+}
+
+void CoreCommandTarget::selectForMixerTracks(
+	const std::function<void(const juce::Array<int>&)>& callback) const {
+	/** Get Track List */
+	auto trackList = quickAPI::getMixerTrackInfos();
+	if (trackList.isEmpty()) {
+		juce::AlertWindow::showMessageBox(
+			juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
+			TRANS("The track list is empty!"));
+		callback({});
+		return;
+	}
+
+	/** Update ListBox */
+	dynamic_cast<TrackListBoxModel*>(this->trackListBoxModel.get())
+		->setItems(trackList);
+	this->trackListBox->updateContent();
+	this->trackListBox->deselectAllRows();
+	this->trackListBox->scrollToEnsureRowIsOnscreen(0);
+
+	/** Show Track Chooser */
+	auto chooserWindow = new juce::AlertWindow{
+		TRANS("Mixer Track Selector"), TRANS("Select tracks in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	chooserWindow->addButton(TRANS("OK"), 1);
+	chooserWindow->addButton(TRANS("Cancel"), 0);
+
+	auto chooserSize = chooserWindow->getLocalBounds();
+	this->trackListBox->setBounds(chooserSize);
+	chooserWindow->addCustomComponent(this->trackListBox.get());
+
+	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[callback, listBox = this->trackListBox.get()](int result) {
+			if (result != 1) { callback({}); return; }
+
+			juce::Array<int> resList;
+			auto resSet = listBox->getSelectedRows();
+			auto& resRanges = resSet.getRanges();
+			for (auto& i : resRanges) {
+				for (int j = i.getStart(); j < i.getEnd(); j++) {
+					resList.add(j);
+				}
+			}
+
+			if (resList.isEmpty()) {
+				juce::AlertWindow::showMessageBox(
+					juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
+					TRANS("No track selected!"));
+				callback({});
+				return;
+			}
+
+			callback(resList);
 		}
 	), true);
 }
