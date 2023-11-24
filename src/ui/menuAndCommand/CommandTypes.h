@@ -10,9 +10,19 @@ enum class CoreCommandType : int {
 	SaveSource,
 	ExportSource,
 
-	Render
+	Render,
+
+	Undo,
+	Redo
 };
 
 enum class GUICommandType : int {
-	CloseEditor = 0x3000
+	CloseEditor = 0x3000,
+
+	Copy,
+	Cut,
+	Paste,
+	Clipboard,
+	SelectAll,
+	Delete
 };

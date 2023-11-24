@@ -34,7 +34,10 @@ void CoreCommandTarget::getAllCommands(
 		(juce::CommandID)(CoreCommandType::LoadSynthSource),
 		(juce::CommandID)(CoreCommandType::SaveSource),
 		(juce::CommandID)(CoreCommandType::ExportSource),
-		(juce::CommandID)(CoreCommandType::Render)
+		(juce::CommandID)(CoreCommandType::Render),
+
+		(juce::CommandID)(CoreCommandType::Undo),
+		(juce::CommandID)(CoreCommandType::Redo)
 	};
 }
 
@@ -77,6 +80,18 @@ void CoreCommandTarget::getCommandInfo(
 		result.setInfo(TRANS("Render"), TRANS("Render the tracks in current project to audio files on disk."), TRANS("File"), 0);
 		result.setActive(!(quickAPI::checkRendering() || quickAPI::checkSourceIORunning()));
 		break;
+
+	case CoreCommandType::Undo:
+		result.setInfo(TRANS("Undo"), TRANS("Undo the last action."), TRANS("Edit"), 0);
+		result.addDefaultKeypress('z', juce::ModifierKeys::ctrlModifier);
+		result.setActive(false);
+		break;
+	case CoreCommandType::Redo:
+		result.setInfo(TRANS("Redo"), TRANS("Redo the last undo action."), TRANS("Edit"), 0);
+		result.addDefaultKeypress('y', juce::ModifierKeys::ctrlModifier);
+		result.addDefaultKeypress('z', juce::ModifierKeys::ctrlModifier | juce::ModifierKeys::shiftModifier);
+		result.setActive(false);
+		break;
 	}
 }
 
@@ -106,6 +121,13 @@ bool CoreCommandTarget::perform(
 		return true;
 	case CoreCommandType::Render:
 		this->render();
+		return true;
+
+	case CoreCommandType::Undo:
+		/** TODO */
+		return true;
+	case CoreCommandType::Redo:
+		/** TODO */
 		return true;
 	}
 

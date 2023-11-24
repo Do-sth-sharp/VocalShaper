@@ -35,6 +35,9 @@ countries: cn
 "Export Synth Source" = "导出合成源"
 "Render" = "渲染"
 
+"Undo" = "撤销"
+"Redo" = "重做"
+
 "Create an empty project." = "建立一个空项目。"
 "Open a project from disk." = "从本地磁盘打开项目。"
 "Save current project to disk." = "保存当前项目到本地磁盘。"
@@ -44,9 +47,26 @@ countries: cn
 "Save the synth result of a synth source to disk." = "保存合成源的合成结果到本地磁盘。"
 "Render the tracks in current project to audio files on disk." = "渲染当前项目的轨道为本地磁盘上的音频文件。"
 
+"Undo the last action." = "撤销最后一个操作。"
+"Redo the last undo action." = "重做最后一个撤销的操作。"
+
 "Close Editor" = "关闭编辑器"
 
+"Copy" = "复制"
+"Cut" = "剪切"
+"Paste" = "粘贴"
+"Clipboard" = "剪贴板"
+"Select All" = "全选"
+"Delete" = "删除"
+
 "Close and exit VocalShaper." = "关闭并退出VocalShaper。"
+
+"Copy selected items in the actived editor to clipboard." = "复制活动编辑器中所选内容到剪贴板。"
+"Cut selected items in the actived editor to clipboard." = "剪切活动编辑器中所选内容到剪贴板。"
+"Paste items to actived editor from clipboard." = "粘贴剪贴板中内容到活动编辑器。"
+"Show items in clipboard." = "显示剪贴板内容。"
+"Select all items in the actived editor." = "选择活动编辑器中所有内容。"
+"Delete selected item in the activer editor." = "删除活动编辑器中所选内容。"
 
 "Project Warning" = "项目警告"
 "Source Selector" = "源选择器"

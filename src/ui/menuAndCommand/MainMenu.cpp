@@ -40,7 +40,16 @@ juce::PopupMenu MainMenu::createFile() const {
 juce::PopupMenu MainMenu::createEdit() const {
 	juce::PopupMenu menu;
 
-	/** TODO */
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Undo);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Redo);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Copy);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Cut);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Paste);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Clipboard);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SelectAll);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Delete);
 
 	return menu;
 }
