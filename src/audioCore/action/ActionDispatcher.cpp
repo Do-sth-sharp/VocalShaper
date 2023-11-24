@@ -19,6 +19,10 @@ bool ActionDispatcher::dispatch(std::unique_ptr<ActionBase> action) {
 	return action->doAction();
 }
 
+void ActionDispatcher::clearUndoList() {
+	this->manager->clearUndoHistory();
+}
+
 void ActionDispatcher::setOutput(const OutputCallback& callback) {
 	this->output = callback;
 }

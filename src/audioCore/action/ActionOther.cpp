@@ -1,5 +1,6 @@
 ﻿#include "ActionOther.h"
 #include "ActionUtils.h"
+#include "ActionDispatcher.h"
 
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
@@ -277,6 +278,8 @@ bool ActionNewProject::doAction() {
 		"Don't do this while source IO running.");
 
 	if (AudioCore::getInstance()->newProj(this->path)) {
+		ActionDispatcher::getInstance()->clearUndoList();
+
 		this->output("Create new project at: " + this->path + "\n");
 		return true;
 	}
@@ -315,6 +318,8 @@ bool ActionLoad::doAction() {
 		"Don't change plugin black list while searching plugin.");
 
 	if (AudioCore::getInstance()->load(this->path)) {
+		ActionDispatcher::getInstance()->clearUndoList();
+
 		this->output("Load project data from: " + this->path + "\n");
 		return true;
 	}
