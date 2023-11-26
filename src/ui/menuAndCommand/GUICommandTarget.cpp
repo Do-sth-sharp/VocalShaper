@@ -27,6 +27,7 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::InstrView),
 		(juce::CommandID)(GUICommandType::MixerView),
 		(juce::CommandID)(GUICommandType::SourceEditView),
+		(juce::CommandID)(GUICommandType::SourceRecordView),
 		(juce::CommandID)(GUICommandType::AudioDebugger),
 		(juce::CommandID)(GUICommandType::MidiDebugger)
 	};
@@ -103,6 +104,10 @@ void GUICommandTarget::getCommandInfo(
 		result.setInfo(TRANS("Source Editor"), TRANS("Show source editor component."), TRANS("View"), 0);
 		result.setActive(false);
 		break;
+	case GUICommandType::SourceRecordView:
+		result.setInfo(TRANS("Source Recorder"), TRANS("Show source recorder component."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
 	case GUICommandType::AudioDebugger:
 		result.setInfo(TRANS("Audio Debugger"), TRANS("Show audio debugger component."), TRANS("View"), 0);
 		result.setActive(false);
@@ -164,6 +169,9 @@ bool GUICommandTarget::perform(
 		/** TODO */
 		return true;
 	case GUICommandType::SourceEditView:
+		/** TODO */
+		return true;
+	case GUICommandType::SourceRecordView:
 		/** TODO */
 		return true;
 	case GUICommandType::AudioDebugger:

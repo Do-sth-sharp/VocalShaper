@@ -204,6 +204,8 @@ public:
 					std::make_unique<flowUI::FlowComponent>(TRANS("Mixer")));
 				CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
 					std::make_unique<flowUI::FlowComponent>(TRANS("Source Editor")));
+				CompManager::getInstance()->set(CompManager::CompType::SourceRecordView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Source Recorder")));
 				CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
 					std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
 				CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,
@@ -262,6 +264,7 @@ public:
 						CompManager::getInstance()->get(CompManager::CompType::InstrView),
 						CompManager::getInstance()->get(CompManager::CompType::MixerView),
 						CompManager::getInstance()->get(CompManager::CompType::SourceEditView),
+						CompManager::getInstance()->get(CompManager::CompType::SourceRecordView),
 						CompManager::getInstance()->get(CompManager::CompType::AudioDebugger),
 						CompManager::getInstance()->get(CompManager::CompType::MidiDebugger),
 				});

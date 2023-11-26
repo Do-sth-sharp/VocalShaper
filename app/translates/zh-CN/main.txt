@@ -14,6 +14,7 @@ countries: cn
 "Mixer" = "混音器"
 "Instrument" = "乐器"
 "Source Editor" = "源编辑器"
+"Source Recorder" = "源录制器"
 "Audio Debugger" = "音频调试器"
 "MIDI Debugger" = "MIDI调试器"
 
@@ -82,6 +83,7 @@ countries: cn
 "Show instrument view component." = "显示乐器视图组件。"
 "Show mixer view component." = "显示混音器视图组件。"
 "Show source editor component." = "显示源编辑器组件。"
+"Show source recorder component." = "显示源录制器组件。"
 "Show audio debugger component." = "显示音频调试器组件。"
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
 

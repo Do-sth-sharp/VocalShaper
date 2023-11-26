@@ -16,6 +16,7 @@ public:
 		InstrView,
 		MixerView,
 		SourceEditView,
+		SourceRecordView,
 		AudioDebugger,
 		MidiDebugger,
 
