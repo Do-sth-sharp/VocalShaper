@@ -7,15 +7,45 @@
 		{
 			"grid": {
 				"vertical": false,
-				"size": [ 0.2, 0.8 ],
+				"size": [ 0.15, 0.85 ],
 				"unit": [
 					{
-						"vertical": false,
-						"id": [ 1, 2 ]
+						"vertical": true,
+						"size": [ 0.6, 0.4 ],
+						"unit": [
+							{
+								"vertical": false,
+								"id": [ 1, 2 ]
+							},
+							{
+								"vertical": false,
+								"id": [ 4 ]
+							}
+						]
 					},
 					{
 						"vertical": true,
-						"id": [ 3 ]
+						"size": [ 0.5, 0.5 ],
+						"unit": [
+							{
+								"vertical": false,
+								"size": [ 0.5, 0.5 ],
+								"unit": [
+									{
+										"vertical": true,
+										"id": [ 3 ]
+									},
+									{
+										"vertical": true,
+										"id": [ 5 ]
+									}
+								]
+							},
+							{
+								"vertical": true,
+								"id": [ 6 ]
+							}
+						]
 					}
 				]
 			}

@@ -31,6 +31,9 @@ enum class GUICommandType : int {
 	PluginView,
 	SourceView,
 	TrackView,
+	InstrView,
+	MixerView,
+	SourceEditView,
 	AudioDebugger,
 	MidiDebugger
 };

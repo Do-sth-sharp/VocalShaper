@@ -13,6 +13,9 @@ public:
 		PluginView,
 		SourceView,
 		TrackView,
+		InstrView,
+		MixerView,
+		SourceEditView,
 		AudioDebugger,
 		MidiDebugger,
 

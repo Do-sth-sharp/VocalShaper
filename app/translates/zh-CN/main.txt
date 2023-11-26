@@ -11,6 +11,9 @@ countries: cn
 "Plugin" = "插件"
 "Source" = "源"
 "Track" = "轨道"
+"Mixer" = "混音器"
+"Instrument" = "乐器"
+"Source Editor" = "源编辑器"
 "Audio Debugger" = "音频调试器"
 "MIDI Debugger" = "MIDI调试器"
 
@@ -76,6 +79,9 @@ countries: cn
 "Show plugin view component." = "显示插件视图组件。"
 "Show source view component." = "显示源视图组件。"
 "Show track view component." = "显示轨道视图组件。"
+"Show instrument view component." = "显示乐器视图组件。"
+"Show mixer view component." = "显示混音器视图组件。"
+"Show source editor component." = "显示源编辑器组件。"
 "Show audio debugger component." = "显示音频调试器组件。"
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
 
