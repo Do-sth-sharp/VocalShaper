@@ -10,8 +10,8 @@ public:
 	enum class CompType : int {
 		StartMenu,
 		ToolBar,
-		ResourceView,
-		PatternView,
+		PluginView,
+		SourceView,
 		TrackView,
 		AudioDebugger,
 		MidiDebugger,

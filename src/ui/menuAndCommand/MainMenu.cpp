@@ -57,7 +57,14 @@ juce::PopupMenu MainMenu::createEdit() const {
 juce::PopupMenu MainMenu::createView() const {
 	juce::PopupMenu menu;
 
-	/** TODO */
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::LoadLayout);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SaveLayout);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::PluginView);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceView);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::TrackView);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::AudioDebugger);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MidiDebugger);
 
 	return menu;
 }

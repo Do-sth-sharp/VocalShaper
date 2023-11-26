@@ -192,10 +192,10 @@ public:
 					std::make_unique<flowUI::FlowComponent>(TRANS("Start Menu")));
 				CompManager::getInstance()->set(CompManager::CompType::ToolBar,
 					std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
-				CompManager::getInstance()->set(CompManager::CompType::ResourceView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Resource")));
-				CompManager::getInstance()->set(CompManager::CompType::PatternView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Pattern")));
+				CompManager::getInstance()->set(CompManager::CompType::PluginView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Plugin")));
+				CompManager::getInstance()->set(CompManager::CompType::SourceView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Source")));
 				CompManager::getInstance()->set(CompManager::CompType::TrackView,
 					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
 				CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
@@ -250,8 +250,8 @@ public:
 					"./layouts/" + layoutName + ".json",
 					juce::Array<flowUI::FlowComponent*>{
 						CompManager::getInstance()->get(CompManager::CompType::ToolBar),
-						CompManager::getInstance()->get(CompManager::CompType::ResourceView),
-						CompManager::getInstance()->get(CompManager::CompType::PatternView),
+						CompManager::getInstance()->get(CompManager::CompType::PluginView),
+						CompManager::getInstance()->get(CompManager::CompType::SourceView),
 						CompManager::getInstance()->get(CompManager::CompType::TrackView),
 						CompManager::getInstance()->get(CompManager::CompType::AudioDebugger),
 						CompManager::getInstance()->get(CompManager::CompType::MidiDebugger),

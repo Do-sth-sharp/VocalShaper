@@ -8,8 +8,8 @@ countries: cn
 
 "Start Menu" = "开始菜单"
 "Tool Bar" = "工具栏"
-"Resource" = "资源"
-"Pattern" = "样式"
+"Plugin" = "插件"
+"Source" = "源"
 "Track" = "轨道"
 "Audio Debugger" = "音频调试器"
 "MIDI Debugger" = "MIDI调试器"
@@ -59,6 +59,9 @@ countries: cn
 "Select All" = "全选"
 "Delete" = "删除"
 
+"Load Layout" = "加载布局"
+"Save Layout" = "保存布局"
+
 "Close and exit VocalShaper." = "关闭并退出VocalShaper。"
 
 "Copy selected items in the actived editor to clipboard." = "复制活动编辑器中所选内容到剪贴板。"
@@ -67,6 +70,14 @@ countries: cn
 "Show items in clipboard." = "显示剪贴板内容。"
 "Select all items in the actived editor." = "选择活动编辑器中所有内容。"
 "Delete selected item in the activer editor." = "删除活动编辑器中所选内容。"
+
+"Load a workspace layout file." = "加载一个工作区布局文件。"
+"Save workspace to layout file." = "保存工作区到布局文件。"
+"Show plugin view component." = "显示插件视图组件。"
+"Show source view component." = "显示源视图组件。"
+"Show track view component." = "显示轨道视图组件。"
+"Show audio debugger component." = "显示音频调试器组件。"
+"Show MIDI debugger component." = "显示MIDI调试器组件。"
 
 "Project Warning" = "项目警告"
 "Source Selector" = "源选择器"

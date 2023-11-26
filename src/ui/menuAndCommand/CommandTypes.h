@@ -24,5 +24,13 @@ enum class GUICommandType : int {
 	Paste,
 	Clipboard,
 	SelectAll,
-	Delete
+	Delete,
+
+	LoadLayout,
+	SaveLayout,
+	PluginView,
+	SourceView,
+	TrackView,
+	AudioDebugger,
+	MidiDebugger
 };

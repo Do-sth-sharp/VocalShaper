@@ -17,7 +17,15 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::Paste),
 		(juce::CommandID)(GUICommandType::Clipboard),
 		(juce::CommandID)(GUICommandType::SelectAll),
-		(juce::CommandID)(GUICommandType::Delete)
+		(juce::CommandID)(GUICommandType::Delete),
+
+		(juce::CommandID)(GUICommandType::LoadLayout),
+		(juce::CommandID)(GUICommandType::SaveLayout),
+		(juce::CommandID)(GUICommandType::PluginView),
+		(juce::CommandID)(GUICommandType::SourceView),
+		(juce::CommandID)(GUICommandType::TrackView),
+		(juce::CommandID)(GUICommandType::AudioDebugger),
+		(juce::CommandID)(GUICommandType::MidiDebugger)
 	};
 }
 
@@ -59,6 +67,35 @@ void GUICommandTarget::getCommandInfo(
 		result.addDefaultKeypress(juce::KeyPress::backspaceKey, juce::ModifierKeys::noModifiers);
 		result.setActive(false);
 		break;
+
+	case GUICommandType::LoadLayout:
+		result.setInfo(TRANS("Load Layout"), TRANS("Load a workspace layout file."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
+	case GUICommandType::SaveLayout:
+		result.setInfo(TRANS("Save Layout"), TRANS("Save workspace to layout file."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
+	case GUICommandType::PluginView:
+		result.setInfo(TRANS("Plugin"), TRANS("Show plugin view component."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
+	case GUICommandType::SourceView:
+		result.setInfo(TRANS("Source"), TRANS("Show source view component."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
+	case GUICommandType::TrackView:
+		result.setInfo(TRANS("Track"), TRANS("Show track view component."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
+	case GUICommandType::AudioDebugger:
+		result.setInfo(TRANS("Audio Debugger"), TRANS("Show audio debugger component."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
+	case GUICommandType::MidiDebugger:
+		result.setInfo(TRANS("MIDI Debugger"), TRANS("Show MIDI debugger component."), TRANS("View"), 0);
+		result.setActive(false);
+		break;
 	}
 }
 
@@ -87,6 +124,28 @@ bool GUICommandTarget::perform(
 		/** TODO */
 		return true;
 	case GUICommandType::Delete:
+		/** TODO */
+		return true;
+
+	case GUICommandType::LoadLayout:
+		/** TODO */
+		return true;
+	case GUICommandType::SaveLayout:
+		/** TODO */
+		return true;
+	case GUICommandType::PluginView:
+		/** TODO */
+		return true;
+	case GUICommandType::SourceView:
+		/** TODO */
+		return true;
+	case GUICommandType::TrackView:
+		/** TODO */
+		return true;
+	case GUICommandType::AudioDebugger:
+		/** TODO */
+		return true;
+	case GUICommandType::MidiDebugger:
 		/** TODO */
 		return true;
 	}
