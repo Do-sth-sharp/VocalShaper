@@ -7,6 +7,9 @@ public:
 	ActionEchoDeviceAudio();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Device Audio";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionEchoDeviceAudio)
@@ -17,6 +20,9 @@ public:
 	ActionEchoDeviceMidi();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Device Midi";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionEchoDeviceMidi)
@@ -27,6 +33,9 @@ public:
 	ActionEchoMixerInfo();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Mixer Info";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionEchoMixerInfo)
@@ -37,6 +46,9 @@ public:
 	ActionEchoMixerTrack();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Mixer Track";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionEchoMixerTrack)
@@ -48,6 +60,9 @@ public:
 	ActionEchoMixerTrackInfo(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Mixer Track Info";
+	};
 
 private:
 	const int index;
@@ -61,6 +76,9 @@ public:
 	ActionEchoMixerTrackGain(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Mixer Track Gain";
+	};
 
 private:
 	const int index;
@@ -74,6 +92,9 @@ public:
 	ActionEchoMixerTrackPan(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Mixer Track Pan";
+	};
 
 private:
 	const int index;
@@ -87,6 +108,9 @@ public:
 	ActionEchoMixerTrackSlider(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Mixer Track Slider";
+	};
 
 private:
 	const int index;
@@ -101,6 +125,9 @@ public:
 		int instr, int param);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Instr Param Value";
+	};
 
 private:
 	const int instr, param;
@@ -115,6 +142,9 @@ public:
 		int instr, int param);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Instr Param Default Value";
+	};
 
 private:
 	const int instr, param;
@@ -129,6 +159,9 @@ public:
 		int track, int effect, int param);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Effect Param Value";
+	};
 
 private:
 	const int track, effect, param;
@@ -143,6 +176,9 @@ public:
 		int track, int effect, int param);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Effect Param Default Value";
+	};
 
 private:
 	const int track, effect, param;
@@ -157,6 +193,9 @@ public:
 		int instr, int param);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Instr Param CC";
+	};
 
 private:
 	const int instr, param;
@@ -171,6 +210,9 @@ public:
 		int track, int effect, int param);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Effect Param CC";
+	};
 
 private:
 	const int track, effect, param;
@@ -185,6 +227,9 @@ public:
 		int instr, int cc);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Instr CC Param";
+	};
 
 private:
 	const int instr, cc;
@@ -199,6 +244,9 @@ public:
 		int track, int effect, int cc);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Effect CC Param";
+	};
 
 private:
 	const int track, effect, cc;
@@ -211,6 +259,9 @@ public:
 	ActionEchoSourceNum();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Source Num";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionEchoSourceNum)
@@ -222,6 +273,9 @@ public:
 	ActionEchoSource(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Echo Source";
+	};
 
 private:
 	const int index;

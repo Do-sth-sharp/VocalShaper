@@ -8,6 +8,9 @@ public:
 	ActionAddPluginBlackList(const juce::String& plugin);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Add Plugin Black List";
+	};
 
 private:
 	const juce::String plugin;
@@ -21,6 +24,9 @@ public:
 	ActionAddPluginSearchPath(const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Add Plugin Search Path";
+	};
 
 private:
 	const juce::String path;
@@ -35,6 +41,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Mixer Track";
+	};
 
 private:
 	const int index, type;
@@ -50,6 +59,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Mixer Track Send";
+	};
 
 private:
 	const int src, srcc, dst, dstc;
@@ -65,6 +77,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Mixer Track Input From Device";
+	};
 
 private:
 	const int srcc, dst, dstc;
@@ -80,6 +95,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Mixer Track Output";
+	};
 
 private:
 	const int src, srcc, dstc;
@@ -95,6 +113,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Effect";
+	};
 
 private:
 	const int track, effect;
@@ -111,6 +132,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Effect Additional Input";
+	};
 
 private:
 	const int track, effect, srcc, dstc;
@@ -126,6 +150,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Instr";
+	};
 
 private:
 	const int index, type;
@@ -142,6 +169,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Instr Output";
+	};
 
 private:
 	const int src, srcc, dst, dstc;
@@ -156,6 +186,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Instr Midi Input";
+	};
 
 private:
 	const int dst;
@@ -170,6 +203,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Mixer Track Midi Input";
+	};
 
 private:
 	const int dst;
@@ -184,6 +220,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Mixer Track Midi Output";
+	};
 
 private:
 	const int src;
@@ -199,6 +238,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Audio Source Then Load";
+	};
 
 private:
 	const juce::String path;
@@ -215,6 +257,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Audio Source Then Init";
+	};
 
 private:
 	const double sampleRate, length;
@@ -231,6 +276,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Midi Source Then Load";
+	};
 
 private:
 	const juce::String path;
@@ -245,6 +293,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Midi Source Then Init";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionAddMidiSourceThenInit)
@@ -258,6 +309,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Synth Source Then Load";
+	};
 
 private:
 	const juce::String path;
@@ -272,6 +326,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Synth Source Then Init";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionAddSynthSourceThenInit)
@@ -285,6 +342,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Sequencer Track";
+	};
 
 private:
 	const int index, type;
@@ -300,6 +360,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Sequencer Track Midi Output To Mixer";
+	};
 
 private:
 	const int src, dst;
@@ -315,6 +378,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Sequencer Track Midi Output To Instr";
+	};
 
 private:
 	const int src, dst;
@@ -330,6 +396,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Sequencer Track Output";
+	};
 
 private:
 	const int src, srcc, dst, dstc;
@@ -345,6 +414,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Sequencer Source Instance";
+	};
 
 private:
 	const int track, src;
@@ -362,6 +434,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Add Recorder Source Instance";
+	};
 
 private:
 	const int src;

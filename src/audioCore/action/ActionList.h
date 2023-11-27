@@ -7,6 +7,9 @@ public:
 	ActionListDeviceAudio();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Device Audio";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionListDeviceAudio)
@@ -17,6 +20,9 @@ public:
 	ActionListDeviceMidi();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Device Midi";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionListDeviceMidi)
@@ -27,6 +33,9 @@ public:
 	ActionListPluginBlackList();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Plugin Black List";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionListPluginBlackList)
@@ -37,6 +46,9 @@ public:
 	ActionListPluginSearchPath();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Plugin Search Path";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionListPluginSearchPath)
@@ -47,6 +59,9 @@ public:
 	ActionListPlugin();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Plugin";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionListPlugin)
@@ -58,6 +73,9 @@ public:
 	ActionListInstrParam(int instr);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Instr Param";
+	};
 
 private:
 	const int instr;
@@ -72,6 +90,9 @@ public:
 		int track, int effect);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "List Effect Param";
+	};
 
 private:
 	const int track, effect;

@@ -81,17 +81,31 @@ void CoreCommandTarget::getCommandInfo(
 		result.setActive(!(quickAPI::checkRendering() || quickAPI::checkSourceIORunning()));
 		break;
 
-	case CoreCommandType::Undo:
-		result.setInfo(TRANS("Undo"), TRANS("Undo the last action."), TRANS("Edit"), 0);
+	case CoreCommandType::Undo: {
+		bool active = this->checkForUndo();
+		juce::String name = TRANS("Undo");
+		if (active) {
+			name += " - " + this->getUndoName();
+		}
+
+		result.setInfo(name, TRANS("Undo the last action."), TRANS("Edit"), 0);
 		result.addDefaultKeypress('z', juce::ModifierKeys::ctrlModifier);
-		result.setActive(this->checkForUndo());
+		result.setActive(active);
 		break;
-	case CoreCommandType::Redo:
-		result.setInfo(TRANS("Redo"), TRANS("Redo the last undo action."), TRANS("Edit"), 0);
+	}
+	case CoreCommandType::Redo: {
+		bool active = this->checkForRedo();
+		juce::String name = TRANS("Redo");
+		if (active) {
+			name += " - " + this->getRedoName();
+		}
+
+		result.setInfo(name, TRANS("Redo the last undo action."), TRANS("Edit"), 0);
 		result.addDefaultKeypress('y', juce::ModifierKeys::ctrlModifier);
 		result.addDefaultKeypress('z', juce::ModifierKeys::ctrlModifier | juce::ModifierKeys::shiftModifier);
-		result.setActive(this->checkForRedo());
+		result.setActive(active);
 		break;
+	}
 	}
 }
 
@@ -467,6 +481,16 @@ bool CoreCommandTarget::checkForUndo() const {
 bool CoreCommandTarget::checkForRedo() const {
 	auto& manager = ActionDispatcher::getInstance()->getActionManager();
 	return manager.canRedo();
+}
+
+const juce::String CoreCommandTarget::getUndoName() const {
+	auto& manager = ActionDispatcher::getInstance()->getActionManager();
+	return manager.getUndoDescription();
+}
+
+const juce::String CoreCommandTarget::getRedoName() const {
+	auto& manager = ActionDispatcher::getInstance()->getActionManager();
+	return manager.getRedoDescription();
 }
 
 CoreCommandTarget* CoreCommandTarget::getInstance() {

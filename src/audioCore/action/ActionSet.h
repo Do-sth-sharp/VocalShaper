@@ -9,6 +9,9 @@ public:
 	ActionSetDeviceAudioType(const juce::String& type);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Audio Type";
+	};
 
 private:
 	const juce::String type;
@@ -22,6 +25,9 @@ public:
 	ActionSetDeviceAudioInput(const juce::String& name);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Audio Input";
+	};
 
 private:
 	const juce::String name;
@@ -35,6 +41,9 @@ public:
 	ActionSetDeviceAudioOutput(const juce::String& name);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Audio Output";
+	};
 
 private:
 	const juce::String name;
@@ -48,6 +57,9 @@ public:
 	ActionSetDeviceAudioSampleRate(double sampleRate);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Audio Sample Rate";
+	};
 
 private:
 	const double sampleRate;
@@ -61,6 +73,9 @@ public:
 	ActionSetDeviceAudioBufferSize(int bufferSize);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Audio Buffer Size";
+	};
 
 private:
 	const int bufferSize;
@@ -75,6 +90,9 @@ public:
 		const juce::String& name, bool enabled);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Midi Input";
+	};
 
 private:
 	const juce::String name;
@@ -89,6 +107,9 @@ public:
 	ActionSetDeviceMidiOutput(const juce::String& name);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Device Midi Output";
+	};
 
 private:
 	const juce::String name;
@@ -102,6 +123,9 @@ public:
 	ActionSetMidiDebuggerMaxNum(int num);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Midi Debugger Max Num";
+	};
 
 private:
 	const int num;
@@ -117,6 +141,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Mixer Track Gain";
+	};
 
 private:
 	const int track;
@@ -135,6 +162,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Mixer Track Pan";
+	};
 
 private:
 	const int track;
@@ -153,6 +183,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Mixer Track Slider";
+	};
 
 private:
 	const int track;
@@ -170,6 +203,9 @@ public:
 		int track, int effect, bool visible);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Effect Window";
+	};
 
 private:
 	const int track, effect;
@@ -186,6 +222,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Bypass";
+	};
 
 private:
 	const int track, effect;
@@ -203,6 +242,9 @@ public:
 		int instr, bool visible);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Instr Window";
+	};
 
 private:
 	const int instr;
@@ -219,6 +261,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Bypass";
+	};
 
 private:
 	const int instr;
@@ -237,6 +282,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Midi Channel";
+	};
 
 private:
 	const int instr;
@@ -255,6 +303,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi Channel";
+	};
 
 private:
 	const int track, effect;
@@ -273,6 +324,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Param Value";
+	};
 
 private:
 	const int instr, param;
@@ -291,6 +345,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Param Value";
+	};
 
 private:
 	const int track, effect, param;
@@ -309,6 +366,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Param Connect To CC";
+	};
 
 private:
 	const int instr, param;
@@ -328,6 +388,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Param Connect To CC";
+	};
 
 private:
 	const int track, effect, param;
@@ -347,6 +410,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Midi CC Intercept";
+	};
 
 private:
 	const int instr;
@@ -365,6 +431,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi CC Intercept";
+	};
 
 private:
 	const int track, effect;
@@ -383,6 +452,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Track Bypass";
+	};
 
 private:
 	const int track;
@@ -399,6 +471,9 @@ public:
 	ActionSetPlayPosition(double pos);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Play Position";
+	};
 
 private:
 	const double pos;
@@ -412,6 +487,9 @@ public:
 	ActionSetReturnToStart(bool returnToStart);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Return To Start";
+	};
 
 private:
 	const bool returnToStart;
@@ -426,6 +504,9 @@ public:
 		int index, const juce::String& pid);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Source Synthesizer";
+	};
 
 private:
 	const int index;
@@ -441,6 +522,9 @@ public:
 		const juce::String& format, int bitPerSample);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Audio Save Bits Per Sample";
+	};
 
 private:
 	const juce::String format;
@@ -456,6 +540,9 @@ public:
 		const juce::String& format, const juce::StringPairArray& metaData);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Audio Save Meta Data";
+	};
 
 private:
 	const juce::String format;
@@ -471,6 +558,9 @@ public:
 		const juce::String& format, int quality);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Audio Save Quality Option Index";
+	};
 
 private:
 	const juce::String format;

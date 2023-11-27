@@ -7,6 +7,9 @@ public:
 	ActionClearPlugin();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Clear Plugin";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionClearPlugin)
@@ -17,6 +20,9 @@ public:
 	ActionSearchPlugin();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Search Plugin";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionSearchPlugin)
@@ -27,6 +33,9 @@ public:
 	ActionPlay();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Play";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionPlay)
@@ -37,6 +46,9 @@ public:
 	ActionPause();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Pause";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionPause)
@@ -47,6 +59,9 @@ public:
 	ActionStop();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Stop";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionStop)
@@ -57,6 +72,9 @@ public:
 	ActionRewind();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Rewind";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionRewind)
@@ -67,6 +85,9 @@ public:
 	ActionStartRecord();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Start Record";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionStartRecord)
@@ -77,6 +98,9 @@ public:
 	ActionStopRecord();
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Stop Record";
+	};
 
 private:
 	JUCE_LEAK_DETECTOR(ActionStopRecord)
@@ -88,6 +112,9 @@ public:
 	ActionSynthSource(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Synth Source";
+	};
 
 private:
 	const int index;
@@ -101,6 +128,9 @@ public:
 	ActionCloneSource(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Clone Source";
+	};
 
 private:
 	const int index;
@@ -115,6 +145,9 @@ public:
 		int index, const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Save Source";
+	};
 
 private:
 	const int index;
@@ -130,6 +163,9 @@ public:
 		int index, const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Save Source Async";
+	};
 
 private:
 	const int index;
@@ -145,6 +181,9 @@ public:
 		int index, const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Export Source";
+	};
 
 private:
 	const int index;
@@ -160,6 +199,9 @@ public:
 		int index, const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Export Source Async";
+	};
 
 private:
 	const int index;
@@ -176,6 +218,9 @@ public:
 		const juce::String& extension, const juce::Array<int>& tracks);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Render Now";
+	};
 
 private:
 	const juce::String path, name, extension;
@@ -190,6 +235,9 @@ public:
 	ActionNewProject(const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "New Project";
+	};
 
 private:
 	const juce::String path;
@@ -203,6 +251,9 @@ public:
 	ActionSave(const juce::String& name);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Save";
+	};
 
 private:
 	const juce::String name;
@@ -216,6 +267,9 @@ public:
 	ActionLoad(const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Load";
+	};
 
 private:
 	const juce::String path;

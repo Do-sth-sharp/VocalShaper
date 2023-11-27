@@ -9,6 +9,9 @@ public:
 	ActionRemovePluginBlackList(const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Remove Plugin Black List";
+	};
 
 private:
 	const juce::String path;
@@ -22,6 +25,9 @@ public:
 	ActionRemovePluginSearchPath(const juce::String& path);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Remove Plugin Search Path";
+	};
 
 private:
 	const juce::String path;
@@ -36,6 +42,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track";
+	};
 
 private:
 	const int index;
@@ -62,6 +71,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track Send";
+	};
 
 private:
 	const int src, srcc, dst, dstc;
@@ -77,6 +89,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track Input From Device";
+	};
 
 private:
 	const int srcc, dst, dstc;
@@ -92,6 +107,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track Output";
+	};
 
 private:
 	const int src, srcc, dstc;
@@ -107,6 +125,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Effect";
+	};
 
 private:
 	const int track, effect;
@@ -125,6 +146,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Effect Additional Input";
+	};
 
 private:
 	const int track, effect, srcc, dstc;
@@ -139,6 +163,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Instr";
+	};
 
 private:
 	const int index;
@@ -159,6 +186,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Instr Output";
+	};
 
 private:
 	const int src, srcc, dst, dstc;
@@ -173,6 +203,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Instr Midi Input";
+	};
 
 private:
 	const int dst;
@@ -188,6 +221,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Instr Param CC Connection";
+	};
 
 private:
 	const int instr, cc;
@@ -204,6 +240,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Effect Param CC Connection";
+	};
 
 private:
 	const int track, effect, cc;
@@ -219,6 +258,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track Midi Input";
+	};
 
 private:
 	const int index;
@@ -233,6 +275,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track Midi Output";
+	};
 
 private:
 	const int index;
@@ -246,6 +291,9 @@ public:
 	ActionRemoveSource(int index);
 
 	bool doAction() override;
+	const juce::String getName() override {
+		return "Remove Source";
+	};
 
 private:
 	const int index;
@@ -260,6 +308,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Sequencer Track";
+	};
 
 private:
 	const int index;
@@ -280,6 +331,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Sequencer Track Midi Output To Mixer";
+	};
 
 private:
 	const int src, dst;
@@ -295,6 +349,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Sequencer Track Midi Output To Instr";
+	};
 
 private:
 	const int src, dst;
@@ -310,6 +367,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Sequencer Track Output";
+	};
 
 private:
 	const int src, srcc, dst, dstc;
@@ -325,6 +385,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Sequencer Source Instance";
+	};
 
 private:
 	const int track, seq;
@@ -342,6 +405,9 @@ public:
 
 	bool doAction() override;
 	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Recorder Source Instance";
+	};
 
 private:
 	const int seq;

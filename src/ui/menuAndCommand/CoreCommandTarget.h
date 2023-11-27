@@ -35,6 +35,8 @@ private:
 
 	bool checkForUndo() const;
 	bool checkForRedo() const;
+	const juce::String getUndoName() const;
+	const juce::String getRedoName() const;
 
 	std::unique_ptr<juce::ListBox> trackListBox = nullptr;
 	std::unique_ptr<juce::ListBoxModel> trackListBoxModel = nullptr;

@@ -8,6 +8,7 @@ public:
 	virtual ~ActionBase() = default;
 
 	virtual bool doAction() = 0;
+	virtual const juce::String getName() = 0;
 
 protected:
 	void output(const juce::String& mes);
