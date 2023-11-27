@@ -14,6 +14,7 @@ bool ActionDispatcher::dispatch(std::unique_ptr<ActionBase> action) {
 	if (!action) { return false; }
 
 	if (dynamic_cast<ActionUndoableBase*>(action.get())) {
+		this->manager->beginNewTransaction();
 		return this->manager->perform(dynamic_cast<ActionUndoableBase*>(action.release()));
 	}
 	return action->doAction();
@@ -21,6 +22,14 @@ bool ActionDispatcher::dispatch(std::unique_ptr<ActionBase> action) {
 
 void ActionDispatcher::clearUndoList() {
 	this->manager->clearUndoHistory();
+}
+
+bool ActionDispatcher::performUndo() {
+	return this->manager->undo();
+}
+
+bool ActionDispatcher::performRedo() {
+	return this->manager->redo();
 }
 
 void ActionDispatcher::setOutput(const OutputCallback& callback) {

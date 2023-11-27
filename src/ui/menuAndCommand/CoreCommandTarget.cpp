@@ -84,13 +84,13 @@ void CoreCommandTarget::getCommandInfo(
 	case CoreCommandType::Undo:
 		result.setInfo(TRANS("Undo"), TRANS("Undo the last action."), TRANS("Edit"), 0);
 		result.addDefaultKeypress('z', juce::ModifierKeys::ctrlModifier);
-		result.setActive(false);
+		result.setActive(this->checkForUndo());
 		break;
 	case CoreCommandType::Redo:
 		result.setInfo(TRANS("Redo"), TRANS("Redo the last undo action."), TRANS("Edit"), 0);
 		result.addDefaultKeypress('y', juce::ModifierKeys::ctrlModifier);
 		result.addDefaultKeypress('z', juce::ModifierKeys::ctrlModifier | juce::ModifierKeys::shiftModifier);
-		result.setActive(false);
+		result.setActive(this->checkForRedo());
 		break;
 	}
 }
@@ -349,6 +349,14 @@ void CoreCommandTarget::render() const {
 	this->selectForMixerTracks(callback);
 }
 
+void CoreCommandTarget::undo() const {
+	ActionDispatcher::getInstance()->performUndo();
+}
+
+void CoreCommandTarget::redo() const {
+	ActionDispatcher::getInstance()->performRedo();
+}
+
 bool CoreCommandTarget::checkForSave() const {
 	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
 		return true;
@@ -449,6 +457,16 @@ void CoreCommandTarget::selectForMixerTracks(
 			callback(resList);
 		}
 	), true);
+}
+
+bool CoreCommandTarget::checkForUndo() const {
+	auto& manager = ActionDispatcher::getInstance()->getActionManager();
+	return manager.canUndo();
+}
+
+bool CoreCommandTarget::checkForRedo() const {
+	auto& manager = ActionDispatcher::getInstance()->getActionManager();
+	return manager.canRedo();
 }
 
 CoreCommandTarget* CoreCommandTarget::getInstance() {

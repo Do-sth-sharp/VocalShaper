@@ -24,11 +24,17 @@ private:
 	void exportSource() const;
 	void render() const;
 
+	void undo() const;
+	void redo() const;
+
 private:
 	bool checkForSave() const;
 	void selectForSource(const std::function<void(int)>& callback) const;
 	void selectForMixerTracks(
 		const std::function<void(const juce::Array<int>&)>& callback) const;
+
+	bool checkForUndo() const;
+	bool checkForRedo() const;
 
 	std::unique_ptr<juce::ListBox> trackListBox = nullptr;
 	std::unique_ptr<juce::ListBoxModel> trackListBoxModel = nullptr;

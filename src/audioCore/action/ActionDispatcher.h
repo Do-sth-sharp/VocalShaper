@@ -11,6 +11,8 @@ public:
 	const juce::UndoManager& getActionManager() const;
 	bool dispatch(std::unique_ptr<ActionBase> action);
 	void clearUndoList();
+	bool performUndo();
+	bool performRedo();
 
 	using OutputCallback = std::function<void(const juce::String&)>;
 	void setOutput(const OutputCallback& callback);
