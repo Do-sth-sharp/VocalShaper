@@ -31,7 +31,7 @@ void PluginSearcher::start() {
 	auto searchPathList = this->getSearchPath();
 	juce::FileSearchPath searchPath;
 	for (auto& s : searchPathList) {
-		searchPath.addPath(juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+		searchPath.addPath(juce::File::getSpecialLocation(juce::File::currentApplicationFile)
 			.getChildFile(s).getFullPathName());
 	}
 
@@ -43,7 +43,7 @@ void PluginSearcher::start() {
 
 	/** Get Dead List Path */
 	juce::File deadListFile =
-		juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+		juce::File::getSpecialLocation(juce::File::currentApplicationFile)
 		.getChildFile(this->deadPluginListPath);
 	if (!deadListFile.exists()) {
 		deadListFile.createDirectory();
@@ -102,7 +102,7 @@ void PluginSearcher::start() {
 }
 
 const juce::File PluginSearcher::getSearchPathFile() const {
-	return juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory()
+	return juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
 		.getChildFile(this->pluginSearchPathListFilePath);
 }
 
@@ -119,7 +119,7 @@ const juce::StringArray PluginSearcher::getSearchPath() const {
 }
 
 const juce::File PluginSearcher::getBlackListFile() const {
-	return juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory()
+	return juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
 		.getChildFile(this->pluginBlackListFilePath);
 }
 
@@ -145,7 +145,7 @@ void PluginSearcher::saveBlackList(const juce::StringArray& list) const {
 }
 
 const juce::File PluginSearcher::getTemporaryFile() const {
-	return juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory()
+	return juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
 		.getChildFile(this->pluginListTemporaryFilePath);
 }
 

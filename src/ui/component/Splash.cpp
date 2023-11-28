@@ -1,6 +1,7 @@
 ﻿#include "Splash.h"
 #include "../misc/ColorMap.h"
 #include "../../audioCore/AC_API.h"
+#include "../Utils.h"
 
 Splash::Splash() : Component() {
 	/** Size */
@@ -33,14 +34,11 @@ Splash::Splash() : Component() {
 
 	/** Images */
 	this->logo = std::make_unique<juce::Image>(
-		juce::ImageFileFormat::loadFrom(
-			juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile)
-			.getParentDirectory().getChildFile("./rc/logo.png")));
+		juce::ImageFileFormat::loadFrom(utils::getResourceFile("logo.png")));
 
 	/** Splash Image */
 	{
-		juce::File splashConfigFile = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile)
-			.getParentDirectory().getChildFile("./splash/" + this->relStr + ".json");
+		juce::File splashConfigFile = utils::getSplashConfigFile(this->relStr);
 		juce::var splashConfig = juce::JSON::parse(splashConfigFile);
 
 		this->illustStr = "Illustration by " + splashConfig["illustrator"].toString() + ".";
@@ -58,8 +56,7 @@ Splash::Splash() : Component() {
 
 		auto relImgTemp = std::make_unique<juce::Image>(
 			juce::ImageFileFormat::loadFrom(
-				juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile)
-				.getParentDirectory().getChildFile(splashConfig["picture"].toString())));
+				utils::getAppRootDir().getChildFile(splashConfig["picture"].toString())));
 
 		juce::Rectangle<int> cutArea(0, 0, relImgTemp->getWidth(), relImgTemp->getHeight());
 		auto cutArray = splashConfig["cut"].getArray();
@@ -80,9 +77,7 @@ Splash::Splash() : Component() {
 	/** Typefaces */
 	{
 		/** Title */
-		juce::File titleFontFile = juce::File::getSpecialLocation(
-			juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-			.getChildFile("./fonts/OpenSans-Bold.ttf");
+		juce::File titleFontFile = utils::getFontFile("OpenSans-Bold");
 		auto titleFontSize = titleFontFile.getSize();
 		auto ptrTitleFontData = std::unique_ptr<char[]>(new char[titleFontSize]);
 
@@ -93,9 +88,7 @@ Splash::Splash() : Component() {
 	}
 	{
 		/** Sub Title */
-		juce::File titleFontFile = juce::File::getSpecialLocation(
-			juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-			.getChildFile("./fonts/OpenSans-BoldItalic.ttf");
+		juce::File titleFontFile = utils::getFontFile("OpenSans-BoldItalic");
 		auto titleFontSize = titleFontFile.getSize();
 		auto ptrTitleFontData = std::unique_ptr<char[]>(new char[titleFontSize]);
 
@@ -106,9 +99,7 @@ Splash::Splash() : Component() {
 	}
 	{
 		/** Text */
-		juce::File textFontFile = juce::File::getSpecialLocation(
-			juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-			.getChildFile("./fonts/OpenSans-Regular.ttf");
+		juce::File textFontFile = utils::getFontFile("OpenSans-Regular");
 		auto textFontSize = textFontFile.getSize();
 		auto ptrTextFontData = std::unique_ptr<char[]>(new char[textFontSize]);
 

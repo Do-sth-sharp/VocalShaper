@@ -38,7 +38,7 @@ std::tuple<bool, juce::KnownPluginList&> AudioPluginSearchThread::getPluginList(
 		juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
 		juce::File temporaryFile =
 			juce::File::getSpecialLocation(
-				juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile(temporaryFilePath);
+				juce::File::SpecialLocationType::currentApplicationFile).getParentDirectory().getChildFile(temporaryFilePath);
 		if (temporaryFile.existsAsFile()) {
 			/** Load From Xml File */
 			if (auto xmlElement = juce::XmlDocument::parse(temporaryFile)) {
@@ -141,7 +141,7 @@ void AudioPluginSearchThread::run() {
 	juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
 	juce::File temporaryFile =
 		juce::File::getSpecialLocation(
-			juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile(temporaryFilePath);
+			juce::File::SpecialLocationType::currentApplicationFile).getParentDirectory().getChildFile(temporaryFilePath);
 
 	/** If Temporary File Doesn't Exist */
 	if (!temporaryFile.existsAsFile()) {
@@ -149,7 +149,7 @@ void AudioPluginSearchThread::run() {
 		juce::ChildProcess process;
 
 		/** Get Searcher Path */
-		juce::File searcher = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+		juce::File searcher = juce::File::getSpecialLocation(juce::File::currentApplicationFile)
 			.getParentDirectory().getChildFile(PluginSearcherPath);
 		juce::String searcherPath = searcher.getFullPathName().quoted();
 
@@ -201,7 +201,7 @@ void AudioPluginSearchThread::clearTemporaryInternal() const {
 	juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
 	juce::File temporaryFile =
 		juce::File::getSpecialLocation(
-			juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile(temporaryFilePath);
+			juce::File::SpecialLocationType::currentApplicationFile).getParentDirectory().getChildFile(temporaryFilePath);
 	if (temporaryFile.existsAsFile()) {
 		/** Remove Temporary File */
 		temporaryFile.deleteFile();
@@ -211,7 +211,7 @@ void AudioPluginSearchThread::clearTemporaryInternal() const {
 const juce::File AudioPluginSearchThread::getBlackListFileInternal() const {
 	juce::String blackListFilePath = AudioConfig::getPluginBlackListFilePath();
 	return juce::File::getSpecialLocation(
-		juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile(blackListFilePath);
+		juce::File::SpecialLocationType::currentApplicationFile).getParentDirectory().getChildFile(blackListFilePath);
 }
 
 void AudioPluginSearchThread::saveBlackListInternal(const juce::StringArray& blackList) const {
@@ -225,7 +225,7 @@ void AudioPluginSearchThread::saveBlackListInternal(const juce::StringArray& bla
 const juce::File AudioPluginSearchThread::getSearchPathFileInternal() const {
 	juce::String pathListFilePath = AudioConfig::getPluginSearchPathListFilePath();
 	return juce::File::getSpecialLocation(
-		juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory().getChildFile(pathListFilePath);
+		juce::File::SpecialLocationType::currentApplicationFile).getParentDirectory().getChildFile(pathListFilePath);
 }
 
 void AudioPluginSearchThread::saveSearchPathInternal(const juce::StringArray& paths) const {

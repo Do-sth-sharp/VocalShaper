@@ -1,6 +1,8 @@
 ﻿#include "GUICommandTarget.h"
 #include "CommandTypes.h"
 #include "../../audioCore/AC_API.h"
+#include "../Utils.h"
+#include "../component/CompManager.h"
 #include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
@@ -74,11 +76,11 @@ void GUICommandTarget::getCommandInfo(
 
 	case GUICommandType::LoadLayout:
 		result.setInfo(TRANS("Load Layout"), TRANS("Load a workspace layout file."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setActive(true);
 		break;
 	case GUICommandType::SaveLayout:
 		result.setInfo(TRANS("Save Layout"), TRANS("Save workspace to layout file."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setActive(true);
 		break;
 	case GUICommandType::PluginView:
 		result.setInfo(TRANS("Plugin"), TRANS("Show plugin view component."), TRANS("View"), 0);
@@ -123,9 +125,7 @@ bool GUICommandTarget::perform(
 	const juce::ApplicationCommandTarget::InvocationInfo& info) {
 	switch ((GUICommandType)(info.commandID)) {
 	case GUICommandType::CloseEditor:
-		if (flowUI::FlowWindowHub::getAppExitHook()()) {
-			juce::JUCEApplication::getInstance()->systemRequestedQuit();
-		}
+		this->closeEditor();
 		return true;
 
 	case GUICommandType::Copy:
@@ -148,10 +148,10 @@ bool GUICommandTarget::perform(
 		return true;
 
 	case GUICommandType::LoadLayout:
-		/** TODO */
+		this->loadLayout();
 		return true;
 	case GUICommandType::SaveLayout:
-		/** TODO */
+		this->saveLayout();
 		return true;
 	case GUICommandType::PluginView:
 		/** TODO */
@@ -183,6 +183,35 @@ bool GUICommandTarget::perform(
 	}
 
 	return false;
+}
+
+void GUICommandTarget::closeEditor() const {
+	if (flowUI::FlowWindowHub::getAppExitHook()()) {
+		juce::JUCEApplication::getInstance()->systemRequestedQuit();
+	}
+}
+
+void GUICommandTarget::loadLayout() const {
+	juce::File defaultPath = utils::getLayoutDir();
+	juce::FileChooser chooser(TRANS("Load Layout"), defaultPath, "*.json");
+	if (chooser.browseForFileToOpen()) {
+		juce::File layoutFile = chooser.getResult();
+		CompManager::getInstance()->autoLayout(layoutFile.getFullPathName());
+		CompManager::getInstance()->maxMainWindow();
+	}
+}
+
+void GUICommandTarget::saveLayout() const {
+	juce::File defaultPath = utils::getLayoutDir();
+	juce::FileChooser chooser(TRANS("Save Layout"), defaultPath, "*.json");
+	if (chooser.browseForFileToSave(true)) {
+		juce::File layoutFile = chooser.getResult();
+		if (layoutFile.getFileExtension().isEmpty()) {
+			layoutFile = layoutFile.withFileExtension("json");
+		}
+
+		CompManager::getInstance()->saveLayout(layoutFile.getFullPathName());
+	}
 }
 
 GUICommandTarget* GUICommandTarget::getInstance() {

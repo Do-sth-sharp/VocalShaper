@@ -458,7 +458,7 @@ namespace utils {
 		this->registerBasicFormats();
 
 		/** LAME Encoder */
-		juce::File LAMEExecutable = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+		juce::File LAMEExecutable = juce::File::getSpecialLocation(juce::File::currentApplicationFile)
 			.getParentDirectory().getChildFile(LAMEPath);
 		this->LAMEFormat = std::unique_ptr<juce::AudioFormat>(
 			new juce::LAMEEncoderAudioFormat(LAMEExecutable));

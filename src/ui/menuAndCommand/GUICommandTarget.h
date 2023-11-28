@@ -13,6 +13,12 @@ public:
 	void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
 	bool perform(const juce::ApplicationCommandTarget::InvocationInfo& info) override;
 
+private:
+	void closeEditor() const;
+
+	void loadLayout() const;
+	void saveLayout() const;
+
 public:
 	static GUICommandTarget* getInstance();
 	static void releaseInstance();

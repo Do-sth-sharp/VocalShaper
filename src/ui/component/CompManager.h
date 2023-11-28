@@ -26,8 +26,14 @@ public:
 	void set(CompType type, std::unique_ptr<flowUI::FlowComponent> comp);
 	flowUI::FlowComponent* get(CompType type) const;
 
+	void autoLayout(const juce::String& path) const;
+	void saveLayout(const juce::String& path) const;
+	void maxMainWindow() const;
+
 private:
 	juce::OwnedArray<flowUI::FlowComponent> compList;
+
+	const juce::Array<flowUI::FlowComponent*> getLayoutList() const;
 
 public:
 	static CompManager* getInstance();

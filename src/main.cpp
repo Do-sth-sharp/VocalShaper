@@ -11,6 +11,7 @@
 #include "ui/component/Splash.h"
 #include "ui/component/CompManager.h"
 #include "ui/menuAndCommand/CommandManager.h"
+#include "ui/Utils.h"
 
 class MainApplication : public juce::JUCEApplication {
 private:
@@ -31,8 +32,7 @@ public:
 		/** Get Config */
 		this->splash->showMessage("Load StartUp Configs...");
 
-		juce::File configFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
-			.getParentDirectory().getChildFile("./data/config/startup.json");
+		juce::File configFile = utils::getConfigFile("startup");
 		auto configData = juce::JSON::parse(configFile);
 		if (!configData.isObject()) {
 			juce::AlertWindow::showMessageBox(
@@ -65,8 +65,7 @@ public:
 		InitTaskList::getInstance()->add(
 			[themeName = configData["theme"].toString()] {
 				/** Get Color Map */
-				juce::File colorMapFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
-					.getParentDirectory().getChildFile("./themes/" + themeName + "/colors.json");
+				juce::File colorMapFile = utils::getThemeColorFile(themeName);
 				auto colorMapData = juce::JSON::parse(colorMapFile);
 				if (!colorMapData.isObject()) {
 					juce::AlertWindow::showMessageBox(
@@ -140,9 +139,7 @@ public:
 		);
 		InitTaskList::getInstance()->add(
 			[transName = configData["language"].toString()] {
-				juce::File transDir = juce::File::getSpecialLocation(
-					juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-					.getChildFile("./translates/" + transName + "/");
+				juce::File transDir = utils::getTransRootDir(transName);
 				auto transList = transDir.findChildFiles(juce::File::findFiles, true, "*.txt");
 
 				if (transList.size() > 0) {
@@ -165,9 +162,7 @@ public:
 		);
 		InitTaskList::getInstance()->add(
 			[fontName = configData["font"].toString()] {
-				juce::File fontFile = juce::File::getSpecialLocation(
-					juce::File::SpecialLocationType::currentExecutableFile).getParentDirectory()
-					.getChildFile("./fonts/" + fontName + ".ttf");
+				juce::File fontFile = utils::getFontFile(fontName);
 
 				auto fontSize = fontFile.getSize();
 				auto ptrFontData = std::unique_ptr<char[]>(new char[fontSize]);
@@ -254,20 +249,8 @@ public:
 		);
 		InitTaskList::getInstance()->add(
 			[layoutName = configData["layout"].toString()] {
-				flowUI::FlowWindowHub::autoLayout(
-					"./layouts/" + layoutName + ".json",
-					juce::Array<flowUI::FlowComponent*>{
-						CompManager::getInstance()->get(CompManager::CompType::ToolBar),
-						CompManager::getInstance()->get(CompManager::CompType::PluginView),
-						CompManager::getInstance()->get(CompManager::CompType::SourceView),
-						CompManager::getInstance()->get(CompManager::CompType::TrackView),
-						CompManager::getInstance()->get(CompManager::CompType::InstrView),
-						CompManager::getInstance()->get(CompManager::CompType::MixerView),
-						CompManager::getInstance()->get(CompManager::CompType::SourceEditView),
-						CompManager::getInstance()->get(CompManager::CompType::SourceRecordView),
-						CompManager::getInstance()->get(CompManager::CompType::AudioDebugger),
-						CompManager::getInstance()->get(CompManager::CompType::MidiDebugger),
-				});
+				CompManager::getInstance()->autoLayout(
+					"./layouts/" + layoutName + ".json");
 			}
 		);
 
@@ -279,11 +262,7 @@ public:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
-				if (flowUI::FlowWindowHub::getSize() > 0) {
-					if (auto window = flowUI::FlowWindowHub::getWindow(0)) {
-						window->setFullScreen(true);
-					}
-				}
+				CompManager::getInstance()->maxMainWindow();
 			}
 		);
 
