@@ -2,6 +2,8 @@
 
 #include <JuceHeader.h>
 
+#include "../component/CompManager.h"
+
 class GUICommandTarget final
 	: public juce::ApplicationCommandTarget,
 	private juce::DeletedAtShutdown {
@@ -18,6 +20,7 @@ private:
 
 	void loadLayout() const;
 	void saveLayout() const;
+	void changeOpened(CompManager::CompType type) const;
 
 public:
 	static GUICommandTarget* getInstance();

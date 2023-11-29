@@ -30,6 +30,34 @@ void CompManager::maxMainWindow() const {
 	}
 }
 
+bool CompManager::isOpened(CompType type) const {
+	auto comp = this->get(type);
+	if (!comp) { return false; }
+	return comp->isOpened();
+}
+
+void CompManager::open(CompType type, int windowIdx) const {
+	this->close(type);
+	
+	if (auto comp = this->get(type)) {
+		if (auto window = flowUI::FlowWindowHub::getWindow(windowIdx)) {
+			window->openComponent(comp);
+		}
+	}
+}
+
+void CompManager::close(CompType type) const {
+	auto comp = this->get(type);
+	if (!comp) { return; }
+
+	int windSize = flowUI::FlowWindowHub::getSize();
+	for (int i = 0; i < windSize; i++) {
+		if (auto window = flowUI::FlowWindowHub::getWindow(i)) {
+			window->closeComponent(comp);
+		}
+	}
+}
+
 const juce::Array<flowUI::FlowComponent*> CompManager::getLayoutList() const {
 	return {
 		this->get(CompType::ToolBar),

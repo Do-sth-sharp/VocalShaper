@@ -84,39 +84,57 @@ void GUICommandTarget::getCommandInfo(
 		break;
 	case GUICommandType::PluginView:
 		result.setInfo(TRANS("Plugin"), TRANS("Show plugin view component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::PluginView));
+		result.setActive(true);
 		break;
 	case GUICommandType::SourceView:
 		result.setInfo(TRANS("Source"), TRANS("Show source view component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::SourceView));
+		result.setActive(true);
 		break;
 	case GUICommandType::TrackView:
 		result.setInfo(TRANS("Track"), TRANS("Show track view component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::TrackView));
+		result.setActive(true);
 		break;
 	case GUICommandType::InstrView:
 		result.setInfo(TRANS("Instrument"), TRANS("Show instrument view component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::InstrView));
+		result.setActive(true);
 		break;
 	case GUICommandType::MixerView:
 		result.setInfo(TRANS("Mixer"), TRANS("Show mixer view component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::MixerView));
+		result.setActive(true);
 		break;
 	case GUICommandType::SourceEditView:
 		result.setInfo(TRANS("Source Editor"), TRANS("Show source editor component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::SourceEditView));
+		result.setActive(true);
 		break;
 	case GUICommandType::SourceRecordView:
 		result.setInfo(TRANS("Source Recorder"), TRANS("Show source recorder component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::SourceRecordView));
+		result.setActive(true);
 		break;
 	case GUICommandType::AudioDebugger:
 		result.setInfo(TRANS("Audio Debugger"), TRANS("Show audio debugger component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::AudioDebugger));
+		result.setActive(true);
 		break;
 	case GUICommandType::MidiDebugger:
 		result.setInfo(TRANS("MIDI Debugger"), TRANS("Show MIDI debugger component."), TRANS("View"), 0);
-		result.setActive(false);
+		result.setTicked(CompManager::getInstance()->isOpened(
+			CompManager::CompType::MidiDebugger));
+		result.setActive(true);
 		break;
 	}
 }
@@ -154,31 +172,31 @@ bool GUICommandTarget::perform(
 		this->saveLayout();
 		return true;
 	case GUICommandType::PluginView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::PluginView);
 		return true;
 	case GUICommandType::SourceView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::SourceView);
 		return true;
 	case GUICommandType::TrackView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::TrackView);
 		return true;
 	case GUICommandType::InstrView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::InstrView);
 		return true;
 	case GUICommandType::MixerView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::MixerView);
 		return true;
 	case GUICommandType::SourceEditView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::SourceEditView);
 		return true;
 	case GUICommandType::SourceRecordView:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::SourceRecordView);
 		return true;
 	case GUICommandType::AudioDebugger:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::AudioDebugger);
 		return true;
 	case GUICommandType::MidiDebugger:
-		/** TODO */
+		this->changeOpened(CompManager::CompType::MidiDebugger);
 		return true;
 	}
 
@@ -211,6 +229,15 @@ void GUICommandTarget::saveLayout() const {
 		}
 
 		CompManager::getInstance()->saveLayout(layoutFile.getFullPathName());
+	}
+}
+
+void GUICommandTarget::changeOpened(CompManager::CompType type) const {
+	if (CompManager::getInstance()->isOpened(type)) {
+		CompManager::getInstance()->close(type);
+	}
+	else {
+		CompManager::getInstance()->open(type);
 	}
 }
 

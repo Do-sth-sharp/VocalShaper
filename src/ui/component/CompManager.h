@@ -30,6 +30,10 @@ public:
 	void saveLayout(const juce::String& path) const;
 	void maxMainWindow() const;
 
+	bool isOpened(CompType type) const;
+	void open(CompType type, int windowIdx = 0) const;
+	void close(CompType type) const;
+
 private:
 	juce::OwnedArray<flowUI::FlowComponent> compList;
 

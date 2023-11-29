@@ -138,10 +138,10 @@ bool CoreCommandTarget::perform(
 		return true;
 
 	case CoreCommandType::Undo:
-		/** TODO */
+		this->undo();
 		return true;
 	case CoreCommandType::Redo:
-		/** TODO */
+		this->redo();
 		return true;
 	}
 
