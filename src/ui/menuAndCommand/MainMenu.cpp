@@ -18,6 +18,11 @@ juce::PopupMenu MainMenu::create() const {
 	return menu;
 }
 
+const juce::StringArray MainMenu::getNames() const {
+	return { TRANS("File"), TRANS("Edit"), TRANS("View"),
+		TRANS("Project"), TRANS("Control"), TRANS("Config"), TRANS("Misc") };
+}
+
 juce::PopupMenu MainMenu::createFile() const {
 	juce::PopupMenu menu;
 

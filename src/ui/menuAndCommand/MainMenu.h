@@ -7,8 +7,9 @@ public:
 	MainMenu() = default;
 
 	juce::PopupMenu create() const;
+	const juce::StringArray getNames() const;
 
-private:
+public:
 	juce::PopupMenu createFile() const;
 	juce::PopupMenu createEdit() const;
 	juce::PopupMenu createView() const;
