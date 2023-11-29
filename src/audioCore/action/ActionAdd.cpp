@@ -65,7 +65,8 @@ bool ActionAddMixerTrack::undo() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeTrack(this->index);
+		graph->removeTrack((this->index > -1 && this->index < graph->getTrackNum())
+			? this->index : (graph->getTrackNum() - 1));
 
 		this->output(juce::String{ "Undo Add Mixer Track.\n" }
 			+ "Total Mixer Track Num: " + juce::String(graph->getTrackNum()) + "\n");
@@ -224,7 +225,8 @@ bool ActionAddEffect::undo() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(this->track)) {
 			if (auto pluginDock = track->getPluginDock()) {
-				pluginDock->removePlugin(this->effect);
+				pluginDock->removePlugin((this->effect > -1 && this->effect < pluginDock->getPluginNum())
+					? this->effect : (pluginDock->getPluginNum() - 1));
 
 				this->output("Undo Insert Plugin: [" + juce::String(this->track) + ", " + juce::String(this->effect) + "] " + this->pid + "\n");
 				return true;
@@ -316,7 +318,8 @@ bool ActionAddInstr::undo() {
 
 	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(this->type));
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeInstrument(this->index);
+		graph->removeInstrument((this->index > -1 && this->index < graph->getInstrumentNum())
+			? this->index : (graph->getInstrumentNum() - 1));
 
 		this->output("Undo Insert Plugin: [" + juce::String(this->index) + "] " + this->pid + " : " + pluginType.getDescription() + "\n");
 		return true;
@@ -679,7 +682,8 @@ bool ActionAddSequencerTrack::undo() {
 		juce::AudioChannelSet trackType = utils::getChannelSet(
 			static_cast<utils::TrackType>(this->type));
 
-		graph->removeSource(this->index);
+		graph->removeSource((this->index > -1 && this->index < graph->getSourceNum())
+			? this->index : (graph->getSourceNum() - 1));
 
 		this->output("Undo Add Sequencer Track: [" + juce::String(this->type) + "]" + trackType.getDescription() + "\n"
 			+ "Total Sequencer Track Num: " + juce::String(graph->getSourceNum()) + "\n");
