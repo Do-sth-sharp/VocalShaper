@@ -2,18 +2,20 @@
 
 #include <JuceHeader.h>
 #include <FlowUI.h>
+#include "../dataModel/MainMenuModel.h"
+#include "MenuBarComponent.h"
 
 class ToolBar final : public flowUI::FlowComponent {
 public:
 	ToolBar();
+	~ToolBar();
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
 private:
-	std::unique_ptr<juce::DrawableButton> mainButton = nullptr;
-
-	void showMainMenu() const;
+	std::unique_ptr<MainMenuModel> mainMenuModel = nullptr;
+	std::unique_ptr<MenuBarComponent> mainMenuBar = nullptr;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ToolBar)
 };

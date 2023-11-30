@@ -11,6 +11,8 @@
 #include "ui/component/Splash.h"
 #include "ui/component/CompManager.h"
 #include "ui/menuAndCommand/CommandManager.h"
+#include "ui/menuAndCommand/CoreCommandTarget.h"
+#include "ui/menuAndCommand/GUICommandTarget.h"
 #include "ui/Utils.h"
 
 class MainApplication : public juce::JUCEApplication {
@@ -286,9 +288,12 @@ public:
 
 		/** Release Commands */
 		CommandManager::releaseInstance();
+		CoreCommandTarget::releaseInstance();
+		GUICommandTarget::releaseInstance();
 
 		/** Release Components */
 		CompManager::releaseInstance();
+		LookAndFeelFactory::releaseInstance();
 
 		/** ShutDown Backend */
 		shutdownAudioCore();

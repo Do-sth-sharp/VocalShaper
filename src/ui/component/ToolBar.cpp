@@ -1,32 +1,20 @@
 ﻿#include "ToolBar.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
-#include "../menuAndCommand/MainMenu.h"
 #include <IconManager.h>
 
 ToolBar::ToolBar()
 	: FlowComponent(TRANS("Tool Bar")) {
-	/** ToolBar LookAndFeel */
-	this->setLookAndFeel(LookAndFeelFactory::getInstance()->forToolBar());
+	/** Main Menu Model */
+	this->mainMenuModel = std::make_unique<MainMenuModel>();
 
-	/** Main Button */
-	auto mainButtonLAF = LookAndFeelFactory::getInstance()->forMainButton();
+	/** Main Menu Bar */
+	this->mainMenuBar =
+		std::make_unique<MenuBarComponent>(this->mainMenuModel.get());
+	this->addAndMakeVisible(this->mainMenuBar.get());
+}
 
-	this->mainButton = std::make_unique<juce::DrawableButton>(
-		TRANS("Main Button"), juce::DrawableButton::ImageOnButtonBackground);
-	this->mainButton->setLookAndFeel(mainButtonLAF);
-	this->mainButton->setWantsKeyboardFocus(false);
-	this->mainButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-	this->mainButton->setConnectedEdges(juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
-	this->mainButton->onClick = [this] {
-		this->showMainMenu();
-	};
-	this->addAndMakeVisible(this->mainButton.get());
-
-	if (auto mainButtonIcon = flowUI::IconManager::getSVG("./RemixIcon/System/menu-line.svg")) {
-		mainButtonIcon->replaceColour(juce::Colours::black,
-			mainButtonLAF->findColour(juce::DrawableButton::ColourIds::textColourId));
-		this->mainButton->setImages(mainButtonIcon.get());
-	}
+ToolBar::~ToolBar() {
+	this->mainMenuBar->setModel(nullptr);
 }
 
 void ToolBar::resized() {
@@ -35,11 +23,11 @@ void ToolBar::resized() {
 	if (!window) { return; }
 	auto screenSize = window->getScreenSize();
 
-	/** Main Button */
-	int mainButtonHeight = this->getHeight() * 0.5;
-	juce::Rectangle<int> mainButtonRect(
-		0, 0, mainButtonHeight, mainButtonHeight);
-	this->mainButton->setBounds(mainButtonRect);
+	/** Main Menu Bar */
+	int mainMenuBarHeight = this->getHeight() * 0.35;
+	juce::Rectangle<int> mainMenuBarRect(
+		0, 0, mainMenuBarHeight * 15, mainMenuBarHeight);
+	this->mainMenuBar->setBounds(mainMenuBarRect);
 }
 
 void ToolBar::paint(juce::Graphics& g) {
@@ -49,9 +37,4 @@ void ToolBar::paint(juce::Graphics& g) {
 	g.setColour(laf.findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId));
 	g.fillAll();
-}
-
-void ToolBar::showMainMenu() const {
-	auto menu = MainMenu::getInstance()->create();
-	menu.showAt(this->mainButton.get());
 }

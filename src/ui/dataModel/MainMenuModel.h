@@ -1,16 +1,24 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "MenuBarModel.h"
 
-class MainMenuModel final : public juce::MenuBarModel {
+class MainMenuModel final : public MenuBarModel {
 public:
 	MainMenuModel();
 
-	juce::StringArray getMenuBarNames() override;
+	const juce::StringArray getMenuBarNames() override;
 	juce::PopupMenu getMenuForIndex(
 		int topLevelMenuIndex, const juce::String& menuName) override;
-	void menuItemSelected(int menuItemID, int topLevelMenuIndex) override;
-	void menuBarActivated(bool isActive) override;
+
+private:
+	juce::PopupMenu createFile() const;
+	juce::PopupMenu createEdit() const;
+	juce::PopupMenu createView() const;
+	juce::PopupMenu createProject() const;
+	juce::PopupMenu createControl() const;
+	juce::PopupMenu createConfig() const;
+	juce::PopupMenu createMisc() const;
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainMenuModel)
