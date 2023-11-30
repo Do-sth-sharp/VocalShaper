@@ -268,6 +268,10 @@ endif (MSVC)
 
 target_compile_definitions (libJUCE PUBLIC "JUCE_MODAL_LOOPS_PERMITTED=1" "JUCE_CATCH_UNHANDLED_EXCEPTIONS=1")
 
+if (JUCE_DISABLE_LEAK_DETECTOR)
+    target_compile_definitions (libJUCE PUBLIC "JUCE_CHECK_MEMORY_LEAKS=0")
+endif (JUCE_DISABLE_LEAK_DETECTOR)
+
 if (NOT MSVC)
     target_compile_options (libJUCE PRIVATE
     -fPIC
