@@ -4,12 +4,18 @@
 
 ToolBar::ToolBar()
 	: FlowComponent(TRANS("Tool Bar")) {
+	/** Look And Feel */
+	this->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forToolBar());
+
 	/** Main Menu Model */
 	this->mainMenuModel = std::make_unique<MainMenuModel>();
 
 	/** Main Menu Bar */
 	this->mainMenuBar =
 		std::make_unique<MenuBarComponent>(this->mainMenuModel.get());
+	this->mainMenuBar->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forMainMenu());
 	this->addAndMakeVisible(this->mainMenuBar.get());
 }
 
@@ -24,9 +30,9 @@ void ToolBar::resized() {
 	auto screenSize = window->getScreenSize();
 
 	/** Main Menu Bar */
-	int mainMenuBarHeight = this->getHeight() * 0.35;
+	int mainMenuBarHeight = this->getHeight() * 0.4;
 	juce::Rectangle<int> mainMenuBarRect(
-		0, 0, mainMenuBarHeight * 15, mainMenuBarHeight);
+		0, 0, std::min(mainMenuBarHeight * 15, this->getWidth()), mainMenuBarHeight);
 	this->mainMenuBar->setBounds(mainMenuBarRect);
 }
 

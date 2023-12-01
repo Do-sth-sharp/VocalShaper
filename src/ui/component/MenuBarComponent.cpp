@@ -5,6 +5,7 @@ MenuBarComponent::MenuBarComponent(MenuBarModel* model)
 	/** More Button */
 	this->moreButton = std::make_unique<juce::TextButton>("...");
 	this->moreButton->setWantsKeyboardFocus(false);
+	this->moreButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->moreButton->setConnectedEdges(
 		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
 	this->moreButton->onClick = [this] {
@@ -83,6 +84,7 @@ void MenuBarComponent::updateButtons() {
 	for (int i = 0; i < textArray.size(); i++) {
 		if (auto button = this->buttons.add(new juce::TextButton{ textArray.getReference(i) })) {
 			button->setWantsKeyboardFocus(false);
+			button->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 			button->setConnectedEdges(
 				juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
 			button->onClick = [i, button, model = this->model] {

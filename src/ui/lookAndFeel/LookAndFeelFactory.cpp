@@ -83,18 +83,7 @@ void LookAndFeelFactory::initialise() {
 	/** ToolBar */
 	this->toolBarLAF = std::make_unique<juce::LookAndFeel_V4>();
 	this->toolBarLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-
-	/** Main Button */
-	this->mainButtonLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->mainButtonLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));
-	this->mainButtonLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));
-	this->mainButtonLAF->setColour(juce::DrawableButton::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
-	this->mainButtonLAF->setColour(juce::DrawableButton::ColourIds::textColourOnId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
+		ColorMap::getInstance()->get("ThemeColorB1"));
 
 	/** List Box */
 	this->listBoxLAF = std::make_unique<juce::LookAndFeel_V4>();
@@ -108,6 +97,19 @@ void LookAndFeelFactory::initialise() {
 		ColorMap::getInstance()->get("ThemeColorB9"));
 	this->listBoxLAF->setColour(juce::ListBox::ColourIds::textColourId + 1,
 		ColorMap::getInstance()->get("ThemeColorB10"));/**< Text On */
+
+	/** Main Menu */
+	this->mainMenuLAF = std::make_unique<juce::LookAndFeel_V4>();
+	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->mainMenuLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -119,12 +121,12 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forToolBar() const {
 	return this->toolBarLAF.get();
 }
 
-juce::LookAndFeel_V4* LookAndFeelFactory::forMainButton() const {
-	return this->mainButtonLAF.get();
-}
-
 juce::LookAndFeel_V4* LookAndFeelFactory::forListBox() const {
 	return this->listBoxLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forMainMenu() const {
+	return this->mainMenuLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {
