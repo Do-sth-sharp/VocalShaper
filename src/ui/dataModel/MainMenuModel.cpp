@@ -111,9 +111,18 @@ juce::PopupMenu MainMenuModel::createConfig() const {
 }
 
 juce::PopupMenu MainMenuModel::createMisc() const {
+	juce::PopupMenu linksMenu;
+	linksMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Bilibili);
+	linksMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Github);
+
 	juce::PopupMenu menu;
 
-	/** TODO */
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Help);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Update);
+	menu.addSubMenu(TRANS("Links"), linksMenu);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Website);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::License);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::About);
 
 	return menu;
 }

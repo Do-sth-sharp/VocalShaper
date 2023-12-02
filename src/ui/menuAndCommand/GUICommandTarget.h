@@ -22,6 +22,14 @@ private:
 	void saveLayout() const;
 	void changeOpened(CompManager::CompType type) const;
 
+	void help() const;
+	void update() const;
+	void bilibili() const;
+	void github() const;
+	void website() const;
+	void license() const;
+	void about() const;
+
 public:
 	static GUICommandTarget* getInstance();
 	static void releaseInstance();

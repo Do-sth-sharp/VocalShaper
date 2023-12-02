@@ -1,10 +1,14 @@
 ﻿language: Chinese
 countries: cn
- 
+
+
+
 "Yes" = "是"
 "No" = "否"
 "OK" = "确认"
 "Cancel" = "取消"
+
+
 
 "Start Menu" = "开始菜单"
 "Tool Bar" = "工具栏"
@@ -18,9 +22,13 @@ countries: cn
 "Audio Debugger" = "音频调试器"
 "MIDI Debugger" = "MIDI调试器"
 
+
+
 "Main Button" = "主按钮"
 "Selector" = "选择器"
 "Track List" = "轨道列表"
+
+
 
 "File" = "文件"
 "Edit" = "编辑"
@@ -29,6 +37,8 @@ countries: cn
 "Control" = "控制"
 "Config" = "配置"
 "Misc" = "其它"
+
+
 
 "New Project" = "新建项目"
 "Open Project" = "打开项目"
@@ -54,6 +64,8 @@ countries: cn
 "Undo the last action." = "撤销最后一个操作。"
 "Redo the last undo action." = "重做最后一个撤销的操作。"
 
+
+
 "Close Editor" = "关闭编辑器"
 
 "Copy" = "复制"
@@ -65,6 +77,15 @@ countries: cn
 
 "Load Layout" = "加载布局"
 "Save Layout" = "保存布局"
+
+"Help" = "帮助"
+"Update" = "更新"
+"Links" = "链接"
+"Bilibili" = "Bilibili"
+"Github" = "Github"
+"Website" = "网站"
+"License" = "许可证"
+"About" = "关于"
 
 "Close and exit VocalShaper." = "关闭并退出VocalShaper。"
 
@@ -87,9 +108,21 @@ countries: cn
 "Show audio debugger component." = "显示音频调试器组件。"
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
 
+"Go to our help page." = "前往我们的帮助页面。"
+"Check for update." = "检查更新。"
+"Go to our bilibili space." = "前往我们的B站空间。"
+"Go to our Github repository." = "前往我们的Github仓库。"
+"Go to our official website." = "前往我们的官方网站。"
+"Read open source licenses." = "阅读开源许可证。"
+"About VocalShaper." = "关于VocalShaper。"
+
+
+
 "Project Warning" = "项目警告"
 "Source Selector" = "源选择器"
 "Mixer Track Selector" = "混音器轨道选择器"
+
+
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"

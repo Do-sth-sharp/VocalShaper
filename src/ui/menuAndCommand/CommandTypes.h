@@ -36,5 +36,13 @@ enum class GUICommandType : int {
 	SourceEditView,
 	SourceRecordView,
 	AudioDebugger,
-	MidiDebugger
+	MidiDebugger,
+
+	Help,
+	Update,
+	Bilibili,
+	Github,
+	Website,
+	License,
+	About
 };

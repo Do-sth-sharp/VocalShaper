@@ -69,4 +69,30 @@ namespace utils {
 		const juce::String& type) {
 		return getSplashConfigDir().getChildFile(name + type);
 	}
+
+	const juce::URL getHelpPage(const juce::String& version,
+		const juce::String& branch) {
+		return juce::URL{ "https://help.daw.org.cn" }
+			.withParameter("version", version)
+			.withParameter("branch", branch);
+	}
+
+	const juce::URL getUpdatePage(const juce::String& version,
+		const juce::String& branch) {
+		return juce::URL{ "https://update.daw.org.cn" }
+			.withParameter("version", version)
+			.withParameter("branch", branch);
+	}
+
+	const juce::URL getBilibiliPage() {
+		return juce::URL{ "https://space.bilibili.com/2060981097" };
+	}
+
+	const juce::URL getGithubPage() {
+		return juce::URL{ "https://github.com/Do-sth-sharp/VocalShaper" };
+	}
+
+	const juce::URL getWebsitePage() {
+		return juce::URL{ "https://daw.org.cn" };
+	}
 }

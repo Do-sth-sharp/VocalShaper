@@ -31,7 +31,15 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::SourceEditView),
 		(juce::CommandID)(GUICommandType::SourceRecordView),
 		(juce::CommandID)(GUICommandType::AudioDebugger),
-		(juce::CommandID)(GUICommandType::MidiDebugger)
+		(juce::CommandID)(GUICommandType::MidiDebugger),
+
+		(juce::CommandID)(GUICommandType::Help),
+		(juce::CommandID)(GUICommandType::Update),
+		(juce::CommandID)(GUICommandType::Bilibili),
+		(juce::CommandID)(GUICommandType::Github),
+		(juce::CommandID)(GUICommandType::Website),
+		(juce::CommandID)(GUICommandType::License),
+		(juce::CommandID)(GUICommandType::About)
 	};
 }
 
@@ -136,6 +144,35 @@ void GUICommandTarget::getCommandInfo(
 			CompManager::CompType::MidiDebugger));
 		result.setActive(true);
 		break;
+
+	case GUICommandType::Help:
+		result.setInfo(TRANS("Help"), TRANS("Go to our help page."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::Update:
+		result.setInfo(TRANS("Update"), TRANS("Check for update."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::Bilibili:
+		result.setInfo(TRANS("Bilibili"), TRANS("Go to our bilibili space."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::Github:
+		result.setInfo(TRANS("Github"), TRANS("Go to our Github repository."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::Website:
+		result.setInfo(TRANS("Website"), TRANS("Go to our official website."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::License:
+		result.setInfo(TRANS("License"), TRANS("Read open source licenses."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::About:
+		result.setInfo(TRANS("About"), TRANS("About VocalShaper."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
 	}
 }
 
@@ -198,6 +235,28 @@ bool GUICommandTarget::perform(
 	case GUICommandType::MidiDebugger:
 		this->changeOpened(CompManager::CompType::MidiDebugger);
 		return true;
+
+	case GUICommandType::Help:
+		this->help();
+		return true;
+	case GUICommandType::Update:
+		this->update();
+		return true;
+	case GUICommandType::Bilibili:
+		this->bilibili();
+		return true;
+	case GUICommandType::Github:
+		this->github();
+		return true;
+	case GUICommandType::Website:
+		this->website();
+		return true;
+	case GUICommandType::License:
+		this->license();
+		return true;
+	case GUICommandType::About:
+		this->about();
+		return true;
 	}
 
 	return false;
@@ -239,6 +298,36 @@ void GUICommandTarget::changeOpened(CompManager::CompType type) const {
 	else {
 		CompManager::getInstance()->open(type);
 	}
+}
+
+void GUICommandTarget::help() const {
+	utils::getHelpPage(utils::getAudioPlatformVersionString(),
+		utils::getReleaseBranch()).launchInDefaultBrowser();
+}
+
+void GUICommandTarget::update() const {
+	utils::getUpdatePage(utils::getAudioPlatformVersionString(),
+		utils::getReleaseBranch()).launchInDefaultBrowser();
+}
+
+void GUICommandTarget::bilibili() const {
+	utils::getBilibiliPage().launchInDefaultBrowser();
+}
+
+void GUICommandTarget::github() const {
+	utils::getGithubPage().launchInDefaultBrowser();
+}
+
+void GUICommandTarget::website() const {
+	utils::getWebsitePage().launchInDefaultBrowser();
+}
+
+void GUICommandTarget::license() const {
+	/** TODO */
+}
+
+void GUICommandTarget::about() const {
+	/** TODO */
 }
 
 GUICommandTarget* GUICommandTarget::getInstance() {
