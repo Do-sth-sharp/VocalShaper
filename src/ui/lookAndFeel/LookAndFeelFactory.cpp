@@ -83,7 +83,7 @@ void LookAndFeelFactory::initialise() {
 	/** ToolBar */
 	this->toolBarLAF = std::make_unique<juce::LookAndFeel_V4>();
 	this->toolBarLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
+		ColorMap::getInstance()->get("ThemeColorB2"));
 
 	/** List Box */
 	this->listBoxLAF = std::make_unique<juce::LookAndFeel_V4>();
@@ -101,15 +101,15 @@ void LookAndFeelFactory::initialise() {
 	/** Main Menu */
 	this->mainMenuLAF = std::make_unique<juce::LookAndFeel_V4>();
 	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
+		ColorMap::getInstance()->get("ThemeColorB2"));
 	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
+		ColorMap::getInstance()->get("ThemeColorB2"));
 	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->mainMenuLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
+		ColorMap::getInstance()->get("ThemeColorB2"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
