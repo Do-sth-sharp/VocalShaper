@@ -33,4 +33,6 @@ namespace utils {
 	const juce::URL getBilibiliPage();
 	const juce::URL getGithubPage();
 	const juce::URL getWebsitePage();
+
+	const juce::Rectangle<int> getScreenSize(juce::Component* comp);
 }

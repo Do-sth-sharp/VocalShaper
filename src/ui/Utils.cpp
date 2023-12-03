@@ -99,4 +99,56 @@ namespace utils {
 	const juce::URL getWebsitePage() {
 		return juce::URL{ "https://daw.org.cn" };
 	}
+
+	const juce::Rectangle<int> getScreenSize(juce::Component* comp) {
+		/** Get current screen */
+		if (!comp) { return { 0, 0 }; }
+		auto ptrScreen = juce::Desktop::getInstance().getDisplays()
+			.getDisplayForRect(comp->getScreenBounds());
+		if (!ptrScreen) { return { 0, 0 }; }
+
+		/** Base size */
+		juce::Rectangle<int> rect = ptrScreen->userArea;
+		juce::Rectangle<int> rectTotal = ptrScreen->totalArea;
+		int width = rect.getWidth();
+		int height = rect.getHeight();
+		int widthT = rectTotal.getWidth();
+		int heightT = rectTotal.getHeight();
+
+		/** Width is the longer side */
+		if (width < height) {
+			int temp = width;
+			width = height;
+			height = temp;
+		}
+		if (widthT < heightT) {
+			int temp = widthT;
+			widthT = heightT;
+			heightT = temp;
+		}
+
+		/** Calculate aspect ratio */
+		double pNow = 9.0 / 16.0, pTotal = 9.0 / 16.0;
+		pNow = (double)height / (double)width;
+		pTotal = (double)heightT / (double)widthT;
+
+		/** Scale to the standard */
+		constexpr double proportion = 816.0 / 1536.0;
+		constexpr double prop4Scale = 1080.0 / 1920.0;
+		const double scaleM = 1.25 / 1920;
+		const double scaleN = 1.0 / ((pTotal >= prop4Scale) ? widthT : (heightT / prop4Scale));
+		const double scaleMN = scaleN / scaleM;
+
+		/** Limit aspect ratio */
+		if (pNow > proportion) {
+			height = width * proportion;
+		}
+		else if (pNow < proportion) {
+			width = height / proportion;
+		}
+
+		/** Result */
+		return juce::Rectangle<int>{
+			(int)(width * scaleMN), (int)(height * scaleMN) };
+	}
 }
