@@ -34,6 +34,10 @@ namespace utils {
 		return getAppRootDir().getChildFile("./data/");
 	}
 
+	const juce::File getLicenseDir() {
+		return getAppRootDir().getChildFile("./licenses/");
+	}
+
 	const juce::File getConfigDir() {
 		return getDataDir().getChildFile("./config/");
 	}

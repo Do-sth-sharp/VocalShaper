@@ -12,6 +12,7 @@ namespace utils {
 	const juce::File getThemeDir();
 	const juce::File getTransDir();
 	const juce::File getDataDir();
+	const juce::File getLicenseDir();
 
 	const juce::File getConfigDir();
 	const juce::File getThemeRootDir(const juce::String& name);
