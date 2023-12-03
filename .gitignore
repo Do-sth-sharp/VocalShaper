@@ -73,3 +73,5 @@ app/*.mp3
 app/*.flac
 app/*.ogg
 app/*.pkf
+app/licenses/*.txt
+app/licenses/*.md
