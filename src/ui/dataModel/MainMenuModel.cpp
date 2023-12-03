@@ -80,8 +80,6 @@ juce::PopupMenu MainMenuModel::createView() const {
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MixerView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceEditView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceRecordView);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::AudioDebugger);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MidiDebugger);
 
 	return menu;
 }
@@ -115,12 +113,17 @@ juce::PopupMenu MainMenuModel::createMisc() const {
 	linksMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Bilibili);
 	linksMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Github);
 
+	juce::PopupMenu devMenu;
+	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::AudioDebugger);
+	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MidiDebugger);
+
 	juce::PopupMenu menu;
 
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Help);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Update);
 	menu.addSubMenu(TRANS("Links"), linksMenu);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Website);
+	menu.addSubMenu(TRANS("Developer Tool"), devMenu);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::License);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::About);
 

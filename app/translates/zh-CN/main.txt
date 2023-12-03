@@ -90,6 +90,7 @@ countries: cn
 "Bilibili" = "Bilibili"
 "Github" = "Github"
 "Website" = "网站"
+"Developer Tool" = "开发者工具"
 "License" = "许可证"
 "About" = "关于"
 
