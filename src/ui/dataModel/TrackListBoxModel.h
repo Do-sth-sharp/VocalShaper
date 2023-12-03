@@ -15,7 +15,7 @@ public:
 
 private:
 	juce::Array<TrackInfo> trackItemList;
-	juce::LookAndFeel_V4* lookAndFeel = nullptr;
+	juce::LookAndFeel& lookAndFeel;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrackListBoxModel)
 };

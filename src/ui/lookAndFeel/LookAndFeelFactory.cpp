@@ -53,6 +53,36 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 
+	/** Set List Box Color */
+	laf.setColour(juce::ListBox::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::ListBox::ColourIds::backgroundColourId + 1,
+		ColorMap::getInstance()->get("ThemeColorA1"));/**< Background On */
+	laf.setColour(juce::ListBox::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::ListBox::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
+	laf.setColour(juce::ListBox::ColourIds::textColourId + 1,
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Text On */
+
+	/** Set Text Editor Color */
+	laf.setColour(juce::TextEditor::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::TextEditor::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::TextEditor::ColourIds::highlightColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
+	laf.setColour(juce::TextEditor::ColourIds::highlightedTextColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::TextEditor::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	laf.setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
+		ColorMap::getInstance()->get("ThemeColorA1"));
+	laf.setColour(juce::TextEditor::ColourIds::shadowColourId,
+		juce::Colour::fromRGBA(0, 0, 0, 0));
+	laf.setColour(juce::TextEditor::ColourIds::shadowColourId + 1,
+		ColorMap::getInstance()->get("ThemeColorB9"));/**< Empty Text */
+
 	/** Set FlowUI Color */
 	flowUI::FlowStyle::setTitleBackgroundColor(
 		ColorMap::getInstance()->get("ThemeColorB2"));
@@ -85,19 +115,6 @@ void LookAndFeelFactory::initialise() {
 	this->toolBarLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
 
-	/** List Box */
-	this->listBoxLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->listBoxLAF->setColour(juce::ListBox::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-	this->listBoxLAF->setColour(juce::ListBox::ColourIds::backgroundColourId + 1,
-		ColorMap::getInstance()->get("ThemeColorA1"));/**< Background On */
-	this->listBoxLAF->setColour(juce::ListBox::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-	this->listBoxLAF->setColour(juce::ListBox::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));
-	this->listBoxLAF->setColour(juce::ListBox::ColourIds::textColourId + 1,
-		ColorMap::getInstance()->get("ThemeColorB10"));/**< Text On */
-
 	/** Main Menu */
 	this->mainMenuLAF = std::make_unique<juce::LookAndFeel_V4>();
 	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
@@ -119,10 +136,6 @@ void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typefac
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forToolBar() const {
 	return this->toolBarLAF.get();
-}
-
-juce::LookAndFeel_V4* LookAndFeelFactory::forListBox() const {
-	return this->listBoxLAF.get();
 }
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forMainMenu() const {

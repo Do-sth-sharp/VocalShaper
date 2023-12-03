@@ -1,10 +1,8 @@
 ﻿#include "TrackListBoxModel.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 
-TrackListBoxModel::TrackListBoxModel() {
-	/** Look And Feel */
-	this->lookAndFeel = LookAndFeelFactory::getInstance()->forListBox();
-}
+TrackListBoxModel::TrackListBoxModel() 
+	: lookAndFeel(juce::LookAndFeel::getDefaultLookAndFeel()) {}
 
 int TrackListBoxModel::getNumRows() {
 	return this->trackItemList.size();
@@ -21,11 +19,11 @@ void TrackListBoxModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 
 	/** Size */
 	juce::Colour backgroundColor = rowIsSelected
-		? this->lookAndFeel->findColour(juce::ListBox::ColourIds::backgroundColourId + 1)
-		: this->lookAndFeel->findColour(juce::ListBox::ColourIds::backgroundColourId);
+		? this->lookAndFeel.findColour(juce::ListBox::ColourIds::backgroundColourId + 1)
+		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::backgroundColourId);
 	juce::Colour textColor = rowIsSelected
-		? this->lookAndFeel->findColour(juce::ListBox::ColourIds::textColourId + 1)
-		: this->lookAndFeel->findColour(juce::ListBox::ColourIds::textColourId);
+		? this->lookAndFeel.findColour(juce::ListBox::ColourIds::textColourId + 1)
+		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::textColourId);
 
 	/** Font */
 	juce::Font font(height * 0.8);

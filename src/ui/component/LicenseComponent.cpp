@@ -1,5 +1,4 @@
 ﻿#include "LicenseComponent.h"
-#include "../lookAndFeel/LookAndFeelFactory.h"
 
 LicenseComponent::LicenseComponent() {
 	/** TODO License List Model */
@@ -7,8 +6,6 @@ LicenseComponent::LicenseComponent() {
 	/** License List */
 	this->licenseList = std::make_unique<juce::ListBox>(
 		TRANS("License List"), nullptr);
-	this->licenseList->setLookAndFeel(
-		LookAndFeelFactory::getInstance()->forListBox());
 	this->addAndMakeVisible(this->licenseList.get());
 
 	/** License Content */
@@ -16,10 +13,10 @@ LicenseComponent::LicenseComponent() {
 		TRANS("License Content"));
 	this->licenseContent->setMultiLine(true);
 	this->licenseContent->setReadOnly(true);
-	auto defaultTextColor = this->getLookAndFeel().findColour(
-		juce::TextEditor::ColourIds::textColourId);
+	auto emptyTextColor = this->getLookAndFeel().findColour(
+		juce::TextEditor::ColourIds::shadowColourId + 1);
 	this->licenseContent->setTextToShowWhenEmpty(
-		TRANS("Select a license in the list to show content."), defaultTextColor);
+		TRANS("Select a license in the list to show content."), emptyTextColor);
 	this->addAndMakeVisible(this->licenseContent.get());
 
 	/** TODO Scan For Licenses */

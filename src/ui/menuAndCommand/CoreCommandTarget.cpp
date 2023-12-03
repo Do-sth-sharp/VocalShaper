@@ -2,7 +2,6 @@
 #include "GUICommandTarget.h"
 #include "CommandTypes.h"
 #include "../dataModel/TrackListBoxModel.h"
-#include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../../audioCore/AC_API.h"
 
 CoreCommandTarget::CoreCommandTarget() {
@@ -10,8 +9,6 @@ CoreCommandTarget::CoreCommandTarget() {
 	this->trackListBoxModel = std::unique_ptr<juce::ListBoxModel>(new TrackListBoxModel);
 	this->trackListBox = std::make_unique<juce::ListBox>(
 		TRANS("Track List"), this->trackListBoxModel.get());
-	this->trackListBox->setLookAndFeel(
-		LookAndFeelFactory::getInstance()->forListBox());
 	this->trackListBox->setMultipleSelectionEnabled(true);
 	//this->trackListBox->setClickingTogglesRowSelection(true);/**< For Touching */
 }
