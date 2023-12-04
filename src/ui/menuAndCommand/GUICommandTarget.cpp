@@ -3,6 +3,7 @@
 #include "../../audioCore/AC_API.h"
 #include "../Utils.h"
 #include "../component/CompManager.h"
+#include "../component/LicenseWindow.h"
 #include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
@@ -323,7 +324,8 @@ void GUICommandTarget::website() const {
 }
 
 void GUICommandTarget::license() const {
-	/** TODO */
+	auto window = new LicenseWindow;
+	window->enterModalState(true, nullptr, true);
 }
 
 void GUICommandTarget::about() const {
