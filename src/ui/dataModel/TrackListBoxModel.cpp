@@ -1,5 +1,4 @@
 ﻿#include "TrackListBoxModel.h"
-#include "../lookAndFeel/LookAndFeelFactory.h"
 
 TrackListBoxModel::TrackListBoxModel() 
 	: lookAndFeel(juce::LookAndFeel::getDefaultLookAndFeel()) {}
