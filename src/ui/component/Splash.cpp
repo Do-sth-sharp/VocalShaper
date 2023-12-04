@@ -1,5 +1,6 @@
 ﻿#include "Splash.h"
 #include "../misc/ColorMap.h"
+#include "../misc/RCManager.h"
 #include "../../audioCore/AC_API.h"
 #include "../Utils.h"
 
@@ -33,8 +34,8 @@ Splash::Splash() : Component() {
 	this->fraStr = "Made with JUCE.";
 
 	/** Images */
-	this->logo = std::make_unique<juce::Image>(
-		juce::ImageFileFormat::loadFrom(utils::getResourceFile("logo.png")));
+	this->logo = RCManager::getInstance()->loadImage(
+		utils::getResourceFile("logo.png"));
 
 	/** Splash Image */
 	{
@@ -55,7 +56,7 @@ Splash::Splash() : Component() {
 		}
 
 		auto relImgTemp = std::make_unique<juce::Image>(
-			juce::ImageFileFormat::loadFrom(
+			RCManager::getInstance()->loadImage(
 				utils::getAppRootDir().getChildFile(splashConfig["picture"].toString())));
 
 		juce::Rectangle<int> cutArea(0, 0, relImgTemp->getWidth(), relImgTemp->getHeight());
@@ -172,7 +173,7 @@ void Splash::paint(juce::Graphics& g) {
 	juce::Rectangle<int> logoRect(
 		backGroundRect.getWidth() * 0.055, backGroundRect.getHeight() * 0.12,
 		titleFontHeight, titleFontHeight);
-	g.drawImageWithin(*(this->logo.get()),
+	g.drawImageWithin(this->logo,
 		logoRect.getX(), logoRect.getY(),
 		logoRect.getWidth(), logoRect.getHeight(),
 		juce::RectanglePlacement::onlyReduceInSize);

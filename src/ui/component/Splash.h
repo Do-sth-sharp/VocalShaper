@@ -18,7 +18,7 @@ public:
 private:
 	bool isReady = false;
 	juce::String mesStr, platStr, verStr, relStr, fraStr;
-	std::unique_ptr<juce::Image> logo;
+	juce::Image logo;
 	juce::Typeface::Ptr titleType, subTitleType, textType;
 
 	juce::String illustStr;

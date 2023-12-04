@@ -4,6 +4,7 @@
 #include <google/protobuf/message_lite.h>
 #include "ui/misc/ColorMap.h"
 #include "ui/misc/InitTaskList.h"
+#include "ui/misc/RCManager.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -298,6 +299,9 @@ public:
 		/** ShutDown Backend */
 		shutdownAudioCore();
 		google::protobuf::ShutdownProtobufLibrary();
+
+		/** Release Resources */
+		RCManager::releaseInstance();
 	};
 };
 
