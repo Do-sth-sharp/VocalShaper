@@ -79,35 +79,17 @@ Splash::Splash() : Component() {
 	{
 		/** Title */
 		juce::File titleFontFile = utils::getFontFile("OpenSans-Bold");
-		auto titleFontSize = titleFontFile.getSize();
-		auto ptrTitleFontData = std::unique_ptr<char[]>(new char[titleFontSize]);
-
-		auto titleFontStream = titleFontFile.createInputStream();
-		titleFontStream->read(ptrTitleFontData.get(), titleFontSize);
-
-		this->titleType = juce::Typeface::createSystemTypefaceFor(ptrTitleFontData.get(), titleFontSize);
+		this->titleType = RCManager::getInstance()->loadType(titleFontFile);
 	}
 	{
 		/** Sub Title */
 		juce::File titleFontFile = utils::getFontFile("OpenSans-BoldItalic");
-		auto titleFontSize = titleFontFile.getSize();
-		auto ptrTitleFontData = std::unique_ptr<char[]>(new char[titleFontSize]);
-
-		auto titleFontStream = titleFontFile.createInputStream();
-		titleFontStream->read(ptrTitleFontData.get(), titleFontSize);
-
-		this->subTitleType = juce::Typeface::createSystemTypefaceFor(ptrTitleFontData.get(), titleFontSize);
+		this->subTitleType = RCManager::getInstance()->loadType(titleFontFile);
 	}
 	{
 		/** Text */
 		juce::File textFontFile = utils::getFontFile("OpenSans-Regular");
-		auto textFontSize = textFontFile.getSize();
-		auto ptrTextFontData = std::unique_ptr<char[]>(new char[textFontSize]);
-
-		auto textFontStream = textFontFile.createInputStream();
-		textFontStream->read(ptrTextFontData.get(), textFontSize);
-
-		this->textType = juce::Typeface::createSystemTypefaceFor(ptrTextFontData.get(), textFontSize);
+		this->textType = RCManager::getInstance()->loadType(textFontFile);
 	}
 }
 

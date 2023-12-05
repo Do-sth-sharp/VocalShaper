@@ -9,6 +9,10 @@ public:
 
 	void clear();
 	juce::Image loadImage(const juce::File& file);
+	juce::Typeface::Ptr loadType(const juce::File& file);
+
+private:
+	std::map<juce::String, juce::Typeface::Ptr> types;
 
 public:
 	static RCManager* getInstance();
