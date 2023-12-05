@@ -83,6 +83,14 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::TextEditor::ColourIds::shadowColourId + 1,
 		ColorMap::getInstance()->get("ThemeColorB9"));/**< Empty Text */
 
+	/** Set Scroll Bar Color */
+	laf.setColour(juce::ScrollBar::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::ScrollBar::ColourIds::thumbColourId,
+		ColorMap::getInstance()->get("ThemeColorA1"));
+	laf.setColour(juce::ScrollBar::ColourIds::trackColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+
 	/** Set FlowUI Color */
 	flowUI::FlowStyle::setTitleBackgroundColor(
 		ColorMap::getInstance()->get("ThemeColorB2"));
