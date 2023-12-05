@@ -5,6 +5,7 @@
 #include "ui/misc/ColorMap.h"
 #include "ui/misc/InitTaskList.h"
 #include "ui/misc/RCManager.h"
+#include "ui/misc/MainThreadPool.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -295,6 +296,9 @@ public:
 		/** Release Components */
 		CompManager::releaseInstance();
 		LookAndFeelFactory::releaseInstance();
+
+		/** ShutDown Threads */
+		MainThreadPool::releaseInstance();
 
 		/** ShutDown Backend */
 		shutdownAudioCore();
