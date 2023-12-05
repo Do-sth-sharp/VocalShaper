@@ -14,11 +14,18 @@ LicenseWindow::LicenseWindow()
 	this->setResizable(true, false);
 	this->centreWithSize(this->getWidth(), this->getHeight());
 
+	/** OpenGL */
+	this->renderer.attachTo(*this);
+
 	/** Icon */
 	juce::File iconFile = utils::getResourceFile("logo.png");
 	this->iconTemp = RCManager::getInstance()->loadImage(iconFile);
 	this->setIcon(this->iconTemp);
 	this->getPeer()->setIcon(this->iconTemp);
+}
+
+LicenseWindow::~LicenseWindow() {
+	this->renderer.detach();
 }
 
 void LicenseWindow::resized() {
