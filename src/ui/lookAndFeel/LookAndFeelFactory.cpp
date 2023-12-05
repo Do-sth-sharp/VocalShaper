@@ -91,6 +91,14 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::ScrollBar::ColourIds::trackColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
 
+	/** Set Tool Tip Color */
+	laf.setColour(juce::TooltipWindow::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB5"));
+	laf.setColour(juce::TooltipWindow::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::TooltipWindow::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB5"));
+
 	/** Set FlowUI Color */
 	flowUI::FlowStyle::setTitleBackgroundColor(
 		ColorMap::getInstance()->get("ThemeColorB2"));
