@@ -100,7 +100,7 @@ namespace utils {
 		return juce::URL{ "https://daw.org.cn" };
 	}
 
-	const juce::Rectangle<int> getScreenSize(juce::Component* comp) {
+	const juce::Rectangle<int> getScreenSize(const juce::Component* comp) {
 		/** Get current screen */
 		if (!comp) { return { 0, 0 }; }
 		auto ptrScreen = juce::Desktop::getInstance().getDisplays()

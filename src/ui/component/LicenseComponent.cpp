@@ -88,6 +88,6 @@ void LicenseComponent::load(const juce::File& file) {
 					textEditor->setReadOnly(true);
 				}
 			});
-		};
+	};
 	MainThreadPool::getInstance()->runJob(loadJob);
 }

@@ -4,6 +4,7 @@
 #include "../Utils.h"
 #include "../component/CompManager.h"
 #include "../component/LicenseWindow.h"
+#include "../component/AboutWindow.h"
 #include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
@@ -329,7 +330,8 @@ void GUICommandTarget::license() const {
 }
 
 void GUICommandTarget::about() const {
-	/** TODO */
+	auto window = new AboutWindow;
+	window->enterModalState(true, nullptr, true);
 }
 
 GUICommandTarget* GUICommandTarget::getInstance() {
