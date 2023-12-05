@@ -22,6 +22,9 @@ LicenseWindow::LicenseWindow()
 	this->iconTemp = RCManager::getInstance()->loadImage(iconFile);
 	this->setIcon(this->iconTemp);
 	this->getPeer()->setIcon(this->iconTemp);
+
+	/** ToolTip */
+	this->toolTip = std::make_unique<juce::TooltipWindow>(this);
 }
 
 LicenseWindow::~LicenseWindow() {

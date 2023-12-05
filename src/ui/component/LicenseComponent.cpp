@@ -7,7 +7,7 @@ LicenseComponent::LicenseComponent() {
 	this->licenseListModel = std::make_unique<LicenseListModel>();
 	this->licenseListModel->setCallback(
 		[this](const juce::File& file) {
-			this->licenseContent->clear();
+			this->licenseContent->setText(" ");
 			this->load(file);
 		});
 
@@ -73,7 +73,7 @@ void LicenseComponent::load(const juce::File& file) {
 	auto textEditor = juce::TextEditor::SafePointer{ this->licenseContent.get() };
 
 	auto loadJob = [file, textEditor] {
-		juce::String data;
+		juce::String data = " ";
 
 		juce::FileInputStream stream(file);
 		if (stream.openedOk()) {
