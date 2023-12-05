@@ -9,6 +9,9 @@ public:
 
 	void resized() override;
 
+	void scan();
+	void load(const juce::File& file);
+
 private:
 	std::unique_ptr<juce::ListBox> licenseList = nullptr;
 	std::unique_ptr<juce::TextEditor> licenseContent = nullptr;
