@@ -4,5 +4,6 @@
   "illustrator": "BYZeta",
   "cut": [ 0, 0, 1, 1 ],
   "centrePos": [ 0.71, 0.52 ],
-  "scale": 1
+  "scale": 1,
+  "scaleAbout": 0.9
 }
