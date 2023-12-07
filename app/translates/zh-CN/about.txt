@@ -10,22 +10,31 @@ countries: cn
 
 "Staffs" = "开发团队"
 "WuChang" = "無常"
-"(Architecture, Audio Core, Editor)" = "（架构，音频内核，编辑器）"
+"Architecture, Audio Core, Editor" = "架构，音频内核，编辑器"
 "Jingang" = "金刚"
-"(SVS Engine)" = "（歌声合成引擎）"
+"SVS Engine" = "歌声合成引擎"
 "Serge S" = "黑方"
-"(UI Design)" = "（UI设计）"
+"UI Design" = "UI设计"
 "BakaDoge" = "弱犬"
-"(Cooperation)" = "（协力）"
+"Cooperation" = "协力"
 
 "Illustraion" = "插画"
 "BYZeta" = "不伊子"
 "Pinellia" = "Pinellia（半夏）"
 
+"Translation" = "翻译"
+"zh-CN" = "汉语（中国）"
+
+"Theme Design" = "主题设计"
+"Colorful" = "彩色"
+
 "Special Thanks" = "鸣谢"
 "GeraintDou" = "少灬杰"
 "xemisyah" = "雨宫花梨"
+"Yukitoha" = "雪葉"
 "Lin Yuansu P" = "磷元素P"
 "Severle" = "Severle颀"
 "Warsic Music Club" = "Warsic音乐社团"
 "Software Engineering and Visualization Laboratory of HFUT(Xuancheng)" = "合肥工业大学宣城校区软件工程与可视化实验室"
+
+"Early Testers" = "早期测试者"

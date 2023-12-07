@@ -47,6 +47,9 @@ void AboutWindow::resized() {
 		screenSize.getWidth() * 0.5, screenSize.getHeight() * 0.5,
 		INT_MAX, INT_MAX);
 
+	/** Viewport Pos */
+	auto viewPos = this->viewport->getViewPosition();
+
 	/** Resize Viewport */
 	this->ResizableWindow::resized();
 
@@ -55,6 +58,9 @@ void AboutWindow::resized() {
 	int contentHeight = this->content->getHeightPrefered();
 	this->content->setBounds(0, 0,
 		contentWidth, std::max(contentHeight, this->getHeight()));
+
+	/** Set Viewport Pos */
+	this->viewport->setViewPosition(viewPos);
 }
 
 void AboutWindow::closeButtonPressed() {

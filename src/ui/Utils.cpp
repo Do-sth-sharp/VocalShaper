@@ -74,6 +74,16 @@ namespace utils {
 		return getSplashConfigDir().getChildFile(name + type);
 	}
 
+	const juce::File getTransConfigFile(const juce::String& name,
+		const juce::String& file) {
+		return getTransRootDir(name).getChildFile(file);
+	}
+
+	const juce::File getThemeConfigFile(const juce::String& name,
+		const juce::String& file) {
+		return getThemeRootDir(name).getChildFile(file);
+	}
+
 	const juce::URL getHelpPage(const juce::String& version,
 		const juce::String& branch) {
 		return juce::URL{ "https://help.daw.org.cn" }
