@@ -27,6 +27,8 @@ private:
 	void bilibili() const;
 	void github() const;
 	void website() const;
+	void regProj() const;
+	void unregProj() const;
 	void license() const;
 	void about() const;
 

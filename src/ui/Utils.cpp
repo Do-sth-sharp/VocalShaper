@@ -1,9 +1,30 @@
 ﻿#include "Utils.h"
 
+#if JUCE_WINDOWS
+#include <Windows.h>
+#endif //JUCE_WINDOWS
+
 namespace utils {
+	const juce::File getAppExecFile() {
+		return juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath);
+	}
 	const juce::File getAppRootDir() {
-		return juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentApplicationFile)
-			.getParentDirectory();
+		return getAppExecFile().getParentDirectory();
+	}
+	const juce::File getRegExecFile() {
+#if JUCE_WINDOWS
+		return getAppRootDir().getChildFile("./FileRegistrar.exe");
+
+#elif JUCE_LINUX
+		return getAppRootDir().getChildFile("./FileRegistrar");
+
+#elif JUCE_MAC
+		return getAppRootDir().getChildFile("./FileRegistrar");
+
+#else
+		return getAppRootDir().getChildFile("./FileRegistrar");
+
+#endif
 	}
 
 	const juce::File getLayoutDir() {
@@ -160,5 +181,75 @@ namespace utils {
 		/** Result */
 		return juce::Rectangle<int>{
 			(int)(width * scaleMN), (int)(height * scaleMN) };
+	}
+
+	const juce::StringArray parseCommand(const juce::String& command) {
+		return juce::StringArray::fromTokens(command, true);
+	}
+
+	bool regProjectFileInSystem() {
+#if JUCE_WINDOWS
+		juce::String regExecFilePath = getRegExecFile().getFullPathName();
+		juce::String appExecFilePath = getAppExecFile().getFullPathName();
+
+		std::string fileStr = regExecFilePath.toStdString();
+		std::string paramStr = juce::String{ "\"" + appExecFilePath + "\"" + " true" }.toStdString();
+
+		SHELLEXECUTEINFO sei = {};
+		sei.cbSize = sizeof(SHELLEXECUTEINFO);
+		sei.fMask = SEE_MASK_NOCLOSEPROCESS;
+		sei.lpVerb = "runas";
+		sei.lpFile = fileStr.c_str();
+		sei.lpParameters = paramStr.c_str();
+		sei.nShow = SW_HIDE;
+
+		DWORD exitCode = -1;
+		if (ShellExecuteEx(&sei)) {
+			if (sei.hProcess != NULL) {
+				WaitForSingleObject(sei.hProcess, INFINITE);
+				GetExitCodeProcess(sei.hProcess, &exitCode);
+				CloseHandle(sei.hProcess);
+			}
+		}
+
+		return exitCode == 0;
+
+#else //JUCE_WINDOWS
+		return false;
+
+#endif //JUCE_WINDOWS
+	}
+
+	bool unregProjectFileFromSystem() {
+#if JUCE_WINDOWS
+		juce::String regExecFilePath = getRegExecFile().getFullPathName();
+		juce::String appExecFilePath = getAppExecFile().getFullPathName();
+
+		std::string fileStr = regExecFilePath.toStdString();
+		std::string paramStr = juce::String{ "\"" + appExecFilePath + "\"" + " false" }.toStdString();
+
+		SHELLEXECUTEINFO sei = {};
+		sei.cbSize = sizeof(SHELLEXECUTEINFO);
+		sei.fMask = SEE_MASK_NOCLOSEPROCESS;
+		sei.lpVerb = "runas";
+		sei.lpFile = fileStr.c_str();
+		sei.lpParameters = paramStr.c_str();
+		sei.nShow = SW_HIDE;
+
+		DWORD exitCode = -1;
+		if (ShellExecuteEx(&sei)) {
+			if (sei.hProcess != NULL) {
+				WaitForSingleObject(sei.hProcess, INFINITE);
+				GetExitCodeProcess(sei.hProcess, &exitCode);
+				CloseHandle(sei.hProcess);
+			}
+		}
+
+		return exitCode == 0;
+
+#else //JUCE_WINDOWS
+		return false;
+
+#endif //JUCE_WINDOWS
 	}
 }

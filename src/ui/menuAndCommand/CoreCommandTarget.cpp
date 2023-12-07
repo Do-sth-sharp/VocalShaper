@@ -2,6 +2,7 @@
 #include "GUICommandTarget.h"
 #include "CommandTypes.h"
 #include "../dataModel/TrackListBoxModel.h"
+#include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
 CoreCommandTarget::CoreCommandTarget() {
@@ -143,6 +144,17 @@ bool CoreCommandTarget::perform(
 	}
 
 	return false;
+}
+
+void CoreCommandTarget::systemRequestOpen(const juce::String& path) {
+	if (!this->checkForSave()) { return; }
+
+	juce::File projFile = utils::getAppRootDir().getChildFile(path);
+	if (projFile.existsAsFile() && projFile.getFileExtension() == ".vsp4") {
+		auto action = std::unique_ptr<ActionBase>(new ActionLoad{
+		projFile.getFullPathName() });
+		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
 }
 
 void CoreCommandTarget::newProject() const {

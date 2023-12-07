@@ -43,6 +43,8 @@ enum class GUICommandType : int {
 	Bilibili,
 	Github,
 	Website,
+	RegProj,
+	UnregProj,
 	License,
 	About
 };

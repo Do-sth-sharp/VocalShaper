@@ -3,7 +3,9 @@
 #include <JuceHeader.h>
 
 namespace utils {
+	const juce::File getAppExecFile();
 	const juce::File getAppRootDir();
+	const juce::File getRegExecFile();
 
 	const juce::File getLayoutDir();
 	const juce::File getResourceDir();
@@ -39,4 +41,9 @@ namespace utils {
 	const juce::URL getWebsitePage();
 
 	const juce::Rectangle<int> getScreenSize(const juce::Component* comp);
+
+	const juce::StringArray parseCommand(const juce::String& command);
+
+	bool regProjectFileInSystem();
+	bool unregProjectFileFromSystem();
 }

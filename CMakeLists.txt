@@ -71,6 +71,18 @@ add_dependencies (PluginSearcher libJUCE)
 
 set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
 
+# File Registrar Target
+file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
+add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
+if (MSVC)
+    target_compile_definitions (FileRegistrar PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
+endif (MSVC)
+target_compile_definitions (FileRegistrar PRIVATE "LUCE_DLL_BUILD=1")
+target_link_libraries (FileRegistrar PRIVATE libJUCE)
+add_dependencies (FileRegistrar libJUCE)
+
+set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
@@ -81,6 +93,6 @@ if (MSVC)
     target_compile_definitions (VocalShaper PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
 endif (MSVC)
 target_link_libraries (VocalShaper PRIVATE libJUCE libFlowUI libLua libvsp4)
-add_dependencies (VocalShaper libJUCE libFlowUI libLua PluginSearcher SynthEngineDemo lame)
+add_dependencies (VocalShaper libJUCE libFlowUI libLua PluginSearcher FileRegistrar SynthEngineDemo lame)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")

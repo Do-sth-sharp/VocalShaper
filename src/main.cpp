@@ -280,6 +280,36 @@ public:
 			}
 		);
 
+		/** Load Project */
+		InitTaskList::getInstance()->add(
+			[commandLineParameters] {
+				if (commandLineParameters.isNotEmpty()) {
+					auto params = utils::parseCommand(commandLineParameters);
+
+					/** Remove Quote */
+					for (auto& s : params) {
+						s = s.removeCharacters("\"");
+					}
+					/** Check First Arg And Remove Execute Path */
+					{
+						juce::File firstArgFile(params[0]);
+						juce::File execFile = utils::getAppExecFile();
+						if (firstArgFile == execFile) {
+							params.remove(0);
+						}
+					}
+
+					/** Load Project */
+					if (params.size() >= 1) {
+						juce::File projFile = utils::getAppRootDir().getChildFile(params[0]);
+						if (projFile.existsAsFile() && projFile.getFileExtension() == ".vsp4") {
+							CoreCommandTarget::getInstance()->systemRequestOpen(params[0]);
+						}
+					}
+				}
+			}
+		);
+
 		/** Run Init */
 		InitTaskList::getInstance()->runNow();
 	};
@@ -307,6 +337,33 @@ public:
 		/** Release Resources */
 		RCManager::releaseInstance();
 	};
+
+	void anotherInstanceStarted(const juce::String& commandLine) override {
+		if (commandLine.isNotEmpty()) {
+			auto params = utils::parseCommand(commandLine);
+
+			/** Remove Quote */
+			for (auto& s : params) {
+				s = s.removeCharacters("\"");
+			}
+			/** Check First Arg And Remove Execute Path */
+			{
+				juce::File firstArgFile(params[0]);
+				juce::File execFile = utils::getAppExecFile();
+				if (firstArgFile == execFile) {
+					params.remove(0);
+				}
+			}
+
+			/** Load Project */
+			if (params.size() >= 1) {
+				juce::File projFile = utils::getAppRootDir().getChildFile(params[0]);
+				if (projFile.existsAsFile() && projFile.getFileExtension() == ".vsp4") {
+					CoreCommandTarget::getInstance()->systemRequestOpen(params[0]);
+				}
+			}
+		}
+	}
 };
 
 START_JUCE_APPLICATION(MainApplication)

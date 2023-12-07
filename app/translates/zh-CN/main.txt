@@ -91,6 +91,8 @@ countries: cn
 "Github" = "Github"
 "Website" = "网站"
 "Developer Tool" = "开发者工具"
+"Register Project File" = "注册项目文件"
+"Unregister Project File" = "注销项目文件"
 "License" = "许可证"
 "About" = "关于"
 
@@ -120,6 +122,8 @@ countries: cn
 "Go to our bilibili space." = "前往我们的B站空间。"
 "Go to our Github repository." = "前往我们的Github仓库。"
 "Go to our official website." = "前往我们的官方网站。"
+"Register project file in system." = "注册项目文件到系统。"
+"Unregister project file from system." = "从系统注销项目文件。"
 "Read open source licenses." = "阅读开源许可证。"
 "About VocalShaper." = "关于VocalShaper。"
 
@@ -143,3 +147,7 @@ countries: cn
 "Select tracks in the list: (Use Ctrl and Shift keys to select multiple items)" = "在列表中选择轨道：（使用Ctrl和Shift键多选）"
 "No track selected!" = "未选择轨道！"
 "The selected directory is not empty, which may cause existing files to be overwritten. Continue?" = "选择的目录不是空的，这可能会导致已有文件被覆盖。继续？"
+"The project file has been registered in the system!" = "项目文件已经注册到系统！"
+"The project file can't be registered in the system!" = "无法将项目文件注册到系统！"
+"The project file has been unregistered from the system!" = "项目文件已从系统注销！"
+"The project file can't be unregistered from the system! There is a possibility that it has not been registered before." = "项目文件无法从系统注销！可能其之前并未注册。"

@@ -5,6 +5,7 @@
 #include "../component/CompManager.h"
 #include "../component/LicenseWindow.h"
 #include "../component/AboutWindow.h"
+#include "../misc/MainThreadPool.h"
 #include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
@@ -40,6 +41,8 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::Bilibili),
 		(juce::CommandID)(GUICommandType::Github),
 		(juce::CommandID)(GUICommandType::Website),
+		(juce::CommandID)(GUICommandType::RegProj),
+		(juce::CommandID)(GUICommandType::UnregProj),
 		(juce::CommandID)(GUICommandType::License),
 		(juce::CommandID)(GUICommandType::About)
 	};
@@ -167,6 +170,22 @@ void GUICommandTarget::getCommandInfo(
 		result.setInfo(TRANS("Website"), TRANS("Go to our official website."), TRANS("Misc"), 0);
 		result.setActive(true);
 		break;
+	case GUICommandType::RegProj:
+		result.setInfo(TRANS("Register Project File"), TRANS("Register project file in system."), TRANS("Misc"), 0);
+#if JUCE_WINDOWS
+		result.setActive(true);
+#else //JUCE_WINDOWS
+		result.setActive(false);
+#endif //JUCE_WINDOWS
+		break;
+	case GUICommandType::UnregProj:
+		result.setInfo(TRANS("Unregister Project File"), TRANS("Unregister project file from system."), TRANS("Misc"), 0);
+#if JUCE_WINDOWS
+		result.setActive(true);
+#else //JUCE_WINDOWS
+		result.setActive(false);
+#endif //JUCE_WINDOWS
+		break;
 	case GUICommandType::License:
 		result.setInfo(TRANS("License"), TRANS("Read open source licenses."), TRANS("Misc"), 0);
 		result.setActive(true);
@@ -253,6 +272,12 @@ bool GUICommandTarget::perform(
 	case GUICommandType::Website:
 		this->website();
 		return true;
+	case GUICommandType::RegProj:
+		this->regProj();
+		return true;
+	case GUICommandType::UnregProj:
+		this->unregProj();
+		return true;
 	case GUICommandType::License:
 		this->license();
 		return true;
@@ -322,6 +347,42 @@ void GUICommandTarget::github() const {
 
 void GUICommandTarget::website() const {
 	utils::getWebsitePage().launchInDefaultBrowser();
+}
+
+void GUICommandTarget::regProj() const {
+	auto regJob = [] {
+		if (utils::regProjectFileInSystem()) {
+			juce::MessageManager::callAsync([] {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::InfoIcon,
+					TRANS("Register Project File"), TRANS("The project file has been registered in the system!"));
+			});
+		}
+		else {
+			juce::MessageManager::callAsync([] {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+					TRANS("Register Project File"), TRANS("The project file can't be registered in the system!"));
+			});
+		}
+	};
+	MainThreadPool::getInstance()->runJob(regJob);
+}
+
+void GUICommandTarget::unregProj() const {
+	auto regJob = [] {
+		if (utils::unregProjectFileFromSystem()) {
+			juce::MessageManager::callAsync([] {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::InfoIcon,
+					TRANS("Unregister Project File"), TRANS("The project file has been unregistered from the system!"));
+			});
+		}
+		else {
+			juce::MessageManager::callAsync([] {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+					TRANS("Unregister Project File"), TRANS("The project file can't be unregistered from the system! There is a possibility that it has not been registered before."));
+			});
+		}
+	};
+	MainThreadPool::getInstance()->runJob(regJob);
 }
 
 void GUICommandTarget::license() const {

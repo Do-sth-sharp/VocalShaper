@@ -14,6 +14,8 @@ public:
 	void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
 	bool perform(const juce::ApplicationCommandTarget::InvocationInfo& info) override;
 
+	void systemRequestOpen(const juce::String& path);
+
 private:
 	void newProject() const;
 	void openProject() const;
