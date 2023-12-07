@@ -27,7 +27,7 @@ public:
         if (commandArray.size() == 5) {
             /** Check First Arg And Remove Execute Path */
             juce::File firstArgFile(commandArray[0]);
-            juce::File execFile = juce::File::getSpecialLocation(juce::File::currentApplicationFile);
+            juce::File execFile = juce::File::getSpecialLocation(juce::File::hostApplicationPath);
             if (firstArgFile == execFile) {
                 commandArray.remove(0);
             }
