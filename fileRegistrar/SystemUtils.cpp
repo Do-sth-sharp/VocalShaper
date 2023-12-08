@@ -68,7 +68,7 @@ bool regProjectFileInSystem(const juce::String& appPath) {
     bool result = juce::WindowsRegistry::setValue(root + ".vsp4" + "\\", "VocalShaper.Project.4")
         && juce::WindowsRegistry::setValue(key + "\\", "VocalShaper Project")
         && juce::WindowsRegistry::setValue(key + "\\shell\\open\\command\\", appPath + " \"%1\"")
-        && juce::WindowsRegistry::setValue(key + "\\DefaultIcon\\", appPath + "," + juce::String{ 0 });
+        && juce::WindowsRegistry::setValue(key + "\\DefaultIcon\\", appPath + "," + juce::String{ 1 });
 
     return result;
 

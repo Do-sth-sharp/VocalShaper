@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ Éú³ÉµÄ°üº¬ÎÄ¼ş¡£
-// ¹© resources.rc Ê¹ÓÃ
+// Microsoft Visual C++ ç”Ÿæˆçš„åŒ…å«æ–‡ä»¶ã€‚
+// ä¾› resources.rc ä½¿ç”¨
 //
 #define SW_HIDE                         0
 #define HIDE_WINDOW                     0
@@ -820,6 +820,7 @@
 #define LANG_TIGRINYA                   0x73
 #define IDI_ICON1                       115
 #define VK_F5                           0x74
+#define IDI_ICON2                       116
 #define VK_F6                           0x75
 #define LANG_HAWAIIAN                   0x75
 #define VK_F7                           0x76
@@ -1610,7 +1611,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        116
+#define _APS_NEXT_RESOURCE_VALUE        117
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101

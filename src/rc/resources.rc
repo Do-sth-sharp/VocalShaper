@@ -2,7 +2,7 @@
 //
 #include "resource.h"
 /////////////////////////////////////////////////////////////////////////////
-// 中文(简体，中国) resources
+// 涓枃(绠�浣擄紝涓浗) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
@@ -32,7 +32,7 @@ BEGIN
         BEGIN
             VALUE "FileDescription", "VocalShaper"
             VALUE "FileVersion", "0.0.1.0"
-            VALUE "LegalCopyright", "Copyright 2022 VocalSharp Org. All rights reserved."
+            VALUE "LegalCopyright", "Copyright 2023-2024 VocalSharp Org. All rights reserved."
             VALUE "ProductName", "VocalShaper"
             VALUE "ProductVersion", "0.0.1.0"
         END
@@ -78,7 +78,9 @@ END
 // remains consistent on all systems.
 IDI_ICON1               ICON                    "logo.ico"
 
-#endif    // 中文(简体，中国) resources
+IDI_ICON2               ICON                    "vsp4.ico"
+
+#endif    // 涓枃(绠�浣擄紝涓浗) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
