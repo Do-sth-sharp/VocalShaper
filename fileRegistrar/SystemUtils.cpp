@@ -4,6 +4,11 @@
 #include <Windows.h>
 #endif //JUCE_WINDOWS
 
+#define REG_RROJ_ROOT "HKEY_CLASSES_ROOT\\"
+#define REG_PROJ_MIME "VocalShaper.Project.4"
+#define REG_PROJ_EXT ".vsp4"
+#define REG_PROJ_DESCRIPTION "VocalShaper Project Version 4"
+
 bool checkAdmin() {
 #if JUCE_WINDOWS
     UINT PID = GetCurrentProcessId();
@@ -62,13 +67,10 @@ bool checkAdmin() {
 
 bool regProjectFileInSystem(const juce::String& appPath) {
 #if JUCE_WINDOWS
-    juce::String root = "HKEY_CLASSES_ROOT\\";
-    juce::String key = root + "VocalShaper.Project.4";
-
-    bool result = juce::WindowsRegistry::setValue(root + ".vsp4" + "\\", "VocalShaper.Project.4")
-        && juce::WindowsRegistry::setValue(key + "\\", "VocalShaper Project")
-        && juce::WindowsRegistry::setValue(key + "\\shell\\open\\command\\", appPath + " \"%1\"")
-        && juce::WindowsRegistry::setValue(key + "\\DefaultIcon\\", appPath + "," + juce::String{ 1 });
+    bool result = juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_EXT "\\", REG_PROJ_MIME)
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_MIME "\\", REG_PROJ_DESCRIPTION)
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_MIME "\\shell\\open\\command\\", appPath + " \"%1\"")
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_MIME "\\DefaultIcon\\", appPath + "," + juce::String{ 1 });
 
     return result;
 
@@ -80,16 +82,13 @@ bool regProjectFileInSystem(const juce::String& appPath) {
 
 bool unregProjectFileFromSystem() {
 #if JUCE_WINDOWS
-    juce::String root = "HKEY_CLASSES_ROOT\\";
-    juce::String key = root + "VocalShaper.Project.4";
-
     bool flagOk = true, flagExists = false;
-    if (juce::WindowsRegistry::keyExists(root + ".vsp4")) {
-        flagOk = juce::WindowsRegistry::deleteKey(root + ".vsp4") && flagOk;
+    if (juce::WindowsRegistry::keyExists(REG_RROJ_ROOT REG_PROJ_EXT)) {
+        flagOk = juce::WindowsRegistry::deleteKey(REG_RROJ_ROOT REG_PROJ_EXT) && flagOk;
         flagExists = true;
     }
-    if (juce::WindowsRegistry::keyExists(key)) {
-        flagOk = juce::WindowsRegistry::deleteKey(key) && flagOk;
+    if (juce::WindowsRegistry::keyExists(REG_RROJ_ROOT REG_PROJ_MIME)) {
+        flagOk = juce::WindowsRegistry::deleteKey(REG_RROJ_ROOT REG_PROJ_MIME) && flagOk;
         flagExists = true;
     }
 
