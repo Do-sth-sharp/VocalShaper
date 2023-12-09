@@ -80,6 +80,8 @@ IDI_ICON1               ICON                    "logo.ico"
 
 IDI_ICON2               ICON                    "vsp4.ico"
 
+IDI_ICON3               ICON                    "vspk.ico"
+
 #endif    // 中文(简体，中国) resources
 /////////////////////////////////////////////////////////////////////////////
 
