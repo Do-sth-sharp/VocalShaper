@@ -17,6 +17,10 @@ ToolBar::ToolBar()
 	this->mainMenuBar->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forMainMenu());
 	this->addAndMakeVisible(this->mainMenuBar.get());
+
+	/** System Status */
+	this->sysStatus = std::make_unique<SysStatusComponent>();
+	this->addAndMakeVisible(this->sysStatus.get());
 }
 
 ToolBar::~ToolBar() {
@@ -29,11 +33,23 @@ void ToolBar::resized() {
 	if (!window) { return; }
 	auto screenSize = window->getScreenSize();
 
-	/** Main Menu Bar */
+	/** Size */
 	int mainMenuBarHeight = this->getHeight() * 0.4;
+	int sysStatusHideWidth = this->getHeight() * 6;
+	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
+	int sysStatusWidth = this->getHeight() * 4;
+
+	/** Main Menu Bar */
 	juce::Rectangle<int> mainMenuBarRect(
-		0, 0, std::min(mainMenuBarHeight * 15, this->getWidth()), mainMenuBarHeight);
+		0, 0, this->getWidth() - (sysStatusShown ? sysStatusWidth : 0), mainMenuBarHeight);
 	this->mainMenuBar->setBounds(mainMenuBarRect);
+
+	/** System Status */
+	juce::Rectangle<int> sysStatusRect(
+		this->getWidth() - sysStatusWidth, 0,
+		sysStatusWidth, this->getHeight());
+	this->sysStatus->setBounds(sysStatusRect);
+	this->sysStatus->setVisible(sysStatusShown);
 }
 
 void ToolBar::paint(juce::Graphics& g) {

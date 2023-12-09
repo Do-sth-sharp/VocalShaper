@@ -143,6 +143,11 @@ void LookAndFeelFactory::initialise() {
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->mainMenuLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
+
+	/** System Status */
+	this->sysStatusLAF = std::make_unique<juce::LookAndFeel_V4>();
+	this->sysStatusLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -156,6 +161,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forToolBar() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forMainMenu() const {
 	return this->mainMenuLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forSysStatus() const {
+	return this->sysStatusLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {
