@@ -19,6 +19,7 @@ mklink /H .\app\licenses\RemixIcon.txt .\RemixIcon\License
 mklink /H .\app\licenses\cmake-lame.txt .\cmake-lame\LICENSE
 mklink /H .\app\licenses\lame.txt .\cmake-lame\lame-3.100\LICENSE
 mklink /H .\app\licenses\lua.txt .\LICENSE-Lua.txt
+mklink /H .\app\licenses\sigar.txt .\sigar\LICENSE
 mklink /H .\app\licenses\ASIO-SDK.txt .\LICENSE-ASIOSDK.txt
 mklink /H .\app\licenses\VST3-SDK.txt .\vst3sdk\LICENSE.txt
 mklink /H .\app\licenses\VST2-SDK.txt .\LICENSE-VST2SDK.txt

@@ -44,6 +44,10 @@ add_subdirectory (cmake-lame)
 add_subdirectory (VocalShaperProject4)
 add_subdirectory (FlowUI)
 
+# sigar
+add_subdirectory (sigar)
+set_target_properties (sigar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+
 # Mackie Control
 set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
 file (GLOB_RECURSE MACKIECONTROL_SRC CONFIGURE_DEPENDS "${MACKIECONTROL_SRC_PATH}/*.cpp")
@@ -92,7 +96,7 @@ target_compile_definitions (VocalShaper PRIVATE "JUCE_DONT_DECLARE_PROJECTINFO=1
 if (MSVC)
     target_compile_definitions (VocalShaper PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
 endif (MSVC)
-target_link_libraries (VocalShaper PRIVATE libJUCE libFlowUI libLua libvsp4)
+target_link_libraries (VocalShaper PRIVATE libJUCE libFlowUI libLua libvsp4 sigar)
 add_dependencies (VocalShaper libJUCE libFlowUI libLua PluginSearcher FileRegistrar SynthEngineDemo lame)
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")

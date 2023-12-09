@@ -31,3 +31,6 @@
 [submodule "FlowUI"]
 	path = FlowUI
 	url = https://github.com/FangCunWuChang/FlowUI.git
+[submodule "sigar"]
+	path = sigar
+	url = https://github.com/Do-sth-sharp/sigar.git
