@@ -33,6 +33,8 @@ namespace utils {
 		const juce::String& file = "config.json");
 	const juce::File getThemeConfigFile(const juce::String& name,
 		const juce::String& file = "config.json");
+	const juce::File getLayoutFile(const juce::String& name,
+		const juce::String& type = ".json");
 
 	const juce::URL getHelpPage(const juce::String& version, const juce::String& branch);
 	const juce::URL getUpdatePage(const juce::String& version, const juce::String& branch);

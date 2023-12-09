@@ -105,6 +105,11 @@ namespace utils {
 		return getThemeRootDir(name).getChildFile(file);
 	}
 
+	const juce::File getLayoutFile(const juce::String& name,
+		const juce::String& type) {
+		return getLayoutDir().getChildFile(name + type);
+	}
+
 	const juce::URL getHelpPage(const juce::String& version,
 		const juce::String& branch) {
 		return juce::URL{ "https://help.daw.org.cn" }

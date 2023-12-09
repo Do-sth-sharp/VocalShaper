@@ -6,6 +6,7 @@
 #include "ui/misc/InitTaskList.h"
 #include "ui/misc/RCManager.h"
 #include "ui/misc/MainThreadPool.h"
+#include "ui/misc/ConfigManager.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -21,31 +22,20 @@ class MainApplication : public juce::JUCEApplication {
 private:
 	std::unique_ptr<Splash> splash = nullptr;
 
-public:
-	const juce::String getApplicationName() override {
-		return utils::getAudioPlatformName(); };
-	const juce::String getApplicationVersion() override {
-		return utils::getAudioPlatformVersionString(); };
-	bool moreThanOneInstanceAllowed() override { return false; };
+	void loadConfig() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Load Configs..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				ConfigManager::getInstance()->loadConfigs();
+			}
+		);
+	};
 
-	void initialise(const juce::String& commandLineParameters) override {
-		/** Show Splash */
-		this->splash = std::make_unique<Splash>();
-		this->splash->setVisible(true);
-
-		/** Get Config */
-		this->splash->showMessage("Load StartUp Configs...");
-
-		juce::File configFile = utils::getConfigFile("startup");
-		auto configData = juce::JSON::parse(configFile);
-		if (!configData.isObject()) {
-			juce::AlertWindow::showMessageBox(
-				juce::MessageBoxIconType::WarningIcon, "VocalShaper Fatal Error",
-				"Can't load startup configs!");
-			juce::JUCEApplication::quit();
-		}
-
-		/** Set Audio Config */
+	void setAudioConfig() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set Audio Configs..."); }
@@ -59,15 +49,20 @@ public:
 				quickAPI::setDeadPluginListPath("./data/audio/deadPlugins");
 			}
 		);
-		
-		/** Load Theme Colors */
+	};
+
+	void loadTheme() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Load Theme Colors..."); }
 			}
 		);
 		InitTaskList::getInstance()->add(
-			[themeName = configData["theme"].toString()] {
+			[] {
+				/** Get Config */
+				auto& conf = ConfigManager::getInstance()->get("startup");
+				juce::String themeName = conf["theme"].toString();
+
 				/** Get Color Map */
 				juce::File colorMapFile = utils::getThemeColorFile(themeName);
 				auto colorMapData = juce::JSON::parse(colorMapFile);
@@ -88,8 +83,9 @@ public:
 				}
 			}
 		);
+	};
 
-		/** Init Default LookAndFeel */
+	void initLookAndFeel() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Init Default LookAndFeel..."); }
@@ -100,8 +96,9 @@ public:
 				LookAndFeelFactory::getInstance()->initialise();
 			}
 		);
+	};
 
-		/** Set FlowUI Button Icon */
+	void setFlowUIIcon() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set FlowUI Button Icons..."); }
@@ -120,8 +117,9 @@ public:
 				flowUI::FlowStyle::setButtonAdsorbBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
 			}
 		);
+	};
 
-		/** Set Flow Window Icon */
+	void configFlowUI() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Config FlowUI Window..."); }
@@ -134,17 +132,24 @@ public:
 				flowUI::FlowWindowHub::setOpenGL(true);
 			}
 		);
+	};
 
-		/** Load UI Translate */
+	void loadUITranslate() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Load UI Translations..."); }
 			}
 		);
 		InitTaskList::getInstance()->add(
-			[transName = configData["language"].toString()] {
+			[] {
+				/** Get Config */
+				auto& conf = ConfigManager::getInstance()->get("startup");
+				juce::String transName = conf["language"].toString();
+
+				/** Load Translates */
 				juce::File transDir = utils::getTransRootDir(transName);
-				auto transList = transDir.findChildFiles(juce::File::findFiles, true, "*.txt");
+				auto transList = transDir.findChildFiles(
+					juce::File::findFiles, true, "*.txt", juce::File::FollowSymlinks::noCycles);
 
 				if (transList.size() > 0) {
 					auto trans = new juce::LocalisedStrings(transList.getReference(0), true);
@@ -157,15 +162,21 @@ public:
 				}
 			}
 		);
+	};
 
-		/** Set UI Font */
+	void setUIFont() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set UI Fonts..."); }
 			}
 		);
 		InitTaskList::getInstance()->add(
-			[fontName = configData["font"].toString()] {
+			[] {
+				/** Get Config */
+				auto& conf = ConfigManager::getInstance()->get("startup");
+				juce::String fontName = conf["font"].toString();
+
+				/** Load Font */
 				juce::File fontFile = utils::getFontFile(fontName);
 
 				auto fontSize = fontFile.getSize();
@@ -178,8 +189,9 @@ public:
 				LookAndFeelFactory::getInstance()->setDefaultSansSerifTypeface(ptrTypeface);
 			}
 		);
+	};
 
-		/** Create Components */
+	void createComponents() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Create Components..."); }
@@ -188,31 +200,32 @@ public:
 		InitTaskList::getInstance()->add(
 			[] {
 				CompManager::getInstance()->set(CompManager::CompType::StartMenu,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Start Menu")));
-				CompManager::getInstance()->set(CompManager::CompType::ToolBar,
-					std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
-				CompManager::getInstance()->set(CompManager::CompType::PluginView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Plugin")));
-				CompManager::getInstance()->set(CompManager::CompType::SourceView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Source")));
-				CompManager::getInstance()->set(CompManager::CompType::TrackView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
-				CompManager::getInstance()->set(CompManager::CompType::InstrView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Instrument")));
-				CompManager::getInstance()->set(CompManager::CompType::MixerView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Mixer")));
-				CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Source Editor")));
-				CompManager::getInstance()->set(CompManager::CompType::SourceRecordView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Source Recorder")));
-				CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
-					std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
-				CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,
-					std::unique_ptr<flowUI::FlowComponent>(new MidiDebuggerComponent));
+				std::make_unique<flowUI::FlowComponent>(TRANS("Start Menu")));
+		CompManager::getInstance()->set(CompManager::CompType::ToolBar,
+			std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
+		CompManager::getInstance()->set(CompManager::CompType::PluginView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Plugin")));
+		CompManager::getInstance()->set(CompManager::CompType::SourceView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Source")));
+		CompManager::getInstance()->set(CompManager::CompType::TrackView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
+		CompManager::getInstance()->set(CompManager::CompType::InstrView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Instrument")));
+		CompManager::getInstance()->set(CompManager::CompType::MixerView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Mixer")));
+		CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Source Editor")));
+		CompManager::getInstance()->set(CompManager::CompType::SourceRecordView,
+			std::make_unique<flowUI::FlowComponent>(TRANS("Source Recorder")));
+		CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
+			std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
+		CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,
+			std::unique_ptr<flowUI::FlowComponent>(new MidiDebuggerComponent));
 			}
 		);
+	};
 
-		/** Init Commands */
+	void initCommands() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Init Command Manager..."); }
@@ -224,8 +237,9 @@ public:
 				flowUI::FlowWindowHub::addKeyListener(CommandManager::getInstance()->getKeyMappings());
 			}
 		);
+	};
 
-		/** Init Core Hooks */
+	void initCoreHooks() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Init Core Hooks..."); }
@@ -241,24 +255,31 @@ public:
 					return juce::AlertWindow::showOkCancelBox(
 						juce::MessageBoxIconType::QuestionIcon, TRANS("Close Editor"),
 						TRANS("Discard unsaved changes and exit?"));
-				});
+					});
 			}
 		);
+	};
 
-		/** Auto Layout */
+	void autoLayout() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Auto Layout Components..."); }
 			}
 		);
 		InitTaskList::getInstance()->add(
-			[layoutName = configData["layout"].toString()] {
+			[] {
+				/** Get Config */
+				auto& conf = ConfigManager::getInstance()->get("startup");
+				juce::String layoutName = conf["layout"].toString();
+
+				/** Layout */
 				CompManager::getInstance()->autoLayout(
-					"./layouts/" + layoutName + ".json");
+					utils::getLayoutFile(layoutName).getFullPathName());
 			}
 		);
+	};
 
-		/** Set Main Window Size */
+	void prepareMainWindow() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) { splash->showMessage("Set Main Window Size..."); }
@@ -269,8 +290,9 @@ public:
 				CompManager::getInstance()->maxMainWindow();
 			}
 		);
+	};
 
-		/** Hide Splash */
+	void hideSplash() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) {
@@ -279,8 +301,9 @@ public:
 				}
 			}
 		);
+	};
 
-		/** Load Project */
+	void loadProject(const juce::String& commandLineParameters) {
 		InitTaskList::getInstance()->add(
 			[commandLineParameters] {
 				if (commandLineParameters.isNotEmpty()) {
@@ -309,6 +332,64 @@ public:
 				}
 			}
 		);
+	};
+
+public:
+	const juce::String getApplicationName() override {
+		return utils::getAudioPlatformName(); };
+	const juce::String getApplicationVersion() override {
+		return utils::getAudioPlatformVersionString(); };
+	bool moreThanOneInstanceAllowed() override { return false; };
+
+	void initialise(const juce::String& commandLineParameters) override {
+		/** Show Splash */
+		this->splash = std::make_unique<Splash>();
+		this->splash->setVisible(true);
+
+		/** Load Config */
+		this->loadConfig();
+
+		/** Set Audio Config */
+		this->setAudioConfig();
+		
+		/** Load Theme Colors */
+		this->loadTheme();
+
+		/** Init Default LookAndFeel */
+		this->initLookAndFeel();
+
+		/** Set FlowUI Button Icon */
+		this->setFlowUIIcon();
+
+		/** Config Flow Window */
+		this->configFlowUI();
+
+		/** Load UI Translate */
+		this->loadUITranslate();
+
+		/** Set UI Font */
+		this->setUIFont();
+
+		/** Create Components */
+		this->createComponents();
+
+		/** Init Commands */
+		this->initCommands();
+
+		/** Init Core Hooks */
+		this->initCoreHooks();
+
+		/** Auto Layout */
+		this->autoLayout();
+
+		/** Set Main Window Size */
+		this->prepareMainWindow();
+
+		/** Hide Splash */
+		this->hideSplash();
+
+		/** Load Project */
+		this->loadProject(commandLineParameters);
 
 		/** Run Init */
 		InitTaskList::getInstance()->runNow();
