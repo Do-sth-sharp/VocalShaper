@@ -90,7 +90,7 @@ set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAK
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
-target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH} "./src")
+target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH} "./sigar/include" "./src")
 target_compile_definitions (VocalShaper PRIVATE "VSP4_DLL=1")
 target_compile_definitions (VocalShaper PRIVATE "JUCE_DONT_DECLARE_PROJECTINFO=1")
 if (MSVC)
