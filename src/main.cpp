@@ -7,6 +7,7 @@
 #include "ui/misc/RCManager.h"
 #include "ui/misc/MainThreadPool.h"
 #include "ui/misc/ConfigManager.h"
+#include "ui/misc/SysStatus.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -414,6 +415,9 @@ public:
 		/** ShutDown Backend */
 		shutdownAudioCore();
 		google::protobuf::ShutdownProtobufLibrary();
+
+		/** ShutDown Sigar */
+		SysStatus::releaseInstance();
 
 		/** Release Resources */
 		RCManager::releaseInstance();

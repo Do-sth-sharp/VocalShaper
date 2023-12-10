@@ -8,6 +8,8 @@ namespace quickAPI {
 
 	const juce::File getProjectDir();
 
+	double getCPUUsage();
+
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::StringArray getSourceNames();
 	const juce::Array<TrackInfo> getMixerTrackInfos();

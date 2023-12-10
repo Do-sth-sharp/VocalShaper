@@ -66,6 +66,7 @@ public:
 	int getAudioBufferSize() const;
 
 	void playTestSound() const;
+	double getCPUUsage() const;
 
 	void setMIDIInputDeviceEnabled(const juce::String& deviceID, bool enabled);
 	void setMIDIOutputDevice(const juce::String& deviceID);

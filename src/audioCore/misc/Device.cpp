@@ -252,6 +252,10 @@ void Device::playTestSound() const {
 	this->audioDeviceManager->playTestSound();
 }
 
+double Device::getCPUUsage() const {
+	return this->audioDeviceManager->getCpuUsage();
+}
+
 void Device::setMIDIInputDeviceEnabled(const juce::String& deviceID, bool enabled) {
 	this->audioDeviceManager->setMidiInputDeviceEnabled(deviceID, enabled);
 }

@@ -1,6 +1,7 @@
 ﻿#include "QuickGet.h"
 #include "../AudioCore.h"
 #include "../source/CloneableSourceManager.h"
+#include "../misc/Device.h"
 
 namespace quickAPI {
 	juce::Component* getAudioDebugger() {
@@ -13,6 +14,10 @@ namespace quickAPI {
 
 	const juce::File getProjectDir() {
 		return utils::getProjectDir();
+	}
+
+	double getCPUUsage() {
+		return Device::getInstance()->getCPUUsage();
 	}
 
 	const juce::StringArray getSourceNames() {
