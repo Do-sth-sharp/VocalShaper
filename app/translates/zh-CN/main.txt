@@ -1,15 +1,6 @@
 ﻿language: Chinese
 countries: cn
 
-
-
-"Yes" = "是"
-"No" = "否"
-"OK" = "确认"
-"Cancel" = "取消"
-
-
-
 "Start Menu" = "开始菜单"
 "Tool Bar" = "工具栏"
 "Plugin" = "插件"
@@ -22,132 +13,15 @@ countries: cn
 "Audio Debugger" = "音频调试器"
 "MIDI Debugger" = "MIDI调试器"
 
-
-
 "Main Button" = "主按钮"
 "Selector" = "选择器"
 "Track List" = "轨道列表"
 "License List" = "许可证列表"
 "License Content" = "许可证内容"
 
-
-
 "Select a license in the list to show content." = "从列表中选择一个许可证以展示内容。"
 
-
-
-"File" = "文件"
-"Edit" = "编辑"
-"View" = "视图"
-"Project" = "项目"
-"Control" = "控制"
-"Config" = "配置"
-"Misc" = "其它"
-
-
-
-"New Project" = "新建项目"
-"Open Project" = "打开项目"
-"Save Project" = "保存项目"
-"Load Playing Source" = "加载播放源"
-"Load Playing Source (Synth)" = "加载播放源（合成）"
-"Save Playing Source" = "保存播放源"
-"Export Synth Source" = "导出合成源"
-"Render" = "渲染"
-
-"Undo" = "撤销"
-"Redo" = "重做"
-
-"Create an empty project." = "建立一个空项目。"
-"Open a project from disk." = "从本地磁盘打开项目。"
-"Save current project to disk." = "保存当前项目到本地磁盘。"
-"Load a playing source from disk." = "从本地磁盘加载播放源。"
-"Load a synth source from disk." = "从本地磁盘加载合成源。"
-"Save a playing source to disk." = "保存播放源到本地磁盘。"
-"Save the synth result of a synth source to disk." = "保存合成源的合成结果到本地磁盘。"
-"Render the tracks in current project to audio files on disk." = "渲染当前项目的轨道为本地磁盘上的音频文件。"
-
-"Undo the last action." = "撤销最后一个操作。"
-"Redo the last undo action." = "重做最后一个撤销的操作。"
-
-
-
-"Close Editor" = "关闭编辑器"
-
-"Copy" = "复制"
-"Cut" = "剪切"
-"Paste" = "粘贴"
-"Clipboard" = "剪贴板"
-"Select All" = "全选"
-"Delete" = "删除"
-
-"Load Layout" = "加载布局"
-"Save Layout" = "保存布局"
-
-"Help" = "帮助"
-"Update" = "更新"
-"Links" = "链接"
-"Bilibili" = "Bilibili"
-"Github" = "Github"
-"Website" = "网站"
-"Developer Tool" = "开发者工具"
-"Register Project File" = "注册项目文件"
-"Unregister Project File" = "注销项目文件"
-"License" = "许可证"
-"About" = "关于"
-
-"Close and exit VocalShaper." = "关闭并退出VocalShaper。"
-
-"Copy selected items in the actived editor to clipboard." = "复制活动编辑器中所选内容到剪贴板。"
-"Cut selected items in the actived editor to clipboard." = "剪切活动编辑器中所选内容到剪贴板。"
-"Paste items to actived editor from clipboard." = "粘贴剪贴板中内容到活动编辑器。"
-"Show items in clipboard." = "显示剪贴板内容。"
-"Select all items in the actived editor." = "选择活动编辑器中所有内容。"
-"Delete selected item in the activer editor." = "删除活动编辑器中所选内容。"
-
-"Load a workspace layout file." = "加载一个工作区布局文件。"
-"Save workspace to layout file." = "保存工作区到布局文件。"
-"Show plugin view component." = "显示插件视图组件。"
-"Show source view component." = "显示源视图组件。"
-"Show track view component." = "显示轨道视图组件。"
-"Show instrument view component." = "显示乐器视图组件。"
-"Show mixer view component." = "显示混音器视图组件。"
-"Show source editor component." = "显示源编辑器组件。"
-"Show source recorder component." = "显示源录制器组件。"
-"Show audio debugger component." = "显示音频调试器组件。"
-"Show MIDI debugger component." = "显示MIDI调试器组件。"
-
-"Go to our help page." = "前往我们的帮助页面。"
-"Check for update." = "检查更新。"
-"Go to our bilibili space." = "前往我们的B站空间。"
-"Go to our Github repository." = "前往我们的Github仓库。"
-"Go to our official website." = "前往我们的官方网站。"
-"Register project file in system." = "注册项目文件到系统。"
-"Unregister project file from system." = "从系统注销项目文件。"
-"Read open source licenses." = "阅读开源许可证。"
-"About VocalShaper." = "关于VocalShaper。"
-
-
-
-"Project Warning" = "项目警告"
-"Source Selector" = "源选择器"
-"Mixer Track Selector" = "混音器轨道选择器"
-
-
-
-"Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
-"Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
-"The project file must be in the root of working directory!" = "项目文件必须在工作目录根内！"
-"Copy source files to working directory?" = "复制源文件到工作目录？"
-"Select a source in the list:" = "在列表中选择一个源："
-"The source list is empty!" = "源列表为空！"
-"Saving the source outside of the working directory may cause dependency problem with project files. Continue?" = "将源保存至工作目录外有可能会导致项目文件依赖问题。继续？"
-"The selected source is not a synth source!" = "选择的源不是一个合成源！"
-"The track list is empty!" = "轨道列表为空！"
-"Select tracks in the list: (Use Ctrl and Shift keys to select multiple items)" = "在列表中选择轨道：（使用Ctrl和Shift键多选）"
-"No track selected!" = "未选择轨道！"
-"The selected directory is not empty, which may cause existing files to be overwritten. Continue?" = "选择的目录不是空的，这可能会导致已有文件被覆盖。继续？"
-"The project file has been registered in the system!" = "项目文件已经注册到系统！"
-"The project file can't be registered in the system!" = "无法将项目文件注册到系统！"
-"The project file has been unregistered from the system!" = "项目文件已从系统注销！"
-"The project file can't be unregistered from the system! There is a possibility that it has not been registered before." = "项目文件无法从系统注销！可能其之前并未注册。"
+"cpu" = "CPU"
+"cpu-audio" = "CPU-音频"
+"mem" = "内存"
+"mem-process" = "内存-本程序"
