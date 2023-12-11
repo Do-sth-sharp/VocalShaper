@@ -76,7 +76,7 @@ void SysStatusComponent::paint(juce::Graphics& g) {
 	juce::Colour textColor = laf.findColour(
 		juce::Label::ColourIds::textWhenEditingColourId);
 	juce::Colour curveColor = laf.findColour(
-		juce::Label::ColourIds::textWhenEditingColourId);
+		juce::Label::ColourIds::outlineWhenEditingColourId);
 	juce::Colour alertColor = juce::Colours::red;
 
 	/** Font */

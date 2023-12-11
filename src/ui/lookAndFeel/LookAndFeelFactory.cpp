@@ -152,15 +152,15 @@ void LookAndFeelFactory::initialise() {
 	this->sysStatusLAF->setColour(juce::Label::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 	this->sysStatusLAF->setColour(juce::Label::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));/**< Label Color */
+		ColorMap::getInstance()->get("ThemeColorB9"));/**< Label Color */
 	this->sysStatusLAF->setColour(juce::Label::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB9"));
 	this->sysStatusLAF->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 	this->sysStatusLAF->setColour(juce::Label::ColourIds::textWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));/**< Text Color */
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Value Color */
 	this->sysStatusLAF->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));
+		ColorMap::getInstance()->get("ThemeColorA2"));/**< Curve Color */
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
