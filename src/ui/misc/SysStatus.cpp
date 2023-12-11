@@ -52,7 +52,7 @@ double SysStatus::getMemUsage() {
 	sigar_mem_get(this->pSigar, &mem);
 
 	/** Get Result */
-	double result = mem.used_percent;
+	double result = mem.used_percent / 100;
 
 	return result;
 }

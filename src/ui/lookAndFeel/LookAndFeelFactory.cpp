@@ -148,6 +148,19 @@ void LookAndFeelFactory::initialise() {
 	this->sysStatusLAF = std::make_unique<juce::LookAndFeel_V4>();
 	this->sysStatusLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
+
+	this->sysStatusLAF->setColour(juce::Label::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	this->sysStatusLAF->setColour(juce::Label::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Label Color */
+	this->sysStatusLAF->setColour(juce::Label::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
+	this->sysStatusLAF->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	this->sysStatusLAF->setColour(juce::Label::ColourIds::textWhenEditingColourId,
+		ColorMap::getInstance()->get("ThemeColorA2"));/**< Text Color */
+	this->sysStatusLAF->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
