@@ -4,9 +4,20 @@ extern "C" {
 #include <sigar_format.h>
 }
 
+#if JUCE_WINDOWS
+#include <Windows.h>
+#include <Psapi.h>
+#endif //JUCE_WINDOWS
+
 SysStatus::SysStatus() {
 	/** Open Sigar */
 	sigar_open(&this->pSigar);
+
+	/** Get Current Process */
+#if JUCE_WINDOWS
+	this->hProcess = GetCurrentProcess();
+
+#endif //JUCE_WINDOWS
 }
 
 SysStatus::~SysStatus() {
@@ -58,6 +69,14 @@ double SysStatus::getMemUsage() {
 }
 
 uint64_t SysStatus::getProcMemUsage() {
+#if JUCE_WINDOWS
+	PROCESS_MEMORY_COUNTERS pmc;
+	if (GetProcessMemoryInfo(this->hProcess, &pmc, sizeof(pmc))) {
+		return pmc.WorkingSetSize;
+	}
+	return 0;
+
+#else //JUCE_WINDOWS
 	/** Check Sigar */
 	if (!this->pSigar) { return 0; }
 
@@ -72,6 +91,8 @@ uint64_t SysStatus::getProcMemUsage() {
 	uint64_t result = mem.size;
 
 	return result;
+
+#endif //JUCE_WINDOWS
 }
 
 SysStatus* SysStatus::getInstance() {

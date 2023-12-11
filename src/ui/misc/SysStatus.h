@@ -18,6 +18,7 @@ public:
 
 private:
 	sigar_t* pSigar = nullptr;
+	void* hProcess = nullptr;/**< For Windows Only */
 
 public:
 	static SysStatus* getInstance();
