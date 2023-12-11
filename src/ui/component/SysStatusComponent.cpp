@@ -13,10 +13,11 @@ SysStatusComponent::SysStatusComponent()
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSysStatus());
+	this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 
 	/** Translate */
 	this->nameTrans.insert(std::make_pair("cpu", TRANS("cpu")));
-	this->nameTrans.insert(std::make_pair("cpu-audio", TRANS("cpu-audio")));
+	this->nameTrans.insert(std::make_pair("audio", TRANS("audio")));
 	this->nameTrans.insert(std::make_pair("mem", TRANS("mem")));
 	this->nameTrans.insert(std::make_pair("mem-process", TRANS("mem-process")));
 }
@@ -167,6 +168,52 @@ void SysStatusComponent::resized() {
 	/** Nothing To Do */
 }
 
+void SysStatusComponent::mouseUp(const juce::MouseEvent& event) {
+	/** Size */
+	int watchWidth = this->getHeight() * 1.25;
+	int watchHeight = this->getHeight() / 3;
+
+	/** Right Button */
+	if (event.mods.isRightButtonDown()) {
+		if (event.position.getX() < (this->getWidth() - watchWidth)) {
+			this->showCurveMenu();
+		}
+		else {
+			this->showWatchMenu(event.position.getY() / watchHeight);
+		}
+		return;
+	}
+}
+
+void SysStatusComponent::mouseMove(const juce::MouseEvent& event) {
+	/** Size */
+	int watchWidth = this->getHeight() * 1.25;
+	int watchHeight = this->getHeight() / 3;
+
+	/** Curve */
+	if (event.position.getX() < (this->getWidth() - watchWidth)) {
+		juce::String name = this->curveName;
+		this->setTooltip(this->nameTrans[name] + ": " +
+			this->getValueText(name, this->getCurve(this->curveData.size() - 1)));
+	}
+	/** Watch */
+	else {
+		int index = event.position.getY() / watchHeight;
+		if (index < 0 || index >= this->watchName.size()
+			|| index >= this->watchData.size()) {
+			return;
+		}
+
+		juce::String name = this->watchName[index];
+		this->setTooltip(this->nameTrans[name] + ": " +
+			this->getValueText(name, this->watchData[index]));
+	}
+}
+
+void SysStatusComponent::mouseExit(const juce::MouseEvent& /*event*/) {
+	this->setTooltip("");
+}
+
 void SysStatusComponent::clearCurve(int size) {
 	this->curveData.resize(size);
 	for (int i = 0; i < size; i++) {
@@ -197,7 +244,7 @@ double SysStatusComponent::getData(const juce::String& name) const {
 	static SysStatus::CPUPercTemp cpuTemp;
 
 	if (name == "cpu") { return SysStatus::getInstance()->getCPUUsage(cpuTemp); }
-	else if (name == "cpu-audio") { return quickAPI::getCPUUsage(); }
+	else if (name == "audio") { return quickAPI::getCPUUsage(); }
 	else if (name == "mem") { return SysStatus::getInstance()->getMemUsage(); }
 	else if (name == "mem-process") { return SysStatus::getInstance()->getProcMemUsage(); }
 
@@ -245,3 +292,106 @@ juce::String SysStatusComponent::getValueText(
 
 	return juce::String{ value * 100, 2, false } + "%";
 }
+
+void SysStatusComponent::showCurveMenu() {
+	/** Show Menu */
+	auto menu = this->createMenu(this->curveName, this->curveData.size(), true);
+	int result = menu.show();
+
+	/** Result */
+	auto conf = ConfigManager::getInstance()->get("sysstat").getDynamicObject();
+	if (!conf) { return; }
+	switch (result) {
+	case 1:
+		conf->setProperty("curve", "cpu");
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+	case 2:
+		conf->setProperty("curve", "audio");
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+	case 3:
+		conf->setProperty("curve", "mem");
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+	case 4:
+		conf->setProperty("curve", "mem-process");
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+
+	case 101:
+		conf->setProperty("points", 10);
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+	case 102:
+		conf->setProperty("points", 20);
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+	case 103:
+		conf->setProperty("points", 50);
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		break;
+	}
+}
+
+void SysStatusComponent::showWatchMenu(int index) {
+	if (index < 0 || index >= this->watchName.size()
+		|| index >= this->watchData.size()) { return; }
+
+	/** Show Menu */
+	auto menu = this->createMenu(this->watchName[index], 0, false);
+	int result = menu.show();
+
+	/** Set Func */
+	auto setFunc = [index, size = this->watchName.size()](const juce::String& name)->bool {
+		auto conf = ConfigManager::getInstance()->get("sysstat").getDynamicObject();
+		if (!conf) { return false; }
+
+		auto& array = conf->getProperty("watch");
+		auto ptrArray = array.getArray();
+		if (!ptrArray) { return false; }
+		if (ptrArray->size() < size) {
+			ptrArray->resize(size);
+		}
+
+		ptrArray->set(index, name);
+		conf->setProperty("watch", juce::var{ *ptrArray });
+		ConfigManager::getInstance()->saveConfig("sysstat");
+		return true;
+	};
+
+	/** Result */
+	switch (result) {
+	case 1:
+		if (!setFunc("cpu")) { return; }
+		break;
+	case 2:
+		if (!setFunc("audio")) { return; }
+		break;
+	case 3:
+		if (!setFunc("mem")) { return; }
+		break;
+	case 4:
+		if (!setFunc("mem-process")) { return; }
+		break;
+	}
+}
+
+juce::PopupMenu SysStatusComponent::createMenu(const juce::String& currentName,
+	int currentPoints, bool isCurve) {
+	juce::PopupMenu menu;
+
+	menu.addItem(1, this->nameTrans["cpu"], true, currentName == "cpu", nullptr);
+	menu.addItem(2, this->nameTrans["audio"], true, currentName == "audio", nullptr);
+	menu.addItem(3, this->nameTrans["mem"], true, currentName == "mem", nullptr);
+	menu.addItem(4, this->nameTrans["mem-process"], true, currentName == "mem-process", nullptr);
+
+	menu.addSeparator();
+
+	menu.addItem(101, "10", isCurve, currentPoints == 10, nullptr);
+	menu.addItem(102, "20", isCurve, currentPoints == 20, nullptr);
+	menu.addItem(103, "50", isCurve, currentPoints == 50, nullptr);
+
+	return menu;
+}
+

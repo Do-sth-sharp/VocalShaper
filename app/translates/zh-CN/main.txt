@@ -22,6 +22,6 @@ countries: cn
 "Select a license in the list to show content." = "从列表中选择一个许可证以展示内容。"
 
 "cpu" = "CPU"
-"cpu-audio" = "CPU-音频"
+"audio" = "音频"
 "mem" = "内存"
 "mem-process" = "内存-本程序"
