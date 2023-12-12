@@ -38,6 +38,13 @@ enum class GUICommandType : int {
 	AudioDebugger,
 	MidiDebugger,
 
+	StartupConfig,
+	FunctionConfig,
+	AudioConfig,
+	OutputConfig,
+	PluginConfig,
+	KeyMappingConfig,
+
 	Help,
 	Update,
 	Bilibili,

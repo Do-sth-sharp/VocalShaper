@@ -5,6 +5,7 @@
 #include "../component/CompManager.h"
 #include "../component/LicenseWindow.h"
 #include "../component/AboutWindow.h"
+#include "../component/ConfigWindow.h"
 #include "../misc/MainThreadPool.h"
 #include <FlowUI.h>
 
@@ -35,6 +36,13 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::SourceRecordView),
 		(juce::CommandID)(GUICommandType::AudioDebugger),
 		(juce::CommandID)(GUICommandType::MidiDebugger),
+
+		(juce::CommandID)(GUICommandType::StartupConfig),
+		(juce::CommandID)(GUICommandType::FunctionConfig),
+		(juce::CommandID)(GUICommandType::AudioConfig),
+		(juce::CommandID)(GUICommandType::OutputConfig),
+		(juce::CommandID)(GUICommandType::PluginConfig),
+		(juce::CommandID)(GUICommandType::KeyMappingConfig),
 
 		(juce::CommandID)(GUICommandType::Help),
 		(juce::CommandID)(GUICommandType::Update),
@@ -150,6 +158,31 @@ void GUICommandTarget::getCommandInfo(
 		result.setActive(true);
 		break;
 
+	case GUICommandType::StartupConfig:
+		result.setInfo(TRANS("Startup Config"), TRANS("Open startup config page."), TRANS("Config"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::FunctionConfig:
+		result.setInfo(TRANS("Function Config"), TRANS("Open the function config page."), TRANS("Config"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::AudioConfig:
+		result.setInfo(TRANS("Audio Config"), TRANS("Open the audio config page."), TRANS("Config"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::OutputConfig:
+		result.setInfo(TRANS("Output Config"), TRANS("Open the output config page."), TRANS("Config"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::PluginConfig:
+		result.setInfo(TRANS("Plugin Config"), TRANS("Open the plugin config page."), TRANS("Config"), 0);
+		result.setActive(true);
+		break;
+	case GUICommandType::KeyMappingConfig:
+		result.setInfo(TRANS("Key Mapping Config"), TRANS("Open the key mapping config page."), TRANS("Config"), 0);
+		result.setActive(true);
+		break;
+
 	case GUICommandType::Help:
 		result.setInfo(TRANS("Help"), TRANS("Go to our help page."), TRANS("Misc"), 0);
 		result.setActive(true);
@@ -257,6 +290,25 @@ bool GUICommandTarget::perform(
 		this->changeOpened(CompManager::CompType::MidiDebugger);
 		return true;
 
+	case GUICommandType::StartupConfig:
+		this->openConfig(0);
+		return true;
+	case GUICommandType::FunctionConfig:
+		this->openConfig(1);
+		return true;
+	case GUICommandType::AudioConfig:
+		this->openConfig(2);
+		return true;
+	case GUICommandType::OutputConfig:
+		this->openConfig(3);
+		return true;
+	case GUICommandType::PluginConfig:
+		this->openConfig(4);
+		return true;
+	case GUICommandType::KeyMappingConfig:
+		this->openConfig(5);
+		return true;
+
 	case GUICommandType::Help:
 		this->help();
 		return true;
@@ -325,6 +377,12 @@ void GUICommandTarget::changeOpened(CompManager::CompType type) const {
 	else {
 		CompManager::getInstance()->open(type);
 	}
+}
+
+void GUICommandTarget::openConfig(int page) const {
+	auto window = new ConfigWindow;
+	window->setPage(page);
+	window->enterModalState(true, nullptr, true);
 }
 
 void GUICommandTarget::help() const {

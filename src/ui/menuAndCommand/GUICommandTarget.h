@@ -22,6 +22,8 @@ private:
 	void saveLayout() const;
 	void changeOpened(CompManager::CompType type) const;
 
+	void openConfig(int page = 0) const;
+
 	void help() const;
 	void update() const;
 	void bilibili() const;

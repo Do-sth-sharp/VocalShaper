@@ -103,7 +103,12 @@ juce::PopupMenu MainMenuModel::createControl() const {
 juce::PopupMenu MainMenuModel::createConfig() const {
 	juce::PopupMenu menu;
 
-	/** TODO */
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::StartupConfig);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::FunctionConfig);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::AudioConfig);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::OutputConfig);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::PluginConfig);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::KeyMappingConfig);
 
 	return menu;
 }

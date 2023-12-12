@@ -45,6 +45,13 @@ countries: cn
 "Load Layout" = "加载布局"
 "Save Layout" = "保存布局"
 
+"Startup Config" = "启动配置"
+"Function Config" = "功能配置"
+"Audio Config" = "音频配置"
+"Output Config" = "输出配置"
+"Plugin Config" = "插件配置"
+"Key Mapping Config" = "按键映射配置"
+
 "Help" = "帮助"
 "Update" = "更新"
 "Links" = "链接"
@@ -77,6 +84,13 @@ countries: cn
 "Show source recorder component." = "显示源录制器组件。"
 "Show audio debugger component." = "显示音频调试器组件。"
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
+
+"Open startup config page." = "打开启动配置页面。"
+"Open the function config page." = "打开功能配置页面。"
+"Open the audio config page." = "打开音频配置界面。"
+"Open the output config page." = "打开输出配置页面。"
+"Open the plugin config page." = "打开插件配置页面。"
+"Open the key mapping config page." = "打开按键映射配置页面。"
 
 "Go to our help page." = "前往我们的帮助页面。"
 "Check for update." = "检查更新。"
