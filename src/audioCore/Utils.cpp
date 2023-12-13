@@ -824,7 +824,7 @@ namespace utils {
 		return juce::String(major) + "." + juce::String(minor) + "." + juce::String(patch);
 	}
 
-	juce::String getAudioPlatformComplieTime() {
+	juce::String getAudioPlatformCompileTime() {
 		return __DATE__ " " __TIME__;
 	}
 
@@ -843,7 +843,7 @@ namespace utils {
 	juce::String createPlatformInfoString() {
 		return getAudioPlatformName() + ", "
 			+ getAudioPlatformVersionString() + ", "
-			+ getAudioPlatformComplieTime() + "; "
+			+ getAudioPlatformCompileTime() + "; "
 			+ getReleaseBranch() + ", "
 			+ getReleaseName() + "; "
 			+ getSystemNameAndVersion();

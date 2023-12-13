@@ -1,4 +1,4 @@
-# VocalShaper [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/works-on-my-machine.svg)](https://github.com/BraveUX/for-the-badge/)
+﻿# VocalShaper [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/works-on-my-machine.svg)](https://github.com/BraveUX/for-the-badge/)
 [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/built-with-love.svg)](https://github.com/BraveUX/for-the-badge/)
 [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/made-with-c-plus-plus.svg)](https://github.com/BraveUX/for-the-badge/)
 [![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/fixed-bugs.svg)](https://github.com/BraveUX/for-the-badge/)
@@ -57,7 +57,7 @@ git submodule update --init --recursive
 .\linkEnv.bat
 ```
 
-## Complie
+## Compile
 ### Windows Debug (MSVC)
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64

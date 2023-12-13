@@ -21,7 +21,7 @@ AboutComponent::AboutComponent() {
 		" " + utils::getReleaseName() + "\n" +
 		TRANS("Open Source Digital Audio Workstation") + "\n" +
 		TRANS("Branch:") + " " + utils::getReleaseBranch() + "\n" +
-		TRANS("Complie Time:") + " " + utils::getAudioPlatformComplieTime();
+		TRANS("Compile Time:") + " " + utils::getAudioPlatformCompileTime();
 	this->copyMes = TRANS("This product available under the MPL 2.0 license.") + "\n" +
 		TRANS("VocalSharp Org.") + " © 2023-2024 " + TRANS("All Rights Reserved.");
 

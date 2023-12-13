@@ -29,7 +29,7 @@ Splash::Splash() : Component() {
 	/** Strings */
 	this->mesStr = "Waiting...";
 	this->platStr = utils::getAudioPlatformName();
-	this->verStr = "v" + utils::getAudioPlatformVersionString() + " build " + utils::getAudioPlatformComplieTime();
+	this->verStr = "v" + utils::getAudioPlatformVersionString() + " build " + utils::getAudioPlatformCompileTime();
 	this->relStr = utils::getReleaseName();
 	this->fraStr = "Made with JUCE.";
 

@@ -115,7 +115,7 @@ namespace utils {
 	Version getAudioPlatformVersion();
 	Version getAudioPlatformVersionMinimumSupported();
 	juce::String getAudioPlatformVersionString();
-	juce::String getAudioPlatformComplieTime();
+	juce::String getAudioPlatformCompileTime();
 	juce::String getSystemNameAndVersion();
 	juce::String getReleaseBranch();
 	juce::String getReleaseName();
