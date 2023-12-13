@@ -15,6 +15,7 @@ public:
 
 private:
 	std::map<juce::String, juce::var> confList;
+	juce::var empty;
 
 	static bool save(const juce::String& name, const juce::var& var);
 
