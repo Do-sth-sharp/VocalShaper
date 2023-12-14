@@ -78,3 +78,42 @@ private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigChoiceProp)
 };
+
+class ConfigSliderProp final
+	: public juce::SliderPropertyComponent,
+	public ConfigPropHelper {
+public:
+	ConfigSliderProp(const juce::String& className,
+		const juce::String& propName,
+		double rangeMin, double rangeMax, double interval = 0.0,
+		double skewFactor = 1.0, bool symmetricSkew = false);
+
+	void setValue(double newValue) override;
+	double getValue() const override;
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigSliderProp)
+};
+
+class ConfigTextProp final
+	: public juce::TextPropertyComponent,
+	public ConfigPropHelper {
+public:
+	enum class ValueType {
+		TextVal, IntVal, DoubleVal };
+
+public:
+	ConfigTextProp(const juce::String& className,
+		const juce::String& propName,
+		int maxNumChars = INT_MAX, bool isMultiLine = false,
+		bool isEditable = true,
+		ValueType valueType = ValueType::TextVal);
+
+	void setText(const juce::String& newText) override;
+	juce::String getText() const override;
+
+private:
+	const ValueType valueType;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigTextProp)
+};

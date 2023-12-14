@@ -45,7 +45,7 @@ ConfigBooleanProp::ConfigBooleanProp(
 			if (ptr) {
 				ptr->refresh();
 			}
-	});
+		});
 }
 
 void ConfigBooleanProp::setState(bool newState) {
@@ -92,7 +92,7 @@ ConfigChoiceProp::ConfigChoiceProp(const juce::String& className,
 			if (ptr) {
 				ptr->refresh();
 			}
-	});
+		});
 }
 
 void ConfigChoiceProp::setIndex(int newIndex) {
@@ -126,4 +126,80 @@ const juce::StringArray ConfigChoiceProp::transChoices(const juce::StringArray& 
 		result.add(TRANS(s));
 	}
 	return result;
+}
+
+ConfigSliderProp::ConfigSliderProp(
+	const juce::String& className,
+	const juce::String& propName,
+	double rangeMin, double rangeMax, double interval,
+	double skewFactor, bool symmetricSkew)
+	: SliderPropertyComponent(TRANS(propName),
+		rangeMin, rangeMax, interval, skewFactor, symmetricSkew),
+	ConfigPropHelper(className, propName) {
+	/** Init State */
+	juce::MessageManager::callAsync(
+		[ptr = juce::PropertyComponent::SafePointer(this)] {
+			if (ptr) {
+				ptr->refresh();
+			}
+		});
+}
+
+void ConfigSliderProp::setValue(double newValue) {
+	if (newValue == this->getValue()) { return; }
+
+	this->updateThenSave(newValue);
+	this->refresh();
+}
+
+double ConfigSliderProp::getValue() const {
+	return this->get();
+}
+
+ConfigTextProp::ConfigTextProp(
+	const juce::String& className,
+	const juce::String& propName,
+	int maxNumChars, bool isMultiLine,
+	bool isEditable, ValueType valueType)
+	: TextPropertyComponent(TRANS(propName),
+		maxNumChars, isMultiLine, isEditable),
+	ConfigPropHelper(className, propName),
+	valueType(valueType) {
+	/** Init State */
+	juce::MessageManager::callAsync(
+		[ptr = juce::PropertyComponent::SafePointer(this)] {
+			if (ptr) {
+				ptr->refresh();
+			}
+		});
+}
+
+void ConfigTextProp::setText(const juce::String& newText) {
+	if (newText == this->getText()) { return; }
+
+	if (this->valueType == ValueType::TextVal) {
+		this->updateThenSave(newText);
+	}
+	else if (this->valueType == ValueType::IntVal) {
+		this->updateThenSave(newText.getLargeIntValue());
+	}
+	else if (this->valueType == ValueType::DoubleVal) {
+		this->updateThenSave(newText.getDoubleValue());
+	}
+
+	this->refresh();
+}
+
+juce::String ConfigTextProp::getText() const {
+	auto& val = this->get();
+	if (this->valueType == ValueType::TextVal) {
+		return val.toString();
+	}
+	else if (this->valueType == ValueType::IntVal) {
+		return juce::String{ (int64_t)val };
+	}
+	else if (this->valueType == ValueType::DoubleVal) {
+		return juce::String{ (double)val };
+	}
+	return juce::String{};
 }
