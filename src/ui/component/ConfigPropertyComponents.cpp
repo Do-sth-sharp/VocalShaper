@@ -76,7 +76,8 @@ juce::String ConfigButtonProp::getButtonText() const {
 	return this->buttonText;
 }
 
-ConfigChoiceProp::ConfigChoiceProp(const juce::String& className,
+ConfigChoiceProp::ConfigChoiceProp(
+	const juce::String& className,
 	const juce::String& propName,
 	const juce::StringArray& choices,
 	ValueType valueType)
