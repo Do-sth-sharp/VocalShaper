@@ -18,8 +18,10 @@ countries: cn
 "Track List" = "轨道列表"
 "License List" = "许可证列表"
 "License Content" = "许可证内容"
+"Config List" = "配置列表"
 
 "Select a license in the list to show content." = "从列表中选择一个许可证以展示内容。"
+"Waiting for a moment..." = "稍等一下..."
 
 "cpu" = "CPU"
 "audio" = "音频"

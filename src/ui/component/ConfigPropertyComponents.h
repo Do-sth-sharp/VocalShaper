@@ -31,6 +31,8 @@ public:
 	void setState(bool newState) override;
 	bool getState() const override;
 
+	void resized() override;
+
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigBooleanProp)
 };
@@ -46,6 +48,8 @@ public:
 
 	void buttonClicked() override;
 	juce::String getButtonText() const override;
+
+	void resized() override;
 
 private:
 	const juce::String buttonText;
@@ -70,6 +74,8 @@ public:
 	void setIndex(int newIndex) override;
 	int getIndex() const override;
 
+	void resized() override;
+
 private:
 	const juce::StringArray choicesValue;
 	const ValueType valueType;
@@ -90,6 +96,8 @@ public:
 
 	void setValue(double newValue) override;
 	double getValue() const override;
+
+	void resized() override;
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigSliderProp)
@@ -112,8 +120,28 @@ public:
 	void setText(const juce::String& newText) override;
 	juce::String getText() const override;
 
+	void resized() override;
+
 private:
 	const ValueType valueType;
+	const bool isMultiLine;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigTextProp)
+};
+
+class ConfigLabelProp final
+	: public juce::PropertyComponent {
+public:
+	ConfigLabelProp(const juce::String& text,
+		bool isMultiLine = false);
+
+	void resized() override;
+	void refresh() override;
+	void paint(juce::Graphics& g) override;
+
+private:
+	std::unique_ptr<juce::Label> label = nullptr;
+	const bool isMultiLine;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigLabelProp)
 };

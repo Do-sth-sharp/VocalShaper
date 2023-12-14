@@ -12,6 +12,7 @@ public:
 		int width, int height, bool rowIsSelected) override;
 	juce::String getNameForRow(int rowNumber) override;
 	void selectedRowsChanged(int lastRowSelected) override;
+	juce::MouseCursor getMouseCursorForRow(int row) override;
 
 	using RowCallback = std::function<void(int)>;
 	void setCallback(const RowCallback& callback);

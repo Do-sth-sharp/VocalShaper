@@ -1,5 +1,8 @@
 ﻿#include "ConfigPropertyComponents.h"
 #include "../misc/ConfigManager.h"
+#include "../Utils.h"
+
+#define PROP_HEIGHT 0.04
 
 ConfigPropHelper::ConfigPropHelper(
 	const juce::String& className,
@@ -59,6 +62,14 @@ bool ConfigBooleanProp::getState() const {
 	return this->get();
 }
 
+void ConfigBooleanProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(prefHeight);
+
+	this->juce::BooleanPropertyComponent::resized();
+}
+
 ConfigButtonProp::ConfigButtonProp(
 	const juce::String& propName,
 	const juce::String& buttonText,
@@ -74,6 +85,14 @@ void ConfigButtonProp::buttonClicked() {
 
 juce::String ConfigButtonProp::getButtonText() const {
 	return this->buttonText;
+}
+
+void ConfigButtonProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(prefHeight);
+
+	this->juce::ButtonPropertyComponent::resized();
 }
 
 ConfigChoiceProp::ConfigChoiceProp(
@@ -121,6 +140,14 @@ int ConfigChoiceProp::getIndex() const {
 	return -1;
 }
 
+void ConfigChoiceProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(prefHeight);
+
+	this->juce::ChoicePropertyComponent::resized();
+}
+
 const juce::StringArray ConfigChoiceProp::transChoices(const juce::StringArray& choices) {
 	juce::StringArray result;
 	for (auto& s : choices) {
@@ -157,6 +184,14 @@ double ConfigSliderProp::getValue() const {
 	return this->get();
 }
 
+void ConfigSliderProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(prefHeight);
+
+	this->juce::SliderPropertyComponent::resized();
+}
+
 ConfigTextProp::ConfigTextProp(
 	const juce::String& className,
 	const juce::String& propName,
@@ -165,7 +200,7 @@ ConfigTextProp::ConfigTextProp(
 	: TextPropertyComponent(TRANS(propName),
 		maxNumChars, isMultiLine, isEditable),
 	ConfigPropHelper(className, propName),
-	valueType(valueType) {
+	valueType(valueType), isMultiLine(isMultiLine) {
 	/** Init State */
 	juce::MessageManager::callAsync(
 		[ptr = juce::PropertyComponent::SafePointer(this)] {
@@ -203,4 +238,43 @@ juce::String ConfigTextProp::getText() const {
 		return juce::String{ (double)val };
 	}
 	return juce::String{};
+}
+
+void ConfigTextProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(
+		prefHeight * (this->isMultiLine ? 4 : 1));
+
+	this->juce::TextPropertyComponent::resized();
+}
+
+ConfigLabelProp::ConfigLabelProp(
+	const juce::String& text, bool isMultiLine)
+	: PropertyComponent(
+		TRANS("Tip"), isMultiLine ? 100 : 25),
+	isMultiLine(isMultiLine) {
+	this->label = std::make_unique<juce::Label>(
+		this->getName(), TRANS(text));
+	this->label->setJustificationType(
+		isMultiLine ? juce::Justification::topLeft : juce::Justification::centredLeft);
+	this->addAndMakeVisible(this->label.get());
+}
+
+void ConfigLabelProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(
+		prefHeight * (this->isMultiLine ? 4 : 1));
+
+	this->label->setBounds(this->getLocalBounds());
+}
+
+void ConfigLabelProp::refresh() {
+	/** Nothing To Do */
+}
+
+void ConfigLabelProp::paint(juce::Graphics& g) {
+	auto& laf = this->getLookAndFeel();
+	laf.drawPropertyComponentBackground(g, this->getWidth(), this->getHeight(), *this);
 }

@@ -9,6 +9,7 @@ ConfigListModel::ConfigListModel()
 int ConfigListModel::getNumRows() {
 	return this->list.size();
 }
+
 void ConfigListModel::paintListBoxItem(
 	int rowNumber, juce::Graphics& g,
 	int width, int height, bool rowIsSelected) {
@@ -26,7 +27,7 @@ void ConfigListModel::paintListBoxItem(
 		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font font(height * 0.8);
+	juce::Font font(height * 0.5);
 
 	/** Background */
 	g.setColour(backgroundColor);
@@ -49,6 +50,10 @@ void ConfigListModel::selectedRowsChanged(int lastRowSelected) {
 	if (lastRowSelected < 0 || lastRowSelected >= this->list.size()) { return; }
 	if (!this->callback) { return; }
 	this->callback(lastRowSelected);
+}
+
+juce::MouseCursor ConfigListModel::getMouseCursorForRow(int row) {
+	return juce::MouseCursor::PointingHandCursor;
 }
 
 void ConfigListModel::setCallback(const RowCallback& callback) {
