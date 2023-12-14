@@ -41,7 +41,9 @@ juce::var& ConfigManager::get(const juce::String& name) {
 	it = this->confList.insert(std::make_pair(
 		name, juce::var{ new juce::DynamicObject })).first;
 	if (it != this->confList.end()) { return it->second; }
-	return this->empty;
+
+	static juce::var empty;
+	return empty;
 }
 
 bool ConfigManager::save(const juce::String& name, const juce::var& var) {

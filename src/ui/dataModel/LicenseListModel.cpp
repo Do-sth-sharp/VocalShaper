@@ -40,21 +40,16 @@ void LicenseListModel::paintListBoxItem(
 }
 
 juce::String LicenseListModel::getNameForRow(int rowNumber) {
-	if (rowNumber < 0 || rowNumber >= this->fileList.size()) { return {}; }
-	return this->fileList
-		.getUnchecked(rowNumber).getFileNameWithoutExtension();
+	return this->fileList[rowNumber].getFileNameWithoutExtension();
 }
 
 void LicenseListModel::selectedRowsChanged(int lastRowSelected) {
-	if (lastRowSelected < 0 || lastRowSelected >= this->fileList.size()) { return; }
 	if (!this->callback) { return; }
-	this->callback(this->fileList.getUnchecked(lastRowSelected));
+	this->callback(this->fileList[lastRowSelected]);
 }
 
 juce::String LicenseListModel::getTooltipForRow(int row) {
-	if (row < 0 || row >= this->fileList.size()) { return {}; }
-	return this->fileList
-		.getUnchecked(row).getFullPathName();
+	return this->fileList[row].getFullPathName();
 }
 
 void LicenseListModel::setList(const juce::Array<juce::File>& list) {
