@@ -195,10 +195,10 @@ void ConfigComponent::createFunctionPage() {
 		return quickAPI::getReturnToStartOnStop();
 		};
 
-	juce::Array<juce::PropertyComponent*> props;
-	props.add(new ConfigBooleanProp{ "function", "return-on-stop",
+	juce::Array<juce::PropertyComponent*> audioProps;
+	audioProps.add(new ConfigBooleanProp{ "function", "return-on-stop",
 		"Disabled", "Enabled", returnToStartUpdateCallback , returnToStartValueCallback});
-	panel->addProperties(props);
+	panel->addSection(TRANS("Audio Core"), audioProps);
 
 	this->pageList.add(std::move(panel));
 }

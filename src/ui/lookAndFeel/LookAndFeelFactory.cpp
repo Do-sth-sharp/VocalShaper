@@ -99,6 +99,22 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::TooltipWindow::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB5"));
 
+	/** Set Property Comp Color */
+	laf.setColour(juce::PropertyComponent::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	laf.setColour(juce::PropertyComponent::ColourIds::labelTextColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::BooleanPropertyComponent::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::BooleanPropertyComponent::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::TextPropertyComponent::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::TextPropertyComponent::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::TextPropertyComponent::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+
 	/** Set FlowUI Color */
 	flowUI::FlowStyle::setTitleBackgroundColor(
 		ColorMap::getInstance()->get("ThemeColorB2"));

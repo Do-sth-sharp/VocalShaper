@@ -10,4 +10,5 @@ countries: cn
 "font" = "字体"
 "layout" = "布局"
 
+"Audio Core" = "音频内核"
 "return-on-stop" = "在停止时返回"
