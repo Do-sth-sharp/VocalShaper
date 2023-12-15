@@ -30,6 +30,7 @@ void ConfigComponent::resized() {
 
 	/** Size */
 	int listWidth = screenSize.getWidth() * 0.1;
+	int audioItemHeight = screenSize.getHeight() * 0.04;
 
 	/** List */
 	this->list->setBounds(
@@ -38,10 +39,37 @@ void ConfigComponent::resized() {
 	/** List Height */
 	this->list->setRowHeight(screenSize.getHeight() * 0.05);
 
+	/** Audio Page */
+	auto audioViewPort = dynamic_cast<juce::Viewport*>(this->pageList[2]);
+	auto audioSelector = dynamic_cast<juce::AudioDeviceSelectorComponent*>(
+		audioViewPort ? audioViewPort->getViewedComponent() : nullptr);
+
+	/** Audio Selector Item Height */
+	if (audioSelector) {
+		audioSelector->setItemHeight(audioItemHeight);
+	}
+
+	/** Audio Viewport Pos */
+	auto audioViewPos = audioSelector
+		? audioViewPort->getViewPosition() : juce::Point<int>{};
+
 	/** Page */
 	auto pageRect = this->getLocalBounds().withTrimmedLeft(listWidth);
 	for (auto i : this->pageList) {
 		i->setBounds(pageRect);
+	}
+
+	/** Audio Selector Size */
+	if (audioSelector) {
+		int contentWidth = audioViewPort->getMaximumVisibleWidth();
+		int contentHeight = audioSelector->getHeight();
+		audioSelector->setBounds(0, 0,
+			contentWidth, std::max(contentHeight, pageRect.getHeight()));
+	}
+
+	/** Set Audio Viewport Pos */
+	if (audioSelector) {
+		audioViewPort->setViewPosition(audioViewPos);
 	}
 }
 
@@ -204,7 +232,19 @@ void ConfigComponent::createFunctionPage() {
 }
 
 void ConfigComponent::createAudioPage() {
+	/** Selector */
+	auto selector = quickAPI::createAudioDeviceSelector();
 
+	/** Viewport */
+	auto viewport = std::make_unique<juce::Viewport>(TRANS("Audio Config"));
+	viewport->setViewedComponent(selector.release(), true);
+	viewport->setScrollBarsShown(true, false);
+	viewport->setScrollOnDragMode(
+		juce::Viewport::ScrollOnDragMode::nonHover);
+	this->addAndMakeVisible(viewport.get());
+
+	/** Add To Page */
+	this->pageList.add(std::move(viewport));
 }
 
 void ConfigComponent::createOutputPage() {

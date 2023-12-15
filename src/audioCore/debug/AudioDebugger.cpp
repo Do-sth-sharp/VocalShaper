@@ -7,9 +7,7 @@ AudioDebugger::AudioDebugger() {
 	this->setOpaque(true);
 
 	/** Device Selector */
-	this->deviceSelector = std::make_unique<juce::AudioDeviceSelectorComponent>(
-		*(Device::getInstance()->getManager()), 0, 1024, 2, 1024,
-		true, true, false, false);
+	this->deviceSelector = Device::createDeviceSelector();
 	this->addAndMakeVisible(this->deviceSelector.get());
 
 	/** Command */

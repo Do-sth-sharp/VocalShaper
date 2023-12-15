@@ -304,6 +304,13 @@ const juce::StringArray Device::getAllMIDIOutputDeviceList() {
 	return Device::getAllMIDIDeviceList(false);
 }
 
+std::unique_ptr<
+	juce::AudioDeviceSelectorComponent> Device::createDeviceSelector() {
+	return std::make_unique<juce::AudioDeviceSelectorComponent>(
+		*(Device::getInstance()->getManager()), 0, 1024, 2, 1024,
+		true, true, false, false);
+}
+
 Device* Device::getInstance() {
 	return Device::instance ? Device::instance : (Device::instance = new Device);
 }

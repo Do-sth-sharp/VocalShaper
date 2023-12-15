@@ -24,6 +24,11 @@ namespace quickAPI {
 		return AudioCore::getInstance()->getReturnToPlayStartPosition();
 	}
 
+	std::unique_ptr<juce::Component> createAudioDeviceSelector() {
+		return std::unique_ptr<juce::Component>{
+			Device::createDeviceSelector().release() };
+	}
+
 	const juce::StringArray getSourceNames() {
 		juce::StringArray result;
 

@@ -83,6 +83,9 @@ public:
 	static const juce::StringArray getAllMIDIInputDeviceList();
 	static const juce::StringArray getAllMIDIOutputDeviceList();
 
+	static std::unique_ptr<
+		juce::AudioDeviceSelectorComponent> createDeviceSelector();
+
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	juce::AudioIODeviceCallback* callback = nullptr;

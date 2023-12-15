@@ -1,0 +1,28 @@
+﻿language: Chinese
+countries: cn
+
+"none" = "空"
+"Show advanced settings..." = "显示推荐的设置..."
+"Error when trying to open audio device!" = "打开音频设备时发生错误！"
+"(no audio output channels found)" = "（未找到音频输出通道）"
+"Active output channels:" = "启用的输出通道："
+"(no audio input channels found)" = "（未找到音频输入通道）"
+"Active input channels:" = "启用的输入通道："
+"Control Panel" = "控制面板"
+"Opens the device's own control panel" = "打开设备控制面板"
+"Reset Device" = "重置设备"
+"Resets the audio interface - sometimes needed after changing a device's properties in its custom control panel" = "重置音频接口 - 有时在设备控制面板中更改设备的属性后需要"
+"Output:" = "输出："
+"Device:" = "设备："
+"Test" = "测试"
+"Plays a test tone" = "播放测试声调"
+"Input:" = "输入："
+"Sample rate:" = "采样率："
+"Audio buffer size:" = "音频缓冲区大小："
+"Audio device type:" = "音频设备类型："
+"No MIDI inputs available" = "没有可用的MIDI输入"
+"Active MIDI inputs:" = "启用的MIDI输入："
+"Bluetooth MIDI" = "蓝牙MIDI"
+"Scan for bluetooth MIDI devices" = "扫描蓝牙MIDI设备"
+"MIDI Output:" = "MIDI 输出:"
+
