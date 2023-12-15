@@ -20,6 +20,10 @@ namespace quickAPI {
 		return Device::getInstance()->getCPUUsage();
 	}
 
+	bool getReturnToStartOnStop() {
+		return AudioCore::getInstance()->getReturnToPlayStartPosition();
+	}
+
 	const juce::StringArray getSourceNames() {
 		juce::StringArray result;
 

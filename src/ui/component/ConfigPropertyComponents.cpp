@@ -6,12 +6,17 @@
 
 ConfigPropHelper::ConfigPropHelper(
 	const juce::String& className,
-	const juce::String& propName)
-	: className(className), propName(propName) {
+	const juce::String& propName,
+	const UpdateCallback& updateCallback,
+	const GetValueCallback& getValueCallback)
+	: className(className), propName(propName),
+	updateCallback(updateCallback),
+	getValueCallback(getValueCallback) {
 	/** Nothing To Do */
 }
 
-const juce::var& ConfigPropHelper::get() const {
+const juce::var ConfigPropHelper::get() const {
+	if (this->getValueCallback) { return this->getValueCallback(); }
 	return ConfigManager::getInstance()
 		->get(this->className)[juce::Identifier{ this->propName }];
 }
@@ -22,6 +27,7 @@ bool ConfigPropHelper::update(const juce::var& data) {
 	auto classObj = classVar.getDynamicObject();
 	if (!classObj) { return false; }
 
+	if (!this->updateCallback(data)) { return false; }
 	classObj->setProperty(this->propName, data);
 	return true;
 }
@@ -38,10 +44,13 @@ ConfigBooleanProp::ConfigBooleanProp(
 	const juce::String& className,
 	const juce::String& propName,
 	const juce::String& buttonOffName,
-	const juce::String& buttonOnName)
+	const juce::String& buttonOnName,
+	const UpdateCallback& updateCallback,
+	const GetValueCallback& getValueCallback)
 	: BooleanPropertyComponent(
-		TRANS(propName), buttonOnName, buttonOffName),
-	ConfigPropHelper(className, propName) {
+		TRANS(propName), TRANS(buttonOnName), TRANS(buttonOffName)),
+	ConfigPropHelper(className, propName,
+		updateCallback, getValueCallback) {
 	/** Init State */
 	juce::MessageManager::callAsync(
 		[ptr = juce::PropertyComponent::SafePointer(this)] {
@@ -99,9 +108,12 @@ ConfigChoiceProp::ConfigChoiceProp(
 	const juce::String& className,
 	const juce::String& propName,
 	const juce::StringArray& choices,
-	ValueType valueType)
+	ValueType valueType,
+	const UpdateCallback& updateCallback,
+	const GetValueCallback& getValueCallback)
 	: ChoicePropertyComponent(TRANS(propName)),
-	ConfigPropHelper(className, propName),
+	ConfigPropHelper(className, propName,
+		updateCallback, getValueCallback),
 	choicesValue(choices), valueType(valueType) {
 	/** Init Choices */
 	this->choices = ConfigChoiceProp::transChoices(choices);
@@ -160,10 +172,13 @@ ConfigSliderProp::ConfigSliderProp(
 	const juce::String& className,
 	const juce::String& propName,
 	double rangeMin, double rangeMax, double interval,
-	double skewFactor, bool symmetricSkew)
+	double skewFactor, bool symmetricSkew,
+	const UpdateCallback& updateCallback,
+	const GetValueCallback& getValueCallback)
 	: SliderPropertyComponent(TRANS(propName),
 		rangeMin, rangeMax, interval, skewFactor, symmetricSkew),
-	ConfigPropHelper(className, propName) {
+	ConfigPropHelper(className, propName,
+		updateCallback, getValueCallback) {
 	/** Init State */
 	juce::MessageManager::callAsync(
 		[ptr = juce::PropertyComponent::SafePointer(this)] {
@@ -196,10 +211,13 @@ ConfigTextProp::ConfigTextProp(
 	const juce::String& className,
 	const juce::String& propName,
 	int maxNumChars, bool isMultiLine,
-	bool isEditable, ValueType valueType)
+	bool isEditable, ValueType valueType,
+	const UpdateCallback& updateCallback,
+	const GetValueCallback& getValueCallback)
 	: TextPropertyComponent(TRANS(propName),
 		maxNumChars, isMultiLine, isEditable),
-	ConfigPropHelper(className, propName),
+	ConfigPropHelper(className, propName,
+		updateCallback, getValueCallback),
 	valueType(valueType), isMultiLine(isMultiLine) {
 	/** Init State */
 	juce::MessageManager::callAsync(
@@ -227,7 +245,7 @@ void ConfigTextProp::setText(const juce::String& newText) {
 }
 
 juce::String ConfigTextProp::getText() const {
-	auto& val = this->get();
+	auto val = this->get();
 	if (this->valueType == ValueType::TextVal) {
 		return val.toString();
 	}

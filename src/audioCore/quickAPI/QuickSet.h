@@ -7,4 +7,6 @@ namespace quickAPI {
 	void setPluginListTemporaryFilePath(const juce::String& path);
 	void setPluginBlackListFilePath(const juce::String& path);
 	void setDeadPluginListPath(const juce::String& path);
+
+	void setReturnToStartOnStop(bool value);
 }

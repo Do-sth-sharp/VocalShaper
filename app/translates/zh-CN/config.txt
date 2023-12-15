@@ -9,3 +9,5 @@ countries: cn
 "theme" = "主题"
 "font" = "字体"
 "layout" = "布局"
+
+"return-on-stop" = "在停止时返回"

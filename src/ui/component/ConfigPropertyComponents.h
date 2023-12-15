@@ -4,17 +4,25 @@
 
 class ConfigPropHelper {
 public:
+	using UpdateCallback = std::function<bool(const juce::var&)>;
+	using GetValueCallback = std::function<const juce::var(void)>;
+
+public:
 	ConfigPropHelper(const juce::String& className,
-		const juce::String& propName);
+		const juce::String& propName,
+		const UpdateCallback& updateCallback = [](const juce::var&) { return true; },
+		const GetValueCallback& getValueCallback = GetValueCallback{});
 	virtual ~ConfigPropHelper() = default;
 
-	const juce::var& get() const;
+	const juce::var get() const;
 	bool update(const juce::var& data);
 	bool save();
 	bool updateThenSave(const juce::var& data);
 
 private:
 	const juce::String className, propName;
+	const UpdateCallback updateCallback;
+	const GetValueCallback getValueCallback;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigPropHelper)
 };
@@ -26,7 +34,9 @@ public:
 	ConfigBooleanProp(const juce::String& className,
 		const juce::String& propName,
 		const juce::String& buttonOffName = {},
-		const juce::String& buttonOnName = {});
+		const juce::String& buttonOnName = {},
+		const UpdateCallback& updateCallback = [](const juce::var&) { return true; },
+		const GetValueCallback& getValueCallback = GetValueCallback{});
 
 	void setState(bool newState) override;
 	bool getState() const override;
@@ -69,7 +79,9 @@ public:
 	ConfigChoiceProp(const juce::String& className,
 		const juce::String& propName,
 		const juce::StringArray& choices,
-		ValueType valueType = ValueType::NameVal);
+		ValueType valueType = ValueType::NameVal,
+		const UpdateCallback& updateCallback = [](const juce::var&) { return true; },
+		const GetValueCallback& getValueCallback = GetValueCallback{});
 
 	void setIndex(int newIndex) override;
 	int getIndex() const override;
@@ -92,7 +104,9 @@ public:
 	ConfigSliderProp(const juce::String& className,
 		const juce::String& propName,
 		double rangeMin, double rangeMax, double interval = 0.0,
-		double skewFactor = 1.0, bool symmetricSkew = false);
+		double skewFactor = 1.0, bool symmetricSkew = false,
+		const UpdateCallback& updateCallback = [](const juce::var&) { return true; },
+		const GetValueCallback& getValueCallback = GetValueCallback{});
 
 	void setValue(double newValue) override;
 	double getValue() const override;
@@ -115,7 +129,9 @@ public:
 		const juce::String& propName,
 		int maxNumChars = INT_MAX, bool isMultiLine = false,
 		bool isEditable = true,
-		ValueType valueType = ValueType::TextVal);
+		ValueType valueType = ValueType::TextVal,
+		const UpdateCallback& updateCallback = [](const juce::var&) { return true; },
+		const GetValueCallback& getValueCallback = GetValueCallback{});
 
 	void setText(const juce::String& newText) override;
 	juce::String getText() const override;

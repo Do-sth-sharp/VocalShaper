@@ -2,6 +2,7 @@
 #include "ConfigPropertyComponents.h"
 #include "../misc/MainThreadPool.h"
 #include "../Utils.h"
+#include "../../audioCore/AC_API.h"
 
 ConfigComponent::ConfigComponent() {
 	/** Text */
@@ -183,7 +184,23 @@ void ConfigComponent::createStartupPage(const StartupOptions& option) {
 }
 
 void ConfigComponent::createFunctionPage() {
+	auto panel = std::make_unique<juce::PropertyPanel>(TRANS("Function Config"));
+	this->addAndMakeVisible(panel.get());
 
+	auto returnToStartUpdateCallback = [](const juce::var& data) {
+		quickAPI::setReturnToStartOnStop(data);
+		return true;
+		};
+	auto returnToStartValueCallback = []()->const juce::var {
+		return quickAPI::getReturnToStartOnStop();
+		};
+
+	juce::Array<juce::PropertyComponent*> props;
+	props.add(new ConfigBooleanProp{ "function", "return-on-stop",
+		"Disabled", "Enabled", returnToStartUpdateCallback , returnToStartValueCallback});
+	panel->addProperties(props);
+
+	this->pageList.add(std::move(panel));
 }
 
 void ConfigComponent::createAudioPage() {

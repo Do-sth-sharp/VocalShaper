@@ -27,3 +27,6 @@ countries: cn
 "audio" = "音频"
 "mem" = "内存"
 "mem-process" = "内存-本程序"
+
+"Enabled" = "已开启"
+"Disabled" = "已关闭"

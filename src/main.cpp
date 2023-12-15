@@ -44,10 +44,15 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
+				/** Plugin Path */
 				quickAPI::setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt");
 				quickAPI::setPluginListTemporaryFilePath("./data/audio/plugins.xml");
 				quickAPI::setPluginBlackListFilePath("./data/audio/blackPlugins.txt");
 				quickAPI::setDeadPluginListPath("./data/audio/deadPlugins");
+
+				/** Functions */
+				auto& funcVar = ConfigManager::getInstance()->get("function");
+				quickAPI::setReturnToStartOnStop(funcVar["return-on-stop"]);
 			}
 		);
 	};

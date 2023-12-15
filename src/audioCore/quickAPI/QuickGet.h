@@ -9,6 +9,7 @@ namespace quickAPI {
 	const juce::File getProjectDir();
 
 	double getCPUUsage();
+	bool getReturnToStartOnStop();
 
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::StringArray getSourceNames();
