@@ -26,6 +26,17 @@
 
 #include "Platform.h"
 
+#if JUCE_PLUGINHOST_VST3
+#include <pluginterfaces/vst/vsttypes.h>
+#endif //JUCE_PLUGINHOST_VST3
+#if JUCE_PLUGINHOST_VST
+#include <pluginterfaces/vst2.x/aeffect.h>
+#endif //JUCE_PLUGINHOST_VST
+#if JUCE_PLUGINHOST_LV2
+#include <juce_audio_processors/format_types/LV2_SDK/juce_lv2_config.h>
+#endif //JUCE_PLUGINHOST_LV2
+#include <DMDA.h>
+
 namespace utils {
 	std::tuple<int, int> getChannelIndexAndNumOfBus(
 		const juce::AudioProcessor* processor, int busIndex, bool isInput) {
@@ -858,6 +869,45 @@ namespace utils {
 
 	juce::String getUserName() {
 		return juce::SystemStats::getLogonName();
+	}
+
+	juce::String getJUCEVersion() {
+		return juce::SystemStats::getJUCEVersion();
+	}
+
+	juce::String getVST3SDKVersion() {
+#if JUCE_PLUGINHOST_VST3
+		return kVstVersionString;
+
+#else //JUCE_PLUGINHOST_VST3
+		return "";
+
+#endif //JUCE_PLUGINHOST_VST3
+	}
+
+	juce::String getVST2SDKVersion() {
+#if JUCE_PLUGINHOST_VST
+		int version = kVstVersion;
+		return juce::String{ version / 1000 } + "." + juce::String{ version % 1000 / 100 };
+
+#else //JUCE_PLUGINHOST_VST
+		return "";
+
+#endif //JUCE_PLUGINHOST_VST
+	}
+
+	juce::String getLV2Version() {
+#if JUCE_PLUGINHOST_LV2
+		return "LILV v" LILV_VERSION " SERD v" SERD_VERSION " SORD v" SORD_VERSION;
+
+#else //JUCE_PLUGINHOST_LV2
+		return "";
+
+#endif //JUCE_PLUGINHOST_LV2
+	}
+
+	juce::String getDMDAVersion() {
+		return DMDA_VERSION;
 	}
 
 	juce::String getLegalFileName(const juce::String& name) {

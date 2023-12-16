@@ -122,6 +122,12 @@ namespace utils {
 	juce::String createPlatformInfoString();
 	juce::String getUserName();
 
+	juce::String getJUCEVersion();
+	juce::String getVST3SDKVersion();
+	juce::String getVST2SDKVersion();
+	juce::String getLV2Version();
+	juce::String getDMDAVersion();
+
 	juce::String getLegalFileName(const juce::String& name);
 	juce::String getSourceDefaultPathForAudio(int id, const juce::String& name);
 	juce::String getSourceDefaultPathForMIDI(int id, const juce::String& name);

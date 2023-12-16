@@ -21,7 +21,18 @@ AboutComponent::AboutComponent() {
 		" " + utils::getReleaseName() + "\n" +
 		TRANS("Open Source Digital Audio Workstation") + "\n" +
 		TRANS("Branch:") + " " + utils::getReleaseBranch() + "\n" +
-		TRANS("Compile Time:") + " " + utils::getAudioPlatformCompileTime();
+		TRANS("Compile Time:") + " " + utils::getAudioPlatformCompileTime() + "\n" +
+		TRANS("JUCE Version:") + " " + utils::getJUCEVersion() + "\n" +
+#if JUCE_PLUGINHOST_VST3
+		TRANS("VST3 SDK Version:") + " " + utils::getVST3SDKVersion() + "\n" +
+#endif //JUCE_PLUGINHOST_VST3
+#if JUCE_PLUGINHOST_VST
+		TRANS("VST2 SDK Version:") + " " + utils::getVST2SDKVersion() + "\n" +
+#endif //JUCE_PLUGINHOST_VST
+#if JUCE_PLUGINHOST_LV2
+		TRANS("LV2 SDK Version:") + " " + utils::getLV2Version() + "\n" +
+#endif //JUCE_PLUGINHOST_LV2
+		TRANS("DMDA SDK Version:") + " " + utils::getDMDAVersion();
 	this->copyMes = TRANS("This product available under the MPL 2.0 license.") + "\n" +
 		TRANS("VocalSharp Org.") + " © 2023-2024 " + TRANS("All Rights Reserved.");
 
