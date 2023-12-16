@@ -91,6 +91,26 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::ScrollBar::ColourIds::trackColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
 
+	/** Set Slider Color */
+	laf.setColour(juce::Slider::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::Slider::ColourIds::thumbColourId,
+		ColorMap::getInstance()->get("ThemeColorA2"));
+	laf.setColour(juce::Slider::ColourIds::trackColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));
+	laf.setColour(juce::Slider::ColourIds::rotarySliderFillColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));
+	laf.setColour(juce::Slider::ColourIds::rotarySliderOutlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));
+	laf.setColour(juce::Slider::ColourIds::textBoxTextColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::Slider::ColourIds::textBoxBackgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	laf.setColour(juce::Slider::ColourIds::textBoxHighlightColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
+	laf.setColour(juce::Slider::ColourIds::textBoxOutlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+
 	/** Set Tool Tip Color */
 	laf.setColour(juce::TooltipWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB5"));
