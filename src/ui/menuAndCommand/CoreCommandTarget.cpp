@@ -208,14 +208,8 @@ void CoreCommandTarget::saveProject() const {
 }
 
 void CoreCommandTarget::loadSource() const {
-	juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
-#if JUCE_WINDOWS
-	audioFormats.addArray({ "*.wmv", "*.asf", "*.wm", "*.wma" });
-#endif
-#if JUCE_MAC
-	audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
-#endif
-	juce::StringArray midiFormats{ "*.mid" };
+	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
+	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
 
 	juce::File defaultPath = quickAPI::getProjectDir();
 	juce::FileChooser chooser(TRANS("Load Playing Source"), defaultPath,
@@ -243,7 +237,7 @@ void CoreCommandTarget::loadSource() const {
 }
 
 void CoreCommandTarget::loadSynthSource() const {
-	juce::StringArray midiFormats{ "*.mid" };
+	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
 
 	juce::File defaultPath = quickAPI::getProjectDir();
 	juce::FileChooser chooser(TRANS("Load Playing Source (Synth)"), defaultPath,
@@ -267,11 +261,8 @@ void CoreCommandTarget::saveSource() const {
 	auto callback = [](int index) {
 		if (index == -1) { return; }
 
-		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
-#if JUCE_MAC
-		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
-#endif
-		juce::StringArray midiFormats{ "*.mid" };
+		juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
+		juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(true);
 
 		bool isAudio = quickAPI::checkForAudioSource(index);
 		auto& formats = isAudio ? audioFormats : midiFormats;
@@ -306,10 +297,7 @@ void CoreCommandTarget::exportSource() const {
 	auto callback = [](int index) {
 		if (index == -1) { return; }
 
-		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
-#if JUCE_MAC
-		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
-#endif
+		juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
 
 		if (!quickAPI::checkForSynthSource(index)) {
 			juce::AlertWindow::showMessageBox(
@@ -340,10 +328,7 @@ void CoreCommandTarget::render() const {
 	auto callback = [](const juce::Array<int>& tracks) {
 		if (tracks.isEmpty()) { return; }
 
-		juce::StringArray audioFormats{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
-#if JUCE_MAC
-		audioFormats.addArray({ "*.aac", "*.m4a", "*.3gp" });
-#endif
+		juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
 
 		juce::File defaultPath = quickAPI::getProjectDir();
 		juce::FileChooser chooser(TRANS("Render"), defaultPath,

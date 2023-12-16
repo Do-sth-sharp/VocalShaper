@@ -58,10 +58,17 @@ namespace utils {
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioSaveConfig)
 	};
 
+	const juce::StringArray getAudioFormatsSupported(bool isWrite);
+	const juce::StringArray getMidiFormatsSupported(bool isWrite);
+	juce::AudioFormat* findAudioFormatForExtension(const juce::String& extension, bool isWrite);
 	juce::AudioFormat* findAudioFormat(const juce::File& file, bool isWrite);
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
 		double sampleRateToUse, const juce::AudioChannelSet& channelLayout);
+	juce::StringArray getQualityOptionsForExtension(const juce::String& extension);
+	juce::Array<int> getPossibleBitDepthsForExtension(const juce::String& extension);
+	juce::Array<int> getPossibleSampleRatesForExtension(const juce::String& extension);
+	juce::StringArray getPossibleMetaKeyForExtension(const juce::String& extension);
 
 	enum class TrackType {
 		DISABLED = 0,

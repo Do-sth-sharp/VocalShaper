@@ -1,4 +1,4 @@
--- Test SeqSource
+﻿-- Test SeqSource
 AC.addSequencerTrack(-1, -1);
 AC.removeSequencerTrack(0);
 
@@ -50,9 +50,9 @@ AC.addSequencerSourceInstance(0, 0, 0, 10, 0);
 AC.removeSequencerSourceInstance(0, 0);
 
 -- Audio Save Config
-AC.setAudioSaveBitsPerSample("WAV file", 32);
-AC.setAudioSaveMetaData("WAV file", { ["bwav description"] = "test description", ["bwav origination date"] = "2023-08-26", ["bwav origination time"] = "00:42:00" });
-AC.setAudioSaveQualityOptionIndex("WAV file", 0);
+AC.setAudioSaveBitsPerSample(".wav", 32);
+AC.setAudioSaveMetaData(".wav", { ["bwav description"] = "test description", ["bwav origination date"] = "2023-08-26", ["bwav origination time"] = "00:42:00" });
+AC.setAudioSaveQualityOptionIndex(".wav", 0);
 
 -- Record
 AC.addRecorderSourceInstance(0, 0);

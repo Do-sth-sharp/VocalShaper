@@ -1,0 +1,293 @@
+﻿#pragma once
+
+#include <JuceHeader.h>
+
+#define WAV_META_KEYS juce::StringArray { \
+		juce::WavAudioFormat::bwavCodingHistory, \
+		juce::WavAudioFormat::bwavDescription, \
+		juce::WavAudioFormat::bwavOriginator, \
+		juce::WavAudioFormat::bwavOriginationDate, \
+		juce::WavAudioFormat::bwavOriginationTime, \
+		juce::WavAudioFormat::bwavTimeReference, \
+		 \
+		juce::WavAudioFormat::aswgContentType, \
+		juce::WavAudioFormat::aswgProject, \
+		juce::WavAudioFormat::aswgOriginator, \
+		juce::WavAudioFormat::aswgOriginatorStudio, \
+		juce::WavAudioFormat::aswgNotes, \
+		juce::WavAudioFormat::aswgSession, \
+		juce::WavAudioFormat::aswgState, \
+		juce::WavAudioFormat::aswgEditor, \
+		juce::WavAudioFormat::aswgMixer, \
+		juce::WavAudioFormat::aswgFxChainName, \
+		juce::WavAudioFormat::aswgChannelConfig, \
+		juce::WavAudioFormat::aswgAmbisonicFormat, \
+		juce::WavAudioFormat::aswgAmbisonicChnOrder, \
+		juce::WavAudioFormat::aswgAmbisonicNorm, \
+		juce::WavAudioFormat::aswgMicType, \
+		juce::WavAudioFormat::aswgMicConfig, \
+		juce::WavAudioFormat::aswgMicDistance, \
+		juce::WavAudioFormat::aswgRecordingLoc, \
+		juce::WavAudioFormat::aswgIsDesigned, \
+		juce::WavAudioFormat::aswgRecEngineer, \
+		juce::WavAudioFormat::aswgRecStudio, \
+		juce::WavAudioFormat::aswgImpulseLocation, \
+		juce::WavAudioFormat::aswgCategory, \
+		juce::WavAudioFormat::aswgSubCategory, \
+		juce::WavAudioFormat::aswgCatId, \
+		juce::WavAudioFormat::aswgUserCategory, \
+		juce::WavAudioFormat::aswgUserData, \
+		juce::WavAudioFormat::aswgVendorCategory, \
+		juce::WavAudioFormat::aswgFxName, \
+		juce::WavAudioFormat::aswgLibrary, \
+		juce::WavAudioFormat::aswgCreatorId, \
+		juce::WavAudioFormat::aswgSourceId, \
+		juce::WavAudioFormat::aswgRmsPower, \
+		juce::WavAudioFormat::aswgLoudness, \
+		juce::WavAudioFormat::aswgLoudnessRange, \
+		juce::WavAudioFormat::aswgMaxPeak, \
+		juce::WavAudioFormat::aswgSpecDensity, \
+		juce::WavAudioFormat::aswgZeroCrossRate, \
+		juce::WavAudioFormat::aswgPapr, \
+		juce::WavAudioFormat::aswgText, \
+		juce::WavAudioFormat::aswgEfforts, \
+		juce::WavAudioFormat::aswgEffortType, \
+		juce::WavAudioFormat::aswgProjection, \
+		juce::WavAudioFormat::aswgLanguage, \
+		juce::WavAudioFormat::aswgTimingRestriction, \
+		juce::WavAudioFormat::aswgCharacterName, \
+		juce::WavAudioFormat::aswgCharacterGender, \
+		juce::WavAudioFormat::aswgCharacterAge, \
+		juce::WavAudioFormat::aswgCharacterRole, \
+		juce::WavAudioFormat::aswgActorName, \
+		juce::WavAudioFormat::aswgActorGender, \
+		juce::WavAudioFormat::aswgDirector, \
+		juce::WavAudioFormat::aswgDirection, \
+		juce::WavAudioFormat::aswgFxUsed, \
+		juce::WavAudioFormat::aswgUsageRights, \
+		juce::WavAudioFormat::aswgIsUnion, \
+		juce::WavAudioFormat::aswgAccent, \
+		juce::WavAudioFormat::aswgEmotion, \
+		juce::WavAudioFormat::aswgComposor, \
+		juce::WavAudioFormat::aswgArtist, \
+		juce::WavAudioFormat::aswgSongTitle, \
+		juce::WavAudioFormat::aswgGenre, \
+		juce::WavAudioFormat::aswgSubGenre, \
+		juce::WavAudioFormat::aswgProducer, \
+		juce::WavAudioFormat::aswgMusicSup, \
+		juce::WavAudioFormat::aswgInstrument, \
+		juce::WavAudioFormat::aswgMusicPublisher, \
+		juce::WavAudioFormat::aswgRightsOwner, \
+		juce::WavAudioFormat::aswgIsSource, \
+		juce::WavAudioFormat::aswgIsLoop, \
+		juce::WavAudioFormat::aswgIntensity, \
+		juce::WavAudioFormat::aswgIsFinal, \
+		juce::WavAudioFormat::aswgOrderRef, \
+		juce::WavAudioFormat::aswgIsOst, \
+		juce::WavAudioFormat::aswgIsCinematic, \
+		juce::WavAudioFormat::aswgIsLicensed, \
+		juce::WavAudioFormat::aswgIsDiegetic, \
+		juce::WavAudioFormat::aswgMusicVersion, \
+		juce::WavAudioFormat::aswgIsrcId, \
+		juce::WavAudioFormat::aswgTempo, \
+		juce::WavAudioFormat::aswgTimeSig, \
+		juce::WavAudioFormat::aswgInKey, \
+		juce::WavAudioFormat::aswgBillingCode, \
+		 \
+		juce::WavAudioFormat::internationalStandardRecordingCode, \
+		 \
+		"NumSampleLoops", \
+		"Manufacturer", \
+		"Product", \
+		"SamplePeriod", \
+		"MidiUnityNote", \
+		"MidiPitchFraction", \
+		"SmpteFormat", \
+		"SmpteOffset", \
+		"SamplerData", \
+		"Loop{n}Identifier", \
+		"Loop{n}Type", \
+		"Loop{n}Start", \
+		"Loop{n}End", \
+		"Loop{n}Fraction", \
+		"Loop{n}PlayCount", \
+		 \
+		"MidiUnityNote", \
+		"Detune", \
+		"Gain", \
+		"LowNote", \
+		"HighNote", \
+		"LowVelocity", \
+		"HighVelocity", \
+		 \
+		"NumCuePoints", \
+		"Cue{n}Identifier", \
+		"Cue{n}Order", \
+		"Cue{n}ChunkID", \
+		"Cue{n}ChunkStart", \
+		"Cue{n}BlockStart", \
+		"Cue{n}Offset", \
+		 \
+		"NumCueLabels", \
+		"NumCueNotes", \
+		"NumCueRegions", \
+		"CueLabel{n}Text", \
+		"CueLabel{n}Identifier", \
+		"CueNote{n}Text", \
+		"CueNote{n}Identifier", \
+		"CueRegion{n}Text", \
+		"CueRegion{n}Identifier", \
+		"CueRegion{n}SampleLength", \
+		"CueRegion{n}Purpose", \
+		"CueRegion{n}Country", \
+		"CueRegion{n}Language", \
+		"CueRegion{n}Dialect", \
+		"CueRegion{n}CodePage", \
+		 \
+		juce::WavAudioFormat::riffInfoArchivalLocation, \
+		juce::WavAudioFormat::riffInfoArtist, \
+		juce::WavAudioFormat::riffInfoBaseURL, \
+		juce::WavAudioFormat::riffInfoCinematographer, \
+		juce::WavAudioFormat::riffInfoComment, \
+		juce::WavAudioFormat::riffInfoComments, \
+		juce::WavAudioFormat::riffInfoComment2, \
+		juce::WavAudioFormat::riffInfoCommissioned, \
+		juce::WavAudioFormat::riffInfoCopyright, \
+		juce::WavAudioFormat::riffInfoCostumeDesigner, \
+		juce::WavAudioFormat::riffInfoCountry, \
+		juce::WavAudioFormat::riffInfoCropped, \
+		juce::WavAudioFormat::riffInfoDateCreated, \
+		juce::WavAudioFormat::riffInfoDateTimeOriginal, \
+		juce::WavAudioFormat::riffInfoDefaultAudioStream, \
+		juce::WavAudioFormat::riffInfoDimension, \
+		juce::WavAudioFormat::riffInfoDirectory, \
+		juce::WavAudioFormat::riffInfoDistributedBy, \
+		juce::WavAudioFormat::riffInfoDotsPerInch, \
+		juce::WavAudioFormat::riffInfoEditedBy, \
+		juce::WavAudioFormat::riffInfoEighthLanguage, \
+		juce::WavAudioFormat::riffInfoEncodedBy, \
+		juce::WavAudioFormat::riffInfoEndTimecode, \
+		juce::WavAudioFormat::riffInfoEngineer, \
+		juce::WavAudioFormat::riffInfoFifthLanguage, \
+		juce::WavAudioFormat::riffInfoFirstLanguage, \
+		juce::WavAudioFormat::riffInfoFourthLanguage, \
+		juce::WavAudioFormat::riffInfoGenre, \
+		juce::WavAudioFormat::riffInfoKeywords, \
+		juce::WavAudioFormat::riffInfoLanguage, \
+		juce::WavAudioFormat::riffInfoLength, \
+		juce::WavAudioFormat::riffInfoLightness, \
+		juce::WavAudioFormat::riffInfoLocation, \
+		juce::WavAudioFormat::riffInfoLogoIconURL, \
+		juce::WavAudioFormat::riffInfoLogoURL, \
+		juce::WavAudioFormat::riffInfoMedium, \
+		juce::WavAudioFormat::riffInfoMoreInfoBannerImage, \
+		juce::WavAudioFormat::riffInfoMoreInfoBannerURL, \
+		juce::WavAudioFormat::riffInfoMoreInfoText, \
+		juce::WavAudioFormat::riffInfoMoreInfoURL, \
+		juce::WavAudioFormat::riffInfoMusicBy, \
+		juce::WavAudioFormat::riffInfoNinthLanguage, \
+		juce::WavAudioFormat::riffInfoNumberOfParts, \
+		juce::WavAudioFormat::riffInfoOrganisation, \
+		juce::WavAudioFormat::riffInfoPart, \
+		juce::WavAudioFormat::riffInfoProducedBy, \
+		juce::WavAudioFormat::riffInfoProductName, \
+		juce::WavAudioFormat::riffInfoProductionDesigner, \
+		juce::WavAudioFormat::riffInfoProductionStudio, \
+		juce::WavAudioFormat::riffInfoRate, \
+		juce::WavAudioFormat::riffInfoRated, \
+		juce::WavAudioFormat::riffInfoRating, \
+		juce::WavAudioFormat::riffInfoRippedBy, \
+		juce::WavAudioFormat::riffInfoSecondaryGenre, \
+		juce::WavAudioFormat::riffInfoSecondLanguage, \
+		juce::WavAudioFormat::riffInfoSeventhLanguage, \
+		juce::WavAudioFormat::riffInfoSharpness, \
+		juce::WavAudioFormat::riffInfoSixthLanguage, \
+		juce::WavAudioFormat::riffInfoSoftware, \
+		juce::WavAudioFormat::riffInfoSoundSchemeTitle, \
+		juce::WavAudioFormat::riffInfoSource, \
+		juce::WavAudioFormat::riffInfoSourceFrom, \
+		juce::WavAudioFormat::riffInfoStarring_ISTR, \
+		juce::WavAudioFormat::riffInfoStarring_STAR, \
+		juce::WavAudioFormat::riffInfoStartTimecode, \
+		juce::WavAudioFormat::riffInfoStatistics, \
+		juce::WavAudioFormat::riffInfoSubject, \
+		juce::WavAudioFormat::riffInfoTapeName, \
+		juce::WavAudioFormat::riffInfoTechnician, \
+		juce::WavAudioFormat::riffInfoThirdLanguage, \
+		juce::WavAudioFormat::riffInfoTimeCode, \
+		juce::WavAudioFormat::riffInfoTitle, \
+		juce::WavAudioFormat::riffInfoTrackNo, \
+		juce::WavAudioFormat::riffInfoTrackNumber, \
+		juce::WavAudioFormat::riffInfoURL, \
+		juce::WavAudioFormat::riffInfoVegasVersionMajor, \
+		juce::WavAudioFormat::riffInfoVegasVersionMinor, \
+		juce::WavAudioFormat::riffInfoVersion, \
+		juce::WavAudioFormat::riffInfoWatermarkURL, \
+		juce::WavAudioFormat::riffInfoWrittenBy, \
+		juce::WavAudioFormat::riffInfoYear, \
+		 \
+		juce::WavAudioFormat::acidOneShot, \
+		juce::WavAudioFormat::acidRootSet, \
+		juce::WavAudioFormat::acidStretch, \
+		juce::WavAudioFormat::acidDiskBased, \
+		juce::WavAudioFormat::acidizerFlag, \
+		juce::WavAudioFormat::acidRootSet, \
+		juce::WavAudioFormat::acidRootNote, \
+		juce::WavAudioFormat::acidBeats, \
+		juce::WavAudioFormat::acidDenominator, \
+		juce::WavAudioFormat::acidNumerator, \
+		juce::WavAudioFormat::acidTempo, \
+		 \
+		juce::WavAudioFormat::tracktionLoopInfo, \
+	}
+
+#define AIFF_META_KEYS juce::StringArray { \
+		"NumCuePoints", \
+		"NumCueLabels", \
+		"Cue{n}Identifier", \
+		"Cue{n}Offset", \
+		"CueLabel{n}Identifier", \
+		"CueLabel{n}Text", \
+		 \
+		"NumCueNotes", \
+		"CueNote{n}TimeStamp", \
+		"CueNote{n}Identifier", \
+		"CueNote{n}Text", \
+		 \
+		"MidiUnityNote", \
+		"Detune", \
+		"LowNote", \
+		"HighNote", \
+		"LowVelocity", \
+		"HighVelocity", \
+		"Gain", \
+		"Loop0Type", \
+		"Loop0StartIdentifier", \
+		"Loop0EndIdentifier", \
+		"Loop1Type", \
+		"Loop1StartIdentifier", \
+		"Loop1EndIdentifier" \
+	}
+
+#define FLAC_META_KEYS juce::StringArray {}
+
+#define MP3_META_KEYS juce::StringArray { \
+		"id3title", \
+		"id3artist", \
+		"id3album", \
+		"id3comment", \
+		"id3date", \
+		"id3genre", \
+		"id3trackNumber" \
+	}
+
+#define OGG_META_KEYS juce::StringArray { \
+		juce::OggVorbisAudioFormat::encoderName, \
+		juce::OggVorbisAudioFormat::id3title, \
+		juce::OggVorbisAudioFormat::id3artist, \
+		juce::OggVorbisAudioFormat::id3album, \
+		juce::OggVorbisAudioFormat::id3comment, \
+		juce::OggVorbisAudioFormat::id3date, \
+		juce::OggVorbisAudioFormat::id3genre, \
+		juce::OggVorbisAudioFormat::id3trackNumber \
+	}

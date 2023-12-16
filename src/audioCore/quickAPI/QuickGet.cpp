@@ -72,4 +72,40 @@ namespace quickAPI {
 
 		return result;
 	}
+
+	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension) {
+		return utils::getQualityOptionsForExtension(extension);
+	}
+
+	const juce::Array<int> getFormatPossibleBitDepthsForExtension(const juce::String& extension) {
+		return utils::getPossibleBitDepthsForExtension(extension);
+	}
+
+	const juce::Array<int> getFormatPossibleSampleRatesForExtension(const juce::String& extension) {
+		return utils::getPossibleSampleRatesForExtension(extension);
+	}
+
+	const juce::StringArray getFormatPossibleMetaKeyForExtension(const juce::String& extension) {
+		return utils::getPossibleMetaKeyForExtension(extension);
+	}
+
+	const juce::StringArray getAudioFormatsSupported(bool isWrite) {
+		return utils::getAudioFormatsSupported(isWrite);
+	}
+
+	const juce::StringArray getMidiFormatsSupported(bool isWrite) {
+		return utils::getMidiFormatsSupported(isWrite);
+	}
+
+	int getFormatBitsPerSample(const juce::String& extension) {
+		return utils::AudioSaveConfig::getInstance()->getBitsPerSample(extension);
+	}
+
+	const juce::StringPairArray getFormatMetaData(const juce::String& extension) {
+		return utils::AudioSaveConfig::getInstance()->getMetaData(extension);
+	}
+
+	int getFormatQualityOptionIndex(const juce::String& extension) {
+		return utils::AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
+	}
 }

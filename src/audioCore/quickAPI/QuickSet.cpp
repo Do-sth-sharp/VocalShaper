@@ -26,4 +26,17 @@ namespace quickAPI {
 	void setAnonymousMode(bool value) {
 		utils::AudioSaveConfig::getInstance()->setAnonymous(value);
 	}
+
+	void setFormatBitsPerSample(const juce::String& extension, int value) {
+		utils::AudioSaveConfig::getInstance()->setBitsPerSample(extension, value);
+	}
+
+	void setFormatMetaData(const juce::String& extension,
+		const juce::StringPairArray& data) {
+		utils::AudioSaveConfig::getInstance()->setMetaData(extension, data);
+	}
+
+	void setFormatQualityOptionIndex(const juce::String& extension, int value) {
+		utils::AudioSaveConfig::getInstance()->setQualityOptionIndex(extension, value);
+	}
 }

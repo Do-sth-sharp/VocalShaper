@@ -25,6 +25,7 @@
 #endif // JUCE_WINDOWS
 
 #include "Platform.h"
+#include "misc/AudioFormatMeta.h"
 
 #if JUCE_PLUGINHOST_VST3
 #include <pluginterfaces/vst/vsttypes.h>
@@ -502,9 +503,32 @@ namespace utils {
 		return SingletonAudioFormatManager::instance ? SingletonAudioFormatManager::instance : SingletonAudioFormatManager::instance = new SingletonAudioFormatManager();
 	}
 
-	juce::AudioFormat* findAudioFormat(const juce::File& file, bool isWrite) {
-		auto extension = file.getFileExtension();
+	const juce::StringArray getAudioFormatsSupported(bool isWrite) {
+		juce::StringArray result{ "*.wav", "*.bwf", "*.flac", "*.mp3", "*.ogg", "*.aiff", "*.aif" };
 
+		if (isWrite) {
+#if JUCE_MAC
+			result.addArray({ "*.aac", "*.m4a", "*.3gp" });
+#endif
+		}
+		else {
+#if JUCE_WINDOWS
+			result.addArray({ "*.wmv", "*.asf", "*.wm", "*.wma" });
+
+#elif JUCE_MAC
+			result.addArray({ "*.aac", "*.m4a", "*.3gp" });
+
+#endif
+		}
+
+		return result;
+	}
+
+	const juce::StringArray getMidiFormatsSupported(bool /*isWrite*/) {
+		return juce::StringArray{ "*.mid" };
+	}
+
+	juce::AudioFormat* findAudioFormatForExtension(const juce::String& extension, bool isWrite) {
 		if (isWrite) {
 			auto LAMEFormat =
 				SingletonAudioFormatManager::getInstance()->getLAMEEncoderFormat();
@@ -515,6 +539,11 @@ namespace utils {
 
 		return SingletonAudioFormatManager::getInstance()
 			->findFormatForFileExtension(extension);
+	}
+
+	juce::AudioFormat* findAudioFormat(const juce::File& file, bool isWrite) {
+		auto extension = file.getFileExtension();
+		return findAudioFormatForExtension(extension, isWrite);
 	}
 
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file) {
@@ -529,13 +558,13 @@ namespace utils {
 		auto format = utils::findAudioFormat(file, true);
 		if (!format) { return nullptr; }
 
-		juce::String formatName = format->getFormatName();
+		juce::String formatType = file.getFileExtension();
 		auto bitsPerSample =
-			AudioSaveConfig::getInstance()->getBitsPerSample(formatName);
+			AudioSaveConfig::getInstance()->getBitsPerSample(formatType);
 		auto metadataValues =
-			AudioSaveConfig::getInstance()->getMetaData(formatName);
+			AudioSaveConfig::getInstance()->getMetaData(formatType);
 		auto qualityOptionIndex =
-			AudioSaveConfig::getInstance()->getQualityOptionIndex(formatName);
+			AudioSaveConfig::getInstance()->getQualityOptionIndex(formatType);
 
 		auto outStream = new juce::FileOutputStream(file);
 		if (outStream->openedOk()) {
@@ -552,6 +581,48 @@ namespace utils {
 		}
 
 		return std::unique_ptr<juce::AudioFormatWriter>(writer);
+	}
+
+	juce::StringArray getQualityOptionsForExtension(const juce::String& extension) {
+		auto format = findAudioFormatForExtension(extension, true);
+		if (!format) { return {}; }
+		return format->getQualityOptions();
+	}
+
+	juce::Array<int> getPossibleBitDepthsForExtension(const juce::String& extension) {
+		auto format = findAudioFormatForExtension(extension, true);
+		if (!format) { return {}; }
+		return format->getPossibleBitDepths();
+	}
+
+	juce::Array<int> getPossibleSampleRatesForExtension(const juce::String& extension) {
+		auto format = findAudioFormatForExtension(extension, true);
+		if (!format) { return {}; }
+		return format->getPossibleSampleRates();
+	}
+
+	juce::StringArray getPossibleMetaKeyForExtension(const juce::String& extension) {
+		auto format = findAudioFormatForExtension(extension, true);
+		if (!format) { return {}; }
+		juce::String formatName = format->getFormatName();
+
+		if (formatName == "WAV file") {
+			return WAV_META_KEYS;
+		}
+		else if (formatName == "AIFF file") {
+			return AIFF_META_KEYS;
+		}
+		else if (formatName == "FLAC file") {
+			return FLAC_META_KEYS;
+		}
+		else if (formatName == "MP3 file") {
+			return MP3_META_KEYS;
+		}
+		else if (formatName == "Ogg-Vorbis file") {
+			return OGG_META_KEYS;
+		}
+
+		return {};
 	}
 
 	const juce::AudioChannelSet getChannelSet(TrackType type) {
