@@ -115,11 +115,6 @@ public:
 
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 
-	juce::int32 getAAXPluginIDForMainBusConfig(
-		const juce::AudioChannelSet& mainInputLayout,
-		const juce::AudioChannelSet& mainOutputLayout,
-		bool idForAudioSuite) const override;
-
 	juce::AudioProcessor::CurveData getResponseCurve(
 		juce::AudioProcessor::CurveData::Type) const override;
 	void updateTrackProperties(

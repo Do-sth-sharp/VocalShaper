@@ -59,7 +59,7 @@ void LicenseComponent::scan() {
 		juce::MessageManager::callAsync(
 			[list, listBox] {
 				if (listBox) {
-					if (auto model = dynamic_cast<LicenseListModel*>(listBox->getModel())) {
+					if (auto model = dynamic_cast<LicenseListModel*>(listBox->getListBoxModel())) {
 						model->setList(list);
 						listBox->updateContent();
 					}

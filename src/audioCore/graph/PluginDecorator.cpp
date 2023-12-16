@@ -449,16 +449,6 @@ void PluginDecorator::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	}
 }
 
-juce::int32 PluginDecorator::getAAXPluginIDForMainBusConfig(
-	const juce::AudioChannelSet& mainInputLayout,
-	const juce::AudioChannelSet& mainOutputLayout,
-	bool idForAudioSuite) const {
-	juce::ScopedReadLock locker(this->pluginLock);
-	if (!this->plugin) { return 0; }
-	return this->plugin->getAAXPluginIDForMainBusConfig(
-		mainInputLayout, mainOutputLayout, idForAudioSuite);
-}
-
 juce::AudioProcessor::CurveData PluginDecorator::getResponseCurve(
 	juce::AudioProcessor::CurveData::Type type) const {
 	juce::ScopedReadLock locker(this->pluginLock);
