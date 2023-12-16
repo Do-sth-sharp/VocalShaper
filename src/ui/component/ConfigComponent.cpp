@@ -222,10 +222,19 @@ void ConfigComponent::createFunctionPage() {
 	auto returnToStartValueCallback = []()->const juce::var {
 		return quickAPI::getReturnToStartOnStop();
 		};
+	auto anonymousUpdateCallback = [](const juce::var& data) {
+		quickAPI::setAnonymousMode(data);
+		return true;
+		};
+	auto anonymousValueCallback = []()->const juce::var {
+		return quickAPI::getAnonymousMode();
+		};
 
 	juce::Array<juce::PropertyComponent*> audioProps;
 	audioProps.add(new ConfigBooleanProp{ "function", "return-on-stop",
 		"Disabled", "Enabled", returnToStartUpdateCallback , returnToStartValueCallback});
+	audioProps.add(new ConfigBooleanProp{ "function", "anonymous-mode",
+		"Disabled", "Enabled", anonymousUpdateCallback , anonymousValueCallback });
 	panel->addSection(TRANS("Audio Core"), audioProps);
 
 	this->pageList.add(std::move(panel));

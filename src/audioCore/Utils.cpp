@@ -443,6 +443,16 @@ namespace utils {
 		AudioSaveConfig::getInstance()->qualityOptionIndex[format] = value;
 	}
 
+	void AudioSaveConfig::setAnonymous(bool anonymous) {
+		juce::ScopedWriteLock locker(this->lock);
+		this->anonymous = anonymous;
+	}
+
+	bool AudioSaveConfig::getAnonymous() const {
+		juce::ScopedReadLock locker(this->lock);
+		return this->anonymous;
+	}
+
 	AudioSaveConfig* AudioSaveConfig::getInstance() {
 		return AudioSaveConfig::instance
 			? AudioSaveConfig::instance
@@ -868,7 +878,8 @@ namespace utils {
 	}
 
 	juce::String getUserName() {
-		return juce::SystemStats::getLogonName();
+		return AudioSaveConfig::getInstance()->getAnonymous()
+			? "Anonymous" : juce::SystemStats::getLogonName();
 	}
 
 	juce::String getJUCEVersion() {

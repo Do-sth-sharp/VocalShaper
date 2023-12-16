@@ -1,3 +1,4 @@
 {
-  "return-on-stop": true
+  "return-on-stop": true,
+  "anonymous-mode": false
 }

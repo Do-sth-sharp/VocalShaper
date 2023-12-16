@@ -10,6 +10,7 @@ namespace quickAPI {
 
 	double getCPUUsage();
 	bool getReturnToStartOnStop();
+	bool getAnonymousMode();
 	std::unique_ptr<juce::Component> createAudioDeviceSelector();
 
 	using TrackInfo = std::tuple<juce::String, juce::String>;

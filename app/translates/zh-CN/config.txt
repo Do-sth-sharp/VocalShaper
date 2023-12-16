@@ -12,3 +12,4 @@ countries: cn
 
 "Audio Core" = "音频内核"
 "return-on-stop" = "在停止时返回"
+"anonymous-mode" = "匿名模式"

@@ -24,6 +24,10 @@ namespace quickAPI {
 		return AudioCore::getInstance()->getReturnToPlayStartPosition();
 	}
 
+	bool getAnonymousMode() {
+		return utils::AudioSaveConfig::getInstance()->getAnonymous();
+	}
+
 	std::unique_ptr<juce::Component> createAudioDeviceSelector() {
 		return std::unique_ptr<juce::Component>{
 			Device::createDeviceSelector().release() };

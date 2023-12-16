@@ -9,4 +9,5 @@ namespace quickAPI {
 	void setDeadPluginListPath(const juce::String& path);
 
 	void setReturnToStartOnStop(bool value);
+	void setAnonymousMode(bool value);
 }

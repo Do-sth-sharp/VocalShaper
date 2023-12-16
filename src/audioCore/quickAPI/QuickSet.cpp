@@ -22,4 +22,8 @@ namespace quickAPI {
 	void setReturnToStartOnStop(bool value) {
 		AudioCore::getInstance()->setReturnToPlayStartPosition(value);
 	}
+
+	void setAnonymousMode(bool value) {
+		utils::AudioSaveConfig::getInstance()->setAnonymous(value);
+	}
 }

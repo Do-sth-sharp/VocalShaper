@@ -39,10 +39,14 @@ namespace utils {
 			const juce::StringPairArray& data);
 		void setQualityOptionIndex(const juce::String& format, int value);
 
+		void setAnonymous(bool anonymous);
+		bool getAnonymous() const;
+
 	private:
 		std::map<juce::String, int> bitsPerSample;
 		std::map<juce::String, juce::StringPairArray> metaData;
 		std::map<juce::String, int> qualityOptionIndex;
+		bool anonymous = false;
 		juce::ReadWriteLock lock;
 
 	public:

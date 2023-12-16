@@ -53,6 +53,7 @@ private:
 				/** Functions */
 				auto& funcVar = ConfigManager::getInstance()->get("function");
 				quickAPI::setReturnToStartOnStop(funcVar["return-on-stop"]);
+				quickAPI::setAnonymousMode(funcVar["anonymous-mode"]);
 			}
 		);
 	};
