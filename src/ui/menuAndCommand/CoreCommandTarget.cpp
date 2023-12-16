@@ -273,7 +273,9 @@ void CoreCommandTarget::saveSource() const {
 		if (chooser.browseForFileToSave(true)) {
 			auto file = chooser.getResult();
 			if (file.getFileExtension().isEmpty()) {
-				file = file.withFileExtension(isAudio ? "wav" : "mid");
+				file = file.withFileExtension(isAudio
+					? audioFormats[0].trimCharactersAtStart("*.")
+					: midiFormats[0].trimCharactersAtStart("*."));
 			}
 
 			if (!file.isAChildOf(defaultPath)) {
@@ -312,7 +314,7 @@ void CoreCommandTarget::exportSource() const {
 		if (chooser.browseForFileToSave(true)) {
 			auto file = chooser.getResult();
 			if (file.getFileExtension().isEmpty()) {
-				file = file.withFileExtension("wav");
+				file = file.withFileExtension(audioFormats[0].trimCharactersAtStart("*."));
 			}
 
 			auto action = std::unique_ptr<ActionBase>(new ActionExportSourceAsync{
@@ -336,7 +338,7 @@ void CoreCommandTarget::render() const {
 		if (chooser.browseForFileToSave(false)) {
 			auto file = chooser.getResult();
 			if (file.getFileExtension().isEmpty()) {
-				file = file.withFileExtension("wav");
+				file = file.withFileExtension(audioFormats[0].trimCharactersAtStart("*."));
 			}
 
 			auto dir = file.getParentDirectory();
