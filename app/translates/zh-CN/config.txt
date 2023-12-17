@@ -18,3 +18,5 @@ countries: cn
 "bit-depth" = "位深度"
 "quality" = "质量"
 "Meta Data" = "元数据"
+"key" = "键"
+"value" = "值"

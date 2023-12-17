@@ -30,3 +30,7 @@ countries: cn
 
 "Enabled" = "已开启"
 "Disabled" = "已关闭"
+
+"(no choices)" = "（无可用选项）"
+"Auto-size this column" = "自动调整此列大小"
+"Auto-size all columns" = "自动调整所有列大小"

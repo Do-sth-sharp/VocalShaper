@@ -11,7 +11,15 @@ OutputConfigComponent::OutputConfigComponent() {
 
 	this->metaList = std::make_unique<juce::TableListBox>(
 		TRANS("Meta Data"), nullptr);
-	this->metaList->setHeaderHeight(0);
+	this->metaList->getHeader().addColumn(
+		TRANS("key"), 1, 30, 30, -1,
+		juce::TableHeaderComponent::ColumnPropertyFlags::visible |
+		juce::TableHeaderComponent::ColumnPropertyFlags::resizable |
+		juce::TableHeaderComponent::ColumnPropertyFlags::sortable);
+	this->metaList->getHeader().addColumn(
+		TRANS("value"), 2, 30, 30, -1,
+		juce::TableHeaderComponent::ColumnPropertyFlags::visible |
+		juce::TableHeaderComponent::ColumnPropertyFlags::resizable);
 	this->addAndMakeVisible(this->metaList.get());
 
 	/** Property Panel */
@@ -44,7 +52,7 @@ void OutputConfigComponent::resized() {
 
 	/** Sizes */
 	int itemHeight = screenSize.getHeight() * 0.04;
-	int metaAreaHeight = screenSize.getHeight() * 0.25;
+	int metaAreaHeight = screenSize.getHeight() * 0.35;
 	int labelWidth = std::min(200, screenSize.getWidth() / 3);
 
 	/** Format Selector */
@@ -60,10 +68,13 @@ void OutputConfigComponent::resized() {
 	
 	/** Meta */
 	juce::Rectangle<int> metaRect(
-		0, this->getHeight() - metaAreaHeight,
+		0, this->getHeightPrefered() - metaAreaHeight,
 		this->getWidth(), metaAreaHeight);
-	this->metaLabel->setBounds(metaRect.withHeight(itemHeight));
-	this->metaList->setBounds(metaRect.withTrimmedTop(itemHeight));
+	this->metaLabel->setBounds(metaRect.withWidth(labelWidth));
+	this->metaList->setBounds(metaRect.withTrimmedLeft(labelWidth));
+	this->metaList->setHeaderHeight(itemHeight);
+	this->metaList->getHeader().setColumnWidth(1, labelWidth);
+	this->metaList->getHeader().setColumnWidth(2, labelWidth);
 }
 
 void OutputConfigComponent::currentFormatChanged(const juce::String& format) {
@@ -99,4 +110,10 @@ void OutputConfigComponent::currentFormatChanged(const juce::String& format) {
 	props.add(new ConfigChoiceProp{ className, "quality", possibleQualities,
 		ConfigChoiceProp::ValueType::IndexVal, qualityUpdateCallback, qualityValueCallback });
 	this->properties->addProperties(props);
+
+	/** TODO Meta */
+
+	/** Resize Components */
+	this->properties->resized();
+	this->resized();
 }

@@ -54,6 +54,29 @@ private:
 				auto& funcVar = ConfigManager::getInstance()->get("function");
 				quickAPI::setReturnToStartOnStop(funcVar["return-on-stop"]);
 				quickAPI::setAnonymousMode(funcVar["anonymous-mode"]);
+
+				/** Output */
+				auto formats = quickAPI::getAudioFormatsSupported(true);
+				for (auto& s : formats) {
+					juce::String format = s.trimCharactersAtStart("*");
+					auto& outputVar =
+						ConfigManager::getInstance()->get("output" + format);
+
+					quickAPI::setFormatBitsPerSample(
+						format, outputVar["bit-depth"].toString().getIntValue());
+					quickAPI::setFormatQualityOptionIndex(
+						format, outputVar["quality"]);
+
+					auto& metaVar = outputVar["meta"];
+					if (auto metaObject = metaVar.getDynamicObject()) {
+						auto& metaSet = metaObject->getProperties();
+						juce::StringPairArray metaList;
+						for (auto& i : metaSet) {
+							metaList.set(i.name.toString(), i.value.toString());
+						}
+						quickAPI::setFormatMetaData(format, metaList);
+					}
+				}
 			}
 		);
 	};
