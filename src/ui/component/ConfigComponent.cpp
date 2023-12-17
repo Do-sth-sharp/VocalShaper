@@ -1,5 +1,6 @@
 ﻿#include "ConfigComponent.h"
 #include "ConfigPropertyComponents.h"
+#include "OutputConfigComponent.h"
 #include "../misc/MainThreadPool.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
@@ -44,6 +45,11 @@ void ConfigComponent::resized() {
 	auto audioSelector = dynamic_cast<juce::AudioDeviceSelectorComponent*>(
 		audioViewPort ? audioViewPort->getViewedComponent() : nullptr);
 
+	/** Output Page */
+	auto outputViewPort = dynamic_cast<juce::Viewport*>(this->pageList[3]);
+	auto outputEditor = dynamic_cast<OutputConfigComponent*>(
+		outputViewPort ? outputViewPort->getViewedComponent() : nullptr);
+
 	/** Audio Selector Item Height */
 	if (audioSelector) {
 		audioSelector->setItemHeight(audioItemHeight);
@@ -52,6 +58,10 @@ void ConfigComponent::resized() {
 	/** Audio Viewport Pos */
 	auto audioViewPos = audioSelector
 		? audioViewPort->getViewPosition() : juce::Point<int>{};
+
+	/** Output Viewport Pos */
+	auto outputViewPos = outputEditor
+		? outputViewPort->getViewPosition() : juce::Point<int>{};
 
 	/** Page */
 	auto pageRect = this->getLocalBounds().withTrimmedLeft(listWidth);
@@ -67,9 +77,22 @@ void ConfigComponent::resized() {
 			contentWidth, std::max(contentHeight, pageRect.getHeight()));
 	}
 
+	/** Output Selector Size */
+	if (outputEditor) {
+		int contentWidth = outputViewPort->getMaximumVisibleWidth();
+		int contentHeight = outputEditor->getHeightPrefered();
+		outputEditor->setBounds(0, 0,
+			contentWidth, std::max(contentHeight, pageRect.getHeight()));
+	}
+
 	/** Set Audio Viewport Pos */
 	if (audioSelector) {
 		audioViewPort->setViewPosition(audioViewPos);
+	}
+
+	/** Set Output Viewport Pos */
+	if (outputEditor) {
+		outputViewPort->setViewPosition(outputViewPos);
 	}
 }
 
@@ -257,7 +280,19 @@ void ConfigComponent::createAudioPage() {
 }
 
 void ConfigComponent::createOutputPage() {
+	/** Editor */
+	auto editor = std::make_unique<OutputConfigComponent>();
 
+	/** Viewport */
+	auto viewport = std::make_unique<juce::Viewport>(TRANS("Output Config"));
+	viewport->setViewedComponent(editor.release(), true);
+	viewport->setScrollBarsShown(true, false);
+	viewport->setScrollOnDragMode(
+		juce::Viewport::ScrollOnDragMode::nonHover);
+	this->addAndMakeVisible(viewport.get());
+
+	/** Add To Page */
+	this->pageList.add(std::move(viewport));
 }
 
 void ConfigComponent::createPluginPage() {

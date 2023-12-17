@@ -13,3 +13,8 @@ countries: cn
 "Audio Core" = "音频内核"
 "return-on-stop" = "在停止时返回"
 "anonymous-mode" = "匿名模式"
+
+"Audio Format" = "音频格式"
+"bit-depth" = "位深度"
+"quality" = "质量"
+"Meta Data" = "元数据"
