@@ -14,6 +14,7 @@ public:
 	juce::LookAndFeel_V4* forSysStatus() const;
 
 private:
+	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> toolBarLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> mainMenuLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> sysStatusLAF = nullptr;
