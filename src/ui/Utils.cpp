@@ -257,4 +257,53 @@ namespace utils {
 
 #endif //JUCE_WINDOWS
 	}
+
+	static const std::vector<int> preKMP(const juce::String& strLong) {
+		std::vector<int> next;
+		next.resize(strLong.length());
+
+		next[0] = -1;/**< While the first char not match, i++, j++ */
+		int j = 0;
+		int k = -1;
+		while (j < strLong.length() - 1) {
+			if (k == -1 || strLong[j] == strLong[k]) {
+				j++;
+				k++;
+				next[j] = k;
+			}
+			else {
+				k = next[k];
+			}
+		}
+
+		return next;
+	}
+
+	static int KMP(const juce::String& strShort, const juce::String& strLong, const std::vector<int>& next) {
+		int i = 0;
+		int j = 0;
+		while (i < strLong.length() && j < strShort.length()) {
+			if (j == -1 || strLong[i] == strShort[j]) {
+				i++;
+				j++;
+			}
+			else {
+				j = next[j];
+			}
+		}
+		if (j == strShort.length()) {
+			return i - j;
+		}
+		return -1;
+	}
+
+	const juce::StringArray searchKMP(const juce::StringArray& list, const juce::String& word) {
+		juce::StringArray result;
+		for (auto& s : list) {
+			if (KMP(word, s, preKMP(s)) >= 0) {
+				result.add(s);
+			}
+		}
+		return result;
+	}
 }

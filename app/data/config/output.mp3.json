@@ -1,4 +1,6 @@
 {
   "bit-depth": "16",
-  "quality": 4
+  "quality": 4,
+  "meta": {
+  }
 }

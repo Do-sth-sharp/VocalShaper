@@ -48,4 +48,6 @@ namespace utils {
 
 	bool regProjectFileInSystem();
 	bool unregProjectFileFromSystem();
+
+	const juce::StringArray searchKMP(const juce::StringArray& list, const juce::String& word);
 }

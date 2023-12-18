@@ -15,7 +15,7 @@ void LicenseListModel::paintListBoxItem(
 	/** Data */
 	juce::String text = this->getNameForRow(rowNumber);
 
-	/** Size */
+	/** Color */
 	juce::Colour backgroundColor = rowIsSelected
 		? this->lookAndFeel.findColour(juce::ListBox::ColourIds::backgroundColourId + 1)
 		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::backgroundColourId);

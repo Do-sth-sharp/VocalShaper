@@ -26,3 +26,5 @@ countries: cn
 "The project file can't be registered in the system!" = "无法将项目文件注册到系统！"
 "The project file has been unregistered from the system!" = "项目文件已从系统注销！"
 "The project file can't be unregistered from the system! There is a possibility that it has not been registered before." = "项目文件无法从系统注销！可能其之前并未注册。"
+"Use the Enter key to quickly look up a key name." = "使用回车键快速查找键名。"
+"The key or value must not be empty!" = "键或值不得为空！"

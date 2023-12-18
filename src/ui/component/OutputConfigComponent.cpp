@@ -1,5 +1,6 @@
 ﻿#include "OutputConfigComponent.h"
 #include "ConfigPropertyComponents.h"
+#include "../misc/ConfigManager.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -75,6 +76,7 @@ void OutputConfigComponent::resized() {
 	this->metaList->setHeaderHeight(itemHeight);
 	this->metaList->getHeader().setColumnWidth(1, labelWidth);
 	this->metaList->getHeader().setColumnWidth(2, labelWidth);
+	this->metaList->setRowHeight(itemHeight);
 }
 
 void OutputConfigComponent::currentFormatChanged(const juce::String& format) {
@@ -111,9 +113,155 @@ void OutputConfigComponent::currentFormatChanged(const juce::String& format) {
 		ConfigChoiceProp::ValueType::IndexVal, qualityUpdateCallback, qualityValueCallback });
 	this->properties->addProperties(props);
 
-	/** TODO Meta */
+	/** Meta */
+	auto metaData = quickAPI::getFormatMetaData(format);
+	this->metaModel = std::make_unique<MetaDataModel>(metaData,
+		[this] { this->addMeta(); },
+		[this](const juce::String& key, const juce::String& value) { this->editMeta(key, value); },
+		[this](const juce::String& key) { this->removeMeta(key); });
+	this->metaList->setModel(this->metaModel.get());
+	this->metaList->updateContent();
 
 	/** Resize Components */
 	this->properties->resized();
 	this->resized();
+}
+
+void OutputConfigComponent::addMeta() {
+	juce::String format = this->formatSelector->getText().trimCharactersAtStart("*");
+
+	auto addCallback =
+		[format, parent = OutputConfigComponent::SafePointer{ this }]
+		(const juce::String& key, const juce::String& value) {
+		if (!parent) { return; }
+		auto metaModel = parent->metaModel.get();
+		if (!metaModel) { return; }
+
+		metaModel->set(key, value);
+		auto data = metaModel->getData();
+
+		quickAPI::setFormatMetaData(format, data);
+		parent->writeMetaConfig(format, data);
+
+		parent->metaList->updateContent();
+		};
+
+	this->showMetaEditor(TRANS("Add"), quickAPI::getFormatPossibleMetaKeyForExtension(format),
+		addCallback);
+}
+
+void OutputConfigComponent::editMeta(const juce::String& key, const juce::String& value) {
+	juce::String format = this->formatSelector->getText().trimCharactersAtStart("*");
+
+	auto editCallback =
+		[format, parent = OutputConfigComponent::SafePointer{ this }]
+		(const juce::String& key, const juce::String& value) {
+		if (!parent) { return; }
+		auto metaModel = parent->metaModel.get();
+		if (!metaModel) { return; }
+
+		metaModel->set(key, value);
+		auto data = metaModel->getData();
+
+		quickAPI::setFormatMetaData(format, data);
+		parent->writeMetaConfig(format, data);
+
+		parent->metaList->updateContent();
+		parent->metaList->repaint();
+		};
+
+	this->showMetaEditor(TRANS("Edit"), quickAPI::getFormatPossibleMetaKeyForExtension(format),
+		editCallback, true, key, value);
+}
+
+void OutputConfigComponent::removeMeta(const juce::String& key) {
+	if (this->metaModel) {
+		juce::String format = this->formatSelector->getText().trimCharactersAtStart("*");
+
+		this->metaModel->remove(key);
+		auto data = this->metaModel->getData();
+
+		quickAPI::setFormatMetaData(format, data);
+		this->writeMetaConfig(format, data);
+
+		this->metaList->updateContent();
+	}
+}
+
+bool OutputConfigComponent::writeMetaConfig(
+	const juce::String& format, const juce::StringPairArray& data) {
+	auto dataObject = std::make_unique<juce::DynamicObject>();
+	auto& keys = data.getAllKeys();
+	auto& values = data.getAllValues();
+	for (int i = 0; i < data.size(); i++) {
+		dataObject->setProperty(keys[i], values[i]);
+	}
+
+	auto dataVar = juce::var{ dataObject.release() };
+	juce::String className = "output" + format;
+	auto& config = ConfigManager::getInstance()->get(className);
+	if (auto confObj = config.getDynamicObject()) {
+		confObj->setProperty("meta", dataVar);
+		return ConfigManager::getInstance()->saveConfig(className);
+	}
+
+	return false;
+}
+
+void OutputConfigComponent::showMetaEditor(
+	const juce::String& title, const juce::StringArray& possibleKeys,
+	const MetaEditorCallback& callback, bool keyLocked,
+	const juce::String& defaultKey, const juce::String& defaultValue) {
+	juce::String message = TRANS("Use the Enter key to quickly look up a key name.");
+	auto window = new juce::AlertWindow{ title, message, juce::MessageBoxIconType::QuestionIcon };
+	window->addButton(TRANS("OK"), 1);
+	window->addButton(TRANS("Cancel"), 0);
+
+	window->addTextEditor("key", defaultKey, TRANS("key"));
+	window->addTextEditor("value", defaultValue, TRANS("value"));
+
+	if (auto keyEditor = window->getTextEditor("key")) {
+		keyEditor->setReadOnly(keyLocked);
+		keyEditor->onReturnKey = [keyEditor, possibleKeys] {
+			juce::String word = keyEditor->getText();
+			auto possibleList = word.isEmpty()
+				? possibleKeys : utils::searchKMP(possibleKeys, word);
+			if (possibleList.isEmpty()) { return; }
+
+			juce::PopupMenu menu;
+			for (int i = 0; i < possibleList.size(); i++) {
+				menu.addItem(i + 1, possibleList[i]);
+			}
+			int result = menu.showMenu(juce::PopupMenu::Options{}
+				.withTargetComponent(keyEditor)
+				.withDeletionCheck(*keyEditor)
+				.withPreferredPopupDirection(
+					juce::PopupMenu::Options::PopupDirection::downwards)
+				.withStandardItemHeight(keyEditor->getHeight()));
+
+			if (result > 0 && result <= possibleList.size()) {
+				keyEditor->setText(possibleList[result - 1], false);
+			}
+			};
+	}
+
+	window->enterModalState(true, juce::ModalCallbackFunction::create(
+		[callback, window, title](int result) {
+			if (result != 1) { return; }
+
+			auto keyEditor = window->getTextEditor("key");
+			auto valueEditor = window->getTextEditor("value");
+			if ((!keyEditor) || (!valueEditor)) { return; }
+			
+			juce::String key = keyEditor->getText();
+			juce::String value = valueEditor->getText();
+			if (key.isEmpty() || value.isEmpty()) {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+					title, TRANS("The key or value must not be empty!"));
+				return;
+			}
+
+			callback(key, value);
+		}
+	), true);
 }

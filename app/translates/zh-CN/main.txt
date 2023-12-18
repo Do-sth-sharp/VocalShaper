@@ -28,6 +28,9 @@ countries: cn
 "mem" = "内存"
 "mem-process" = "内存-本程序"
 
+"Add" = "添加"
+"Remove" = "移除"
+
 "Enabled" = "已开启"
 "Disabled" = "已关闭"
 

@@ -135,6 +135,16 @@ void LookAndFeelFactory::initialise() {
 	laf.setColour(juce::TextPropertyComponent::ColourIds::textColourId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
 
+	/** Set Table Header Color */
+	laf.setColour(juce::TableHeaderComponent::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB3"));
+	laf.setColour(juce::TableHeaderComponent::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	laf.setColour(juce::TableHeaderComponent::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	laf.setColour(juce::TableHeaderComponent::ColourIds::highlightColourId,
+		ColorMap::getInstance()->get("ThemeColorB5"));
+
 	/** Set FlowUI Color */
 	flowUI::FlowStyle::setTitleBackgroundColor(
 		ColorMap::getInstance()->get("ThemeColorB2"));

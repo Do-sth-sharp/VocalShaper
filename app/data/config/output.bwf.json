@@ -1,3 +1,6 @@
 {
-  "bit-depth": "24"
+  "bit-depth": "24",
+  "meta": {
+    "editor": "VocalShaper"
+  }
 }
