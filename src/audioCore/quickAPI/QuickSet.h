@@ -15,4 +15,9 @@ namespace quickAPI {
 	void setFormatMetaData(const juce::String& extension,
 		const juce::StringPairArray& data);
 	void setFormatQualityOptionIndex(const juce::String& extension, int value);
+
+	bool addToPluginBlackList(const juce::String& plugin);
+	bool removeFromPluginBlackList(const juce::String& plugin);
+	bool addToPluginSearchPath(const juce::String& path);
+	bool removeFromPluginSearchPath(const juce::String& path);
 }

@@ -63,6 +63,10 @@ namespace utils {
 		return getDataDir().getChildFile("./config/");
 	}
 
+	const juce::File getAudioDir() {
+		return getDataDir().getChildFile("./audio/");
+	}
+
 	const juce::File getThemeRootDir(const juce::String& name) {
 		return getThemeDir().getChildFile("./" + name + "/");
 	}
@@ -108,6 +112,26 @@ namespace utils {
 	const juce::File getLayoutFile(const juce::String& name,
 		const juce::String& type) {
 		return getLayoutDir().getChildFile(name + type);
+	}
+
+	const juce::File getPluginBlackListFile(
+		const juce::String& file) {
+		return getAudioDir().getChildFile(file);
+	}
+
+	const juce::File getPluginListFile(
+		const juce::String& file) {
+		return getAudioDir().getChildFile(file);
+	}
+
+	const juce::File getPluginSearchPathFile(
+		const juce::String& file) {
+		return getAudioDir().getChildFile(file);
+	}
+
+	const juce::File getPluginDeadTempDir(
+		const juce::String& path) {
+		return getAudioDir().getChildFile(path);
 	}
 
 	const juce::URL getHelpPage(const juce::String& version,

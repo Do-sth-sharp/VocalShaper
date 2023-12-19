@@ -45,10 +45,10 @@ private:
 		InitTaskList::getInstance()->add(
 			[] {
 				/** Plugin Path */
-				quickAPI::setPluginSearchPathListFilePath("./data/audio/pluginPaths.txt");
-				quickAPI::setPluginListTemporaryFilePath("./data/audio/plugins.xml");
-				quickAPI::setPluginBlackListFilePath("./data/audio/blackPlugins.txt");
-				quickAPI::setDeadPluginListPath("./data/audio/deadPlugins");
+				quickAPI::setPluginSearchPathListFilePath(utils::getPluginSearchPathFile().getFullPathName());
+				quickAPI::setPluginListTemporaryFilePath(utils::getPluginListFile().getFullPathName());
+				quickAPI::setPluginBlackListFilePath(utils::getPluginBlackListFile().getFullPathName());
+				quickAPI::setDeadPluginListPath(utils::getPluginDeadTempDir().getFullPathName());
 
 				/** Functions */
 				auto& funcVar = ConfigManager::getInstance()->get("function");

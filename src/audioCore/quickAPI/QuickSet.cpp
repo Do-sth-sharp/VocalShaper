@@ -1,6 +1,7 @@
 ﻿#include "QuickSet.h"
 #include "../AudioConfig.h"
 #include "../AudioCore.h"
+#include "../plugin/Plugin.h"
 
 namespace quickAPI {
 	void setPluginSearchPathListFilePath(const juce::String& path) {
@@ -38,5 +39,29 @@ namespace quickAPI {
 
 	void setFormatQualityOptionIndex(const juce::String& extension, int value) {
 		utils::AudioSaveConfig::getInstance()->setQualityOptionIndex(extension, value);
+	}
+
+	bool addToPluginBlackList(const juce::String& plugin) {
+		if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
+		Plugin::getInstance()->addToPluginBlackList(plugin);
+		return true;
+	}
+
+	bool removeFromPluginBlackList(const juce::String& plugin) {
+		if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
+		Plugin::getInstance()->removeFromPluginBlackList(plugin);
+		return true;
+	}
+
+	bool addToPluginSearchPath(const juce::String& path) {
+		if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
+		Plugin::getInstance()->addToPluginSearchPath(path);
+		return true;
+	}
+
+	bool removeFromPluginSearchPath(const juce::String& path) {
+		if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
+		Plugin::getInstance()->removeFromPluginSearchPath(path);
+		return true;
 	}
 }

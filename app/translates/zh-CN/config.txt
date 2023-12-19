@@ -20,3 +20,6 @@ countries: cn
 "Meta Data" = "元数据"
 "key" = "键"
 "value" = "值"
+
+"Plugin Search Path" = "插件搜索路径"
+"Plugin Black List" = "插件黑名单"

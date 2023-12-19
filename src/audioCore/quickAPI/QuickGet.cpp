@@ -1,6 +1,7 @@
 ﻿#include "QuickGet.h"
 #include "../AudioCore.h"
 #include "../source/CloneableSourceManager.h"
+#include "../plugin/Plugin.h"
 #include "../misc/Device.h"
 
 namespace quickAPI {
@@ -107,5 +108,13 @@ namespace quickAPI {
 
 	int getFormatQualityOptionIndex(const juce::String& extension) {
 		return utils::AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
+	}
+
+	const juce::StringArray getPluginBlackList() {
+		return Plugin::getInstance()->getPluginBlackList();
+	}
+
+	const juce::StringArray getPluginSearchPath() {
+		return Plugin::getInstance()->getPluginSearchPath();
 	}
 }

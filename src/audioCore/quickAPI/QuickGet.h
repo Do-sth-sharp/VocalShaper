@@ -28,4 +28,7 @@ namespace quickAPI {
 	int getFormatBitsPerSample(const juce::String& extension);
 	const juce::StringPairArray getFormatMetaData(const juce::String& extension);
 	int getFormatQualityOptionIndex(const juce::String& extension);
+
+	const juce::StringArray getPluginBlackList();
+	const juce::StringArray getPluginSearchPath();
 }
