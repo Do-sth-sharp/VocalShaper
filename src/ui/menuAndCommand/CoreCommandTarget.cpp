@@ -150,7 +150,13 @@ void CoreCommandTarget::systemRequestOpen(const juce::String& path) {
 	if (!this->checkForSave()) { return; }
 
 	juce::File projFile = utils::getAppRootDir().getChildFile(path);
-	if (projFile.existsAsFile() && projFile.getFileExtension() == ".vsp4") {
+	juce::StringArray extensions;
+	auto formatsSupport = quickAPI::getProjectFormatsSupported(false);
+	for (auto& s : formatsSupport) {
+		extensions.add(s.trimCharactersAtStart("*"));
+	}
+
+	if (projFile.existsAsFile() && extensions.contains(projFile.getFileExtension())) {
 		auto action = std::unique_ptr<ActionBase>(new ActionLoad{
 		projFile.getFullPathName() });
 		ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -174,8 +180,11 @@ void CoreCommandTarget::newProject() const {
 void CoreCommandTarget::openProject() const {
 	if (!this->checkForSave()) { return; }
 
+	auto projectFormats = quickAPI::getProjectFormatsSupported(false);
+
 	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Open Project"), defaultPath, "*.vsp4");
+	juce::FileChooser chooser(TRANS("Open Project"), defaultPath,
+		projectFormats.joinIntoString(","));
 	if (chooser.browseForFileToOpen()) {
 		juce::File projFile = chooser.getResult();
 
@@ -186,12 +195,16 @@ void CoreCommandTarget::openProject() const {
 }
 
 void CoreCommandTarget::saveProject() const {
+	auto projectFormats = quickAPI::getProjectFormatsSupported(true);
+
 	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Save Project"), defaultPath, "*.vsp4");
+	juce::FileChooser chooser(TRANS("Save Project"), defaultPath,
+		projectFormats.joinIntoString(","));
 	if (chooser.browseForFileToSave(true)) {
 		juce::File projFile = chooser.getResult();
 		if (projFile.getFileExtension().isEmpty()) {
-			projFile = projFile.withFileExtension("vsp4");
+			projFile = projFile.withFileExtension(
+				projectFormats[0].trimCharactersAtStart("*."));
 		}
 
 		if (projFile.getParentDirectory() != defaultPath) {

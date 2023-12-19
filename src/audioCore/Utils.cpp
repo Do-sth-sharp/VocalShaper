@@ -1036,4 +1036,8 @@ namespace utils {
 			juce::File::SpecialLocationType::userDocumentsDirectory)
 			.getChildFile("./VocalShaperProjectTemp/");
 	}
+
+	const juce::StringArray getProjectFormatsSupported(bool /*isWrite*/) {
+		return juce::StringArray{ "*.vsp4" };
+	}
 }

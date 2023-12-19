@@ -98,6 +98,10 @@ namespace quickAPI {
 		return utils::getMidiFormatsSupported(isWrite);
 	}
 
+	const juce::StringArray getProjectFormatsSupported(bool isWrite) {
+		return utils::getProjectFormatsSupported(isWrite);
+	}
+
 	int getFormatBitsPerSample(const juce::String& extension) {
 		return utils::AudioSaveConfig::getInstance()->getBitsPerSample(extension);
 	}

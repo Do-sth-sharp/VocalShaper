@@ -355,7 +355,13 @@ private:
 					/** Load Project */
 					if (params.size() >= 1) {
 						juce::File projFile = utils::getAppRootDir().getChildFile(params[0]);
-						if (projFile.existsAsFile() && projFile.getFileExtension() == ".vsp4") {
+						juce::StringArray extensions;
+						auto formatsSupport = quickAPI::getProjectFormatsSupported(false);
+						for (auto& s : formatsSupport) {
+							extensions.add(s.trimCharactersAtStart("*"));
+						}
+
+						if (projFile.existsAsFile() && extensions.contains(projFile.getFileExtension())) {
 							CoreCommandTarget::getInstance()->systemRequestOpen(params[0]);
 						}
 					}
@@ -472,7 +478,13 @@ public:
 			/** Load Project */
 			if (params.size() >= 1) {
 				juce::File projFile = utils::getAppRootDir().getChildFile(params[0]);
-				if (projFile.existsAsFile() && projFile.getFileExtension() == ".vsp4") {
+				juce::StringArray extensions;
+				auto formatsSupport = quickAPI::getProjectFormatsSupported(false);
+				for (auto& s : formatsSupport) {
+					extensions.add(s.trimCharactersAtStart("*"));
+				}
+
+				if (projFile.existsAsFile() && extensions.contains(projFile.getFileExtension())) {
 					CoreCommandTarget::getInstance()->systemRequestOpen(params[0]);
 				}
 			}

@@ -151,6 +151,8 @@ namespace utils {
 	juce::File getSourceFile(const juce::String& path);
 	juce::File getDefaultWorkingDir();
 
+	const juce::StringArray getProjectFormatsSupported(bool isWrite);
+
 	using AudioConnection = std::tuple<int, int, int, int>;
 	using AudioConnectionList = juce::Array<AudioConnection>;
 

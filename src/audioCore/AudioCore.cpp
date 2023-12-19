@@ -184,7 +184,8 @@ bool AudioCore::save(const juce::String& name) {
 	/** Get Save Dir */
 	juce::String legalName = utils::getLegalFileName(name);
 	juce::File projFile = utils::getProjectDir()
-		.getChildFile("./" + legalName + ".vsp4");
+		.getChildFile("./" + legalName +
+			utils::getProjectFormatsSupported(true)[0].trimCharactersAtStart("*"));
 	juce::File projDir = projFile.getParentDirectory();
 	projDir.createDirectory();
 

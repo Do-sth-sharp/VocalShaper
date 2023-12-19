@@ -24,6 +24,7 @@ namespace quickAPI {
 
 	const juce::StringArray getAudioFormatsSupported(bool isWrite);
 	const juce::StringArray getMidiFormatsSupported(bool isWrite);
+	const juce::StringArray getProjectFormatsSupported(bool isWrite);
 
 	int getFormatBitsPerSample(const juce::String& extension);
 	const juce::StringPairArray getFormatMetaData(const juce::String& extension);
