@@ -1,14 +1,24 @@
 ﻿#include "PluginConfigComponent.h"
 #include "../Utils.h"
+#include "../../audioCore/AC_API.h"
 
 PluginConfigComponent::PluginConfigComponent() {
+	/** Plugin Configs */
+	auto pluginPath = quickAPI::getPluginSearchPath();
+	auto pluginBlackList = quickAPI::getPluginBlackList();
+
 	/** Plugin Path */
 	this->pathLabel = std::make_unique<juce::Label>(
 		TRANS("Plugin Search Path"), TRANS("Plugin Search Path"));
 	this->addAndMakeVisible(this->pathLabel.get());
 
+	this->pathModel = std::make_unique<EditableStringListModel>(
+		pluginPath, [this](int index) { this->addPath(index); },
+		[](int, const juce::String&) {},
+		[this](int index, const juce::String& data) { this->removePath(index, data); },
+		EditableStringListModel::MenuType::MenuNoEditItem);
 	this->pathList = std::make_unique<juce::ListBox>(
-		TRANS("Plugin Search Path"), nullptr);
+		TRANS("Plugin Search Path"), this->pathModel.get());
 	this->addAndMakeVisible(this->pathList.get());
 
 	/** Plugin Black List */
@@ -16,8 +26,13 @@ PluginConfigComponent::PluginConfigComponent() {
 		TRANS("Plugin Black List"), TRANS("Plugin Black List"));
 	this->addAndMakeVisible(this->blackListLabel.get());
 
+	this->blackListModel = std::make_unique<EditableStringListModel>(
+		pluginBlackList, [this](int index) { this->addBlackList(index); },
+		[](int, const juce::String&) {},
+		[this](int index, const juce::String& data) { this->removeBlackList(index, data); },
+		EditableStringListModel::MenuType::MenuNoEditItem);
 	this->blackList = std::make_unique<juce::ListBox>(
-		TRANS("Plugin Black List"), nullptr);
+		TRANS("Plugin Black List"), this->blackListModel.get());
 	this->addAndMakeVisible(this->blackList.get());
 }
 
@@ -51,4 +66,96 @@ void PluginConfigComponent::resized() {
 	juce::Rectangle<int> blackListRect(
 		0, blackListLabelRect.getBottom(), this->getWidth(), blackListHeight);
 	this->blackList->setBounds(blackListRect);
+}
+
+void PluginConfigComponent::addPath(int index) {
+	if (!this->pathModel) { return; }
+
+	auto defaultPath = utils::getAppRootDir();
+	auto chooser = std::make_unique<juce::FileChooser>(
+		TRANS("Add Plugin Search Path"), defaultPath, "*");
+	if (chooser->browseForDirectory()) {
+		juce::File result = chooser->getResult();
+
+		juce::String path = result.getFullPathName().replaceCharacter('\\', '/');
+		if (result.isAChildOf(defaultPath)) {
+			path = "./" + result.getRelativePathFrom(defaultPath).replaceCharacter('\\', '/');
+		}
+
+		if (this->pathModel->contains(path)) {
+			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+				TRANS("Add Plugin Search Path"),
+				TRANS("The path is already in the list:") + " " + path);
+			return;
+		}
+
+		if (!quickAPI::addToPluginSearchPath(path)) {
+			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+				TRANS("Add Plugin Search Path"), TRANS("Do not change plugin configs during plugin search!"));
+			return;
+		}
+
+		this->pathModel->insert(index, path);
+		this->pathList->updateContent();
+	}
+}
+
+void PluginConfigComponent::removePath(int index, const juce::String& path) {
+	if (this->pathModel) {
+		if (!quickAPI::removeFromPluginSearchPath(path)) {
+			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+				TRANS("Remove Plugin Search Path"), TRANS("Do not change plugin configs during plugin search!"));
+			return;
+		}
+		
+		this->pathModel->remove(index);
+		this->pathList->updateContent();
+	}
+}
+
+void PluginConfigComponent::addBlackList(int index) {
+	if (!this->blackListModel) { return; }
+
+	auto pluginFormats = utils::getPluginFormatsSupported();
+
+	auto defaultPath = utils::getAppRootDir();
+	auto chooser = std::make_unique<juce::FileChooser>(
+		TRANS("Add Plugin Black List"), defaultPath,
+		pluginFormats.joinIntoString(","));
+	if (chooser->browseForMultipleFilesToOpen()) {
+		auto results = chooser->getResults();
+
+		for (auto& i : results) {
+			juce::String path = i.getFullPathName();
+
+			if (this->blackListModel->contains(path)) {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+					TRANS("Add Plugin Black List"),
+					TRANS("The plugin is already in the list:") + " " + path);
+				continue;
+			}
+
+			if (!quickAPI::addToPluginBlackList(path)) {
+				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+					TRANS("Add Plugin Black List"), TRANS("Do not change plugin configs during plugin search!"));
+				return;
+			}
+
+			this->blackListModel->insert(index, path);
+		}
+		
+		this->blackList->updateContent();
+	}
+}
+
+void PluginConfigComponent::removeBlackList(int index, const juce::String& path) {
+	if (this->blackListModel) {
+		if (!quickAPI::removeFromPluginBlackList(path)) {
+			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+				TRANS("Remove Plugin Black List"), TRANS("Do not change plugin configs during plugin search!"));
+			return;
+		}
+		this->blackListModel->remove(index);
+		this->blackList->updateContent();
+	}
 }

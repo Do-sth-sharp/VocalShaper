@@ -23,3 +23,7 @@ countries: cn
 
 "Plugin Search Path" = "插件搜索路径"
 "Plugin Black List" = "插件黑名单"
+"Add Plugin Search Path" = "添加插件搜索路径"
+"Remove Plugin Search Path" = "移除插件搜索路径"
+"Add Plugin Black List" = "添加插件黑名单"
+"Remove Plugin Black List" = "移除插件黑名单"

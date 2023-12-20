@@ -28,3 +28,6 @@ countries: cn
 "The project file can't be unregistered from the system! There is a possibility that it has not been registered before." = "项目文件无法从系统注销！可能其之前并未注册。"
 "Use the Enter key to quickly look up a key name." = "使用回车键快速查找键名。"
 "The key or value must not be empty!" = "键或值不得为空！"
+"Do not change plugin configs during plugin search!" = "不要在插件搜索期间更改插件配置！"
+"The plugin is already in the list:" = "插件已经在列表中："
+"The path is already in the list:" = "路径已经在列表中："

@@ -102,6 +102,10 @@ namespace quickAPI {
 		return utils::getProjectFormatsSupported(isWrite);
 	}
 
+	juce::StringArray getPluginFormatsSupported() {
+		return utils::getPluginFormatsSupported();
+	}
+
 	int getFormatBitsPerSample(const juce::String& extension) {
 		return AudioSaveConfig::getInstance()->getBitsPerSample(extension);
 	}

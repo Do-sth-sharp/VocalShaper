@@ -982,4 +982,21 @@ namespace utils {
 	const juce::StringArray getProjectFormatsSupported(bool /*isWrite*/) {
 		return juce::StringArray{ "*.vsp4" };
 	}
+
+	const juce::StringArray getPluginFormatsSupported() {
+		juce::StringArray result{ "*.vst3", "*.lv2" };
+
+#if JUCE_WINDOWS
+		result.addArray({ "*.dll" });
+
+#elif JUCE_LINUX
+		result.addArray({ "*.so" });
+
+#elif JUCE_MAC
+		result.addArray({ "*.dylib", "*.component", "*.appex" });
+
+#endif 
+
+		return result;
+	}
 }

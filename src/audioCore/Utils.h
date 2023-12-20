@@ -120,6 +120,7 @@ namespace utils {
 	juce::File getDefaultWorkingDir();
 
 	const juce::StringArray getProjectFormatsSupported(bool isWrite);
+	const juce::StringArray getPluginFormatsSupported();
 
 	using AudioConnection = std::tuple<int, int, int, int>;
 	using AudioConnectionList = juce::Array<AudioConnection>;
