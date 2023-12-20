@@ -883,11 +883,11 @@ bool ActionSetAudioSaveBitsPerSample::doAction() {
 	ACTION_CHECK_SOURCE_IO_RUNNING(
 		"Don't do this while source IO running.");
 
-	utils::AudioSaveConfig::getInstance()->setBitsPerSample(
+	AudioSaveConfig::getInstance()->setBitsPerSample(
 		this->format, this->bitPerSample);
 
 	this->output("Set audio save bits per sample: [" + this->format + "] "
-		+ juce::String(utils::AudioSaveConfig::getInstance()->getBitsPerSample(this->format)) + "\n");
+		+ juce::String(AudioSaveConfig::getInstance()->getBitsPerSample(this->format)) + "\n");
 	return true;
 }
 
@@ -899,10 +899,10 @@ bool ActionSetAudioSaveMetaData::doAction() {
 	ACTION_CHECK_SOURCE_IO_RUNNING(
 		"Don't do this while source IO running.");
 
-	utils::AudioSaveConfig::getInstance()->setMetaData(
+	AudioSaveConfig::getInstance()->setMetaData(
 		this->format, this->metaData);
 
-	auto metaData = utils::AudioSaveConfig::getInstance()->getMetaData(this->format);
+	auto metaData = AudioSaveConfig::getInstance()->getMetaData(this->format);
 	auto& metaKeys = metaData.getAllKeys();
 
 	juce::String result;
@@ -922,10 +922,10 @@ bool ActionSetAudioSaveQualityOptionIndex::doAction() {
 	ACTION_CHECK_SOURCE_IO_RUNNING(
 		"Don't do this while source IO running.");
 
-	utils::AudioSaveConfig::getInstance()
+	AudioSaveConfig::getInstance()
 		->setQualityOptionIndex(this->format, this->quality);
 
 	this->output("Set audio save quality option index: [" + this->format + "] "
-		+ juce::String(utils::AudioSaveConfig::getInstance()->getQualityOptionIndex(this->format)) + "\n");
+		+ juce::String(AudioSaveConfig::getInstance()->getQualityOptionIndex(this->format)) + "\n");
 	return true;
 }

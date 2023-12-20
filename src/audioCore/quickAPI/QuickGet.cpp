@@ -26,7 +26,7 @@ namespace quickAPI {
 	}
 
 	bool getAnonymousMode() {
-		return utils::AudioSaveConfig::getInstance()->getAnonymous();
+		return AudioConfig::getAnonymous();
 	}
 
 	std::unique_ptr<juce::Component> createAudioDeviceSelector() {
@@ -103,15 +103,15 @@ namespace quickAPI {
 	}
 
 	int getFormatBitsPerSample(const juce::String& extension) {
-		return utils::AudioSaveConfig::getInstance()->getBitsPerSample(extension);
+		return AudioSaveConfig::getInstance()->getBitsPerSample(extension);
 	}
 
 	const juce::StringPairArray getFormatMetaData(const juce::String& extension) {
-		return utils::AudioSaveConfig::getInstance()->getMetaData(extension);
+		return AudioSaveConfig::getInstance()->getMetaData(extension);
 	}
 
 	int getFormatQualityOptionIndex(const juce::String& extension) {
-		return utils::AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
+		return AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
 	}
 
 	const juce::StringArray getPluginBlackList() {

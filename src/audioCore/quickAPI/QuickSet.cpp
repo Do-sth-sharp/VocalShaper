@@ -5,19 +5,19 @@
 
 namespace quickAPI {
 	void setPluginSearchPathListFilePath(const juce::String& path) {
-		AudioConfig::getInstance()->setPluginSearchPathListFilePath(path);
+		AudioConfig::setPluginSearchPathListFilePath(path);
 	}
 
 	void setPluginListTemporaryFilePath(const juce::String& path) {
-		AudioConfig::getInstance()->setPluginListTemporaryFilePath(path);
+		AudioConfig::setPluginListTemporaryFilePath(path);
 	}
 
 	void setDeadPluginListPath(const juce::String& path) {
-		AudioConfig::getInstance()->setDeadPluginListPath(path);
+		AudioConfig::setDeadPluginListPath(path);
 	}
 
 	void setPluginBlackListFilePath(const juce::String& path) {
-		AudioConfig::getInstance()->setPluginBlackListFilePath(path);
+		AudioConfig::setPluginBlackListFilePath(path);
 	}
 
 	void setReturnToStartOnStop(bool value) {
@@ -25,20 +25,20 @@ namespace quickAPI {
 	}
 
 	void setAnonymousMode(bool value) {
-		utils::AudioSaveConfig::getInstance()->setAnonymous(value);
+		AudioConfig::setAnonymous(value);
 	}
 
 	void setFormatBitsPerSample(const juce::String& extension, int value) {
-		utils::AudioSaveConfig::getInstance()->setBitsPerSample(extension, value);
+		AudioSaveConfig::getInstance()->setBitsPerSample(extension, value);
 	}
 
 	void setFormatMetaData(const juce::String& extension,
 		const juce::StringPairArray& data) {
-		utils::AudioSaveConfig::getInstance()->setMetaData(extension, data);
+		AudioSaveConfig::getInstance()->setMetaData(extension, data);
 	}
 
 	void setFormatQualityOptionIndex(const juce::String& extension, int value) {
-		utils::AudioSaveConfig::getInstance()->setQualityOptionIndex(extension, value);
+		AudioSaveConfig::getInstance()->setQualityOptionIndex(extension, value);
 	}
 
 	bool addToPluginBlackList(const juce::String& plugin) {
