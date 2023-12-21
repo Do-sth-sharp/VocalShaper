@@ -47,7 +47,7 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigBooleanProp)
 };
 
-class ConfigButtonProp final : public juce::ButtonPropertyComponent {
+class ConfigButtonProp final : public juce::PropertyComponent {
 public:
 	using ActiveFunc = std::function<void(void)>;
 
@@ -56,12 +56,14 @@ public:
 		const juce::String& buttonText,
 		const ActiveFunc& activeFunc);
 
-	void buttonClicked() override;
-	juce::String getButtonText() const override;
+	void buttonClicked();
+	juce::String getButtonText() const;
+	void refresh() override;
 
 	void resized() override;
 
 private:
+	juce::TextButton button;
 	const juce::String buttonText;
 	const ActiveFunc activeFunc;
 

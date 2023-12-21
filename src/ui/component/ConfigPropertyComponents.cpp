@@ -83,9 +83,12 @@ ConfigButtonProp::ConfigButtonProp(
 	const juce::String& propName,
 	const juce::String& buttonText,
 	const ActiveFunc& activeFunc)
-	: ButtonPropertyComponent(TRANS(propName), false),
+	: PropertyComponent(TRANS(propName)),
 	buttonText(TRANS(buttonText)), activeFunc(activeFunc) {
-	/** Nothing To Do */
+	this->addAndMakeVisible(this->button);
+	this->button.setTriggeredOnMouseDown(false);
+	this->button.setWantsKeyboardFocus(false);
+	this->button.onClick = [this] { this->buttonClicked(); };
 }
 
 void ConfigButtonProp::buttonClicked() {
@@ -96,12 +99,16 @@ juce::String ConfigButtonProp::getButtonText() const {
 	return this->buttonText;
 }
 
+void ConfigButtonProp::refresh() {
+	this->button.setButtonText(this->getButtonText());
+}
+
 void ConfigButtonProp::resized() {
 	auto screenSize = utils::getScreenSize(this);
 	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
 	this->setPreferredHeight(prefHeight);
 
-	this->juce::ButtonPropertyComponent::resized();
+	this->juce::PropertyComponent::resized();
 }
 
 ConfigChoiceProp::ConfigChoiceProp(
