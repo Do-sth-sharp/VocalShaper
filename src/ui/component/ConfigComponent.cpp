@@ -5,6 +5,7 @@
 #include "../misc/MainThreadPool.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
+#include <FlowUI.h>
 
 ConfigComponent::ConfigComponent() {
 	/** Text */
@@ -282,6 +283,16 @@ void ConfigComponent::createFunctionPage() {
 	audioProps.add(new ConfigBooleanProp{ "function", "anonymous-mode",
 		"Disabled", "Enabled", anonymousUpdateCallback , anonymousValueCallback });
 	panel->addSection(TRANS("Audio Core"), audioProps);
+
+	auto cpuPaintingUpdateCallback = [](const juce::var& data) {
+		flowUI::FlowWindowHub::setOpenGL(!((bool)data));
+		return true;
+		};
+
+	juce::Array<juce::PropertyComponent*> performProps;
+	performProps.add(new ConfigBooleanProp{ "function", "cpu-painting",
+		"Disabled", "Enabled", cpuPaintingUpdateCallback , ConfigPropHelper::GetValueCallback{} });
+	panel->addSection(TRANS("Performance"), performProps);
 
 	this->pageList.add(std::move(panel));
 }

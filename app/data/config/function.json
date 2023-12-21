@@ -1,4 +1,5 @@
 {
   "return-on-stop": true,
-  "anonymous-mode": false
+  "anonymous-mode": false,
+  "cpu-painting": false
 }

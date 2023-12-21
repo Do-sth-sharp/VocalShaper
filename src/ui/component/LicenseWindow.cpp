@@ -1,6 +1,7 @@
 ﻿#include "LicenseWindow.h"
 #include "LicenseComponent.h"
 #include "../misc/RCManager.h"
+#include "../misc/ConfigManager.h"
 #include "../Utils.h"
 
 LicenseWindow::LicenseWindow()
@@ -15,7 +16,11 @@ LicenseWindow::LicenseWindow()
 	this->centreWithSize(this->getWidth(), this->getHeight());
 
 	/** OpenGL */
-	this->renderer.attachTo(*this);
+	auto& funcVar = ConfigManager::getInstance()->get("function");
+	if (!((bool)(funcVar["cpu-painting"]))) {
+		this->renderer = std::make_unique<juce::OpenGLContext>();
+		this->renderer->attachTo(*this);
+	}
 
 	/** Icon */
 	juce::File iconFile = utils::getResourceFile("logo.png");
@@ -28,7 +33,9 @@ LicenseWindow::LicenseWindow()
 }
 
 LicenseWindow::~LicenseWindow() {
-	this->renderer.detach();
+	if (this->renderer) {
+		this->renderer->detach();
+	}
 }
 
 void LicenseWindow::resized() {

@@ -157,9 +157,11 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
+				auto& funcVar = ConfigManager::getInstance()->get("function");
+
 				flowUI::FlowWindowHub::setTitle(utils::getAudioPlatformName());
 				flowUI::FlowWindowHub::setIcon("./rc/logo.png");
-				flowUI::FlowWindowHub::setOpenGL(true);
+				flowUI::FlowWindowHub::setOpenGL(!((bool)(funcVar["cpu-painting"])));
 			}
 		);
 	};

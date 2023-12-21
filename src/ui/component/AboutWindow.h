@@ -13,7 +13,7 @@ public:
 
 private:
 	juce::Image iconTemp;
-	juce::OpenGLContext renderer;
+	std::unique_ptr<juce::OpenGLContext> renderer = nullptr;
 	std::unique_ptr<juce::TooltipWindow> toolTip = nullptr;
 	std::unique_ptr<juce::Viewport> viewport = nullptr;
 	std::unique_ptr<AboutComponent> content = nullptr;
