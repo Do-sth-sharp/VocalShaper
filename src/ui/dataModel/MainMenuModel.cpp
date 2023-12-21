@@ -121,8 +121,8 @@ juce::PopupMenu MainMenuModel::createMisc() const {
 	juce::PopupMenu devMenu;
 	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::AudioDebugger);
 	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MidiDebugger);
-	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::RegProj);
-	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::UnregProj);
+	//devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::RegProj);
+	//devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::UnregProj);
 
 	juce::PopupMenu menu;
 

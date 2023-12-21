@@ -4,6 +4,8 @@ countries: cn
 "Tip" = "提示"
 
 "The following settings will take effect after restarting this application." = "下列设置将在重启本应用后生效。"
+"The effect of some settings will be delayed." = "某些设置将会延迟生效。"
+"Some settings are only available on certain operating systems." = "某些设置只在特定的操作系统中有效。"
 
 "language" = "语言"
 "theme" = "主题"
@@ -15,6 +17,11 @@ countries: cn
 "anonymous-mode" = "匿名模式"
 "Performance" = "性能"
 "cpu-painting" = "CPU绘图"
+"System" = "系统"
+"proj-reg" = "注册项目文件"
+"proj-unreg" = "取消注册项目文件"
+"Register" = "注册"
+"Unregister" = "反注册"
 
 "Audio Format" = "音频格式"
 "bit-depth" = "位深度"

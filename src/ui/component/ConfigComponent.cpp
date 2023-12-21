@@ -3,6 +3,8 @@
 #include "OutputConfigComponent.h"
 #include "PluginConfigComponent.h"
 #include "../misc/MainThreadPool.h"
+#include "../menuAndCommand/CommandManager.h"
+#include "../menuAndCommand/CommandTypes.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <FlowUI.h>
@@ -290,9 +292,25 @@ void ConfigComponent::createFunctionPage() {
 		};
 
 	juce::Array<juce::PropertyComponent*> performProps;
+	performProps.add(new ConfigLabelProp{ "The effect of some settings will be delayed." });
 	performProps.add(new ConfigBooleanProp{ "function", "cpu-painting",
 		"Disabled", "Enabled", cpuPaintingUpdateCallback , ConfigPropHelper::GetValueCallback{} });
 	panel->addSection(TRANS("Performance"), performProps);
+
+	auto projRegFunc = [] {
+		CommandManager::getInstance()->invokeDirectly(
+			(juce::CommandID)GUICommandType::RegProj, true);
+		};
+	auto projUnregFunc = [] {
+		CommandManager::getInstance()->invokeDirectly(
+			(juce::CommandID)GUICommandType::UnregProj, true);
+		};
+
+	juce::Array<juce::PropertyComponent*> systemProps;
+	systemProps.add(new ConfigLabelProp{ "Some settings are only available on certain operating systems." });
+	systemProps.add(new ConfigButtonProp{ "proj-reg", "Register", projRegFunc });
+	systemProps.add(new ConfigButtonProp{ "proj-unreg", "Unregister", projUnregFunc });
+	panel->addSection(TRANS("System"), systemProps);
 
 	this->pageList.add(std::move(panel));
 }
