@@ -107,6 +107,7 @@ void OutputConfigComponent::currentFormatChanged(const juce::String& format) {
 		};
 
 	juce::Array<juce::PropertyComponent*> props;
+	props.add(new ConfigLabelProp{ "Switch audio formats to see different options." });
 	props.add(new ConfigChoiceProp{ className, "bit-depth", possibleBitDepth,
 		ConfigChoiceProp::ValueType::NameVal, bitDepthUpdateCallback, bitDepthValueCallback });
 	props.add(new ConfigChoiceProp{ className, "quality", possibleQualities,
