@@ -48,6 +48,7 @@ void PluginConfigComponent::resized() {
 	int itemHeight = screenSize.getHeight() * 0.04;
 	int pluginListHeight = screenSize.getHeight() * 0.35;
 	int blackListHeight = screenSize.getHeight() * 0.35;
+	int listRowHeight = itemHeight * 0.8;
 
 	/** Plugin Search Path */
 	juce::Rectangle<int> searchPathLabelRect(
@@ -57,6 +58,7 @@ void PluginConfigComponent::resized() {
 	juce::Rectangle<int> searchPathListRect(
 		0, searchPathLabelRect.getBottom(), this->getWidth(), pluginListHeight);
 	this->pathList->setBounds(searchPathListRect);
+	this->pathList->setRowHeight(listRowHeight);
 
 	/** Plugin Black List */
 	juce::Rectangle<int> blackListLabelRect(
@@ -66,6 +68,7 @@ void PluginConfigComponent::resized() {
 	juce::Rectangle<int> blackListRect(
 		0, blackListLabelRect.getBottom(), this->getWidth(), blackListHeight);
 	this->blackList->setBounds(blackListRect);
+	this->blackList->setRowHeight(listRowHeight);
 }
 
 void PluginConfigComponent::addPath(int index) {
