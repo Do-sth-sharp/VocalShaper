@@ -2,11 +2,13 @@
 countries: cn
 
 "Tip" = "提示"
+"White Space" = "空白"
 
 "The following settings will take effect after restarting this application." = "下列设置将在重启本应用后生效。"
 "The effect of some settings will be delayed." = "某些设置将会延迟生效。"
 "Some settings are only available on certain operating systems." = "某些设置只在特定的操作系统中有效。"
 "Switch audio formats to see different options." = "切换音频格式以查看不同选项。"
+"The following settings will take effect the next time the plugins are scanned." = "下列设置将会在下次插件扫描时生效。"
 
 "language" = "语言"
 "theme" = "主题"

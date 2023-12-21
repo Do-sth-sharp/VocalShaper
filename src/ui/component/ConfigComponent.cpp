@@ -255,6 +255,7 @@ void ConfigComponent::createStartupPage(const StartupOptions& option) {
 	props.add(new ConfigChoiceProp{ "startup", "theme", option.theme });
 	props.add(new ConfigChoiceProp{ "startup", "font", option.font });
 	props.add(new ConfigChoiceProp{ "startup", "layout", option.layout });
+	props.add(new ConfigWhiteSpaceProp{});
 	panel->addProperties(props);
 
 	this->pageList.add(std::move(panel));
@@ -284,6 +285,7 @@ void ConfigComponent::createFunctionPage() {
 		"Disabled", "Enabled", returnToStartUpdateCallback , returnToStartValueCallback});
 	audioProps.add(new ConfigBooleanProp{ "function", "anonymous-mode",
 		"Disabled", "Enabled", anonymousUpdateCallback , anonymousValueCallback });
+	audioProps.add(new ConfigWhiteSpaceProp{});
 	panel->addSection(TRANS("Audio Core"), audioProps);
 
 	auto cpuPaintingUpdateCallback = [](const juce::var& data) {
@@ -295,6 +297,7 @@ void ConfigComponent::createFunctionPage() {
 	performProps.add(new ConfigLabelProp{ "The effect of some settings will be delayed." });
 	performProps.add(new ConfigBooleanProp{ "function", "cpu-painting",
 		"Disabled", "Enabled", cpuPaintingUpdateCallback , ConfigPropHelper::GetValueCallback{} });
+	performProps.add(new ConfigWhiteSpaceProp{});
 	panel->addSection(TRANS("Performance"), performProps);
 
 	auto projRegFunc = [] {
@@ -310,6 +313,7 @@ void ConfigComponent::createFunctionPage() {
 	systemProps.add(new ConfigLabelProp{ "Some settings are only available on certain operating systems." });
 	systemProps.add(new ConfigButtonProp{ "proj-reg", "Register", projRegFunc });
 	systemProps.add(new ConfigButtonProp{ "proj-unreg", "Unregister", projUnregFunc });
+	systemProps.add(new ConfigWhiteSpaceProp{});
 	panel->addSection(TRANS("System"), systemProps);
 
 	this->pageList.add(std::move(panel));

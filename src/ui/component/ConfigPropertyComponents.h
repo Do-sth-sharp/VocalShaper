@@ -161,3 +161,16 @@ private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigLabelProp)
 };
+
+class ConfigWhiteSpaceProp final
+	: public juce::PropertyComponent {
+public:
+	ConfigWhiteSpaceProp();
+
+	void resized() override;
+	void refresh() override;
+	void paint(juce::Graphics& g) override;
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConfigWhiteSpaceProp)
+};

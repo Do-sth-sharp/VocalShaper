@@ -296,3 +296,21 @@ void ConfigLabelProp::paint(juce::Graphics& g) {
 	auto& laf = this->getLookAndFeel();
 	laf.drawPropertyComponentBackground(g, this->getWidth(), this->getHeight(), *this);
 }
+
+ConfigWhiteSpaceProp::ConfigWhiteSpaceProp()
+	: PropertyComponent(TRANS("White Space"), 25) {}
+
+void ConfigWhiteSpaceProp::resized() {
+	auto screenSize = utils::getScreenSize(this);
+	int prefHeight = screenSize.getHeight() * PROP_HEIGHT;
+	this->setPreferredHeight(prefHeight);
+}
+
+void ConfigWhiteSpaceProp::refresh() {
+	/** Nothing To Do */
+}
+
+void ConfigWhiteSpaceProp::paint(juce::Graphics& g) {
+	auto& laf = this->getLookAndFeel();
+	laf.drawPropertyComponentBackground(g, this->getWidth(), this->getHeight(), *this);
+}

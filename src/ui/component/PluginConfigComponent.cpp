@@ -3,6 +3,11 @@
 #include "../../audioCore/AC_API.h"
 
 PluginConfigComponent::PluginConfigComponent() {
+	/** Tip Label */
+	this->tipLabel = std::make_unique<juce::Label>(
+		TRANS("Tip"), TRANS("The following settings will take effect the next time the plugins are scanned."));
+	this->addAndMakeVisible(this->tipLabel.get());
+
 	/** Plugin Configs */
 	auto pluginPath = quickAPI::getPluginSearchPath();
 	auto pluginBlackList = quickAPI::getPluginBlackList();
@@ -48,25 +53,31 @@ void PluginConfigComponent::resized() {
 	int itemHeight = screenSize.getHeight() * 0.04;
 	int pluginListHeight = screenSize.getHeight() * 0.35;
 	int blackListHeight = screenSize.getHeight() * 0.35;
+	int labelWidth = std::min(200, screenSize.getWidth() / 3);
 	int listRowHeight = itemHeight * 0.8;
+
+	/** Tip */
+	juce::Rectangle<int> tipLabelRect(
+		0, 0, this->getWidth(), itemHeight);
+	this->tipLabel->setBounds(tipLabelRect);
 
 	/** Plugin Search Path */
 	juce::Rectangle<int> searchPathLabelRect(
-		0, 0, this->getWidth(), itemHeight);
+		0, tipLabelRect.getBottom(), labelWidth, pluginListHeight);
 	this->pathLabel->setBounds(searchPathLabelRect);
 
 	juce::Rectangle<int> searchPathListRect(
-		0, searchPathLabelRect.getBottom(), this->getWidth(), pluginListHeight);
+		labelWidth, tipLabelRect.getBottom(), this->getWidth() - labelWidth, pluginListHeight);
 	this->pathList->setBounds(searchPathListRect);
 	this->pathList->setRowHeight(listRowHeight);
 
 	/** Plugin Black List */
 	juce::Rectangle<int> blackListLabelRect(
-		0, searchPathListRect.getBottom(), this->getWidth(), itemHeight);
+		0, searchPathLabelRect.getBottom() + itemHeight, labelWidth, blackListHeight);
 	this->blackListLabel->setBounds(blackListLabelRect);
 
 	juce::Rectangle<int> blackListRect(
-		0, blackListLabelRect.getBottom(), this->getWidth(), blackListHeight);
+		labelWidth, searchPathLabelRect.getBottom() + itemHeight, this->getWidth() - labelWidth, blackListHeight);
 	this->blackList->setBounds(blackListRect);
 	this->blackList->setRowHeight(listRowHeight);
 }
