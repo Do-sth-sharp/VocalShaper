@@ -4,11 +4,19 @@
 
 class CommandManager final
 	: public juce::ApplicationCommandManager,
+	public juce::ChangeListener,
 	private juce::DeletedAtShutdown {
 public:
 	CommandManager() = default;
+	~CommandManager();
 
 	void init();
+
+	void startListening();
+	void stopListening();
+
+private:
+	void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
 public:
 	static CommandManager* getInstance();

@@ -5,28 +5,28 @@ enum class CoreCommandType : int {
 	OpenProject,
 	SaveProject,
 
-	LoadSource,
+	LoadSource = 0x2100,
 	LoadSynthSource,
 	SaveSource,
 	ExportSource,
 
-	Render,
+	Render = 0x2200,
 
-	Undo,
+	Undo = 0x2300,
 	Redo
 };
 
 enum class GUICommandType : int {
 	CloseEditor = 0x3000,
 
-	Copy,
+	Copy = 0x3100,
 	Cut,
 	Paste,
 	Clipboard,
 	SelectAll,
 	Delete,
 
-	LoadLayout,
+	LoadLayout = 0x3200,
 	SaveLayout,
 	PluginView,
 	SourceView,
@@ -38,14 +38,14 @@ enum class GUICommandType : int {
 	AudioDebugger,
 	MidiDebugger,
 
-	StartupConfig,
+	StartupConfig = 0x3500,
 	FunctionConfig,
 	AudioConfig,
 	OutputConfig,
 	PluginConfig,
 	KeyMappingConfig,
 
-	Help,
+	Help = 0x3600,
 	Update,
 	Bilibili,
 	Github,

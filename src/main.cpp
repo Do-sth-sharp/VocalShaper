@@ -271,6 +271,25 @@ private:
 		);
 	};
 
+	void loadKeyMapping() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Load Key Mapping..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				if (auto keyMapping = CommandManager::getInstance()->getKeyMappings()) {
+					auto kmFile = utils::getKeyMappingFile();
+					if (auto kmData = utils::readXml(kmFile)) {
+						keyMapping->restoreFromXml(*(kmData.get()));
+					}
+				}
+				CommandManager::getInstance()->startListening();
+			}
+		);
+	};
+
 	void initCoreHooks() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -414,6 +433,9 @@ public:
 		/** Init Commands */
 		this->initCommands();
 
+		/** Load Key Mapping */
+		this->loadKeyMapping();
+
 		/** Init Core Hooks */
 		this->initCoreHooks();
 
@@ -437,14 +459,14 @@ public:
 		/** ShutDown FlowUI */
 		flowUI::FlowWindowHub::shutdown();
 
+		/** Release Components */
+		CompManager::releaseInstance();
+		LookAndFeelFactory::releaseInstance();
+
 		/** Release Commands */
 		CommandManager::releaseInstance();
 		CoreCommandTarget::releaseInstance();
 		GUICommandTarget::releaseInstance();
-
-		/** Release Components */
-		CompManager::releaseInstance();
-		LookAndFeelFactory::releaseInstance();
 
 		/** ShutDown Threads */
 		MainThreadPool::releaseInstance();

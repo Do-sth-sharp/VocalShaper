@@ -1,6 +1,11 @@
 ﻿#include "CommandManager.h"
 #include "CoreCommandTarget.h"
 #include "GUICommandTarget.h"
+#include "../Utils.h"
+
+CommandManager::~CommandManager() {
+	this->stopListening();
+}
 
 void CommandManager::init() {
 	/** First Command Target */
@@ -9,6 +14,28 @@ void CommandManager::init() {
 	/** Register Commands */
 	this->registerAllCommandsForTarget(CoreCommandTarget::getInstance());
 	this->registerAllCommandsForTarget(GUICommandTarget::getInstance());
+}
+
+void CommandManager::startListening() {
+	if (auto km = this->getKeyMappings()) {
+		km->addChangeListener(this);
+	}
+}
+
+void CommandManager::stopListening() {
+	if (auto km = this->getKeyMappings()) {
+		km->removeChangeListener(this);
+	}
+}
+
+void CommandManager::changeListenerCallback(juce::ChangeBroadcaster* source) {
+	/** Save Key Mapping */
+	auto file = utils::getKeyMappingFile();
+	
+	if (auto km = this->getKeyMappings()) {
+		auto data = km->createXml(true);
+		utils::saveXml(file, data.get());
+	}
 }
 
 CommandManager* CommandManager::getInstance() {
