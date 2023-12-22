@@ -2,6 +2,7 @@
 #include "ConfigPropertyComponents.h"
 #include "OutputConfigComponent.h"
 #include "PluginConfigComponent.h"
+#include "KeyMappingEditorComponent.h"
 #include "../misc/MainThreadPool.h"
 #include "../menuAndCommand/CommandManager.h"
 #include "../menuAndCommand/CommandTypes.h"
@@ -368,5 +369,11 @@ void ConfigComponent::createPluginPage() {
 }
 
 void ConfigComponent::createKeyMappingPage() {
-
+	/** Editor */
+	auto editor = std::make_unique<KeyMappingEditorComponent>(
+		*(CommandManager::getInstance()->getKeyMappings()), true);
+	this->addAndMakeVisible(editor.get());
+	
+	/** Add To Page */
+	this->pageList.add(std::move(editor));
 }

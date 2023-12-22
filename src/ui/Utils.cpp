@@ -1,5 +1,10 @@
 ﻿#include "Utils.h"
 
+/** To Fix Symbol Export Error Of juce::ScopedMessageBox */
+#include <juce_gui_basics/detail/juce_ScopedMessageBoxInterface.h>
+#include <juce_gui_basics/detail/juce_ScopedMessageBoxImpl.h>
+#include <juce_gui_basics/windows/juce_ScopedMessageBox.cpp>
+
 #if JUCE_WINDOWS
 #include <Windows.h>
 #endif //JUCE_WINDOWS

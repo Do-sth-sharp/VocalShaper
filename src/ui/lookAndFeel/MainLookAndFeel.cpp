@@ -142,6 +142,12 @@ MainLookAndFeel::MainLookAndFeel()
 		ColorMap::getInstance()->get("ThemeColorB1"));
 	this->setColour(juce::TableHeaderComponent::ColourIds::highlightColourId,
 		ColorMap::getInstance()->get("ThemeColorB5"));
+
+	/** Set Key Mapping Editor Color */
+	this->setColour(juce::KeyMappingEditorComponent::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->setColour(juce::KeyMappingEditorComponent::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
 }
 
 void MainLookAndFeel::drawTableHeaderColumn(
