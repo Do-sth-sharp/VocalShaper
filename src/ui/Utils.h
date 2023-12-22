@@ -23,6 +23,8 @@ namespace utils {
 
 	const juce::File getConfigFile(const juce::String& name,
 		const juce::String& type = ".json");
+	const juce::File getKeyMappingFile(
+		const juce::String& file = "keyMapping.xml");
 	const juce::File getThemeColorFile(const juce::String& name,
 		const juce::String& file = "colors.json");
 	const juce::File getFontFile(const juce::String& name,
@@ -60,4 +62,7 @@ namespace utils {
 	bool unregProjectFileFromSystem();
 
 	const juce::StringArray searchKMP(const juce::StringArray& list, const juce::String& word);
+
+	bool saveXml(const juce::File& file, juce::XmlElement* xml);
+	std::unique_ptr<juce::XmlElement> readXml(const juce::File& file);
 }

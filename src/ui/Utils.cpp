@@ -5,6 +5,11 @@
 #include <juce_gui_basics/detail/juce_ScopedMessageBoxImpl.h>
 #include <juce_gui_basics/windows/juce_ScopedMessageBox.cpp>
 
+/** To Fix Symbol Export Error Of XmlElement::TextFormat::TextFormat() */
+namespace juce {
+	XmlElement::TextFormat::TextFormat() {}
+}
+
 #if JUCE_WINDOWS
 #include <Windows.h>
 #endif //JUCE_WINDOWS
@@ -83,6 +88,11 @@ namespace utils {
 	const juce::File getConfigFile(const juce::String& name,
 		const juce::String& type) {
 		return getConfigDir().getChildFile(name + type);
+	}
+
+	const juce::File getKeyMappingFile(
+		const juce::String& file) {
+		return getConfigDir().getChildFile(file);
 	}
 
 	const juce::File getThemeColorFile(const juce::String& name,
@@ -334,5 +344,22 @@ namespace utils {
 			}
 		}
 		return result;
+	}
+
+	bool saveXml(const juce::File& file, juce::XmlElement* xml) {
+		if (!xml) { return false; }
+
+		juce::FileOutputStream ostream(file);
+		if (!ostream.openedOk()) { return false; }
+		ostream.setPosition(0);
+		ostream.truncate();
+
+		xml->writeTo(ostream, juce::XmlElement::TextFormat{});
+		return true;
+	}
+
+	std::unique_ptr<juce::XmlElement> readXml(const juce::File& file) {
+		juce::XmlDocument doc(file);
+		return doc.getDocumentElement(false);
 	}
 }

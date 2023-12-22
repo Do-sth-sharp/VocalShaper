@@ -157,5 +157,10 @@ void PluginSearcher::saveTemporaryFile(const juce::XmlElement* data) const {
 		file.getParentDirectory().createDirectory();
 	}
 
-	file.replaceWithText(data->toString());
+	juce::FileOutputStream ostream(file);
+	if (!ostream.openedOk()) { return; }
+	ostream.setPosition(0);
+	ostream.truncate();
+
+	data->writeTo(ostream, juce::XmlElement::TextFormat{});
 }
