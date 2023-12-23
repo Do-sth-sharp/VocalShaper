@@ -66,7 +66,7 @@ void applicationCrashHandler(void* info) {
 		+ std::string{ (results[2] == 0) ? "Saved" : "Error" } + " : " + std::string{ projLLPathStr } + "\n"
 		+ std::string{ (results[1] == 0) ? "Saved" : "Error" } + " : " + std::string{ projMLPathStr } + "\n"
 		+ std::string{ (results[0] == 0) ? "Saved" : "Error" } + " : " + std::string{ projHLPathStr } + "\n";
-	showWarningBox("Crash Handler", message);
+	showWarningBox("VocalShaper Crash Handler", message);
 }
 
 const juce::Array<juce::File> getAllDumpFiles() {
