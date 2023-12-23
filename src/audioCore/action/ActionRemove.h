@@ -414,6 +414,7 @@ private:
 
 	int index;
 	double offset;
+	int compensate;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveRecorderSourceInstance)
 };

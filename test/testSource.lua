@@ -55,5 +55,5 @@ AC.setAudioSaveMetaData(".wav", { ["bwav description"] = "test description", ["b
 AC.setAudioSaveQualityOptionIndex(".wav", 0);
 
 -- Record
-AC.addRecorderSourceInstance(0, 0);
+AC.addRecorderSourceInstance(0, 0, 1);
 AC.removeRecorderSourceInstance(0);

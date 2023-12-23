@@ -18,7 +18,7 @@ SourceRecordProcessor::~SourceRecordProcessor() {
 void SourceRecordProcessor::insertTask(
 	const SourceRecordProcessor::RecorderTask& task, int index) {
 	juce::ScopedWriteLock locker(this->taskLock);
-	auto& [source, srcIndex, offset] = task;
+	auto& [source, srcIndex, offset, compensate] = task;
 
 	/** Check Source */
 	if (!source) { return; }
@@ -32,12 +32,12 @@ void SourceRecordProcessor::insertTask(
 		this->getSampleRate(), this->getBlockSize());
 	
 	/** Add Task */
-	return this->tasks.insert(index, { source, srcIndex, offset });
+	return this->tasks.insert(index, { source, srcIndex, offset, compensate });
 }
 
 void SourceRecordProcessor::removeTask(int index) {
 	juce::ScopedWriteLock locker(this->taskLock);
-	auto [src, srcIndex, offset] = this->tasks.removeAndReturn(index);
+	auto [src, srcIndex, offset, compensate] = this->tasks.removeAndReturn(index);
 	if (src) {
 		src->recordingFinishedInternal();
 	}
@@ -65,7 +65,7 @@ void SourceRecordProcessor::prepareToPlay(
 
 	/** Update Source Sample Rate And Buffer Size */
 	juce::ScopedReadLock locker(this->taskLock);
-	for (auto& [source, srcIndex, offset] : this->tasks) {
+	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
 		if (source) {
 			source->prepareToRecordInternal(this->getTotalNumInputChannels(),
 				this->getSampleRate(), this->getBlockSize(), true);
@@ -86,13 +86,14 @@ void SourceRecordProcessor::processBlock(
 	if (!playPosition->getIsPlaying() || !playPosition->getIsRecording()) { return; }
 
 	/** Check Each Task */
-	for (auto& [source, srcIndex, offset] : this->tasks) {
+	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
 		/** Get Task Info */
 		int offsetPos = std::floor(offset * this->getSampleRate());
 		if (static_cast<long long>(offsetPos - buffer.getNumSamples()) >
 			playPosition->getTimeInSamples().orFallback(0)) { continue; }
 		int startPos =
 			playPosition->getTimeInSamples().orFallback(0) - offsetPos;
+		startPos -= (compensate * this->getBlockSize());
 
 		/** Copy Data */
 		if (auto src = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
@@ -126,7 +127,7 @@ bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
 	auto& list = mes->sources();
 	for (auto& i : list) {
 		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
-			this->insertTask({ ptrSrc, i.index(), i.offset() });
+			this->insertTask({ ptrSrc, i.index(), i.offset(), i.compensate()});
 		}
 	}
 
@@ -138,10 +139,11 @@ std::unique_ptr<google::protobuf::Message> SourceRecordProcessor::serialize() co
 
 	auto list = mes->mutable_sources();
 	juce::ScopedReadLock locker(this->taskLock);
-	for (auto& [source, srcIndex, offset] : this->tasks) {
+	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
 		auto smes = std::make_unique<vsp4::SourceRecorderInstance>();
 		smes->set_index(srcIndex);
 		smes->set_offset(offset);
+		smes->set_compensate(compensate);
 		list->AddAllocated(smes.release());
 	}
 

@@ -430,7 +430,7 @@ class ActionAddRecorderSourceInstance final : public ActionUndoableBase {
 public:
 	ActionAddRecorderSourceInstance() = delete;
 	ActionAddRecorderSourceInstance(
-		int src, double offset);
+		int src, double offset, int compensate);
 
 	bool doAction() override;
 	bool undo() override;
@@ -441,6 +441,7 @@ public:
 private:
 	const int src;
 	const double offset;
+	const int compensate;
 
 	JUCE_LEAK_DETECTOR(ActionAddRecorderSourceInstance)
 };

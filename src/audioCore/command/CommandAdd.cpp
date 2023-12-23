@@ -183,7 +183,8 @@ AUDIOCORE_FUNC(addSequencerSourceInstance) {
 
 AUDIOCORE_FUNC(addRecorderSourceInstance) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddRecorderSourceInstance{
-		(int)luaL_checkinteger(L, 1), luaL_checknumber(L, 2) });
+		(int)luaL_checkinteger(L, 1), luaL_checknumber(L, 2),
+		(int)luaL_checkinteger(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }

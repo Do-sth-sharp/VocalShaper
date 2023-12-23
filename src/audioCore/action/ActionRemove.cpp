@@ -1042,7 +1042,7 @@ bool ActionRemoveRecorderSourceInstance::doAction() {
 				return false;
 			}
 
-			std::tie(std::ignore, this->index, this->offset)
+			std::tie(std::ignore, this->index, this->offset, this->compensate)
 				= recorder->getTask(this->seq);
 
 			recorder->removeTask(this->seq);
@@ -1070,7 +1070,7 @@ bool ActionRemoveRecorderSourceInstance::undo() {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(this->index);
 			if (!ptrSrc) { return false; }
 
-			recorder->insertTask({ ptrSrc, this->index, this->offset }, this->seq);
+			recorder->insertTask({ ptrSrc, this->index, this->offset, this->compensate }, this->seq);
 
 			juce::String result;
 			result += "Undo Remove Recorder Source Instance [" + juce::String(this->seq) + "]\n";

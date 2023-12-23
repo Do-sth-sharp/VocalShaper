@@ -845,8 +845,8 @@ bool ActionAddSequencerSourceInstance::undo() {
 }
 
 ActionAddRecorderSourceInstance::ActionAddRecorderSourceInstance(
-	int src, double offset)
-	: src(src), offset(offset) {}
+	int src, double offset, int compensate)
+	: src(src), offset(offset), compensate(compensate) {}
 
 bool ActionAddRecorderSourceInstance::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -861,7 +861,7 @@ bool ActionAddRecorderSourceInstance::doAction() {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(this->src);
 			if (!ptrSrc) { return false; }
 
-			recorder->insertTask({ ptrSrc, this->src, this->offset });
+			recorder->insertTask({ ptrSrc, this->src, this->offset, this->compensate });
 
 			this->output("Add Recorder Source Instance [" + juce::String(this->src) + "]\n"
 				+ "Total Recorder Source Instance: " + juce::String(recorder->getTaskNum()) + "\n");
