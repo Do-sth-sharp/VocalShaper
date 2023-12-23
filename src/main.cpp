@@ -18,6 +18,7 @@
 #include "ui/menuAndCommand/CoreCommandTarget.h"
 #include "ui/menuAndCommand/GUICommandTarget.h"
 #include "ui/Utils.h"
+#include "crash.h"
 
 class MainApplication : public juce::JUCEApplication {
 private:
@@ -402,6 +403,9 @@ public:
 		/** Show Splash */
 		this->splash = std::make_unique<Splash>();
 		this->splash->setVisible(true);
+
+		/** Set Crash Handler */
+		juce::SystemStats::setApplicationCrashHandler(applicationCrashHandler);
 
 		/** Load Config */
 		this->loadConfig();

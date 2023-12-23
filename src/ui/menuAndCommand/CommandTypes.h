@@ -53,5 +53,6 @@ enum class GUICommandType : int {
 	RegProj,
 	UnregProj,
 	License,
-	About
+	About,
+	MakeCrash
 };

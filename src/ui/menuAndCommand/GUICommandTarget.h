@@ -31,6 +31,7 @@ private:
 	void website() const;
 	void regProj() const;
 	void unregProj() const;
+	void makeCrash() const;
 	void license() const;
 	void about() const;
 

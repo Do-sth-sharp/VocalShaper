@@ -123,6 +123,7 @@ juce::PopupMenu MainMenuModel::createMisc() const {
 	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MidiDebugger);
 	//devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::RegProj);
 	//devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::UnregProj);
+	devMenu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MakeCrash);
 
 	juce::PopupMenu menu;
 

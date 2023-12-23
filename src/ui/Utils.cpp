@@ -1,5 +1,9 @@
 ﻿#include "Utils.h"
 
+#if JUCE_WINDOWS
+#include <Windows.h>
+#endif //JUCE_WINDOWS
+
 /** To Fix Symbol Export Error Of juce::ScopedMessageBox */
 #include <juce_gui_basics/detail/juce_ScopedMessageBoxInterface.h>
 #include <juce_gui_basics/detail/juce_ScopedMessageBoxImpl.h>
@@ -9,10 +13,6 @@
 namespace juce {
 	XmlElement::TextFormat::TextFormat() {}
 }
-
-#if JUCE_WINDOWS
-#include <Windows.h>
-#endif //JUCE_WINDOWS
 
 namespace utils {
 	const juce::File getAppExecFile() {
@@ -361,5 +361,10 @@ namespace utils {
 	std::unique_ptr<juce::XmlElement> readXml(const juce::File& file) {
 		juce::XmlDocument doc(file);
 		return doc.getDocumentElement(false);
+	}
+
+	void panic() {
+		/** Force SIGSEGV */
+		*((char*)-1) = 'x';
 	}
 }

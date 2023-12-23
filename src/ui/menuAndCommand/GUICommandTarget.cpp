@@ -51,6 +51,7 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::Website),
 		(juce::CommandID)(GUICommandType::RegProj),
 		(juce::CommandID)(GUICommandType::UnregProj),
+		(juce::CommandID)(GUICommandType::MakeCrash),
 		(juce::CommandID)(GUICommandType::License),
 		(juce::CommandID)(GUICommandType::About)
 	};
@@ -219,6 +220,10 @@ void GUICommandTarget::getCommandInfo(
 		result.setActive(false);
 #endif //JUCE_WINDOWS
 		break;
+	case GUICommandType::MakeCrash:
+		result.setInfo(TRANS("Make Crash"), TRANS("Let the application crash."), TRANS("Misc"), 0);
+		result.setActive(true);
+		break;
 	case GUICommandType::License:
 		result.setInfo(TRANS("License"), TRANS("Read open source licenses."), TRANS("Misc"), 0);
 		result.setActive(true);
@@ -329,6 +334,9 @@ bool GUICommandTarget::perform(
 		return true;
 	case GUICommandType::UnregProj:
 		this->unregProj();
+		return true;
+	case GUICommandType::MakeCrash:
+		this->makeCrash();
 		return true;
 	case GUICommandType::License:
 		this->license();
@@ -441,6 +449,16 @@ void GUICommandTarget::unregProj() const {
 		}
 	};
 	MainThreadPool::getInstance()->runJob(regJob);
+}
+
+void GUICommandTarget::makeCrash() const {
+	if(!juce::AlertWindow::showOkCancelBox(juce::MessageBoxIconType::WarningIcon,
+		TRANS("Make Crash"), TRANS("This action will crash the app, which is very dangerous and may cause you to lose all your unsaved data, continue?"))) {
+		return;
+	}
+
+	/** Crash */
+	utils::panic();
 }
 
 void GUICommandTarget::license() const {

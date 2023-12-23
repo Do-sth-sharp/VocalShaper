@@ -65,4 +65,6 @@ namespace utils {
 
 	bool saveXml(const juce::File& file, juce::XmlElement* xml);
 	std::unique_ptr<juce::XmlElement> readXml(const juce::File& file);
+
+	void panic();
 }

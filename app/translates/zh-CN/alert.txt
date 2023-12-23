@@ -31,3 +31,4 @@ countries: cn
 "Do not change plugin configs during plugin search!" = "不要在插件搜索期间更改插件配置！"
 "The plugin is already in the list:" = "插件已经在列表中："
 "The path is already in the list:" = "路径已经在列表中："
+"This action will crash the app, which is very dangerous and may cause you to lose all your unsaved data, continue?" = "该操作将会使应用崩溃，这是十分危险的，有可能会导致你丢失所有未保存的数据，继续？"

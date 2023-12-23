@@ -61,6 +61,7 @@ countries: cn
 "Developer Tool" = "开发者工具"
 "Register Project File" = "注册项目文件"
 "Unregister Project File" = "注销项目文件"
+"Make Crash" = "制造崩溃"
 "License" = "许可证"
 "About" = "关于"
 
@@ -99,5 +100,6 @@ countries: cn
 "Go to our official website." = "前往我们的官方网站。"
 "Register project file in system." = "注册项目文件到系统。"
 "Unregister project file from system." = "从系统注销项目文件。"
+"Let the application crash." = "使应用崩溃。"
 "Read open source licenses." = "阅读开源许可证。"
 "About VocalShaper." = "关于VocalShaper。"
