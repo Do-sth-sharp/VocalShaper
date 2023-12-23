@@ -344,6 +344,35 @@ private:
 		);
 	};
 
+	void clearCrashDump() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Find Crash Dump..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				auto dumpList = getAllDumpFiles();
+				if (!dumpList.isEmpty()) {
+					juce::String mes = TRANS("Found the following crash dump files. These files take up {DMPSIZE} of storage space, should they be deleted to save disk space?") + "\n";
+					size_t dumpSize = 0;
+					for (auto& i : dumpList) {
+						mes += (i.getFullPathName() + "\n");
+						dumpSize += i.getSize();
+					}
+					mes = mes.replace("{DMPSIZE}", juce::File::descriptionOfSizeInBytes(dumpSize));
+
+					if (juce::AlertWindow::showOkCancelBox(
+						juce::MessageBoxIconType::QuestionIcon, TRANS("Crash Dump File"), mes)) {
+						for (auto& i : dumpList) {
+							i.deleteFile();
+						}
+					}
+				}
+			}
+		);
+	};
+
 	void hideSplash() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -392,6 +421,14 @@ private:
 		);
 	};
 
+	void setCrashHandler() {
+		InitTaskList::getInstance()->add(
+			[] {
+				juce::SystemStats::setApplicationCrashHandler(applicationCrashHandler);
+			}
+		);
+	};
+
 public:
 	const juce::String getApplicationName() override {
 		return utils::getAudioPlatformName(); };
@@ -403,9 +440,6 @@ public:
 		/** Show Splash */
 		this->splash = std::make_unique<Splash>();
 		this->splash->setVisible(true);
-
-		/** Set Crash Handler */
-		juce::SystemStats::setApplicationCrashHandler(applicationCrashHandler);
 
 		/** Load Config */
 		this->loadConfig();
@@ -449,11 +483,17 @@ public:
 		/** Set Main Window Size */
 		this->prepareMainWindow();
 
+		/** Clear Dump File */
+		this->clearCrashDump();
+
 		/** Hide Splash */
 		this->hideSplash();
 
 		/** Load Project */
 		this->loadProject(commandLineParameters);
+
+		/** Set Crash Handler */
+		this->setCrashHandler();
 
 		/** Run Init */
 		InitTaskList::getInstance()->runNow();

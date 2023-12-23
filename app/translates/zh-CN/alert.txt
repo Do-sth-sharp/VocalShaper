@@ -9,6 +9,7 @@ countries: cn
 "Project Warning" = "项目警告"
 "Source Selector" = "源选择器"
 "Mixer Track Selector" = "混音器轨道选择器"
+"Crash Dump File" = "崩溃转储文件"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
@@ -32,3 +33,4 @@ countries: cn
 "The plugin is already in the list:" = "插件已经在列表中："
 "The path is already in the list:" = "路径已经在列表中："
 "This action will crash the app, which is very dangerous and may cause you to lose all your unsaved data, continue?" = "该操作将会使应用崩溃，这是十分危险的，有可能会导致你丢失所有未保存的数据，继续？"
+"Found the following crash dump files. These files take up {DMPSIZE} of storage space, should they be deleted to save disk space?" = "发现下列崩溃转储文件。这些文件占用了 {DMPSIZE} 的储存空间，是否要将其删除以节省磁盘空间？"

@@ -1,7 +1,7 @@
 ﻿#include "crash.h"
 
-#include <JuceHeader.h>
 #include "audioCore/AC_API.h"
+#include "ui/Utils.h"
 #include <iostream>
 #include <format>
 #include <filesystem>
@@ -30,7 +30,7 @@ void showWarningBox(const std::string& title, const std::string& message) {
 #endif
 }
 
-void applicationCrashHandler(void*) {
+void applicationCrashHandler(void* info) {
 	/** Get Time */
 	std::string time = getLocalTime();
 	std::replace(time.begin(), time.end(), ' ', '_');
@@ -39,11 +39,16 @@ void applicationCrashHandler(void*) {
 
 	/** Get File Path */
 	std::filesystem::path projPath = std::filesystem::current_path();
-	std::filesystem::path projHLPath = projPath / (time + ".vshldmp");
+	std::filesystem::path projHLPath = projPath / (time + ".vshl.dmp");
+	std::filesystem::path projLLPath = projPath / (time + ".vsll.dmp");
 
 	/** Results */
-	std::array<int, 1> results = { 0 };
+	std::array<int, 3> results = { 0 };
 	
+	/** Low Layer Recovery */
+	std::string projLLPathStr = projLLPath.string();
+	results[2] = audioCoreLowLayerDataRecovery(projLLPathStr.c_str(), info);
+
 	/** High Layer Recovery */
 	std::string projHLPathStr = projHLPath.string();
 	results[0] = audioCoreHighLayerDataRecovery(projHLPathStr.c_str());
@@ -53,6 +58,13 @@ void applicationCrashHandler(void*) {
 	/** Result */
 	std::string message = "A fatal error has occurred in the application and the program will abort.\n"
 		"The error triggered an emergency backup of the project data, and here is the result of that backup:\n"
-		+ std::string{ (results[0] == 0) ? "Saved" : "Error" } + " : " + std::string{ projHLPathStr };
+		+ std::string{ (results[2] == 0) ? "Saved" : "Error" } + " : " + std::string{ projLLPathStr } + "\n"
+		+ std::string{ (results[0] == 0) ? "Saved" : "Error" } + " : " + std::string{ projHLPathStr } + "\n";
 	showWarningBox("Crash Handler", message);
+}
+
+const juce::Array<juce::File> getAllDumpFiles() {
+	auto appDir = utils::getAppRootDir();
+	return appDir.findChildFiles(juce::File::findFiles, false,
+		"*.vsll.dmp;*.vsml.dmp;*.vshl.dmp", juce::File::FollowSymlinks::no);
 }

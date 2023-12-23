@@ -75,6 +75,6 @@ app/*.ogg
 app/*.pkf
 app/licenses/*.txt
 app/licenses/*.md
-app/*.vshldmp
-app/*.vsmldmp
-app/*.vslldmp
+app/*.vshl.dmp
+app/*.vsml.dmp
+app/*.vsll.dmp
