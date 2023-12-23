@@ -40,6 +40,7 @@ void applicationCrashHandler(void* info) {
 	/** Get File Path */
 	std::filesystem::path projPath = std::filesystem::current_path();
 	std::filesystem::path projHLPath = projPath / (time + ".vshl.dmp");
+	std::filesystem::path projMLPath = projPath / (time + ".vsml.dmp");
 	std::filesystem::path projLLPath = projPath / (time + ".vsll.dmp");
 
 	/** Results */
@@ -48,6 +49,10 @@ void applicationCrashHandler(void* info) {
 	/** Low Layer Recovery */
 	std::string projLLPathStr = projLLPath.string();
 	results[2] = audioCoreLowLayerDataRecovery(projLLPathStr.c_str(), info);
+
+	/** Mid Layer Recovery */
+	std::string projMLPathStr = projMLPath.string();
+	results[1] = audioCoreMidLayerDataRecovery(projMLPathStr.c_str());
 
 	/** High Layer Recovery */
 	std::string projHLPathStr = projHLPath.string();
@@ -59,6 +64,7 @@ void applicationCrashHandler(void* info) {
 	std::string message = "A fatal error has occurred in the application and the program will abort.\n"
 		"The error triggered an emergency backup of the project data, and here is the result of that backup:\n"
 		+ std::string{ (results[2] == 0) ? "Saved" : "Error" } + " : " + std::string{ projLLPathStr } + "\n"
+		+ std::string{ (results[1] == 0) ? "Saved" : "Error" } + " : " + std::string{ projMLPathStr } + "\n"
 		+ std::string{ (results[0] == 0) ? "Saved" : "Error" } + " : " + std::string{ projHLPathStr } + "\n";
 	showWarningBox("Crash Handler", message);
 }

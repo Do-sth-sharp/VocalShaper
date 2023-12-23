@@ -59,6 +59,11 @@ error0:
 	return ret;
 }
 
+int audioCoreMidLayerDataRecovery(const char* path) {
+	/** TODO Mid Layer */
+	return 1;
+}
+
 int audioCoreLowLayerDataRecovery(const char* path, void* info) {
 #if WIN32
 	int ret = 1;
