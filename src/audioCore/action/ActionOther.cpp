@@ -1,9 +1,9 @@
 ﻿#include "ActionOther.h"
-#include "ActionUtils.h"
 #include "ActionDispatcher.h"
 
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
+#include "../recovery/DataControl.hpp"
 #include "../Utils.h"
 
 ActionClearPlugin::ActionClearPlugin() {}
@@ -133,7 +133,7 @@ bool ActionSynthSource::doAction() {
 }
 
 ActionCloneSource::ActionCloneSource(int index)
-	: index(index) {}
+	: ACTION_DB{ index } {}
 
 bool ActionCloneSource::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -141,20 +141,23 @@ bool ActionCloneSource::doAction() {
 
 	ACTION_UNSAVE_PROJECT();
 
+	ACTION_WRITE_TYPE(ActionCloneSource);
+	ACTION_WRITE_DB();
+
 	if (auto manager = CloneableSourceManager::getInstance()) {
 		if (CloneableSourceManager::getInstance()
-			->cloneSource(this->index)) {
+			->cloneSource(ACTION_DATA(index))) {
 			juce::String result;
 
-			result += "Clone Source: [" + juce::String(this->index) + "]\n";
+			result += "Clone Source: [" + juce::String(ACTION_DATA(index)) + "]\n";
 			result += "Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n";
 
 			this->output(result);
-			return true;
+			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't Clone Source: [" + juce::String(this->index) + "]\n");
-	return false;
+	this->output("Can't Clone Source: [" + juce::String(ACTION_DATA(index)) + "]\n");
+	ACTION_RESULT(false);
 }
 
 ActionSaveSource::ActionSaveSource(
@@ -279,6 +282,7 @@ bool ActionNewProject::doAction() {
 
 	if (AudioCore::getInstance()->newProj(this->path)) {
 		ActionDispatcher::getInstance()->clearUndoList();
+		resetRecoveryMemoryBlock();
 
 		this->output("Create new project at: " + this->path + "\n");
 		return true;
@@ -288,7 +292,7 @@ bool ActionNewProject::doAction() {
 }
 
 ActionSave::ActionSave(const juce::String& name)
-	: name(name) {}
+	: ACTION_DB{ name } {}
 
 bool ActionSave::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -296,12 +300,16 @@ bool ActionSave::doAction() {
 	ACTION_CHECK_SOURCE_IO_RUNNING(
 		"Don't do this while source IO running.");
 
-	if (AudioCore::getInstance()->save(this->name)) {
-		this->output("Saved project data to: " + this->name + "\n");
-		return true;
+	ACTION_WRITE_TYPE(ActionSave);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+
+	if (AudioCore::getInstance()->save(ACTION_DATA(name))) {
+		this->output("Saved project data to: " + ACTION_DATA(name) + "\n");
+		ACTION_RESULT(true);
 	}
-	this->output("Can't save project data to: " + this->name + "\n");
-	return false;
+	this->output("Can't save project data to: " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
 }
 
 ActionLoad::ActionLoad(const juce::String& path)
@@ -319,6 +327,7 @@ bool ActionLoad::doAction() {
 
 	if (AudioCore::getInstance()->load(this->path)) {
 		ActionDispatcher::getInstance()->clearUndoList();
+		resetRecoveryMemoryBlock();
 
 		this->output("Load project data from: " + this->path + "\n");
 		return true;

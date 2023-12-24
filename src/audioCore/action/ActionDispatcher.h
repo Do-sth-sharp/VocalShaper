@@ -7,6 +7,7 @@ class ActionDispatcher final
 	: private juce::DeletedAtShutdown {
 public:
 	ActionDispatcher();
+	~ActionDispatcher();
 
 	const juce::UndoManager& getActionManager() const;
 	bool dispatch(std::unique_ptr<ActionBase> action);

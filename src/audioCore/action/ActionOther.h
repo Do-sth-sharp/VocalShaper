@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "ActionUndoableBase.h"
+#include "ActionUtils.h"
 
 class ActionClearPlugin final : public ActionBase {
 public:
@@ -133,7 +134,9 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionCloneSource)
 };
@@ -256,7 +259,9 @@ public:
 	};
 
 private:
-	const juce::String name;
+	ACTION_DATABLOCK{
+		const juce::String name;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSave)
 };

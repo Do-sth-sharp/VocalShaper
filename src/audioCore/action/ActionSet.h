@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "ActionUndoableBase.h"
+#include "ActionUtils.h"
 #include "../Utils.h"
 
 class ActionSetDeviceAudioType final : public ActionBase {
@@ -146,10 +147,12 @@ public:
 	};
 
 private:
-	const int track;
-	const float value;
+	ACTION_DATABLOCK{
+		const int track;
+		const float value;
 
-	float oldValue = 0;
+		float oldValue = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetMixerTrackGain)
 };
@@ -167,10 +170,12 @@ public:
 	};
 
 private:
-	const int track;
-	const float value;
+	ACTION_DATABLOCK{
+		const int track;
+		const float value;
 
-	float oldValue = 0;
+		float oldValue = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetMixerTrackPan)
 };
@@ -188,10 +193,12 @@ public:
 	};
 
 private:
-	const int track;
-	const float value;
+	ACTION_DATABLOCK{
+		const int track;
+		const float value;
 
-	float oldValue = 0;
+		float oldValue = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetMixerTrackSlider)
 };
@@ -227,10 +234,12 @@ public:
 	};
 
 private:
-	const int track, effect;
-	const bool bypass;
+	ACTION_DATABLOCK{
+		const int track, effect;
+		const bool bypass;
 
-	bool oldBypass = false;
+		bool oldBypass = false;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectBypass)
 };
@@ -266,10 +275,12 @@ public:
 	};
 
 private:
-	const int instr;
-	const bool bypass;
+	ACTION_DATABLOCK{
+		const int instr;
+		const bool bypass;
 
-	bool oldBypass = false;
+		bool oldBypass = false;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrBypass)
 };
@@ -287,10 +298,12 @@ public:
 	};
 
 private:
-	const int instr;
-	const int channel;
+	ACTION_DATABLOCK{
+		const int instr;
+		const int channel;
 
-	int oldChannel = -1;
+		int oldChannel = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannel)
 };
@@ -308,10 +321,12 @@ public:
 	};
 
 private:
-	const int track, effect;
-	const int channel;
+	ACTION_DATABLOCK{
+		const int track, effect;
+		const int channel;
 
-	int oldChannel = -1;
+		int oldChannel = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannel)
 };
@@ -329,10 +344,12 @@ public:
 	};
 
 private:
-	const int instr, param;
-	const float value;
+	ACTION_DATABLOCK{
+		const int instr, param;
+		const float value;
 
-	float oldValue = 0;
+		float oldValue = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrParamValue)
 };
@@ -350,10 +367,12 @@ public:
 	};
 
 private:
-	const int track, effect, param;
-	const float value;
+	ACTION_DATABLOCK{
+		const int track, effect, param;
+		const float value;
 
-	float oldValue = 0;
+		float oldValue = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamValue)
 };
@@ -371,11 +390,13 @@ public:
 	};
 
 private:
-	const int instr, param;
-	const int cc;
+	ACTION_DATABLOCK{
+		const int instr, param;
+		const int cc;
 
-	int oldParam = -1;
-	int oldCC = -1;
+		int oldParam = -1;
+		int oldCC = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrParamConnectToCC)
 };
@@ -393,11 +414,13 @@ public:
 	};
 
 private:
-	const int track, effect, param;
-	const int cc;
+	ACTION_DATABLOCK{
+		const int track, effect, param;
+		const int cc;
 
-	int oldParam = -1;
-	int oldCC = -1;
+		int oldParam = -1;
+		int oldCC = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCC)
 };
@@ -415,10 +438,12 @@ public:
 	};
 
 private:
-	const int instr;
-	const bool intercept;
+	ACTION_DATABLOCK{
+		const int instr;
+		const bool intercept;
 
-	bool oldIntercept = 0;
+		bool oldIntercept = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCIntercept)
 };
@@ -436,10 +461,12 @@ public:
 	};
 
 private:
-	const int track, effect;
-	const bool intercept;
+	ACTION_DATABLOCK{
+		const int track, effect;
+		const bool intercept;
 
-	bool oldIntercept = 0;
+		bool oldIntercept = 0;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
 };
@@ -457,10 +484,12 @@ public:
 	};
 
 private:
-	const int track;
-	const bool bypass;
+	ACTION_DATABLOCK{
+		const int track;
+		const bool bypass;
 
-	bool oldBypass = false;
+		bool oldBypass = false;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackBypass)
 };
@@ -509,8 +538,10 @@ public:
 	};
 
 private:
-	const int index;
-	const juce::String pid;
+	ACTION_DATABLOCK{
+		const int index;
+		const juce::String pid;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetSourceSynthesizer)
 };

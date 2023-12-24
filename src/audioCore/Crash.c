@@ -2,24 +2,25 @@
 #include <stdint.h>
 #include <malloc.h>
 
+#include "recovery/DataGet.h"
+
 #ifdef WIN32
 #include <Windows.h>
 #include <DbgHelp.h>
 #endif // WIN32
 
-
 extern char* audioCoreCreateProjectDataBlock();
 extern void audioCoreFreeProjectDataBlock(char* mem);
-extern int audioCoreGetProjectDataSize(const char* mem);
-extern int audioCoreCopyProjectData(char* dst, int size, const char* mem);
+extern size_t audioCoreGetProjectDataSize(const char* mem);
+extern int audioCoreCopyProjectData(char* dst, size_t size, const char* mem);
 
-int saveAsFile(const char* path, const char* data, int size) {
+static int saveAsFile(const char* path, const char* data, size_t size) {
 	int ret = 1;
 
 	FILE* outFile = fopen(path, "w");
 	if (!outFile) { goto error0; }
 
-	if (fwrite(data, size, 1, outFile) == 0) {
+	if (fwrite(data, 1, size, outFile) != size) {
 		goto error1;
 	}
 
@@ -37,7 +38,7 @@ int audioCoreHighLayerDataRecovery(const char* path) {
 	char* project = audioCoreCreateProjectDataBlock();
 	if (!project) { goto error0; }
 
-	int size = audioCoreGetProjectDataSize(project);
+	size_t size = audioCoreGetProjectDataSize(project);
 	char* data = malloc(size);
 	if (!data) { goto error1; }
 
@@ -60,8 +61,20 @@ error0:
 }
 
 int audioCoreMidLayerDataRecovery(const char* path) {
-	/** TODO Mid Layer */
-	return 1;
+	int ret = 1;
+
+	size_t size = getRecoverySize();
+	char* data = getRecoveryData();
+	if (!data) { goto error0; }
+
+	if (saveAsFile(path, data, size) != 0) {
+		goto error0;
+	}
+
+done:
+	ret = 0;
+error0:
+	return ret;
 }
 
 int audioCoreLowLayerDataRecovery(const char* path, void* info) {

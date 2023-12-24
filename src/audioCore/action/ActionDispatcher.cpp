@@ -1,9 +1,18 @@
 ﻿#include "ActionDispatcher.h"
 #include "ActionUndoableBase.h"
+#include "../recovery/DataControl.hpp"
 
 ActionDispatcher::ActionDispatcher() {
 	/** Undo Manager */
 	this->manager = std::make_unique<juce::UndoManager>();
+
+	/** Recovery */
+	initRecoveryMemoryBlock();
+}
+
+ActionDispatcher::~ActionDispatcher() {
+	/** Recovery */
+	destoryRecoveryMemoryBlock();
 }
 
 const juce::UndoManager& ActionDispatcher::getActionManager() const {

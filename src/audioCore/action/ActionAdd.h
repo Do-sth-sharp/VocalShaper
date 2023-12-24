@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "ActionUndoableBase.h"
+#include "ActionUtils.h"
 
 class ActionAddPluginBlackList final : public ActionBase {
 public:
@@ -46,7 +47,9 @@ public:
 	};
 
 private:
-	const int index, type;
+	ACTION_DATABLOCK{
+		const int index, type;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrack)
 };
@@ -64,7 +67,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrack)
 };
@@ -82,7 +87,9 @@ public:
 	};
 
 private:
-	const int srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrackInputFromDevice)
 };
@@ -100,7 +107,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrackOutput)
 };
@@ -118,8 +127,10 @@ public:
 	};
 
 private:
-	const int track, effect;
-	const juce::String pid;
+	ACTION_DATABLOCK{
+		const int track, effect;
+		const juce::String pid;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddEffect)
 };
@@ -137,7 +148,9 @@ public:
 	};
 
 private:
-	const int track, effect, srcc, dstc;
+	ACTION_DATABLOCK{
+		const int track, effect, srcc, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddEffectAdditionalInput)
 };
@@ -155,8 +168,10 @@ public:
 	};
 
 private:
-	const int index, type;
-	const juce::String pid;
+	ACTION_DATABLOCK{
+		const int index, type;
+		const juce::String pid;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddInstr)
 };
@@ -174,7 +189,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddInstrOutput)
 };
@@ -191,7 +208,9 @@ public:
 	};
 
 private:
-	const int dst;
+	ACTION_DATABLOCK{
+		const int dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddInstrMidiInput)
 };
@@ -208,7 +227,9 @@ public:
 	};
 
 private:
-	const int dst;
+	ACTION_DATABLOCK{
+		const int dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrackMidiInput)
 };
@@ -225,7 +246,9 @@ public:
 	};
 
 private:
-	const int src;
+	ACTION_DATABLOCK{
+		const int src;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMixerTrackMidiOutput)
 };
@@ -243,8 +266,10 @@ public:
 	};
 
 private:
-	const juce::String path;
-	const bool copy;
+	ACTION_DATABLOCK{
+		const juce::String path;
+		const bool copy;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddAudioSourceThenLoad)
 };
@@ -262,8 +287,11 @@ public:
 	};
 
 private:
-	const double sampleRate, length;
-	const int channels;
+	ACTION_DATABLOCK{
+		const double sampleRate;
+		const int channels;
+		const double length;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddAudioSourceThenInit)
 };
@@ -281,8 +309,10 @@ public:
 	};
 
 private:
-	const juce::String path;
-	const bool copy;
+	ACTION_DATABLOCK{
+		const juce::String path;
+		const bool copy;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddMidiSourceThenLoad)
 };
@@ -314,8 +344,10 @@ public:
 	};
 
 private:
-	const juce::String path;
-	const bool copy;
+	ACTION_DATABLOCK{
+		const juce::String path;
+		const bool copy;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSynthSourceThenLoad)
 };
@@ -347,7 +379,9 @@ public:
 	};
 
 private:
-	const int index, type;
+	ACTION_DATABLOCK{
+		const int index, type;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerTrack)
 };
@@ -365,7 +399,9 @@ public:
 	};
 
 private:
-	const int src, dst;
+	ACTION_DATABLOCK{
+		const int src, dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackMidiOutputToMixer)
 };
@@ -383,7 +419,9 @@ public:
 	};
 
 private:
-	const int src, dst;
+	ACTION_DATABLOCK{
+		const int src, dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackMidiOutputToInstr)
 };
@@ -401,7 +439,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackOutput)
 };
@@ -419,9 +459,11 @@ public:
 	};
 
 private:
-	const int track, src;
-	const double start, end, offset;
-	int index = -1;
+	ACTION_DATABLOCK{
+		const int track, src;
+		const double start, end, offset;
+		int index = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerSourceInstance)
 };
@@ -439,9 +481,11 @@ public:
 	};
 
 private:
-	const int src;
-	const double offset;
-	const int compensate;
+	ACTION_DATABLOCK{
+		const int src;
+		const double offset;
+		const int compensate;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddRecorderSourceInstance)
 };

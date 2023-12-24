@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "ActionUndoableBase.h"
+#include "ActionUtils.h"
 #include "../Utils.h"
 
 class ActionRemovePluginBlackList final : public ActionBase {
@@ -47,18 +48,20 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
 
-	utils::AudioConnectionList audioT2Trk;
-	utils::AudioConnectionList audioSrc2Trk;
-	utils::AudioConnectionList audioInstr2Trk;
-	utils::AudioConnectionList audioI2Trk;
-	utils::AudioConnectionList audioTrk2T;
-	utils::AudioConnectionList audioTrk2O;
-	utils::MidiConnectionList midiSrc2Trk;
-	utils::MidiConnectionList midiI2Trk;
-	utils::MidiConnectionList midiTrk2O;
-	juce::MemoryBlock data;
+		utils::AudioConnectionList audioT2Trk;
+		utils::AudioConnectionList audioSrc2Trk;
+		utils::AudioConnectionList audioInstr2Trk;
+		utils::AudioConnectionList audioI2Trk;
+		utils::AudioConnectionList audioTrk2T;
+		utils::AudioConnectionList audioTrk2O;
+		utils::MidiConnectionList midiSrc2Trk;
+		utils::MidiConnectionList midiI2Trk;
+		utils::MidiConnectionList midiTrk2O;
+		juce::MemoryBlock data;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrack)
 };
@@ -76,7 +79,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackSend)
 };
@@ -94,7 +99,9 @@ public:
 	};
 
 private:
-	const int srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackInputFromDevice)
 };
@@ -112,7 +119,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackOutput)
 };
@@ -130,10 +139,12 @@ public:
 	};
 
 private:
-	const int track, effect;
+	ACTION_DATABLOCK{
+		const int track, effect;
 
-	utils::AudioConnectionList additional;
-	juce::MemoryBlock data;
+		utils::AudioConnectionList additional;
+		juce::MemoryBlock data;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveEffect)
 };
@@ -151,7 +162,9 @@ public:
 	};
 
 private:
-	const int track, effect, srcc, dstc;
+	ACTION_DATABLOCK{
+		const int track, effect, srcc, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveEffectAdditionalInput)
 };
@@ -168,12 +181,14 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
 
-	utils::AudioConnectionList audioInstr2Trk;
-	utils::MidiConnectionList midiSrc2Instr;
-	utils::MidiConnectionList midiI2Instr;
-	juce::MemoryBlock data;
+		utils::AudioConnectionList audioInstr2Trk;
+		utils::MidiConnectionList midiSrc2Instr;
+		utils::MidiConnectionList midiI2Instr;
+		juce::MemoryBlock data;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstr)
 };
@@ -191,7 +206,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstrOutput)
 };
@@ -208,7 +225,9 @@ public:
 	};
 
 private:
-	const int dst;
+	ACTION_DATABLOCK{
+		const int dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstrMidiInput)
 };
@@ -226,8 +245,10 @@ public:
 	};
 
 private:
-	const int instr, cc;
-	int param = -1;
+	ACTION_DATABLOCK{
+		const int instr, cc;
+		int param = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstrParamCCConnection)
 };
@@ -245,8 +266,10 @@ public:
 	};
 
 private:
-	const int track, effect, cc;
-	int param = -1;
+	ACTION_DATABLOCK{
+		const int track, effect, cc;
+		int param = -1;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveEffectParamCCConnection)
 };
@@ -263,7 +286,9 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiInput)
 };
@@ -280,7 +305,9 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiOutput)
 };
@@ -296,7 +323,9 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSource)
 };
@@ -313,12 +342,14 @@ public:
 	};
 
 private:
-	const int index;
+	ACTION_DATABLOCK{
+		const int index;
 
-	utils::AudioConnectionList audioSrc2Trk;
-	utils::MidiConnectionList midiSrc2Instr;
-	utils::MidiConnectionList midiSrc2Trk;
-	juce::MemoryBlock data;
+		utils::AudioConnectionList audioSrc2Trk;
+		utils::MidiConnectionList midiSrc2Instr;
+		utils::MidiConnectionList midiSrc2Trk;
+		juce::MemoryBlock data;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrack)
 };
@@ -336,7 +367,9 @@ public:
 	};
 
 private:
-	const int src, dst;
+	ACTION_DATABLOCK{
+		const int src, dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToMixer)
 };
@@ -354,7 +387,9 @@ public:
 	};
 
 private:
-	const int src, dst;
+	ACTION_DATABLOCK{
+		const int src, dst;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToInstr)
 };
@@ -372,7 +407,9 @@ public:
 	};
 
 private:
-	const int src, srcc, dst, dstc;
+	ACTION_DATABLOCK{
+		const int src, srcc, dst, dstc;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
 };
@@ -390,10 +427,12 @@ public:
 	};
 
 private:
-	const int track, seq;
+	ACTION_DATABLOCK{
+		const int track, seq;
 
-	int index;
-	double start, end, offset;
+		int index;
+		double start, end, offset;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerSourceInstance)
 };
@@ -410,11 +449,13 @@ public:
 	};
 
 private:
-	const int seq;
+	ACTION_DATABLOCK{
+		const int seq;
 
-	int index;
-	double offset;
-	int compensate;
+		int index;
+		double offset;
+		int compensate;
+	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveRecorderSourceInstance)
 };
