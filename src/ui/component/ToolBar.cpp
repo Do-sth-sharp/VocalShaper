@@ -21,6 +21,10 @@ ToolBar::ToolBar()
 	/** System Status */
 	this->sysStatus = std::make_unique<SysStatusComponent>();
 	this->addAndMakeVisible(this->sysStatus.get());
+
+	/** Time */
+	this->time = std::make_unique<TimeComponent>();
+	this->addAndMakeVisible(this->time.get());
 }
 
 ToolBar::~ToolBar() {
@@ -34,22 +38,45 @@ void ToolBar::resized() {
 	auto screenSize = window->getScreenSize();
 
 	/** Size */
+	int splitWidth = this->getHeight() * 0.075;
 	int mainMenuBarHeight = this->getHeight() * 0.4;
-	int sysStatusHideWidth = this->getHeight() * 6;
-	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
+	int sysStatusHideWidth = this->getHeight() * 12;
 	int sysStatusWidth = this->getHeight() * 4;
+	int timeHideWidth = this->getHeight() * 7;
+	int timeWidth = this->getHeight() * 3;
+
+	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
+	bool timeShown = this->getWidth() > timeHideWidth;
+
+	/** Total Area */
+	auto totalArea = this->getLocalBounds();
+
+	/** System Status */
+	if (sysStatusShown) {
+		juce::Rectangle<int> sysStatusRect(
+			totalArea.getRight() - sysStatusWidth, 0,
+			sysStatusWidth, this->getHeight());
+		this->sysStatus->setBounds(sysStatusRect);
+
+		totalArea.removeFromRight(sysStatusRect.getWidth() + splitWidth);
+	}
+	this->sysStatus->setVisible(sysStatusShown);
+	
+	/** Time */
+	if (timeShown) {
+		juce::Rectangle<int> timeRect(
+			totalArea.getRight() - timeWidth, 0,
+			timeWidth, this->getHeight());
+		this->time->setBounds(timeRect);
+
+		totalArea.removeFromRight(timeRect.getWidth() + splitWidth);
+	}
+	this->time->setVisible(timeShown);
 
 	/** Main Menu Bar */
 	juce::Rectangle<int> mainMenuBarRect(
-		0, 0, this->getWidth() - (sysStatusShown ? sysStatusWidth : 0), mainMenuBarHeight);
+		0, 0, totalArea.getRight(), mainMenuBarHeight);
 	this->mainMenuBar->setBounds(mainMenuBarRect);
-
-	/** System Status */
-	juce::Rectangle<int> sysStatusRect(
-		this->getWidth() - sysStatusWidth, 0,
-		sysStatusWidth, this->getHeight());
-	this->sysStatus->setBounds(sysStatusRect);
-	this->sysStatus->setVisible(sysStatusShown);
 }
 
 void ToolBar::paint(juce::Graphics& g) {
