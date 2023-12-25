@@ -43,7 +43,7 @@ void ToolBar::resized() {
 	int sysStatusHideWidth = this->getHeight() * 12;
 	int sysStatusWidth = this->getHeight() * 4;
 	int timeHideWidth = this->getHeight() * 7;
-	int timeWidth = this->getHeight() * 3;
+	int timeWidth = this->getHeight() * 2.75;
 
 	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
 	bool timeShown = this->getWidth() > timeHideWidth;
