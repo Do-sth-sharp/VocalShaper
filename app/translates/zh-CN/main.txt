@@ -37,3 +37,10 @@ countries: cn
 "(no choices)" = "（无可用选项）"
 "Auto-size this column" = "自动调整此列大小"
 "Auto-size all columns" = "自动调整所有列大小"
+
+"Time In Seconds" = "以秒作为时间单位"
+"Time In Beats" = "以拍作为时间单位"
+
+"Playing" = "播放中"
+"Recording" = "录制中"
+"Ready" = "就绪"
