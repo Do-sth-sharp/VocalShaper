@@ -18,7 +18,8 @@ public:
 
 private:
 	double timeInSec = 0;
-	double timeInMeasure = 0, timeInBeat = 0;
+	uint64_t timeInMeasure = 0;
+	double timeInBeat = 0;
 	bool showSec = true;
 
 	using LevelValue = std::tuple<float, float>;
@@ -39,7 +40,7 @@ private:
 		float lineThickness, float splitThickness);
 	static void paintLevelMeter(
 		juce::Graphics& g, const juce::Rectangle<int>& area,
-		const LevelValue& value, float splitThickness);
+		const LevelValue& value, float splitThickness, bool logMeter);
 	static void paintRecordStatus(
 		juce::Graphics& g, const juce::Rectangle<int>& area,
 		float lineThickness, bool recording);
@@ -48,7 +49,7 @@ private:
 		float lineThickness, bool playing);
 
 	static std::tuple<int, int, int, int> parseTimeSec(double time);
-	static std::tuple<int, int, int> parseTimeBeat(double tMeasure, double tBeat);
+	static std::tuple<int, int, int> parseTimeBeat(uint64_t tMeasure, double tBeat);
 
 	juce::PopupMenu createTimeMenu() const;
 

@@ -367,4 +367,16 @@ namespace utils {
 		/** Force SIGSEGV */
 		*((char*)-1) = 'x';
 	}
+
+	float logRMS(float rms) {
+		return 20.f * std::log10f(rms);
+	}
+
+	float getLogLevelPercent(float logLevel, float total) {
+		return (logLevel - (-total)) / total;
+	}
+
+	float getLogFromPercent(float percent, float total) {
+		return (-total) + percent * total;
+	}
 }

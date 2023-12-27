@@ -90,6 +90,12 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 				{this->recorderNode->nodeID, i} });
 		}
 	}
+
+	/** Set Level Size */
+	{
+		juce::ScopedWriteLock locker(this->levelsLock);
+		this->outputLevels.resize(outputChannelNum);
+	}
 }
 
 void MainGraph::setMIDIMessageHook(
@@ -224,6 +230,11 @@ void MainGraph::clearGraph() {
 		this->removeNode(i->nodeID);
 	}
 	this->audioSourceNodeList.clear();
+}
+
+const juce::Array<float> MainGraph::getOutputLevels() const {
+	juce::ScopedReadLock locker(this->levelsLock);
+	return this->outputLevels;
 }
 
 bool MainGraph::parse(const google::protobuf::Message* data) {
@@ -567,6 +578,17 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	if (isRendering) {
 		audio.setSize(audio.getNumChannels(), audio.getNumSamples(), false, true, true);
 		midi.clear();
+	}
+
+	/** Get Level */
+	{
+		juce::ScopedTryReadLock locker(this->levelsLock);
+		if (locker.isLocked()) {
+			for (int i = 0; i < audio.getNumChannels() && i < this->outputLevels.size(); i++) {
+				this->outputLevels.getReference(i) =
+					audio.getRMSLevel(i, 0, audio.getNumSamples());
+			}
+		}
 	}
 
 	/** MIDI Output */

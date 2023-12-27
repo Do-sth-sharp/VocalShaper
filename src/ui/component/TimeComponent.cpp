@@ -1,6 +1,8 @@
 ﻿#include "TimeComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/ConfigManager.h"
+#include "../Utils.h"
+#include "../../audioCore/AC_API.h"
 
 TimeComponent::TimeComponent() {
 	/** Animate */
@@ -17,15 +19,15 @@ TimeComponent::TimeComponent() {
 }
 
 void TimeComponent::update() {
-	/** Test Value */
-	this->timeInSec = 29288.888;
-	this->timeInMeasure = 8888;
-	this->timeInBeat = 88.88;
-	this->level = { 1.f, 1.f };
-	this->isPlaying = true;
-	this->isRecording = true;
-
-	/** TODO Get Values From Audio Core */
+	/** Get Values From Audio Core */
+	std::tie(this->timeInMeasure, this->timeInBeat) = quickAPI::getTimeInBeat();
+	this->timeInSec = quickAPI::getTimeInSecond();
+	auto levels = quickAPI::getAudioOutputLevel();
+	this->level = {
+		(levels.size() > 0) ? levels[0] : 0.f,
+		(levels.size() > 1) ? levels[1] : 0.f };
+	this->isPlaying = quickAPI::isPlaying();
+	this->isRecording = quickAPI::isRecording();
 }
 
 void TimeComponent::paint(juce::Graphics& g) {
@@ -54,7 +56,7 @@ void TimeComponent::paint(juce::Graphics& g) {
 	int levelAreaWidth = this->getWidth() * 0.7;
 	int levelPaddingWidth = this->getHeight() * 0.05;
 	int levelPaddingHeight = this->getHeight() * 0.05;
-	float levelSplitSize = this->getHeight() * 0.02;
+	float levelSplitSize = this->getHeight() * 0.04;
 
 	int statusPaddingWidth = levelPaddingWidth;
 	int statusPaddingHeight = levelPaddingHeight;
@@ -240,7 +242,7 @@ void TimeComponent::paint(juce::Graphics& g) {
 		levelPaddingWidth, timeAreaHeight + levelPaddingHeight,
 		levelAreaWidth - levelPaddingWidth * 2, this->getHeight() - timeAreaHeight - levelPaddingHeight * 2);
 	TimeComponent::paintLevelMeter(
-		g, levelRect, this->level, levelSplitSize);
+		g, levelRect, this->level, levelSplitSize, true);
 
 	/** Status */
 	juce::Rectangle<int> statusRect(
@@ -311,9 +313,11 @@ void TimeComponent::mouseMove(const juce::MouseEvent& event) {
 	}
 	/** Level Meter */
 	else if (event.position.getX() < levelAreaWidth) {
-		auto& [left, right] = this->level;
+		auto [left, right] = this->level;
+		left = utils::logRMS(left);
+		right = utils::logRMS(right);
 		juce::String str =
-			juce::String{ left, 2 } + ", " + juce::String{ right, 2 };
+			juce::String{ left, 2 } + " dB, " + juce::String{ right, 2 } + " dB";
 		this->setTooltip(str);
 	}
 	/** Status */
@@ -566,7 +570,7 @@ void TimeComponent::paintDot(
 
 void TimeComponent::paintLevelMeter(
 	juce::Graphics& g, const juce::Rectangle<int>& area,
-	const LevelValue& value, float splitThickness) {
+	const LevelValue& value, float splitThickness, bool logMeter) {
 	/** Level Area */
 	float barHeight = area.getHeight() / 2.f - splitThickness / 2;
 	juce::Rectangle<float> leftRect(
@@ -581,7 +585,14 @@ void TimeComponent::paintLevelMeter(
 		0.66f, 0.86f, 1.f };
 
 	/** Level Value */
-	auto& [left, right] = value;
+	auto [left, right] = value;
+
+	/** Log Value */
+	if (logMeter) {
+		constexpr float rmsNum = 70.f;
+		left = std::max(utils::getLogLevelPercent(utils::logRMS(left)), 0.f);
+		right = std::max(utils::getLogLevelPercent(utils::logRMS(right)), 0.f);
+	}
 
 	/** Level Color */
 	std::array<juce::Colour, levelSegs.size()> levelColors{
@@ -605,6 +616,10 @@ void TimeComponent::paintLevelMeter(
 void TimeComponent::paintRecordStatus(
 	juce::Graphics& g, const juce::Rectangle<int>& area,
 	float lineThickness, bool recording) {
+	/** Status */
+	if (!recording) { return; }
+
+	/** Circle */
 	juce::Rectangle<float> contentArea(
 		area.getCentreX() - lineThickness / 2, area.getCentreY() - lineThickness / 2,
 		lineThickness, lineThickness);
@@ -614,6 +629,9 @@ void TimeComponent::paintRecordStatus(
 void TimeComponent::paintPlayStatus(
 	juce::Graphics& g, const juce::Rectangle<int>& area,
 	float lineThickness, bool playing) {
+	/** Status */
+	if (!playing) { return; }
+
 	/** Size */
 	constexpr float corner = 0.2;
 
@@ -684,7 +702,7 @@ std::tuple<int, int, int, int> TimeComponent::parseTimeSec(double time) {
 	return { hour, minute, sec, msec };
 }
 
-std::tuple<int, int, int> TimeComponent::parseTimeBeat(double tMeasure, double tBeat) {
+std::tuple<int, int, int> TimeComponent::parseTimeBeat(uint64_t tMeasure, double tBeat) {
 	int mbeat = (uint64_t)(tBeat * 100Ui64) % 100;
 	int beat = (uint64_t)std::floor(tBeat) % 100;
 	int measure = (uint64_t)std::floor(tMeasure) % 10000;

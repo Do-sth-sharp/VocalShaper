@@ -112,6 +112,8 @@ public:
 
 	void clearGraph();
 
+	const juce::Array<float> getOutputLevels() const;
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
@@ -140,6 +142,9 @@ private:
 	juce::ReadWriteLock hookLock;
 
 	juce::ReadWriteLock midiLock;
+
+	juce::Array<float> outputLevels;
+	juce::ReadWriteLock levelsLock;
 
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();

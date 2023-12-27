@@ -67,4 +67,8 @@ namespace utils {
 	std::unique_ptr<juce::XmlElement> readXml(const juce::File& file);
 
 	void panic();
+
+	float logRMS(float rms);
+	float getLogLevelPercent(float logLevel, float total = 60.f);
+	float getLogFromPercent(float percent, float total = 60.f);
 }

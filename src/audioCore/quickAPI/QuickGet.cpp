@@ -3,6 +3,7 @@
 #include "../source/CloneableSourceManager.h"
 #include "../plugin/Plugin.h"
 #include "../misc/Device.h"
+#include "../misc/PlayPosition.h"
 
 namespace quickAPI {
 	juce::Component* getAudioDebugger() {
@@ -32,6 +33,34 @@ namespace quickAPI {
 	std::unique_ptr<juce::Component> createAudioDeviceSelector() {
 		return std::unique_ptr<juce::Component>{
 			Device::createDeviceSelector().release() };
+	}
+
+	std::tuple<int64_t, double> getTimeInBeat() {
+		auto pos = PlayPosition::getInstance()->getPosition();
+		return { pos->getBarCount().orFallback(0),
+			pos->getPpqPosition().orFallback(0) - pos->getPpqPositionOfLastBarStart().orFallback(0) };
+	}
+
+	double getTimeInSecond() {
+		auto pos = PlayPosition::getInstance()->getPosition();
+		return pos->getTimeInSeconds().orFallback(0);
+	}
+
+	const juce::Array<float> getAudioOutputLevel() {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getOutputLevels();
+		}
+		return {};
+	}
+
+	bool isPlaying() {
+		auto pos = PlayPosition::getInstance()->getPosition();
+		return pos->getIsPlaying();
+	}
+
+	bool isRecording() {
+		auto pos = PlayPosition::getInstance()->getPosition();
+		return pos->getIsRecording();
 	}
 
 	const juce::StringArray getSourceNames() {

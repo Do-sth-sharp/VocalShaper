@@ -13,6 +13,12 @@ namespace quickAPI {
 	bool getAnonymousMode();
 	std::unique_ptr<juce::Component> createAudioDeviceSelector();
 
+	std::tuple<int64_t, double> getTimeInBeat();
+	double getTimeInSecond();
+	const juce::Array<float> getAudioOutputLevel();
+	bool isPlaying();
+	bool isRecording();
+
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::StringArray getSourceNames();
 	const juce::Array<TrackInfo> getMixerTrackInfos();
