@@ -13,9 +13,9 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Debug, RelWithDebInfo, Release, MinSizeRel]
+        compiler: [MSVC]
         include:
-          - os: windows-latest
-            compiler: MSVC
+          - compiler: MSVC
             c_compiler: cl
             cxx_compiler: cl
             asm_compiler: cl
@@ -60,8 +60,10 @@ jobs:
       run: .\prePacking.bat
     
     - name: Archive Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{github.sha}}-${{runner.os}}-${{matrix.build_type}}-${{runner.arch}}-${{matrix.compiler}}
+        name: VocalShaper-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
         path: |
           app/**
+        retention-days: 7
+        compression-level: 9
