@@ -1,3 +1,4 @@
+﻿%Remove Unused Files%
 del /f /s /q .\app\data\audio\blackPlugins.txt
 del /f /s /q .\app\data\audio\pluginPaths.txt
 del /f /s /q .\app\data\audio\plugins.xml

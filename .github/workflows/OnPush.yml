@@ -1,0 +1,66 @@
+﻿name: OnPush
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        build_type: [Debug, RelWithDebInfo, Release, MinSizeRel]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cxx_compiler: cl
+            asm_compiler: cl
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Link Env Windows
+      if: runner.os == 'windows-latest'
+      working-directory: ${{github.workspace}}
+      run: .\linkEnv.bat
+
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        version: 1.11.0
+
+    - name: Initialize MSVC environment
+      if: matrix.compiler == 'MSVC'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{runner.arch}}
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}
+      env:
+        CC: ${{matrix.c_compiler}}
+        CXX: ${{matrix.cxx_compiler}}
+        ASM: ${{matrix.asm_compiler}}
+      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -B out/build/${{runner.arch}}-${{matrix.build_type}} .
+
+    - name: Build
+      working-directory: ${{github.workspace}}
+      run: ninja -C out/build/${{runner.arch}}-${{matrix.build_type}} -j 2 VocalShaper
+
+    - name: Pre Packing Windows
+      if: runner.os == 'windows-latest'
+      working-directory: ${{github.workspace}}
+      run: .\prePacking.bat
+    
+    - name: Archive Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{runner.os}}-${{matrix.build_type}}-${{runner.arch}}-${{github.sha}}
+        path: |
+          app/**
