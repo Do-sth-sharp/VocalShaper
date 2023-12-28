@@ -13,6 +13,9 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")# Using /MD and /MDd on MSVC
+if (MSVC)
+    add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
+endif (MSVC)
 
 set (JUCE_USE_WINRT_MIDI OFF)# Windows 10.0.14393.0 or later
 set (JUCE_ASIO ON)
