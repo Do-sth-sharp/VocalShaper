@@ -1,0 +1,68 @@
+name: OnPush-Debug-Windows-MSVC
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+  pull_request:
+    branches: [ "develop", "main" ]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Link Env
+      working-directory: ${{github.workspace}}
+      run: .\linkEnv.bat
+
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        version: 1.11.0
+
+    - name: Initialize MSVC environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: ${{runner.arch}}
+
+    - name: Configure CMake
+      working-directory: ${{github.workspace}}
+      env:
+        CC: cl
+        CXX: cl
+        ASM: cl
+      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -B out/build/${{runner.arch}}-${{env.BUILD_TYPE}} .
+
+    - name: Build
+      working-directory: ${{github.workspace}}
+      run: ninja -C out/build/${{runner.arch}}-${{env.BUILD_TYPE}} -j 2 VocalShaper
+
+    - name: Create Cache
+      uses: actions/cache@v3
+      with:
+        key: ${{runner.os}}-${{env.BUILD_TYPE}}-${{runner.arch}}-${{github.sha}}
+        path: ${{github.workspace}}/caches
+        restore-keys: ${{runner.os}}-${{env.BUILD_TYPE}}-${{runner.arch}}-
+
+    - name: Pre Packing
+      working-directory: ${{github.workspace}}
+      run: .\prePacking.bat
+    
+    - name: Packing
+      working-directory: ${{github.workspace}}/app
+      run: tar -zcvf ../caches/${{runner.os}}-${{env.BUILD_TYPE}}-${{runner.arch}}-${{github.sha}}.tar.gz ./*
+
+    - name: Archive Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{runner.os}}-${{env.BUILD_TYPE}}-${{runner.arch}}-${{github.sha}}
+        path: |
+          app
