@@ -15,6 +15,7 @@ jobs:
         build_type: [Debug, RelWithDebInfo, Release, MinSizeRel]
         include:
           - os: windows-latest
+            compiler: MSVC
             c_compiler: cl
             cxx_compiler: cl
             asm_compiler: cl
@@ -26,7 +27,7 @@ jobs:
         submodules: recursive
 
     - name: Link Env Windows
-      if: runner.os == 'windows-latest'
+      if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}
       run: .\linkEnv.bat
 
@@ -36,7 +37,7 @@ jobs:
         version: 1.11.0
 
     - name: Initialize MSVC environment
-      if: matrix.cxx_compiler == 'cl'
+      if: matrix.compiler == 'MSVC'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{runner.arch}}
@@ -54,13 +55,13 @@ jobs:
       run: ninja -C out/build/${{runner.arch}}-${{matrix.build_type}} -j 2 VocalShaper
 
     - name: Pre Packing Windows
-      if: runner.os == 'windows-latest'
+      if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}
       run: .\prePacking.bat
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: ${{runner.os}}-${{matrix.build_type}}-${{runner.arch}}-${{github.sha}}
+        name: ${{github.sha}}-${{runner.os}}-${{matrix.build_type}}-${{runner.arch}}-${{matrix.compiler}}
         path: |
           app/**
