@@ -78,3 +78,6 @@ app/licenses/*.md
 app/*.vshl.dmp
 app/*.vsml.dmp
 app/*.vsll.dmp
+
+# Caches
+caches/**
