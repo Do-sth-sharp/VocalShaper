@@ -10,6 +10,7 @@
 #include "misc/Device.h"
 #include "project/ProjectInfoData.h"
 #include "action/ActionDispatcher.h"
+#include "uiCallback/UICallback.h"
 #include "Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -90,6 +91,7 @@ AudioCore::~AudioCore() {
 	AudioIOList::releaseInstance();
 	CloneableSourceManager::releaseInstance();
 	Plugin::releaseInstance();
+	UICallback::releaseInstance();
 }
 
 juce::Component* AudioCore::getAudioDebugger() const {

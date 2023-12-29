@@ -1,6 +1,7 @@
 ﻿#include "PluginDecorator.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
+#include "../uiCallback/UICallback.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -494,8 +495,15 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 	};
 
 	auto pluginDes = Plugin::getInstance()->findPlugin(info.id(), this->isInstr);
-	PluginLoader::getInstance()->loadPlugin(
-		*(pluginDes.get()), ptrPlugin, callback);
+	if (pluginDes) {
+		PluginLoader::getInstance()->loadPlugin(
+			*(pluginDes.get()), ptrPlugin, callback);
+	}
+	else {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Plugin",
+			"Can't find the plugin: " + info.id());
+	}
 
 	return true;
 }
