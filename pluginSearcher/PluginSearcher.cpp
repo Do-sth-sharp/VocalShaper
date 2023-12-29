@@ -31,9 +31,12 @@ void PluginSearcher::start() {
 	auto searchPathList = this->getSearchPath();
 	juce::FileSearchPath searchPath;
 	for (auto& s : searchPathList) {
-		searchPath.addPath(juce::File::getSpecialLocation(juce::File::hostApplicationPath)
-			.getChildFile(s).getFullPathName());
+		juce::String path = juce::File::getSpecialLocation(juce::File::hostApplicationPath)
+			.getParentDirectory().getChildFile(s).getFullPathName();
+		searchPath.addPath(path);
+		OUT("\033[36mPath:\033[0m " + path.toStdString());
 	}
+	OUT("");
 
 	/** Get Black List */
 	auto blackList = this->getBlackList();
@@ -44,7 +47,7 @@ void PluginSearcher::start() {
 	/** Get Dead List Path */
 	juce::File deadListFile =
 		juce::File::getSpecialLocation(juce::File::hostApplicationPath)
-		.getChildFile(this->deadPluginListPath);
+		.getParentDirectory().getChildFile(this->deadPluginListPath);
 	if (!deadListFile.exists()) {
 		deadListFile.createDirectory();
 	}
@@ -102,8 +105,8 @@ void PluginSearcher::start() {
 }
 
 const juce::File PluginSearcher::getSearchPathFile() const {
-	return juce::File::getSpecialLocation(juce::File::hostApplicationPath).getParentDirectory()
-		.getChildFile(this->pluginSearchPathListFilePath);
+	return juce::File::getSpecialLocation(juce::File::hostApplicationPath)
+		.getParentDirectory().getChildFile(this->pluginSearchPathListFilePath);
 }
 
 const juce::StringArray PluginSearcher::getSearchPath() const {
@@ -119,8 +122,8 @@ const juce::StringArray PluginSearcher::getSearchPath() const {
 }
 
 const juce::File PluginSearcher::getBlackListFile() const {
-	return juce::File::getSpecialLocation(juce::File::hostApplicationPath).getParentDirectory()
-		.getChildFile(this->pluginBlackListFilePath);
+	return juce::File::getSpecialLocation(juce::File::hostApplicationPath)
+		.getParentDirectory().getChildFile(this->pluginBlackListFilePath);
 }
 
 const juce::StringArray PluginSearcher::getBlackList() const {
@@ -145,8 +148,8 @@ void PluginSearcher::saveBlackList(const juce::StringArray& list) const {
 }
 
 const juce::File PluginSearcher::getTemporaryFile() const {
-	return juce::File::getSpecialLocation(juce::File::hostApplicationPath).getParentDirectory()
-		.getChildFile(this->pluginListTemporaryFilePath);
+	return juce::File::getSpecialLocation(juce::File::hostApplicationPath)
+		.getParentDirectory().getChildFile(this->pluginListTemporaryFilePath);
 }
 
 void PluginSearcher::saveTemporaryFile(const juce::XmlElement* data) const {
