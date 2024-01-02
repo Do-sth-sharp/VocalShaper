@@ -62,13 +62,13 @@ jobs:
     - name: Pre Packing Windows
       if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}
-      run: .\prePacking.bat .\out\build\${{runner.arch}}-${{matrix.build_type}}
+      run: .\prePacking.bat .\out\build\${{runner.arch}}-${{matrix.build_type}}\bin
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: VocalShaper-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
         path: |
-          out/build/${{runner.arch}}-${{matrix.build_type}}/**
+          out/build/${{runner.arch}}-${{matrix.build_type}}/bin/**
         retention-days: 7
         compression-level: 9
