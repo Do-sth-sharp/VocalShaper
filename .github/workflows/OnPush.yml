@@ -37,7 +37,7 @@ jobs:
           !${{github.workspace}}/vcpkg/packages
           !${{github.workspace}}/vcpkg/downloads
         key: |
-          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('${{github.workspace}}/scripts/vcpkg-manifest/vcpkg.json')}}
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
         restore-keys: |
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-
