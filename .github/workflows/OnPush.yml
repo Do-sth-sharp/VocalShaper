@@ -26,13 +26,29 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Restore vcpkg and its artifacts.
+      uses: actions/cache@v3
+      id: vcpkg-cache
+      with:
+        path: |
+          ${{github.workspace}}/vcpkg
+          !${{github.workspace}}/vcpkg/.git
+          !${{github.workspace}}/vcpkg/buildtrees
+          !${{github.workspace}}/vcpkg/packages
+          !${{github.workspace}}/vcpkg/downloads
+        key: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('${{github.workspace}}/scripts/vcpkg-manifest/vcpkg.json')}}
+        restore-keys: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-
+
     - name: Setup Ninja
       uses: ashutoshvarma/setup-ninja@master
       with:
         version: 1.11.0
 
     - name: Install vcpkg Windows
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && steps.vcpkg-cache.outputs.cache-hit != 'true'
       working-directory: ${{github.workspace}}/vcpkg
       run: .\bootstrap-vcpkg.bat
 
