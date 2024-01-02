@@ -535,7 +535,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 		auto paramCCLinks = state->mutable_paramcclinks();
 		for (int i = 0; i < this->paramCCList.size(); i++) {
 			if (this->paramCCList[i] >= 0) {
-				paramCCLinks->insert(std::make_pair(i, (uint32_t)this->paramCCList[i]));
+				paramCCLinks->insert(google::protobuf::MapPair((uint32_t)i, (uint32_t)this->paramCCList[i]));
 			}
 		}
 	}

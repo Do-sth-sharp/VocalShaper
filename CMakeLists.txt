@@ -17,92 +17,179 @@ if (MSVC)
     add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
 endif (MSVC)
 
-set (JUCE_USE_WINRT_MIDI OFF)# Windows 10.0.14393.0 or later
-set (JUCE_ASIO ON)
-set (JUCE_ASIO_DEBUGGING ON)
-set (JUCE_WINRT_MIDI_LOGGING ON)
-set (JUCE_PLUGINHOST_VST ON)
-set (JUCE_PLUGINHOST_VST3 ON)
-set (JUCE_PLUGINHOST_LV2 ON)
-set (JUCE_PLUGINHOST_ARA OFF)
-set (JUCE_CUSTOM_VST3_SDK ON)
-set (JUCE_USE_MP3AUDIOFORMAT ON)
-set (JUCE_USE_LAME_AUDIO_FORMAT ON)
-set (JUCE_DISABLE_LEAK_DETECTOR ON)# Dangerous! To avoid false alarm.
+# Packages
+find_package (juce-host-dev-kit CONFIG REQUIRED)
+find_package (SynthEngineDemo CONFIG REQUIRED)
+find_package (Lua REQUIRED)
+find_package (mp3lame CONFIG REQUIRED)
+find_package (vsp4 CONFIG REQUIRED)
+find_package (flowui CONFIG REQUIRED)
+find_package (sigar CONFIG REQUIRED)
 
-set (JUCE_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/JUCE")
-set (ASIO_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asiosdk_2.3.3_2019-06-14/common")
-set (VST_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst2-sdk-for-vst3sdk")
-set (VST3_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/vst3sdk")
+set (OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
+set (ENGINES_PATH "${OUTPUT_DIR}/synth-engines")
 
-set (JUCE_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
-set (SYNTH_ENGINE_DEMO_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/app/synth-engines")
-set (LAME_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
-set (VSP4_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
-set (FLOWUI_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/app")
+# App Configs
+file (GLOB_RECURSE APP_CONFIG_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/app/*")
+set (APP_CONFIG_OUTPUT "")
+foreach (ITEM ${APP_CONFIG_SRC})
+    string (REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/app" "${OUTPUT_DIR}" ITEM_TARGET ${ITEM})
+	list (APPEND APP_CONFIG_OUTPUT ${ITEM_TARGET})
 
-add_subdirectory (JuceLibraryCode)
-add_subdirectory (SynthEngineDemo)
-add_subdirectory (cmake-lame)
-add_subdirectory (VocalShaperProject4)
-add_subdirectory (FlowUI)
+	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
+	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-# sigar
-add_subdirectory (sigar)
-set_target_properties (sigar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+    add_custom_command (
+		OUTPUT ${ITEM_TARGET}
+		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
+		DEPENDS ${ITEM}
+		COMMENT "Copying application config file: ${ITEM}"
+		VERBATIM)
+endforeach (ITEM ${APP_CONFIG_SRC})
+add_custom_target (app_config_copy
+	DEPENDS ${APP_CONFIG_OUTPUT}
+	COMMENT "Copy application configs"
+	VERBATIM)
 
-# Mackie Control
-set (MACKIECONTROL_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libMackieControl/src")
-file (GLOB_RECURSE MACKIECONTROL_SRC CONFIGURE_DEPENDS "${MACKIECONTROL_SRC_PATH}/*.cpp")
+# RemixIcon
+file (GLOB_RECURSE REMIXICON_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/RemixIcon/icons/*.svg")
+set (REMIXICON_OUTPUT "")
+foreach (ITEM ${REMIXICON_SRC})
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/RemixIcon/icons" "${OUTPUT_DIR}/RemixIcon" ITEM_TARGET ${ITEM})
+	list (APPEND REMIXICON_OUTPUT ${ITEM_TARGET})
 
-# DMDA
-set (DMDA_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libDMDA")
-set (DMDA_SRC "${DMDA_SRC_PATH}/DMDA.cpp")
+	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
+	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-# Lua Target
-add_library (libLua SHARED lua/onelua.c)
-target_compile_definitions (libLua PUBLIC "LUA_BUILD_AS_DLL=1")
-target_include_directories (libLua PUBLIC "lua")
+    add_custom_command (
+		OUTPUT ${ITEM_TARGET}
+		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
+		DEPENDS ${ITEM}
+		COMMENT "Copying icon file: ${ITEM}"
+		VERBATIM)
+endforeach (ITEM ${REMIXICON_SRC})
+add_custom_target (remix_icon_copy
+	DEPENDS ${REMIXICON_OUTPUT}
+	COMMENT "Copy RemixIcon files"
+	VERBATIM)
 
-set_target_properties (libLua PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+# Engines
+function (engine_get_pdb var vst3_path)
+	get_filename_component (vst3_dir ${vst3_path} DIRECTORY)
+	get_filename_component (vst3_name ${vst3_path} NAME_WE)
+	set (${var} "${vst3_dir}/${vst3_name}.pdb" PARENT_SCOPE)
+endfunction (engine_get_pdb var vst3_path)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	get_target_property (ENGINE_PATH SynthEngineDemo::SynthEngineDemo IMPORTED_LOCATION_DEBUG)
+	engine_get_pdb (ENGINE_PDB_PATH ${ENGINE_PATH})
+else (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	get_target_property (ENGINE_PATH SynthEngineDemo::SynthEngineDemo IMPORTED_LOCATION_RELEASE)
+	set (ENGINE_PDB_PATH "")
+endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set (ENGINE_LIST ${ENGINE_LIST} "${ENGINE_PATH}" "${ENGINE_PDB_PATH}")
+
+set (ENGINE_OUTPUT "")
+foreach (ITEM ${ENGINE_LIST})
+	get_filename_component (ITEM_NAME ${ITEM} NAME)
+	set (ITEM_TARGET "${ENGINES_PATH}/${ITEM_NAME}")
+	list (APPEND ENGINE_OUTPUT ${ITEM_TARGET})
+
+	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
+	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
+
+    add_custom_command (
+		OUTPUT ${ITEM_TARGET}
+		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
+		DEPENDS ${ITEM}
+		COMMENT "Copying engine file: ${ITEM}"
+		VERBATIM)
+endforeach (ITEM ${ENGINE_LIST})
+add_custom_target (engines_copy
+	DEPENDS ${ENGINE_OUTPUT}
+	COMMENT "Copy engines"
+	VERBATIM)
+add_dependencies (engines_copy
+	SynthEngineDemo::SynthEngineDemo
+)
+
+# lame
+get_filename_component (LAME_CONFIG_DIR ${mp3lame_CONFIG} DIRECTORY)
+set (LAME_EXEC_PATH "${LAME_CONFIG_DIR}/../../tools/mp3lame/lame")
+if (WIN32)
+	set (LAME_EXEC_PATH "${LAME_EXEC_PATH}.exe")
+endif (WIN32)
+
+set (LAME_EXEC_OUTPUT "")
+foreach (ITEM ${LAME_EXEC_PATH})
+	get_filename_component (ITEM_NAME ${ITEM} NAME)
+	set (ITEM_PATH "${OUTPUT_DIR}")
+	set (ITEM_TARGET "${ITEM_PATH}/${ITEM_NAME}")
+	list (APPEND LAME_EXEC_OUTPUT ${ITEM_TARGET})
+
+	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
+	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
+
+    add_custom_command (
+		OUTPUT ${ITEM_TARGET}
+		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
+		DEPENDS ${ITEM}
+		COMMENT "Copying lame exec file: ${ITEM}"
+		VERBATIM)
+endforeach (ITEM ${LAME_EXEC_PATH})
+add_custom_target (lame_copy
+	DEPENDS ${LAME_EXEC_OUTPUT}
+	COMMENT "Copy lame exec file"
+	VERBATIM)
 
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
+target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::libJUCE)
 if (MSVC)
-    target_compile_definitions (PluginSearcher PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
+	target_link_options (PluginSearcher PRIVATE 
+		/SUBSYSTEM:WINDOWS
+	)
 endif (MSVC)
-target_compile_definitions (PluginSearcher PRIVATE "LUCE_DLL_BUILD=1")
-target_link_libraries (PluginSearcher PRIVATE libJUCE)
-add_dependencies (PluginSearcher libJUCE)
 
-set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 
 # File Registrar Target
 file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
 add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
+target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::libJUCE)
 if (MSVC)
-    target_compile_definitions (FileRegistrar PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
+	target_link_options (FileRegistrar PRIVATE 
+		/SUBSYSTEM:WINDOWS
+	)
 endif (MSVC)
-target_compile_definitions (FileRegistrar PRIVATE "LUCE_DLL_BUILD=1")
-target_link_libraries (FileRegistrar PRIVATE libJUCE)
-add_dependencies (FileRegistrar libJUCE)
 
-set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.c" "./src/*.rc")
-add_executable (VocalShaper ${VOCALSHAPER_SRC} ${MACKIECONTROL_SRC} ${DMDA_SRC})
-target_include_directories (VocalShaper PRIVATE ${MACKIECONTROL_SRC_PATH} ${DMDA_SRC_PATH} "./sigar/include" "./src")
+add_executable (VocalShaper ${VOCALSHAPER_SRC} "./JuceFix/fix.cpp")
+target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./sigar/include" "./src")
 target_compile_definitions (VocalShaper PRIVATE "VSP4_DLL=1")
-target_compile_definitions (VocalShaper PRIVATE "JUCE_DONT_DECLARE_PROJECTINFO=1")
-if (MSVC)
-    target_compile_definitions (VocalShaper PRIVATE "JUCE_DLL=1" "JUCE_DISABLE_DLL_ALLOCATORS=1")
-endif (MSVC)
-target_link_libraries (VocalShaper PRIVATE libJUCE libFlowUI libLua libvsp4 sigar)
+target_link_libraries (VocalShaper PRIVATE
+	juce-host-dev-kit::libJUCE
+	flowui::libFlowUI
+	${LUA_LIBRARIES}
+	vsp4::libvsp4
+	sigar::sigar
+)
 if (WIN32)
     target_link_libraries (VocalShaper PRIVATE Dbghelp)
 endif (WIN32)
-add_dependencies (VocalShaper libJUCE libFlowUI libLua PluginSearcher FileRegistrar SynthEngineDemo lame)
+if (MSVC)
+	target_link_options (VocalShaper PRIVATE 
+		/SUBSYSTEM:WINDOWS
+	)
+endif (MSVC)
 
-set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/app")
+add_dependencies (VocalShaper
+	PluginSearcher FileRegistrar lame_copy
+	app_config_copy remix_icon_copy engines_copy
+)
+
+set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")

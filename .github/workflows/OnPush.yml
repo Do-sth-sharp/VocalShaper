@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        build_type: [Debug, RelWithDebInfo, Release, MinSizeRel]
+        build_type: [Debug, Release]
         compiler: [MSVC]
         include:
           - compiler: MSVC
@@ -26,17 +26,22 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Link Env Windows
-      if: runner.os == 'Windows'
-      working-directory: ${{github.workspace}}
-      run: .\linkEnv.bat
-
     - name: Setup Ninja
       uses: ashutoshvarma/setup-ninja@master
       with:
         version: 1.11.0
 
-    - name: Initialize MSVC environment
+    - name: Install vcpkg Windows
+      if: runner.os == 'Windows'
+      working-directory: ${{github.workspace}}/vcpkg
+      run: .\bootstrap-vcpkg.bat
+
+    - name: Install Packages MSVC
+      if: runner.os == 'Windows' && matrix.compiler == 'MSVC'
+      working-directory: ${{github.workspace}}/vcpkg
+      run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-windows
+
+    - name: Initialize MSVC Environment
       if: matrix.compiler == 'MSVC'
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -48,7 +53,7 @@ jobs:
         CC: ${{matrix.c_compiler}}
         CXX: ${{matrix.cxx_compiler}}
         ASM: ${{matrix.asm_compiler}}
-      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -B out/build/${{runner.arch}}-${{matrix.build_type}} .
+      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -B out/build/${{runner.arch}}-${{matrix.build_type}} .
 
     - name: Build
       working-directory: ${{github.workspace}}
@@ -57,13 +62,13 @@ jobs:
     - name: Pre Packing Windows
       if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}
-      run: .\prePacking.bat
+      run: .\prePacking.bat .\out\build\${{runner.arch}}-${{matrix.build_type}}
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: VocalShaper-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
         path: |
-          app/**
+          out/build/${{runner.arch}}-${{matrix.build_type}}/**
         retention-days: 7
         compression-level: 9

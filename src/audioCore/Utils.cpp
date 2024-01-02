@@ -1,18 +1,5 @@
 ﻿#include "Utils.h"
 
-/** To Fix Symbol Export Error Of juce::dsp::Panner<float> */
-#include <juce_dsp/processors/juce_Panner.cpp>
-
-/**
- * To Fix Symbol Export Error Of
- * juce::AAXClientExtensions::getPluginIDForMainBusConfig and
- * juce::AAXClientExtensions::getPageFileName.
- */
-#include <juce_audio_processors/utilities/juce_AAXClientExtensions.cpp>
-
-/** To Fix Symbol Export Of juce::AudioProcessorParameterGroup */
-//#include <juce_audio_processors/processors/juce_AudioProcessorParameterGroup.cpp>
-
 /** LAME Path */
 #if JUCE_WINDOWS
 #define LAMEPath "./lame.exe"

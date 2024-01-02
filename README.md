@@ -48,39 +48,29 @@ A JUCE-based Open Source DAW. **Under development, not released.**
 - Mackie Control (TODO)
 
 ## Get Source Code
-### Windows
+### Windows (MSVC)
 ```
 git clone https://github.com/Do-sth-sharp/VocalShaper.git
 cd VocalShaper
 git checkout develop
 git submodule update --init --recursive
-.\linkEnv.bat
+cd vcpkg
+.\bootstrap-vcpkg.bat
+vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-windows
+cd ..
 ```
 
 ## Compile
 ### Windows Debug (MSVC)
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
-set CC=cl
-set CXX=cl
-set ASM=cl
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -B out/build/x64-Debug .
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -B out/build/x64-Debug .
 ninja -C out/build/x64-Debug -j 8 VocalShaper
 ```
 
 ### Windows Release (MSVC)
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
-set CC=cl
-set CXX=cl
-set ASM=cl
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -B out/build/x64-Release .
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -B out/build/x64-Release .
 ninja -C out/build/x64-Release -j 8 VocalShaper
-```
-
-## Run
-### Windows
-```
-cd app
-VocalShaper
 ```

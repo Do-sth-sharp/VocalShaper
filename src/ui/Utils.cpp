@@ -4,16 +4,6 @@
 #include <Windows.h>
 #endif //JUCE_WINDOWS
 
-/** To Fix Symbol Export Error Of juce::ScopedMessageBox */
-#include <juce_gui_basics/detail/juce_ScopedMessageBoxInterface.h>
-#include <juce_gui_basics/detail/juce_ScopedMessageBoxImpl.h>
-#include <juce_gui_basics/windows/juce_ScopedMessageBox.cpp>
-
-/** To Fix Symbol Export Error Of XmlElement::TextFormat::TextFormat() */
-namespace juce {
-	XmlElement::TextFormat::TextFormat() {}
-}
-
 namespace utils {
 	const juce::File getAppExecFile() {
 		return juce::File::getSpecialLocation(juce::File::SpecialLocationType::hostApplicationPath);

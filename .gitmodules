@@ -1,36 +1,9 @@
 [submodule "RemixIcon"]
 	path = RemixIcon
 	url = https://github.com/Remix-Design/RemixIcon.git
-[submodule "vst3sdk"]
-	path = vst3sdk
-	url = https://github.com/steinbergmedia/vst3sdk.git
-[submodule "vst2-sdk-for-vst3sdk"]
-	path = vst2-sdk-for-vst3sdk
-	url = https://github.com/Do-sth-sharp/vst2-sdk-for-vst3sdk.git
-[submodule "libMackieControl"]
-	path = libMackieControl
-	url = https://github.com/Do-sth-sharp/libMackieControl.git
-[submodule "SynthEngineDemo"]
-	path = SynthEngineDemo
-	url = https://github.com/Do-sth-sharp/SynthEngineDemo.git
-[submodule "libDMDA"]
-	path = libDMDA
-	url = https://github.com/Do-sth-sharp/libDMDA.git
-[submodule "cmake-lame"]
-	path = cmake-lame
-	url = https://github.com/Do-sth-sharp/cmake-lame.git
-[submodule "VocalShaperProject4"]
-	path = VocalShaperProject4
-	url = https://github.com/Do-sth-sharp/VocalShaperProject4.git
-[submodule "JUCE"]
-	path = JUCE
-	url = https://github.com/juce-framework/JUCE.git
-[submodule "lua"]
-	path = lua
-	url = https://github.com/lua/lua.git
-[submodule "FlowUI"]
-	path = FlowUI
-	url = https://github.com/FangCunWuChang/FlowUI.git
-[submodule "sigar"]
-	path = sigar
-	url = https://github.com/Do-sth-sharp/sigar.git
+[submodule "scripts/vcpkg"]
+	path = scripts/vcpkg
+	url = https://github.com/Do-sth-sharp/vcpkg-overlay.git
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg.git

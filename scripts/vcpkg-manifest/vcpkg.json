@@ -1,0 +1,21 @@
+﻿{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "dependencies": [
+      "protobuf",
+      "mp3lame",
+      "lua",
+      "vsp4",
+      "flowui",
+      "sigar",
+      "juce-host-dev-kit",
+      "synth-engine-demo"
+    ],
+    "vcpkg-configuration": {
+        "overlay-ports": [
+            "../vcpkg/ports"
+        ],
+        "overlay-triplets": [
+            "../vcpkg/triplets"
+        ]
+    }
+}
