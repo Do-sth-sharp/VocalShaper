@@ -26,16 +26,12 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Restore vcpkg and its artifacts.
+    - name: Restore vcpkg cache.
       uses: actions/cache@v3
       id: vcpkg-cache
       with:
         path: |
-          ${{github.workspace}}/vcpkg
-          !${{github.workspace}}/vcpkg/.git
-          !${{github.workspace}}/vcpkg/buildtrees
-          !${{github.workspace}}/vcpkg/packages
-          !${{github.workspace}}/vcpkg/downloads
+          ${{github.workspace}}/vcpkg/installed
         key: |
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
         restore-keys: |
@@ -48,7 +44,7 @@ jobs:
         version: 1.11.0
 
     - name: Install vcpkg Windows
-      if: runner.os == 'Windows' && steps.vcpkg-cache.outputs.cache-hit != 'true'
+      if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}/vcpkg
       run: .\bootstrap-vcpkg.bat
 
