@@ -124,35 +124,6 @@ add_dependencies (engines_copy
 	SynthEngineDemo::SynthEngineDemo
 )
 
-# lame
-#get_filename_component (LAME_CONFIG_DIR ${mp3lame_CONFIG} DIRECTORY)
-#set (LAME_EXEC_PATH "${LAME_CONFIG_DIR}/../../tools/mp3lame/lame")
-#if (WIN32)
-#	set (LAME_EXEC_PATH "${LAME_EXEC_PATH}.exe")
-#endif (WIN32)
-#
-#set (LAME_EXEC_OUTPUT "")
-#foreach (ITEM ${LAME_EXEC_PATH})
-#	get_filename_component (ITEM_NAME ${ITEM} NAME)
-#	set (ITEM_PATH "${OUTPUT_DIR}")
-#	set (ITEM_TARGET "${ITEM_PATH}/${ITEM_NAME}")
-#	list (APPEND LAME_EXEC_OUTPUT ${ITEM_TARGET})
-#
-#	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
-#	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
-#
-#    add_custom_command (
-#		OUTPUT ${ITEM_TARGET}
-#		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
-#		DEPENDS ${ITEM}
-#		COMMENT "Copying lame exec file: ${ITEM}"
-#		VERBATIM)
-#endforeach (ITEM ${LAME_EXEC_PATH})
-#add_custom_target (lame_copy
-#	DEPENDS ${LAME_EXEC_OUTPUT}
-#	COMMENT "Copy lame exec file"
-#	VERBATIM)
-
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
@@ -172,7 +143,11 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT
 # File Registrar Target
 file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
 add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
-target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
+if (MSVC)
+	target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
+else (MSVC)
+	target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core-static)#To avoid "[[deprecated]] __attribute__ ((visibility ("default")))" failure.
+endif (MSVC)
 if (MSVC)
 	target_link_options (FileRegistrar PRIVATE 
 		/SUBSYSTEM:WINDOWS
