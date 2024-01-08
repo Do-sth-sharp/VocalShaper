@@ -15,9 +15,11 @@ del /f /s /q %1\synth-engines\*.ipdb
 del /f /s /q %1\synth-engines\*.exp
 del /f /s /q %1\synth-engines\*.ilk
 del /f /s /q %1\synth-engines\*.lib
+del /f /s /q %1\synth-engines\*.a
 
 del /f /s /q %1\*.iobj
 del /f /s /q %1\*.ipdb
 del /f /s /q %1\*.exp
 del /f /s /q %1\*.ilk
 del /f /s /q %1\*.lib
+del /f /s /q %1\*.a

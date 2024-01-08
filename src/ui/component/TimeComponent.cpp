@@ -636,12 +636,20 @@ void TimeComponent::paintPlayStatus(
 	constexpr float corner = 0.2;
 
 	float verSize = lineThickness;
+#if JUCE_MSVC
 	float horSize = verSize / 2 * std::sqrtf(3.f);
+#else //JUCE_MSVC
+	float horSize = verSize / 2 * std::sqrt(3.f);
+#endif //JUCE_MSVC
 	float halfVerSize = verSize / 2;
 	float halfHorSize = horSize / 2;
 	float cornerVerSize = corner * verSize;
 	float cornerHorSize = corner * horSize;
-	float cornerR = cornerVerSize / sqrtf(3.f);
+#if JUCE_MSVC
+	float cornerR = cornerVerSize / std::sqrtf(3.f);
+#else //JUCE_MSVC
+	float cornerR = cornerVerSize / std::sqrt(3.f);
+#endif //JUCE_MSVC
 
 	/** Key Points */
 	juce::Point<float> p00(
@@ -694,7 +702,7 @@ void TimeComponent::paintPlayStatus(
 }
 
 std::tuple<int, int, int, int> TimeComponent::parseTimeSec(double time) {
-	int msec = (uint64_t)(time * 1000Ui64) % 1000;
+	int msec = (uint64_t)(time * (uint64_t)1000) % 1000;
 	int sec = (uint64_t)std::floor(time) % 60;
 	int minute = ((uint64_t)std::floor(time) / 60) % 60;
 	int hour = time / 3600;
@@ -703,7 +711,7 @@ std::tuple<int, int, int, int> TimeComponent::parseTimeSec(double time) {
 }
 
 std::tuple<int, int, int> TimeComponent::parseTimeBeat(uint64_t tMeasure, double tBeat) {
-	int mbeat = (uint64_t)(tBeat * 100Ui64) % 100;
+	int mbeat = (uint64_t)(tBeat * (uint64_t)100) % 100;
 	int beat = (uint64_t)std::floor(tBeat) % 100;
 	int measure = (uint64_t)std::floor(tMeasure) % 10000;
 

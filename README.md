@@ -60,17 +60,44 @@ vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./ins
 cd ..
 ```
 
+### Windows (MinGW)
+```
+git clone https://github.com/Do-sth-sharp/VocalShaper.git
+cd VocalShaper
+git checkout develop
+git submodule update --init --recursive
+cd vcpkg
+.\bootstrap-vcpkg.bat
+vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
+cd ..
+```
+
 ## Compile
 ### Windows Debug (MSVC)
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -B out/build/x64-Debug .
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-windows -B out/build/x64-Debug-MSVC .
 ninja -C out/build/x64-Debug -j 8 VocalShaper
 ```
 
 ### Windows Release (MSVC)
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -B out/build/x64-Release .
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-windows -B out/build/x64-Release-MSVC .
 ninja -C out/build/x64-Release -j 8 VocalShaper
 ```
+
+### Windows Debug (MinGW)
+```
+set CC=gcc
+set CXX=c++
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-mingw-dynamic -B out/build/x64-Debug-MinGW .
+ninja -C out/build/x64-Debug -j 8 VocalShaper
+```
+
+### Windows Release (MinGW)
+```
+set CC=gcc
+set CXX=c++
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-mingw-dynamic -B out/build/x64-Release-MinGW .
+ninja -C out/build/x64-Release -j 8 VocalShaper

@@ -359,7 +359,11 @@ namespace utils {
 	}
 
 	float logRMS(float rms) {
+#if JUCE_MSVC
 		return 20.f * std::log10f(rms);
+#else //JUCE_MSVC
+		return 20.f * std::log10(rms);
+#endif //JUCE_MSVC
 	}
 
 	float getLogLevelPercent(float logLevel, float total) {

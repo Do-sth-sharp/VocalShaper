@@ -15,18 +15,12 @@
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-class AudioDeviceChangeListener : public juce::ChangeListener {
-public:
-	AudioDeviceChangeListener(AudioCore* parent) : parent(parent) {};
-	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
-		if (parent) {
-			/** Update Audio Buses */
-			parent->updateAudioBuses();
-		}
-	};
-
-private:
-	AudioCore* const parent = nullptr;
+AudioDeviceChangeListener::AudioDeviceChangeListener(AudioCore* parent) : parent(parent) {};
+void AudioDeviceChangeListener::changeListenerCallback(juce::ChangeBroadcaster* /*source*/) {
+	if (parent) {
+		/** Update Audio Buses */
+		parent->updateAudioBuses();
+	}
 };
 
 AudioCore::AudioCore() {

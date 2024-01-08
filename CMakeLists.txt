@@ -17,11 +17,24 @@ if (MSVC)
     add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
 endif (MSVC)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (COMPILE_DEBUG_DEF "DEBUG=1" "_DEBUG=1")
+else (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (COMPILE_DEBUG_DEF "NDEBUG=1")
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (WIN32)
+	set (COMPILE_SYS_DEF "WIN32=1" "WIN64=1")
+elseif (UNIX AND NOT APPLE)
+	set (COMPILE_SYS_DEF "LINUX=1")
+elseif (APPLE)
+	set (COMPILE_SYS_DEF "MACOS=1" "DARWIN=1")
+endif ()
+
 # Packages
 find_package (juce-host-dev-kit CONFIG REQUIRED)
 find_package (SynthEngineDemo CONFIG REQUIRED)
 find_package (Lua REQUIRED)
-find_package (mp3lame CONFIG REQUIRED)
+find_package (cmake-lame CONFIG REQUIRED)
 find_package (vsp4 CONFIG REQUIRED)
 find_package (flowui CONFIG REQUIRED)
 find_package (sigar CONFIG REQUIRED)
@@ -87,7 +100,10 @@ else (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	get_target_property (ENGINE_PATH SynthEngineDemo::SynthEngineDemo IMPORTED_LOCATION_RELEASE)
 	set (ENGINE_PDB_PATH "")
 endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-set (ENGINE_LIST ${ENGINE_LIST} "${ENGINE_PATH}" "${ENGINE_PDB_PATH}")
+set (ENGINE_LIST ${ENGINE_LIST} "${ENGINE_PATH}")
+if (MSVC)
+	set (ENGINE_LIST ${ENGINE_LIST} "${ENGINE_PDB_PATH}")
+endif (MSVC)
 
 set (ENGINE_OUTPUT "")
 foreach (ITEM ${ENGINE_LIST})
@@ -114,38 +130,43 @@ add_dependencies (engines_copy
 )
 
 # lame
-get_filename_component (LAME_CONFIG_DIR ${mp3lame_CONFIG} DIRECTORY)
-set (LAME_EXEC_PATH "${LAME_CONFIG_DIR}/../../tools/mp3lame/lame")
-if (WIN32)
-	set (LAME_EXEC_PATH "${LAME_EXEC_PATH}.exe")
-endif (WIN32)
-
-set (LAME_EXEC_OUTPUT "")
-foreach (ITEM ${LAME_EXEC_PATH})
-	get_filename_component (ITEM_NAME ${ITEM} NAME)
-	set (ITEM_PATH "${OUTPUT_DIR}")
-	set (ITEM_TARGET "${ITEM_PATH}/${ITEM_NAME}")
-	list (APPEND LAME_EXEC_OUTPUT ${ITEM_TARGET})
-
-	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
-	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
-
-    add_custom_command (
-		OUTPUT ${ITEM_TARGET}
-		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
-		DEPENDS ${ITEM}
-		COMMENT "Copying lame exec file: ${ITEM}"
-		VERBATIM)
-endforeach (ITEM ${LAME_EXEC_PATH})
-add_custom_target (lame_copy
-	DEPENDS ${LAME_EXEC_OUTPUT}
-	COMMENT "Copy lame exec file"
-	VERBATIM)
+#get_filename_component (LAME_CONFIG_DIR ${mp3lame_CONFIG} DIRECTORY)
+#set (LAME_EXEC_PATH "${LAME_CONFIG_DIR}/../../tools/mp3lame/lame")
+#if (WIN32)
+#	set (LAME_EXEC_PATH "${LAME_EXEC_PATH}.exe")
+#endif (WIN32)
+#
+#set (LAME_EXEC_OUTPUT "")
+#foreach (ITEM ${LAME_EXEC_PATH})
+#	get_filename_component (ITEM_NAME ${ITEM} NAME)
+#	set (ITEM_PATH "${OUTPUT_DIR}")
+#	set (ITEM_TARGET "${ITEM_PATH}/${ITEM_NAME}")
+#	list (APPEND LAME_EXEC_OUTPUT ${ITEM_TARGET})
+#
+#	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
+#	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
+#
+#    add_custom_command (
+#		OUTPUT ${ITEM_TARGET}
+#		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
+#		DEPENDS ${ITEM}
+#		COMMENT "Copying lame exec file: ${ITEM}"
+#		VERBATIM)
+#endforeach (ITEM ${LAME_EXEC_PATH})
+#add_custom_target (lame_copy
+#	DEPENDS ${LAME_EXEC_OUTPUT}
+#	COMMENT "Copy lame exec file"
+#	VERBATIM)
 
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
-target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::libJUCE)
+if (MSVC)
+	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full)
+else (MSVC)
+	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full-static)
+endif (MSVC)
+target_compile_definitions (PluginSearcher PRIVATE ${COMPILE_DEBUG_DEF} ${COMPILE_SYS_DEF})
 if (MSVC)
 	target_link_options (PluginSearcher PRIVATE 
 		/SUBSYSTEM:WINDOWS
@@ -157,7 +178,8 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT
 # File Registrar Target
 file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
 add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
-target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::libJUCE)
+target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
+target_compile_definitions (FileRegistrar PRIVATE ${COMPILE_DEBUG_DEF} ${COMPILE_SYS_DEF})
 if (MSVC)
 	target_link_options (FileRegistrar PRIVATE 
 		/SUBSYSTEM:WINDOWS
@@ -170,14 +192,18 @@ set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTP
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.c" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} "./JuceFix/fix.cpp")
 target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./sigar/include" "./src")
-target_compile_definitions (VocalShaper PRIVATE "VSP4_DLL=1")
+target_compile_definitions (VocalShaper PRIVATE ${COMPILE_DEBUG_DEF} ${COMPILE_SYS_DEF})
 target_link_libraries (VocalShaper PRIVATE
-	juce-host-dev-kit::libJUCE
-	flowui::libFlowUI
+	flowui::flowui
 	${LUA_LIBRARIES}
-	vsp4::libvsp4
+	vsp4::vsp4
 	sigar::sigar
 )
+if (MSVC)
+	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
+else (MSVC)
+	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full-static)
+endif (MSVC)
 if (WIN32)
     target_link_libraries (VocalShaper PRIVATE Dbghelp)
 endif (WIN32)
@@ -188,7 +214,7 @@ if (MSVC)
 endif (MSVC)
 
 add_dependencies (VocalShaper
-	PluginSearcher FileRegistrar lame_copy
+	PluginSearcher FileRegistrar cmake-lame::lame#lame_copy
 	app_config_copy remix_icon_copy engines_copy
 )
 

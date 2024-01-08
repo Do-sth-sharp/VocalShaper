@@ -275,19 +275,19 @@ bool SysStatusComponent::getAlert(
 juce::String SysStatusComponent::getValueText(
 	const juce::String& name, double value) const {
 	if (name == "mem-process") {
-		if (value < 1024) {
+		if (value < (uint64_t)1024) {
 			return juce::String{ value, 2, false } + "B";
 		}
-		if (value < (1024 * 1024)) {
-			return juce::String{ value / 1024, 2, false } + "KB";
+		if (value < ((uint64_t)1024 * 1024)) {
+			return juce::String{ value / (uint64_t)1024, 2, false } + "KB";
 		}
-		if (value < (1024 * 1024 * 1024)) {
-			return juce::String{ value / (1024 * 1024), 2, false } + "MB";
+		if (value < ((uint64_t)1024 * 1024 * 1024)) {
+			return juce::String{ value / ((uint64_t)1024 * 1024), 2, false } + "MB";
 		}
-		if (value < (1024 * 1024 * 1024 * 1024)) {
-			return juce::String{ value / (1024 * 1024 * 1024), 2, false } + "GB";
+		if (value < ((uint64_t)1024 * 1024 * 1024 * 1024)) {
+			return juce::String{ value / ((uint64_t)1024 * 1024 * 1024), 2, false } + "GB";
 		}
-		return juce::String{ value / (1024 * 1024 * 1024 * 1024), 2, false } + "TB";
+		return juce::String{ value / ((uint64_t)1024 * 1024 * 1024 * 1024), 2, false } + "TB";
 	}
 
 	return juce::String{ value * 100, 2, false } + "%";

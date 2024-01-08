@@ -13,12 +13,16 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Debug, Release]
-        compiler: [MSVC]
+        compiler: [MSVC, MinGW]
         include:
           - compiler: MSVC
             c_compiler: cl
             cxx_compiler: cl
             asm_compiler: cl
+          - compiler: MinGW
+            c_compiler: gcc
+            cxx_compiler: c++
+            asm_compiler: ''
 
     steps:
     - name: Checkout
@@ -43,6 +47,13 @@ jobs:
       with:
         version: 1.11.0
 
+    - name: Install MinGW
+      if: matrix.compiler == 'MinGW'
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+        static: 0
+
     - name: Install vcpkg Windows
       if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}/vcpkg
@@ -53,34 +64,49 @@ jobs:
       working-directory: ${{github.workspace}}/vcpkg
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-windows
 
+    - name: Install Packages MSVC
+      if: runner.os == 'Windows' && matrix.compiler == 'MinGW'
+      working-directory: ${{github.workspace}}/vcpkg
+      run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
+
     - name: Initialize MSVC Environment
       if: matrix.compiler == 'MSVC'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{runner.arch}}
 
-    - name: Configure CMake
+    - name: Configure CMake MSVC
+      if: runner.os == 'Windows' && matrix.compiler == 'MSVC'
       working-directory: ${{github.workspace}}
       env:
         CC: ${{matrix.c_compiler}}
         CXX: ${{matrix.cxx_compiler}}
         ASM: ${{matrix.asm_compiler}}
-      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -B out/build/${{runner.arch}}-${{matrix.build_type}} .
+      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-windows -B out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}} .
+
+    - name: Configure CMake MinGW
+      if: runner.os == 'Windows' && matrix.compiler == 'MinGW'
+      working-directory: ${{github.workspace}}
+      env:
+        CC: ${{matrix.c_compiler}}
+        CXX: ${{matrix.cxx_compiler}}
+        ASM: ${{matrix.asm_compiler}}
+      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-mingw-dynamic -B out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}} .
 
     - name: Build
       working-directory: ${{github.workspace}}
-      run: ninja -C out/build/${{runner.arch}}-${{matrix.build_type}} -j 2 VocalShaper
+      run: ninja -C out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}} -j 2 VocalShaper
 
     - name: Pre Packing Windows
       if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}
-      run: .\prePacking.bat .\out\build\${{runner.arch}}-${{matrix.build_type}}\bin
+      run: .\prePacking.bat .\out\build\${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}\bin
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: VocalShaper-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
         path: |
-          out/build/${{runner.arch}}-${{matrix.build_type}}/bin/**
+          out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/**
         retention-days: 7
         compression-level: 9

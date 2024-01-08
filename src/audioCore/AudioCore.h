@@ -11,10 +11,19 @@
 #include "misc/MackieControlHub.h"
 #include "project/Serializable.h"
 
-class AudioDeviceChangeListener;
+class AudioCore;
 namespace audioCommand {
 	class CommandBase;
 }
+
+class AudioDeviceChangeListener : public juce::ChangeListener {
+public:
+	AudioDeviceChangeListener(AudioCore* parent);
+	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override;
+
+private:
+	AudioCore* const parent = nullptr;
+};
 
 class AudioCore final 
 	: private juce::DeletedAtShutdown, public Serializable {
