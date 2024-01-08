@@ -7,6 +7,13 @@
 
 #include "../source/CloneableSourceManagerTemplates.h"
 
+template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableAudioSource>(
+	const juce::String& path, bool copy);
+template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableMIDISource>(
+	const juce::String& path, bool copy);
+template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableSynthSource>(
+	const juce::String& path, bool copy);
+
 ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
 	: plugin(plugin) {}
 
