@@ -17,17 +17,12 @@ if (MSVC)
     add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
 endif (MSVC)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set (COMPILE_DEBUG_DEF "DEBUG=1" "_DEBUG=1")
-else (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set (COMPILE_DEBUG_DEF "NDEBUG=1")
-endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 if (WIN32)
-	set (COMPILE_SYS_DEF "WIN32=1" "WIN64=1")
+	set (COMPILE_SYS_DEF "WIN32=1")
 elseif (UNIX AND NOT APPLE)
 	set (COMPILE_SYS_DEF "LINUX=1")
 elseif (APPLE)
-	set (COMPILE_SYS_DEF "MACOS=1" "DARWIN=1")
+	set (COMPILE_SYS_DEF "DARWIN=1")
 endif ()
 
 # Packages
@@ -166,7 +161,6 @@ if (MSVC)
 else (MSVC)
 	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full-static)
 endif (MSVC)
-target_compile_definitions (PluginSearcher PRIVATE ${COMPILE_DEBUG_DEF} ${COMPILE_SYS_DEF})
 if (MSVC)
 	target_link_options (PluginSearcher PRIVATE 
 		/SUBSYSTEM:WINDOWS
@@ -179,7 +173,6 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT
 file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
 add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
 target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
-target_compile_definitions (FileRegistrar PRIVATE ${COMPILE_DEBUG_DEF} ${COMPILE_SYS_DEF})
 if (MSVC)
 	target_link_options (FileRegistrar PRIVATE 
 		/SUBSYSTEM:WINDOWS
@@ -192,7 +185,7 @@ set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTP
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.c" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} "./JuceFix/fix.cpp")
 target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./sigar/include" "./src")
-target_compile_definitions (VocalShaper PRIVATE ${COMPILE_DEBUG_DEF} ${COMPILE_SYS_DEF})
+target_compile_definitions (VocalShaper PRIVATE ${COMPILE_SYS_DEF})
 target_link_libraries (VocalShaper PRIVATE
 	flowui::flowui
 	${LUA_LIBRARIES}
