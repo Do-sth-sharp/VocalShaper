@@ -27,8 +27,10 @@ jobs:
         path: |
           ${{github.workspace}}/vcpkg/installed
         key: |
-          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/**/portfile.cmake')}}-${{hashFiles('scripts/**/vcpkg.json')}}-${{github.sha}}
         restore-keys: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/**/portfile.cmake')}}-${{hashFiles('scripts/**/vcpkg.json')}}-
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/**/portfile.cmake')}}-
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-
 
@@ -58,15 +60,6 @@ jobs:
       if: runner.os == 'Windows' && matrix.compiler == 'MinGW'
       working-directory: ${{github.workspace}}/vcpkg
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
-
-    - name: Save vcpkg Cache
-      uses: actions/cache/save@v3
-      id: vcpkg-cache-save
-      with:
-        path: |
-          ${{github.workspace}}/vcpkg/installed
-        key: |
-          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
 
     - name: Archive vcpkg Logs
       if: ${{ !cancelled() }}
@@ -111,8 +104,10 @@ jobs:
         path: |
           ${{github.workspace}}/vcpkg/installed
         key: |
-          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/**/portfile.cmake')}}-${{hashFiles('scripts/**/vcpkg.json')}}-${{github.sha}}
         restore-keys: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/**/portfile.cmake')}}-${{hashFiles('scripts/**/vcpkg.json')}}-
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/**/portfile.cmake')}}-
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-
           vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-
 
