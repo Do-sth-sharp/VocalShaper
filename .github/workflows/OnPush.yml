@@ -59,6 +59,15 @@ jobs:
       working-directory: ${{github.workspace}}/vcpkg
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
 
+    - name: Save vcpkg Cache
+      uses: actions/cache/save@v3
+      id: vcpkg-cache-save
+      with:
+        path: |
+          ${{github.workspace}}/vcpkg/installed
+        key: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
+
     - name: Archive vcpkg Logs
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
