@@ -3,7 +3,6 @@
 #include "audioCore/AC_API.h"
 #include "ui/Utils.h"
 #include <iostream>
-#include <format>
 #include <filesystem>
 
 #if JUCE_WINDOWS
@@ -11,13 +10,12 @@
 #endif //JUCE_WINDOWS
 
 std::string getLocalTime() {
-	time_t nowtime;
-	time(&nowtime);
-	tm p;
-	localtime_s(&p, &nowtime);
+	time_t nowTime;
+	time(&nowTime);
 
-	return std::format("{}-{}-{} {}:{}:{}",
-		p.tm_year + 1900, p.tm_mon + 1, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
+	std::stringstream timeStr;
+	timeStr << std::put_time(std::localtime(&nowTime), "%F %T");
+	return timeStr.str();
 }
 
 void showWarningBox(const std::string& title, const std::string& message) {
