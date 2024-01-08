@@ -5,24 +5,14 @@ on:
     branches: [ "develop", "main" ]
 
 jobs:
-  build:
+  build-package:
     runs-on: ${{matrix.os}}
 
     strategy:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        build_type: [Debug, Release]
         compiler: [MSVC, MinGW]
-        include:
-          - compiler: MSVC
-            c_compiler: cl
-            cxx_compiler: cl
-            asm_compiler: cl
-          - compiler: MinGW
-            c_compiler: gcc
-            cxx_compiler: c++
-            asm_compiler: ''
 
     steps:
     - name: Checkout
@@ -30,7 +20,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Restore vcpkg cache.
+    - name: Restore vcpkg Cache
       uses: actions/cache@v3
       id: vcpkg-cache
       with:
@@ -73,11 +63,66 @@ jobs:
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
-        name: vcpkglogs-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
+        name: vcpkglogs-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{github.sha}}
         path: |
           vcpkg/buildtrees/*/*.log
         retention-days: 7
         compression-level: 9
+
+  build:
+    needs: [build-package]
+    runs-on: ${{matrix.os}}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        build_type: [Debug, Release]
+        compiler: [MSVC, MinGW]
+        include:
+          - compiler: MSVC
+            c_compiler: cl
+            cxx_compiler: cl
+            asm_compiler: cl
+          - compiler: MinGW
+            c_compiler: gcc
+            cxx_compiler: c++
+            asm_compiler: ''
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Restore vcpkg Cache
+      uses: actions/cache@v3
+      id: vcpkg-cache
+      with:
+        path: |
+          ${{github.workspace}}/vcpkg/installed
+        key: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-${{hashFiles('scripts/vcpkg-manifest/vcpkg.json')}}
+        restore-keys: |
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-${{github.ref_name}}-
+          vcpkg-${{runner.arch}}-${{matrix.compiler}}-${{runner.os}}-
+
+    - name: Setup Ninja
+      uses: ashutoshvarma/setup-ninja@master
+      with:
+        version: 1.11.0
+
+    - name: Install MinGW
+      if: matrix.compiler == 'MinGW'
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+        static: 0
+
+    - name: Install vcpkg Windows
+      if: runner.os == 'Windows'
+      working-directory: ${{github.workspace}}/vcpkg
+      run: .\bootstrap-vcpkg.bat
 
     - name: Initialize MSVC Environment
       if: matrix.compiler == 'MSVC'
