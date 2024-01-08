@@ -64,10 +64,20 @@ jobs:
       working-directory: ${{github.workspace}}/vcpkg
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-windows
 
-    - name: Install Packages MSVC
+    - name: Install Packages MinGW
       if: runner.os == 'Windows' && matrix.compiler == 'MinGW'
       working-directory: ${{github.workspace}}/vcpkg
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
+
+    - name: Archive vcpkg Logs
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: vcpkglogs-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
+        path: |
+          vcpkg/buildtrees/*/*.log
+        retention-days: 7
+        compression-level: 9
 
     - name: Initialize MSVC Environment
       if: matrix.compiler == 'MSVC'
