@@ -17,7 +17,7 @@ ControllerComponent::ControllerComponent() {
 	this->pauseIcon = flowUI::IconManager::getSVG(
 		utils::getIconFile("Media", "pause-fill").getFullPathName());
 	this->pauseIcon->replaceColour(juce::Colours::black,
-		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
 	this->stopIcon = flowUI::IconManager::getSVG(
 		utils::getIconFile("Media", "stop-fill").getFullPathName());
 	this->stopIcon->replaceColour(juce::Colours::black,

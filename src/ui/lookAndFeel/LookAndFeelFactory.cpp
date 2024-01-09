@@ -96,7 +96,7 @@ void LookAndFeelFactory::initialise() {
 	this->controllerLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 	this->controllerLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
-		ColorMap::getInstance()->get("ThemeColorB9"));
+		ColorMap::getInstance()->get("ThemeColorB8"));
 	this->controllerLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->controllerLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
