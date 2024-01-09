@@ -59,6 +59,10 @@ namespace utils {
 		return getAppRootDir().getChildFile("./licenses/");
 	}
 
+	const juce::File getIconDir() {
+		return getAppRootDir().getChildFile("./RemixIcon/");
+	}
+
 	const juce::File getConfigDir() {
 		return getDataDir().getChildFile("./config/");
 	}
@@ -73,6 +77,10 @@ namespace utils {
 
 	const juce::File getTransRootDir(const juce::String& name) {
 		return getTransDir().getChildFile("./" + name + "/");
+	}
+
+	const juce::File getIconClassDir(const juce::String& name) {
+		return getIconDir().getChildFile("./" + name + "/");
 	}
 
 	const juce::File getConfigFile(const juce::String& name,
@@ -117,6 +125,12 @@ namespace utils {
 	const juce::File getLayoutFile(const juce::String& name,
 		const juce::String& type) {
 		return getLayoutDir().getChildFile(name + type);
+	}
+
+	const juce::File getIconFile(
+		const juce::String& className, const juce::String& name,
+		const juce::String& type) {
+		return getIconClassDir(className).getChildFile(name + type);
 	}
 
 	const juce::File getPluginBlackListFile(

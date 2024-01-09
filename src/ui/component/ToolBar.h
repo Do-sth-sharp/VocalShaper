@@ -6,6 +6,7 @@
 #include "MenuBarComponent.h"
 #include "SysStatusComponent.h"
 #include "TimeComponent.h"
+#include "ControllerComponent.h"
 
 class ToolBar final : public flowUI::FlowComponent {
 public:
@@ -20,6 +21,7 @@ private:
 	std::unique_ptr<MenuBarComponent> mainMenuBar = nullptr;
 	std::unique_ptr<SysStatusComponent> sysStatus = nullptr;
 	std::unique_ptr<TimeComponent> time = nullptr;
+	std::unique_ptr<ControllerComponent> controller = nullptr;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ToolBar)
 };

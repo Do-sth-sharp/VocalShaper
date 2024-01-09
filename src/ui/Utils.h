@@ -15,11 +15,13 @@ namespace utils {
 	const juce::File getTransDir();
 	const juce::File getDataDir();
 	const juce::File getLicenseDir();
+	const juce::File getIconDir();
 
 	const juce::File getConfigDir();
 	const juce::File getAudioDir();
 	const juce::File getThemeRootDir(const juce::String& name);
 	const juce::File getTransRootDir(const juce::String& name);
+	const juce::File getIconClassDir(const juce::String& name);
 
 	const juce::File getConfigFile(const juce::String& name,
 		const juce::String& type = ".json");
@@ -38,6 +40,9 @@ namespace utils {
 		const juce::String& file = "config.json");
 	const juce::File getLayoutFile(const juce::String& name,
 		const juce::String& type = ".json");
+	const juce::File getIconFile(
+		const juce::String& className, const juce::String& name,
+		const juce::String& type = ".svg");
 
 	const juce::File getPluginBlackListFile(
 		const juce::String& file = "blackPlugins.txt");

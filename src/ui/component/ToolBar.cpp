@@ -25,6 +25,10 @@ ToolBar::ToolBar()
 	/** Time */
 	this->time = std::make_unique<TimeComponent>();
 	this->addAndMakeVisible(this->time.get());
+
+	/** Controller */
+	this->controller = std::make_unique<ControllerComponent>();
+	this->addAndMakeVisible(this->controller.get());
 }
 
 ToolBar::~ToolBar() {
@@ -40,13 +44,16 @@ void ToolBar::resized() {
 	/** Size */
 	int splitWidth = this->getHeight() * 0.075;
 	int mainMenuBarHeight = this->getHeight() * 0.4;
-	int sysStatusHideWidth = this->getHeight() * 12;
+	int sysStatusHideWidth = this->getHeight() * 14;
 	int sysStatusWidth = this->getHeight() * 4;
 	int timeHideWidth = this->getHeight() * 7;
 	int timeWidth = this->getHeight() * 2.75;
+	int controllerHideWidth = this->getHeight() * 10;
+	int controllerWidth = this->getHeight() * 3.3;
 
 	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
 	bool timeShown = this->getWidth() > timeHideWidth;
+	bool controllerShown = this->getWidth() > controllerHideWidth;
 
 	/** Total Area */
 	auto totalArea = this->getLocalBounds();
@@ -72,6 +79,17 @@ void ToolBar::resized() {
 		totalArea.removeFromRight(timeRect.getWidth() + splitWidth);
 	}
 	this->time->setVisible(timeShown);
+
+	/** Controller */
+	if (controllerShown) {
+		juce::Rectangle<int> controllerRect(
+			totalArea.getRight() - controllerWidth, 0,
+			controllerWidth, this->getHeight());
+		this->controller->setBounds(controllerRect);
+
+		totalArea.removeFromRight(controllerRect.getWidth() + splitWidth);
+	}
+	this->controller->setVisible(controllerShown);
 
 	/** Main Menu Bar */
 	juce::Rectangle<int> mainMenuBarRect(
