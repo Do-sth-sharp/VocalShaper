@@ -22,6 +22,7 @@ AboutComponent::AboutComponent() {
 		TRANS("Open Source Digital Audio Workstation") + "\n" +
 		TRANS("Branch:") + " " + utils::getReleaseBranch() + "\n" +
 		TRANS("Compile Time:") + " " + utils::getAudioPlatformCompileTime() + "\n" +
+		TRANS("Compiler:") + " " + utils::getCompilerVersion() + "\n" +
 		TRANS("JUCE Version:") + " " + utils::getJUCEVersion() + "\n" +
 #if JUCE_PLUGINHOST_VST3
 		TRANS("VST3 SDK Version:") + " " + utils::getVST3SDKVersion() + "\n" +
@@ -58,6 +59,7 @@ AboutComponent::AboutComponent() {
 	this->thanksTitle = TRANS("Special Thanks");
 	this->thanksList =
 		TRANS("GeraintDou") + "\n" +
+		TRANS("SineStriker") + "\n" +
 		TRANS("xemisyah") + "\n" +
 		TRANS("Yukitoha") + "\n" +
 		TRANS("Lin Yuansu P") + "\n" +

@@ -4,6 +4,7 @@ countries: cn
 "Open Source Digital Audio Workstation" = "开源数字音频工作站"
 "Branch:" = "分支："
 "Compile Time:" = "编译时间："
+"Compiler:" = "编译器："
 "JUCE Version:" = "JUCE版本："
 "VST3 SDK Version:" = "VST3 SDK版本："
 "VST2 SDK Version:" = "VST2 SDK版本："
@@ -35,6 +36,7 @@ countries: cn
 
 "Special Thanks" = "鸣谢"
 "GeraintDou" = "少灬杰"
+"SineStriker" = "至精至简"
 "xemisyah" = "雨宫花梨"
 "Yukitoha" = "雪葉"
 "Lin Yuansu P" = "磷元素P"

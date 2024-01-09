@@ -106,6 +106,7 @@ namespace utils {
 	juce::String getVST2SDKVersion();
 	juce::String getLV2Version();
 	juce::String getDMDAVersion();
+	juce::String getCompilerVersion();
 
 	juce::String getLegalFileName(const juce::String& name);
 	juce::String getSourceDefaultPathForAudio(int id, const juce::String& name);

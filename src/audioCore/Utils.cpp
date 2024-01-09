@@ -921,6 +921,21 @@ namespace utils {
 		return DMDA_VERSION;
 	}
 
+	juce::String getCompilerVersion() {
+#if JUCE_MSVC
+		return juce::String{ "MSVC " } + juce::String{ (uint64_t)_MSC_FULL_VER };
+
+#elif JUCE_GCC
+		return juce::String{ "GCC " } + juce::String{ __GNUC__ } + "." + juce::String{ __GNUC_MINOR__ } + "." + juce::String{ __GNUC_PATCHLEVEL__ };
+
+#elif JUCE_CLANG
+		return juce::String{ "Clang " } + juce::String{ __clang_major__ } + "." + juce::String{ __clang_minor__ } + "." + juce::String{ __clang_patchlevel__ };
+
+#else
+		return "Unknown";
+#endif
+	}
+
 	juce::String getLegalFileName(const juce::String& name) {
 		return name.replaceCharacters(
 			"\\/:*?\"<>|", "_________");
