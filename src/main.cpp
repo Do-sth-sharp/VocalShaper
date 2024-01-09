@@ -8,6 +8,7 @@
 #include "ui/misc/MainThreadPool.h"
 #include "ui/misc/ConfigManager.h"
 #include "ui/misc/SysStatus.h"
+#include "ui/misc/CoreCallbacks.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -373,6 +374,24 @@ private:
 		);
 	};
 
+	void addCoreCallback() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Register Core Callbacks..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				CoreCallbacks::getInstance()->addError(
+					[](const juce::String& title, const juce::String& mes) {
+						juce::AlertWindow::showMessageBox(
+							juce::MessageBoxIconType::WarningIcon, title, mes);
+					}
+				);
+			}
+		);
+	};
+
 	void hideSplash() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -485,6 +504,9 @@ public:
 
 		/** Clear Dump File */
 		this->clearCrashDump();
+
+		/** Add Core Callback */
+		this->addCoreCallback();
 
 		/** Hide Splash */
 		this->hideSplash();

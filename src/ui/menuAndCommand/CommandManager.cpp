@@ -1,15 +1,15 @@
 ﻿#include "CommandManager.h"
 #include "CoreCommandTarget.h"
 #include "GUICommandTarget.h"
+#include "../misc/CoreCallbacks.h"
 #include "../Utils.h"
-#include "../../audioCore/AC_API.h"
 
 CommandManager::CommandManager() {
-	UICallbackAPI<bool>::set(UICallbackType::PlayStateChanged,
+	CoreCallbacks::getInstance()->addPlayingStatus(
 		[this](bool) {
 			this->commandStatusChanged();
 		});
-	UICallbackAPI<bool>::set(UICallbackType::RecordStateChanged,
+	CoreCallbacks::getInstance()->addRecordingStatus(
 		[this](bool) {
 			this->commandStatusChanged();
 		});
