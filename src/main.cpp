@@ -313,6 +313,24 @@ private:
 		);
 	};
 
+	void addCoreCallback() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Register Core Callbacks..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				CoreCallbacks::getInstance()->addError(
+					[](const juce::String& title, const juce::String& mes) {
+						juce::AlertWindow::showMessageBox(
+							juce::MessageBoxIconType::WarningIcon, title, mes);
+					}
+				);
+			}
+		);
+	};
+
 	void autoLayout() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -370,24 +388,6 @@ private:
 						}
 					}
 				}
-			}
-		);
-	};
-
-	void addCoreCallback() {
-		InitTaskList::getInstance()->add(
-			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
-				if (splash) { splash->showMessage("Register Core Callbacks..."); }
-			}
-		);
-		InitTaskList::getInstance()->add(
-			[] {
-				CoreCallbacks::getInstance()->addError(
-					[](const juce::String& title, const juce::String& mes) {
-						juce::AlertWindow::showMessageBox(
-							juce::MessageBoxIconType::WarningIcon, title, mes);
-					}
-				);
 			}
 		);
 	};
@@ -496,6 +496,9 @@ public:
 		/** Init Core Hooks */
 		this->initCoreHooks();
 
+		/** Add Core Callback */
+		this->addCoreCallback();
+
 		/** Auto Layout */
 		this->autoLayout();
 
@@ -504,9 +507,6 @@ public:
 
 		/** Clear Dump File */
 		this->clearCrashDump();
-
-		/** Add Core Callback */
-		this->addCoreCallback();
 
 		/** Hide Splash */
 		this->hideSplash();
