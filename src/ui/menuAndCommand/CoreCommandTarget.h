@@ -29,6 +29,11 @@ private:
 	void undo() const;
 	void redo() const;
 
+	void play() const;
+	void stop() const;
+	void record() const;
+	void rewind() const;
+
 private:
 	bool checkForSave() const;
 	void selectForSource(const std::function<void(int)>& callback) const;
@@ -39,6 +44,9 @@ private:
 	bool checkForRedo() const;
 	const juce::String getUndoName() const;
 	const juce::String getRedoName() const;
+
+	bool checkForPlaying() const;
+	bool checkForRecording() const;
 
 	std::unique_ptr<juce::ListBox> trackListBox = nullptr;
 	std::unique_ptr<juce::ListBoxModel> trackListBoxModel = nullptr;

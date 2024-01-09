@@ -35,7 +35,12 @@ void CoreCommandTarget::getAllCommands(
 		(juce::CommandID)(CoreCommandType::Render),
 
 		(juce::CommandID)(CoreCommandType::Undo),
-		(juce::CommandID)(CoreCommandType::Redo)
+		(juce::CommandID)(CoreCommandType::Redo),
+
+		(juce::CommandID)(CoreCommandType::Play),
+		(juce::CommandID)(CoreCommandType::Stop),
+		(juce::CommandID)(CoreCommandType::Record),
+		(juce::CommandID)(CoreCommandType::Rewind)
 	};
 }
 
@@ -104,6 +109,26 @@ void CoreCommandTarget::getCommandInfo(
 		result.setActive(active);
 		break;
 	}
+
+	case CoreCommandType::Play:
+		result.setInfo(TRANS("Play"), TRANS("Play or pause."), TRANS("Control"), 0);
+		result.addDefaultKeypress(juce::KeyPress::spaceKey, juce::ModifierKeys::noModifiers);
+		result.setActive(true);
+		result.setTicked(this->checkForPlaying());
+		break;
+	case CoreCommandType::Stop:
+		result.setInfo(TRANS("Stop"), TRANS("Stop playing."), TRANS("Control"), 0);
+		result.setActive(this->checkForPlaying());
+		break;
+	case CoreCommandType::Record:
+		result.setInfo(TRANS("Record"), TRANS("Record the source."), TRANS("Control"), 0);
+		result.setActive(true);
+		result.setTicked(this->checkForRecording());
+		break;
+	case CoreCommandType::Rewind:
+		result.setInfo(TRANS("Rewind"), TRANS("Back to start position."), TRANS("Control"), 0);
+		result.setActive(true);
+		break;
 	}
 }
 
@@ -140,6 +165,19 @@ bool CoreCommandTarget::perform(
 		return true;
 	case CoreCommandType::Redo:
 		this->redo();
+		return true;
+
+	case CoreCommandType::Play:
+		this->play();
+		return true;
+	case CoreCommandType::Stop:
+		this->stop();
+		return true;
+	case CoreCommandType::Record:
+		this->record();
+		return true;
+	case CoreCommandType::Rewind:
+		this->rewind();
 		return true;
 	}
 
@@ -380,6 +418,34 @@ void CoreCommandTarget::redo() const {
 	ActionDispatcher::getInstance()->performRedo();
 }
 
+void CoreCommandTarget::play() const {
+	bool isPlaying = this->checkForPlaying();
+
+	auto action = isPlaying
+		? std::unique_ptr<ActionBase>(new ActionPause)
+		: std::unique_ptr<ActionBase>(new ActionPlay);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreCommandTarget::stop() const {
+	auto action = std::unique_ptr<ActionBase>(new ActionStop);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreCommandTarget::record() const {
+	bool isRecording = this->checkForRecording();
+
+	auto action = isRecording
+		? std::unique_ptr<ActionBase>(new ActionStopRecord)
+		: std::unique_ptr<ActionBase>(new ActionStartRecord);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreCommandTarget::rewind() const {
+	auto action = std::unique_ptr<ActionBase>(new ActionRewind);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 bool CoreCommandTarget::checkForSave() const {
 	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
 		return true;
@@ -500,6 +566,14 @@ const juce::String CoreCommandTarget::getUndoName() const {
 const juce::String CoreCommandTarget::getRedoName() const {
 	auto& manager = ActionDispatcher::getInstance()->getActionManager();
 	return manager.getRedoDescription();
+}
+
+bool CoreCommandTarget::checkForPlaying() const {
+	return quickAPI::isPlaying();
+}
+
+bool CoreCommandTarget::checkForRecording() const {
+	return quickAPI::isRecording();
 }
 
 CoreCommandTarget* CoreCommandTarget::getInstance() {

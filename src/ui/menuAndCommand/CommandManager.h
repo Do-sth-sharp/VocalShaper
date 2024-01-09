@@ -7,7 +7,7 @@ class CommandManager final
 	public juce::ChangeListener,
 	private juce::DeletedAtShutdown {
 public:
-	CommandManager() = default;
+	CommandManager();
 	~CommandManager();
 
 	void init();

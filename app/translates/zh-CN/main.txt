@@ -44,3 +44,5 @@ countries: cn
 "Playing" = "播放中"
 "Recording" = "录制中"
 "Ready" = "就绪"
+
+"Play/Pause" = "播放/暂停"

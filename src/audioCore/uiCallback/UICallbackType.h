@@ -2,6 +2,8 @@
 
 enum class UICallbackType : int {
 	ErrorAlert,
+	PlayStateChanged,
+	RecordStateChanged,
 
 	TypeMaxNum
 };

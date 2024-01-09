@@ -1,5 +1,7 @@
 ﻿#include "ControllerComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../menuAndCommand/CommandManager.h"
+#include "../menuAndCommand/CommandTypes.h"
 #include "../Utils.h"
 #include <IconManager.h>
 
@@ -48,6 +50,8 @@ ControllerComponent::ControllerComponent() {
 		this->pauseIcon.get(), nullptr, nullptr, nullptr);
 	this->playButton->setWantsKeyboardFocus(false);
 	this->playButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->playButton->setCommandToTrigger(
+		CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Play, true);
 	this->addAndMakeVisible(this->playButton.get());
 
 	this->stopButton = std::make_unique<juce::DrawableButton>(
@@ -55,6 +59,8 @@ ControllerComponent::ControllerComponent() {
 	this->stopButton->setImages(this->stopIcon.get());
 	this->stopButton->setWantsKeyboardFocus(false);
 	this->stopButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->stopButton->setCommandToTrigger(
+		CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Stop, true);
 	this->addAndMakeVisible(this->stopButton.get());
 
 	this->recordButton = std::make_unique<juce::DrawableButton>(
@@ -64,6 +70,8 @@ ControllerComponent::ControllerComponent() {
 		this->recordOnIcon.get(), nullptr, nullptr, nullptr);
 	this->recordButton->setWantsKeyboardFocus(false);
 	this->recordButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->recordButton->setCommandToTrigger(
+		CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Record, true);
 	this->addAndMakeVisible(this->recordButton.get());
 
 	this->rewindButton = std::make_unique<juce::DrawableButton>(
@@ -71,6 +79,8 @@ ControllerComponent::ControllerComponent() {
 	this->rewindButton->setImages(this->rewindIcon.get());
 	this->rewindButton->setWantsKeyboardFocus(false);
 	this->rewindButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->rewindButton->setCommandToTrigger(
+		CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Rewind, true);
 	this->addAndMakeVisible(this->rewindButton.get());
 
 	this->followButton = std::make_unique<juce::DrawableButton>(
@@ -80,6 +90,8 @@ ControllerComponent::ControllerComponent() {
 		this->followOnIcon.get(), nullptr, nullptr, nullptr);
 	this->followButton->setWantsKeyboardFocus(false);
 	this->followButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->followButton->setCommandToTrigger(
+		CommandManager::getInstance(), (juce::CommandID)GUICommandType::Follow, true);
 	this->addAndMakeVisible(this->followButton.get());
 }
 

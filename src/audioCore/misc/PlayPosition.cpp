@@ -1,6 +1,7 @@
-#include "PlayPosition.h"
+﻿#include "PlayPosition.h"
 
 #include <chrono>
+#include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> MovablePlayHead::getPosition() const {
@@ -30,6 +31,9 @@ void MovablePlayHead::transportPlay(bool shouldStartPlaying) {
 	if (!shouldStartPlaying) {
 		this->position.setIsRecording(false);
 	}
+
+	UICallbackAPI<bool>::invoke(
+		UICallbackType::PlayStateChanged, shouldStartPlaying);
 }
 
 void MovablePlayHead::transportRecord(bool shouldStartRecording) {
@@ -38,6 +42,9 @@ void MovablePlayHead::transportRecord(bool shouldStartRecording) {
 	if (shouldStartRecording) {
 		this->position.setIsPlaying(true);
 	}
+
+	UICallbackAPI<bool>::invoke(
+		UICallbackType::RecordStateChanged, shouldStartRecording);
 }
 
 void MovablePlayHead::transportRewind() {

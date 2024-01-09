@@ -2,6 +2,18 @@
 #include "CoreCommandTarget.h"
 #include "GUICommandTarget.h"
 #include "../Utils.h"
+#include "../../audioCore/AC_API.h"
+
+CommandManager::CommandManager() {
+	UICallbackAPI<bool>::set(UICallbackType::PlayStateChanged,
+		[this](bool) {
+			this->commandStatusChanged();
+		});
+	UICallbackAPI<bool>::set(UICallbackType::RecordStateChanged,
+		[this](bool) {
+			this->commandStatusChanged();
+		});
+}
 
 CommandManager::~CommandManager() {
 	this->stopListening();

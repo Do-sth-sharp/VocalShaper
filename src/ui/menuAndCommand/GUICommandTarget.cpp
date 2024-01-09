@@ -37,6 +37,8 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::AudioDebugger),
 		(juce::CommandID)(GUICommandType::MidiDebugger),
 
+		(juce::CommandID)(GUICommandType::Follow),
+
 		(juce::CommandID)(GUICommandType::StartupConfig),
 		(juce::CommandID)(GUICommandType::FunctionConfig),
 		(juce::CommandID)(GUICommandType::AudioConfig),
@@ -156,6 +158,12 @@ void GUICommandTarget::getCommandInfo(
 		result.setInfo(TRANS("MIDI Debugger"), TRANS("Show MIDI debugger component."), TRANS("View"), 0);
 		result.setTicked(CompManager::getInstance()->isOpened(
 			CompManager::CompType::MidiDebugger));
+		result.setActive(true);
+		break;
+
+	case GUICommandType::Follow:
+		result.setInfo(TRANS("Follow"), TRANS("Follow playing position in editor."), TRANS("Control"), 0);
+		result.setTicked(this->checkFollow());
 		result.setActive(true);
 		break;
 
@@ -295,6 +303,10 @@ bool GUICommandTarget::perform(
 		this->changeOpened(CompManager::CompType::MidiDebugger);
 		return true;
 
+	case GUICommandType::Follow:
+		this->follow();
+		return true;
+
 	case GUICommandType::StartupConfig:
 		this->openConfig(0);
 		return true;
@@ -387,6 +399,10 @@ void GUICommandTarget::changeOpened(CompManager::CompType type) const {
 	}
 }
 
+void GUICommandTarget::follow() const {
+	/** TODO */
+}
+
 void GUICommandTarget::openConfig(int page) const {
 	auto window = new ConfigWindow;
 	window->setPage(page);
@@ -469,6 +485,11 @@ void GUICommandTarget::license() const {
 void GUICommandTarget::about() const {
 	auto window = new AboutWindow;
 	window->enterModalState(true, nullptr, true);
+}
+
+bool GUICommandTarget::checkFollow() const {
+	/** TODO */
+	return false;
 }
 
 GUICommandTarget* GUICommandTarget::getInstance() {

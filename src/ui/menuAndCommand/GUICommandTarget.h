@@ -22,6 +22,8 @@ private:
 	void saveLayout() const;
 	void changeOpened(CompManager::CompType type) const;
 
+	void follow() const;
+
 	void openConfig(int page = 0) const;
 
 	void help() const;
@@ -34,6 +36,9 @@ private:
 	void makeCrash() const;
 	void license() const;
 	void about() const;
+
+private:
+	bool checkFollow() const;
 
 public:
 	static GUICommandTarget* getInstance();

@@ -95,7 +95,12 @@ juce::PopupMenu MainMenuModel::createProject() const {
 juce::PopupMenu MainMenuModel::createControl() const {
 	juce::PopupMenu menu;
 
-	/** TODO */
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Play);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Stop);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Record);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Rewind);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Follow);
 
 	return menu;
 }

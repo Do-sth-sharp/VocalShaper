@@ -21,6 +21,11 @@ countries: cn
 "Undo" = "撤销"
 "Redo" = "重做"
 
+"Play" = "播放"
+"Stop" = "停止"
+"Record" = "录制"
+"Rewind" = "倒回"
+
 "Create an empty project." = "建立一个空项目。"
 "Open a project from disk." = "从本地磁盘打开项目。"
 "Save current project to disk." = "保存当前项目到本地磁盘。"
@@ -33,6 +38,13 @@ countries: cn
 "Undo the last action." = "撤销最后一个操作。"
 "Redo the last undo action." = "重做最后一个撤销的操作。"
 
+"Play or pause." = "播放或暂停。"
+"Stop playing." = "停止播放。"
+"Record the source." = "录制源。"
+"Back to start position." = "回到开始位置。"
+
+
+
 "Close Editor" = "关闭编辑器"
 
 "Copy" = "复制"
@@ -44,6 +56,8 @@ countries: cn
 
 "Load Layout" = "加载布局"
 "Save Layout" = "保存布局"
+
+"Follow" = "跟随"
 
 "Startup Config" = "启动配置"
 "Function Config" = "功能配置"
@@ -85,6 +99,8 @@ countries: cn
 "Show source recorder component." = "显示源录制器组件。"
 "Show audio debugger component." = "显示音频调试器组件。"
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
+
+"Follow playing position in editor." = "在编辑器中跟随播放位置。"
 
 "Open startup config page." = "打开启动配置页面。"
 "Open the function config page." = "打开功能配置页面。"

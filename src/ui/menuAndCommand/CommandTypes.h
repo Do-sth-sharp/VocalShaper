@@ -13,7 +13,12 @@ enum class CoreCommandType : int {
 	Render = 0x2200,
 
 	Undo = 0x2300,
-	Redo
+	Redo,
+
+	Play = 0x2400,
+	Stop,
+	Record,
+	Rewind
 };
 
 enum class GUICommandType : int {
@@ -37,6 +42,8 @@ enum class GUICommandType : int {
 	SourceRecordView,
 	AudioDebugger,
 	MidiDebugger,
+
+	Follow = 0x3400,
 
 	StartupConfig = 0x3500,
 	FunctionConfig,
