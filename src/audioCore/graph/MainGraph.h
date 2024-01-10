@@ -139,12 +139,8 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Connection> midiTrk2OConnectionList;
 
 	std::function<void(const juce::MidiMessage&, bool)> midiHook;
-	juce::ReadWriteLock hookLock;
-
-	juce::ReadWriteLock midiLock;
 
 	juce::Array<float> outputLevels;
-	juce::ReadWriteLock levelsLock;
 
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();

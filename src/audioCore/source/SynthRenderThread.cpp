@@ -1,9 +1,10 @@
-#include "SynthRenderThread.h"
+﻿#include "SynthRenderThread.h"
 
 #include <DMDA.h>
 
 #include "CloneableSynthSource.h"
 #include "../misc/PlayPosition.h"
+#include "../misc/AudioLock.h"
 #include "../Utils.h"
 
 SynthRenderThread::SynthRenderThread(CloneableSynthSource* parent)
@@ -15,7 +16,7 @@ SynthRenderThread::~SynthRenderThread() {
 
 void SynthRenderThread::run() {
 	/** Lock Buffer */
-	juce::ScopedWriteLock audioLocker(parent->audioLock);
+	juce::ScopedWriteLock audioLocker(audioLock::getLock());
 
 	/** Prepare Synth Info */
 	if (!parent->synthesizer) { return; }
@@ -24,11 +25,7 @@ void SynthRenderThread::run() {
 	int channelNum = parent->audioBuffer.getNumChannels();
 
 	/** Get MIDI Data */
-	juce::MidiFile midiData;
-	{
-		juce::ScopedReadLock locker(parent->lock);
-		midiData = parent->buffer;
-	}
+	juce::MidiFile midiData = parent->buffer;
 
 	/** Set Play Head */
 	auto playHead = std::make_unique<MovablePlayHead>();

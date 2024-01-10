@@ -43,7 +43,6 @@ private:
 private:
 	juce::Array<std::tuple<std::unique_ptr<juce::MidiInput>, int>> inputDevices;
 	juce::Array<std::tuple<std::unique_ptr<juce::MidiOutput>, int>> outputDevices;
-	juce::ReadWriteLock deviceListLock;
 
 	std::function<void(const std::tuple<int, mackieControl::Message>&)> mackieCallback;
 

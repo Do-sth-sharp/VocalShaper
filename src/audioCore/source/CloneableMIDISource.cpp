@@ -1,5 +1,6 @@
 ﻿#include "CloneableMIDISource.h"
 
+#include "../misc/AudioLock.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -9,24 +10,20 @@ void CloneableMIDISource::readData(
 	int startTime, int endTime) const {
 	if (this->checkRecording()) { return; }
 
-	juce::ScopedTryReadLock locker(this->lock);
-
-	if (locker.isLocked()) {
-		/** Get MIDI Data */
-		juce::MidiMessageSequence total;
-		for (int i = 0; i < this->buffer.getNumTracks(); i++) {
-			auto track = this->buffer.getTrack(i);
-			if (track) {
-				total.addSequence(*track, 0, startTime / this->getSampleRate(), endTime / this->getSampleRate());
-			}
+	/** Get MIDI Data */
+	juce::MidiMessageSequence total;
+	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
+		auto track = this->buffer.getTrack(i);
+		if (track) {
+			total.addSequence(*track, 0, startTime / this->getSampleRate(), endTime / this->getSampleRate());
 		}
+	}
 
-		/** Copy Data */
-		for (auto i : total) {
-			auto& message = i->message;
-			double time = message.getTimeStamp();
-			buffer.addEvent(message, std::floor((time + baseTime / this->getSampleRate()) * this->getSampleRate()));
-		}
+	/** Copy Data */
+	for (auto i : total) {
+		auto& message = i->message;
+		double time = message.getTimeStamp();
+		buffer.addEvent(message, std::floor((time + baseTime / this->getSampleRate()) * this->getSampleRate()));
 	}
 }
 
@@ -56,7 +53,7 @@ std::unique_ptr<google::protobuf::Message> CloneableMIDISource::serialize() cons
 
 std::unique_ptr<CloneableSource> CloneableMIDISource::clone() const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(this->lock);
+	juce::ScopedTryReadLock locker(audioLock::getLock());
 	if (locker.isLocked()) {
 		/** Create New Source */
 		auto dst = std::unique_ptr<CloneableMIDISource>();
@@ -84,7 +81,7 @@ bool CloneableMIDISource::load(const juce::File& file) {
 
 	/** Copy Data */
 	{
-		juce::ScopedWriteLock locker(this->lock);
+		juce::ScopedWriteLock locker(audioLock::getLock());
 		this->buffer = midiFile;
 		this->buffer.convertTimestampTicksToSeconds();
 	}
@@ -100,7 +97,7 @@ bool CloneableMIDISource::save(const juce::File& file) const {
 	stream->truncate();
 
 	/** Copy Data */
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	juce::MidiFile midiFile{ this->buffer };
 	utils::convertSecondsToTicks(midiFile);
 
@@ -115,7 +112,7 @@ bool CloneableMIDISource::save(const juce::File& file) const {
 }
 
 double CloneableMIDISource::getLength() const {
-	juce::ScopedReadLock locker(this->lock);
+	juce::ScopedReadLock locker(audioLock::getLock());
 
 	/** Get Time In Seconds */
 	return this->buffer.getLastTimestamp();
@@ -126,7 +123,7 @@ void CloneableMIDISource::prepareToRecord(
 	int /*blockSize*/, bool updateOnly) {
 	if (!updateOnly) {
 		/** Lock */
-		juce::ScopedWriteLock locker(this->lock);
+		juce::ScopedWriteLock locker(audioLock::getLock());
 
 		/** Add New Track */
 		this->buffer.addTrack(juce::MidiMessageSequence{});
@@ -138,7 +135,7 @@ void CloneableMIDISource::prepareToRecord(
 
 void CloneableMIDISource::recordingFinished() {
 	/** Lock */
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 
 	/** Match Notes */
 	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
@@ -155,7 +152,7 @@ void CloneableMIDISource::recordingFinished() {
 void CloneableMIDISource::writeData(
 	const juce::MidiBuffer& buffer, int offset) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(this->lock);
+	juce::ScopedTryWriteLock locker(audioLock::getLock());
 	if (locker.isLocked()) {
 		/** Write To The Last Track */
 		if (auto track = const_cast<juce::MidiMessageSequence*>(

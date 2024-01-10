@@ -28,7 +28,6 @@ int SeqSourceProcessor::getSeqNum() const {
 }
 
 const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
-	juce::GenericScopedLock locker(this->srcs.getLock());
 	return this->srcs.get(index);
 }
 
@@ -101,53 +100,48 @@ void SeqSourceProcessor::processBlock(
 
 	/** Copy Source Data */
 	{
-		juce::ScopedTryReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
-		if (managerLocker.isLocked()) {
-			juce::GenericScopedLock srcLocker(this->srcs.getLock());
+		/** Find Hot Block */
+		auto index = this->srcs.match(startTime, endTime);
 
-			/** Find Hot Block */
-			auto index = this->srcs.match(startTime, endTime);
+		for (int i = std::get<0>(index);
+			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
+			/** Get Block */
+			auto [blockStartTime, blockEndTime, blockOffset, blockPointer, blockIndex] = this->srcs.getUnchecked(i);
+			int blockStartTimeInSample = blockStartTime * sampleRate;
+			int blockEndTimeInSample = blockEndTime * sampleRate;
+			int blockOffsetInSample = blockOffset * sampleRate;
 
-			for (int i = std::get<0>(index);
-				i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
-				/** Get Block */
-				auto [blockStartTime, blockEndTime, blockOffset, blockPointer, blockIndex] = this->srcs.getUnchecked(i);
-				int blockStartTimeInSample = blockStartTime * sampleRate;
-				int blockEndTimeInSample = blockEndTime * sampleRate;
-				int blockOffsetInSample = blockOffset * sampleRate;
+			if (CloneableSource::SafePointer<> ptr = blockPointer) {
+				/** Caculate Time */
+				int blockLengthInSample = ptr->getSourceLength() * sampleRate;
+				int dataStartTimeInSample = blockStartTimeInSample + std::max(blockOffsetInSample, 0);
+				int dataEndTimeInSample =
+					std::min(blockEndTimeInSample, blockStartTimeInSample + blockOffsetInSample + blockLengthInSample);
 
-				if (CloneableSource::SafePointer<> ptr = blockPointer) {
-					/** Caculate Time */
-					int blockLengthInSample = ptr->getSourceLength() * sampleRate;
-					int dataStartTimeInSample = blockStartTimeInSample + std::max(blockOffsetInSample, 0);
-					int dataEndTimeInSample =
-						std::min(blockEndTimeInSample, blockStartTimeInSample + blockOffsetInSample + blockLengthInSample);
+				if (dataEndTimeInSample > dataStartTimeInSample) {
+					int hotStartTimeInSample = std::max(startTimeInSample, dataStartTimeInSample);
+					int hotEndTimeInSample = std::min(endTimeInSample, dataEndTimeInSample);
 
-					if (dataEndTimeInSample > dataStartTimeInSample) {
-						int hotStartTimeInSample = std::max(startTimeInSample, dataStartTimeInSample);
-						int hotEndTimeInSample = std::min(endTimeInSample, dataEndTimeInSample);
+					if (hotEndTimeInSample > hotStartTimeInSample) {
+						int dataTimeInSample = blockStartTimeInSample + blockOffsetInSample;
+						int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
+						int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
+						int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
 
-						if (hotEndTimeInSample > hotStartTimeInSample) {
-							int dataTimeInSample = blockStartTimeInSample + blockOffsetInSample;
-							int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
-							int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
-							int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
-
-							if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-								/** Copy Audio Data */
-								p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
-							}
-							else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-								/** Copy Audio Data */
-								p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
-							}
-							else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-								/** Copy MIDI Message */
-								p->readData(midiMessages, 
-									dataTimeInSample - startTimeInSample,
-									hotOffsetInSample, 
-									hotEndTimeInSample - dataTimeInSample);
-							}
+						if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+							/** Copy Audio Data */
+							p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
+						}
+						else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+							/** Copy Audio Data */
+							p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
+						}
+						else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
+							/** Copy MIDI Message */
+							p->readData(midiMessages,
+								dataTimeInSample - startTimeInSample,
+								hotOffsetInSample,
+								hotEndTimeInSample - dataTimeInSample);
 						}
 					}
 				}
@@ -168,8 +162,6 @@ void SeqSourceProcessor::processBlock(
 }
 
 double SeqSourceProcessor::getTailLengthSeconds() const {
-	juce::GenericScopedLock locker(this->srcs.getLock());
-
 	int size = this->srcs.size();
 	return (size > 0) ? std::get<1>(this->srcs.getUnchecked(size - 1)) : 0;
 }

@@ -49,7 +49,6 @@ public:
 
 private:
 	juce::Array<RecorderTask> tasks;
-	juce::ReadWriteLock taskLock;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceRecordProcessor)
 };

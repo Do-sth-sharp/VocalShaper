@@ -1,4 +1,5 @@
 ﻿#include "CloneableSource.h"
+#include "../misc/AudioLock.h"
 
 std::atomic_int CloneableSource::globalCounter = 0;
 
@@ -73,10 +74,12 @@ const juce::String CloneableSource::getName() const {
 }
 
 void CloneableSource::setPath(const juce::String& path) {
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->path = path;
 }
 
 const juce::String CloneableSource::getPath() const {
+	juce::ScopedReadLock locker(audioLock::getLock());
 	return this->path;
 }
 

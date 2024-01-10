@@ -1,6 +1,7 @@
 ﻿#include "CloneableSynthSource.h"
 
 #include <DMDA.h>
+#include "../misc/AudioLock.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -23,15 +24,12 @@ void CloneableSynthSource::readData(juce::AudioBuffer<float>& buffer, int buffer
 	if (this->checkRecording()) { return; }
 	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
-	juce::ScopedTryReadLock locker(this->audioLock);
-	if (locker.isLocked()) {
-		if (this->source && this->memorySource) {
-			this->memorySource->setNextReadPosition((int64_t)(dataOffset * this->source->getResamplingRatio()));
-			int startSample = bufferOffset;
-			this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
-				&buffer, startSample,
-					std::min(buffer.getNumSamples() - startSample, length)});
-		}
+	if (this->source && this->memorySource) {
+		this->memorySource->setNextReadPosition((int64_t)(dataOffset * this->source->getResamplingRatio()));
+		int startSample = bufferOffset;
+		this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
+			&buffer, startSample,
+				std::min(buffer.getNumSamples() - startSample, length) });
 	}
 }
 
@@ -76,8 +74,7 @@ void CloneableSynthSource::synth() {
 	this->synthThread->stopThread(3000);
 
 	/** Lock Buffer */
-	juce::ScopedReadLock locker(this->lock);
-	juce::ScopedWriteLock audioLocker(this->audioLock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 
 	/** Prepare Audio Buffer */
 	{
@@ -157,7 +154,7 @@ std::unique_ptr<google::protobuf::Message> CloneableSynthSource::serialize() con
 
 std::unique_ptr<CloneableSource> CloneableSynthSource::clone() const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(this->lock);
+	juce::ScopedTryReadLock locker(audioLock::getLock());
 	if (locker.isLocked()) {
 		/** Create New Source */
 		auto dst = std::unique_ptr<CloneableSynthSource>();
@@ -185,7 +182,7 @@ bool CloneableSynthSource::load(const juce::File& file) {
 
 	/** Copy Data */
 	{
-		juce::ScopedWriteLock locker(this->lock);
+		juce::ScopedWriteLock locker(audioLock::getLock());
 		this->buffer = midiFile;
 		this->buffer.convertTimestampTicksToSeconds();
 	}
@@ -201,7 +198,7 @@ bool CloneableSynthSource::save(const juce::File& file) const {
 	stream->truncate();
 
 	/** Copy Data */
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	juce::MidiFile midiFile{ this->buffer };
 	utils::convertSecondsToTicks(midiFile);
 
@@ -216,7 +213,7 @@ bool CloneableSynthSource::save(const juce::File& file) const {
 }
 
 bool CloneableSynthSource::exportt(const juce::File& file) const {
-	juce::ScopedReadLock locker(this->audioLock);
+	juce::ScopedReadLock locker(audioLock::getLock());
 
 	if ((!this->source) || (!this->memorySource)) { return false; }
 
@@ -236,14 +233,14 @@ bool CloneableSynthSource::exportt(const juce::File& file) const {
 }
 
 double CloneableSynthSource::getLength() const {
-	juce::ScopedReadLock locker(this->lock);
+	juce::ScopedReadLock locker(audioLock::getLock());
 
 	/** Get Time In Seconds */
 	return this->buffer.getLastTimestamp() + this->tailTime;
 }
 
 void CloneableSynthSource::sampleRateChanged() {
-	juce::ScopedWriteLock locker(this->audioLock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	if (this->source) {
 		this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 		this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
@@ -255,11 +252,11 @@ void CloneableSynthSource::prepareToRecord(
 	int /*blockSize*/, bool updateOnly) {
 	if (!updateOnly) {
 		/** Lock */
-		juce::ScopedWriteLock locker(this->lock);
+		juce::ScopedWriteLock locker(audioLock::getLock());
 
 		/** Clear Audio Source */
 		{
-			juce::ScopedWriteLock locker(this->audioLock);
+			juce::ScopedWriteLock locker(audioLock::getLock());
 			this->source = nullptr;
 			this->memorySource = nullptr;
 		}
@@ -274,7 +271,7 @@ void CloneableSynthSource::prepareToRecord(
 
 void CloneableSynthSource::recordingFinished() {
 	/** Lock */
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 
 	/** Match Notes */
 	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
@@ -290,7 +287,7 @@ void CloneableSynthSource::recordingFinished() {
 
 void CloneableSynthSource::writeData(const juce::MidiBuffer& buffer, int offset) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(this->lock);
+	juce::ScopedTryWriteLock locker(audioLock::getLock());
 	if (locker.isLocked()) {
 		/** Write To The Last Track */
 		if (auto track = const_cast<juce::MidiMessageSequence*>(

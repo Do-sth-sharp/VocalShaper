@@ -189,9 +189,6 @@ bool AudioCore::save(const juce::String& name) {
 	ProjectInfoData::getInstance()->push();
 	ProjectInfoData::getInstance()->update();
 
-	/** Lock Sources */
-	juce::ScopedReadLock locker(CloneableSourceManager::getInstance()->getLock());
-
 	/** Get Project Data */
 	auto mes = this->serialize();
 	if (!dynamic_cast<vsp4::Project*>(mes.get())) { ProjectInfoData::getInstance()->pop(); return false; };

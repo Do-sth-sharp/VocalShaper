@@ -34,7 +34,6 @@ public:
 	int size() const;
 	int add(const SeqBlock& block);
 	void remove(int index);
-	const juce::CriticalSection& getLock() const noexcept;
 
 	void clearGraph();
 

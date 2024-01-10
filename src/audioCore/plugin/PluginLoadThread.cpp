@@ -1,4 +1,4 @@
-#include "PluginLoadThread.h"
+﻿#include "PluginLoadThread.h"
 
 #define PLUGIN_LOAD_ON_MESSAGE_THREAD 0
 

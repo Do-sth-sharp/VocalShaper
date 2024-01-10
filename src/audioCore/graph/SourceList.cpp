@@ -1,5 +1,6 @@
 ﻿#include "SourceList.h"
 #include "../source/CloneableSourceManager.h"
+#include "../misc/AudioLock.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -78,13 +79,12 @@ const SourceList::SeqBlock& SourceList::getReference(int index) const {
 }
 
 int SourceList::size() const {
-	juce::GenericScopedLock locker(this->getLock());
 	return this->list.size();
 }
 
 int SourceList::add(const SourceList::SeqBlock& block) {
 	/** Get Lock */
-	juce::GenericScopedLock locker(this->getLock());
+	juce::ScopedWriteLock locker(audioLock::getLock());
 
 	/** Get Insert Place */
 	int index = this->list.isEmpty()
@@ -108,18 +108,14 @@ int SourceList::add(const SourceList::SeqBlock& block) {
 }
 
 void SourceList::remove(int index) {
-	juce::GenericScopedLock locker(this->getLock());
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	if (index >= 0 && index < this->list.size()) {
 		this->list.remove(index);
 	}
 }
 
-const juce::CriticalSection& SourceList::getLock() const noexcept {
-	return this->list.getLock();
-}
-
 void SourceList::clearGraph() {
-	juce::GenericScopedLock locker(this->getLock());
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->list.clear();
 	this->lastIndex = -1;
 }
@@ -141,7 +137,6 @@ bool SourceList::parse(const google::protobuf::Message* data) {
 std::unique_ptr<google::protobuf::Message> SourceList::serialize() const {
 	auto mes = std::make_unique<vsp4::SourceInstanceList>();
 
-	juce::GenericScopedLock locker(this->getLock());
 	auto list = mes->mutable_sources();
 	for (auto& [startTime, endTime, offset, ptr, index] : this->list) {
 		auto instance = std::make_unique<vsp4::SeqSourceInstance>();

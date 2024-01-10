@@ -129,8 +129,6 @@ private:
 	juce::String pluginIdentifier;
 	std::unique_ptr<juce::AudioBuffer<float>> buffer = nullptr;
 	std::unique_ptr<juce::AudioBuffer<double>> doubleBuffer = nullptr;
-	juce::ReadWriteLock pluginLock;
-	juce::ReadWriteLock bufferLock;
 	std::atomic_int midiChannel = 1;
 	std::array<std::atomic_int, 128> paramCCList;
 	//std::atomic_int paramListenningCC = -1;

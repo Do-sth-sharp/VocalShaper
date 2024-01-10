@@ -4,6 +4,7 @@
 #include "../source/CloneableMIDISource.h"
 #include "../source/CloneableSynthSource.h"
 #include "../source/CloneableSourceManager.h"
+#include "../misc/AudioLock.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -17,7 +18,7 @@ SourceRecordProcessor::~SourceRecordProcessor() {
 
 void SourceRecordProcessor::insertTask(
 	const SourceRecordProcessor::RecorderTask& task, int index) {
-	juce::ScopedWriteLock locker(this->taskLock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	auto& [source, srcIndex, offset, compensate] = task;
 
 	/** Check Source */
@@ -36,7 +37,7 @@ void SourceRecordProcessor::insertTask(
 }
 
 void SourceRecordProcessor::removeTask(int index) {
-	juce::ScopedWriteLock locker(this->taskLock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	auto [src, srcIndex, offset, compensate] = this->tasks.removeAndReturn(index);
 	if (src) {
 		src->recordingFinishedInternal();
@@ -44,18 +45,16 @@ void SourceRecordProcessor::removeTask(int index) {
 }
 
 int SourceRecordProcessor::getTaskNum() const {
-	juce::ScopedReadLock locker(this->taskLock);
 	return this->tasks.size();
 }
 
 const SourceRecordProcessor::RecorderTask
 	SourceRecordProcessor::getTask(int index) const {
-	juce::ScopedReadLock locker(this->taskLock);
 	return this->tasks.getReference(index);
 }
 
 void SourceRecordProcessor::clearGraph() {
-	juce::ScopedWriteLock locker(this->taskLock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->tasks.clear();
 }
 
@@ -64,7 +63,6 @@ void SourceRecordProcessor::prepareToPlay(
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
 
 	/** Update Source Sample Rate And Buffer Size */
-	juce::ScopedReadLock locker(this->taskLock);
 	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
 		if (source) {
 			source->prepareToRecordInternal(this->getTotalNumInputChannels(),
@@ -75,10 +73,6 @@ void SourceRecordProcessor::prepareToPlay(
 
 void SourceRecordProcessor::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
-	/** Lock Task List */
-	juce::ScopedTryReadLock locker(this->taskLock);
-	if (!locker.isLocked()) { return; }
-
 	/** Check Play State */
 	auto playHead = this->getPlayHead();
 	if (!playHead) { return; }
@@ -138,7 +132,6 @@ std::unique_ptr<google::protobuf::Message> SourceRecordProcessor::serialize() co
 	auto mes = std::make_unique<vsp4::Recorder>();
 
 	auto list = mes->mutable_sources();
-	juce::ScopedReadLock locker(this->taskLock);
 	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
 		auto smes = std::make_unique<vsp4::SourceRecorderInstance>();
 		smes->set_index(srcIndex);

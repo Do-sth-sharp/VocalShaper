@@ -2,6 +2,7 @@
 
 #include "../misc/PlayPosition.h"
 #include "../misc/Renderer.h"
+#include "../misc/AudioLock.h"
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
@@ -93,14 +94,14 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 
 	/** Set Level Size */
 	{
-		juce::ScopedWriteLock locker(this->levelsLock);
+		juce::ScopedWriteLock locker(audioLock::getLock());
 		this->outputLevels.resize(outputChannelNum);
 	}
 }
 
 void MainGraph::setMIDIMessageHook(
 	const std::function<void(const juce::MidiMessage&, bool)> hook) {
-	juce::ScopedWriteLock locker(this->hookLock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->midiHook = hook;
 }
 
@@ -233,7 +234,6 @@ void MainGraph::clearGraph() {
 }
 
 const juce::Array<float> MainGraph::getOutputLevels() const {
-	juce::ScopedReadLock locker(this->levelsLock);
 	return this->outputLevels;
 }
 
@@ -519,12 +519,19 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
+	/** Lock */
+	juce::ScopedTryReadLock locker(audioLock::getLock());
+	if (!locker.isLocked()) {
+		audio.clear();
+		midi.clear();
+		return;
+	}
+
 	/** Render State */
 	bool isRendering = Renderer::getInstance()->getRendering();
 
 	/** Call MIDI Hook */
 	if(!isRendering) {
-		juce::ScopedReadLock locker(this->hookLock);
 		if (this->midiHook) {
 			for (auto m : midi) {
 				juce::MessageManager::callAsync(
@@ -582,18 +589,14 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Get Level */
 	{
-		juce::ScopedTryReadLock locker(this->levelsLock);
-		if (locker.isLocked()) {
-			for (int i = 0; i < audio.getNumChannels() && i < this->outputLevels.size(); i++) {
-				this->outputLevels.getReference(i) =
-					audio.getRMSLevel(i, 0, audio.getNumSamples());
-			}
+		for (int i = 0; i < audio.getNumChannels() && i < this->outputLevels.size(); i++) {
+			this->outputLevels.getReference(i) =
+				audio.getRMSLevel(i, 0, audio.getNumSamples());
 		}
 	}
 
 	/** MIDI Output */
 	if (!isRendering) {
-		juce::ScopedReadLock locker(this->midiLock);
 		if (this->midiHook) {
 			for (auto m : midi) {
 				juce::MessageManager::callAsync(

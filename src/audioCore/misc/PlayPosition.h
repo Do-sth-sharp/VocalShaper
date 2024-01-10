@@ -8,7 +8,6 @@ public:
 	~MovablePlayHead() override = default;
 
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const override;
-	const juce::ReadWriteLock& getLock() const;
 
 	bool canControlTransport() override;
 	void transportPlay(bool shouldStartPlaying) override;
@@ -44,7 +43,6 @@ protected:
 	std::atomic_short timeFormat = 480;
 	std::atomic<double> sampleRate = 48000;
 	std::atomic_bool overflowFlag = false;
-	juce::ReadWriteLock lock;
 
 	void updatePositionByTimeInSecond();
 	void updatePositionByTimeInSample();
@@ -65,7 +63,6 @@ public:
 
 private:
 	static PlayPosition* instance;
-	static juce::CriticalSection instanceGuard;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayPosition)
 };

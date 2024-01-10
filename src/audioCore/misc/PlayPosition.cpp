@@ -2,11 +2,10 @@
 
 #include <chrono>
 #include "../uiCallback/UICallback.h"
+#include "../misc/AudioLock.h"
 #include "../Utils.h"
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> MovablePlayHead::getPosition() const {
-	juce::ScopedReadLock locker(this->lock);
-
 	/** Get System Clock Nanoseconds */
 	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 	std::chrono::nanoseconds ns
@@ -16,17 +15,13 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> MovablePlayHead::getPosition()
 	return juce::makeOptional(this->position);
 }
 
-const juce::ReadWriteLock& MovablePlayHead::getLock() const {
-	return this->lock;
-}
-
 bool MovablePlayHead::canControlTransport() {
 	//return juce::MessageManager::existsAndIsCurrentThread();
 	return true;
 }
 
 void MovablePlayHead::transportPlay(bool shouldStartPlaying) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setIsPlaying(shouldStartPlaying);
 	if (!shouldStartPlaying) {
 		this->position.setIsRecording(false);
@@ -38,7 +33,7 @@ void MovablePlayHead::transportPlay(bool shouldStartPlaying) {
 }
 
 void MovablePlayHead::transportRecord(bool shouldStartRecording) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setIsRecording(shouldStartRecording);
 	if (shouldStartRecording) {
 		this->position.setIsPlaying(true);
@@ -49,7 +44,7 @@ void MovablePlayHead::transportRecord(bool shouldStartRecording) {
 }
 
 void MovablePlayHead::transportRewind() {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setTimeInSamples(0);
 	this->position.setTimeInSeconds(0);
 	this->position.setBarCount(0);
@@ -59,12 +54,12 @@ void MovablePlayHead::transportRewind() {
 }
 
 void MovablePlayHead::setTimeFormat(short ticksPerQuarter) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->timeFormat = ticksPerQuarter;
 }
 
 void MovablePlayHead::setSampleRate(double sampleRate) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->sampleRate = sampleRate;
 
 	this->position.setTimeInSamples(
@@ -72,12 +67,12 @@ void MovablePlayHead::setSampleRate(double sampleRate) {
 }
 
 void MovablePlayHead::setLooping(bool looping) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setIsLooping(looping);
 }
 
 void MovablePlayHead::setLoopPointsInSeconds(const std::tuple<double, double>& points) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 
 	auto [start, end] = points;
 	start = this->toTick(start) / this->timeFormat;
@@ -88,32 +83,31 @@ void MovablePlayHead::setLoopPointsInSeconds(const std::tuple<double, double>& p
 }
 
 void MovablePlayHead::setLoopPointsInQuarter(const std::tuple<double, double>& points) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setLoopPoints(
 		juce::AudioPlayHead::LoopPoints{ std::get<0>(points), std::get<1>(points) });
 }
 
 void MovablePlayHead::setPositionInSeconds(double time) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setTimeInSeconds(time);
 
 	this->updatePositionByTimeInSecond();
 }
 
 void MovablePlayHead::setPositionInQuarter(double time) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->setPositionInSeconds(this->toSecond(time * this->timeFormat));
 }
 
 void MovablePlayHead::setPositionInSamples(int64_t sampleNum) {
-	juce::ScopedWriteLock locker(this->lock);
+	juce::ScopedWriteLock locker(audioLock::getLock());
 	this->position.setTimeInSamples(sampleNum);
 
 	this->updatePositionByTimeInSample();
 }
 
 void MovablePlayHead::next(int blockSize) {
-	juce::ScopedWriteLock locker(this->lock);
 	if (this->position.getIsPlaying()) {
 		uint64_t time = this->position.getTimeInSamples().orFallback(0);
 		time += blockSize;
@@ -152,7 +146,6 @@ juce::MidiMessageSequence& MovablePlayHead::getTempoSequence() {
 }
 
 double MovablePlayHead::getSampleRate() const {
-	juce::ScopedReadLock locker(this->lock);
 	return this->sampleRate;
 }
 
@@ -186,12 +179,10 @@ void MovablePlayHead::updatePositionByTimeInSample() {
 }
 
 PlayPosition* PlayPosition::getInstance() {
-	juce::GenericScopedLock locker{ PlayPosition::instanceGuard };
 	return PlayPosition::instance ? PlayPosition::instance : (PlayPosition::instance = new PlayPosition());
 }
 
 void PlayPosition::releaseInstance() {
-	juce::GenericScopedLock locker{ PlayPosition::instanceGuard };
 	if (PlayPosition::instance) {
 		delete PlayPosition::instance;
 		PlayPosition::instance = nullptr;
@@ -199,4 +190,3 @@ void PlayPosition::releaseInstance() {
 }
 
 PlayPosition* PlayPosition::instance = nullptr;
-juce::CriticalSection PlayPosition::instanceGuard;
