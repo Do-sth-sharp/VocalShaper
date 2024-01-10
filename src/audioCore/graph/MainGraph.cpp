@@ -228,6 +228,7 @@ void MainGraph::clearGraph() {
 }
 
 const juce::Array<float> MainGraph::getOutputLevels() const {
+	juce::ScopedReadLock locker(this->levelsLock);
 	return this->outputLevels;
 }
 
@@ -573,7 +574,10 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	}
 
 	/** Process Audio Block */
-	this->juce::AudioProcessorGraph::processBlock(audio, midi);
+	{
+		juce::ScopedTryReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
+		this->juce::AudioProcessorGraph::processBlock(audio, midi);
+	}
 
 	/** Truncate Output */
 	if (isRendering) {
@@ -583,6 +587,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Get Level */
 	{
+		juce::ScopedWriteLock locker(this->levelsLock);
 		for (int i = 0; i < audio.getNumChannels() && i < this->outputLevels.size(); i++) {
 			this->outputLevels.getReference(i) =
 				audio.getRMSLevel(i, 0, audio.getNumSamples());

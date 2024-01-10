@@ -141,6 +141,7 @@ private:
 	std::function<void(const juce::MidiMessage&, bool)> midiHook;
 
 	juce::Array<float> outputLevels;
+	juce::ReadWriteLock levelsLock;
 
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
