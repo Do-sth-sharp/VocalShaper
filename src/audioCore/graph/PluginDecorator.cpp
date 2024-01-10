@@ -32,12 +32,26 @@ PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plug
 	this->setPlugin(std::move(plugin), identifier);
 }
 
+PluginDecorator::~PluginDecorator() {
+	if (this->plugin) {
+		if (auto editor = this->plugin->getActiveEditor()) {
+			delete editor;
+		}
+	}
+}
+
 void PluginDecorator::setPlugin(
 	std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier) {
 	if (!plugin) { return; }
 
 	{
 		juce::ScopedWriteLock locker(audioLock::getLock());
+
+		if (this->plugin) {
+			if (auto editor = this->plugin->getActiveEditor()) {
+				delete editor;
+			}
+		}
 
 		this->plugin = std::move(plugin);
 		this->pluginIdentifier = pluginIdentifier;

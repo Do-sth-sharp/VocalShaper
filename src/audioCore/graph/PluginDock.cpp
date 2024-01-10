@@ -41,13 +41,7 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 }
 
 PluginDock::~PluginDock() {
-	for (auto& i : this->pluginNodeList) {
-		if (auto processor = i->getProcessor()) {
-			if (auto editor = processor->getActiveEditor()) {
-				delete editor;
-			}
-		}
-	}
+	/** Nothing To Do */
 }
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,

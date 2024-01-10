@@ -37,13 +37,7 @@ MainGraph::MainGraph() {
 }
 
 MainGraph::~MainGraph() {
-	for (auto& i : this->instrumentNodeList) {
-		if (auto processor = i->getProcessor()) {
-			if (auto editor = processor->getActiveEditor()) {
-				delete editor;
-			}
-		}
-	}
+	/** Nothing To Do */
 }
 
 void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {

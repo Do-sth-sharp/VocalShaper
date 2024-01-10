@@ -12,6 +12,7 @@ public:
 		const juce::String& identifier,
 		bool isInstr = false,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	~PluginDecorator();
 
 	void setPlugin(
 		std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier);
