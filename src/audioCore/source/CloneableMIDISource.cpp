@@ -8,8 +8,6 @@ using namespace org::vocalsharp::vocalshaper;
 void CloneableMIDISource::readData(
 	juce::MidiBuffer& buffer, int baseTime,
 	int startTime, int endTime) const {
-	if (this->checkRecording()) { return; }
-
 	/** Get MIDI Data */
 	juce::MidiMessageSequence total;
 	for (int i = 0; i < this->buffer.getNumTracks(); i++) {

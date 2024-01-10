@@ -21,7 +21,6 @@ double CloneableSynthSource::getSourceSampleRate() const {
 
 void CloneableSynthSource::readData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {
-	if (this->checkRecording()) { return; }
 	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
 	if (this->source && this->memorySource) {

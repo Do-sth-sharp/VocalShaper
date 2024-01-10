@@ -11,7 +11,6 @@ double CloneableAudioSource::getSourceSampleRate() const {
 
 void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {
-	if (this->checkRecording()) { return; }
 	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
 	if (this->source && this->memorySource) {
@@ -143,6 +142,7 @@ void CloneableAudioSource::init(double sampleRate, int channelNum, int sampleNum
 
 	/** Create Buffer */
 	this->buffer = juce::AudioSampleBuffer{ channelNum, sampleNum };
+	this->buffer.clear();
 	this->sourceSampleRate = sampleRate;
 
 	/** Create Audio Source */
@@ -164,7 +164,10 @@ void CloneableAudioSource::prepareToRecord(
 	/** Clear Buffer If Sample Rate Mismatch */
 	if (this->getSourceSampleRate() != sampleRate) {
 		this->sourceSampleRate = sampleRate;
-		this->buffer.setSize(this->buffer.getNumChannels(), 0, false, false, true);
+		this->buffer.setSize(this->buffer.getNumChannels(), 0, false, true, true);
+
+		/** Set Flag */
+		this->changed();
 	}
 
 	/** Clear Audio Source */
@@ -174,22 +177,23 @@ void CloneableAudioSource::prepareToRecord(
 	/** Init Buffer */
 	this->buffer.setSize(
 		std::max(inputChannels, this->buffer.getNumChannels()),
-		this->buffer.getNumSamples(), true, false, true);
+		this->buffer.getNumSamples(), true, true, true);
 
-	/** Set Flag */
-	this->changed();
-}
-
-void CloneableAudioSource::recordingFinished() {
 	/** Create Audio Source */
 	this->memorySource = std::make_unique<juce::MemoryAudioSource>(this->buffer, false, false);
 	this->source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
 
 	/** Update Resampling Ratio */
 	this->sampleRateChanged();
+}
 
-	/** Set Flag */
-	this->changed();
+void CloneableAudioSource::recordingFinished() {
+	/** Create Audio Source */
+	//this->memorySource = std::make_unique<juce::MemoryAudioSource>(this->buffer, false, false);
+	//this->source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
+
+	/** Update Resampling Ratio */
+	//this->sampleRateChanged();
 }
 
 void CloneableAudioSource::writeData(
@@ -211,7 +215,7 @@ void CloneableAudioSource::writeData(
 		if (startSample > this->buffer.getNumSamples() - length) {
 			int newLength = startSample + length;
 			this->buffer.setSize(
-				this->buffer.getNumChannels(), newLength, true, false, true);
+				this->buffer.getNumChannels(), newLength, true, true, true);
 		}
 
 		/** CopyData */

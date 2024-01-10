@@ -121,7 +121,7 @@ public:
 private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
-	juce::AudioProcessorGraph::Node::Ptr recorderNode;
+	std::unique_ptr<SourceRecordProcessor> recorder = nullptr;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> audioSourceNodeList;
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> instrumentNodeList;

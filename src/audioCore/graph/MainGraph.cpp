@@ -29,11 +29,7 @@ MainGraph::MainGraph() {
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
 	/** The Source Recorder Node */
-	this->recorderNode = this->addNode(std::make_unique<SourceRecordProcessor>());
-
-	/** Link MIDI Input To Recorder */
-	this->addConnection({ {this->midiInputNode->nodeID, this->midiChannelIndex},
-		{this->recorderNode->nodeID, this->midiChannelIndex} });
+	this->recorder = std::make_unique<SourceRecordProcessor>();
 }
 
 MainGraph::~MainGraph() {
@@ -63,28 +59,8 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	this->removeIllegalAudioI2TrkConnections();
 	this->removeIllegalAudioTrk2OConnections();
 
-	/** Remove Recorder Input */
-	{
-		int inputChannels =
-			this->recorderNode->getProcessor()->getTotalNumInputChannels();
-		for (int i = 0; i < inputChannels; i++) {
-			this->removeConnection(
-				{ {this->audioInputNode->nodeID, i},
-				{this->recorderNode->nodeID, i} });
-		}
-	}
-
 	/** Set Layout of Recorder */
-	this->recorderNode->getProcessor()->setBusesLayout(inputLayout);
-
-	/** Add Recorder Input */
-	{
-		for (int i = 0; i < inputChannelNum; i++) {
-			this->addConnection(
-				{ {this->audioInputNode->nodeID, i},
-				{this->recorderNode->nodeID, i} });
-		}
-	}
+	this->getRecorder()->setBusesLayout(inputLayout);
 
 	/** Set Level Size */
 	{
@@ -113,6 +89,10 @@ void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 	Renderer::getInstance()->updateSampleRateAndBufferSize(
 		sampleRate, maximumExpectedSamplesPerBlock);
 
+	/** Recorder */
+	this->recorder->prepareToPlay(
+		sampleRate, maximumExpectedSamplesPerBlock);
+
 	/** Current Graph */
 	this->juce::AudioProcessorGraph::prepareToPlay(
 		sampleRate, maximumExpectedSamplesPerBlock);
@@ -122,7 +102,7 @@ void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
 
 	/** Recorder */
-	this->recorderNode->getProcessor()->setPlayHead(newPlayHead);
+	this->getRecorder()->setPlayHead(newPlayHead);
 
 	/** Audio Source */
 	for (auto& i : this->audioSourceNodeList) {
@@ -152,12 +132,11 @@ double MainGraph::getTailLengthSeconds() const {
 }
 
 SourceRecordProcessor* MainGraph::getRecorder() const {
-	return dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor());
+	return this->recorder.get();
 }
 
 void MainGraph::clearGraph() {
-	auto recorder = dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor());
-	if (recorder) {
+	if (auto recorder = this->getRecorder()) {
 		recorder->clearGraph();
 	}
 
@@ -323,8 +302,7 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 		this->setMIDITrk2OConnection(i.src());
 	}
 
-	if (!dynamic_cast<SourceRecordProcessor*>(
-		this->recorderNode->getProcessor())->parse(&(mes->recorder()))) {
+	if (!this->getRecorder()->parse(&(mes->recorder()))) {
 		return false;
 	}
 
@@ -506,7 +484,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 		midiTrack2O->AddAllocated(cmes.release());
 	}
 
-	auto recorder = dynamic_cast<SourceRecordProcessor*>(this->recorderNode->getProcessor())->serialize();
+	auto recorder = this->getRecorder()->serialize();
 	if (!dynamic_cast<vsp4::Recorder*>(recorder.get())) { return nullptr; }
 	mes->set_allocated_recorder(dynamic_cast<vsp4::Recorder*>(recorder.release()));
 
@@ -569,19 +547,20 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Truncate Input */
 	if (isRendering) {
-		audio.setSize(audio.getNumChannels(), audio.getNumSamples(), false, true, true);
+		audio.clear();
 		midi.clear();
 	}
 
 	/** Process Audio Block */
 	{
 		juce::ScopedTryReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
+		this->recorder->processBlock(audio, midi);
 		this->juce::AudioProcessorGraph::processBlock(audio, midi);
 	}
 
 	/** Truncate Output */
 	if (isRendering) {
-		audio.setSize(audio.getNumChannels(), audio.getNumSamples(), false, true, true);
+		audio.clear();
 		midi.clear();
 	}
 
