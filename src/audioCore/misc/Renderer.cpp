@@ -1,4 +1,4 @@
-#include "Renderer.h"
+﻿#include "Renderer.h"
 
 #include "../AudioCore.h"
 #include "../Utils.h"
@@ -76,6 +76,7 @@ void RenderThread::run() {
 
 	/** Get Total Time */
 	double totalLength = mainGraph->getTailLengthSeconds();
+	totalLength = std::min(totalLength, INT_MAX / PlayPosition::getInstance()->getSampleRate());
 
 	/** Reset Play Position */
 	PlayPosition::getInstance()->setPositionInSamples(0);

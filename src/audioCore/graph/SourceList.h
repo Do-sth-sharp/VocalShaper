@@ -8,6 +8,9 @@ class SourceList final : public Serializable {
 public:
 	SourceList() = default;
 
+	/**
+	 * StartTime, EndTime, Offset, Pointer, Index.
+	 */
 	using SeqBlock = std::tuple<
 		double, double, double,
 		CloneableSource::SafePointer<>, int>;

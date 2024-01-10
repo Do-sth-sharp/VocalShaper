@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "CloneableSource.h"
@@ -10,8 +10,8 @@ public:
 
 	double getSourceSampleRate() const;
 
-	void readData(juce::AudioBuffer<float>& buffer, double bufferOffset,
-		double dataOffset, double length) const;
+	void readData(juce::AudioBuffer<float>& buffer, int bufferOffset,
+		int dataOffset, int length) const;
 	int getChannelNum() const;
 
 public:

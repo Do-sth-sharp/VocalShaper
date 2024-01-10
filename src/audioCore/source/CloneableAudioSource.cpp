@@ -1,4 +1,4 @@
-#include "CloneableAudioSource.h"
+﻿#include "CloneableAudioSource.h"
 
 #include "../Utils.h"
 #include <VSP4.h>
@@ -8,19 +8,19 @@ double CloneableAudioSource::getSourceSampleRate() const {
 	return this->sourceSampleRate;
 }
 
-void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, double bufferOffset,
-	double dataOffset, double length) const {
+void CloneableAudioSource::readData(juce::AudioBuffer<float>& buffer, int bufferOffset,
+	int dataOffset, int length) const {
 	if (this->checkRecording()) { return; }
 	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
 
 	juce::ScopedTryReadLock locker(this->lock);
 	if (locker.isLocked()) {
 		if (this->source && this->memorySource) {
-			this->memorySource->setNextReadPosition(std::floor(dataOffset * this->sourceSampleRate));
-			int startSample = (int)std::floor(bufferOffset * this->getSampleRate());
+			this->memorySource->setNextReadPosition((int64_t)(dataOffset * this->source->getResamplingRatio()));
+			int startSample = bufferOffset;
 			this->source->getNextAudioBlock(juce::AudioSourceChannelInfo{
 				&buffer, startSample,
-					std::min(buffer.getNumSamples() - startSample, (int)std::ceil(length * this->getSampleRate()))});/**< Ceil then min with buffer size to ensure audio data fill the last point in buffer */
+					std::min(buffer.getNumSamples() - startSample, length)});
 		}
 	}
 }

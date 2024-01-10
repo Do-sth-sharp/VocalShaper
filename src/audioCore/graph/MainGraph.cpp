@@ -606,6 +606,13 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Add Position */
 	if (auto position = dynamic_cast<PlayPosition*>(this->getPlayHead())) {
-		position->next(audio.getNumSamples());
+		int currentPos = position->getPosition()->getTimeInSamples().orFallback(0);
+		if (INT_MAX - audio.getNumSamples() > currentPos) {
+			position->next(audio.getNumSamples());
+		}
+		else {
+			/** Time Overflow */
+			position->setOverflow();
+		}
 	}
 }

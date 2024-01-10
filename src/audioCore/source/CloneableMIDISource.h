@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "CloneableSource.h"
@@ -9,8 +9,8 @@ public:
 	~CloneableMIDISource() override = default;
 
 	void readData(
-		juce::MidiBuffer& buffer, double baseTime,
-		double startTime, double endTime) const;
+		juce::MidiBuffer& buffer, int baseTime,
+		int startTime, int endTime) const;
 	int getTrackNum() const;
 
 public:

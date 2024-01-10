@@ -30,6 +30,7 @@ void MovablePlayHead::transportPlay(bool shouldStartPlaying) {
 	this->position.setIsPlaying(shouldStartPlaying);
 	if (!shouldStartPlaying) {
 		this->position.setIsRecording(false);
+		this->overflowFlag = false;
 	}
 
 	UICallbackAPI<bool>::invoke(
@@ -54,6 +55,7 @@ void MovablePlayHead::transportRewind() {
 	this->position.setBarCount(0);
 	this->position.setPpqPositionOfLastBarStart(0);
 	this->position.setPpqPosition(0);
+	this->overflowFlag = false;
 }
 
 void MovablePlayHead::setTimeFormat(short ticksPerQuarter) {
@@ -147,6 +149,19 @@ std::tuple<int, double> MovablePlayHead::toBar(double timeSecond, short /*timeFo
 
 juce::MidiMessageSequence& MovablePlayHead::getTempoSequence() {
 	return this->tempos;
+}
+
+double MovablePlayHead::getSampleRate() const {
+	juce::ScopedReadLock locker(this->lock);
+	return this->sampleRate;
+}
+
+void MovablePlayHead::setOverflow() {
+	this->overflowFlag = true;
+}
+
+bool MovablePlayHead::checkOverflow() const {
+	return this->overflowFlag;
 }
 
 void MovablePlayHead::updatePositionByTimeInSecond() {

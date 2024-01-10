@@ -1,12 +1,12 @@
-#include "CloneableMIDISource.h"
+﻿#include "CloneableMIDISource.h"
 
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
 void CloneableMIDISource::readData(
-	juce::MidiBuffer& buffer, double baseTime,
-	double startTime, double endTime) const {
+	juce::MidiBuffer& buffer, int baseTime,
+	int startTime, int endTime) const {
 	if (this->checkRecording()) { return; }
 
 	juce::ScopedTryReadLock locker(this->lock);
@@ -17,7 +17,7 @@ void CloneableMIDISource::readData(
 		for (int i = 0; i < this->buffer.getNumTracks(); i++) {
 			auto track = this->buffer.getTrack(i);
 			if (track) {
-				total.addSequence(*track, 0, startTime, endTime);
+				total.addSequence(*track, 0, startTime / this->getSampleRate(), endTime / this->getSampleRate());
 			}
 		}
 
@@ -25,7 +25,7 @@ void CloneableMIDISource::readData(
 		for (auto i : total) {
 			auto& message = i->message;
 			double time = message.getTimeStamp();
-			buffer.addEvent(message, std::floor((time + baseTime) * this->getSampleRate()));
+			buffer.addEvent(message, std::floor((time + baseTime / this->getSampleRate()) * this->getSampleRate()));
 		}
 	}
 }

@@ -1,4 +1,4 @@
-#include "PlayWatcher.h"
+﻿#include "PlayWatcher.h"
 
 #include "PlayPosition.h"
 #include "../AudioCore.h"
@@ -12,7 +12,8 @@ void PlayWatcher::timerCallback() {
 	auto playPosition = PlayPosition::getInstance()->getPosition();
 	if (playPosition->getIsPlaying() && !playPosition->getIsRecording()) {
 		if (auto mainGraph = AudioCore::getInstance()->getGraph()) {
-			if (playPosition->getTimeInSeconds() > mainGraph->getTailLengthSeconds()) {
+			if ((playPosition->getTimeInSeconds() > mainGraph->getTailLengthSeconds())
+				|| PlayPosition::getInstance()->checkOverflow()) {
 				AudioCore::getInstance()->pause();
 			}
 		}

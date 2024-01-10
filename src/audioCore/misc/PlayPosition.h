@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 
@@ -33,12 +33,17 @@ public:
 	std::tuple<int, double> toBar(double timeSecond, short timeFormat) const;
 
 	juce::MidiMessageSequence& getTempoSequence();
+	double getSampleRate() const;
+
+	void setOverflow();
+	bool checkOverflow() const;
 
 protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
 	juce::MidiMessageSequence tempos;
 	std::atomic_short timeFormat = 480;
 	std::atomic<double> sampleRate = 48000;
+	std::atomic_bool overflowFlag = false;
 	juce::ReadWriteLock lock;
 
 	void updatePositionByTimeInSecond();
