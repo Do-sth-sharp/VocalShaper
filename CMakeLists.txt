@@ -127,6 +127,10 @@ add_dependencies (engines_copy
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
+if (NOT MSVC)
+	target_compile_options (PluginSearcher PRIVATE
+		-pthread -fPIE)
+endif (NOT MSVC)
 if (MSVC)
 	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full)
 else (MSVC)
@@ -143,6 +147,10 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT
 # File Registrar Target
 file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
 add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
+if (NOT MSVC)
+	target_compile_options (FileRegistrar PRIVATE
+		-pthread -fPIE)
+endif (NOT MSVC)
 if (MSVC)
 	target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
 else (MSVC)
@@ -167,6 +175,11 @@ target_link_libraries (VocalShaper PRIVATE
 	vsp4::vsp4
 	sigar::sigar
 )
+if (NOT MSVC)
+	target_compile_options (VocalShaper PRIVATE
+		-pthread -fPIE
+		-msse3 -mavx2 -mavx512f)
+endif (NOT MSVC)
 if (MSVC)
 	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
 else (MSVC)
@@ -182,7 +195,7 @@ if (MSVC)
 endif (MSVC)
 
 add_dependencies (VocalShaper
-	PluginSearcher FileRegistrar cmake-lame::lame#lame_copy
+	PluginSearcher FileRegistrar cmake-lame::lame
 	app_config_copy remix_icon_copy engines_copy
 )
 
