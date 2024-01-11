@@ -28,7 +28,7 @@ bool ConfigPropHelper::update(const juce::var& data) {
 	if (!classObj) { return false; }
 
 	if (!this->updateCallback(data)) { return false; }
-	classObj->setProperty(this->propName, data);
+	classObj->setProperty(this->propName, this->getValueCallback ? this->getValueCallback() : data);
 	return true;
 }
 
