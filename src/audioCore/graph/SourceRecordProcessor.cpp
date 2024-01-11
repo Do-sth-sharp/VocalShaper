@@ -18,7 +18,7 @@ SourceRecordProcessor::~SourceRecordProcessor() {
 
 void SourceRecordProcessor::insertTask(
 	const SourceRecordProcessor::RecorderTask& task, int index) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	auto& [source, srcIndex, offset, compensate] = task;
 
 	/** Check Source */
@@ -37,7 +37,7 @@ void SourceRecordProcessor::insertTask(
 }
 
 void SourceRecordProcessor::removeTask(int index) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	auto [src, srcIndex, offset, compensate] = this->tasks.removeAndReturn(index);
 	if (src) {
 		src->recordingFinishedInternal();
@@ -54,7 +54,7 @@ const SourceRecordProcessor::RecorderTask
 }
 
 void SourceRecordProcessor::clearGraph() {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->tasks.clear();
 }
 

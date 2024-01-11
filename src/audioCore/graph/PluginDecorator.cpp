@@ -45,7 +45,7 @@ void PluginDecorator::setPlugin(
 	if (!plugin) { return; }
 
 	{
-		juce::ScopedWriteLock locker(audioLock::getLock());
+		juce::ScopedWriteLock locker(audioLock::getPluginLock());
 
 		if (this->plugin) {
 			if (auto editor = this->plugin->getActiveEditor()) {
@@ -204,7 +204,7 @@ void PluginDecorator::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
 
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getPluginLock());
 	if (!this->plugin) { return; }
 
 	int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());

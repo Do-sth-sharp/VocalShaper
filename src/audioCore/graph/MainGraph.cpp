@@ -64,14 +64,14 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 
 	/** Set Level Size */
 	{
-		juce::ScopedWriteLock locker(audioLock::getLock());
+		juce::ScopedWriteLock locker(this->levelsLock);
 		this->outputLevels.resize(outputChannelNum);
 	}
 }
 
 void MainGraph::setMIDIMessageHook(
 	const std::function<void(const juce::MidiMessage&, bool)> hook) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->midiHook = hook;
 }
 
@@ -493,8 +493,13 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Lock */
-	juce::ScopedTryReadLock locker(audioLock::getLock());
-	if (!locker.isLocked()) {
+	juce::ScopedTryReadLock audioLocker(audioLock::getAudioLock());
+	juce::ScopedTryReadLock sourceLocker(audioLock::getAudioLock());
+	juce::ScopedTryReadLock pluginLocker(audioLock::getPluginLock());
+	juce::ScopedTryReadLock positionLocker(audioLock::getPositionLock());
+	juce::ScopedTryReadLock mackieLocker(audioLock::getMackieLock());
+	if (!(audioLocker.isLocked() && pluginLocker.isLocked() 
+		&& sourceLocker.isLocked()  && positionLocker.isLocked() && mackieLocker.isLocked())) {
 		audio.clear();
 		midi.clear();
 		return;

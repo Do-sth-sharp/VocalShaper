@@ -16,7 +16,7 @@ SynthRenderThread::~SynthRenderThread() {
 
 void SynthRenderThread::run() {
 	/** Lock Buffer */
-	juce::ScopedWriteLock audioLocker(audioLock::getLock());
+	juce::ScopedWriteLock audioLocker(audioLock::getAudioLock());
 
 	/** Prepare Synth Info */
 	if (!parent->synthesizer) { return; }

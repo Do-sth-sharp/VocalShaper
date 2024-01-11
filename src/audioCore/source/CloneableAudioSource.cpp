@@ -48,7 +48,7 @@ std::unique_ptr<google::protobuf::Message> CloneableAudioSource::serialize() con
 
 std::unique_ptr<CloneableSource> CloneableAudioSource::clone() const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(audioLock::getLock());
+	juce::ScopedTryReadLock locker(audioLock::getSourceLock());
 	if (locker.isLocked()) {
 		/** Create New Source */
 		auto dst = std::unique_ptr<CloneableAudioSource>();
@@ -75,7 +75,7 @@ bool CloneableAudioSource::load(const juce::File& file) {
 	if (this->checkRecording()) { return false; }
 
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Create Audio Reader */
 	auto audioReader = utils::createAudioReader(file);
@@ -103,7 +103,7 @@ bool CloneableAudioSource::load(const juce::File& file) {
 }
 
 bool CloneableAudioSource::save(const juce::File& file) const {
-	juce::ScopedReadLock locker(audioLock::getLock());
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
 
 	/** Create Audio Writer */
 	auto audioWriter = utils::createAudioWriter(file, this->sourceSampleRate,
@@ -117,12 +117,12 @@ bool CloneableAudioSource::save(const juce::File& file) const {
 }
 
 double CloneableAudioSource::getLength() const {
-	juce::ScopedReadLock locker(audioLock::getLock());
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
 	return this->buffer.getNumSamples() / this->sourceSampleRate;
 }
 
 void CloneableAudioSource::sampleRateChanged() {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 	if (this->source) {
 		this->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 		this->source->prepareToPlay(this->getBufferSize(), this->getSampleRate());
@@ -134,7 +134,7 @@ void CloneableAudioSource::init(double sampleRate, int channelNum, int sampleNum
 	if (this->checkRecording()) { return; }
 
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Clear Audio Source */
 	this->source = nullptr;
@@ -159,7 +159,7 @@ void CloneableAudioSource::init(double sampleRate, int channelNum, int sampleNum
 void CloneableAudioSource::prepareToRecord(
 	int inputChannels, double sampleRate, int blockSize, bool /*updateOnly*/) {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Clear Buffer If Sample Rate Mismatch */
 	if (this->getSourceSampleRate() != sampleRate) {
@@ -199,7 +199,7 @@ void CloneableAudioSource::recordingFinished() {
 void CloneableAudioSource::writeData(
 	const juce::AudioBuffer<float>& buffer, int offset)	{
 	/** Lock */
-	juce::ScopedTryWriteLock locker(audioLock::getLock());
+	juce::ScopedTryWriteLock locker(audioLock::getSourceLock());
 	if (locker.isLocked()) {
 		/** Get Time */
 		int startSample = offset;

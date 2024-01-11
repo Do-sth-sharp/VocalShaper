@@ -74,12 +74,12 @@ const juce::String CloneableSource::getName() const {
 }
 
 void CloneableSource::setPath(const juce::String& path) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 	this->path = path;
 }
 
 const juce::String CloneableSource::getPath() const {
-	juce::ScopedReadLock locker(audioLock::getLock());
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
 	return this->path;
 }
 

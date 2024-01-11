@@ -84,7 +84,7 @@ int SourceList::size() const {
 
 int SourceList::add(const SourceList::SeqBlock& block) {
 	/** Get Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 
 	/** Get Insert Place */
 	int index = this->list.isEmpty()
@@ -108,14 +108,14 @@ int SourceList::add(const SourceList::SeqBlock& block) {
 }
 
 void SourceList::remove(int index) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	if (index >= 0 && index < this->list.size()) {
 		this->list.remove(index);
 	}
 }
 
 void SourceList::clearGraph() {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->list.clear();
 	this->lastIndex = -1;
 }

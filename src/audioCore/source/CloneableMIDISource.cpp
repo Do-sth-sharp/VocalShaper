@@ -51,7 +51,7 @@ std::unique_ptr<google::protobuf::Message> CloneableMIDISource::serialize() cons
 
 std::unique_ptr<CloneableSource> CloneableMIDISource::clone() const {
 	/** Lock */
-	juce::ScopedTryReadLock locker(audioLock::getLock());
+	juce::ScopedTryReadLock locker(audioLock::getSourceLock());
 	if (locker.isLocked()) {
 		/** Create New Source */
 		auto dst = std::unique_ptr<CloneableMIDISource>();
@@ -79,7 +79,7 @@ bool CloneableMIDISource::load(const juce::File& file) {
 
 	/** Copy Data */
 	{
-		juce::ScopedWriteLock locker(audioLock::getLock());
+		juce::ScopedWriteLock locker(audioLock::getSourceLock());
 		this->buffer = midiFile;
 		this->buffer.convertTimestampTicksToSeconds();
 	}
@@ -95,7 +95,7 @@ bool CloneableMIDISource::save(const juce::File& file) const {
 	stream->truncate();
 
 	/** Copy Data */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 	juce::MidiFile midiFile{ this->buffer };
 	utils::convertSecondsToTicks(midiFile);
 
@@ -110,7 +110,7 @@ bool CloneableMIDISource::save(const juce::File& file) const {
 }
 
 double CloneableMIDISource::getLength() const {
-	juce::ScopedReadLock locker(audioLock::getLock());
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
 
 	/** Get Time In Seconds */
 	return this->buffer.getLastTimestamp();
@@ -121,7 +121,7 @@ void CloneableMIDISource::prepareToRecord(
 	int /*blockSize*/, bool updateOnly) {
 	if (!updateOnly) {
 		/** Lock */
-		juce::ScopedWriteLock locker(audioLock::getLock());
+		juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 		/** Add New Track */
 		this->buffer.addTrack(juce::MidiMessageSequence{});
@@ -133,7 +133,7 @@ void CloneableMIDISource::prepareToRecord(
 
 void CloneableMIDISource::recordingFinished() {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Match Notes */
 	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
@@ -150,7 +150,7 @@ void CloneableMIDISource::recordingFinished() {
 void CloneableMIDISource::writeData(
 	const juce::MidiBuffer& buffer, int offset) {
 	/** Lock */
-	juce::ScopedTryWriteLock locker(audioLock::getLock());
+	juce::ScopedTryWriteLock locker(audioLock::getSourceLock());
 	if (locker.isLocked()) {
 		/** Write To The Last Track */
 		if (auto track = const_cast<juce::MidiMessageSequence*>(

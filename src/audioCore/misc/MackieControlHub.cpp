@@ -2,7 +2,7 @@
 #include "../misc/AudioLock.h"
 
 MackieControlHub::~MackieControlHub() {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 
 	for (auto& [device, index] : this->inputDevices) {
 		device->stop();
@@ -18,7 +18,7 @@ MackieControlHub::~MackieControlHub() {
 juce::MidiInput* MackieControlHub::openInputDevice(
 	const juce::String& deviceIdentifier, int index) {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 
 	/** Device Has Opened */
 	for (auto& [device, ind] : this->inputDevices) {
@@ -44,7 +44,7 @@ juce::MidiInput* MackieControlHub::openInputDevice(
 juce::MidiOutput* MackieControlHub::openOutputDevice(
 	const juce::String& deviceIdentifier, int index) {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 
 	/** Device Has Opened */
 	for (auto& [device, ind] : this->outputDevices) {
@@ -69,7 +69,7 @@ juce::MidiOutput* MackieControlHub::openOutputDevice(
 
 bool MackieControlHub::closeInputDevice(const juce::String& deviceIdentifier) {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 
 	/** Find Device */
 	auto deviceIndex = this->findInputDevice(deviceIdentifier);
@@ -87,7 +87,7 @@ bool MackieControlHub::closeInputDevice(const juce::String& deviceIdentifier) {
 
 bool MackieControlHub::closeOutputDevice(const juce::String& deviceIdentifier) {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 
 	/** Find Device */
 	auto deviceIndex = this->findOutputDevice(deviceIdentifier);
@@ -167,7 +167,7 @@ int MackieControlHub::getOutputDeviceIndex(int index) const {
 }
 
 bool MackieControlHub::setInputDeviceIndex(int index, int deviceIndex) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 	if (index < 0 || index >= this->inputDevices.size()) { return false; }
 
 	auto& [device, devIdx] = this->inputDevices.getReference(index);
@@ -176,7 +176,7 @@ bool MackieControlHub::setInputDeviceIndex(int index, int deviceIndex) {
 }
 
 bool MackieControlHub::setOutputDeviceIndex(int index, int deviceIndex) {
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 	if (index < 0 || index >= this->outputDevices.size()) { return false; }
 
 	auto& [device, devIdx] = this->outputDevices.getReference(index);
@@ -188,7 +188,7 @@ void MackieControlHub::removeUnavailableDevices(
 	const juce::Array<juce::MidiDeviceInfo>& inputDevices,
 	const juce::Array<juce::MidiDeviceInfo>& outputDeivces) {
 	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getLock());
+	juce::ScopedWriteLock locker(audioLock::getMackieLock());
 
 	/** Input */
 	for (int i = this->inputDevices.size() - 1; i >= 0; i--) {
