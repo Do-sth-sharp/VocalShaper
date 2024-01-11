@@ -1,5 +1,11 @@
 ﻿#include "LookAndFeelFactory.h"
 #include "MainLookAndFeel.h"
+#include "ToolBarLookAndFeel.h"
+#include "MainMenuLookAndFeel.h"
+#include "SystemStatusLookAndFeel.h"
+#include "TimeLookAndFeel.h"
+#include "ControllerLookAndFeel.h"
+#include "ToolsLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -36,84 +42,22 @@ void LookAndFeelFactory::initialise() {
 		ColorMap::getInstance()->get("ThemeColorA2").withAlpha(0.3f));
 
 	/** ToolBar */
-	this->toolBarLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->toolBarLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->toolBarLAF = std::make_unique<ToolBarLookAndFeel>();
 
 	/** Main Menu */
-	this->mainMenuLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
-	this->mainMenuLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
-	this->mainMenuLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->mainMenuLAF = std::make_unique<MainMenuLookAndFeel>();
 
 	/** System Status */
-	this->sysStatusLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->sysStatusLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-
-	this->sysStatusLAF->setColour(juce::Label::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-	this->sysStatusLAF->setColour(juce::Label::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));/**< Label Color */
-	this->sysStatusLAF->setColour(juce::Label::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));
-	this->sysStatusLAF->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-	this->sysStatusLAF->setColour(juce::Label::ColourIds::textWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));/**< Value Color */
-	this->sysStatusLAF->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));/**< Curve Color */
+	this->sysStatusLAF = std::make_unique<SystemStatusLookAndFeel>();
 
 	/** Time */
-	this->timeLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->timeLAF->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-
-	this->timeLAF->setColour(juce::Label::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-	this->timeLAF->setColour(juce::Label::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));/**< Label Color */
-	this->timeLAF->setColour(juce::Label::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));
-	this->timeLAF->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-	this->timeLAF->setColour(juce::Label::ColourIds::textWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));/**< Value Color */
-	this->timeLAF->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));/**< Curve Color */
-
+	this->timeLAF = std::make_unique<TimeLookAndFeel>();
+	
 	/** Controller */
-	this->controllerLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->controllerLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-	this->controllerLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-	this->controllerLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
-		ColorMap::getInstance()->get("ThemeColorB8"));
-	this->controllerLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
-	this->controllerLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->controllerLAF = std::make_unique<ControllerLookAndFeel>();
 
 	/** Tools */
-	this->toolsLAF = std::make_unique<juce::LookAndFeel_V4>();
-	this->toolsLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
-	this->toolsLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
-	this->toolsLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
-		ColorMap::getInstance()->get("ThemeColorB8"));
-	this->toolsLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
-	this->toolsLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->toolsLAF = std::make_unique<ToolsLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
