@@ -139,15 +139,24 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
-				flowUI::FlowStyle::setButtonLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
-				flowUI::FlowStyle::setButtonRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
-				flowUI::FlowStyle::setButtonTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
-				flowUI::FlowStyle::setButtonBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
-				flowUI::FlowStyle::setButtonAdsorbCenterIcon("./RemixIcon/Editor/link.svg");
-				flowUI::FlowStyle::setButtonAdsorbLeftIcon("./RemixIcon/Design/layout-left-2-line.svg");
-				flowUI::FlowStyle::setButtonAdsorbRightIcon("./RemixIcon/Design/layout-right-2-line.svg");
-				flowUI::FlowStyle::setButtonAdsorbTopIcon("./RemixIcon/Design/layout-top-2-line.svg");
-				flowUI::FlowStyle::setButtonAdsorbBottomIcon("./RemixIcon/Design/layout-bottom-2-line.svg");
+				flowUI::FlowStyle::setButtonLeftIcon(
+					utils::getIconFile("Design", "layout-left-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonRightIcon(
+					utils::getIconFile("Design", "layout-right-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonTopIcon(
+					utils::getIconFile("Design", "layout-top-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonBottomIcon(
+					utils::getIconFile("Design", "layout-bottom-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonAdsorbCenterIcon(
+					utils::getIconFile("Editor", "link").getFullPathName());
+				flowUI::FlowStyle::setButtonAdsorbLeftIcon(
+					utils::getIconFile("Design", "layout-left-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonAdsorbRightIcon(
+					utils::getIconFile("Design", "layout-right-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonAdsorbTopIcon(
+					utils::getIconFile("Design", "layout-top-2-line").getFullPathName());
+				flowUI::FlowStyle::setButtonAdsorbBottomIcon(
+					utils::getIconFile("Design", "layout-bottom-2-line").getFullPathName());
 			}
 		);
 	};
