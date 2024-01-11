@@ -2,6 +2,7 @@
 
 #include <DMDA.h>
 #include "../misc/AudioLock.h"
+#include "../AudioConfig.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -235,7 +236,7 @@ double CloneableSynthSource::getLength() const {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 
 	/** Get Time In Seconds */
-	return this->buffer.getLastTimestamp() + this->tailTime;
+	return this->buffer.getLastTimestamp() + AudioConfig::getMidiTail();
 }
 
 void CloneableSynthSource::sampleRateChanged() {

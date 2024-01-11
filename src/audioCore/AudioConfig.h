@@ -18,6 +18,9 @@ public:
 	static void setAnonymous(bool anonymous);
 	static bool getAnonymous();
 
+	static void setMidiTail(double time);
+	static double getMidiTail();
+
 private:
 	juce::String pluginSearchPathListFilePath;
 	juce::String pluginListTemporaryFilePath;
@@ -25,6 +28,7 @@ private:
 	juce::String deadPluginListPath;
 
 	bool anonymous = false;
+	std::atomic<double> midiTailTime = 2;
 
 public:
 	static AudioConfig* getInstance();

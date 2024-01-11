@@ -51,7 +51,6 @@ private:
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;
 
-	double tailTime = 2;
 	int audioChannels = 1;
 
 	friend class SynthRenderThread;

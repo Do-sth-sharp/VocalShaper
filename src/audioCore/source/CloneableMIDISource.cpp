@@ -1,6 +1,7 @@
 ﻿#include "CloneableMIDISource.h"
 
 #include "../misc/AudioLock.h"
+#include "../AudioConfig.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -113,7 +114,7 @@ double CloneableMIDISource::getLength() const {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 
 	/** Get Time In Seconds */
-	return this->buffer.getLastTimestamp();
+	return this->buffer.getLastTimestamp() + AudioConfig::getMidiTail();
 }
 
 void CloneableMIDISource::prepareToRecord(
@@ -156,9 +157,11 @@ void CloneableMIDISource::writeData(
 		if (auto track = const_cast<juce::MidiMessageSequence*>(
 			this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
 			for (const auto& m : buffer) {
-				double timeAdjustment = (m.samplePosition + offset) / this->getSampleRate();
-				if (timeAdjustment >= 0) {
-					track->addEvent(m.getMessage(), timeAdjustment);
+				double timeStamp = (m.samplePosition + offset) / this->getSampleRate();
+				if (timeStamp >= 0) {
+					auto mes = m.getMessage();
+					mes.setTimeStamp(timeStamp);
+					track->addEvent(mes);
 				}
 			}
 

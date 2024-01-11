@@ -39,6 +39,14 @@ bool AudioConfig::getAnonymous() {
 	return AudioConfig::getInstance()->anonymous;
 }
 
+void AudioConfig::setMidiTail(double time) {
+	AudioConfig::getInstance()->midiTailTime = time;
+}
+
+double AudioConfig::getMidiTail() {
+	return AudioConfig::getInstance()->midiTailTime;
+}
+
 AudioConfig* AudioConfig::getInstance() {
 	return AudioConfig::instance ? AudioConfig::instance : (AudioConfig::instance = new AudioConfig());
 }
