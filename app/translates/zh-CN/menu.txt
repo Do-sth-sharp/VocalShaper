@@ -59,6 +59,13 @@ countries: cn
 
 "Follow" = "跟随"
 
+"Arrow" = "箭头"
+"Hand" = "手"
+"Pencil" = "铅笔"
+"Magic" = "魔棒"
+"Scissors" = "剪刀"
+"Eraser" = "橡皮"
+
 "Startup Config" = "启动配置"
 "Function Config" = "功能配置"
 "Audio Config" = "音频配置"
@@ -101,6 +108,13 @@ countries: cn
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
 
 "Follow playing position in editor." = "在编辑器中跟随播放位置。"
+
+"Arrow tool." = "箭头工具。"
+"Hand tool." = "手工具。"
+"Pencil tool." = "铅笔工具。"
+"Magic tool." = "魔棒工具。"
+"Scissors tool." = "剪刀工具。"
+"Eraser tool." = "橡皮工具。"
 
 "Open startup config page." = "打开启动配置页面。"
 "Open the function config page." = "打开功能配置页面。"

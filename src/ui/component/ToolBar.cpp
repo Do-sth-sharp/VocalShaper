@@ -29,6 +29,10 @@ ToolBar::ToolBar()
 	/** Controller */
 	this->controller = std::make_unique<ControllerComponent>();
 	this->addAndMakeVisible(this->controller.get());
+
+	/** Tools */
+	this->tools = std::make_unique<ToolComponent>();
+	this->addAndMakeVisible(this->tools.get());
 }
 
 ToolBar::~ToolBar() {
@@ -44,16 +48,19 @@ void ToolBar::resized() {
 	/** Size */
 	int splitWidth = this->getHeight() * 0.075;
 	int mainMenuBarHeight = this->getHeight() * 0.4;
-	int sysStatusHideWidth = this->getHeight() * 14;
+	int sysStatusHideWidth = this->getHeight() * 15;
 	int sysStatusWidth = this->getHeight() * 4;
-	int timeHideWidth = this->getHeight() * 7;
+	int timeHideWidth = this->getHeight() * 8;
 	int timeWidth = this->getHeight() * 2.75;
-	int controllerHideWidth = this->getHeight() * 10;
+	int controllerHideWidth = this->getHeight() * 11;
 	int controllerWidth = this->getHeight() * 3.3;
+	int toolsHideWidth = this->getHeight() * 6;
+	int toolsWidth = this->getHeight() * 3.475;
 
 	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
 	bool timeShown = this->getWidth() > timeHideWidth;
 	bool controllerShown = this->getWidth() > controllerHideWidth;
+	bool toolsShown = this->getWidth() > toolsHideWidth;
 
 	/** Total Area */
 	auto totalArea = this->getLocalBounds();
@@ -61,8 +68,8 @@ void ToolBar::resized() {
 	/** System Status */
 	if (sysStatusShown) {
 		juce::Rectangle<int> sysStatusRect(
-			totalArea.getRight() - sysStatusWidth, 0,
-			sysStatusWidth, this->getHeight());
+			totalArea.getRight() - sysStatusWidth, totalArea.getY(),
+			sysStatusWidth, totalArea.getHeight());
 		this->sysStatus->setBounds(sysStatusRect);
 
 		totalArea.removeFromRight(sysStatusRect.getWidth() + splitWidth);
@@ -72,8 +79,8 @@ void ToolBar::resized() {
 	/** Time */
 	if (timeShown) {
 		juce::Rectangle<int> timeRect(
-			totalArea.getRight() - timeWidth, 0,
-			timeWidth, this->getHeight());
+			totalArea.getRight() - timeWidth, totalArea.getY(),
+			timeWidth, totalArea.getHeight());
 		this->time->setBounds(timeRect);
 
 		totalArea.removeFromRight(timeRect.getWidth() + splitWidth);
@@ -83,8 +90,8 @@ void ToolBar::resized() {
 	/** Controller */
 	if (controllerShown) {
 		juce::Rectangle<int> controllerRect(
-			totalArea.getRight() - controllerWidth, 0,
-			controllerWidth, this->getHeight());
+			totalArea.getRight() - controllerWidth, totalArea.getY(),
+			controllerWidth, totalArea.getHeight());
 		this->controller->setBounds(controllerRect);
 
 		totalArea.removeFromRight(controllerRect.getWidth() + splitWidth);
@@ -92,9 +99,20 @@ void ToolBar::resized() {
 	this->controller->setVisible(controllerShown);
 
 	/** Main Menu Bar */
-	juce::Rectangle<int> mainMenuBarRect(
-		0, 0, totalArea.getRight(), mainMenuBarHeight);
+	juce::Rectangle<int> mainMenuBarRect = totalArea.withHeight(mainMenuBarHeight);
 	this->mainMenuBar->setBounds(mainMenuBarRect);
+	totalArea.removeFromTop(mainMenuBarRect.getHeight());
+
+	/** Tools */
+	if (toolsShown) {
+		juce::Rectangle<int> toolsRect(
+			0, totalArea.getY(),
+			toolsWidth, totalArea.getHeight());
+		this->tools->setBounds(toolsRect);
+
+		totalArea.removeFromLeft(toolsRect.getWidth() + splitWidth);
+	}
+	this->tools->setVisible(toolsShown);
 }
 
 void ToolBar::paint(juce::Graphics& g) {

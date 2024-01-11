@@ -101,6 +101,19 @@ void LookAndFeelFactory::initialise() {
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->controllerLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
+
+	/** Tools */
+	this->toolsLAF = std::make_unique<juce::LookAndFeel_V4>();
+	this->toolsLAF->setColour(juce::TextButton::ColourIds::buttonColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
+	this->toolsLAF->setColour(juce::TextButton::ColourIds::buttonOnColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	this->toolsLAF->setColour(juce::TextButton::ColourIds::textColourOffId,
+		ColorMap::getInstance()->get("ThemeColorB8"));
+	this->toolsLAF->setColour(juce::TextButton::ColourIds::textColourOnId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->toolsLAF->setColour(juce::ComboBox::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB2"));
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -126,6 +139,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forTime() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forController() const {
 	return this->controllerLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forTools() const {
+	return this->toolsLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

@@ -7,6 +7,7 @@
 #include "../component/AboutWindow.h"
 #include "../component/ConfigWindow.h"
 #include "../misc/MainThreadPool.h"
+#include "../misc/Tools.h"
 #include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
@@ -38,6 +39,13 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::MidiDebugger),
 
 		(juce::CommandID)(GUICommandType::Follow),
+
+		(juce::CommandID)(GUICommandType::Arrow),
+		(juce::CommandID)(GUICommandType::Hand),
+		(juce::CommandID)(GUICommandType::Pencil),
+		(juce::CommandID)(GUICommandType::Magic),
+		(juce::CommandID)(GUICommandType::Scissors),
+		(juce::CommandID)(GUICommandType::Eraser),
 
 		(juce::CommandID)(GUICommandType::StartupConfig),
 		(juce::CommandID)(GUICommandType::FunctionConfig),
@@ -164,6 +172,43 @@ void GUICommandTarget::getCommandInfo(
 	case GUICommandType::Follow:
 		result.setInfo(TRANS("Follow"), TRANS("Follow playing position in editor."), TRANS("Control"), 0);
 		result.setTicked(this->checkFollow());
+		result.setActive(true);
+		break;
+
+	case GUICommandType::Arrow:
+		result.setInfo(TRANS("Arrow"), TRANS("Arrow tool."), TRANS("Control"), 0);
+		result.addDefaultKeypress('q', juce::ModifierKeys::altModifier);
+		result.setTicked(Tools::getInstance()->getType() == Tools::Type::Arrow);
+		result.setActive(true);
+		break;
+	case GUICommandType::Hand:
+		result.setInfo(TRANS("Hand"), TRANS("Hand tool."), TRANS("Control"), 0);
+		result.addDefaultKeypress('w', juce::ModifierKeys::altModifier);
+		result.setTicked(Tools::getInstance()->getType() == Tools::Type::Hand);
+		result.setActive(true);
+		break;
+	case GUICommandType::Pencil:
+		result.setInfo(TRANS("Pencil"), TRANS("Pencil tool."), TRANS("Control"), 0);
+		result.addDefaultKeypress('e', juce::ModifierKeys::altModifier);
+		result.setTicked(Tools::getInstance()->getType() == Tools::Type::Pencil);
+		result.setActive(true);
+		break;
+	case GUICommandType::Magic:
+		result.setInfo(TRANS("Magic"), TRANS("Magic tool."), TRANS("Control"), 0);
+		result.addDefaultKeypress('a', juce::ModifierKeys::altModifier);
+		result.setTicked(Tools::getInstance()->getType() == Tools::Type::Magic);
+		result.setActive(true);
+		break;
+	case GUICommandType::Scissors:
+		result.setInfo(TRANS("Scissors"), TRANS("Scissors tool."), TRANS("Control"), 0);
+		result.addDefaultKeypress('s', juce::ModifierKeys::altModifier);
+		result.setTicked(Tools::getInstance()->getType() == Tools::Type::Scissors);
+		result.setActive(true);
+		break;
+	case GUICommandType::Eraser:
+		result.setInfo(TRANS("Eraser"), TRANS("Eraser tool."), TRANS("Control"), 0);
+		result.addDefaultKeypress('d', juce::ModifierKeys::altModifier);
+		result.setTicked(Tools::getInstance()->getType() == Tools::Type::Eraser);
 		result.setActive(true);
 		break;
 
@@ -305,6 +350,25 @@ bool GUICommandTarget::perform(
 
 	case GUICommandType::Follow:
 		this->follow();
+		return true;
+
+	case GUICommandType::Arrow:
+		Tools::getInstance()->setType(Tools::Type::Arrow);
+		return true;
+	case GUICommandType::Hand:
+		Tools::getInstance()->setType(Tools::Type::Hand);
+		return true;
+	case GUICommandType::Pencil:
+		Tools::getInstance()->setType(Tools::Type::Pencil);
+		return true;
+	case GUICommandType::Magic:
+		Tools::getInstance()->setType(Tools::Type::Magic);
+		return true;
+	case GUICommandType::Scissors:
+		Tools::getInstance()->setType(Tools::Type::Scissors);
+		return true;
+	case GUICommandType::Eraser:
+		Tools::getInstance()->setType(Tools::Type::Eraser);
 		return true;
 
 	case GUICommandType::StartupConfig:

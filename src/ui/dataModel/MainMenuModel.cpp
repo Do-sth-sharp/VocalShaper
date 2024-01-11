@@ -101,6 +101,13 @@ juce::PopupMenu MainMenuModel::createControl() const {
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Rewind);
 	menu.addSeparator();
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Follow);
+	menu.addSeparator();
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Arrow);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Hand);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Pencil);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Magic);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Scissors);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::Eraser);
 
 	return menu;
 }
