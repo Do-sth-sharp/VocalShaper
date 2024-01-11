@@ -20,4 +20,6 @@ namespace quickAPI {
 	bool removeFromPluginBlackList(const juce::String& plugin);
 	bool addToPluginSearchPath(const juce::String& path);
 	bool removeFromPluginSearchPath(const juce::String& path);
+
+	void setSIMDLevel(int level);
 }

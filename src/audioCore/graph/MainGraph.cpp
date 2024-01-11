@@ -3,6 +3,7 @@
 #include "../misc/PlayPosition.h"
 #include "../misc/Renderer.h"
 #include "../misc/AudioLock.h"
+#include "../misc/VMath.h"
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
@@ -500,7 +501,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	juce::ScopedTryReadLock mackieLocker(audioLock::getMackieLock());
 	if (!(audioLocker.isLocked() && pluginLocker.isLocked() 
 		&& sourceLocker.isLocked()  && positionLocker.isLocked() && mackieLocker.isLocked())) {
-		audio.clear();
+		vMath::zeroAllAudioData(audio);
 		midi.clear();
 		return;
 	}
@@ -552,7 +553,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Truncate Input */
 	if (isRendering) {
-		audio.clear();
+		vMath::zeroAllAudioData(audio);
 		midi.clear();
 	}
 
@@ -565,7 +566,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Truncate Output */
 	if (isRendering) {
-		audio.clear();
+		vMath::zeroAllAudioData(audio);
 		midi.clear();
 	}
 

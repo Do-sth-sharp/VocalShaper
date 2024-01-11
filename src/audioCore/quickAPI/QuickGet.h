@@ -39,4 +39,8 @@ namespace quickAPI {
 
 	const juce::StringArray getPluginBlackList();
 	const juce::StringArray getPluginSearchPath();
+
+	int getSIMDLevel();
+	const juce::String getSIMDInsName();
+	const juce::StringArray getAllSIMDInsName();
 }

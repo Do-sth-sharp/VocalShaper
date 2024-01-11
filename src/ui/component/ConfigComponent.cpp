@@ -280,12 +280,22 @@ void ConfigComponent::createFunctionPage() {
 	auto anonymousValueCallback = []()->const juce::var {
 		return quickAPI::getAnonymousMode();
 		};
+	auto simdUpdateCallback = [](const juce::var& data) {
+		quickAPI::setSIMDLevel(data);
+		return true;
+		};
+	auto simdValueCallback = []()->const juce::var {
+		return quickAPI::getSIMDLevel();
+		};
 
 	juce::Array<juce::PropertyComponent*> audioProps;
 	audioProps.add(new ConfigBooleanProp{ "function", "return-on-stop",
 		"Disabled", "Enabled", returnToStartUpdateCallback , returnToStartValueCallback});
 	audioProps.add(new ConfigBooleanProp{ "function", "anonymous-mode",
 		"Disabled", "Enabled", anonymousUpdateCallback , anonymousValueCallback });
+	audioProps.add(new ConfigChoiceProp{ "function", "simd-speed-up",
+		quickAPI::getAllSIMDInsName(), ConfigChoiceProp::ValueType::IndexVal,
+		simdUpdateCallback , simdValueCallback });
 	audioProps.add(new ConfigWhiteSpaceProp{});
 	panel->addSection(TRANS("Audio Core"), audioProps);
 

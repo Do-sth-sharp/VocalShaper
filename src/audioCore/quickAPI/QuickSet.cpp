@@ -2,6 +2,8 @@
 #include "../AudioConfig.h"
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
+#include "../misc/AudioLock.h"
+#include "../misc/VMath.h"
 
 namespace quickAPI {
 	void setPluginSearchPathListFilePath(const juce::String& path) {
@@ -63,5 +65,13 @@ namespace quickAPI {
 		if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
 		Plugin::getInstance()->removeFromPluginSearchPath(path);
 		return true;
+	}
+
+	void setSIMDLevel(int level) {
+		if (level >= (int)(vMath::InsType::MaxNum)) { level = (int)(vMath::InsType::MaxNum) - 1; }
+		if (level < 0) { level = 0; }
+
+		juce::ScopedWriteLock locker(audioLock::getAudioLock());
+		vMath::setInsType((vMath::InsType)(level));
 	}
 }

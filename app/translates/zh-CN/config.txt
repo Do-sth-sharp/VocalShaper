@@ -18,6 +18,7 @@ countries: cn
 "Audio Core" = "音频内核"
 "return-on-stop" = "在停止时返回"
 "anonymous-mode" = "匿名模式"
+"simd-speed-up" = "SIMD加速"
 "Performance" = "性能"
 "cpu-painting" = "CPU绘图"
 "System" = "系统"

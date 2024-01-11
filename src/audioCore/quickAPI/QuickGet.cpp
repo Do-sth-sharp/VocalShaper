@@ -4,6 +4,7 @@
 #include "../plugin/Plugin.h"
 #include "../misc/Device.h"
 #include "../misc/PlayPosition.h"
+#include "../misc/VMath.h"
 
 namespace quickAPI {
 	juce::Component* getAudioDebugger() {
@@ -153,5 +154,17 @@ namespace quickAPI {
 
 	const juce::StringArray getPluginSearchPath() {
 		return Plugin::getInstance()->getPluginSearchPath();
+	}
+
+	int getSIMDLevel() {
+		return (int)(vMath::getInsType());
+	}
+
+	const juce::String getSIMDInsName() {
+		return vMath::getInsTypeName();
+	}
+
+	const juce::StringArray getAllSIMDInsName() {
+		return vMath::getAllInsTypeName();
 	}
 }

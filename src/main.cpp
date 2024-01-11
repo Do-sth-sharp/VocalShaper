@@ -56,6 +56,7 @@ private:
 				auto& funcVar = ConfigManager::getInstance()->get("function");
 				quickAPI::setReturnToStartOnStop(funcVar["return-on-stop"]);
 				quickAPI::setAnonymousMode(funcVar["anonymous-mode"]);
+				quickAPI::setSIMDLevel(funcVar["simd-speed-up"]);
 
 				/** Output */
 				auto formats = quickAPI::getAudioFormatsSupported(true);
