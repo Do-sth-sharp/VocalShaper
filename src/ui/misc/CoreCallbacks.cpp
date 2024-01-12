@@ -14,6 +14,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](bool status) {
 			CoreCallbacks::getInstance()->invokeRecordingStatus(status);
 		});
+	UICallbackAPI<const juce::String&>::set(UICallbackType::ErrorMessage,
+		[](const juce::String& mes) {
+			CoreCallbacks::getInstance()->invokeErrorMes(mes);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -26,6 +30,10 @@ void CoreCallbacks::addPlayingStatus(const PlayingStatusCallback& callback) {
 
 void CoreCallbacks::addRecordingStatus(const RecordingStatusCallback& callback) {
 	this->recordingingStatus.add(callback);
+}
+
+void CoreCallbacks::addErrorMes(const ErrorMesCallback& callback) {
+	this->errorMes.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -44,6 +52,12 @@ void CoreCallbacks::invokePlayingStatus(bool status) const {
 void CoreCallbacks::invokeRecordingStatus(bool status) const {
 	for (auto& i : this->recordingingStatus) {
 		i(status);
+	}
+}
+
+void CoreCallbacks::invokeErrorMes(const juce::String& mes) const {
+	for (auto& i : this->errorMes) {
+		i(mes);
 	}
 }
 

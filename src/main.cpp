@@ -18,6 +18,7 @@
 #include "ui/menuAndCommand/CommandManager.h"
 #include "ui/menuAndCommand/CoreCommandTarget.h"
 #include "ui/menuAndCommand/GUICommandTarget.h"
+#include "ui/dataModel/MessageModel.h"
 #include "ui/Utils.h"
 #include "crash.h"
 
@@ -333,8 +334,14 @@ private:
 			[] {
 				CoreCallbacks::getInstance()->addError(
 					[](const juce::String& title, const juce::String& mes) {
+						MessageModel::getInstance()->addNow("AudioCore: " + mes, MessageModel::Callback{});
 						juce::AlertWindow::showMessageBox(
 							juce::MessageBoxIconType::WarningIcon, title, mes);
+					}
+				);
+				CoreCallbacks::getInstance()->addErrorMes(
+					[](const juce::String& mes) {
+						MessageModel::getInstance()->addNow("AudioCore: " + mes, MessageModel::Callback{});
 					}
 				);
 			}

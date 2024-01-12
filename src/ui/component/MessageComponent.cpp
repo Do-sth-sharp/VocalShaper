@@ -1,5 +1,6 @@
 ﻿#include "MessageComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../dataModel/MessageModel.h"
 #include "../Utils.h"
 #include <IconManager.h>
 
@@ -19,6 +20,13 @@ MessageComponent::MessageComponent() {
 
 	/** Message */
 	this->emptyMes = TRANS("No notification");
+
+	/** Listen Messages */
+	MessageModel::getInstance()->addChangeListener(this);
+}
+
+MessageComponent::~MessageComponent() {
+	MessageModel::getInstance()->removeChangeListener(this);
 }
 
 void MessageComponent::paint(juce::Graphics& g) {
@@ -71,7 +79,38 @@ void MessageComponent::paint(juce::Graphics& g) {
 	g.setFont(textFont);
 	juce::Rectangle<int> mesRect(
 		iconRect.getRight() + splitWidth, paddingHeight,
-		this->getWidth() - (iconRect.getRight() + splitWidth), mesHeight);
+		this->getWidth() - (iconRect.getRight() + splitWidth) - paddingWidth, mesHeight);
 	g.drawFittedText(this->mes.isEmpty() ? this->emptyMes : this->mes, mesRect,
-		juce::Justification::centredLeft, mesLines, 1.f);
+		juce::Justification::topLeft, mesLines, 1.f);
+
+	/** Padding */
+	g.setColour(backgroundColor);
+	g.fillRect(this->getLocalBounds().withWidth(paddingWidth));
+	g.fillRect(this->getLocalBounds().withHeight(paddingHeight));
+	g.fillRect(this->getLocalBounds().withTrimmedLeft(this->getWidth() - paddingWidth));
+	g.fillRect(this->getLocalBounds().withTrimmedTop(this->getHeight() - paddingHeight));
+}
+
+void MessageComponent::changeListenerCallback(juce::ChangeBroadcaster*) {
+	if (MessageModel::getInstance()->isEmpty()) {
+		this->mes.clear();
+		this->showNoticeDot = false;
+	}
+	else {
+		auto [time, mes, callback] = MessageModel::getInstance()->getList().getLast();
+		this->mes = time.formatted("[%H:%M:%S]") + " " + mes;
+		this->showNoticeDot = true;
+	}
+	
+	this->repaint();
+}
+
+void MessageComponent::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		/** TODO Show Message Box */
+
+		/** Clear Notice */
+		this->showNoticeDot = false;
+		this->repaint();
+	}
 }
