@@ -15,6 +15,7 @@ public:
 	juce::LookAndFeel_V4* forTime() const;
 	juce::LookAndFeel_V4* forController() const;
 	juce::LookAndFeel_V4* forTools() const;
+	juce::LookAndFeel_V4* forMessage() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -24,6 +25,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> timeLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> controllerLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> toolsLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> messageLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

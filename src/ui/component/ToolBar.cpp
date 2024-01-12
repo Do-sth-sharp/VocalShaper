@@ -33,6 +33,10 @@ ToolBar::ToolBar()
 	/** Tools */
 	this->tools = std::make_unique<ToolComponent>();
 	this->addAndMakeVisible(this->tools.get());
+
+	/** Message */
+	this->message = std::make_unique<MessageComponent>();
+	this->addAndMakeVisible(this->message.get());
 }
 
 ToolBar::~ToolBar() {
@@ -56,6 +60,7 @@ void ToolBar::resized() {
 	int controllerWidth = this->getHeight() * 3.3;
 	int toolsHideWidth = this->getHeight() * 6;
 	int toolsWidth = this->getHeight() * 3.475;
+	int messageMaxWidth = this->getHeight() * 3;
 
 	bool sysStatusShown = this->getWidth() > sysStatusHideWidth;
 	bool timeShown = this->getWidth() > timeHideWidth;
@@ -103,10 +108,24 @@ void ToolBar::resized() {
 	this->mainMenuBar->setBounds(mainMenuBarRect);
 	totalArea.removeFromTop(mainMenuBarRect.getHeight());
 
+	/** Message */
+	int messageWidth = totalArea.getWidth();
+	if (toolsShown) {
+		messageWidth -= (toolsWidth + splitWidth);
+	}
+	messageWidth = std::min(messageMaxWidth, messageWidth);
+
+	juce::Rectangle<int> messageRect(
+		totalArea.getX(), totalArea.getY(),
+		messageWidth, totalArea.getHeight());
+	this->message->setBounds(messageRect);
+
+	totalArea.removeFromLeft(messageRect.getWidth() + splitWidth);
+
 	/** Tools */
 	if (toolsShown) {
 		juce::Rectangle<int> toolsRect(
-			0, totalArea.getY(),
+			totalArea.getX(), totalArea.getY(),
 			toolsWidth, totalArea.getHeight());
 		this->tools->setBounds(toolsRect);
 

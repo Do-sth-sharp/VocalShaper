@@ -6,6 +6,7 @@
 #include "TimeLookAndFeel.h"
 #include "ControllerLookAndFeel.h"
 #include "ToolsLookAndFeel.h"
+#include "MessageLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -58,6 +59,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Tools */
 	this->toolsLAF = std::make_unique<ToolsLookAndFeel>();
+
+	/** Message */
+	this->messageLAF = std::make_unique<MessageLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -87,6 +91,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forController() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forTools() const {
 	return this->toolsLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forMessage() const {
+	return this->messageLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

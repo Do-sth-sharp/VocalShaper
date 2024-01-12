@@ -46,3 +46,5 @@ countries: cn
 "Ready" = "就绪"
 
 "Play/Pause" = "播放/暂停"
+
+"No notification" = "无通知"
