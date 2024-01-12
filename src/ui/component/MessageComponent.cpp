@@ -1,4 +1,5 @@
 ﻿#include "MessageComponent.h"
+#include "MessageViewer.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../dataModel/MessageModel.h"
 #include "../Utils.h"
@@ -23,6 +24,9 @@ MessageComponent::MessageComponent() {
 
 	/** Listen Messages */
 	MessageModel::getInstance()->addChangeListener(this);
+
+	/** Update */
+	this->update();
 }
 
 MessageComponent::~MessageComponent() {
@@ -91,23 +95,44 @@ void MessageComponent::paint(juce::Graphics& g) {
 	g.fillRect(this->getLocalBounds().withTrimmedTop(this->getHeight() - paddingHeight));
 }
 
-void MessageComponent::changeListenerCallback(juce::ChangeBroadcaster*) {
+void MessageComponent::update() {
 	if (MessageModel::getInstance()->isEmpty()) {
 		this->mes.clear();
+		this->setTooltip(this->emptyMes);
 		this->showNoticeDot = false;
 	}
 	else {
 		auto [time, mes, callback] = MessageModel::getInstance()->getList().getLast();
 		this->mes = time.formatted("[%H:%M:%S]") + " " + mes;
+		this->setTooltip(mes);
 		this->showNoticeDot = true;
 	}
-	
+
 	this->repaint();
+}
+
+void MessageComponent::changeListenerCallback(juce::ChangeBroadcaster*) {
+	this->update();
 }
 
 void MessageComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
-		/** TODO Show Message Box */
+		/** Show Message Box */
+		auto screenSize = utils::getScreenSize(this);
+		int viewWidth = screenSize.getWidth() * 0.2;
+		int viewHeight = screenSize.getHeight() * 0.7;
+		float arrowSize = screenSize.getHeight() * 0.025;
+
+		auto mesView = std::make_unique<MessageViewer>();
+		mesView->setSize(viewWidth, viewHeight);
+
+		auto pointRect = this->getScreenBounds();
+		auto& messageBox = juce::CallOutBox::launchAsynchronously(
+			std::move(mesView), pointRect, nullptr);
+		messageBox.setLookAndFeel(LookAndFeelFactory::getInstance()->forMessageView());
+		messageBox.setArrowSize(arrowSize);
+		messageBox.updatePosition(pointRect, juce::Rectangle<int>{
+			pointRect.getX(), pointRect.getBottom(), viewWidth, viewHeight});
 
 		/** Clear Notice */
 		this->showNoticeDot = false;

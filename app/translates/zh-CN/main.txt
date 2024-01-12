@@ -48,3 +48,6 @@ countries: cn
 "Play/Pause" = "播放/暂停"
 
 "No notification" = "无通知"
+
+"Clear Notifications" = "清空通知"
+"Notifications" = "通知"

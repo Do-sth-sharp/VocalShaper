@@ -4,12 +4,15 @@
 
 class MessageComponent final
 	: public juce::Component,
-	public juce::ChangeListener {
+	public juce::ChangeListener,
+	public juce::SettableTooltipClient {
 public:
 	MessageComponent();
 	~MessageComponent();
 
 	void paint(juce::Graphics& g) override;
+
+	void update();
 
 private:
 	void changeListenerCallback(juce::ChangeBroadcaster*) override;
