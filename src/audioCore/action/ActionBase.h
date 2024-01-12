@@ -12,6 +12,7 @@ public:
 
 protected:
 	void output(const juce::String& mes);
+	void error(const juce::String& mes);
 
 private:
 	JUCE_LEAK_DETECTOR(ActionBase)

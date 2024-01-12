@@ -41,16 +41,23 @@ bool ActionDispatcher::performRedo() {
 	return this->manager->redo();
 }
 
-void ActionDispatcher::setOutput(const OutputCallback& callback) {
-	this->output = callback;
+void ActionDispatcher::setOutput(
+	const OutputCallback& output, const ErrorCallback& error) {
+	this->output = output;
+	this->error = error;
 }
 
 void ActionDispatcher::removeOutput() {
 	this->output = [](const juce::String&) {};
+	this->error = [](const juce::String&) {};
 }
 
 void ActionDispatcher::outputInternal(const juce::String& mes) {
 	this->output(mes);
+}
+
+void ActionDispatcher::errorInternal(const juce::String& mes) {
+	this->error(mes);
 }
 
 ActionDispatcher* ActionDispatcher::getInstance() {

@@ -12,12 +12,7 @@ bool ActionClearPlugin::doAction() {
 	ACTION_CHECK_PLUGIN_LOADING(
 		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
-
-	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
-		this->output("Don't clear plugin list while searching plugin.");
-		return false;
-	}
+		"Don't change plugin list while searching plugin.");
 
 	Plugin::getInstance()->clearPluginTemporary();
 
@@ -31,7 +26,7 @@ bool ActionSearchPlugin::doAction() {
 	ACTION_CHECK_PLUGIN_LOADING(
 		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
+		"Don't change plugin list while searching plugin.");
 
 	Plugin::getInstance()->clearPluginList();
 	Plugin::getInstance()->getPluginList();
@@ -128,7 +123,7 @@ bool ActionSynthSource::doAction() {
 		this->output("Start synth source: [" + juce::String(this->index) + "]\n");
 		return true;
 	}
-	this->output("Can't start synth source: [" + juce::String(this->index) + "]\n");
+	this->error("Can't start synth source: [" + juce::String(this->index) + "]\n");
 	return false;
 }
 
@@ -156,7 +151,7 @@ bool ActionCloneSource::doAction() {
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't Clone Source: [" + juce::String(ACTION_DATA(index)) + "]\n");
+	this->error("Can't Clone Source: [" + juce::String(ACTION_DATA(index)) + "]\n");
 	ACTION_RESULT(false);
 }
 
@@ -177,7 +172,7 @@ bool ActionSaveSource::doAction() {
 			return true;
 		}
 	}
-	this->output("Can't Save Source Data: " + this->path + "\n");
+	this->error("Can't Save Source Data: " + this->path + "\n");
 	return false;
 }
 
@@ -216,7 +211,7 @@ bool ActionExportSource::doAction() {
 			return true;
 		}
 	}
-	this->output("Can't Export Source Data: " + this->path + "\n");
+	this->error("Can't Export Source Data: " + this->path + "\n");
 	return false;
 }
 
@@ -267,7 +262,7 @@ bool ActionRenderNow::doAction() {
 		return true;
 	}
 
-	this->output("Can't start to render. Maybe rendering is already started!\n");
+	this->error("Can't start to render. Maybe rendering is already started!\n");
 	return false;
 }
 
@@ -287,7 +282,7 @@ bool ActionNewProject::doAction() {
 		this->output("Create new project at: " + this->path + "\n");
 		return true;
 	}
-	this->output("Can't create new project at: " + this->path + "\n");
+	this->error("Can't create new project at: " + this->path + "\n");
 	return false;
 }
 
@@ -308,7 +303,7 @@ bool ActionSave::doAction() {
 		this->output("Saved project data to: " + ACTION_DATA(name) + "\n");
 		ACTION_RESULT(true);
 	}
-	this->output("Can't save project data to: " + ACTION_DATA(name) + "\n");
+	this->error("Can't save project data to: " + ACTION_DATA(name) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -323,7 +318,7 @@ bool ActionLoad::doAction() {
 	ACTION_CHECK_PLUGIN_LOADING(
 		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
+		"Don't load project while searching plugin.");
 
 	if (AudioCore::getInstance()->load(this->path)) {
 		ActionDispatcher::getInstance()->clearUndoList();
@@ -332,6 +327,6 @@ bool ActionLoad::doAction() {
 		this->output("Load project data from: " + this->path + "\n");
 		return true;
 	}
-	this->output("Can't load project data from: " + this->path + "\n");
+	this->error("Can't load project data from: " + this->path + "\n");
 	return false;
 }

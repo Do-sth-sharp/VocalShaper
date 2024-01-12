@@ -858,6 +858,8 @@ ActionSetSourceSynthesizer::ActionSetSourceSynthesizer(
 bool ActionSetSourceSynthesizer::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change synthesizer while searching plugin.");
 
 	ACTION_UNSAVE_PROJECT();
 
@@ -869,7 +871,7 @@ bool ActionSetSourceSynthesizer::doAction() {
 		this->output("Set synthesizer: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 		ACTION_RESULT(true);
 	}
-	this->output("Can't set synthesizer: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
+	this->error("Can't set synthesizer: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 

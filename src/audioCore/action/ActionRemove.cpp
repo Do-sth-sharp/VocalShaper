@@ -16,11 +16,6 @@ bool ActionRemovePluginBlackList::doAction() {
 	ACTION_CHECK_PLUGIN_SEARCHING(
 		"Don't change plugin black list while searching plugin.");
 
-	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
-		this->output("Don't change plugin black list while searching plugin.");
-		ACTION_RESULT(false);
-	}
-
 	Plugin::getInstance()->removeFromPluginBlackList(this->path);
 	
 	this->output("Remove from plugin black list.");
@@ -35,12 +30,7 @@ bool ActionRemovePluginSearchPath::doAction() {
 	ACTION_CHECK_PLUGIN_LOADING(
 		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
-
-	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) {
-		this->output("Don't change plugin search path while searching plugin.");
-		ACTION_RESULT(false);
-	}
+		"Don't change plugin search path while searching plugin.");
 
 	Plugin::getInstance()->removeFromPluginSearchPath(this->path);
 	
@@ -508,10 +498,8 @@ bool ActionRemoveEffect::doAction() {
 bool ActionRemoveEffect::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
+		"Don't change effect while searching plugin.");
 
 	ACTION_UNSAVE_PROJECT();
 
@@ -680,10 +668,8 @@ bool ActionRemoveInstr::doAction() {
 bool ActionRemoveInstr::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
+		"Don't change instrument while searching plugin.");
 
 	ACTION_UNSAVE_PROJECT();
 

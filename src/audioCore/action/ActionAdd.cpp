@@ -219,10 +219,8 @@ ActionAddEffect::ActionAddEffect(
 bool ActionAddEffect::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
+		"Don't change effect while searching plugin.");
 
 	ACTION_UNSAVE_PROJECT();
 
@@ -245,7 +243,7 @@ bool ActionAddEffect::doAction() {
 		}
 	}
 
-	this->output("Can't Insert Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
+	this->error("Can't Insert Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -271,7 +269,7 @@ bool ActionAddEffect::undo() {
 		}
 	}
 
-	this->output("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
+	this->error("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -330,10 +328,8 @@ ActionAddInstr::ActionAddInstr(
 bool ActionAddInstr::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
+		"Don't change instrument while searching plugin.");
 
 	ACTION_UNSAVE_PROJECT();
 
@@ -353,7 +349,7 @@ bool ActionAddInstr::doAction() {
 		}
 	}
 
-	this->output("Can't Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
+	this->error("Can't Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -376,7 +372,7 @@ bool ActionAddInstr::undo() {
 		ACTION_RESULT(true);
 	}
 	
-	this->output("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
+	this->error("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
 	ACTION_RESULT(false);
 }
 

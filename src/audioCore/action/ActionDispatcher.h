@@ -16,16 +16,19 @@ public:
 	bool performRedo();
 
 	using OutputCallback = std::function<void(const juce::String&)>;
-	void setOutput(const OutputCallback& callback);
+	using ErrorCallback = std::function<void(const juce::String&)>;
+	void setOutput(const OutputCallback& output, const ErrorCallback& error);
 	void removeOutput();
 
 private:
 	friend class ActionBase;
 	void outputInternal(const juce::String& mes);
+	void errorInternal(const juce::String& mes);
 
 private:
 	std::unique_ptr<juce::UndoManager> manager = nullptr;
 	OutputCallback output = [](const juce::String&) {};
+	ErrorCallback error = [](const juce::String&) {};
 
 public:
 	static ActionDispatcher* getInstance();

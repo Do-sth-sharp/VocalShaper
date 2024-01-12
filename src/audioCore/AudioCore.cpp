@@ -53,6 +53,13 @@ AudioCore::AudioCore() {
 			if (auto ptr = dynamic_cast<AudioDebugger*>(debugger.getComponent())) {
 				ptr->output(mes);
 			}
+		},
+		[debugger = juce::Component::SafePointer{ this->audioDebugger.get() }]
+		(const juce::String& mes) {
+			if (auto ptr = dynamic_cast<AudioDebugger*>(debugger.getComponent())) {
+				ptr->output("[ERROR]" + mes);
+			}
+			UICallbackAPI<const juce::String&>::invoke(UICallbackType::ErrorMessage, mes);
 		}
 	);
 
