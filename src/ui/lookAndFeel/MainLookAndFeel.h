@@ -26,6 +26,10 @@ public:
 	int getCallOutBoxBorderSize(const juce::CallOutBox&) override;
 	float getCallOutBoxCornerSize(const juce::CallOutBox&) override;
 
+	juce::Rectangle<int> getTooltipBounds(const juce::String& tipText,
+		juce::Point<int> screenPos, juce::Rectangle<int> parentArea) override;
+	void drawTooltip(juce::Graphics&, const juce::String& text, int width, int height) override;
+
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainLookAndFeel)
 };

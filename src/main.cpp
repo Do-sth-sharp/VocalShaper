@@ -86,6 +86,19 @@ private:
 		);
 	};
 
+	void loadAudioPlugins() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Load Audio Plugins..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				[[maybe_unused]] auto result = quickAPI::getPluginList();
+			}
+		);
+	};
+
 	void loadTheme() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -483,6 +496,9 @@ public:
 
 		/** Set Audio Config */
 		this->setAudioConfig();
+
+		/** Load Plugin List */
+		this->loadAudioPlugins();
 		
 		/** Load Theme Colors */
 		this->loadTheme();

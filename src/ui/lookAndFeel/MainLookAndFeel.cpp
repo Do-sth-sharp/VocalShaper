@@ -294,14 +294,54 @@ void MainLookAndFeel::drawCallOutBoxBackground(
 
 	g.setColour(colorBackground);
 	g.fillPath(path);
-};
+}
 
 int MainLookAndFeel::getCallOutBoxBorderSize(const juce::CallOutBox& box) {
 	auto screenSize = utils::getScreenSize(&box);
 	return screenSize.getHeight() * 0.005;
-};
+}
 
 float MainLookAndFeel::getCallOutBoxCornerSize(const juce::CallOutBox& box) {
 	auto screenSize = utils::getScreenSize(&box);
 	return screenSize.getHeight() * 0.01;
-};
+}
+
+static juce::TextLayout layoutTooltipText(const juce::String& text, juce::Colour colour) {
+	const float tooltipFontSize = 16.0f;
+	const int maxToolTipWidth = 400;
+
+	juce::AttributedString s;
+	s.setJustification(juce::Justification::centredLeft);
+	s.append(text, juce::Font{ tooltipFontSize, juce::Font::bold }, colour);
+
+	juce::TextLayout tl;
+	tl.createLayoutWithBalancedLineLengths(s, (float)maxToolTipWidth);
+	return tl;
+}
+
+juce::Rectangle<int> MainLookAndFeel::getTooltipBounds(const juce::String& tipText,
+	juce::Point<int> screenPos, juce::Rectangle<int> parentArea) {
+	const juce::TextLayout tl(layoutTooltipText(tipText, juce::Colours::black));
+
+	auto w = (int)(tl.getWidth() + 14.0f);
+	auto h = (int)(tl.getHeight() + 6.0f);
+
+	return juce::Rectangle<int>{screenPos.x > parentArea.getCentreX() ? screenPos.x - (w + 12) : screenPos.x + 24,
+		screenPos.y > parentArea.getCentreY() ? screenPos.y - (h + 6) : screenPos.y + 6,
+		w, h}.constrainedWithin(parentArea);
+}
+
+void MainLookAndFeel::drawTooltip(
+	juce::Graphics& g, const juce::String& text, int width, int height) {
+	juce::Rectangle<int> bounds(width, height);
+	auto cornerSize = 5.0f;
+
+	g.setColour(this->findColour(juce::TooltipWindow::backgroundColourId));
+	g.fillRoundedRectangle(bounds.toFloat(), cornerSize);
+
+	g.setColour(this->findColour(juce::TooltipWindow::outlineColourId));
+	g.drawRoundedRectangle(bounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+
+	layoutTooltipText(text, findColour(juce::TooltipWindow::textColourId))
+		.draw(g, { 7.0f, 3.0f, static_cast<float>(width) - 14.0f, static_cast<float>(height) - 6.0f });
+}

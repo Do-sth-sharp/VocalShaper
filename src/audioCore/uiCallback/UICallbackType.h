@@ -5,6 +5,7 @@ enum class UICallbackType : int {
 	PlayStateChanged,
 	RecordStateChanged,
 	ErrorMessage,
+	PluginSearchStateChanged,
 
 	TypeMaxNum
 };

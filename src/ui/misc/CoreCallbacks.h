@@ -14,17 +14,21 @@ public:
 	void addRecordingStatus(const RecordingStatusCallback& callback);
 	using ErrorMesCallback = std::function<void(const juce::String&)>;
 	void addErrorMes(const ErrorMesCallback& callback);
+	using SearchPluginCallback = std::function<void(bool)>;
+	void addSearchPlugin(const SearchPluginCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
 	void invokeRecordingStatus(bool status) const;
 	void invokeErrorMes(const juce::String& mes) const;
+	void invokeSearchPlugin(bool status) const;
 
 private:
 	juce::Array<ErrorCallback> error;
 	juce::Array<PlayingStatusCallback> playingStatus;
 	juce::Array<RecordingStatusCallback> recordingingStatus;
 	juce::Array<ErrorMesCallback> errorMes;
+	juce::Array<SearchPluginCallback> searchPlugin;
 
 public:
 	static CoreCallbacks* getInstance();

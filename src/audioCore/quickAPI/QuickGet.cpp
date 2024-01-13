@@ -167,4 +167,9 @@ namespace quickAPI {
 	const juce::StringArray getAllSIMDInsName() {
 		return vMath::getAllInsTypeName();
 	}
+
+	const std::tuple<bool, juce::Array<juce::PluginDescription>> getPluginList() {
+		auto [result, list] = Plugin::getInstance()->getPluginList();
+		return { result, list.getTypes() };
+	}
 }

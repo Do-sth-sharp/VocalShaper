@@ -43,4 +43,6 @@ namespace quickAPI {
 	int getSIMDLevel();
 	const juce::String getSIMDInsName();
 	const juce::StringArray getAllSIMDInsName();
+
+	const std::tuple<bool, juce::Array<juce::PluginDescription>> getPluginList();
 }

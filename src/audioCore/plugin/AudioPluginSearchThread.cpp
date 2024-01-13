@@ -1,4 +1,6 @@
 ﻿#include "AudioPluginSearchThread.h"
+#include "../uiCallback/UICallbackType.h"
+#include "../uiCallback/UICallback.h"
 #include "../AudioConfig.h"
 
 /** Plugin Searcher Path */
@@ -30,7 +32,7 @@ const juce::Array<juce::AudioPluginFormat*> AudioPluginSearchThread::getFormats(
 
 std::tuple<bool, juce::KnownPluginList&> AudioPluginSearchThread::getPluginList() {
 	if (this->isThreadRunning()) {
-		return std::tuple<bool, juce::KnownPluginList&>(false, this->pluginList);
+		return std::tuple<bool, juce::KnownPluginList&>(this->pluginListValidFlag, this->pluginList);
 	}
 
 	if (!this->pluginListValidFlag) {
@@ -61,19 +63,29 @@ void AudioPluginSearchThread::clearList() {
 	if (this->isThreadRunning()) {
 		this->stopThread(-1);
 	}
+
+	UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, true);
+
 	this->pluginList.clear();
 	this->pluginList.clearBlacklistedFiles();
 	this->pluginListValidFlag = false;
+
+	UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, false);
 }
 
 void AudioPluginSearchThread::clearTemporary() {
 	if (this->isThreadRunning()) {
 		this->stopThread(-1);
 	}
+
+	UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, true);
+
 	this->pluginList.clear();
 	this->pluginList.clearBlacklistedFiles();
 	this->clearTemporaryInternal();
 	this->pluginListValidFlag = false;
+
+	UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, false);
 }
 
 const juce::StringArray AudioPluginSearchThread::getBlackList() const {
@@ -137,6 +149,10 @@ void AudioPluginSearchThread::removeFromSearchPath(const juce::String& path) con
 }
 
 void AudioPluginSearchThread::run() {
+	/** Search Start */
+	juce::MessageManager::callAsync(
+		[] { UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, true); });
+
 	/** Get Temporary File */
 	juce::String temporaryFilePath = AudioConfig::getPluginListTemporaryFilePath();
 	juce::File temporaryFile =
@@ -171,6 +187,10 @@ void AudioPluginSearchThread::run() {
 			/** Check If Thread Terminate */
 			if (this->threadShouldExit()) {
 				process.kill();
+
+				/** Search End */
+				juce::MessageManager::callAsync(
+					[] { UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, false); });
 				return;
 			}
 
@@ -186,8 +206,12 @@ void AudioPluginSearchThread::run() {
 			/** Create Plugin List From Xml Data */
 			this->pluginList.recreateFromXml(*xmlElement);
 
-			/** Set List Valid Flag And Return */
+			/** Set List Valid Flag */
 			this->pluginListValidFlag = true;
+
+			/** Search End */
+			juce::MessageManager::callAsync(
+				[] { UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, false); });
 			return;
 		}
 		else {
@@ -195,6 +219,10 @@ void AudioPluginSearchThread::run() {
 			temporaryFile.deleteFile();
 		}
 	}
+
+	/** Search End */
+	juce::MessageManager::callAsync(
+		[] { UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, false); });
 }
 
 void AudioPluginSearchThread::clearTemporaryInternal() const {

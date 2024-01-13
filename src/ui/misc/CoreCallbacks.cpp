@@ -18,6 +18,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](const juce::String& mes) {
 			CoreCallbacks::getInstance()->invokeErrorMes(mes);
 		});
+	UICallbackAPI<bool>::set(UICallbackType::PluginSearchStateChanged,
+		[](bool state) {
+			CoreCallbacks::getInstance()->invokeSearchPlugin(state);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -34,6 +38,10 @@ void CoreCallbacks::addRecordingStatus(const RecordingStatusCallback& callback) 
 
 void CoreCallbacks::addErrorMes(const ErrorMesCallback& callback) {
 	this->errorMes.add(callback);
+}
+
+void CoreCallbacks::addSearchPlugin(const SearchPluginCallback& callback) {
+	this->searchPlugin.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -58,6 +66,12 @@ void CoreCallbacks::invokeRecordingStatus(bool status) const {
 void CoreCallbacks::invokeErrorMes(const juce::String& mes) const {
 	for (auto& i : this->errorMes) {
 		i(mes);
+	}
+}
+
+void CoreCallbacks::invokeSearchPlugin(bool status) const {
+	for (auto& i : this->searchPlugin) {
+		i(status);
 	}
 }
 
