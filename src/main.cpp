@@ -15,6 +15,7 @@
 #include "ui/component/ToolBar.h"
 #include "ui/component/Splash.h"
 #include "ui/component/CompManager.h"
+#include "ui/component/PluginView.h"
 #include "ui/menuAndCommand/CommandManager.h"
 #include "ui/menuAndCommand/CoreCommandTarget.h"
 #include "ui/menuAndCommand/GUICommandTarget.h"
@@ -245,27 +246,27 @@ private:
 		InitTaskList::getInstance()->add(
 			[] {
 				CompManager::getInstance()->set(CompManager::CompType::StartMenu,
-				std::make_unique<flowUI::FlowComponent>(TRANS("Start Menu")));
-		CompManager::getInstance()->set(CompManager::CompType::ToolBar,
-			std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
-		CompManager::getInstance()->set(CompManager::CompType::PluginView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Plugin")));
-		CompManager::getInstance()->set(CompManager::CompType::SourceView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Source")));
-		CompManager::getInstance()->set(CompManager::CompType::TrackView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
-		CompManager::getInstance()->set(CompManager::CompType::InstrView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Instrument")));
-		CompManager::getInstance()->set(CompManager::CompType::MixerView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Mixer")));
-		CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Source Editor")));
-		CompManager::getInstance()->set(CompManager::CompType::SourceRecordView,
-			std::make_unique<flowUI::FlowComponent>(TRANS("Source Recorder")));
-		CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
-			std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
-		CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,
-			std::unique_ptr<flowUI::FlowComponent>(new MidiDebuggerComponent));
+					std::make_unique<flowUI::FlowComponent>(TRANS("Start Menu")));
+				CompManager::getInstance()->set(CompManager::CompType::ToolBar,
+					std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
+				CompManager::getInstance()->set(CompManager::CompType::PluginView,
+					std::unique_ptr<flowUI::FlowComponent>(new PluginView));
+				CompManager::getInstance()->set(CompManager::CompType::SourceView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Source")));
+				CompManager::getInstance()->set(CompManager::CompType::TrackView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
+				CompManager::getInstance()->set(CompManager::CompType::InstrView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Instrument")));
+				CompManager::getInstance()->set(CompManager::CompType::MixerView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Mixer")));
+				CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Source Editor")));
+				CompManager::getInstance()->set(CompManager::CompType::SourceRecordView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Source Recorder")));
+				CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
+					std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
+				CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,
+					std::unique_ptr<flowUI::FlowComponent>(new MidiDebuggerComponent));
 			}
 		);
 	};

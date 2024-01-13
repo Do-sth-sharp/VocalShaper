@@ -11,6 +11,8 @@
 #include <FlowUI.h>
 
 ConfigComponent::ConfigComponent() {
+	this->setWantsKeyboardFocus(true);
+
 	/** Text */
 	this->scanningMes = TRANS("Waiting for a moment...");
 

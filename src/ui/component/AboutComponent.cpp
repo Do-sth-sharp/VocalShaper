@@ -6,6 +6,8 @@
 #include "../../audioCore/AC_API.h"
 
 AboutComponent::AboutComponent() {
+	this->setWantsKeyboardFocus(true);
+
 	/** LOGO */
 	this->logo = RCManager::getInstance()->loadImage(
 		utils::getResourceFile("logo.png"));

@@ -51,3 +51,7 @@ countries: cn
 
 "Clear Notifications" = "清空通知"
 "Notifications" = "通知"
+
+"Search For Plugin" = "查找插件"
+"Find plugins in the list." = "在列表中查找插件。"
+"Plugin List" = "插件列表"

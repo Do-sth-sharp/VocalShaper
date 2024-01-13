@@ -3,6 +3,8 @@
 #include "../Utils.h"
 
 LicenseComponent::LicenseComponent() {
+	this->setWantsKeyboardFocus(true);
+
 	/** License List Model */
 	this->licenseListModel = std::make_unique<LicenseListModel>();
 	this->licenseListModel->setCallback(

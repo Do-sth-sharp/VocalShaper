@@ -6,6 +6,8 @@
 
 MessageViewer::MessageViewer()
 	: Component() {
+	this->setWantsKeyboardFocus(true);
+
 	/** Clear Icon */
 	this->clearIcon = flowUI::IconManager::getSVG(
 		utils::getIconFile("System", "delete-bin-line").getFullPathName());
