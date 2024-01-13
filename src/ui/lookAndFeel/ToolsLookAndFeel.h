@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "MainLookAndFeel.h"
 
-class ToolsLookAndFeel : public juce::LookAndFeel_V4 {
+class ToolsLookAndFeel : public MainLookAndFeel {
 public:
 	ToolsLookAndFeel();
 

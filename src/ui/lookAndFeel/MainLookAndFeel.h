@@ -19,6 +19,13 @@ public:
 		const juce::String& shortcutKeyText,
 		const juce::Drawable* icon, const juce::Colour* const textColourToUse) override;
 
+	juce::Font getTextButtonFont(juce::TextButton& b, int) override;
+
+	void drawCallOutBoxBackground(
+		juce::CallOutBox&, juce::Graphics&, const juce::Path&, juce::Image&) override;
+	int getCallOutBoxBorderSize(const juce::CallOutBox&) override;
+	float getCallOutBoxCornerSize(const juce::CallOutBox&) override;
+
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainLookAndFeel)
 };

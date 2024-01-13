@@ -1,15 +1,11 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "MainLookAndFeel.h"
 
-class MessageViewLookAndFeel : public juce::LookAndFeel_V4 {
+class MessageViewLookAndFeel : public MainLookAndFeel {
 public:
 	MessageViewLookAndFeel();
-
-	void drawCallOutBoxBackground(
-		juce::CallOutBox&, juce::Graphics&, const juce::Path&, juce::Image&) override;
-	int getCallOutBoxBorderSize(const juce::CallOutBox&) override;
-	float getCallOutBoxCornerSize(const juce::CallOutBox&) override;
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MessageViewLookAndFeel)

@@ -3,7 +3,7 @@
 #include "../Utils.h"
 
 MessageViewLookAndFeel::MessageViewLookAndFeel()
-	: LookAndFeel_V4() {
+	: MainLookAndFeel() {
 	/** Background */
 	this->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB3"));
@@ -46,32 +46,3 @@ MessageViewLookAndFeel::MessageViewLookAndFeel()
 	this->setColour(juce::ScrollBar::ColourIds::trackColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 }
-
-void MessageViewLookAndFeel::drawCallOutBoxBackground(
-	juce::CallOutBox& box, juce::Graphics& g, const juce::Path& path, juce::Image& cachedImage) {
-	juce::Colour colorBackground = this->findColour(
-		juce::ResizableWindow::ColourIds::backgroundColourId);
-
-	if (cachedImage.isNull()) {
-		cachedImage = { juce::Image::ARGB, box.getWidth(), box.getHeight(), true };
-		juce::Graphics g2(cachedImage);
-
-		juce::DropShadow(juce::Colours::black.withAlpha(0.7f), 8, { 0, 2 }).drawForPath(g2, path);
-	}
-
-	g.setColour(juce::Colours::black);
-	g.drawImageAt(cachedImage, 0, 0);
-
-	g.setColour(colorBackground);
-	g.fillPath(path);
-};
-
-int MessageViewLookAndFeel::getCallOutBoxBorderSize(const juce::CallOutBox& box) {
-	auto screenSize = utils::getScreenSize(&box);
-	return screenSize.getHeight() * 0.005;
-};
-
-float MessageViewLookAndFeel::getCallOutBoxCornerSize(const juce::CallOutBox& box) {
-	auto screenSize = utils::getScreenSize(&box);
-	return screenSize.getHeight() * 0.01;
-};

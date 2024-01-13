@@ -1,5 +1,6 @@
 ﻿#include "MainLookAndFeel.h"
 #include "../misc/ColorMap.h"
+#include "../Utils.h"
 
 MainLookAndFeel::MainLookAndFeel()
 	: LookAndFeel_V4() {
@@ -80,6 +81,8 @@ MainLookAndFeel::MainLookAndFeel()
 		juce::Colour::fromRGBA(0, 0, 0, 0));
 	this->setColour(juce::TextEditor::ColourIds::shadowColourId + 1,
 		ColorMap::getInstance()->get("ThemeColorB9"));/**< Empty Text */
+	this->setColour(juce::CaretComponent::ColourIds::caretColourId,
+		ColorMap::getInstance()->get("ThemeColorB9"));
 
 	/** Set Scroll Bar Color */
 	this->setColour(juce::ScrollBar::ColourIds::backgroundColourId,
@@ -195,8 +198,7 @@ void MainLookAndFeel::drawPopupMenuItem(juce::Graphics& g, const juce::Rectangle
 	const bool isHighlighted, const bool isTicked,
 	const bool hasSubMenu, const juce::String& text,
 	const juce::String& shortcutKeyText,
-	const juce::Drawable* icon, const juce::Colour* const textColourToUse)
-{
+	const juce::Drawable* icon, const juce::Colour* const textColourToUse) {
 	if (isSeparator) {
 		auto r = area.reduced(5, 0);
 		r.removeFromTop(juce::roundToInt(((float)r.getHeight() * 0.5f) - 0.5f));
@@ -269,3 +271,37 @@ void MainLookAndFeel::drawPopupMenuItem(juce::Graphics& g, const juce::Rectangle
 		}
 	}
 }
+
+juce::Font MainLookAndFeel::getTextButtonFont(juce::TextButton& b, int) {
+	auto screenSize = utils::getScreenSize(&b);
+	return juce::Font{ screenSize.getHeight() * 0.02f };
+}
+
+void MainLookAndFeel::drawCallOutBoxBackground(
+	juce::CallOutBox& box, juce::Graphics& g, const juce::Path& path, juce::Image& cachedImage) {
+	juce::Colour colorBackground = this->findColour(
+		juce::ResizableWindow::ColourIds::backgroundColourId);
+
+	if (cachedImage.isNull()) {
+		cachedImage = { juce::Image::ARGB, box.getWidth(), box.getHeight(), true };
+		juce::Graphics g2(cachedImage);
+
+		juce::DropShadow(juce::Colours::black.withAlpha(0.7f), 8, { 0, 2 }).drawForPath(g2, path);
+	}
+
+	g.setColour(juce::Colours::black);
+	g.drawImageAt(cachedImage, 0, 0);
+
+	g.setColour(colorBackground);
+	g.fillPath(path);
+};
+
+int MainLookAndFeel::getCallOutBoxBorderSize(const juce::CallOutBox& box) {
+	auto screenSize = utils::getScreenSize(&box);
+	return screenSize.getHeight() * 0.005;
+};
+
+float MainLookAndFeel::getCallOutBoxCornerSize(const juce::CallOutBox& box) {
+	auto screenSize = utils::getScreenSize(&box);
+	return screenSize.getHeight() * 0.01;
+};

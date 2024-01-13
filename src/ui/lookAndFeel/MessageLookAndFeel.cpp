@@ -2,7 +2,7 @@
 #include "../misc/ColorMap.h"
 
 MessageLookAndFeel::MessageLookAndFeel()
-	: LookAndFeel_V4() {
+	: MainLookAndFeel() {
 	/** Background */
 	this->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));

@@ -1,9 +1,9 @@
-﻿#include "ToolBarLookAndFeel.h"
+﻿#include "PluginViewLookAndFeel.h"
 #include "../misc/ColorMap.h"
 
-ToolBarLookAndFeel::ToolBarLookAndFeel()
+PluginViewLookAndFeel::PluginViewLookAndFeel()
 	: MainLookAndFeel() {
 	/** Background */
 	this->setColour(juce::ResizableWindow::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+		ColorMap::getInstance()->get("ThemeColorB1"));
 }

@@ -2,7 +2,7 @@
 #include "../misc/ColorMap.h"
 
 ControllerLookAndFeel::ControllerLookAndFeel()
-	: LookAndFeel_V4() {
+	: MainLookAndFeel() {
 	/** Buttons */
 	this->setColour(juce::TextButton::ColourIds::buttonColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
