@@ -15,6 +15,13 @@ public:
 	void paint(juce::Graphics& g) override;
 
 	void update();
+	void searchUpdate();
+	void rescan();
+	void expandAll();
+	void foldAll();
+
+	void showGroupMenu(const juce::String& name);
+	void showPluginMenu(const juce::PluginDescription& plugin);
 
 private:
 	std::unique_ptr<juce::Drawable> searchIcon = nullptr;
@@ -31,6 +38,9 @@ private:
 
 	void searchStart();
 	void searchEnd();
+
+	juce::PopupMenu createGroupMenu() const;
+	juce::PopupMenu createPluginMenu() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginView)
 };

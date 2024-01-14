@@ -28,6 +28,8 @@ PluginView::PluginView()
 		TRANS("Find plugins in the list."),
 		this->getLookAndFeel().findColour(
 			juce::TextEditor::ColourIds::shadowColourId + 1));
+	this->searchBox->onReturnKey = [this] { this->searchUpdate(); };
+	this->searchBox->onTextChange = [this] {if (this->searchBox->isEmpty()) { this->update(); }};
 	this->addAndMakeVisible(this->searchBox.get());
 
 	/** Plugin Tree */
@@ -134,25 +136,40 @@ void PluginView::update() {
 		/** Plugin Groups */
 		std::map<juce::String, juce::Array<juce::PluginDescription>> groupMap;
 
+		/** Searching */
+		auto searchName = this->searchBox->getText();
+		bool searchEnabled = searchName.isNotEmpty();
+
 		/** Group Plugin */
 		for (auto& i : list) {
 			/** Group Index */
-			juce::String index;
+			juce::StringArray indexs;
 			switch (this->groupType) {
 			case GroupType::Format:
-				index = i.pluginFormatName;
+				indexs.add(i.pluginFormatName);
 				break;
 			case GroupType::Manufacturer:
-				index = i.manufacturerName;
+				indexs.add(i.manufacturerName);
 				break;
-			case GroupType::Category:
-				index = i.category;
+			case GroupType::Category: {
+				indexs = juce::StringArray::fromTokens(i.category, "|", "\"\'");
 				break;
+			}
+			}
+
+			/** Searching By Name */
+			if (searchEnabled) {
+				if (utils::matchKMP(i.name, searchName) < 0
+					&& utils::searchKMP(indexs, searchName).isEmpty()) {
+					continue;
+				}
 			}
 
 			/** Insert To Group List */
-			auto& groupList = groupMap[index];
-			groupList.add(i);
+			for (auto& index : indexs) {
+				auto& groupList = groupMap[index];
+				groupList.add(i);
+			}
 		}
 
 		/** Plugin Group List */
@@ -162,9 +179,90 @@ void PluginView::update() {
 		}
 
 		/** Create Plugin Tree Model */
-		this->pluginModel = std::make_unique<PluginTreeModel>(groupList);
+		this->pluginModel = std::make_unique<PluginTreeModel>(groupList,
+			[this](const juce::String& name) { this->showGroupMenu(name); },
+			[this](const juce::PluginDescription& plugin) { this->showPluginMenu(plugin); });
 		this->pluginTree->setRootItem(this->pluginModel.get());
-		this->pluginTree->setDefaultOpenness(false);
+		this->pluginTree->setDefaultOpenness(searchEnabled);
+	}
+}
+
+void PluginView::searchUpdate() {
+	this->update();
+}
+
+void PluginView::rescan() {
+	auto clearAction = std::unique_ptr<ActionBase>(new ActionClearPlugin);
+	auto searchAction = std::unique_ptr<ActionBase>(new ActionSearchPlugin);
+	ActionDispatcher::getInstance()->dispatch(std::move(clearAction));
+	ActionDispatcher::getInstance()->dispatch(std::move(searchAction));
+}
+
+void PluginView::expandAll() {
+	if (this->pluginModel) {
+		this->pluginModel->changeAllOpenness(true);
+	}
+}
+
+void PluginView::foldAll() {
+	if (this->pluginModel) {
+		this->pluginModel->changeAllOpenness(false);
+	}
+}
+
+void PluginView::showGroupMenu(const juce::String& name) {
+	auto menu = this->createGroupMenu();
+	int result = menu.show();
+
+	switch (result) {
+	case 1:
+		this->expandAll();
+		break;
+	case 2:
+		this->foldAll();
+		break;
+	case 3:
+		this->groupType = GroupType::Format;
+		this->update();
+		break;
+	case 4:
+		this->groupType = GroupType::Manufacturer;
+		this->update();
+		break;
+	case 5:
+		this->groupType = GroupType::Category;
+		this->update();
+		break;
+	case 6:
+		this->rescan();
+		break;
+	}
+}
+
+void PluginView::showPluginMenu(const juce::PluginDescription& plugin) {
+	auto menu = this->createPluginMenu();
+	int result = menu.show();
+
+	switch (result) {
+	case 1:
+		this->expandAll();
+		break;
+	case 2:
+		this->foldAll();
+		break;
+	case 3:
+		juce::Process::openDocument(
+			juce::File{ plugin.fileOrIdentifier }.getParentDirectory().getFullPathName(), "");
+		break;
+	case 4:
+		if (quickAPI::addToPluginBlackList(plugin.fileOrIdentifier)) {
+			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::InfoIcon,
+				TRANS("Add to Blacklist"), TRANS("This will take effect during the next plugin scan."));
+		}
+		break;
+	case 5:
+		this->rescan();
+		break;
 	}
 }
 
@@ -183,4 +281,33 @@ void PluginView::searchEnd() {
 
 	/** Show Plugin Tree */
 	this->pluginTree->setVisible(true);
+}
+
+juce::PopupMenu PluginView::createGroupMenu() const {
+	juce::PopupMenu menu;
+
+	menu.addItem(1, TRANS("Expand All"), true);
+	menu.addItem(2, TRANS("Fold All"), true);
+	menu.addSeparator();
+	menu.addItem(3, TRANS("Group by Format"), true, this->groupType == GroupType::Format);
+	menu.addItem(4, TRANS("Group by Manufacturer"), true, this->groupType == GroupType::Manufacturer);
+	menu.addItem(5, TRANS("Group by Category"), true, this->groupType == GroupType::Category);
+	menu.addSeparator();
+	menu.addItem(6, TRANS("Rescan Plugins"), true);
+
+	return menu;
+}
+
+juce::PopupMenu PluginView::createPluginMenu() const {
+	juce::PopupMenu menu;
+
+	menu.addItem(1, TRANS("Expand All"), true);
+	menu.addItem(2, TRANS("Fold All"), true);
+	menu.addSeparator();
+	menu.addItem(3, TRANS("Open Plugin Folder"), true);
+	menu.addItem(4, TRANS("Add to Blacklist"), true);
+	menu.addSeparator();
+	menu.addItem(5, TRANS("Rescan Plugins"), true);
+
+	return menu;
 }

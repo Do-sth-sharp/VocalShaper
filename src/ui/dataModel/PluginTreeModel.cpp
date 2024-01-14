@@ -5,10 +5,14 @@
 class PluginItemModel final : public juce::TreeViewItem {
 public:
 	PluginItemModel() = delete;
-	PluginItemModel(const juce::PluginDescription& plugin) : plugin(plugin) {};
+	PluginItemModel(const juce::String& groupName, const juce::PluginDescription& plugin,
+		const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback)
+		: groupName(groupName), plugin(plugin), menuCallback(pluginMenuCallback) {};
 
 	bool mightContainSubItems() override { return false; };
-	juce::String getUniqueName() const override { return this->plugin.createIdentifierString(); };
+	juce::String getUniqueName() const override {
+		return this->groupName + "-" + this->plugin.createIdentifierString();
+	};
 
 	int getItemWidth() const override {
 		if (auto view = this->getOwnerView()) {
@@ -46,10 +50,12 @@ public:
 			float textHeight = screenSize.getHeight() * 0.0175f;
 
 			/** Color */
-			juce::Colour backgroundColor = laf.findColour(
-				juce::Label::ColourIds::backgroundColourId);
-			juce::Colour textColor = laf.findColour(
-				juce::Label::ColourIds::textColourId);
+			juce::Colour backgroundColor = this->isSelected()
+				? laf.findColour(juce::Label::ColourIds::backgroundWhenEditingColourId)
+				: laf.findColour(juce::Label::ColourIds::backgroundColourId);
+			juce::Colour textColor = this->isSelected()
+				? laf.findColour(juce::Label::ColourIds::textWhenEditingColourId)
+				: laf.findColour(juce::Label::ColourIds::textColourId);
 
 			/** Font */
 			juce::Font textFont(textHeight);
@@ -68,6 +74,14 @@ public:
 		}
 	};
 
+	void itemClicked(const juce::MouseEvent& event) override {
+		this->juce::TreeViewItem::itemClicked(event);
+
+		if (event.mods.isRightButtonDown()) {
+			this->menuCallback(this->plugin);
+		}
+	};
+
 	juce::String getTooltip() override {
 		return this->plugin.name + "\n"
 			+ TRANS("Description:") + " " + this->plugin.descriptiveName + "\n"
@@ -76,8 +90,8 @@ public:
 			+ TRANS("Manufacturer:") + " " + this->plugin.manufacturerName + "\n"
 			+ TRANS("Version:") + " " + this->plugin.version + "\n"
 			+ TRANS("File:") + " " + this->plugin.fileOrIdentifier + "\n"
-			+ TRANS("Last File Mod Time:") + " " + this->plugin.lastFileModTime.formatted("%Y-%m-%d %H:%M:S") + "\n"
-			+ TRANS("Last Info Update Time:") + " " + this->plugin.lastInfoUpdateTime.formatted("%Y-%m-%d %H:%M:S") + "\n"
+			+ TRANS("Last File Mod Time:") + " " + this->plugin.lastFileModTime.formatted("%Y-%m-%d %H:%M:%S") + "\n"
+			+ TRANS("Last Info Update Time:") + " " + this->plugin.lastInfoUpdateTime.formatted("%Y-%m-%d %H:%M:%S") + "\n"
 			+ TRANS("Is Instrument:") + " " + (this->plugin.isInstrument ? TRANS("Yes") : TRANS("No")) + "\n"
 			+ TRANS("Input Channels:") + " " + juce::String{ this->plugin.numInputChannels } + "\n"
 			+ TRANS("Output Channels:") + " " + juce::String{ this->plugin.numOutputChannels } + "\n";
@@ -99,7 +113,9 @@ public:
 	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) { return false; };
 
 private:
+	const juce::String groupName;
 	const juce::PluginDescription plugin;
+	const std::function<void(const juce::PluginDescription&)> menuCallback;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginItemModel)
 };
@@ -108,10 +124,12 @@ class PluginClassModel final : public juce::TreeViewItem {
 public:
 	PluginClassModel() = delete;
 	PluginClassModel(const juce::String& name,
-		const juce::Array<juce::PluginDescription>& plugins)
-		: name(name) {
+		const juce::Array<juce::PluginDescription>& plugins,
+		const std::function<void(const juce::String&)>& groupMenuCallback,
+		const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback)
+		: name(name), menuCallback(groupMenuCallback) {
 		for (auto& i : plugins) {
-			this->addSubItem(new PluginItemModel{ i });
+			this->addSubItem(new PluginItemModel{ name, i, pluginMenuCallback });
 		}
 	};
 
@@ -176,19 +194,51 @@ public:
 		}
 	};
 
+	void itemClicked(const juce::MouseEvent& event) override {
+		this->juce::TreeViewItem::itemClicked(event);
+
+		if (event.mods.isLeftButtonDown()) {
+			this->setOpen(!this->isOpen());
+		}
+		else if (event.mods.isRightButtonDown()) {
+			this->menuCallback(this->name);
+		}
+	};
+	void itemDoubleClicked(const juce::MouseEvent&) override {};
+
 	bool isInterestedInFileDrag(const juce::StringArray&) { return false; };
 	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) { return false; };
 
+	void changeAllOpenness(bool open) {
+		/** Current */
+		this->setOpenness(open
+			? juce::TreeViewItem::Openness::opennessOpen
+			: juce::TreeViewItem::Openness::opennessClosed);
+
+		/** Sub */
+		int subNum = this->getNumSubItems();
+		for (int i = 0; i < subNum; i++) {
+			if (auto item = dynamic_cast<PluginItemModel*>(this->getSubItem(i))) {
+				item->setOpenness(open
+					? juce::TreeViewItem::Openness::opennessOpen
+					: juce::TreeViewItem::Openness::opennessClosed);
+			}
+		}
+	}
+
 private:
 	const juce::String name;
+	const std::function<void(const juce::String&)> menuCallback;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginClassModel)
 };
 
 PluginTreeModel::PluginTreeModel(
-	const juce::Array<PluginClass>& plugins) {
+	const juce::Array<PluginClass>& plugins,
+	const std::function<void(const juce::String&)>& groupMenuCallback,
+	const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback) {
 	for (auto& [name, list] : plugins) {
-		this->addSubItem(new PluginClassModel{ name, list });
+		this->addSubItem(new PluginClassModel{ name, list, groupMenuCallback, pluginMenuCallback });
 	}
 }
 
@@ -201,3 +251,12 @@ bool PluginTreeModel::isInterestedInFileDrag(
 
 bool PluginTreeModel::isInterestedInDragSource(
 	const juce::DragAndDropTarget::SourceDetails&) { return false; };
+
+void PluginTreeModel::changeAllOpenness(bool open) {
+	int subNum = this->getNumSubItems();
+	for (int i = 0; i < subNum; i++) {
+		if (auto item = dynamic_cast<PluginClassModel*>(this->getSubItem(i))) {
+			item->changeAllOpenness(open);
+		}
+	}
+}

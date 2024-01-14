@@ -66,6 +66,7 @@ namespace utils {
 	bool regProjectFileInSystem();
 	bool unregProjectFileFromSystem();
 
+	int matchKMP(const juce::String& line, const juce::String& word);
 	const juce::StringArray searchKMP(const juce::StringArray& list, const juce::String& word);
 
 	bool saveXml(const juce::File& file, juce::XmlElement* xml);

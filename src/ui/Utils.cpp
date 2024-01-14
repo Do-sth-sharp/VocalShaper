@@ -340,10 +340,14 @@ namespace utils {
 		return -1;
 	}
 
+	int matchKMP(const juce::String& line, const juce::String& word) {
+		return KMP(word, line, preKMP(line));
+	}
+
 	const juce::StringArray searchKMP(const juce::StringArray& list, const juce::String& word) {
 		juce::StringArray result;
 		for (auto& s : list) {
-			if (KMP(word, s, preKMP(s)) >= 0) {
+			if (matchKMP(s, word) >= 0) {
 				result.add(s);
 			}
 		}

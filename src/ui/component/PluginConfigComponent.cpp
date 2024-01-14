@@ -8,6 +8,13 @@ PluginConfigComponent::PluginConfigComponent() {
 		TRANS("Tip"), TRANS("The following settings will take effect the next time the plugins are scanned."));
 	this->addAndMakeVisible(this->tipLabel.get());
 
+	/** Rescan Button */
+	this->rescanButton = std::make_unique<juce::TextButton>(TRANS("Rescan Plugins"));
+	this->rescanButton->setWantsKeyboardFocus(false);
+	this->rescanButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->rescanButton->onClick = [this] { this->rescan(); };
+	this->addAndMakeVisible(this->rescanButton.get());
+
 	/** Plugin Configs */
 	auto pluginPath = quickAPI::getPluginSearchPath();
 	auto pluginBlackList = quickAPI::getPluginBlackList();
@@ -56,10 +63,21 @@ void PluginConfigComponent::resized() {
 	int labelWidth = std::min(200, screenSize.getWidth() / 3);
 	int listRowHeight = itemHeight * 0.8;
 
+	int rescanButtonAreaWidth = screenSize.getWidth() * 0.075;
+	int rescanButtonWidth = rescanButtonAreaWidth * 0.8;
+	int rescanButtonHeight = itemHeight * 0.8;
+
 	/** Tip */
 	juce::Rectangle<int> tipLabelRect(
-		0, 0, this->getWidth(), itemHeight);
+		0, 0, this->getWidth() - rescanButtonAreaWidth, itemHeight);
 	this->tipLabel->setBounds(tipLabelRect);
+
+	/** Rescan Button */
+	juce::Rectangle<int> rescanButtonRect(
+		tipLabelRect.getRight() + (rescanButtonAreaWidth - rescanButtonWidth) / 2,
+		(itemHeight - rescanButtonHeight) / 2,
+		rescanButtonWidth, rescanButtonHeight);
+	this->rescanButton->setBounds(rescanButtonRect);
 
 	/** Plugin Search Path */
 	juce::Rectangle<int> searchPathLabelRect(
@@ -172,4 +190,11 @@ void PluginConfigComponent::removeBlackList(int index, const juce::String& path)
 		this->blackListModel->remove(index);
 		this->blackList->updateContent();
 	}
+}
+
+void PluginConfigComponent::rescan() {
+	auto clearAction = std::unique_ptr<ActionBase>(new ActionClearPlugin);
+	auto searchAction = std::unique_ptr<ActionBase>(new ActionSearchPlugin);
+	ActionDispatcher::getInstance()->dispatch(std::move(clearAction));
+	ActionDispatcher::getInstance()->dispatch(std::move(searchAction));
 }

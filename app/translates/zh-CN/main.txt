@@ -68,3 +68,13 @@ countries: cn
 "Is Instrument:" = "乐器："
 "Input Channels:" = "输入通道："
 "Output Channels:" = "输出通道："
+
+"Expand All" = "全部展开"
+"Fold All" = "全部折叠"
+"Group by Format" = "以类型分组"
+"Group by Manufacturer" = "以制造商分组"
+"Group by Category" = "以类别分组"
+"Rescan Plugins" = "重新扫描插件"
+"Open Plugin Folder" = "打开插件目录"
+"Add to Blacklist" = "添加到黑名单"
+"This will take effect during the next plugin scan." = "这将会在下次插件扫描时生效。"

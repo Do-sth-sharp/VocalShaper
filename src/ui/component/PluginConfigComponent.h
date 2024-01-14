@@ -16,8 +16,11 @@ public:
 	void addBlackList(int index);
 	void removeBlackList(int index, const juce::String& path);
 
+	void rescan();
+
 private:
 	std::unique_ptr<juce::Label> tipLabel = nullptr;
+	std::unique_ptr<juce::TextButton> rescanButton = nullptr;
 	std::unique_ptr<juce::Label> pathLabel = nullptr;
 	std::unique_ptr<EditableStringListModel> pathModel = nullptr;
 	std::unique_ptr<juce::ListBox> pathList = nullptr;

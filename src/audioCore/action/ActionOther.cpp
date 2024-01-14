@@ -25,8 +25,7 @@ ActionSearchPlugin::ActionSearchPlugin() {}
 bool ActionSearchPlugin::doAction() {
 	ACTION_CHECK_PLUGIN_LOADING(
 		"Don't do this while loading plugin.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin list while searching plugin.");
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return true; }
 
 	Plugin::getInstance()->clearPluginList();
 	Plugin::getInstance()->getPluginList();
