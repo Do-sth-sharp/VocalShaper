@@ -16,6 +16,7 @@
 #include "ui/component/Splash.h"
 #include "ui/component/CompManager.h"
 #include "ui/component/PluginView.h"
+#include "ui/component/SourceView.h"
 #include "ui/menuAndCommand/CommandManager.h"
 #include "ui/menuAndCommand/CoreCommandTarget.h"
 #include "ui/menuAndCommand/GUICommandTarget.h"
@@ -265,7 +266,7 @@ private:
 				CompManager::getInstance()->set(CompManager::CompType::PluginView,
 					std::unique_ptr<flowUI::FlowComponent>(new PluginView));
 				CompManager::getInstance()->set(CompManager::CompType::SourceView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Source")));
+					std::unique_ptr<flowUI::FlowComponent>(new SourceView));
 				CompManager::getInstance()->set(CompManager::CompType::TrackView,
 					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
 				CompManager::getInstance()->set(CompManager::CompType::InstrView,
