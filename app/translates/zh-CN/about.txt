@@ -30,6 +30,7 @@ countries: cn
 
 "Translation" = "翻译"
 "zh-CN" = "汉语（中国）"
+"en-US" = "英语（美国）"
 
 "Theme Design" = "主题设计"
 "Colorful" = "彩色"

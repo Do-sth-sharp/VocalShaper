@@ -1,0 +1,19 @@
+﻿language: English
+countries: us
+
+"language" = "Language"
+"theme" = "Theme"
+"font" = "Font"
+"layout" = "Layout"
+
+"return-on-stop" = "Return On Stop"
+"anonymous-mode" = "Anonymous Mode"
+"simd-speed-up" = "SIMD Speed Up"
+"cpu-painting" = "CPU Painting"
+"proj-reg" = "Register Project Format"
+"proj-unreg" = "Unregister Project Format"
+
+"bit-depth" = "Bit Depth"
+"quality" = "Quality"
+"key" = "Key"
+"value" = "Value"
