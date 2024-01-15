@@ -70,9 +70,48 @@ public:
 				width - paddingWidth * 2, textHeight);
 			g.setColour(textColor);
 			g.setFont(textFont);
-			g.drawFittedText(this->plugin.name, textRect, juce::Justification::centredLeft, 1, 1.f);
+			g.drawFittedText(this->plugin.name, textRect,
+				juce::Justification::centredLeft, 1, 1.f);
 		}
 	};
+
+	void paintHorizontalConnectingLine(
+		juce::Graphics& g, const juce::Line<float>& line) override {
+		if (auto view = this->getOwnerView()) {
+			auto screenSize = utils::getScreenSize(view);
+			auto& laf = view->getLookAndFeel();
+
+			/** Size */
+			float lineTickness = screenSize.getHeight() * 0.0015f;
+
+			/** Color */
+			juce::Colour lineColor = laf.findColour(
+				juce::TreeView::ColourIds::linesColourId);
+
+			/** Line */
+			g.setColour(lineColor);
+			g.drawLine(line, lineTickness);
+		}
+	};
+
+	void paintVerticalConnectingLine(
+		juce::Graphics& g, const juce::Line<float>& line) override {
+		if (auto view = this->getOwnerView()) {
+			auto screenSize = utils::getScreenSize(view);
+			auto& laf = view->getLookAndFeel();
+
+			/** Size */
+			float lineTickness = screenSize.getHeight() * 0.0015f;
+
+			/** Color */
+			juce::Colour lineColor = laf.findColour(
+				juce::TreeView::ColourIds::linesColourId);
+
+			/** Line */
+			g.setColour(lineColor);
+			g.drawLine(line, lineTickness);
+		}
+	}
 
 	void itemClicked(const juce::MouseEvent& event) override {
 		this->juce::TreeViewItem::itemClicked(event);
@@ -193,6 +232,11 @@ public:
 			g.drawFittedText(this->name, textRect, juce::Justification::centredLeft, 1, 1.f);
 		}
 	};
+
+	void paintHorizontalConnectingLine(
+		juce::Graphics&, const juce::Line<float>&) override {};
+	void paintVerticalConnectingLine(
+		juce::Graphics&, const juce::Line<float>&) override {};
 
 	void itemClicked(const juce::MouseEvent& event) override {
 		this->juce::TreeViewItem::itemClicked(event);

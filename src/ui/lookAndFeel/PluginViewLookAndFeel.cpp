@@ -55,3 +55,38 @@ PluginViewLookAndFeel::PluginViewLookAndFeel()
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
 }
+
+void PluginViewLookAndFeel::drawTreeviewPlusMinusBox(
+	juce::Graphics& g, const juce::Rectangle<float>& area,
+	juce::Colour /*backgroundColour*/, bool isOpen, bool /*isMouseOver*/) {
+	juce::Colour lineColor = this->findColour(
+		juce::TreeView::ColourIds::linesColourId);
+
+	float rectWidth  = area.getWidth() * 0.6;
+	float rectHeight = area.getHeight() * 0.6;
+	float lineTickness = rectHeight * 0.075;
+	float iconHeight = rectHeight * 0.5;
+	float iconWidth = rectWidth * 0.5;
+
+	juce::Rectangle<float> rect(
+		area.getCentreX() - rectWidth / 2,
+		area.getCentreY() - rectHeight / 2,
+		rectWidth, rectHeight);
+	juce::Rectangle<float> hLineRect(
+		rect.getCentreX() - iconWidth / 2,
+		rect.getCentreY() - lineTickness / 2,
+		iconWidth, lineTickness);
+	juce::Rectangle<float> vLineRect(
+		rect.getCentreX() - lineTickness / 2,
+		rect.getCentreY() - iconHeight / 2,
+		lineTickness, iconHeight);
+
+	g.setColour(lineColor);
+	g.drawRect(rect, lineTickness);
+	g.fillRect(hLineRect);
+	if (!isOpen) { g.fillRect(vLineRect); }
+}
+
+bool PluginViewLookAndFeel::areLinesDrawnForTreeView(juce::TreeView&) {
+	return true;
+}
