@@ -12,6 +12,7 @@ public:
 		juce::MidiBuffer& buffer, int baseTime,
 		int startTime, int endTime) const;
 	int getTrackNum() const;
+	int getEventNum() const;
 
 public:
 	bool parse(const google::protobuf::Message* data) override;

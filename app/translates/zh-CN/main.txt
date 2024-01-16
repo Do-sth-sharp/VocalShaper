@@ -78,3 +78,11 @@ countries: cn
 "Open Plugin Folder" = "打开插件目录"
 "Add to Blacklist" = "添加到黑名单"
 "This will take effect during the next plugin scan." = "这将会在下次插件扫描时生效。"
+
+"Type:" = "类型："
+"Length:" = "长度："
+"Channels:" = "通道："
+"Tracks:" = "轨道："
+"Events:" = "事件："
+"Synthesizer:" = "合成器："
+"Sample Rate:" = "采样率："

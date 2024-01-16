@@ -12,8 +12,7 @@ void CloneableMIDISource::readData(
 	/** Get MIDI Data */
 	juce::MidiMessageSequence total;
 	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
-		auto track = this->buffer.getTrack(i);
-		if (track) {
+		if (auto track = this->buffer.getTrack(i)) {
 			total.addSequence(*track, 0, startTime / this->getSampleRate(), endTime / this->getSampleRate());
 		}
 	}
@@ -28,6 +27,18 @@ void CloneableMIDISource::readData(
 
 int CloneableMIDISource::getTrackNum() const {
 	return this->buffer.getNumTracks();
+}
+
+int CloneableMIDISource::getEventNum() const {
+	juce::ScopedTryReadLock locker(audioLock::getSourceLock());
+
+	int total = 0;
+	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
+		if (auto track = this->buffer.getTrack(i)) {
+			total += track->getNumEvents();
+		}
+	}
+	return total;
 }
 
 bool CloneableMIDISource::parse(const google::protobuf::Message* data) {

@@ -15,6 +15,7 @@ public:
 	void readData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
 	int getChannelNum() const;
+	int getEventNum() const;
 
 	void setSynthesizer(
 		std::unique_ptr<juce::AudioPluginInstance> synthesizer,
@@ -49,7 +50,7 @@ private:
 	juce::AudioSampleBuffer audioBuffer;
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
-	double sourceSampleRate = 0;
+	std::atomic<double> sourceSampleRate = 0;
 
 	int audioChannels = 1;
 

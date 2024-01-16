@@ -64,6 +64,118 @@ namespace quickAPI {
 		return pos->getIsRecording();
 	}
 
+	int getSourceNum() {
+		return CloneableSourceManager::getInstance()->getSourceNum();
+	}
+
+	int getSourceId(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			return ptr->getId();
+		}
+		return -1;
+	}
+
+	const juce::String getSourceName(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			return ptr->getName();
+		}
+		return "";
+	}
+
+	constexpr std::array<const char*, 4> sourceTypeNameList{
+		"Unknown", "Audio", "MIDI", "Synth" };
+
+	SourceType getSourceType(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+				return SourceType::AudioSource;
+			}
+			else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
+				return SourceType::MIDISource;
+			}
+			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+				return SourceType::SynthSource;
+			}
+		}
+		return SourceType::UnknownSource;
+	}
+
+	const juce::String getSourceTypeName(int index) {
+		return sourceTypeNameList[getSourceType(index)];
+	}
+
+	const juce::StringArray getAllSourceTypeName() {
+		juce::StringArray result;
+		for (auto s : sourceTypeNameList) {
+			result.add(juce::String{ s });
+		}
+		return result;
+	}
+
+	double getSourceLength(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			return ptr->getSourceLength();
+		}
+		return 0;
+	}
+
+	int getSourceChannelNum(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+				return p->getChannelNum();
+			}
+			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+				return p->getChannelNum();
+			}
+		}
+		return 0;
+	}
+
+	int getSourceTrackNum(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
+				return p->getTrackNum();
+			}
+			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+				return p->getTrackNum();
+			}
+		}
+		return 0;
+	}
+
+	const juce::String getSourceSynthesizerName(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+				return p->getSynthesizerName();
+			}
+		}
+		return "";
+	}
+
+	double getSourceSampleRate(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
+				return p->getSourceSampleRate();
+			}
+			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+				return p->getSourceSampleRate();
+			}
+		}
+		return 0;
+	}
+
+	int getSourceEventNum(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
+				return p->getEventNum();
+			}
+			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+				return p->getEventNum();
+			}
+		}
+		return 0;
+	}
+
 	const juce::StringArray getSourceNames() {
 		juce::StringArray result;
 

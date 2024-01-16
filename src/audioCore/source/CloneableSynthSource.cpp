@@ -16,6 +16,18 @@ int CloneableSynthSource::getTrackNum() const {
 	return this->buffer.getNumTracks();
 }
 
+int CloneableSynthSource::getEventNum() const {
+	juce::ScopedTryReadLock locker(audioLock::getSourceLock());
+
+	int total = 0;
+	for (int i = 0; i < this->buffer.getNumTracks(); i++) {
+		if (auto track = this->buffer.getTrack(i)) {
+			total += track->getNumEvents();
+		}
+	}
+	return total;
+}
+
 double CloneableSynthSource::getSourceSampleRate() const {
 	return this->sourceSampleRate;
 }

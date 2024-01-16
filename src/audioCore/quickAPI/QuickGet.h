@@ -19,8 +19,24 @@ namespace quickAPI {
 	bool isPlaying();
 	bool isRecording();
 
-	using TrackInfo = std::tuple<juce::String, juce::String>;
+	enum SourceType {
+		UnknownSource, AudioSource, MIDISource, SynthSource
+	};
+	int getSourceNum();
+	int getSourceId(int index);
+	const juce::String getSourceName(int index);
+	SourceType getSourceType(int index);
+	const juce::String getSourceTypeName(int index);
+	const juce::StringArray getAllSourceTypeName();
+	double getSourceLength(int index);
+	int getSourceChannelNum(int index);
+	int getSourceTrackNum(int index);
+	const juce::String getSourceSynthesizerName(int index);
+	double getSourceSampleRate(int index);
+	int getSourceEventNum(int index);
 	const juce::StringArray getSourceNames();
+
+	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
 
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension);
