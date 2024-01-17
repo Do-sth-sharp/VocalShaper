@@ -71,7 +71,7 @@ countries: cn
 
 "Expand All" = "全部展开"
 "Fold All" = "全部折叠"
-"Group by Format" = "以类型分组"
+"Group by Format" = "以格式分组"
 "Group by Manufacturer" = "以制造商分组"
 "Group by Category" = "以类别分组"
 "Rescan Plugins" = "重新扫描插件"
