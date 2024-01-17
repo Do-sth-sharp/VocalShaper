@@ -11,6 +11,10 @@ public:
 	static void saveProject(const juce::String& fileName);
 
 	static void rescanPlugins();
+	static bool addPluginBlackList(const juce::String& filePath);
+	static bool removePluginBlackList(const juce::String& filePath);
+	static bool addPluginSearchPath(const juce::String& path);
+	static bool removePluginSearchPath(const juce::String& path);
 
 	static void loadMIDISource(const juce::String& filePath, bool copy);
 	static void loadAudioSource(const juce::String& filePath, bool copy);
@@ -38,6 +42,11 @@ public:
 	static void loadProjectGUI();
 	static void newProjectGUI();
 	static void saveProjectGUI();
+
+	static bool addPluginBlackListGUI(const juce::String& filePath);
+	static bool removePluginBlackListGUI(const juce::String& filePath);
+	static bool addPluginSearchPathGUI(const juce::String& path);
+	static bool removePluginSearchPathGUI(const juce::String& path);
 
 	static void loadSourceGUI();
 	static void loadSynthSourceGUI();

@@ -122,9 +122,7 @@ void PluginConfigComponent::addPath(int index) {
 			return;
 		}
 
-		if (!quickAPI::addToPluginSearchPath(path)) {
-			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-				TRANS("Add Plugin Search Path"), TRANS("Do not change plugin configs during plugin search!"));
+		if (!CoreActions::addPluginSearchPathGUI(path)) {
 			return;
 		}
 
@@ -135,9 +133,7 @@ void PluginConfigComponent::addPath(int index) {
 
 void PluginConfigComponent::removePath(int index, const juce::String& path) {
 	if (this->pathModel) {
-		if (!quickAPI::removeFromPluginSearchPath(path)) {
-			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-				TRANS("Remove Plugin Search Path"), TRANS("Do not change plugin configs during plugin search!"));
+		if (!CoreActions::removePluginSearchPathGUI(path)) {
 			return;
 		}
 		
@@ -168,9 +164,7 @@ void PluginConfigComponent::addBlackList(int index) {
 				continue;
 			}
 
-			if (!quickAPI::addToPluginBlackList(path)) {
-				juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-					TRANS("Add Plugin Black List"), TRANS("Do not change plugin configs during plugin search!"));
+			if (!CoreActions::addPluginBlackListGUI(path)) {
 				return;
 			}
 
@@ -183,9 +177,7 @@ void PluginConfigComponent::addBlackList(int index) {
 
 void PluginConfigComponent::removeBlackList(int index, const juce::String& path) {
 	if (this->blackListModel) {
-		if (!quickAPI::removeFromPluginBlackList(path)) {
-			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-				TRANS("Remove Plugin Black List"), TRANS("Do not change plugin configs during plugin search!"));
+		if (!CoreActions::removePluginBlackListGUI(path)) {
 			return;
 		}
 		this->blackListModel->remove(index);

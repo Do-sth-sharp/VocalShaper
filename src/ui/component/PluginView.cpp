@@ -253,7 +253,7 @@ void PluginView::showPluginMenu(const juce::PluginDescription& plugin) {
 			juce::File{ plugin.fileOrIdentifier }.getParentDirectory().getFullPathName(), "");
 		break;
 	case 4:
-		if (quickAPI::addToPluginBlackList(plugin.fileOrIdentifier)) {
+		if (CoreActions::addPluginBlackListGUI(plugin.fileOrIdentifier)) {
 			juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::InfoIcon,
 				TRANS("Add to Blacklist"), TRANS("This will take effect during the next plugin scan."));
 		}

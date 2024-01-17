@@ -25,6 +25,22 @@ void CoreActions::rescanPlugins() {
 	ActionDispatcher::getInstance()->dispatch(std::move(searchAction));
 }
 
+bool CoreActions::addPluginBlackList(const juce::String& filePath) {
+	return quickAPI::addToPluginBlackList(filePath);
+}
+
+bool CoreActions::removePluginBlackList(const juce::String& filePath) {
+	return quickAPI::removeFromPluginBlackList(filePath);
+}
+
+bool CoreActions::addPluginSearchPath(const juce::String& path) {
+	return quickAPI::addToPluginSearchPath(path);
+}
+
+bool CoreActions::removePluginSearchPath(const juce::String& path) {
+	return quickAPI::removeFromPluginSearchPath(path);
+}
+
 void CoreActions::loadMIDISource(const juce::String& filePath, bool copy) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionAddMidiSourceThenLoad{ filePath, copy });
@@ -175,6 +191,42 @@ void CoreActions::saveProjectGUI() {
 
 		CoreActions::saveProject(projFile.getFileNameWithoutExtension());
 	}
+}
+
+bool CoreActions::addPluginBlackListGUI(const juce::String& filePath) {
+	if (!CoreActions::addPluginBlackList(filePath)) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("Add Plugin Black List"), TRANS("Do not change plugin configs during plugin search!"));
+		return false;
+	}
+	return true;
+}
+
+bool CoreActions::removePluginBlackListGUI(const juce::String& filePath) {
+	if (!CoreActions::removePluginBlackList(filePath)) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("Remove Plugin Black List"), TRANS("Do not change plugin configs during plugin search!"));
+		return false;
+	}
+	return true;
+}
+
+bool CoreActions::addPluginSearchPathGUI(const juce::String& path) {
+	if (!CoreActions::addPluginSearchPath(path)) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("Add Plugin Search Path"), TRANS("Do not change plugin configs during plugin search!"));
+		return false;
+	}
+	return true;
+}
+
+bool CoreActions::removePluginSearchPathGUI(const juce::String& path) {
+	if (!CoreActions::removePluginSearchPath(path)) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("Remove Plugin Search Path"), TRANS("Do not change plugin configs during plugin search!"));
+		return false;
+	}
+	return true;
 }
 
 void CoreActions::loadSourceGUI() {
