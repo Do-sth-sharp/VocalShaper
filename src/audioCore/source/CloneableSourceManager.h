@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "CloneableSource.h"
@@ -71,6 +71,10 @@ public:
 	* @attention	You must call this from message thread.
 	*/
 	bool exportSourceAsync(int index, const juce::String& path) const;
+	/**
+	* @attention	You must call this from message thread.
+	*/
+	bool reloadSourceAsync(int index, const juce::String& path, bool copy);
 
 	void prepareToPlay(double sampleRate, int bufferSize);
 

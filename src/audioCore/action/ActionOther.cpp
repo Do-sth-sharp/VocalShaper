@@ -154,6 +154,36 @@ bool ActionCloneSource::doAction() {
 	ACTION_RESULT(false);
 }
 
+ActionReloadSource::ActionReloadSource(
+	int index, const juce::String& path, bool copy)
+	: ACTION_DB{ index, path, copy } {}
+
+bool ActionReloadSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionReloadSource);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(path);
+
+	if (auto manager = CloneableSourceManager::getInstance()) {
+		if (CloneableSourceManager::getInstance()
+			->reloadSourceAsync(ACTION_DATA(index), ACTION_DATA(path), ACTION_DATA(copy))) {
+			juce::String result;
+
+			result += "Reload Source: [" + juce::String(ACTION_DATA(index)) + "]\n";
+			result += "Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n";
+
+			this->output(result);
+			ACTION_RESULT(true);
+		}
+	}
+	this->error("Can't Reload Source: [" + juce::String(ACTION_DATA(index)) + "]\n");
+	ACTION_RESULT(false);
+}
+
 ActionSaveSource::ActionSaveSource(
 	int index, const juce::String& path)
 	: index(index), path(path) {}

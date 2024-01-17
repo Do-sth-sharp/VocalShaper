@@ -28,6 +28,8 @@ public:
 	juce::String getCurrentAudioDeviceType() const;
 	bool isMidiInputDeviceEnabled(const juce::String& deviceIdentifier) const;
 
+	const juce::Array<double> getCurrentAvailableSampleRates() const;
+
 	juce::AudioDeviceManager* getManager() const;
 
 	enum class AudioDeviceType {

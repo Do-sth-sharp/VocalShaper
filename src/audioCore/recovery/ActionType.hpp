@@ -27,6 +27,7 @@ enum class ActionType : unsigned int {
 
 	ActionCloneSource = 0x0101,
 	ActionSave,
+	ActionReloadSource,
 
 	ActionRemoveMixerTrack = 0x0201,
 	ActionRemoveMixerTrackSend,
@@ -63,5 +64,6 @@ enum class ActionType : unsigned int {
 	ActionSetInstrMidiCCIntercept,
 	ActionSetEffectMidiCCIntercept,
 	ActionSetSequencerTrackBypass,
-	ActionSetSourceSynthesizer
+	ActionSetSourceSynthesizer,
+	ActionSetSourceName
 };

@@ -141,6 +141,26 @@ private:
 	JUCE_LEAK_DETECTOR(ActionCloneSource)
 };
 
+class ActionReloadSource final : public ActionBase {
+public:
+	ActionReloadSource() = delete;
+	ActionReloadSource(int index, const juce::String& path, bool copy);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Reload Source";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int index;
+		const juce::String path;
+		const bool copy;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionCloneSource)
+};
+
 class ActionSaveSource final : public ActionBase {
 public:
 	ActionSaveSource() = delete;

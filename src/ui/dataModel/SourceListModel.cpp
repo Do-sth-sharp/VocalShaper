@@ -1,5 +1,6 @@
 ﻿#include "SourceListModel.h"
 #include "../misc/DragSourceType.h"
+#include "../misc/CoreActions.h"
 #include "../../audioCore/AC_API.h"
 
 SourceListModel::SourceListModel(const juce::Component* parent)
@@ -93,33 +94,105 @@ juce::MouseCursor SourceListModel::getMouseCursorForRow(int row) {
 	return juce::MouseCursor::PointingHandCursor;
 }
 
+enum SourceListActionType {
+	NewAudio = 1,
+	NewMIDI,
+	NewSynth,
+	Clone,
+	Load,
+	Save,
+	Export,
+	Remove,
+	Replace,
+	SetName,
+	SetSynthesizer,
+	Synth
+};
+
 void SourceListModel::showItemMenu(int index) {
-	/** TODO */
+	auto menu = this->createItemMenu(index);
+	auto result = (SourceListActionType)(menu.show());
+
+	switch (result) {
+	case SourceListActionType::NewAudio:
+		CoreActions::newAudioSourceGUI();
+		break;
+	case SourceListActionType::NewMIDI:
+		CoreActions::newMIDISourceGUI();
+		break;
+	case SourceListActionType::NewSynth:
+		CoreActions::newSynthSourceGUI();
+		break;
+	case SourceListActionType::Clone:
+		CoreActions::cloneSource(index);
+		break;
+	case SourceListActionType::Load:
+		CoreActions::loadSourceGUI();
+		break;
+	case SourceListActionType::Save:
+		CoreActions::saveSourceGUI(index);
+		break;
+	case SourceListActionType::Export:
+		CoreActions::exportSourceGUI(index);
+		break;
+	case SourceListActionType::Remove:
+		CoreActions::removeSourceGUI(index);
+		break;
+	case SourceListActionType::Replace:
+		CoreActions::reloadSourceGUI(index);
+		break;
+	case SourceListActionType::SetName:
+		CoreActions::setSourceNameGUI(index);
+		break;
+	case SourceListActionType::SetSynthesizer:
+		CoreActions::setSourceSynthesizerGUI(index);
+		break;
+	case SourceListActionType::Synth:
+		CoreActions::synthSourceGUI(index);
+		break;
+	}
 }
 
 void SourceListModel::showBackgroundMenu() {
-	/** TODO */
+	auto menu = this->createBackgroundMenu();
+	auto result = (SourceListActionType)(menu.show());
+
+	switch (result) {
+	case SourceListActionType::NewAudio:
+		CoreActions::newAudioSourceGUI();
+		break;
+	case SourceListActionType::NewMIDI:
+		CoreActions::newMIDISourceGUI();
+		break;
+	case SourceListActionType::NewSynth:
+		CoreActions::newSynthSourceGUI();
+		break;
+	case SourceListActionType::Load:
+		CoreActions::loadSourceGUI();
+		break;
+	}
 }
 
 void SourceListModel::deleteItem(int index) {
-	/** TODO */
+	CoreActions::removeSourceGUI(index);
 }
 
 juce::PopupMenu SourceListModel::createItemMenu(int index) const {
 	juce::PopupMenu menu;
 
 	menu.addSubMenu(TRANS("New"), this->createNewMenu());
-	menu.addItem(1, TRANS("Clone"));
-	menu.addItem(2, TRANS("Load"));
-	menu.addItem(3, TRANS("Save"));
-	menu.addItem(4, TRANS("Export"),
+	menu.addItem(SourceListActionType::Clone, TRANS("Clone"));
+	menu.addItem(SourceListActionType::Load, TRANS("Load"));
+	menu.addItem(SourceListActionType::Save, TRANS("Save"));
+	menu.addItem(SourceListActionType::Export, TRANS("Export"),
 		quickAPI::getSourceType(index) == quickAPI::SourceType::SynthSource);
-	menu.addItem(5, TRANS("Remove"));
-	menu.addItem(6, TRANS("Replace"));
+	menu.addItem(SourceListActionType::Remove, TRANS("Remove"));
+	menu.addItem(SourceListActionType::Replace, TRANS("Replace"));
 	menu.addSeparator();
-	menu.addItem(7, TRANS("Set Synthesizer"),
+	menu.addItem(SourceListActionType::SetName, TRANS("Set Name"));
+	menu.addItem(SourceListActionType::SetSynthesizer, TRANS("Set Synthesizer"),
 		quickAPI::getSourceType(index) == quickAPI::SourceType::SynthSource);
-	menu.addItem(8, TRANS("Synth"),
+	menu.addItem(SourceListActionType::Synth, TRANS("Synth"),
 		quickAPI::getSourceType(index) == quickAPI::SourceType::SynthSource);
 
 	return menu;
@@ -129,7 +202,7 @@ juce::PopupMenu SourceListModel::createBackgroundMenu() const {
 	juce::PopupMenu menu;
 
 	menu.addSubMenu(TRANS("New"), this->createNewMenu());
-	menu.addItem(1, TRANS("Load"));
+	menu.addItem(SourceListActionType::Load, TRANS("Load"));
 
 	return menu;
 }
@@ -137,9 +210,9 @@ juce::PopupMenu SourceListModel::createBackgroundMenu() const {
 juce::PopupMenu SourceListModel::createNewMenu() const {
 	juce::PopupMenu menu;
 
-	menu.addItem(0x1001, TRANS("Audio"));
-	menu.addItem(0x1002, TRANS("MIDI"));
-	menu.addItem(0x1003, TRANS("Synth"));
+	menu.addItem(SourceListActionType::NewAudio, TRANS("Audio"));
+	menu.addItem(SourceListActionType::NewMIDI, TRANS("MIDI"));
+	menu.addItem(SourceListActionType::NewSynth, TRANS("Synth"));
 
 	return menu;
 }

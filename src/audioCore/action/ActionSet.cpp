@@ -875,6 +875,47 @@ bool ActionSetSourceSynthesizer::doAction() {
 	ACTION_RESULT(false);
 }
 
+ActionSetSourceName::ActionSetSourceName(
+	int index, const juce::String& name)
+	: ACTION_DB{ index, name } {}
+
+bool ActionSetSourceName::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSourceName);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+	ACTION_WRITE_STRING(oldName);
+
+	if (auto source = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		ACTION_DATA(oldName) = source->getName();
+		source->setName(ACTION_DATA(name));
+
+		this->output("Set source name: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(name) + "\n");
+		ACTION_RESULT(true);
+	}
+	this->error("Can't set source name: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSourceName::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSourceName);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+	ACTION_WRITE_STRING(oldName);
+
+	if (auto source = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		source->setName(ACTION_DATA(oldName));
+
+		this->output("Ubdo set source name: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(name) + "\n");
+		ACTION_RESULT(true);
+	}
+	this->error("Can't undo set source name: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
+}
+
 ActionSetEffectWindow::ActionSetEffectWindow(
 	int track, int effect, bool visible)
 	: track(track), effect(effect), visible(visible) {}

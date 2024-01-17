@@ -59,6 +59,23 @@ void CoreActions::loadSynthSource(const juce::String& filePath, bool copy) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::newMIDISource() {
+	auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenInit);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::newAudioSource(
+	double sampleRate, int channels, double length) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionAddAudioSourceThenInit{ sampleRate, channels, length });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::newSynthSource() {
+	auto action = std::unique_ptr<ActionBase>(new ActionAddSynthSourceThenInit);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::saveSource(int index, const juce::String& filePath) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSaveSourceAsync{ index, filePath });
@@ -68,6 +85,40 @@ void CoreActions::saveSource(int index, const juce::String& filePath) {
 void CoreActions::exportSource(int index, const juce::String& filePath) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionExportSourceAsync{ index, filePath });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::cloneSource(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionCloneSource{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::reloadSource(
+	int index, const juce::String& filePath, bool copy) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionReloadSource{ index, filePath, copy });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::synthSource(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSynthSource{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::removeSource(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSource{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setSourceName(int index, const juce::String& name) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetSourceName{ index, name });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setSourceSynthesizer(int index, const juce::String& pid) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetSourceSynthesizer{ index, pid });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -273,6 +324,41 @@ void CoreActions::loadSynthSourceGUI() {
 	}
 }
 
+void CoreActions::newMIDISourceGUI() {
+	CoreActions::newMIDISource();
+}
+
+void CoreActions::newAudioSourceGUI(
+	double sampleRate, int channels, double length) {
+	if (sampleRate <= 0) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("New Audio Source"), TRANS("Unavailable sample rate!"));
+		return;
+	}
+	if (channels <= 0) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("New Audio Source"), TRANS("Unavailable channel num!"));
+		return;
+	}
+	if (length <= 0) {
+		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			TRANS("New Audio Source"), TRANS("Unavailable length!"));
+		return;
+	}
+
+	CoreActions::newAudioSource(sampleRate, channels, length);
+}
+
+void CoreActions::newAudioSourceGUI() {
+	auto callback = [](double sampleRate, int channels, double length) {
+		CoreActions::newAudioSourceGUI(sampleRate, channels, length); };
+	CoreActions::askForAudioPropGUIAsync(callback);
+}
+
+void CoreActions::newSynthSourceGUI() {
+	CoreActions::newSynthSource();
+}
+
 void CoreActions::saveSourceGUI(int index) {
 	if (index == -1) { return; }
 
@@ -306,7 +392,7 @@ void CoreActions::saveSourceGUI(int index) {
 }
 
 void CoreActions::saveSourceGUI() {
-	auto callback = [](int index) {CoreActions::saveSourceGUI(index); };
+	auto callback = [](int index) { CoreActions::saveSourceGUI(index); };
 	CoreActions::askForSourceIndexGUIAsync(callback);
 }
 
@@ -336,7 +422,86 @@ void CoreActions::exportSourceGUI(int index) {
 }
 
 void CoreActions::exportSourceGUI() {
-	auto callback = [](int index) {CoreActions::exportSourceGUI(index); };
+	auto callback = [](int index) { CoreActions::exportSourceGUI(index); };
+	CoreActions::askForSourceIndexGUIAsync(callback);
+}
+
+void CoreActions::reloadSourceGUI(int index) {
+	if (index == -1) { return; }
+
+	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
+	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
+
+	bool isAudio = quickAPI::checkForAudioSource(index);
+	auto& formats = isAudio ? audioFormats : midiFormats;
+
+	juce::File defaultPath = quickAPI::getProjectDir();
+	juce::FileChooser chooser(TRANS("Reload Source"), defaultPath,
+		formats.joinIntoString(","));
+	if (chooser.browseForFileToOpen()) {
+		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
+			juce::MessageBoxIconType::QuestionIcon, TRANS("Reload Source"),
+			TRANS("Copy source files to working directory?"));
+		if (shouldCopy == 0) { return; }
+
+		auto file = chooser.getResult();
+		CoreActions::reloadSource(index, file.getFullPathName(), shouldCopy == 1);
+	}
+}
+
+void CoreActions::reloadSourceGUI() {
+	auto callback = [](int index) { CoreActions::reloadSourceGUI(index); };
+	CoreActions::askForSourceIndexGUIAsync(callback);
+}
+
+void CoreActions::synthSourceGUI(int index) {
+	if (index == -1) { return; }
+
+	CoreActions::synthSource(index);
+}
+
+void CoreActions::synthSourceGUI() {
+	auto callback = [](int index) { CoreActions::synthSourceGUI(index); };
+	CoreActions::askForSourceIndexGUIAsync(callback);
+}
+
+void CoreActions::removeSourceGUI(int index) {
+	if (index == -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Source"),
+		TRANS("Remove the source from source list. Continue?"))) {
+		return;
+	}
+
+	CoreActions::removeSource(index);
+}
+
+void CoreActions::setSourceNameGUI(int index) {
+	if (index == -1) { return; }
+
+	auto oldName = quickAPI::getSourceName(index);
+
+	auto callback = [index](const juce::String& name) { CoreActions::setSourceName(index, name); };
+	CoreActions::askForNameGUIAsync(callback, oldName);
+}
+
+void CoreActions::setSourceNameGUI() {
+	auto callback = [](int index) { CoreActions::setSourceNameGUI(index); };
+	CoreActions::askForSourceIndexGUIAsync(callback);
+}
+
+void CoreActions::setSourceSynthesizerGUI(int index) {
+	if (index == -1) { return; }
+
+	auto callback = [index](const juce::String& id) {
+		if (id.isEmpty()) { return; }
+		CoreActions::setSourceSynthesizer(index, id); };
+	CoreActions::askForPluginGUIAsync(callback);
+}
+
+void CoreActions::setSourceSynthesizerGUI() {
+	auto callback = [](int index) { CoreActions::setSourceSynthesizerGUI(index); };
 	CoreActions::askForSourceIndexGUIAsync(callback);
 }
 
@@ -381,6 +546,48 @@ bool CoreActions::askForSaveGUI() {
 	return juce::AlertWindow::showOkCancelBox(
 		juce::MessageBoxIconType::QuestionIcon, TRANS("Project Warning"),
 		TRANS("Discard unsaved changes and continue?"));
+}
+
+void CoreActions::askForAudioPropGUIAsync(
+	const std::function<void(double, int, double)>& callback) {
+	/** Get Available Props */
+	auto availableSampleRate = quickAPI::getSampleRateSupported();
+	juce::StringArray availableSampleRateList;
+	for (auto i : availableSampleRate) {
+		availableSampleRateList.add(juce::String{ i });
+	}
+
+	/** Create Config Window */
+	auto configWindow = new juce::AlertWindow{
+		TRANS("Audio Properties"), TRANS("Set audio properties:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	configWindow->addButton(TRANS("OK"), 1);
+	configWindow->addButton(TRANS("Cancel"), 0);
+
+	/** Add Prop Comp */
+	configWindow->addComboBox(TRANS("Sample Rate"), availableSampleRateList, TRANS("Sample Rate"));
+	configWindow->addTextEditor(TRANS("Channels"), juce::String{ 2 }, TRANS("Channels"));
+	configWindow->addTextEditor(TRANS("Length"), juce::String{ 60.0 }, TRANS("Length"));
+
+	auto sampleRateSeletor = configWindow->getComboBoxComponent(TRANS("Sample Rate"));
+	auto channelsEditor = configWindow->getTextEditor(TRANS("Channels"));
+	auto lengthEditor = configWindow->getTextEditor(TRANS("Length"));
+
+	channelsEditor->setInputFilter(new utils::TextIntegerFilter{ 0, 1024 }, true);
+	lengthEditor->setInputFilter(new utils::TextDoubleFilter{ 0, INT_MAX, 2 }, true);
+
+	/** Show Window */
+	configWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[sampleRateSeletor, channelsEditor, lengthEditor, callback](int result) {
+			if (result != 1) { callback(0, 0, 0); return; }
+
+			double sampleRate = sampleRateSeletor->getText().getDoubleValue();
+			int channels = channelsEditor->getText().getIntValue();
+			double length = lengthEditor->getText().getDoubleValue();
+
+			callback(sampleRate, channels, length);
+		}
+	), true);
 }
 
 void CoreActions::askForSourceIndexGUIAsync(
@@ -525,6 +732,66 @@ void CoreActions::askForMixerTracksListGUIAsync(
 			}
 
 			callback(resList);
+		}
+	), true);
+}
+
+void CoreActions::askForNameGUIAsync(
+	const std::function<void(const juce::String&)>& callback,
+	const juce::String& defaultName) {
+	/** Create Name Editor */
+	auto editorWindow = new juce::AlertWindow{
+		TRANS("Name Editor"), TRANS("Input the name in the editor:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	editorWindow->addButton(TRANS("OK"), 1);
+	editorWindow->addButton(TRANS("Cancel"), 0);
+	editorWindow->addTextEditor(TRANS("Name"), "", TRANS("Name"));
+
+	auto editor = editorWindow->getTextEditor(TRANS("Name"));
+	editor->setText(defaultName);
+
+	/** Show Async */
+	editorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[editor, callback, defaultName](int result) {
+			if (result != 1) { callback(defaultName); return; }
+
+			juce::String name = editor->getText();
+			callback(name);
+		}
+	), true);
+}
+
+void CoreActions::askForPluginGUIAsync(
+	const std::function<void(const juce::String&)>& callback,
+	bool filter, bool instr) {
+	/** Get Plugin List */
+	auto [result, list] = quickAPI::getPluginList(filter, instr);
+	juce::StringArray pluginNames;
+	for (auto& i : list) {
+		pluginNames.add(i.name);
+	}
+
+	/** Create Selector */
+	auto selectorWindow = new juce::AlertWindow{
+		TRANS("Plugin Selector"), TRANS("Select a plugin in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	selectorWindow->addButton(TRANS("OK"), 1);
+	selectorWindow->addButton(TRANS("Cancel"), 0);
+	selectorWindow->addComboBox(TRANS("Plugin"), pluginNames, TRANS("Plugin"));
+
+	/** Show Selector Async */
+	auto combo = selectorWindow->getComboBoxComponent(TRANS("Plugin"));
+	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo, callback, list](int result) {
+			if (result != 1) { callback(""); return; }
+
+			int index = combo->getSelectedItemIndex();
+			juce::String name = combo->getText();
+
+			auto& pluginDes = list.getReference(index);
+			if(pluginDes.name != name){ callback(""); return; }
+
+			callback(pluginDes.createIdentifierString());
 		}
 	), true);
 }

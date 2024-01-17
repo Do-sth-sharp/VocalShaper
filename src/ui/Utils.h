@@ -77,4 +77,33 @@ namespace utils {
 	float logRMS(float rms);
 	float getLogLevelPercent(float logLevel, float total = 60.f);
 	float getLogFromPercent(float percent, float total = 60.f);
+
+	class TextIntegerFilter : public juce::TextEditor::InputFilter {
+	public:
+		TextIntegerFilter() = delete;
+		TextIntegerFilter(int minLimit, int maxLimit);
+
+		juce::String filterNewText(
+			juce::TextEditor&, const juce::String& newInput) override;
+
+	private:
+		const int minLimit, maxLimit;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextIntegerFilter)
+	};
+
+	class TextDoubleFilter : public juce::TextEditor::InputFilter {
+	public:
+		TextDoubleFilter() = delete;
+		TextDoubleFilter(double minLimit, double maxLimit, int numberOfDecimalPlaces);
+
+		juce::String filterNewText(
+			juce::TextEditor&, const juce::String& newInput) override;
+
+	private:
+		const double minLimit, maxLimit;
+		const int numberOfDecimalPlaces;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextDoubleFilter)
+	};
 }

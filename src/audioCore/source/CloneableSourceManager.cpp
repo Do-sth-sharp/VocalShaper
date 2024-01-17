@@ -134,6 +134,21 @@ bool CloneableSourceManager::exportSourceAsync(
 	return false;
 }
 
+bool CloneableSourceManager::reloadSourceAsync(
+	int index, const juce::String& path, bool copy) {
+	/** Lock */
+	juce::ScopedWriteLock locker(this->getLock());
+
+	/** Create */
+	auto source = this->getSource(index);
+	if (!source) { return false; }
+
+	/** Load Async */
+	AudioIOList::getInstance()->load(source, path, copy);
+
+	return true;
+}
+
 void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
 	juce::ScopedWriteLock locker(this->getLock());
 	this->sampleRate = sampleRate;

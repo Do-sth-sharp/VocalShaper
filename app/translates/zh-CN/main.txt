@@ -86,3 +86,9 @@ countries: cn
 "Events:" = "事件："
 "Synthesizer:" = "合成器："
 "Sample Rate:" = "采样率："
+
+"Sample Rate" = "采样率"
+"Channels" = "通道"
+"Length" = "长度"
+
+"Name" = "名称"

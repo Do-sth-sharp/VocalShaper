@@ -53,6 +53,8 @@ namespace quickAPI {
 	const juce::StringPairArray getFormatMetaData(const juce::String& extension);
 	int getFormatQualityOptionIndex(const juce::String& extension);
 
+	const juce::Array<double> getSampleRateSupported();
+
 	const juce::StringArray getPluginBlackList();
 	const juce::StringArray getPluginSearchPath();
 
@@ -60,5 +62,6 @@ namespace quickAPI {
 	const juce::String getSIMDInsName();
 	const juce::StringArray getAllSIMDInsName();
 
-	const std::tuple<bool, juce::Array<juce::PluginDescription>> getPluginList();
+	const std::tuple<bool, juce::Array<juce::PluginDescription>>
+		getPluginList(bool filter = false, bool instr = true);
 }

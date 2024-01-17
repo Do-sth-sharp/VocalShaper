@@ -260,6 +260,10 @@ namespace quickAPI {
 		return AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
 	}
 
+	const juce::Array<double> getSampleRateSupported() {
+		return Device::getInstance()->getCurrentAvailableSampleRates();
+	}
+
 	const juce::StringArray getPluginBlackList() {
 		return Plugin::getInstance()->getPluginBlackList();
 	}
@@ -280,8 +284,20 @@ namespace quickAPI {
 		return vMath::getAllInsTypeName();
 	}
 
-	const std::tuple<bool, juce::Array<juce::PluginDescription>> getPluginList() {
+	const std::tuple<bool, juce::Array<juce::PluginDescription>>
+		getPluginList(bool filter, bool instr) {
 		auto [result, list] = Plugin::getInstance()->getPluginList();
-		return { result, list.getTypes() };
+
+		if (!filter) { return { result, list.getTypes() }; }
+
+		juce::Array<juce::PluginDescription> listRes;
+		auto listAll = list.getTypes();
+		for (auto& i : listAll) {
+			if (i.isInstrument == instr) {
+				listRes.add(i);
+			}
+		}
+
+		return { result, listRes };
 	}
 }

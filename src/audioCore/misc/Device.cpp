@@ -72,6 +72,13 @@ bool Device::isMidiInputDeviceEnabled(const juce::String& deviceIdentifier) cons
 	return this->audioDeviceManager->isMidiInputDeviceEnabled(deviceIdentifier);
 }
 
+const juce::Array<double> Device::getCurrentAvailableSampleRates() const {
+	if (auto device = this->getCurrentAudioDevice()) {
+		return device->getAvailableSampleRates();
+	}
+	return {};
+}
+
 juce::AudioDeviceManager* Device::getManager() const {
 	return this->audioDeviceManager.get();
 }

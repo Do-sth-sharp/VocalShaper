@@ -391,4 +391,28 @@ namespace utils {
 	float getLogFromPercent(float percent, float total) {
 		return (-total) + percent * total;
 	}
+
+	TextIntegerFilter::TextIntegerFilter(int minLimit, int maxLimit)
+		: minLimit(minLimit), maxLimit(maxLimit) {}
+
+	juce::String TextIntegerFilter::filterNewText(
+		juce::TextEditor&, const juce::String& newInput) {
+		int num = newInput.getIntValue();
+		if (num < this->minLimit) { num = minLimit; }
+		if (num > this->maxLimit) { num = maxLimit; }
+		return juce::String{ num };
+	}
+
+	TextDoubleFilter::TextDoubleFilter(
+		double minLimit, double maxLimit, int numberOfDecimalPlaces)
+		: minLimit(minLimit), maxLimit(maxLimit),
+		numberOfDecimalPlaces(numberOfDecimalPlaces) {}
+
+	juce::String TextDoubleFilter::filterNewText(
+		juce::TextEditor&, const juce::String& newInput) {
+		double num = newInput.getDoubleValue();
+		if (num < this->minLimit) { num = minLimit; }
+		if (num > this->maxLimit) { num = maxLimit; }
+		return juce::String{ num, this->numberOfDecimalPlaces };
+	}
 }
