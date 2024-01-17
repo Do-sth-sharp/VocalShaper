@@ -1,6 +1,7 @@
 ﻿#include "PluginView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreCallbacks.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -192,10 +193,7 @@ void PluginView::searchUpdate() {
 }
 
 void PluginView::rescan() {
-	auto clearAction = std::unique_ptr<ActionBase>(new ActionClearPlugin);
-	auto searchAction = std::unique_ptr<ActionBase>(new ActionSearchPlugin);
-	ActionDispatcher::getInstance()->dispatch(std::move(clearAction));
-	ActionDispatcher::getInstance()->dispatch(std::move(searchAction));
+	CoreActions::rescanPlugins();
 }
 
 void PluginView::expandAll() {

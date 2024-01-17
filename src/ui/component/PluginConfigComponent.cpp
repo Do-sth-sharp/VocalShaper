@@ -1,4 +1,5 @@
 ﻿#include "PluginConfigComponent.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -193,8 +194,5 @@ void PluginConfigComponent::removeBlackList(int index, const juce::String& path)
 }
 
 void PluginConfigComponent::rescan() {
-	auto clearAction = std::unique_ptr<ActionBase>(new ActionClearPlugin);
-	auto searchAction = std::unique_ptr<ActionBase>(new ActionSearchPlugin);
-	ActionDispatcher::getInstance()->dispatch(std::move(clearAction));
-	ActionDispatcher::getInstance()->dispatch(std::move(searchAction));
+	CoreActions::rescanPlugins();
 }

@@ -6,8 +6,7 @@ class CoreCommandTarget final
 	: public juce::ApplicationCommandTarget,
 	private juce::DeletedAtShutdown {
 public:
-	CoreCommandTarget();
-	~CoreCommandTarget();
+	CoreCommandTarget() = default;
 
 	juce::ApplicationCommandTarget* getNextCommandTarget() override;
 	void getAllCommands(juce::Array<juce::CommandID>& commands) override;
@@ -35,11 +34,6 @@ private:
 	void rewind() const;
 
 private:
-	bool checkForSave() const;
-	void selectForSource(const std::function<void(int)>& callback) const;
-	void selectForMixerTracks(
-		const std::function<void(const juce::Array<int>&)>& callback) const;
-
 	bool checkForUndo() const;
 	bool checkForRedo() const;
 	const juce::String getUndoName() const;
@@ -47,9 +41,6 @@ private:
 
 	bool checkForPlaying() const;
 	bool checkForRecording() const;
-
-	std::unique_ptr<juce::ListBox> trackListBox = nullptr;
-	std::unique_ptr<juce::ListBoxModel> trackListBoxModel = nullptr;
 
 public:
 	static CoreCommandTarget* getInstance();

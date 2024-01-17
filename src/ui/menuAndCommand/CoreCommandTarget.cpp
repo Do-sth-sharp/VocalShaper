@@ -2,21 +2,9 @@
 #include "GUICommandTarget.h"
 #include "CommandTypes.h"
 #include "../dataModel/TrackListBoxModel.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
-
-CoreCommandTarget::CoreCommandTarget() {
-	/** Track List Box */
-	this->trackListBoxModel = std::unique_ptr<juce::ListBoxModel>(new TrackListBoxModel);
-	this->trackListBox = std::make_unique<juce::ListBox>(
-		TRANS("Track List"), this->trackListBoxModel.get());
-	this->trackListBox->setMultipleSelectionEnabled(true);
-	//this->trackListBox->setClickingTogglesRowSelection(true);/**< For Touching */
-}
-
-CoreCommandTarget::~CoreCommandTarget() {
-	this->trackListBox->setModel(nullptr);
-}
 
 juce::ApplicationCommandTarget* CoreCommandTarget::getNextCommandTarget() {
 	return GUICommandTarget::getInstance();
@@ -185,387 +173,84 @@ bool CoreCommandTarget::perform(
 }
 
 void CoreCommandTarget::systemRequestOpen(const juce::String& path) {
-	if (!this->checkForSave()) { return; }
-
-	juce::File projFile = utils::getAppRootDir().getChildFile(path);
-	juce::StringArray extensions;
-	auto formatsSupport = quickAPI::getProjectFormatsSupported(false);
-	for (auto& s : formatsSupport) {
-		extensions.add(s.trimCharactersAtStart("*"));
-	}
-
-	if (projFile.existsAsFile() && extensions.contains(projFile.getFileExtension())) {
-		auto action = std::unique_ptr<ActionBase>(new ActionLoad{
-		projFile.getFullPathName() });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
+	CoreActions::loadProjectGUI(path);
 }
 
 void CoreCommandTarget::newProject() const {
-	if (!this->checkForSave()) { return; }
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("New Project"), defaultPath);
-	if (chooser.browseForDirectory()) {
-		juce::File projDir = chooser.getResult();
-
-		auto action = std::unique_ptr<ActionBase>(new ActionNewProject{
-		projDir.getFullPathName() });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
+	CoreActions::newProjectGUI();
 }
 
 void CoreCommandTarget::openProject() const {
-	if (!this->checkForSave()) { return; }
-
-	auto projectFormats = quickAPI::getProjectFormatsSupported(false);
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Open Project"), defaultPath,
-		projectFormats.joinIntoString(","));
-	if (chooser.browseForFileToOpen()) {
-		juce::File projFile = chooser.getResult();
-
-		auto action = std::unique_ptr<ActionBase>(new ActionLoad{
-		projFile.getFullPathName() });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
+	CoreActions::loadProjectGUI();
 }
 
 void CoreCommandTarget::saveProject() const {
-	auto projectFormats = quickAPI::getProjectFormatsSupported(true);
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Save Project"), defaultPath,
-		projectFormats.joinIntoString(","));
-	if (chooser.browseForFileToSave(true)) {
-		juce::File projFile = chooser.getResult();
-		if (projFile.getFileExtension().isEmpty()) {
-			projFile = projFile.withFileExtension(
-				projectFormats[0].trimCharactersAtStart("*."));
-		}
-
-		if (projFile.getParentDirectory() != defaultPath) {
-			juce::AlertWindow::showMessageBox(
-				juce::MessageBoxIconType::WarningIcon, TRANS("Save Project"),
-				TRANS("The project file must be in the root of working directory!"));
-			return;
-		}
-
-		auto action = std::unique_ptr<ActionBase>(new ActionSave{
-		projFile.getFileNameWithoutExtension() });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
+	CoreActions::saveProjectGUI();
 }
 
 void CoreCommandTarget::loadSource() const {
-	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
-	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Load Playing Source"), defaultPath,
-		audioFormats.joinIntoString(",") + ";" + midiFormats.joinIntoString(","));
-	if (chooser.browseForMultipleFilesToOpen()) {
-		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
-			juce::MessageBoxIconType::QuestionIcon, TRANS("Load Playing Source"),
-			TRANS("Copy source files to working directory?"));
-		if (shouldCopy == 0) { return; }
-
-		auto files = chooser.getResults();
-		for (auto& i : files) {
-			if (midiFormats.contains("*" + i.getFileExtension())) {
-				auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenLoad{
-					i.getFullPathName(), shouldCopy == 1 });
-				ActionDispatcher::getInstance()->dispatch(std::move(action));
-			}
-			else {
-				auto action = std::unique_ptr<ActionBase>(new ActionAddAudioSourceThenLoad{
-					i.getFullPathName(), shouldCopy == 1 });
-				ActionDispatcher::getInstance()->dispatch(std::move(action));
-			}
-		}
-	}
+	CoreActions::loadSourceGUI();
 }
 
 void CoreCommandTarget::loadSynthSource() const {
-	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Load Playing Source (Synth)"), defaultPath,
-		midiFormats.joinIntoString(","));
-	if (chooser.browseForMultipleFilesToOpen()) {
-		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
-			juce::MessageBoxIconType::QuestionIcon, TRANS("Load Playing Source (Synth)"),
-			TRANS("Copy source files to working directory?"));
-		if (shouldCopy == 0) { return; }
-
-		auto files = chooser.getResults();
-		for (auto& i : files) {
-			auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenLoad{
-					i.getFullPathName(), shouldCopy == 1 });
-			ActionDispatcher::getInstance()->dispatch(std::move(action));
-		}
-	}
+	CoreActions::loadSynthSourceGUI();
 }
 
 void CoreCommandTarget::saveSource() const {
-	auto callback = [](int index) {
-		if (index == -1) { return; }
-
-		juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
-		juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(true);
-
-		bool isAudio = quickAPI::checkForAudioSource(index);
-		auto& formats = isAudio ? audioFormats : midiFormats;
-
-		juce::File defaultPath = quickAPI::getProjectDir();
-		juce::FileChooser chooser(TRANS("Save Playing Source"), defaultPath,
-			formats.joinIntoString(","));
-		if (chooser.browseForFileToSave(true)) {
-			auto file = chooser.getResult();
-			if (file.getFileExtension().isEmpty()) {
-				file = file.withFileExtension(isAudio
-					? audioFormats[0].trimCharactersAtStart("*.")
-					: midiFormats[0].trimCharactersAtStart("*."));
-			}
-
-			if (!file.isAChildOf(defaultPath)) {
-				if (!juce::AlertWindow::showOkCancelBox(
-					juce::MessageBoxIconType::QuestionIcon, TRANS("Save Playing Source"),
-					TRANS("Saving the source outside of the working directory may cause dependency problem with project files. Continue?"))) {
-					return;
-				}
-			}
-
-			auto action = std::unique_ptr<ActionBase>(new ActionSaveSourceAsync{
-			index, file.getFullPathName() });
-			ActionDispatcher::getInstance()->dispatch(std::move(action));
-		}
-	};
-
-	this->selectForSource(callback);
+	CoreActions::saveSourceGUI();
 }
 
 void CoreCommandTarget::exportSource() const {
-	auto callback = [](int index) {
-		if (index == -1) { return; }
-
-		juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
-
-		if (!quickAPI::checkForSynthSource(index)) {
-			juce::AlertWindow::showMessageBox(
-				juce::MessageBoxIconType::WarningIcon, TRANS("Export Synth Source"),
-				TRANS("The selected source is not a synth source!"));
-			return;
-		}
-
-		juce::File defaultPath = quickAPI::getProjectDir();
-		juce::FileChooser chooser(TRANS("Export Synth Source"), defaultPath,
-			audioFormats.joinIntoString(","));
-		if (chooser.browseForFileToSave(true)) {
-			auto file = chooser.getResult();
-			if (file.getFileExtension().isEmpty()) {
-				file = file.withFileExtension(audioFormats[0].trimCharactersAtStart("*."));
-			}
-
-			auto action = std::unique_ptr<ActionBase>(new ActionExportSourceAsync{
-			index, file.getFullPathName() });
-			ActionDispatcher::getInstance()->dispatch(std::move(action));
-		}
-	};
-
-	this->selectForSource(callback);
+	CoreActions::exportSourceGUI();
 }
 
 void CoreCommandTarget::render() const {
-	auto callback = [](const juce::Array<int>& tracks) {
-		if (tracks.isEmpty()) { return; }
-
-		juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
-
-		juce::File defaultPath = quickAPI::getProjectDir();
-		juce::FileChooser chooser(TRANS("Render"), defaultPath,
-			audioFormats.joinIntoString(","));
-		if (chooser.browseForFileToSave(false)) {
-			auto file = chooser.getResult();
-			if (file.getFileExtension().isEmpty()) {
-				file = file.withFileExtension(audioFormats[0].trimCharactersAtStart("*."));
-			}
-
-			auto dir = file.getParentDirectory();
-			if (!dir.findChildFiles(juce::File::TypesOfFileToFind::findFilesAndDirectories, false).isEmpty()) {
-				if (!juce::AlertWindow::showOkCancelBox(
-					juce::MessageBoxIconType::QuestionIcon, TRANS("Render"),
-					TRANS("The selected directory is not empty, which may cause existing files to be overwritten. Continue?"))) {
-					return;
-				}
-			}
-
-			auto action = std::unique_ptr<ActionBase>(new ActionRenderNow{
-				dir.getFullPathName(), file.getFileNameWithoutExtension(), file.getFileExtension(), tracks});
-			ActionDispatcher::getInstance()->dispatch(std::move(action));
-		}
-	};
-
-	this->selectForMixerTracks(callback);
+	CoreActions::renderGUI();
 }
 
 void CoreCommandTarget::undo() const {
-	ActionDispatcher::getInstance()->performUndo();
+	CoreActions::undo();
 }
 
 void CoreCommandTarget::redo() const {
-	ActionDispatcher::getInstance()->performRedo();
+	CoreActions::redo();
 }
 
 void CoreCommandTarget::play() const {
 	bool isPlaying = this->checkForPlaying();
 
-	auto action = isPlaying
-		? std::unique_ptr<ActionBase>(new ActionPause)
-		: std::unique_ptr<ActionBase>(new ActionPlay);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	if (isPlaying) { CoreActions::pause(); }
+	else { CoreActions::play(); }
 }
 
 void CoreCommandTarget::stop() const {
-	auto action = std::unique_ptr<ActionBase>(new ActionStop);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	CoreActions::stop();
 }
 
 void CoreCommandTarget::record() const {
 	bool isRecording = this->checkForRecording();
 
-	auto action = isRecording
-		? std::unique_ptr<ActionBase>(new ActionStopRecord)
-		: std::unique_ptr<ActionBase>(new ActionStartRecord);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	CoreActions::record(!isRecording);
 }
 
 void CoreCommandTarget::rewind() const {
-	auto action = std::unique_ptr<ActionBase>(new ActionRewind);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-bool CoreCommandTarget::checkForSave() const {
-	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
-		return true;
-	}
-
-	return juce::AlertWindow::showOkCancelBox(
-		juce::MessageBoxIconType::QuestionIcon, TRANS("Project Warning"),
-		TRANS("Discard unsaved changes and continue?"));
-}
-
-void CoreCommandTarget::selectForSource(const std::function<void(int)>& callback) const {
-	/** Get Source List */
-	auto sourceList = quickAPI::getSourceNames();
-	if (sourceList.isEmpty()) {
-		juce::AlertWindow::showMessageBox(
-			juce::MessageBoxIconType::WarningIcon, TRANS("Source Selector"),
-			TRANS("The source list is empty!"));
-		callback(-1);
-		return;
-	}
-	for (int i = 0; i < sourceList.size(); i++) {
-		auto& str = sourceList.getReference(i);
-		str = "[" + juce::String(i) + "] " + str;
-	}
-
-	/** Show Source Chooser */
-	auto chooserWindow = new juce::AlertWindow{
-		TRANS("Source Selector"), TRANS("Select a source in the list:"),
-		juce::MessageBoxIconType::QuestionIcon };
-	chooserWindow->addButton(TRANS("OK"), 1);
-	chooserWindow->addButton(TRANS("Cancel"), 0);
-	chooserWindow->addComboBox(TRANS("Selector"), sourceList);
-
-	auto combo = chooserWindow->getComboBoxComponent(TRANS("Selector"));
-	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
-		[combo, callback, size = sourceList.size()](int result) {
-			if (result != 1) { callback(-1); return; }
-
-			int index = combo->getSelectedItemIndex();
-			if (index < 0 || index >= size) { callback(-1); return; }
-
-			callback(index);
-		}
-	), true);
-}
-
-void CoreCommandTarget::selectForMixerTracks(
-	const std::function<void(const juce::Array<int>&)>& callback) const {
-	/** Get Track List */
-	auto trackList = quickAPI::getMixerTrackInfos();
-	if (trackList.isEmpty()) {
-		juce::AlertWindow::showMessageBox(
-			juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
-			TRANS("The track list is empty!"));
-		callback({});
-		return;
-	}
-
-	/** Update ListBox */
-	dynamic_cast<TrackListBoxModel*>(this->trackListBoxModel.get())
-		->setItems(trackList);
-	this->trackListBox->updateContent();
-	this->trackListBox->deselectAllRows();
-	this->trackListBox->scrollToEnsureRowIsOnscreen(0);
-
-	/** Show Track Chooser */
-	auto chooserWindow = new juce::AlertWindow{
-		TRANS("Mixer Track Selector"), TRANS("Select tracks in the list: (Use Ctrl and Shift keys to select multiple items)"),
-		juce::MessageBoxIconType::QuestionIcon };
-	chooserWindow->addButton(TRANS("OK"), 1);
-	chooserWindow->addButton(TRANS("Cancel"), 0);
-
-	auto chooserSize = chooserWindow->getLocalBounds();
-	this->trackListBox->setBounds(chooserSize);
-	chooserWindow->addCustomComponent(this->trackListBox.get());
-
-	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
-		[callback, listBox = this->trackListBox.get()](int result) {
-			if (result != 1) { callback({}); return; }
-
-			juce::Array<int> resList;
-			auto resSet = listBox->getSelectedRows();
-			auto& resRanges = resSet.getRanges();
-			for (auto& i : resRanges) {
-				for (int j = i.getStart(); j < i.getEnd(); j++) {
-					resList.add(j);
-				}
-			}
-
-			if (resList.isEmpty()) {
-				juce::AlertWindow::showMessageBox(
-					juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
-					TRANS("No track selected!"));
-				callback({});
-				return;
-			}
-
-			callback(resList);
-		}
-	), true);
+	CoreActions::rewind();
 }
 
 bool CoreCommandTarget::checkForUndo() const {
-	auto& manager = ActionDispatcher::getInstance()->getActionManager();
-	return manager.canUndo();
+	return CoreActions::canUndo();
 }
 
 bool CoreCommandTarget::checkForRedo() const {
-	auto& manager = ActionDispatcher::getInstance()->getActionManager();
-	return manager.canRedo();
+	return CoreActions::canRedo();
 }
 
 const juce::String CoreCommandTarget::getUndoName() const {
-	auto& manager = ActionDispatcher::getInstance()->getActionManager();
-	return manager.getUndoDescription();
+	return CoreActions::getUndoName();
 }
 
 const juce::String CoreCommandTarget::getRedoName() const {
-	auto& manager = ActionDispatcher::getInstance()->getActionManager();
-	return manager.getRedoDescription();
+	return CoreActions::getRedoName();
 }
 
 bool CoreCommandTarget::checkForPlaying() const {
