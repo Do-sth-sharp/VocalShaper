@@ -14,7 +14,10 @@ CloneableSource::CloneableSource(
 }
 
 std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
-	if (auto dst = this->clone()) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	auto dst = this->createThisType();
+	if (this->clone(dst.get())) {
 		dst->name = this->name;
 		dst->isSaved = (bool)this->isSaved;
 		dst->currentSampleRate = (double)this->currentSampleRate;
@@ -22,6 +25,19 @@ std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
 		return std::move(dst);
 	}
 	return nullptr;
+}
+
+bool CloneableSource::cloneAs(CloneableSource* dst) const {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	if (this->clone(dst)) {
+		dst->name = this->name;
+		dst->isSaved = (bool)this->isSaved;
+		dst->currentSampleRate = (double)this->currentSampleRate;
+
+		return true;
+	}
+	return false;
 }
 
 void CloneableSource::initThis(
@@ -84,6 +100,8 @@ const juce::String CloneableSource::getPath() const {
 }
 
 void CloneableSource::prepareToPlay(double sampleRate, int bufferSize) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
 	if (this->currentSampleRate == sampleRate && this->currentBufferSize == bufferSize) { return; }
 
 	this->currentSampleRate = sampleRate;

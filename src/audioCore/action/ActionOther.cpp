@@ -140,7 +140,7 @@ bool ActionCloneSource::doAction() {
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
 		if (CloneableSourceManager::getInstance()
-			->cloneSource(ACTION_DATA(index))) {
+			->cloneSourceAsync(ACTION_DATA(index))) {
 			juce::String result;
 
 			result += "Clone Source: [" + juce::String(ACTION_DATA(index)) + "]\n";

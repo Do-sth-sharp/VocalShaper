@@ -3,6 +3,7 @@
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
+#include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -11,18 +12,33 @@ bool CloneableSourceManager::addSource(std::unique_ptr<CloneableSource> src) {
 	juce::ScopedWriteLock locker(this->getLock());
 	src->prepareToPlay(this->sampleRate, this->bufferSize);
 	this->sourceList.add(std::move(src));
+
+	juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+		});
+
 	return true;
 }
 
 bool CloneableSourceManager::removeSource(CloneableSource* src) {
 	juce::ScopedWriteLock locker(this->getLock());
 	this->sourceList.removeObject(src, true);
+
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
+
 	return true;
 }
 
 bool CloneableSourceManager::removeSource(int index) {
 	juce::ScopedWriteLock locker(this->getLock());
 	this->sourceList.remove(index, true);
+
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
+
 	return true;
 }
 
@@ -48,6 +64,11 @@ bool CloneableSourceManager::setSourceSynthesizer(
 		if (auto des = Plugin::getInstance()->findPlugin(identifier, true)) {
 			PluginLoader::getInstance()->loadPlugin(*(des.get()),
 				CloneableSource::SafePointer<CloneableSynthSource>(src));
+
+			juce::MessageManager::callAsync([index] {
+				UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+				});
+
 			return true;
 		}
 	}
@@ -59,6 +80,11 @@ bool CloneableSourceManager::synthSource(int index) {
 	auto source = this->getSource(index);
 	if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
 		src->synth();
+
+		juce::MessageManager::callAsync([index] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+			});
+
 		return true;
 	}
 	return false;
@@ -71,9 +97,43 @@ bool CloneableSourceManager::cloneSource(int index) {
 	/** Clone */
 	if (auto source = this->getSource(index)) {
 		if (auto ptr = source->cloneThis()) {
-			return this->addSource(std::move(ptr));
+			bool result = this->addSource(std::move(ptr));
+
+			/** Callback */
+			juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
+				UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+				});
+
+			return result;
 		}
 	}
+	return false;
+}
+
+bool CloneableSourceManager::cloneSourceAsync(int index) {
+	/** Lock */
+	juce::ScopedReadLock locker(this->getLock());
+
+	/** Get Source */
+	if (auto src = this->getSource(index)) {
+		/** Create */
+		auto dst = src->createThisType();
+		auto ptr = dst.get();
+
+		/** Add To List */
+		if (!this->addSource(std::move(dst))) { return false; }
+
+		/** Load Async */
+		AudioIOList::getInstance()->clone(src, CloneableSource::SafePointer<>{ ptr });
+
+		/** Callback */
+		juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+			});
+
+		return true;
+	}
+
 	return false;
 }
 
@@ -86,6 +146,12 @@ bool CloneableSourceManager::saveSource(
 	if (auto src = this->getSource(index)) {
 		if (src->saveAs(utils::getSourceFile(path))) {
 			src->setPath(path);
+
+			/** Callback */
+			juce::MessageManager::callAsync([index] {
+				UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+				});
+
 			return true;
 		}
 	}
@@ -101,6 +167,12 @@ bool CloneableSourceManager::saveSourceAsync(
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
 		AudioIOList::getInstance()->save(src, path);
+
+		/** Callback */
+		juce::MessageManager::callAsync([index] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+			});
+
 		return true;
 	}
 
@@ -114,7 +186,14 @@ bool CloneableSourceManager::exportSource(
 
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
-		return src->exportAs(utils::getSourceFile(path));
+		bool result = src->exportAs(utils::getSourceFile(path));
+
+		/** Callback */
+		juce::MessageManager::callAsync([index] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+			});
+
+		return result;
 	}
 
 	return false;
@@ -128,6 +207,12 @@ bool CloneableSourceManager::exportSourceAsync(
 	/** Get Source */
 	if (auto src = this->getSource(index)) {
 		AudioIOList::getInstance()->exportt(src, path);
+
+		/** Callback */
+		juce::MessageManager::callAsync([index] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+			});
+
 		return true;
 	}
 
@@ -146,6 +231,11 @@ bool CloneableSourceManager::reloadSourceAsync(
 	/** Load Async */
 	AudioIOList::getInstance()->load(source, path, copy);
 
+	/** Callback */
+	juce::MessageManager::callAsync([index] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+		});
+
 	return true;
 }
 
@@ -156,12 +246,20 @@ void CloneableSourceManager::prepareToPlay(double sampleRate, int bufferSize) {
 	for (auto i : this->sourceList) {
 		i->prepareToPlay(sampleRate, bufferSize);
 	}
+
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 void CloneableSourceManager::clearGraph() {
 	juce::ScopedWriteLock locker(this->getLock());
 	this->sourceList.clear(true);
 	CloneableSource::resetIdCounter();
+
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
@@ -214,6 +312,11 @@ bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
 					dynamic_cast<CloneableSynthSource*>(ptrSrc.getSource())), callback);
 		}
 	}
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 
 	return true;
 }

@@ -1,5 +1,6 @@
 ﻿#include "CloneableMIDISource.h"
 
+#include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
 #include "../AudioConfig.h"
 #include "../Utils.h"
@@ -61,20 +62,23 @@ std::unique_ptr<google::protobuf::Message> CloneableMIDISource::serialize() cons
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
-std::unique_ptr<CloneableSource> CloneableMIDISource::clone() const {
+std::unique_ptr<CloneableSource> CloneableMIDISource::createThisType() const {
+	return std::unique_ptr<CloneableSource>{ new CloneableMIDISource };
+}
+
+bool CloneableMIDISource::clone(CloneableSource* dst) const {
 	/** Lock */
 	juce::ScopedTryReadLock locker(audioLock::getSourceLock());
 	if (locker.isLocked()) {
-		/** Create New Source */
-		auto dst = std::unique_ptr<CloneableMIDISource>();
+		if (auto dsts = dynamic_cast<CloneableMIDISource*>(dst)) {
+			/** Copy MIDI Data */
+			dsts->buffer = this->buffer;
 
-		/** Copy MIDI Data */
-		dst->buffer = this->buffer;
-
-		/** Move Result */
-		return std::move(std::unique_ptr<CloneableSource>(dst.release()));
+			/** Result */
+			return true;
+		}
 	}
-	return nullptr;
+	return false;
 }
 
 bool CloneableMIDISource::load(const juce::File& file) {
@@ -140,6 +144,11 @@ void CloneableMIDISource::prepareToRecord(
 
 		/** Set Flag */
 		this->changed();
+
+		/** Callback */
+		juce::MessageManager::callAsync([] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+			});
 	}
 }
 
@@ -157,27 +166,28 @@ void CloneableMIDISource::recordingFinished() {
 
 	/** Set Flag */
 	this->changed();
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 void CloneableMIDISource::writeData(
 	const juce::MidiBuffer& buffer, int offset) {
-	/** Lock */
-	juce::ScopedTryWriteLock locker(audioLock::getSourceLock());
-	if (locker.isLocked()) {
-		/** Write To The Last Track */
-		if (auto track = const_cast<juce::MidiMessageSequence*>(
-			this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
-			for (const auto& m : buffer) {
-				double timeStamp = (m.samplePosition + offset) / this->getSampleRate();
-				if (timeStamp >= 0) {
-					auto mes = m.getMessage();
-					mes.setTimeStamp(timeStamp);
-					track->addEvent(mes);
-				}
+	/** Write To The Last Track */
+	if (auto track = const_cast<juce::MidiMessageSequence*>(
+		this->buffer.getTrack(this->buffer.getNumTracks() - 1))) {
+		for (const auto& m : buffer) {
+			double timeStamp = (m.samplePosition + offset) / this->getSampleRate();
+			if (timeStamp >= 0) {
+				auto mes = m.getMessage();
+				mes.setTimeStamp(timeStamp);
+				track->addEvent(mes);
 			}
-
-			/** Set Flag */
-			this->changed();
 		}
+
+		/** Set Flag */
+		this->changed();
 	}
 }

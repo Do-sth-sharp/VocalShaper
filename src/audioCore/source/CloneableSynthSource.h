@@ -29,7 +29,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	std::unique_ptr<CloneableSource> clone() const override;
+	std::unique_ptr<CloneableSource> createThisType() const override;
+	bool clone(CloneableSource* dst) const override;
 	bool load(const juce::File& file) override;
 	bool save(const juce::File& file) const override;
 	bool exportt(const juce::File& file) const override;

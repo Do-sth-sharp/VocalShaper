@@ -2,6 +2,7 @@
 
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
+#include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -47,28 +48,31 @@ std::unique_ptr<google::protobuf::Message> CloneableAudioSource::serialize() con
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
-std::unique_ptr<CloneableSource> CloneableAudioSource::clone() const {
+std::unique_ptr<CloneableSource> CloneableAudioSource::createThisType() const {
+	return std::unique_ptr<CloneableSource>{ new CloneableAudioSource };
+}
+
+bool CloneableAudioSource::clone(CloneableSource* dst) const {
 	/** Lock */
 	juce::ScopedTryReadLock locker(audioLock::getSourceLock());
 	if (locker.isLocked()) {
-		/** Create New Source */
-		auto dst = std::unique_ptr<CloneableAudioSource>();
+		if (auto dsts = dynamic_cast<CloneableAudioSource*>(dst)) {
+			/** Copy Data */
+			dsts->buffer = this->buffer;
+			dsts->sourceSampleRate = this->sourceSampleRate;
 
-		/** Copy Data */
-		dst->buffer = this->buffer;
-		dst->sourceSampleRate = this->sourceSampleRate;
+			/** Create Audio Source */
+			dsts->memorySource = std::make_unique<juce::MemoryAudioSource>(dsts->buffer, false, false);
+			dsts->source = std::make_unique<juce::ResamplingAudioSource>(dsts->memorySource.get(), false, dsts->buffer.getNumChannels());
 
-		/** Create Audio Source */
-		dst->memorySource = std::make_unique<juce::MemoryAudioSource>(dst->buffer, false, false);
-		dst->source = std::make_unique<juce::ResamplingAudioSource>(dst->memorySource.get(), false, dst->buffer.getNumChannels());
+			/** Set Sample Rate */
+			dsts->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
 
-		/** Set Sample Rate */
-		dst->source->setResamplingRatio(this->sourceSampleRate / this->getSampleRate());
-
-		/** Move Result */
-		return std::move(std::unique_ptr<CloneableSource>(dst.release()));
+			/** Result */
+			return true;
+		}
 	}
-	return nullptr;
+	return false;
 }
 
 bool CloneableAudioSource::load(const juce::File& file) {
@@ -194,6 +198,11 @@ void CloneableAudioSource::prepareToRecord(
 
 	/** Update Resampling Ratio */
 	this->sampleRateChanged();
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 void CloneableAudioSource::recordingFinished() {
@@ -203,36 +212,37 @@ void CloneableAudioSource::recordingFinished() {
 
 	/** Update Resampling Ratio */
 	//this->sampleRateChanged();
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 void CloneableAudioSource::writeData(
 	const juce::AudioBuffer<float>& buffer, int offset)	{
-	/** Lock */
-	juce::ScopedTryWriteLock locker(audioLock::getSourceLock());
-	if (locker.isLocked()) {
-		/** Get Time */
-		int startSample = offset;
-		int srcStartSample = 0;
-		int length = buffer.getNumSamples();
-		if (startSample < 0) {
-			srcStartSample -= startSample;
-			length -= srcStartSample;
-			startSample = 0;
-		}
-
-		/** Increase BufferLength */
-		if (startSample > this->buffer.getNumSamples() - length) {
-			int newLength = startSample + length;
-			this->buffer.setSize(
-				this->buffer.getNumChannels(), newLength, true, false, true);
-		}
-
-		/** CopyData */
-		for (int i = 0; i < buffer.getNumChannels() && i < this->buffer.getNumChannels(); i++) {
-			vMath::copyAudioData(this->buffer, buffer, startSample, srcStartSample, i, i, length);
-		}
-
-		/** Set Flag */
-		this->changed();
+	/** Get Time */
+	int startSample = offset;
+	int srcStartSample = 0;
+	int length = buffer.getNumSamples();
+	if (startSample < 0) {
+		srcStartSample -= startSample;
+		length -= srcStartSample;
+		startSample = 0;
 	}
+
+	/** Increase BufferLength */
+	if (startSample > this->buffer.getNumSamples() - length) {
+		int newLength = startSample + length;
+		this->buffer.setSize(
+			this->buffer.getNumChannels(), newLength, true, false, true);
+	}
+
+	/** CopyData */
+	for (int i = 0; i < buffer.getNumChannels() && i < this->buffer.getNumChannels(); i++) {
+		vMath::copyAudioData(this->buffer, buffer, startSample, srcStartSample, i, i, length);
+	}
+
+	/** Set Flag */
+	this->changed();
 }

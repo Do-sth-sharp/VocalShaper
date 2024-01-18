@@ -16,12 +16,15 @@ public:
 	void addErrorMes(const ErrorMesCallback& callback);
 	using SearchPluginCallback = std::function<void(bool)>;
 	void addSearchPlugin(const SearchPluginCallback& callback);
+	using SourceChangedCallback = std::function<void(int)>;
+	void addSourceChanged(const SourceChangedCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
 	void invokeRecordingStatus(bool status) const;
 	void invokeErrorMes(const juce::String& mes) const;
 	void invokeSearchPlugin(bool status) const;
+	void invokeSourceChanged(int index) const;
 
 private:
 	juce::Array<ErrorCallback> error;
@@ -29,6 +32,7 @@ private:
 	juce::Array<RecordingStatusCallback> recordingingStatus;
 	juce::Array<ErrorMesCallback> errorMes;
 	juce::Array<SearchPluginCallback> searchPlugin;
+	juce::Array<SourceChangedCallback> sourceChanged;
 
 public:
 	static CoreCallbacks* getInstance();

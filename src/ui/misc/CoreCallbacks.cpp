@@ -22,6 +22,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](bool state) {
 			CoreCallbacks::getInstance()->invokeSearchPlugin(state);
 		});
+	UICallbackAPI<int>::set(UICallbackType::SourceChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeSourceChanged(index);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -42,6 +46,10 @@ void CoreCallbacks::addErrorMes(const ErrorMesCallback& callback) {
 
 void CoreCallbacks::addSearchPlugin(const SearchPluginCallback& callback) {
 	this->searchPlugin.add(callback);
+}
+
+void CoreCallbacks::addSourceChanged(const SourceChangedCallback& callback) {
+	this->sourceChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -72,6 +80,12 @@ void CoreCallbacks::invokeErrorMes(const juce::String& mes) const {
 void CoreCallbacks::invokeSearchPlugin(bool status) const {
 	for (auto& i : this->searchPlugin) {
 		i(status);
+	}
+}
+
+void CoreCallbacks::invokeSourceChanged(int index) const {
+	for (auto& i : this->sourceChanged) {
+		i(index);
 	}
 }
 

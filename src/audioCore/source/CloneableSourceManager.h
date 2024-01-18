@@ -42,6 +42,10 @@ public:
 	/**
 	* @attention	You must call this from message thread.
 	*/
+	bool cloneSourceAsync(int index);
+	/**
+	* @attention	You must call this from message thread.
+	*/
 	template<IsCloneable T>
 	bool createNewSource(
 		double sampleRate = 48000, int channelNum = 2, double length = 0);

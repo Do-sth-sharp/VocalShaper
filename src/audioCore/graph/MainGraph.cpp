@@ -495,7 +495,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Lock */
 	juce::ScopedTryReadLock audioLocker(audioLock::getAudioLock());
-	juce::ScopedTryReadLock sourceLocker(audioLock::getAudioLock());
+	juce::ScopedTryWriteLock sourceLocker(audioLock::getAudioLock());
 	juce::ScopedTryReadLock pluginLocker(audioLock::getPluginLock());
 	juce::ScopedTryReadLock positionLocker(audioLock::getPositionLock());
 	juce::ScopedTryReadLock mackieLocker(audioLock::getMackieLock());

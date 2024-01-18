@@ -4,6 +4,7 @@
 
 #include "../source/CloneableSource.h"
 #include "../project/Serializable.h"
+#include "../uiCallback/LimitedCall.h"
 
 class SourceRecordProcessor final : public juce::AudioProcessor,
 	public Serializable {
@@ -49,6 +50,7 @@ public:
 
 private:
 	juce::Array<RecorderTask> tasks;
+	LimitedCall limitedCall;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceRecordProcessor)
 };

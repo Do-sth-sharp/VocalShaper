@@ -1,4 +1,5 @@
 ﻿#include "CloneableSourceManager.h"
+#include "../uiCallback/UICallback.h"
 
 template<IsCloneable T>
 bool CloneableSourceManager::createNewSource(
@@ -15,6 +16,11 @@ bool CloneableSourceManager::createNewSource(
 
 	/** Init */
 	ptr->initThis(sampleRate, channelNum, length * this->sampleRate);
+
+	/** Callback */
+	juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+		});
 
 	return true;
 }
@@ -49,7 +55,14 @@ bool CloneableSourceManager::createNewSourceThenLoad(
 		return false;
 	}
 
+	/** Set Path */
 	ptr->setPath(dstPath);
+
+	/** Callback */
+	juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+		});
+
 	return true;
 }
 
@@ -68,6 +81,11 @@ bool CloneableSourceManager::createNewSourceThenLoadAsync(
 
 	/** Load Async */
 	AudioIOList::getInstance()->load(CloneableSource::SafePointer<>{ ptr }, path, copy);
+
+	/** Callback */
+	juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, index);
+		});
 
 	return true;
 }

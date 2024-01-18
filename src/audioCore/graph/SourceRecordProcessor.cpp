@@ -4,6 +4,7 @@
 #include "../source/CloneableMIDISource.h"
 #include "../source/CloneableSynthSource.h"
 #include "../source/CloneableSourceManager.h"
+#include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -102,6 +103,13 @@ void SourceRecordProcessor::processBlock(
 			/** Synth Source */
 			src->writeData(midiMessages, startPos);
 		}
+	}
+
+	/** Callback */
+	if (this->tasks.size() > 0) {
+		this->limitedCall.call([] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+			}, 500 / (1000 / (this->getSampleRate() / buffer.getNumChannels())), 500);
 	}
 }
 

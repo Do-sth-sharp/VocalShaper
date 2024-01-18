@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "../project/Serializable.h"
@@ -15,6 +15,7 @@ public:
 	virtual ~CloneableSource() = default;
 
 	std::unique_ptr<CloneableSource> cloneThis() const;
+	bool cloneAs(CloneableSource* dst) const;
 	void initThis(double sampleRate = 48000, int channelNum = 2, int sampleNum = 0);
 	bool loadFrom(const juce::File& file);
 	bool saveAs(const juce::File& file) const;
@@ -78,7 +79,8 @@ protected:
 	virtual void recordingFinished() {};
 
 protected:
-	virtual std::unique_ptr<CloneableSource> clone() const = 0;
+	virtual std::unique_ptr<CloneableSource> createThisType() const = 0;
+	virtual bool clone(CloneableSource* dst) const = 0;
 	virtual bool load(const juce::File& file) = 0;
 	virtual bool save(const juce::File& file) const = 0;
 	virtual bool exportt(const juce::File& file) const { return false; };

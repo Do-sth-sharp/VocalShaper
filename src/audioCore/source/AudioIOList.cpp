@@ -1,7 +1,8 @@
-#include "AudioIOList.h"
+﻿#include "AudioIOList.h"
 
 #include "CloneableSourceManager.h"
 #include "CloneableAudioSource.h"
+#include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 
 AudioIOList::AudioIOList()
@@ -18,7 +19,7 @@ void AudioIOList::load(CloneableSource::SafePointer<> ptr, juce::String path, bo
 
 	if (!ptr) { return; }
 	this->list.push(std::make_tuple(
-		copy ? TaskType::CopyLoad : TaskType::Load, ptr, path));
+		copy ? TaskType::CopyLoad : TaskType::Load, ptr, nullptr, path));
 
 	this->startThread();
 }
@@ -26,7 +27,7 @@ void AudioIOList::load(CloneableSource::SafePointer<> ptr, juce::String path, bo
 void AudioIOList::save(CloneableSource::SafePointer<> ptr, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(TaskType::Save, ptr, path));
+	this->list.push(std::make_tuple(TaskType::Save, ptr, nullptr, path));
 
 	this->startThread();
 }
@@ -34,7 +35,15 @@ void AudioIOList::save(CloneableSource::SafePointer<> ptr, juce::String path) {
 void AudioIOList::exportt(CloneableSource::SafePointer<> ptr, juce::String path) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(TaskType::Export, ptr, path));
+	this->list.push(std::make_tuple(TaskType::Export, ptr, nullptr, path));
+
+	this->startThread();
+}
+
+void AudioIOList::clone(CloneableSource::SafePointer<> src, CloneableSource::SafePointer<> dst) {
+	juce::GenericScopedLock locker(this->lock);
+
+	this->list.push(std::make_tuple(TaskType::Clone, src, dst, ""));
 
 	this->startThread();
 }
@@ -83,28 +92,28 @@ void AudioIOList::run() {
 		{
 			if (auto src = static_cast<CloneableSource*>(this->currentTask)) {
 				juce::File file
-					= utils::getSourceFile(std::get<2>(task));
+					= utils::getSourceFile(std::get<3>(task));
 				bool result = false;
 				switch (std::get<0>(task)) {
 				case TaskType::Load:
 					/** Read */
 					result = src->loadFrom(file);
 					if (result) {
-						src->setPath(std::get<2>(task));
+						src->setPath(std::get<3>(task));
 					}
 					break;
 				case TaskType::Save:
 					/** Write */
 					result = src->saveAs(file);
 					if (result) {
-						src->setPath(std::get<2>(task));
+						src->setPath(std::get<3>(task));
 					}
 					break;
 				case TaskType::Export:
 					/** Export */
 					result = src->exportAs(file);
 					break;
-				case TaskType::CopyLoad:
+				case TaskType::CopyLoad: {
 					/** Copy */
 					juce::String dstPath = "./" + file.getFileName();
 					juce::File dstFile = utils::getSourceFile(dstPath);
@@ -119,6 +128,11 @@ void AudioIOList::run() {
 					}
 					break;
 				}
+				case TaskType::Clone:
+					/** Clone */
+					result = src->cloneAs(std::get<2>(task));
+					break;
+				}
 
 				if (result) {
 					//src->setPath(std::get<2>(task));
@@ -128,6 +142,11 @@ void AudioIOList::run() {
 
 		/** Task End */
 		this->currentTask = nullptr;
+
+		/** Callback */
+		juce::MessageManager::callAsync([] {
+			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+			});
 	}
 }
 

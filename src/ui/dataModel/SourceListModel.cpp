@@ -1,4 +1,5 @@
 ﻿#include "SourceListModel.h"
+#include "../component/SourceComponent.h"
 #include "../misc/DragSourceType.h"
 #include "../misc/CoreActions.h"
 #include "../../audioCore/AC_API.h"
@@ -18,8 +19,16 @@ void SourceListModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 juce::Component* SourceListModel::refreshComponentForRow(
 	int rowNumber, bool isRowSelected,
 	juce::Component* existingComponentToUpdate) {
-	/** TODO */
-	return existingComponentToUpdate;
+	SourceComponent* comp = nullptr;
+	if (existingComponentToUpdate) {
+		comp = dynamic_cast<SourceComponent*>(existingComponentToUpdate);
+		if (!comp) { delete existingComponentToUpdate; }
+	}
+	if (!comp) { comp = new SourceComponent; }
+
+	comp->update(rowNumber, isRowSelected);
+
+	return comp;
 }
 
 juce::String SourceListModel::getNameForRow(int rowNumber) {
