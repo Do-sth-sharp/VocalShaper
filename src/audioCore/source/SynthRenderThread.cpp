@@ -5,6 +5,8 @@
 #include "CloneableSynthSource.h"
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
+#include "../misc/VMath.h"
+#include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 
 SynthRenderThread::SynthRenderThread(CloneableSynthSource* parent)
@@ -15,6 +17,11 @@ SynthRenderThread::~SynthRenderThread() {
 }
 
 void SynthRenderThread::run() {
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
+
 	/** Lock Buffer */
 	juce::ScopedWriteLock audioLocker(audioLock::getAudioLock());
 
@@ -78,8 +85,8 @@ void SynthRenderThread::run() {
 		
 		/** Copy Audio Data */
 		for (int j = 0; j < channelNum; j++) {
-			parent->audioBuffer.copyFrom(
-				j, startPos, audioBuffer.getReadPointer(j),
+			vMath::copyAudioData(parent->audioBuffer, audioBuffer,
+				startPos, 0, j, j,
 				(i == clipNum) ? (totalSamples % clipNum) : bufferSize);
 		}
 
@@ -107,4 +114,9 @@ void SynthRenderThread::run() {
 
 	/** Reset Play Head */
 	parent->synthesizer->setPlayHead(nullptr);
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }

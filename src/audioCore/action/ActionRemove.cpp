@@ -1029,6 +1029,19 @@ bool ActionRemoveSource::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
+		if (auto src = manager->getSource(ACTION_DATA(index))) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
 		manager->removeSource(ACTION_DATA(index));
 		this->output("Total Source Num: " + juce::String(manager->getSourceNum()) + "\n");
 		ACTION_RESULT(true);

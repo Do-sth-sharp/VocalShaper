@@ -5,6 +5,7 @@
 #include "PlayPosition.h"
 #include "../source/AudioIOList.h"
 #include "../plugin/PluginLoader.h"
+#include "../misc/VMath.h"
 
 class RenderThread final : public juce::Thread {
 public:
@@ -298,9 +299,8 @@ void Renderer::writeData(const Track* trackPtr,
 
 	/** Copy Data */
 	for (int i = 0; i < dstBuffer.getNumChannels(); i++) {
-		if (auto src = buffer.getReadPointer(i)) {
-			dstBuffer.copyFrom(i, offset, src, buffer.getNumSamples());
-		}
+		vMath::copyAudioData(dstBuffer, buffer,
+			offset, 0, i, i, buffer.getNumSamples());
 	}
 }
 

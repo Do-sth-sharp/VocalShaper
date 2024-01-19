@@ -118,6 +118,19 @@ bool ActionSynthSource::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
+	if (auto src = CloneableSourceManager::getInstance()->getSource(this->index)) {
+		if (AudioIOList::getInstance()->isTask(src)) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
+		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+			if (p->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+		}
+	}
+
 	if (CloneableSourceManager::getInstance()->synthSource(this->index)) {
 		this->output("Start synth source: [" + juce::String(this->index) + "]\n");
 		return true;
@@ -139,8 +152,20 @@ bool ActionCloneSource::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
-		if (CloneableSourceManager::getInstance()
-			->cloneSourceAsync(ACTION_DATA(index))) {
+		if (auto src = manager->getSource(ACTION_DATA(index))) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
+		if (manager->cloneSourceAsync(ACTION_DATA(index))) {
 			juce::String result;
 
 			result += "Clone Source: [" + juce::String(ACTION_DATA(index)) + "]\n";
@@ -169,12 +194,25 @@ bool ActionReloadSource::doAction() {
 	ACTION_WRITE_STRING(path);
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
-		if (CloneableSourceManager::getInstance()
-			->reloadSourceAsync(ACTION_DATA(index), ACTION_DATA(path), ACTION_DATA(copy))) {
+		if (auto src = manager->getSource(ACTION_DATA(index))) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
+		if (manager->reloadSourceAsync(ACTION_DATA(index),
+			ACTION_DATA(path), ACTION_DATA(copy))) {
 			juce::String result;
 
 			result += "Reload Source: [" + juce::String(ACTION_DATA(index)) + "]\n";
-			result += "Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n";
+			result += "Total Source Num: " + juce::String(manager->getSourceNum()) + "\n";
 
 			this->output(result);
 			ACTION_RESULT(true);
@@ -195,8 +233,20 @@ bool ActionSaveSource::doAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
-		if (CloneableSourceManager::getInstance()
-			->saveSource(this->index, this->path)) {
+		if (auto src = manager->getSource(this->index)) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
+		if (manager->saveSource(this->index, this->path)) {
 			this->output("Save Source Data: " + this->path + "\n");
 			return true;
 		}
@@ -216,8 +266,20 @@ bool ActionSaveSourceAsync::doAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
-		CloneableSourceManager::getInstance()
-			->saveSourceAsync(this->index, this->path);
+		if (auto src = manager->getSource(this->index)) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
+		manager->saveSourceAsync(this->index, this->path);
 
 		this->output("Create Save Source Data Task: " + this->path + "\n");
 		return true;
@@ -234,8 +296,20 @@ bool ActionExportSource::doAction() {
 		"Don't do this while rendering.");
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
-		if (CloneableSourceManager::getInstance()
-			->exportSource(this->index, this->path)) {
+		if (auto src = manager->getSource(this->index)) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
+		if (manager->exportSource(this->index, this->path)) {
 			this->output("Export Source Data: " + this->path + "\n");
 			return true;
 		}
@@ -253,8 +327,20 @@ bool ActionExportSourceAsync::doAction() {
 		"Don't do this while rendering.");
 
 	if (auto manager = CloneableSourceManager::getInstance()) {
-		CloneableSourceManager::getInstance()
-			->exportSourceAsync(this->index, this->path);
+		if (auto src = manager->getSource(this->index)) {
+			if (AudioIOList::getInstance()->isTask(src)) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+				if (p->isSynthRunning()) {
+					this->error("Unavailable source status!");
+					ACTION_RESULT(false);
+				}
+			}
+		}
+
+		manager->exportSourceAsync(this->index, this->path);
 
 		this->output("Create Export Source Data Task: " + this->path + "\n");
 		return true;

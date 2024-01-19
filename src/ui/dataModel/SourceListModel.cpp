@@ -4,8 +4,9 @@
 #include "../misc/CoreActions.h"
 #include "../../audioCore/AC_API.h"
 
-SourceListModel::SourceListModel(const juce::Component* parent)
-	: parent(parent) {}
+SourceListModel::SourceListModel(
+	const std::function<void(int)>& selectCallback)
+	: selectCallback(selectCallback) {}
 
 int SourceListModel::getNumRows() {
 	return quickAPI::getSourceNum();
@@ -24,7 +25,7 @@ juce::Component* SourceListModel::refreshComponentForRow(
 		comp = dynamic_cast<SourceComponent*>(existingComponentToUpdate);
 		if (!comp) { delete existingComponentToUpdate; }
 	}
-	if (!comp) { comp = new SourceComponent; }
+	if (!comp) { comp = new SourceComponent(this->selectCallback); }
 
 	comp->update(rowNumber, isRowSelected);
 
@@ -35,41 +36,10 @@ juce::String SourceListModel::getNameForRow(int rowNumber) {
 	return quickAPI::getSourceName(rowNumber);
 }
 
-void SourceListModel::listBoxItemClicked(int row, const juce::MouseEvent& event) {
-	if (event.mods.isRightButtonDown()) {
-		this->showItemMenu(row);
-	}
-}
-
 void SourceListModel::backgroundClicked(const juce::MouseEvent& event) {
 	if (event.mods.isRightButtonDown()) {
 		this->showBackgroundMenu();
 	}
-}
-
-void SourceListModel::deleteKeyPressed(int lastRowSelected) {
-	this->deleteItem(lastRowSelected);
-}
-
-juce::var SourceListModel::getDragSourceDescription(
-	const juce::SparseSet<int>& rowsToDescribe) {
-	/** Get First Row */
-	auto range = rowsToDescribe.getRange(0);
-	int index = range.getStart();
-
-	/** Var */
-	auto object = std::make_unique<juce::DynamicObject>();
-
-	object->setProperty("type", (int)DragSourceType::Source);
-	object->setProperty("name", quickAPI::getSourceName(index));
-	object->setProperty("srcType", quickAPI::getSourceType(index));
-	object->setProperty("length", quickAPI::getSourceLength(index));
-
-	return juce::var{ object.release() };
-}
-
-bool SourceListModel::mayDragToExternalWindows() const {
-	return true;
 }
 
 juce::String SourceListModel::getTooltipForRow(int row) {
@@ -107,60 +77,9 @@ enum SourceListActionType {
 	NewAudio = 1,
 	NewMIDI,
 	NewSynth,
-	Clone,
 	Load,
-	Save,
-	Export,
-	Remove,
-	Replace,
-	SetName,
-	SetSynthesizer,
-	Synth
+	LoadSynth
 };
-
-void SourceListModel::showItemMenu(int index) {
-	auto menu = this->createItemMenu(index);
-	auto result = (SourceListActionType)(menu.show());
-
-	switch (result) {
-	case SourceListActionType::NewAudio:
-		CoreActions::newAudioSourceGUI();
-		break;
-	case SourceListActionType::NewMIDI:
-		CoreActions::newMIDISourceGUI();
-		break;
-	case SourceListActionType::NewSynth:
-		CoreActions::newSynthSourceGUI();
-		break;
-	case SourceListActionType::Clone:
-		CoreActions::cloneSource(index);
-		break;
-	case SourceListActionType::Load:
-		CoreActions::loadSourceGUI();
-		break;
-	case SourceListActionType::Save:
-		CoreActions::saveSourceGUI(index);
-		break;
-	case SourceListActionType::Export:
-		CoreActions::exportSourceGUI(index);
-		break;
-	case SourceListActionType::Remove:
-		CoreActions::removeSourceGUI(index);
-		break;
-	case SourceListActionType::Replace:
-		CoreActions::reloadSourceGUI(index);
-		break;
-	case SourceListActionType::SetName:
-		CoreActions::setSourceNameGUI(index);
-		break;
-	case SourceListActionType::SetSynthesizer:
-		CoreActions::setSourceSynthesizerGUI(index);
-		break;
-	case SourceListActionType::Synth:
-		CoreActions::synthSourceGUI(index);
-		break;
-	}
-}
 
 void SourceListModel::showBackgroundMenu() {
 	auto menu = this->createBackgroundMenu();
@@ -179,32 +98,10 @@ void SourceListModel::showBackgroundMenu() {
 	case SourceListActionType::Load:
 		CoreActions::loadSourceGUI();
 		break;
+	case SourceListActionType::LoadSynth:
+		CoreActions::loadSynthSourceGUI();
+		break;
 	}
-}
-
-void SourceListModel::deleteItem(int index) {
-	CoreActions::removeSourceGUI(index);
-}
-
-juce::PopupMenu SourceListModel::createItemMenu(int index) const {
-	juce::PopupMenu menu;
-
-	menu.addSubMenu(TRANS("New"), this->createNewMenu());
-	menu.addItem(SourceListActionType::Clone, TRANS("Clone"));
-	menu.addItem(SourceListActionType::Load, TRANS("Load"));
-	menu.addItem(SourceListActionType::Save, TRANS("Save"));
-	menu.addItem(SourceListActionType::Export, TRANS("Export"),
-		quickAPI::getSourceType(index) == quickAPI::SourceType::SynthSource);
-	menu.addItem(SourceListActionType::Remove, TRANS("Remove"));
-	menu.addItem(SourceListActionType::Replace, TRANS("Replace"));
-	menu.addSeparator();
-	menu.addItem(SourceListActionType::SetName, TRANS("Set Name"));
-	menu.addItem(SourceListActionType::SetSynthesizer, TRANS("Set Synthesizer"),
-		quickAPI::getSourceType(index) == quickAPI::SourceType::SynthSource);
-	menu.addItem(SourceListActionType::Synth, TRANS("Synth"),
-		quickAPI::getSourceType(index) == quickAPI::SourceType::SynthSource);
-
-	return menu;
 }
 
 juce::PopupMenu SourceListModel::createBackgroundMenu() const {
@@ -212,6 +109,7 @@ juce::PopupMenu SourceListModel::createBackgroundMenu() const {
 
 	menu.addSubMenu(TRANS("New"), this->createNewMenu());
 	menu.addItem(SourceListActionType::Load, TRANS("Load"));
+	menu.addItem(SourceListActionType::LoadSynth, TRANS("Load(Synth)"));
 
 	return menu;
 }

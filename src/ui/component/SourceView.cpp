@@ -1,6 +1,7 @@
 ﻿#include "SourceView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreCallbacks.h"
+#include "../Utils.h"
 
 SourceView::SourceView()
 	: FlowComponent(TRANS("Source")) {
@@ -9,7 +10,9 @@ SourceView::SourceView()
 		LookAndFeelFactory::getInstance()->forSourceView());
 
 	/** Source List */
-	this->sources = std::make_unique<SourceListModel>(this);
+	this->sources = std::make_unique<SourceListModel>(
+		[this](int index) { this->select(index); }
+	);
 	this->list = std::make_unique<juce::ListBox>(
 		TRANS("Source List"), this->sources.get());
 	this->addAndMakeVisible(this->list.get());
@@ -29,8 +32,16 @@ SourceView::~SourceView() {
 }
 
 void SourceView::resized() {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+
+	int itemHeight = screenSize.getHeight() * 0.1;
+
 	/** Source List */
 	this->list->setBounds(this->getLocalBounds());
+
+	/** Source Item Height */
+	this->list->setRowHeight(itemHeight);
 }
 
 void SourceView::paint(juce::Graphics& g) {
@@ -47,4 +58,8 @@ void SourceView::paint(juce::Graphics& g) {
 
 void SourceView::update() {
 	this->list->updateContent();
+}
+
+void SourceView::select(int index) {
+	this->list->selectRow(index);
 }

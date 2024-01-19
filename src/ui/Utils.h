@@ -84,7 +84,7 @@ namespace utils {
 		TextIntegerFilter(int minLimit, int maxLimit);
 
 		juce::String filterNewText(
-			juce::TextEditor&, const juce::String& newInput) override;
+			juce::TextEditor& editor, const juce::String& newInput) override;
 
 	private:
 		const int minLimit, maxLimit;
@@ -98,7 +98,7 @@ namespace utils {
 		TextDoubleFilter(double minLimit, double maxLimit, int numberOfDecimalPlaces);
 
 		juce::String filterNewText(
-			juce::TextEditor&, const juce::String& newInput) override;
+			juce::TextEditor& editor, const juce::String& newInput) override;
 
 	private:
 		const double minLimit, maxLimit;

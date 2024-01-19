@@ -78,11 +78,18 @@ const juce::String CloneableSynthSource::getSynthesizerName() const {
 	return juce::String{};
 }
 
+bool CloneableSynthSource::isSynthRunning() const {
+	return this->synthThread->isThreadRunning();
+}
+
 void CloneableSynthSource::stopSynth() {
 	this->synthThread->stopThread(3000);
 }
 
 void CloneableSynthSource::synth() {
+	/** Check Synthesizer */
+	if (!this->synthesizer) { return; }
+
 	/** Stop Render */
 	this->synthThread->stopThread(3000);
 

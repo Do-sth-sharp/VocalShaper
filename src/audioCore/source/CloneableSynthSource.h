@@ -21,6 +21,7 @@ public:
 		std::unique_ptr<juce::AudioPluginInstance> synthesizer,
 		const juce::String& identifier);
 	const juce::String getSynthesizerName() const;
+	bool isSynthRunning() const;
 	void stopSynth();
 	void synth();
 

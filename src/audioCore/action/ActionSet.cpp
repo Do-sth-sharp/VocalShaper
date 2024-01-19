@@ -867,6 +867,19 @@ bool ActionSetSourceSynthesizer::doAction() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
+	if (auto src = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		if (AudioIOList::getInstance()->isTask(src)) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
+		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
+			if (p->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+		}
+	}
+
 	if (CloneableSourceManager::getInstance()->setSourceSynthesizer(ACTION_DATA(index), ACTION_DATA(pid))) {
 		this->output("Set synthesizer: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 		ACTION_RESULT(true);

@@ -497,7 +497,7 @@ void CoreActions::setSourceSynthesizerGUI(int index) {
 	auto callback = [index](const juce::String& id) {
 		if (id.isEmpty()) { return; }
 		CoreActions::setSourceSynthesizer(index, id); };
-	CoreActions::askForPluginGUIAsync(callback);
+	CoreActions::askForPluginGUIAsync(callback, true, true);
 }
 
 void CoreActions::setSourceSynthesizerGUI() {
@@ -579,7 +579,7 @@ void CoreActions::askForAudioPropGUIAsync(
 	/** Show Window */
 	configWindow->enterModalState(true, juce::ModalCallbackFunction::create(
 		[sampleRateSeletor, channelsEditor, lengthEditor, callback](int result) {
-			if (result != 1) { callback(0, 0, 0); return; }
+			if (result != 1) { return; }
 
 			double sampleRate = sampleRateSeletor->getText().getDoubleValue();
 			int channels = channelsEditor->getText().getIntValue();
@@ -598,7 +598,6 @@ void CoreActions::askForSourceIndexGUIAsync(
 		juce::AlertWindow::showMessageBox(
 			juce::MessageBoxIconType::WarningIcon, TRANS("Source Selector"),
 			TRANS("The source list is empty!"));
-		callback(-1);
 		return;
 	}
 	for (int i = 0; i < sourceList.size(); i++) {
@@ -617,10 +616,10 @@ void CoreActions::askForSourceIndexGUIAsync(
 	auto combo = chooserWindow->getComboBoxComponent(TRANS("Selector"));
 	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
 		[combo, callback, size = sourceList.size()](int result) {
-			if (result != 1) { callback(-1); return; }
+			if (result != 1) { return; }
 
 			int index = combo->getSelectedItemIndex();
-			if (index < 0 || index >= size) { callback(-1); return; }
+			if (index < 0 || index >= size) { return; }
 
 			callback(index);
 		}
@@ -692,7 +691,6 @@ void CoreActions::askForMixerTracksListGUIAsync(
 		juce::AlertWindow::showMessageBox(
 			juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
 			TRANS("The track list is empty!"));
-		callback({});
 		return;
 	}
 
@@ -712,7 +710,7 @@ void CoreActions::askForMixerTracksListGUIAsync(
 
 	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
 		[callback, listBox = TrackListHelper::getInstance()->getListBox()](int result) {
-			if (result != 1) { callback({}); return; }
+			if (result != 1) { return; }
 
 			juce::Array<int> resList;
 			auto resSet = listBox->getSelectedRows();
@@ -727,7 +725,6 @@ void CoreActions::askForMixerTracksListGUIAsync(
 				juce::AlertWindow::showMessageBox(
 					juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
 					TRANS("No track selected!"));
-				callback({});
 				return;
 			}
 
@@ -753,7 +750,7 @@ void CoreActions::askForNameGUIAsync(
 	/** Show Async */
 	editorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
 		[editor, callback, defaultName](int result) {
-			if (result != 1) { callback(defaultName); return; }
+			if (result != 1) { return; }
 
 			juce::String name = editor->getText();
 			callback(name);
@@ -783,13 +780,13 @@ void CoreActions::askForPluginGUIAsync(
 	auto combo = selectorWindow->getComboBoxComponent(TRANS("Plugin"));
 	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
 		[combo, callback, list](int result) {
-			if (result != 1) { callback(""); return; }
+			if (result != 1) { return; }
 
 			int index = combo->getSelectedItemIndex();
 			juce::String name = combo->getText();
 
 			auto& pluginDes = list.getReference(index);
-			if(pluginDes.name != name){ callback(""); return; }
+			if(pluginDes.name != name){ return; }
 
 			callback(pluginDes.createIdentifierString());
 		}

@@ -57,7 +57,7 @@ bool AudioIOList::isTask(CloneableSource::SafePointer<> ptr) const {
 	for (int i = 0; i < size; i++) {
 		auto& task = this->list.front();
 
-		if (std::get<1>(task) == ptr) { return true; }
+		if ((std::get<1>(task) == ptr) || (std::get<2>(task) == ptr)) { return true; }
 
 		this->list.push(task);
 		this->list.pop();
@@ -67,6 +67,11 @@ bool AudioIOList::isTask(CloneableSource::SafePointer<> ptr) const {
 }
 
 void AudioIOList::run() {
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
+
 	while (!this->threadShouldExit()) {
 		/** Lock Source List */
 		juce::ScopedReadLock listLocker(

@@ -16,6 +16,7 @@ public:
 	void paint(juce::Graphics& g) override;
 
 	void update();
+	void select(int index);
 
 private:
 	std::unique_ptr<juce::ListBox> list = nullptr;

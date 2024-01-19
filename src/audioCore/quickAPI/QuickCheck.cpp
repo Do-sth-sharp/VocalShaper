@@ -56,4 +56,17 @@ namespace quickAPI {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
 		return dynamic_cast<CloneableSynthSource*>(ptr.getSource());
 	}
+
+	bool checkSourceIOTask(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		return AudioIOList::getInstance()->isTask(ptr);
+	}
+
+	bool checkSourceSynthing(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
+			return p->isSynthRunning();
+		}
+		return false;
+	}
 }
