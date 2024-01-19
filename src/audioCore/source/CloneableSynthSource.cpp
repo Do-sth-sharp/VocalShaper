@@ -69,6 +69,11 @@ void CloneableSynthSource::setSynthesizer(
 	DMDA::PluginHandler handShakeHandler(
 		[](DMDA::Context* context) { context->handShake(); });
 	this->synthesizer->getExtensions(handShakeHandler);
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 const juce::String CloneableSynthSource::getSynthesizerName() const {

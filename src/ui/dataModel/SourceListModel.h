@@ -14,8 +14,6 @@ public:
 		juce::Component* existingComponentToUpdate) override;
 	juce::String getNameForRow(int rowNumber) override;
 	void backgroundClicked(const juce::MouseEvent&) override;
-	juce::String getTooltipForRow(int row) override;
-	juce::MouseCursor getMouseCursorForRow(int row) override;
 
 private:
 	const std::function<void(int)> selectCallback;

@@ -4,7 +4,8 @@
 
 class SourceComponent final
 	: public juce::Component,
-	public juce::DragAndDropTarget {
+	public juce::DragAndDropTarget,
+	public juce::SettableTooltipClient {
 public:
 	SourceComponent(const std::function<void(int)>& selectCallback);
 
@@ -51,6 +52,7 @@ private:
 	juce::PopupMenu createNewMenu() const;
 
 	juce::var getDragSourceDescription() const;
+	juce::String createTooltip() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceComponent)
 };

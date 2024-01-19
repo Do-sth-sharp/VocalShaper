@@ -1,5 +1,6 @@
 ﻿#include "CloneableSource.h"
 #include "../misc/AudioLock.h"
+#include "../uiCallback/UICallback.h"
 
 std::atomic_int CloneableSource::globalCounter = 0;
 
@@ -83,6 +84,11 @@ int CloneableSource::getId() const {
 
 void CloneableSource::setName(const juce::String& name) {
 	this->name = name;
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 const juce::String CloneableSource::getName() const {

@@ -135,6 +135,8 @@ void SourceComponent::update(int index, bool selected) {
 		this->sampleRate = quickAPI::getSourceSampleRate(index);
 		this->isIOTask = quickAPI::checkSourceIOTask(index);
 		this->isSynthing = quickAPI::checkSourceSynthing(index);
+
+		this->setTooltip(this->createTooltip());
 	}
 
 	this->repaint();
@@ -329,4 +331,29 @@ juce::var SourceComponent::getDragSourceDescription() const {
 	object->setProperty("length", this->length);
 
 	return juce::var{ object.release() };
+}
+
+juce::String SourceComponent::createTooltip() const {
+	juce::String result =
+		"#" + juce::String{ this->id } + " " + this->nameEditor->getText() + "\n"
+		+ TRANS("Type:") + " " + this->typeName + "\n"
+		+ TRANS("Length:") + " " + juce::String{ this->length } + "s\n";
+
+	if (this->type == quickAPI::SourceType::AudioSource || this->type == quickAPI::SourceType::SynthSource) {
+		result += (TRANS("Channels:") + " " + juce::String{ this->channels } + "\n");
+	}
+	if (this->type == quickAPI::SourceType::MIDISource || this->type == quickAPI::SourceType::SynthSource) {
+		result += (TRANS("Tracks:") + " " + juce::String{ this->tracks } + "\n");
+	}
+	if (this->type == quickAPI::SourceType::MIDISource || this->type == quickAPI::SourceType::SynthSource) {
+		result += (TRANS("Events:") + " " + juce::String{ this->events } + "\n");
+	}
+	if (this->type == quickAPI::SourceType::SynthSource) {
+		result += (TRANS("Synthesizer:") + " " + this->synthesizer + "\n");
+	}
+	if (this->type == quickAPI::SourceType::AudioSource || this->type == quickAPI::SourceType::SynthSource) {
+		result += (TRANS("Sample Rate:") + " " + juce::String{ this->sampleRate } + "Hz\n");
+	}
+
+	return result;
 }

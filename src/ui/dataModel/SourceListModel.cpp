@@ -14,7 +14,7 @@ int SourceListModel::getNumRows() {
 
 void SourceListModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 	int width, int height, bool rowIsSelected) {
-	/** TODO */
+	/** Nothing To Do */
 }
 
 juce::Component* SourceListModel::refreshComponentForRow(
@@ -40,37 +40,6 @@ void SourceListModel::backgroundClicked(const juce::MouseEvent& event) {
 	if (event.mods.isRightButtonDown()) {
 		this->showBackgroundMenu();
 	}
-}
-
-juce::String SourceListModel::getTooltipForRow(int row) {
-	auto type = quickAPI::getSourceType(row);
-
-	juce::String result = 
-		"#" + juce::String{ quickAPI::getSourceId(row) } + " " + quickAPI::getSourceName(row) + "\n"
-		+ TRANS("Type:") + " " + quickAPI::getSourceTypeName(row) + "\n"
-		+ TRANS("Length:") + " " + juce::String{ quickAPI::getSourceLength(row) } + "s\n";
-
-	if (type == quickAPI::SourceType::AudioSource || type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Channels:") + " " + juce::String{ quickAPI::getSourceChannelNum(row) } + "\n");
-	}
-	if (type == quickAPI::SourceType::MIDISource || type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Tracks:") + " " + juce::String{ quickAPI::getSourceTrackNum(row) } + "\n");
-	}
-	if (type == quickAPI::SourceType::MIDISource || type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Events:") + " " + juce::String{ quickAPI::getSourceEventNum(row) } + "\n");
-	}
-	if (type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Synthesizer:") + " " + juce::String{ quickAPI::getSourceSynthesizerName(row) } + "\n");
-	}
-	if (type == quickAPI::SourceType::AudioSource || type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Sample Rate:") + " " + juce::String{ quickAPI::getSourceSampleRate(row) } + "\n");
-	}
-
-	return result;
-}
-
-juce::MouseCursor SourceListModel::getMouseCursorForRow(int row) {
-	return juce::MouseCursor::PointingHandCursor;
 }
 
 enum SourceListActionType {
