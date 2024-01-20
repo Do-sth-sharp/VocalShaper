@@ -872,11 +872,9 @@ bool ActionSetSourceSynthesizer::doAction() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
 		}
 	}
 
@@ -885,6 +883,65 @@ bool ActionSetSourceSynthesizer::doAction() {
 		ACTION_RESULT(true);
 	}
 	this->error("Can't set synthesizer: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
+	ACTION_RESULT(false);
+}
+
+ActionSetSourceSynthDst::ActionSetSourceSynthDst(
+	int index, int dst)
+	: ACTION_DB{ index, dst } {}
+
+bool ActionSetSourceSynthDst::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSourceSynthDst);
+	ACTION_WRITE_DB();
+
+	if (auto src = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		if (AudioIOList::getInstance()->isTask(src)) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
+	}
+
+	if (auto source = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		ACTION_DATA(oldDst) = CloneableSourceManager::getInstance()->getSourceIndex(source);
+		source->setDstSource(CloneableSourceManager::getInstance()->getSource(ACTION_DATA(dst)));
+
+		this->output("Set source synth destination: [" + juce::String(ACTION_DATA(index)) + "] " + juce::String(ACTION_DATA(dst)) + "\n");
+		ACTION_RESULT(true);
+	}
+	this->error("Can't set source synth destination: [" + juce::String(ACTION_DATA(index)) + "] " + juce::String(ACTION_DATA(dst)) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSourceSynthDst::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSourceSynthDst);
+	ACTION_WRITE_DB();
+
+	if (auto src = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		if (AudioIOList::getInstance()->isTask(src)) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
+	}
+
+	if (auto source = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index))) {
+		source->setDstSource(CloneableSourceManager::getInstance()->getSource(ACTION_DATA(oldDst)));
+
+		this->output("Undo set source synth destination: [" + juce::String(ACTION_DATA(index)) + "] " + juce::String(ACTION_DATA(dst)) + "\n");
+		ACTION_RESULT(true);
+	}
+	this->error("Can't undo set source synth destination: [" + juce::String(ACTION_DATA(index)) + "] " + juce::String(ACTION_DATA(dst)) + "\n");
 	ACTION_RESULT(false);
 }
 

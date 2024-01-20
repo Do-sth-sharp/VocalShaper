@@ -127,7 +127,7 @@ bool SourceList::parse(const google::protobuf::Message* data) {
 	auto& list = mes->sources();
 	for (auto& i : list) {
 		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
-			this->add({ i.startpos(), i.endpos(), i.offset(), ptrSrc, i.index() });
+			this->add({ i.startpos(), i.endpos(), i.offset(), ptrSrc });
 		}
 	}
 
@@ -138,9 +138,9 @@ std::unique_ptr<google::protobuf::Message> SourceList::serialize() const {
 	auto mes = std::make_unique<vsp4::SourceInstanceList>();
 
 	auto list = mes->mutable_sources();
-	for (auto& [startTime, endTime, offset, ptr, index] : this->list) {
+	for (auto& [startTime, endTime, offset, ptr] : this->list) {
 		auto instance = std::make_unique<vsp4::SeqSourceInstance>();
-		instance->set_index(index);
+		instance->set_index(CloneableSourceManager::getInstance()->getSourceIndex(ptr));
 		instance->set_startpos(startTime);
 		instance->set_endpos(endTime);
 		instance->set_offset(offset);

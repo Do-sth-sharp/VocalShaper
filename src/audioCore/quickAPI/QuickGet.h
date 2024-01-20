@@ -20,7 +20,7 @@ namespace quickAPI {
 	bool isRecording();
 
 	enum SourceType {
-		UnknownSource, AudioSource, MIDISource, SynthSource
+		UnknownSource, AudioSource, MIDISource
 	};
 	int getSourceNum();
 	int getSourceId(int index);
@@ -32,6 +32,7 @@ namespace quickAPI {
 	int getSourceChannelNum(int index);
 	int getSourceTrackNum(int index);
 	const juce::String getSourceSynthesizerName(int index);
+	int getSourceSynthDstIndex(int index);
 	double getSourceSampleRate(int index);
 	int getSourceEventNum(int index);
 	const juce::StringArray getSourceNames();

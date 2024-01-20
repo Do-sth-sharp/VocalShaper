@@ -125,6 +125,6 @@ void SourceViewLookAndFeel::drawButtonText(juce::Graphics& g, juce::TextButton& 
 	if (textWidth > 0) {
 		g.drawFittedText(button.getButtonText(),
 			leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2,
-			juce::Justification::centredLeft, 2);
+			juce::Justification::centredLeft, 1, 1.f);
 	}
 }

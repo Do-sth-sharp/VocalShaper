@@ -13,9 +13,7 @@ countries: cn
 "Open Project" = "打开项目"
 "Save Project" = "保存项目"
 "Load Playing Source" = "加载播放源"
-"Load Playing Source (Synth)" = "加载播放源（合成）"
 "Save Playing Source" = "保存播放源"
-"Export Synth Source" = "导出合成源"
 "Render" = "渲染"
 
 "Undo" = "撤销"
@@ -30,9 +28,7 @@ countries: cn
 "Open a project from disk." = "从本地磁盘打开项目。"
 "Save current project to disk." = "保存当前项目到本地磁盘。"
 "Load a playing source from disk." = "从本地磁盘加载播放源。"
-"Load a synth source from disk." = "从本地磁盘加载合成源。"
 "Save a playing source to disk." = "保存播放源到本地磁盘。"
-"Save the synth result of a synth source to disk." = "保存合成源的合成结果到本地磁盘。"
 "Render the tracks in current project to audio files on disk." = "渲染当前项目的轨道为本地磁盘上的音频文件。"
 
 "Undo the last action." = "撤销最后一个操作。"

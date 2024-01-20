@@ -13,7 +13,6 @@ namespace quickAPI {
 
 	bool checkForAudioSource(int index);
 	bool checkForMidiSource(int index);
-	bool checkForSynthSource(int index);
 
 	bool checkSourceIOTask(int index);
 	bool checkSourceSynthing(int index);

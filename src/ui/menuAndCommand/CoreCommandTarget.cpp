@@ -17,9 +17,7 @@ void CoreCommandTarget::getAllCommands(
 		(juce::CommandID)(CoreCommandType::OpenProject),
 		(juce::CommandID)(CoreCommandType::SaveProject),
 		(juce::CommandID)(CoreCommandType::LoadSource),
-		(juce::CommandID)(CoreCommandType::LoadSynthSource),
 		(juce::CommandID)(CoreCommandType::SaveSource),
-		(juce::CommandID)(CoreCommandType::ExportSource),
 		(juce::CommandID)(CoreCommandType::Render),
 
 		(juce::CommandID)(CoreCommandType::Undo),
@@ -55,16 +53,8 @@ void CoreCommandTarget::getCommandInfo(
 		result.setInfo(TRANS("Load Playing Source"), TRANS("Load a playing source from disk."), TRANS("File"), 0);
 		result.setActive(!quickAPI::checkRendering());
 		break;
-	case CoreCommandType::LoadSynthSource:
-		result.setInfo(TRANS("Load Playing Source (Synth)"), TRANS("Load a synth source from disk."), TRANS("File"), 0);
-		result.setActive(!quickAPI::checkRendering());
-		break;
 	case CoreCommandType::SaveSource:
 		result.setInfo(TRANS("Save Playing Source"), TRANS("Save a playing source to disk."), TRANS("File"), 0);
-		result.setActive(!quickAPI::checkRendering());
-		break;
-	case CoreCommandType::ExportSource:
-		result.setInfo(TRANS("Export Synth Source"), TRANS("Save the synth result of a synth source to disk."), TRANS("File"), 0);
 		result.setActive(!quickAPI::checkRendering());
 		break;
 	case CoreCommandType::Render:
@@ -135,14 +125,8 @@ bool CoreCommandTarget::perform(
 	case CoreCommandType::LoadSource:
 		this->loadSource();
 		return true;
-	case CoreCommandType::LoadSynthSource:
-		this->loadSynthSource();
-		return true;
 	case CoreCommandType::SaveSource:
 		this->saveSource();
-		return true;
-	case CoreCommandType::ExportSource:
-		this->exportSource();
 		return true;
 	case CoreCommandType::Render:
 		this->render();
@@ -192,16 +176,8 @@ void CoreCommandTarget::loadSource() const {
 	CoreActions::loadSourceGUI();
 }
 
-void CoreCommandTarget::loadSynthSource() const {
-	CoreActions::loadSynthSourceGUI();
-}
-
 void CoreCommandTarget::saveSource() const {
 	CoreActions::saveSourceGUI();
-}
-
-void CoreCommandTarget::exportSource() const {
-	CoreActions::exportSourceGUI();
 }
 
 void CoreCommandTarget::render() const {

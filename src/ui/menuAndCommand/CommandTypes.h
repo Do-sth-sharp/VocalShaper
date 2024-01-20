@@ -6,9 +6,7 @@ enum class CoreCommandType : int {
 	SaveProject,
 
 	LoadSource = 0x2100,
-	LoadSynthSource,
 	SaveSource,
-	ExportSource,
 
 	Render = 0x2200,
 

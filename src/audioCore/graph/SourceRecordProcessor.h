@@ -12,7 +12,8 @@ public:
 	SourceRecordProcessor();
 	~SourceRecordProcessor();
 
-	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, int, double, int>;
+	/** Pointer, Offset, Compensate */
+	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, double, int>;
 	void insertTask(const RecorderTask& task, int index = -1);
 	void removeTask(int index);
 	int getTaskNum() const;

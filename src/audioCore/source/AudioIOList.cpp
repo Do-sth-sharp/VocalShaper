@@ -32,14 +32,6 @@ void AudioIOList::save(CloneableSource::SafePointer<> ptr, juce::String path) {
 	this->startThread();
 }
 
-void AudioIOList::exportt(CloneableSource::SafePointer<> ptr, juce::String path) {
-	juce::GenericScopedLock locker(this->lock);
-
-	this->list.push(std::make_tuple(TaskType::Export, ptr, nullptr, path));
-
-	this->startThread();
-}
-
 void AudioIOList::clone(CloneableSource::SafePointer<> src, CloneableSource::SafePointer<> dst) {
 	juce::GenericScopedLock locker(this->lock);
 
@@ -113,10 +105,6 @@ void AudioIOList::run() {
 					if (result) {
 						src->setPath(std::get<3>(task));
 					}
-					break;
-				case TaskType::Export:
-					/** Export */
-					result = src->exportAs(file);
 					break;
 				case TaskType::CopyLoad: {
 					/** Copy */

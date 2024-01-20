@@ -45,9 +45,7 @@ void SourceListModel::backgroundClicked(const juce::MouseEvent& event) {
 enum SourceListActionType {
 	NewAudio = 1,
 	NewMIDI,
-	NewSynth,
-	Load,
-	LoadSynth
+	Load
 };
 
 void SourceListModel::showBackgroundMenu() {
@@ -61,14 +59,8 @@ void SourceListModel::showBackgroundMenu() {
 	case SourceListActionType::NewMIDI:
 		CoreActions::newMIDISourceGUI();
 		break;
-	case SourceListActionType::NewSynth:
-		CoreActions::newSynthSourceGUI();
-		break;
 	case SourceListActionType::Load:
 		CoreActions::loadSourceGUI();
-		break;
-	case SourceListActionType::LoadSynth:
-		CoreActions::loadSynthSourceGUI();
 		break;
 	}
 }
@@ -78,7 +70,6 @@ juce::PopupMenu SourceListModel::createBackgroundMenu() const {
 
 	menu.addSubMenu(TRANS("New"), this->createNewMenu());
 	menu.addItem(SourceListActionType::Load, TRANS("Load"));
-	menu.addItem(SourceListActionType::LoadSynth, TRANS("Load(Synth)"));
 
 	return menu;
 }
@@ -88,7 +79,6 @@ juce::PopupMenu SourceListModel::createNewMenu() const {
 
 	menu.addItem(SourceListActionType::NewAudio, TRANS("Audio"));
 	menu.addItem(SourceListActionType::NewMIDI, TRANS("MIDI"));
-	menu.addItem(SourceListActionType::NewSynth, TRANS("Synth"));
 
 	return menu;
 }

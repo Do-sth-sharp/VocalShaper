@@ -9,11 +9,11 @@ public:
 	SourceList() = default;
 
 	/**
-	 * StartTime, EndTime, Offset, Pointer, Index.
+	 * StartTime, EndTime, Offset, Pointer.
 	 */
 	using SeqBlock = std::tuple<
 		double, double, double,
-		CloneableSource::SafePointer<>, int>;
+		CloneableSource::SafePointer<>>;
 
 	/**
 	 * @attention Call this only on audio thread. Get the lock before use this method.

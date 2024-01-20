@@ -197,42 +197,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSaveSourceAsync)
 };
 
-class ActionExportSource final : public ActionBase {
-public:
-	ActionExportSource() = delete;
-	ActionExportSource(
-		int index, const juce::String& path);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Export Source";
-	};
-
-private:
-	const int index;
-	const juce::String path;
-
-	JUCE_LEAK_DETECTOR(ActionExportSource)
-};
-
-class ActionExportSourceAsync final : public ActionBase {
-public:
-	ActionExportSourceAsync() = delete;
-	ActionExportSourceAsync(
-		int index, const juce::String& path);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Export Source Async";
-	};
-
-private:
-	const int index;
-	const juce::String path;
-
-	JUCE_LEAK_DETECTOR(ActionExportSourceAsync)
-};
-
 class ActionRenderNow final : public ActionBase {
 public:
 	ActionRenderNow() = delete;

@@ -43,8 +43,12 @@ int CloneableMIDISource::getEventNum() const {
 }
 
 bool CloneableMIDISource::parse(const google::protobuf::Message* data) {
-	/** Nothing To Do, Never Invoked */
-	return dynamic_cast<const vsp4::Source*>(data);
+	auto src = dynamic_cast<const vsp4::Source*>(data);
+	if (!src) { return false; }
+
+	this->setName(src->name());
+	this->setPath(src->path());
+	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableMIDISource::serialize() const {
@@ -190,4 +194,8 @@ void CloneableMIDISource::writeData(
 		/** Set Flag */
 		this->changed();
 	}
+}
+
+juce::MidiFile* CloneableMIDISource::getMidiContentPtr() {
+	return &(this->buffer);
 }

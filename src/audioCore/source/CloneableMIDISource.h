@@ -11,7 +11,7 @@ public:
 	void readData(
 		juce::MidiBuffer& buffer, int baseTime,
 		int startTime, int endTime) const;
-	int getTrackNum() const;
+	int getTrackNum() const override;
 	int getEventNum() const;
 
 public:
@@ -35,6 +35,8 @@ private:
 
 private:
 	juce::MidiFile buffer;
+
+	juce::MidiFile* getMidiContentPtr() override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableMIDISource)
 };

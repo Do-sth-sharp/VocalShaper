@@ -123,11 +123,9 @@ bool ActionSynthSource::doAction() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
 		}
 	}
 
@@ -157,11 +155,9 @@ bool ActionCloneSource::doAction() {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
+			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
 			}
 		}
 
@@ -199,11 +195,9 @@ bool ActionReloadSource::doAction() {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
+			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
 			}
 		}
 
@@ -238,11 +232,9 @@ bool ActionSaveSource::doAction() {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
+			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
 			}
 		}
 
@@ -271,78 +263,15 @@ bool ActionSaveSourceAsync::doAction() {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
+			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
 			}
 		}
 
 		manager->saveSourceAsync(this->index, this->path);
 
 		this->output("Create Save Source Data Task: " + this->path + "\n");
-		return true;
-	}
-	return false;
-}
-
-ActionExportSource::ActionExportSource(
-	int index, const juce::String& path)
-	: index(index), path(path) {}
-
-bool ActionExportSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	if (auto manager = CloneableSourceManager::getInstance()) {
-		if (auto src = manager->getSource(this->index)) {
-			if (AudioIOList::getInstance()->isTask(src)) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
-			}
-		}
-
-		if (manager->exportSource(this->index, this->path)) {
-			this->output("Export Source Data: " + this->path + "\n");
-			return true;
-		}
-	}
-	this->error("Can't Export Source Data: " + this->path + "\n");
-	return false;
-}
-
-ActionExportSourceAsync::ActionExportSourceAsync(
-	int index, const juce::String& path)
-	: index(index), path(path) {}
-
-bool ActionExportSourceAsync::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	if (auto manager = CloneableSourceManager::getInstance()) {
-		if (auto src = manager->getSource(this->index)) {
-			if (AudioIOList::getInstance()->isTask(src)) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
-			}
-		}
-
-		manager->exportSourceAsync(this->index, this->path);
-
-		this->output("Create Export Source Data Task: " + this->path + "\n");
 		return true;
 	}
 	return false;

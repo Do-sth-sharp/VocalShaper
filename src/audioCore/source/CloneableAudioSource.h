@@ -8,11 +8,11 @@ public:
 	CloneableAudioSource() = default;
 	~CloneableAudioSource() override = default;
 
-	double getSourceSampleRate() const;
+	double getSourceSampleRate() const override;
 
 	void readData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
-	int getChannelNum() const;
+	int getChannelNum() const override;
 
 public:
 	bool parse(const google::protobuf::Message* data) override;
@@ -40,6 +40,8 @@ private:
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;
+
+	juce::AudioSampleBuffer* getAudioContentPtr() override;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableAudioSource)
 };

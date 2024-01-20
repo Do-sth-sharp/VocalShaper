@@ -39,6 +39,7 @@ SourceComponent::SourceComponent(
 
 	this->synthesizerButton = std::make_unique<juce::TextButton>(TRANS("Synthesizer"));
 	this->synthesizerButton->setWantsKeyboardFocus(false);
+	this->synthesizerButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->synthesizerButton->onClick = [this] { this->showSynthesizerMenu(); };
 	this->addAndMakeVisible(this->synthesizerButton.get());
 }
@@ -178,11 +179,6 @@ void SourceComponent::update(int index, bool selected) {
 		this->synthesizerButton->setButtonText(
 			this->synthButtonHeader + " " +
 			(this->synthesizer.isNotEmpty() ? this->synthesizer : this->synthButtonEmptyStr));
-		this->synthesizerButton->setEnabled(this->type == (int)(quickAPI::SourceType::SynthSource));
-		this->synthesizerButton->setMouseCursor(
-			this->synthesizerButton->isEnabled()
-			? juce::MouseCursor::PointingHandCursor
-			: juce::MouseCursor::NormalCursor);
 
 		this->infoStr = TRANS(this->typeName) + ", ";
 		this->infoStr += (utils::createTimeString(utils::splitTime(this->length)) + ", ");
@@ -205,8 +201,6 @@ void SourceComponent::update(int index, bool selected) {
 bool SourceComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
 	auto& des = dragSourceDetails.description;
-
-	if (this->type != quickAPI::SourceType::SynthSource) { return false; }
 
 	if ((int)(des["type"]) != (int)(DragSourceType::Plugin)) { return false; }
 	if (!des["instrument"]) { return false; }
@@ -276,12 +270,9 @@ void SourceComponent::selectThis() {
 enum SourceActionType {
 	NewAudio = 1,
 	NewMIDI,
-	NewSynth,
 	Clone,
 	Load,
-	LoadSynth,
 	Save,
-	Export,
 	Remove,
 	Replace,
 	SetName,
@@ -300,23 +291,14 @@ void SourceComponent::showSourceMenu() {
 	case SourceActionType::NewMIDI:
 		CoreActions::newMIDISourceGUI();
 		break;
-	case SourceActionType::NewSynth:
-		CoreActions::newSynthSourceGUI();
-		break;
 	case SourceActionType::Clone:
 		CoreActions::cloneSource(this->index);
 		break;
 	case SourceActionType::Load:
 		CoreActions::loadSourceGUI();
 		break;
-	case SourceActionType::LoadSynth:
-		CoreActions::loadSynthSourceGUI();
-		break;
 	case SourceActionType::Save:
 		CoreActions::saveSourceGUI(this->index);
-		break;
-	case SourceActionType::Export:
-		CoreActions::exportSourceGUI(this->index);
 		break;
 	case SourceActionType::Remove:
 		CoreActions::removeSourceGUI(this->index);
@@ -364,12 +346,8 @@ juce::PopupMenu SourceComponent::createSourceMenu() const {
 
 	menu.addSubMenu(TRANS("New"), this->createNewMenu());
 	menu.addItem(SourceActionType::Load, TRANS("Load"));
-	menu.addItem(SourceActionType::LoadSynth, TRANS("Load(Synth)"));
 	menu.addItem(SourceActionType::Save, TRANS("Save"),
 		(!this->isSynthing) && (!this->isIOTask));
-	menu.addItem(SourceActionType::Export, TRANS("Export"),
-		(this->type == (int)(quickAPI::SourceType::SynthSource))
-		&& (!this->isSynthing) && (!this->isIOTask));
 	menu.addItem(SourceActionType::Clone, TRANS("Clone"),
 		(!this->isSynthing) && (!this->isIOTask));
 	menu.addItem(SourceActionType::Remove, TRANS("Remove"), 
@@ -379,11 +357,9 @@ juce::PopupMenu SourceComponent::createSourceMenu() const {
 	menu.addSeparator();
 	menu.addItem(SourceActionType::SetName, TRANS("Set Name"));
 	menu.addItem(SourceActionType::SetSynthesizer, TRANS("Set Synthesizer"),
-		(this->type == (int)(quickAPI::SourceType::SynthSource))
-		&& (!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask));
 	menu.addItem(SourceActionType::Synth, TRANS("Synth"),
-		(this->type == (int)(quickAPI::SourceType::SynthSource))
-		&& (!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask));
 
 	return menu;
 }
@@ -393,7 +369,6 @@ juce::PopupMenu SourceComponent::createNewMenu() const {
 
 	menu.addItem(SourceActionType::NewAudio, TRANS("Audio"));
 	menu.addItem(SourceActionType::NewMIDI, TRANS("MIDI"));
-	menu.addItem(SourceActionType::NewSynth, TRANS("Synth"));
 
 	return menu;
 }
@@ -415,21 +390,17 @@ juce::String SourceComponent::createTooltip() const {
 		+ TRANS("Type:") + " " + this->typeName + "\n"
 		+ TRANS("Length:") + " " + juce::String{ this->length } + "s\n";
 
-	if (this->type == quickAPI::SourceType::AudioSource || this->type == quickAPI::SourceType::SynthSource) {
+	if (this->type == quickAPI::SourceType::AudioSource) {
 		result += (TRANS("Channels:") + " " + juce::String{ this->channels } + "\n");
 	}
-	if (this->type == quickAPI::SourceType::MIDISource || this->type == quickAPI::SourceType::SynthSource) {
+	if (this->type == quickAPI::SourceType::MIDISource) {
 		result += (TRANS("Tracks:") + " " + juce::String{ this->tracks } + "\n");
 	}
-	if (this->type == quickAPI::SourceType::MIDISource || this->type == quickAPI::SourceType::SynthSource) {
+	if (this->type == quickAPI::SourceType::MIDISource) {
 		result += (TRANS("Events:") + " " + juce::String{ this->events } + "\n");
 	}
-	if (this->type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Synthesizer:") + " " + this->synthesizer + "\n");
-	}
-	if (this->type == quickAPI::SourceType::AudioSource || this->type == quickAPI::SourceType::SynthSource) {
-		result += (TRANS("Sample Rate:") + " " + juce::String{ this->sampleRate } + "Hz\n");
-	}
+	result += (TRANS("Synthesizer:") + " " + this->synthesizer + "\n");
+	result += (TRANS("Sample Rate:") + " " + juce::String{ this->sampleRate } + "Hz\n");
 
 	return result;
 }

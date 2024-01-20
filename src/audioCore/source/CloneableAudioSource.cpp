@@ -29,8 +29,12 @@ int CloneableAudioSource::getChannelNum() const {
 }
 
 bool CloneableAudioSource::parse(const google::protobuf::Message* data) {
-	/** Nothing To Do, Never Invoked */
-	return dynamic_cast<const vsp4::Source*>(data);
+	auto src = dynamic_cast<const vsp4::Source*>(data);
+	if (!src) { return false; }
+
+	this->setName(src->name());
+	this->setPath(src->path());
+	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableAudioSource::serialize() const {
@@ -245,4 +249,8 @@ void CloneableAudioSource::writeData(
 
 	/** Set Flag */
 	this->changed();
+}
+
+juce::AudioSampleBuffer* CloneableAudioSource::getAudioContentPtr() {
+	return &(this->buffer);
 }

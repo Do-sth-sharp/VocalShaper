@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "PluginLoadThread.h"
@@ -13,7 +13,7 @@ public:
 		PluginDecorator::SafePointer ptr,
 		const Callback& callback = [] {});
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
-		CloneableSource::SafePointer<CloneableSynthSource> ptr,
+		CloneableSource::SafePointer<> ptr,
 		const Callback& callback = [] {});
 
 	bool isRunning() const;

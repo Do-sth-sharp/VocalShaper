@@ -8,6 +8,8 @@ class CloneableSource;
 template<typename T>
 concept IsCloneable = std::derived_from<T, CloneableSource>;
 
+class SynthRenderThread;
+
 class CloneableSource : public Serializable {
 public:
 	CloneableSource(const juce::String& name = juce::String{});
@@ -19,7 +21,6 @@ public:
 	void initThis(double sampleRate = 48000, int channelNum = 2, int sampleNum = 0);
 	bool loadFrom(const juce::File& file);
 	bool saveAs(const juce::File& file) const;
-	bool exportAs(const juce::File& file) const;
 	double getSourceLength() const;
 
 	bool checkSaved() const;
@@ -57,6 +58,39 @@ public:
 		juce::WeakReference<CloneableSource> weakRef;
 	};
 
+	void setSynthesizer(
+		std::unique_ptr<juce::AudioPluginInstance> synthesizer,
+		const juce::String& identifier);
+	const juce::String getSynthesizerName() const;
+	bool isSynthRunning() const;
+	void stopSynth();
+	void synth();
+
+	void setDstSource(CloneableSource::SafePointer<> dst);
+	CloneableSource::SafePointer<> getDstSource() const;
+
+	virtual double getSourceSampleRate() const { return 0; };
+	virtual int getChannelNum() const { return 0; };
+	virtual int getTrackNum() const { return 0; };
+
+	class SourceRenderHelperBase {
+	public:
+		SourceRenderHelperBase() = default;
+		virtual ~SourceRenderHelperBase() = default;
+		virtual SynthRenderThread* getImpl() const = 0;
+
+	private:
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceRenderHelperBase)
+	};
+
+private:
+	virtual juce::MidiFile* getMidiContentPtr() { return nullptr; };
+	virtual juce::AudioSampleBuffer* getAudioContentPtr() { return nullptr; };
+
+public:
+	void setSynthesizerState(const juce::MemoryBlock& state);
+	const juce::MemoryBlock getSynthesizerState() const;
+
 private:
 	friend class CloneableSourceManager;
 	static void resetIdCounter();
@@ -83,7 +117,6 @@ protected:
 	virtual bool clone(CloneableSource* dst) const = 0;
 	virtual bool load(const juce::File& file) = 0;
 	virtual bool save(const juce::File& file) const = 0;
-	virtual bool exportt(const juce::File& file) const { return false; };
 	virtual double getLength() const = 0;
 	virtual void sampleRateChanged() {};
 	virtual void init(double sampleRate, int channelNum, int sampleNum) {};
@@ -97,6 +130,11 @@ private:
 	std::atomic<double> currentSampleRate = 0;
 	std::atomic_int currentBufferSize = 0;
 	std::atomic_bool isRecording = false;
+
+	friend class SynthRenderThread;
+	std::unique_ptr<SourceRenderHelperBase> synthThread = nullptr;
+	std::unique_ptr<juce::AudioPluginInstance> synthesizer = nullptr;
+	juce::String pluginIdentifier;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource)

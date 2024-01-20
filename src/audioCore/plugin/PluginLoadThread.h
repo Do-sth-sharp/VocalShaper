@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 #include "../graph/PluginDecorator.h"
-#include "../source/CloneableSynthSource.h"
+#include "../source/CloneableSource.h"
 
 class PluginLoadThread final : public juce::Thread {
 public:
@@ -13,7 +13,7 @@ public:
 	struct DstPointer {
 		enum class Type { Plugin, Synth } type;
 		PluginDecorator::SafePointer pluginPtr;
-		CloneableSource::SafePointer<CloneableSynthSource> synthPtr;
+		CloneableSource::SafePointer<> synthPtr;
 	};
 	void load(const juce::PluginDescription& pluginInfo,
 		DstPointer ptr, const Callback& callback, double sampleRate, int blockSize);

@@ -83,7 +83,7 @@ namespace quickAPI {
 	}
 
 	constexpr std::array<const char*, 4> sourceTypeNameList{
-		"Unknown", "Audio", "MIDI", "Synth" };
+		"Unknown", "Audio", "MIDI" };
 
 	SourceType getSourceType(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
@@ -92,9 +92,6 @@ namespace quickAPI {
 			}
 			else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
 				return SourceType::MIDISource;
-			}
-			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-				return SourceType::SynthSource;
 			}
 		}
 		return SourceType::UnknownSource;
@@ -121,45 +118,36 @@ namespace quickAPI {
 
 	int getSourceChannelNum(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-				return p->getChannelNum();
-			}
-			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-				return p->getChannelNum();
-			}
+			return ptr->getChannelNum();
 		}
 		return 0;
 	}
 
 	int getSourceTrackNum(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-				return p->getTrackNum();
-			}
-			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-				return p->getTrackNum();
-			}
+			return ptr->getTrackNum();
 		}
 		return 0;
 	}
-
+	
 	const juce::String getSourceSynthesizerName(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-				return p->getSynthesizerName();
-			}
+			return ptr->getSynthesizerName();
 		}
 		return "";
 	}
 
+	int getSourceSynthDstIndex(int index) {
+		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
+			return CloneableSourceManager::getInstance()->getSourceIndex(
+				ptr->getDstSource());
+		}
+		return -1;
+	}
+
 	double getSourceSampleRate(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-				return p->getSourceSampleRate();
-			}
-			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-				return p->getSourceSampleRate();
-			}
+			ptr->getSourceSampleRate();
 		}
 		return 0;
 	}
@@ -167,9 +155,6 @@ namespace quickAPI {
 	int getSourceEventNum(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
 			if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-				return p->getEventNum();
-			}
-			else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
 				return p->getEventNum();
 			}
 		}

@@ -3,7 +3,6 @@
 #include "../source/CloneableSourceManager.h"
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
-#include "../source/CloneableSynthSource.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -106,7 +105,7 @@ void SeqSourceProcessor::processBlock(
 		for (int i = std::get<0>(index);
 			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
 			/** Get Block */
-			auto [blockStartTime, blockEndTime, blockOffset, blockPointer, blockIndex] = this->srcs.getUnchecked(i);
+			auto [blockStartTime, blockEndTime, blockOffset, blockPointer] = this->srcs.getUnchecked(i);
 			int blockStartTimeInSample = blockStartTime * sampleRate;
 			int blockEndTimeInSample = blockEndTime * sampleRate;
 			int blockOffsetInSample = blockOffset * sampleRate;
@@ -129,10 +128,6 @@ void SeqSourceProcessor::processBlock(
 						int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
 
 						if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-							/** Copy Audio Data */
-							p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
-						}
-						else if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
 							/** Copy Audio Data */
 							p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
 						}

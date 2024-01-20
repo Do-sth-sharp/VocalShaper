@@ -18,12 +18,9 @@ public:
 
 	static void loadMIDISource(const juce::String& filePath, bool copy);
 	static void loadAudioSource(const juce::String& filePath, bool copy);
-	static void loadSynthSource(const juce::String& filePath, bool copy);
 	static void newMIDISource();
 	static void newAudioSource(double sampleRate, int channels, double length);
-	static void newSynthSource();
 	static void saveSource(int index, const juce::String& filePath);
-	static void exportSource(int index, const juce::String& filePath);
 	static void cloneSource(int index);
 	static void reloadSource(int index, const juce::String& filePath, bool copy);
 	static void synthSource(int index);
@@ -62,11 +59,8 @@ public:
 	static void newMIDISourceGUI();
 	static void newAudioSourceGUI(double sampleRate, int channels, double length);
 	static void newAudioSourceGUI();
-	static void newSynthSourceGUI();
 	static void saveSourceGUI(int index);
 	static void saveSourceGUI();
-	static void exportSourceGUI(int index);
-	static void exportSourceGUI();
 	static void reloadSourceGUI(int index);
 	static void reloadSourceGUI();
 	static void synthSourceGUI(int index);

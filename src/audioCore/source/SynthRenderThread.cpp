@@ -2,18 +2,34 @@
 
 #include <DMDA.h>
 
-#include "CloneableSynthSource.h"
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 
-SynthRenderThread::SynthRenderThread(CloneableSynthSource* parent)
-	: Thread("Synth Render Thread"), parent(parent) {}
+SynthRenderThread::SynthRenderThread(CloneableSource* src)
+	: Thread("Synth Render Thread"), src(src) {}
 
 SynthRenderThread::~SynthRenderThread() {
 	this->stopThread(3000);
+}
+
+void SynthRenderThread::setDstSource(CloneableSource::SafePointer<> dst) {
+	/** Lock Buffer */
+	juce::ScopedWriteLock audioLocker(audioLock::getAudioLock());
+
+	/** Set Source */
+	this->dst = dst;
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
+}
+
+CloneableSource::SafePointer<> SynthRenderThread::getDstSource() const {
+	return this->dst;
 }
 
 void SynthRenderThread::run() {
@@ -25,35 +41,54 @@ void SynthRenderThread::run() {
 	/** Lock Buffer */
 	juce::ScopedWriteLock audioLocker(audioLock::getAudioLock());
 
-	/** Prepare Synth Info */
-	if (!parent->synthesizer) { return; }
-	double sampleRate = parent->getSourceSampleRate();
-	int bufferSize = parent->getBufferSize();
-	int channelNum = parent->audioBuffer.getNumChannels();
+	/** Check Synth Source */
+	if (!this->src->synthesizer) { return; }
+	if (!this->dst) { return; }
 
-	/** Get MIDI Data */
-	juce::MidiFile midiData = parent->buffer;
+	/** Get Input Data */
+	auto ptrMidiData = this->src->getMidiContentPtr();
+	auto ptrAudioData = this->src->getAudioContentPtr();
+	auto ptrMidiOut = this->dst->getMidiContentPtr();
+	auto ptrAudioOut = this->dst->getAudioContentPtr();
+
+	/** Prepare Synth Info */
+	double sampleRate = this->src->synthesizer->getSampleRate();
+	int bufferSize = this->src->synthesizer->getBlockSize();
+	int channelNum = std::max(this->src->synthesizer->getTotalNumInputChannels(),
+		this->src->synthesizer->getTotalNumOutputChannels());
+	int inputChannels = std::min(channelNum,
+		(ptrAudioData ? ptrAudioData->getNumChannels() : 0));
+	int outputChannels = std::min(channelNum, 
+		(ptrAudioOut ? ptrAudioOut->getNumChannels() : 0));
 
 	/** Set Play Head */
 	auto playHead = std::make_unique<MovablePlayHead>();
 	playHead->setSampleRate(sampleRate);
-	midiData.findAllTempoEvents(playHead->getTempoSequence());
-	midiData.findAllTimeSigEvents(playHead->getTempoSequence());
-	parent->synthesizer->setPlayHead(playHead.get());
+	if (ptrMidiData) {
+		ptrMidiData->findAllTempoEvents(playHead->getTempoSequence());
+		ptrMidiData->findAllTimeSigEvents(playHead->getTempoSequence());
+	}
+	this->src->synthesizer->setPlayHead(playHead.get());
 
 	/** DMDA Update Context Data */
 	DMDA::PluginHandler contextDataHandler(
-		[&midiData](DMDA::Context* context) { 
+		[ptrMidiData](DMDA::Context* context) {
 			if (auto ptrContext = dynamic_cast<DMDA::MidiFileContext*>(context)) {
 				juce::ScopedWriteLock locker(ptrContext->getLock());
-				ptrContext->setData(&midiData);
+				if (ptrMidiData) {
+					ptrContext->setData(ptrMidiData);
+				}
 			}
 		});
-	parent->synthesizer->getExtensions(contextDataHandler);
+	this->src->synthesizer->getExtensions(contextDataHandler);
 
 	/** Render Audio Data */
-	double audioLength = parent->getLength();
+	double audioLength = this->src->getLength();
 	playHead->transportPlay(true);
+
+	if (ptrMidiOut) {
+		ptrMidiOut->addTrack(juce::MidiMessageSequence{});
+	}
 
 	uint64_t totalSamples = audioLength * sampleRate;
 	int clipNum = totalSamples / bufferSize;
@@ -64,30 +99,60 @@ void SynthRenderThread::run() {
 		double endTime = startTime + bufferSize / sampleRate;
 		int64_t startPos = playPosition->getTimeInSamples().orFallback(0);
 
+		/** Input Buffer */
+		juce::MidiBuffer midiBuffer;
+		juce::AudioBuffer<float> audioBuffer(channelNum, bufferSize);
+
 		/** Get MIDI Data */
-		juce::MidiMessageSequence midiMessages;
-		for (int j = 0; j < midiData.getNumTracks(); j++) {
-			auto track = midiData.getTrack(j);
-			if (track) {
-				midiMessages.addSequence(*track, 0, startTime, endTime);
+		if (ptrMidiData) {
+			juce::MidiMessageSequence midiMessages;
+			for (int j = 0; j < ptrMidiData->getNumTracks(); j++) {
+				auto track = ptrMidiData->getTrack(j);
+				if (track) {
+					midiMessages.addSequence(*track, 0, startTime, endTime);
+				}
+			}
+			for (auto j : midiMessages) {
+				auto& message = j->message;
+				double time = message.getTimeStamp();
+				midiBuffer.addEvent(message, time * sampleRate);
 			}
 		}
-		juce::MidiBuffer midiBuffer;
-		for (auto j : midiMessages) {
-			auto& message = j->message;
-			double time = message.getTimeStamp();
-			midiBuffer.addEvent(message, time * sampleRate);
+		
+		/** Get Audio Data */
+		if (ptrAudioData) {
+			for (int j = 0; j < inputChannels; j++) {
+				vMath::copyAudioData(audioBuffer, *ptrAudioData,
+					0, startPos, j, j,
+					(i == clipNum) ? (totalSamples % clipNum) : bufferSize);
+			}
 		}
 
 		/** Call Process Block */
-		juce::AudioBuffer<float> audioBuffer(channelNum, bufferSize);
-		parent->synthesizer->processBlock(audioBuffer, midiBuffer);
+		this->src->synthesizer->processBlock(audioBuffer, midiBuffer);
 		
+		/** Copy MIDI Data */
+		if (ptrMidiOut) {
+			if (auto track = const_cast<juce::MidiMessageSequence*>(
+				ptrMidiOut->getTrack(ptrMidiOut->getNumTracks() - 1))) {
+				for (const auto& m : midiBuffer) {
+					double timeStamp = startTime + m.samplePosition / sampleRate;
+					if (timeStamp >= 0) {
+						auto mes = m.getMessage();
+						mes.setTimeStamp(timeStamp);
+						track->addEvent(mes);
+					}
+				}
+			}
+		}
+
 		/** Copy Audio Data */
-		for (int j = 0; j < channelNum; j++) {
-			vMath::copyAudioData(parent->audioBuffer, audioBuffer,
-				startPos, 0, j, j,
-				(i == clipNum) ? (totalSamples % clipNum) : bufferSize);
+		if (ptrAudioOut) {
+			for (int j = 0; j < outputChannels; j++) {
+				vMath::copyAudioData(*ptrAudioOut, audioBuffer,
+					startPos, 0, j, j,
+					(i == clipNum) ? (totalSamples % clipNum) : bufferSize);
+			}
 		}
 
 		/** Set Play Head */
@@ -102,10 +167,10 @@ void SynthRenderThread::run() {
 				ptrContext->setData(nullptr);
 			}
 		});
-	parent->synthesizer->getExtensions(contextDataReleaseHandler);
+	this->src->synthesizer->getExtensions(contextDataReleaseHandler);
 
 	/** Release Source */
-	auto releaseFunc = [src = CloneableSynthSource::SafePointer(parent)] {
+	auto releaseFunc = [src = CloneableSource::SafePointer(src)] {
 		if (src && src->synthesizer) {
 			src->synthesizer->releaseResources();
 		}
@@ -113,7 +178,7 @@ void SynthRenderThread::run() {
 	juce::MessageManager::callAsync(releaseFunc);
 
 	/** Reset Play Head */
-	parent->synthesizer->setPlayHead(nullptr);
+	this->src->synthesizer->setPlayHead(nullptr);
 
 	/** Callback */
 	juce::MessageManager::callAsync([] {

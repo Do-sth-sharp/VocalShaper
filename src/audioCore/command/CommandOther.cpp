@@ -76,20 +76,6 @@ AUDIOCORE_FUNC(saveSourceAsync) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(exportSource) {
-	auto action = std::unique_ptr<ActionBase>(new ActionExportSource{
-		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(exportSourceAsync) {
-	auto action = std::unique_ptr<ActionBase>(new ActionExportSourceAsync{
-		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(renderNow) {
 	juce::String result;
 
@@ -146,8 +132,6 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, cloneSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveSourceAsync);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, exportSource);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, exportSourceAsync);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, renderNow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, newProject);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, save);

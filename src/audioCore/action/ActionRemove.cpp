@@ -1034,11 +1034,9 @@ bool ActionRemoveSource::doAction() {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
-			if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-				if (p->isSynthRunning()) {
-					this->error("Unavailable source status!");
-					ACTION_RESULT(false);
-				}
+			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
 			}
 		}
 
@@ -1343,7 +1341,7 @@ bool ActionRemoveSequencerSourceInstance::doAction() {
 				ACTION_RESULT(false);
 			}
 
-			std::tie(ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), std::ignore, ACTION_DATA(index))
+			std::tie(ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), std::ignore)
 				= seqTrack->getSeq(ACTION_DATA(seq));
 
 			seqTrack->removeSeq(ACTION_DATA(seq));
@@ -1374,7 +1372,7 @@ bool ActionRemoveSequencerSourceInstance::undo() {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index));
 			if (!ptrSrc) { ACTION_RESULT(false); }
 
-			seqTrack->addSeq({ ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), ptrSrc, ACTION_DATA(index) });
+			seqTrack->addSeq({ ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), ptrSrc });
 
 			juce::String result;
 			result += "Undo Remove Sequencer Source Instance [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(seq)) + "]\n";
@@ -1406,7 +1404,7 @@ bool ActionRemoveRecorderSourceInstance::doAction() {
 				ACTION_RESULT(false);
 			}
 
-			std::tie(std::ignore, ACTION_DATA(index), ACTION_DATA(offset), ACTION_DATA(compensate))
+			std::tie(std::ignore, ACTION_DATA(offset), ACTION_DATA(compensate))
 				= recorder->getTask(ACTION_DATA(seq));
 
 			recorder->removeTask(ACTION_DATA(seq));
@@ -1437,7 +1435,7 @@ bool ActionRemoveRecorderSourceInstance::undo() {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(index));
 			if (!ptrSrc) { ACTION_RESULT(false); }
 
-			recorder->insertTask({ ptrSrc, ACTION_DATA(index), ACTION_DATA(offset), ACTION_DATA(compensate) }, ACTION_DATA(seq));
+			recorder->insertTask({ ptrSrc, ACTION_DATA(offset), ACTION_DATA(compensate) }, ACTION_DATA(seq));
 
 			juce::String result;
 			result += "Undo Remove Recorder Source Instance [" + juce::String(ACTION_DATA(seq)) + "]\n";

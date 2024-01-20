@@ -2,7 +2,6 @@
 
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
-#include "../source/CloneableSynthSource.h"
 #include "../source/CloneableSourceManager.h"
 #include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
@@ -20,7 +19,7 @@ SourceRecordProcessor::~SourceRecordProcessor() {
 void SourceRecordProcessor::insertTask(
 	const SourceRecordProcessor::RecorderTask& task, int index) {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
-	auto& [source, srcIndex, offset, compensate] = task;
+	auto& [source, offset, compensate] = task;
 
 	/** Check Source */
 	if (!source) { return; }
@@ -34,12 +33,12 @@ void SourceRecordProcessor::insertTask(
 		this->getSampleRate(), this->getBlockSize());
 	
 	/** Add Task */
-	return this->tasks.insert(index, { source, srcIndex, offset, compensate });
+	return this->tasks.insert(index, task);
 }
 
 void SourceRecordProcessor::removeTask(int index) {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
-	auto [src, srcIndex, offset, compensate] = this->tasks.removeAndReturn(index);
+	auto [src, offset, compensate] = this->tasks.removeAndReturn(index);
 	if (src) {
 		src->recordingFinishedInternal();
 	}
@@ -64,7 +63,7 @@ void SourceRecordProcessor::prepareToPlay(
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
 
 	/** Update Source Sample Rate And Buffer Size */
-	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
+	for (auto& [source, offset, compensate] : this->tasks) {
 		if (source) {
 			source->prepareToRecordInternal(this->getTotalNumInputChannels(),
 				this->getSampleRate(), this->getBlockSize(), true);
@@ -81,7 +80,7 @@ void SourceRecordProcessor::processBlock(
 	if (!playPosition->getIsPlaying() || !playPosition->getIsRecording()) { return; }
 
 	/** Check Each Task */
-	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
+	for (auto& [source, offset, compensate] : this->tasks) {
 		/** Get Task Info */
 		int offsetPos = std::floor(offset * this->getSampleRate());
 		if (static_cast<long long>(offsetPos - buffer.getNumSamples()) >
@@ -97,10 +96,6 @@ void SourceRecordProcessor::processBlock(
 		}
 		else if (auto src = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
 			/** MIDI Source */
-			src->writeData(midiMessages, startPos);
-		}
-		else if (auto src = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-			/** Synth Source */
 			src->writeData(midiMessages, startPos);
 		}
 	}
@@ -129,7 +124,7 @@ bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
 	auto& list = mes->sources();
 	for (auto& i : list) {
 		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
-			this->insertTask({ ptrSrc, i.index(), i.offset(), i.compensate()});
+			this->insertTask({ ptrSrc, i.offset(), i.compensate()});
 		}
 	}
 
@@ -140,9 +135,9 @@ std::unique_ptr<google::protobuf::Message> SourceRecordProcessor::serialize() co
 	auto mes = std::make_unique<vsp4::Recorder>();
 
 	auto list = mes->mutable_sources();
-	for (auto& [source, srcIndex, offset, compensate] : this->tasks) {
+	for (auto& [source, offset, compensate] : this->tasks) {
 		auto smes = std::make_unique<vsp4::SourceRecorderInstance>();
-		smes->set_index(srcIndex);
+		smes->set_index(CloneableSourceManager::getInstance()->getSourceIndex(source));
 		smes->set_offset(offset);
 		smes->set_compensate(compensate);
 		list->AddAllocated(smes.release());

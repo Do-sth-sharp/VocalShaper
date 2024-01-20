@@ -4,7 +4,6 @@
 #include "../source/CloneableSourceManager.h"
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
-#include "../source/CloneableSynthSource.h"
 #include "../plugin/PluginLoader.h"
 #include "../plugin/Plugin.h"
 #include "../project/ProjectInfoData.h"
@@ -52,11 +51,6 @@ namespace quickAPI {
 		return dynamic_cast<CloneableMIDISource*>(ptr.getSource());
 	}
 
-	bool checkForSynthSource(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return dynamic_cast<CloneableSynthSource*>(ptr.getSource());
-	}
-
 	bool checkSourceIOTask(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
 		return AudioIOList::getInstance()->isTask(ptr);
@@ -64,9 +58,6 @@ namespace quickAPI {
 
 	bool checkSourceSynthing(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		if (auto p = dynamic_cast<CloneableSynthSource*>(ptr.getSource())) {
-			return p->isSynthRunning();
-		}
-		return false;
+		return ptr->isSynthRunning();
 	}
 }

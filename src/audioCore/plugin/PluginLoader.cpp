@@ -1,4 +1,4 @@
-#include "PluginLoader.h"
+﻿#include "PluginLoader.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 
@@ -24,7 +24,7 @@ void PluginLoader::loadPlugin(
 }
 
 void PluginLoader::loadPlugin(const juce::PluginDescription& pluginInfo,
-	CloneableSource::SafePointer<CloneableSynthSource> ptr, const Callback& callback) {
+	CloneableSource::SafePointer<> ptr, const Callback& callback) {
 	/** Get Audio Config */
 	auto mainGraph = AudioCore::getInstance()->getGraph();
 	if (!mainGraph) {

@@ -331,41 +331,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionAddMidiSourceThenInit)
 };
 
-class ActionAddSynthSourceThenLoad final : public ActionUndoableBase {
-public:
-	ActionAddSynthSourceThenLoad() = delete;
-	ActionAddSynthSourceThenLoad(
-		const juce::String& path, bool copy);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Add Synth Source Then Load";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const juce::String path;
-		const bool copy;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionAddSynthSourceThenLoad)
-};
-
-class ActionAddSynthSourceThenInit final : public ActionUndoableBase {
-public:
-	ActionAddSynthSourceThenInit();
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Add Synth Source Then Init";
-	};
-
-private:
-	JUCE_LEAK_DETECTOR(ActionAddSynthSourceThenInit)
-};
-
 class ActionAddSequencerTrack final : public ActionUndoableBase {
 public:
 	ActionAddSequencerTrack() = delete;

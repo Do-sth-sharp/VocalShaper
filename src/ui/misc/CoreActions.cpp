@@ -53,12 +53,6 @@ void CoreActions::loadAudioSource(const juce::String& filePath, bool copy) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::loadSynthSource(const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddSynthSourceThenLoad{ filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
 void CoreActions::newMIDISource() {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenInit);
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -71,20 +65,9 @@ void CoreActions::newAudioSource(
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::newSynthSource() {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddSynthSourceThenInit);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
 void CoreActions::saveSource(int index, const juce::String& filePath) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSaveSourceAsync{ index, filePath });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::exportSource(int index, const juce::String& filePath) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionExportSourceAsync{ index, filePath });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -305,25 +288,6 @@ void CoreActions::loadSourceGUI() {
 	}
 }
 
-void CoreActions::loadSynthSourceGUI() {
-	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Load Playing Source (Synth)"), defaultPath,
-		midiFormats.joinIntoString(","));
-	if (chooser.browseForMultipleFilesToOpen()) {
-		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
-			juce::MessageBoxIconType::QuestionIcon, TRANS("Load Playing Source (Synth)"),
-			TRANS("Copy source files to working directory?"));
-		if (shouldCopy == 0) { return; }
-
-		auto files = chooser.getResults();
-		for (auto& i : files) {
-			CoreActions::loadSynthSource(i.getFullPathName(), shouldCopy == 1);
-		}
-	}
-}
-
 void CoreActions::newMIDISourceGUI() {
 	CoreActions::newMIDISource();
 }
@@ -353,10 +317,6 @@ void CoreActions::newAudioSourceGUI() {
 	auto callback = [](double sampleRate, int channels, double length) {
 		CoreActions::newAudioSourceGUI(sampleRate, channels, length); };
 	CoreActions::askForAudioPropGUIAsync(callback);
-}
-
-void CoreActions::newSynthSourceGUI() {
-	CoreActions::newSynthSource();
 }
 
 void CoreActions::saveSourceGUI(int index) {
@@ -393,36 +353,6 @@ void CoreActions::saveSourceGUI(int index) {
 
 void CoreActions::saveSourceGUI() {
 	auto callback = [](int index) { CoreActions::saveSourceGUI(index); };
-	CoreActions::askForSourceIndexGUIAsync(callback);
-}
-
-void CoreActions::exportSourceGUI(int index) {
-	if (index == -1) { return; }
-
-	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
-
-	if (!quickAPI::checkForSynthSource(index)) {
-		juce::AlertWindow::showMessageBox(
-			juce::MessageBoxIconType::WarningIcon, TRANS("Export Synth Source"),
-			TRANS("The selected source is not a synth source!"));
-		return;
-	}
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Export Synth Source"), defaultPath,
-		audioFormats.joinIntoString(","));
-	if (chooser.browseForFileToSave(true)) {
-		auto file = chooser.getResult();
-		if (file.getFileExtension().isEmpty()) {
-			file = file.withFileExtension(audioFormats[0].trimCharactersAtStart("*."));
-		}
-
-		CoreActions::exportSource(index, file.getFullPathName());
-	}
-}
-
-void CoreActions::exportSourceGUI() {
-	auto callback = [](int index) { CoreActions::exportSourceGUI(index); };
 	CoreActions::askForSourceIndexGUIAsync(callback);
 }
 

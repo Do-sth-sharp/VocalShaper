@@ -546,6 +546,29 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetSourceSynthesizer)
 };
 
+class ActionSetSourceSynthDst final : public ActionUndoableBase {
+public:
+	ActionSetSourceSynthDst() = delete;
+	ActionSetSourceSynthDst(
+		int index, int dst);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Source Synth Destination";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int index;
+		const int dst;
+
+		int oldDst = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSourceSynthesizer)
+};
+
 class ActionSetSourceName final : public ActionUndoableBase {
 public:
 	ActionSetSourceName() = delete;

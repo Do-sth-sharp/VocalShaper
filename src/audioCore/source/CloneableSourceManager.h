@@ -23,6 +23,7 @@ public:
 	*/
 	bool removeSource(int index);
 	CloneableSource::SafePointer<> getSource(int index) const;
+	int getSourceIndex(const CloneableSource* src) const;
 	int getSourceNum() const;
 	juce::ReadWriteLock& getLock() const;
 
@@ -67,14 +68,6 @@ public:
 	* @attention	You must call this from message thread.
 	*/
 	bool saveSourceAsync(int index, const juce::String& path) const;
-	/**
-	* @attention	You must call this from message thread.
-	*/
-	bool exportSource(int index, const juce::String& path) const;
-	/**
-	* @attention	You must call this from message thread.
-	*/
-	bool exportSourceAsync(int index, const juce::String& path) const;
 	/**
 	* @attention	You must call this from message thread.
 	*/

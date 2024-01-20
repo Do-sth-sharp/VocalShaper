@@ -11,8 +11,6 @@ template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableAudi
 	const juce::String& path, bool copy);
 template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableMIDISource>(
 	const juce::String& path, bool copy);
-template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableSynthSource>(
-	const juce::String& path, bool copy);
 
 ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
 	: plugin(plugin) {}
@@ -571,11 +569,9 @@ bool ActionAddAudioSourceThenLoad::undo() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
 		}
 	}
 
@@ -623,11 +619,9 @@ bool ActionAddAudioSourceThenInit::undo() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
 		}
 	}
 
@@ -676,11 +670,9 @@ bool ActionAddMidiSourceThenLoad::undo() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
 		}
 	}
 
@@ -721,117 +713,15 @@ bool ActionAddMidiSourceThenInit::undo() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
+		if (src->isSynthRunning()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
 		}
 	}
 
 	CloneableSourceManager::getInstance()->removeSource(index);
 
 	this->output("Undo Add MIDI Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-ActionAddSynthSourceThenLoad::ActionAddSynthSourceThenLoad(
-	const juce::String& path, bool copy)
-	: ACTION_DB{ path, copy } {}
-
-bool ActionAddSynthSourceThenLoad::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddSynthSourceThenLoad);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(path);
-
-	CloneableSourceManager::getInstance()
-		->createNewSourceThenLoadAsync<CloneableSynthSource>(ACTION_DATA(path), ACTION_DATA(copy));
-
-	this->output("Add Synth Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-bool ActionAddSynthSourceThenLoad::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddSynthSourceThenLoad);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(path);
-
-	int index = CloneableSourceManager::getInstance()->getSourceNum() - 1;
-	if (auto src = CloneableSourceManager::getInstance()->getSource(index)) {
-		if (AudioIOList::getInstance()->isTask(src)) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
-		}
-	}
-
-	CloneableSourceManager::getInstance()->removeSource(index);
-
-	this->output("Undo Add Synth Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-ActionAddSynthSourceThenInit::ActionAddSynthSourceThenInit() {}
-
-bool ActionAddSynthSourceThenInit::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddSynthSourceThenInit);
-
-	CloneableSourceManager::getInstance()
-		->createNewSource<CloneableSynthSource>();
-
-	this->output("Add Synth Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-bool ActionAddSynthSourceThenInit::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddSynthSourceThenInit);
-
-	int index = CloneableSourceManager::getInstance()->getSourceNum() - 1;
-	if (auto src = CloneableSourceManager::getInstance()->getSource(index)) {
-		if (AudioIOList::getInstance()->isTask(src)) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-		if (auto p = dynamic_cast<CloneableSynthSource*>(src.getSource())) {
-			if (p->isSynthRunning()) {
-				this->error("Unavailable source status!");
-				ACTION_RESULT(false);
-			}
-		}
-	}
-
-	CloneableSourceManager::getInstance()->removeSource(index);
-
-	this->output("Undo Add Synth Source.\n"
 		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
 	ACTION_RESULT(true);
 }
@@ -1028,7 +918,7 @@ bool ActionAddSequencerSourceInstance::doAction() {
 			if (!ptrSrc) { ACTION_RESULT(false); }
 
 			ACTION_DATA(index) = seqTrack->addSeq(
-				{ ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), ptrSrc, ACTION_DATA(src) });
+				{ ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), ptrSrc });
 
 			this->output("Add Sequencer Source Instance [" + juce::String(ACTION_DATA(track)) + "] : [" + juce::String(ACTION_DATA(src)) + "]\n"
 				+ "Total Sequencer Source Instance: " + juce::String(seqTrack->getSeqNum()) + "\n");
@@ -1081,7 +971,7 @@ bool ActionAddRecorderSourceInstance::doAction() {
 			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(src));
 			if (!ptrSrc) { ACTION_RESULT(false); }
 
-			recorder->insertTask({ ptrSrc, ACTION_DATA(src), ACTION_DATA(offset), ACTION_DATA(compensate) });
+			recorder->insertTask({ ptrSrc, ACTION_DATA(offset), ACTION_DATA(compensate) });
 
 			this->output("Add Recorder Source Instance [" + juce::String(ACTION_DATA(src)) + "]\n"
 				+ "Total Recorder Source Instance: " + juce::String(recorder->getTaskNum()) + "\n");

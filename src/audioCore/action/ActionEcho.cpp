@@ -466,21 +466,17 @@ bool ActionEchoSource::doAction() {
 			result += "Name: " + source->getName() + "\n";
 			result += "Length: " + juce::String(source->getSourceLength()) + "\n";
 			result += "SampleRate: " + juce::String(source->getSampleRate()) + "\n";
+			result += "Source SampleRate: " + juce::String(source->getSourceSampleRate()) + "\n";
+			result += "Channel Num: " + juce::String(source->getChannelNum()) + "\n";
+			result += "Track Num: " + juce::String(source->getTrackNum()) + "\n";
+			result += "Synthesizer: " + source->getSynthesizerName() + "\n";
 			if (auto ptr = dynamic_cast<CloneableAudioSource*>(source.getSource())) {
 				result += "Type: Audio\n";
-				result += "Source SampleRate: " + juce::String(ptr->getSourceSampleRate()) + "\n";
 				result += "Channel Num: " + juce::String(ptr->getChannelNum()) + "\n";
 			}
 			else if (auto ptr = dynamic_cast<CloneableMIDISource*>(source.getSource())) {
 				result += "Type: MIDI\n";
 				result += "Track Num: " + juce::String(ptr->getTrackNum()) + "\n";
-			}
-			else if (auto ptr = dynamic_cast<CloneableSynthSource*>(source.getSource())) {
-				result += "Type: Synth\n";
-				result += "Source SampleRate: " + juce::String(ptr->getSourceSampleRate()) + "\n";
-				result += "Channel Num: " + juce::String(ptr->getChannelNum()) + "\n";
-				result += "Track Num: " + juce::String(ptr->getTrackNum()) + "\n";
-				result += "Synthesizer: " + ptr->getSynthesizerName() + "\n";
 			}
 			else {
 				result += "Type: Unknown\n";

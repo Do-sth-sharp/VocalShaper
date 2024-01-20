@@ -20,9 +20,7 @@ private:
 	void openProject() const;
 	void saveProject() const;
 	void loadSource() const;
-	void loadSynthSource() const;
 	void saveSource() const;
-	void exportSource() const;
 	void render() const;
 
 	void undo() const;

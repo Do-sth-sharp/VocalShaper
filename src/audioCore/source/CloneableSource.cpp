@@ -1,6 +1,26 @@
 ﻿#include "CloneableSource.h"
+#include "SynthRenderThread.h"
 #include "../misc/AudioLock.h"
 #include "../uiCallback/UICallback.h"
+#include <DMDA.h>
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
+
+class SourceRenderHelper final : public CloneableSource::SourceRenderHelperBase {
+public:
+	SourceRenderHelper() = delete;
+	explicit SourceRenderHelper(CloneableSource* src) {
+		this->thread = std::make_unique<SynthRenderThread>(src);
+	}
+	SynthRenderThread* getImpl() const override {
+		return this->thread.get();
+	}
+
+private:
+	std::unique_ptr<SynthRenderThread> thread = nullptr;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceRenderHelper)
+};
 
 std::atomic_int CloneableSource::globalCounter = 0;
 
@@ -12,6 +32,9 @@ CloneableSource::CloneableSource(
 	int id, const juce::String& name)
 	: name(name) {
 	this->setId(id);
+
+	this->synthThread = std::unique_ptr<SourceRenderHelperBase>(
+		new SourceRenderHelper(this));
 }
 
 std::unique_ptr<CloneableSource> CloneableSource::cloneThis() const {
@@ -60,10 +83,6 @@ bool CloneableSource::saveAs(const juce::File& file) const {
 		return true;
 	}
 	return false;
-}
-
-bool CloneableSource::exportAs(const juce::File& file) const {
-	return this->exportt(file);
 }
 
 double CloneableSource::getSourceLength() const {
@@ -121,6 +140,91 @@ double CloneableSource::getSampleRate() const {
 
 int CloneableSource::getBufferSize() const {
 	return this->currentBufferSize;
+}
+
+void CloneableSource::setSynthesizer(
+	std::unique_ptr<juce::AudioPluginInstance> synthesizer,
+	const juce::String& identifier) {
+	/** Stop Render */
+	this->synthThread->getImpl()->stopThread(3000);
+
+	/** Set Synthesizer */
+	this->synthesizer = std::move(synthesizer);
+	this->pluginIdentifier = identifier;
+
+	/** DMDA Hand Shake */
+	DMDA::PluginHandler handShakeHandler(
+		[](DMDA::Context* context) { context->handShake(); });
+	this->synthesizer->getExtensions(handShakeHandler);
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
+}
+
+const juce::String CloneableSource::getSynthesizerName() const {
+	if (this->synthesizer) {
+		return this->synthesizer->getName();
+	}
+	return juce::String{};
+}
+
+bool CloneableSource::isSynthRunning() const {
+	return this->synthThread->getImpl()->isThreadRunning();
+}
+
+void CloneableSource::stopSynth() {
+	this->synthThread->getImpl()->stopThread(3000);
+}
+
+void CloneableSource::synth() {
+	/** Check Synthesizer */
+	if (!this->synthesizer) { return; }
+	auto dstSource = this->synthThread->getImpl()->getDstSource();
+	if (!dstSource) { return; }
+
+	/** Stop Render */
+	this->synthThread->getImpl()->stopThread(3000);
+
+	/** Lock Buffer */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	/** Prepare Synthesizer */
+	{
+		double sampleRate = std::max(this->getSourceSampleRate(), dstSource->getSourceSampleRate());
+		if (sampleRate <= 0) { sampleRate = this->getSampleRate(); }
+		int bufferSize = this->getBufferSize();
+		this->synthesizer->prepareToPlay(sampleRate, bufferSize);
+	}
+
+	/** Start Render */
+	this->synthThread->getImpl()->startThread();
+}
+
+void CloneableSource::setDstSource(CloneableSource::SafePointer<> dst) {
+	this->synthThread->getImpl()->setDstSource(dst);
+}
+
+CloneableSource::SafePointer<> CloneableSource::getDstSource() const {
+	return this->synthThread->getImpl()->getDstSource();
+}
+
+void CloneableSource::setSynthesizerState(const juce::MemoryBlock& state) {
+	if (this->synthesizer) {
+		this->synthesizer->setStateInformation(
+			state.getData(), state.getSize());
+	}
+}
+
+const juce::MemoryBlock CloneableSource::getSynthesizerState() const {
+	juce::MemoryBlock result;
+
+	if (this->synthesizer) {
+		this->synthesizer->getStateInformation(result);
+	}
+
+	return result;
 }
 
 void CloneableSource::resetIdCounter() {

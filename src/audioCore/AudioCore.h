@@ -6,7 +6,6 @@
 #include "source/CloneableSourceManager.h"
 #include "source/CloneableAudioSource.h"
 #include "source/CloneableMIDISource.h"
-#include "source/CloneableSynthSource.h"
 #include "source/AudioIOList.h"
 #include "misc/MackieControlHub.h"
 #include "project/Serializable.h"

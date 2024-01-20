@@ -24,7 +24,6 @@ countries: cn
 "Select a source in the list:" = "在列表中选择一个源："
 "The source list is empty!" = "源列表为空！"
 "Saving the source outside of the working directory may cause dependency problem with project files. Continue?" = "将源保存至工作目录外有可能会导致项目文件依赖问题。继续？"
-"The selected source is not a synth source!" = "选择的源不是一个合成源！"
 "The track list is empty!" = "轨道列表为空！"
 "Select tracks in the list: (Use Ctrl and Shift keys to select multiple items)" = "在列表中选择轨道：（使用Ctrl和Shift键多选）"
 "No track selected!" = "未选择轨道！"

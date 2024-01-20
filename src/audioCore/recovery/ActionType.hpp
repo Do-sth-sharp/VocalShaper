@@ -16,8 +16,6 @@ enum class ActionType : unsigned int {
 	ActionAddAudioSourceThenInit,
 	ActionAddMidiSourceThenLoad,
 	ActionAddMidiSourceThenInit,
-	ActionAddSynthSourceThenLoad,
-	ActionAddSynthSourceThenInit,
 	ActionAddSequencerTrack,
 	ActionAddSequencerTrackMidiOutputToMixer,
 	ActionAddSequencerTrackMidiOutputToInstr,
@@ -65,5 +63,6 @@ enum class ActionType : unsigned int {
 	ActionSetEffectMidiCCIntercept,
 	ActionSetSequencerTrackBypass,
 	ActionSetSourceSynthesizer,
-	ActionSetSourceName
+	ActionSetSourceName,
+	ActionSetSourceSynthDst
 };
