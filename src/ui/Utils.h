@@ -106,4 +106,22 @@ namespace utils {
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextDoubleFilter)
 	};
+
+	using PluginGroup = std::tuple<juce::String, juce::Array<juce::PluginDescription>>;
+	enum class PluginGroupType {
+		Format, Manufacturer, Category
+	};
+	const juce::Array<PluginGroup> groupPlugin(const juce::Array<juce::PluginDescription>& list,
+		PluginGroupType groupType, bool search = false, const juce::String& searchText = "");
+	juce::PopupMenu createPluginMenu(const juce::Array<PluginGroup>& list,
+		const std::function<void(const juce::PluginDescription&)>& callback);
+
+	using TimeInSeconds = std::tuple<int, int, int, int>;
+	using TimeInBeats = std::tuple<int, int, int>;
+	const TimeInSeconds splitTime(double seconds);
+	const TimeInBeats splitBeat(uint64_t measures, double beats);
+	const std::array<uint8_t, 8> createTimeStringBase(const TimeInSeconds& time);
+	const std::array<uint8_t, 8> createBeatStringBase(const TimeInBeats& time);
+	const juce::String createTimeString(const TimeInSeconds& time);
+	const juce::String createBeatString(const TimeInBeats& time);
 }

@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../Utils.h"
 
 class PluginTreeModel final : public juce::TreeViewItem {
 public:
 	PluginTreeModel() = delete;
-	using PluginClass = std::tuple<const juce::String&, const juce::Array<juce::PluginDescription>&>;
+	using PluginClass = utils::PluginGroup;
 	PluginTreeModel(const juce::Array<PluginClass>& plugins,
 		const std::function<void(const juce::String&)>& groupMenuCallback,
 		const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback);

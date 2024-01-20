@@ -32,6 +32,15 @@ SourceComponent::SourceComponent(
 	this->nameEditor->onReturnKey = updateNameFunc;
 	this->nameEditor->onFocusLost = updateNameFunc;
 	this->addAndMakeVisible(this->nameEditor.get());
+
+	/** Synthesizer Button */
+	this->synthButtonHeader = TRANS("Synthesizer:");
+	this->synthButtonEmptyStr = TRANS("Empty");
+
+	this->synthesizerButton = std::make_unique<juce::TextButton>(TRANS("Synthesizer"));
+	this->synthesizerButton->setWantsKeyboardFocus(false);
+	this->synthesizerButton->onClick = [this] { this->showSynthesizerMenu(); };
+	this->addAndMakeVisible(this->synthesizerButton.get());
 }
 
 void SourceComponent::resized() {
@@ -48,6 +57,8 @@ void SourceComponent::resized() {
 	int nameLineHeight = screenSize.getHeight() * 0.03;
 	int idAreaWidth = screenSize.getWidth() * 0.015;
 
+	int synthLineHeight = screenSize.getHeight() * 0.02;
+
 	/** Name Line */
 	juce::Rectangle<int> nameLineArea(
 		selectBarWidth + paddingWidth, paddingHeight,
@@ -56,6 +67,12 @@ void SourceComponent::resized() {
 	/** Name */
 	auto nameRect = nameLineArea.withTrimmedLeft(idAreaWidth + splitWidth);
 	this->nameEditor->setBounds(nameRect);
+
+	/** Synthesizer */
+	juce::Rectangle<int> synthRect(
+		selectBarWidth + paddingWidth, nameLineArea.getBottom() + splitHeight,
+		nameLineArea.getWidth(), synthLineHeight);
+	this->synthesizerButton->setBounds(synthRect);
 }
 
 void SourceComponent::paint(juce::Graphics& g) {
@@ -76,6 +93,11 @@ void SourceComponent::paint(juce::Graphics& g) {
 	float idFontHeight = screenSize.getHeight() * 0.02;
 	int idAreaWidth = screenSize.getWidth() * 0.015;
 
+	int synthLineHeight = screenSize.getHeight() * 0.02;
+
+	int infoLineHeight = screenSize.getHeight() * 0.02;
+	float infoFontHeight = screenSize.getHeight() * 0.015;
+
 	/** Color */
 	juce::Colour backgroundColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
@@ -87,9 +109,12 @@ void SourceComponent::paint(juce::Graphics& g) {
 	juce::Colour selectBarColor = laf.findColour(this->selected
 		? (juce::Label::ColourIds::outlineWhenEditingColourId)
 		: juce::Label::ColourIds::outlineColourId);
+	juce::Colour infoTextColor = laf.findColour(
+		juce::Label::ColourIds::textColourId);
 
 	/** Font */
 	juce::Font idFont(idFontHeight);
+	juce::Font infoFont(infoFontHeight);
 
 	/** Background */
 	g.setColour(backgroundColor);
@@ -117,6 +142,20 @@ void SourceComponent::paint(juce::Graphics& g) {
 	g.setFont(idFont);
 	g.drawFittedText("#" + juce::String{ this->id },
 		idRect, juce::Justification::centredLeft, 1);
+
+	/** Synthesizer */
+	juce::Rectangle<int> synthRect(
+		selectBarWidth + paddingWidth, nameLineArea.getBottom() + splitHeight,
+		nameLineArea.getWidth(), synthLineHeight);
+
+	/** Info */
+	juce::Rectangle<int> infoLineArea(
+		selectBarWidth + paddingWidth, synthRect.getBottom() + splitHeight,
+		nameLineArea.getWidth(), infoLineHeight);
+	g.setColour(infoTextColor);
+	g.setFont(infoFont);
+	g.drawFittedText(this->infoStr, infoLineArea,
+		juce::Justification::centredLeft, 1, 1.f);
 }
 
 void SourceComponent::update(int index, bool selected) {
@@ -135,6 +174,27 @@ void SourceComponent::update(int index, bool selected) {
 		this->sampleRate = quickAPI::getSourceSampleRate(index);
 		this->isIOTask = quickAPI::checkSourceIOTask(index);
 		this->isSynthing = quickAPI::checkSourceSynthing(index);
+
+		this->synthesizerButton->setButtonText(
+			this->synthButtonHeader + " " +
+			(this->synthesizer.isNotEmpty() ? this->synthesizer : this->synthButtonEmptyStr));
+		this->synthesizerButton->setEnabled(this->type == (int)(quickAPI::SourceType::SynthSource));
+		this->synthesizerButton->setMouseCursor(
+			this->synthesizerButton->isEnabled()
+			? juce::MouseCursor::PointingHandCursor
+			: juce::MouseCursor::NormalCursor);
+
+		this->infoStr = TRANS(this->typeName) + ", ";
+		this->infoStr += (utils::createTimeString(utils::splitTime(this->length)) + ", ");
+		if (this->isIOTask) {
+			this->infoStr += TRANS("IO Running");
+		}
+		else if (this->isSynthing) {
+			this->infoStr += TRANS("Synthing");
+		}
+		else {
+			this->infoStr += TRANS("Ready");
+		}
 
 		this->setTooltip(this->createTooltip());
 	}
@@ -281,6 +341,22 @@ void SourceComponent::startDrag() {
 		container->startDragging(this->getDragSourceDescription(),
 			this, juce::ScaledImage{}, true);
 	}
+}
+
+void SourceComponent::showSynthesizerMenu() {
+	/** Callback */
+	auto callback = [index = this->index](const juce::PluginDescription& plugin) {
+		CoreActions::setSourceSynthesizer(index, plugin.createIdentifierString());
+		};
+
+	/** Create Menu */
+	auto [valid, list] = quickAPI::getPluginList(true, true);
+	if (!valid) { return; }
+	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
+	auto menu = utils::createPluginMenu(groups, callback);
+
+	/** Show Menu */
+	menu.showAt(this->synthesizerButton.get());
 }
 
 juce::PopupMenu SourceComponent::createSourceMenu() const {

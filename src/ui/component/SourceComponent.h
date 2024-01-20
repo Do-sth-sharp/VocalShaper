@@ -28,6 +28,7 @@ private:
 	const std::function<void(int)> selectCallback;
 
 	std::unique_ptr<juce::TextEditor> nameEditor = nullptr;
+	std::unique_ptr<juce::TextButton> synthesizerButton = nullptr;
 	int index = -1, id = -1;
 	int type = 0;
 	juce::String typeName;
@@ -39,6 +40,9 @@ private:
 	bool selected = false, itemDragAccepted = false;
 	bool isIOTask = false, isSynthing = false;
 
+	juce::String synthButtonHeader, synthButtonEmptyStr;
+	juce::String infoStr;
+
 	void updateName(const juce::String& name);
 
 	void preDrop();
@@ -47,6 +51,8 @@ private:
 	void selectThis();
 	void showSourceMenu();
 	void startDrag();
+
+	void showSynthesizerMenu();
 
 	juce::PopupMenu createSourceMenu() const;
 	juce::PopupMenu createNewMenu() const;

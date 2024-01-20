@@ -48,9 +48,6 @@ private:
 		juce::Graphics& g, const juce::Rectangle<int>& area,
 		float lineThickness, bool playing);
 
-	static std::tuple<int, int, int, int> parseTimeSec(double time);
-	static std::tuple<int, int, int> parseTimeBeat(uint64_t tMeasure, double tBeat);
-
 	juce::PopupMenu createTimeMenu() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TimeComponent)

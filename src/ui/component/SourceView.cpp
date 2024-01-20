@@ -35,7 +35,7 @@ void SourceView::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 
-	int itemHeight = screenSize.getHeight() * 0.1;
+	int itemHeight = screenSize.getHeight() * 0.11;
 
 	/** Source List */
 	this->list->setBounds(this->getLocalBounds());

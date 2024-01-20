@@ -84,17 +84,8 @@ void TimeComponent::paint(juce::Graphics& g) {
 
 	if (this->showSec) {
 		/** Get Num */
-		std::array<uint8_t, 8> num = { 0 };
-		auto [hour, minute, sec, msec] = TimeComponent::parseTimeSec(this->timeInSec);
-
-		num[0] = (hour / 1) % 10;
-		num[1] = (minute / 10) % 10;
-		num[2] = (minute / 1) % 10;
-		num[3] = (sec / 10) % 10;
-		num[4] = (sec / 1) % 10;
-		num[5] = (msec / 100) % 10;
-		num[6] = (msec / 10) % 10;
-		num[7] = (msec / 1) % 10;
+		auto time = utils::splitTime(this->timeInSec);
+		auto num = utils::createTimeStringBase(time);
 
 		/** Paint Hour */
 		for (int i = 0; i <= 0; i++) {
@@ -171,17 +162,8 @@ void TimeComponent::paint(juce::Graphics& g) {
 	}
 	else {
 		/** Get Num */
-		std::array<uint8_t, 8> num = { 0 };
-		auto [measure, beat, mbeat] = TimeComponent::parseTimeBeat(this->timeInMeasure, this->timeInBeat);
-
-		num[0] = (measure / 1000) % 10;
-		num[1] = (measure / 100) % 10;
-		num[2] = (measure / 10) % 10;
-		num[3] = (measure / 1) % 10;
-		num[4] = (beat / 10) % 10;
-		num[5] = (beat / 1) % 10;
-		num[6] = (mbeat / 10) % 10;
-		num[7] = (mbeat / 1) % 10;
+		auto time = utils::splitBeat(this->timeInMeasure, this->timeInBeat);
+		auto num = utils::createBeatStringBase(time);
 
 		/** Paint Measure */
 		for (int i = 0; i <= 3; i++) {
@@ -298,16 +280,13 @@ void TimeComponent::mouseMove(const juce::MouseEvent& event) {
 	/** Time */
 	if (event.position.getY() < timeAreaHeight) {
 		if (this->showSec) {
-			auto [hour, minute, sec, msec] = TimeComponent::parseTimeSec(this->timeInSec);
-			juce::String str =
-				juce::String{ hour } + ":" + juce::String{ minute } + ":"
-				+ juce::String{ sec } + "." + juce::String{ msec };
+			auto time = utils::splitTime(this->timeInSec);
+			juce::String str = utils::createTimeString(time);
 			this->setTooltip(str);
 		}
 		else {
-			auto [measure, beat, mbeat] = TimeComponent::parseTimeBeat(this->timeInMeasure, this->timeInBeat);
-			juce::String str =
-				juce::String{ measure } + ":" + juce::String{ beat } + "." + juce::String{ mbeat };
+			auto time = utils::splitBeat(this->timeInMeasure, this->timeInBeat);
+			juce::String str = utils::createBeatString(time);
 			this->setTooltip(str);
 		}
 	}
@@ -699,23 +678,6 @@ void TimeComponent::paintPlayStatus(
 		cornerR * 2, cornerR * 2);
 	g.fillEllipse(r2.getX() - cornerR, r2.getY() - cornerR,
 		cornerR * 2, cornerR * 2);
-}
-
-std::tuple<int, int, int, int> TimeComponent::parseTimeSec(double time) {
-	int msec = (uint64_t)(time * (uint64_t)1000) % 1000;
-	int sec = (uint64_t)std::floor(time) % 60;
-	int minute = ((uint64_t)std::floor(time) / 60) % 60;
-	int hour = time / 3600;
-
-	return { hour, minute, sec, msec };
-}
-
-std::tuple<int, int, int> TimeComponent::parseTimeBeat(uint64_t tMeasure, double tBeat) {
-	int mbeat = (uint64_t)(tBeat * (uint64_t)100) % 100;
-	int beat = (uint64_t)std::floor(tBeat) % 100;
-	int measure = (uint64_t)std::floor(tMeasure) % 10000;
-
-	return { measure, beat, mbeat };
 }
 
 juce::PopupMenu TimeComponent::createTimeMenu() const {

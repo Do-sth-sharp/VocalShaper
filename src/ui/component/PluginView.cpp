@@ -134,57 +134,18 @@ void PluginView::update() {
 	/** Get Plugin List */
 	auto [valid, list] = quickAPI::getPluginList();
 	if (valid) {
-		/** Plugin Groups */
-		std::map<juce::String, juce::Array<juce::PluginDescription>> groupMap;
-
-		/** Searching */
-		auto searchName = this->searchBox->getText();
-		bool searchEnabled = searchName.isNotEmpty();
-
-		/** Group Plugin */
-		for (auto& i : list) {
-			/** Group Index */
-			juce::StringArray indexs;
-			switch (this->groupType) {
-			case GroupType::Format:
-				indexs.add(i.pluginFormatName);
-				break;
-			case GroupType::Manufacturer:
-				indexs.add(i.manufacturerName);
-				break;
-			case GroupType::Category: {
-				indexs = juce::StringArray::fromTokens(i.category, "|", "\"\'");
-				break;
-			}
-			}
-
-			/** Searching By Name */
-			if (searchEnabled) {
-				if (utils::matchKMP(i.name, searchName) < 0
-					&& utils::searchKMP(indexs, searchName).isEmpty()) {
-					continue;
-				}
-			}
-
-			/** Insert To Group List */
-			for (auto& index : indexs) {
-				auto& groupList = groupMap[index];
-				groupList.add(i);
-			}
-		}
-
-		/** Plugin Group List */
-		juce::Array<PluginTreeModel::PluginClass> groupList;
-		for (auto& i : groupMap) {
-			groupList.add({ i.first, i.second });
-		}
+		/** Group Plugins */
+		auto searchText = this->searchBox->getText();
+		bool search = searchText.isNotEmpty();
+		auto groupList = utils::groupPlugin(
+			list, this->groupType, search, searchText);
 
 		/** Create Plugin Tree Model */
 		this->pluginModel = std::make_unique<PluginTreeModel>(groupList,
 			[this](const juce::String& name) { this->showGroupMenu(name); },
 			[this](const juce::PluginDescription& plugin) { this->showPluginMenu(plugin); });
 		this->pluginTree->setRootItem(this->pluginModel.get());
-		this->pluginTree->setDefaultOpenness(searchEnabled);
+		this->pluginTree->setDefaultOpenness(search);
 	}
 }
 
@@ -220,15 +181,15 @@ void PluginView::showGroupMenu(const juce::String& name) {
 		this->foldAll();
 		break;
 	case 3:
-		this->groupType = GroupType::Format;
+		this->groupType = utils::PluginGroupType::Format;
 		this->update();
 		break;
 	case 4:
-		this->groupType = GroupType::Manufacturer;
+		this->groupType = utils::PluginGroupType::Manufacturer;
 		this->update();
 		break;
 	case 5:
-		this->groupType = GroupType::Category;
+		this->groupType = utils::PluginGroupType::Category;
 		this->update();
 		break;
 	case 6:
@@ -287,9 +248,9 @@ juce::PopupMenu PluginView::createGroupMenu() const {
 	menu.addItem(1, TRANS("Expand All"), true);
 	menu.addItem(2, TRANS("Fold All"), true);
 	menu.addSeparator();
-	menu.addItem(3, TRANS("Group by Format"), true, this->groupType == GroupType::Format);
-	menu.addItem(4, TRANS("Group by Manufacturer"), true, this->groupType == GroupType::Manufacturer);
-	menu.addItem(5, TRANS("Group by Category"), true, this->groupType == GroupType::Category);
+	menu.addItem(3, TRANS("Group by Format"), true, this->groupType == utils::PluginGroupType::Format);
+	menu.addItem(4, TRANS("Group by Manufacturer"), true, this->groupType == utils::PluginGroupType::Manufacturer);
+	menu.addItem(5, TRANS("Group by Category"), true, this->groupType == utils::PluginGroupType::Category);
 	menu.addSeparator();
 	menu.addItem(6, TRANS("Rescan Plugins"), true);
 

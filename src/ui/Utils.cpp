@@ -426,4 +426,134 @@ namespace utils {
 		if (num > this->maxLimit) { return ""; }
 		return newInput;
 	}
+
+	const juce::Array<PluginGroup> groupPlugin(const juce::Array<juce::PluginDescription>& list,
+		PluginGroupType groupType, bool search, const juce::String& searchText) {
+		/** Plugin Groups */
+		std::map<juce::String, juce::Array<juce::PluginDescription>> groupMap;
+
+		/** Group Plugin */
+		for (auto& i : list) {
+			/** Group Index */
+			juce::StringArray indexs;
+			switch (groupType) {
+			case PluginGroupType::Format:
+				indexs.add(i.pluginFormatName);
+				break;
+			case PluginGroupType::Manufacturer:
+				indexs.add(i.manufacturerName);
+				break;
+			case PluginGroupType::Category: {
+				indexs = juce::StringArray::fromTokens(i.category, "|", "\"\'");
+				break;
+			}
+			}
+
+			/** Searching By Name */
+			if (search) {
+				if (utils::matchKMP(i.name, searchText) < 0
+					&& utils::searchKMP(indexs, searchText).isEmpty()) {
+					continue;
+				}
+			}
+
+			/** Insert To Group List */
+			for (auto& index : indexs) {
+				auto& groupList = groupMap[index];
+				groupList.add(i);
+			}
+		}
+
+		/** Plugin Group List */
+		juce::Array<PluginGroup> groupList;
+		for (auto& i : groupMap) {
+			groupList.add({ i.first, i.second });
+		}
+
+		return groupList;
+	}
+
+	juce::PopupMenu createPluginMenu(const juce::Array<PluginGroup>& list,
+		const std::function<void(const juce::PluginDescription&)>& callback) {
+		juce::PopupMenu menu;
+
+		for (auto& [name, plugins] : list) {
+			menu.addSectionHeader(name);
+			for (auto& i : plugins) {
+				menu.addItem(i.name, std::bind(callback, i));
+			}
+		}
+
+		return menu;
+	}
+
+	const TimeInSeconds splitTime(double seconds) {
+		int msec = (uint64_t)(seconds * (uint64_t)1000) % 1000;
+		int sec = (uint64_t)std::floor(seconds) % 60;
+		int minute = ((uint64_t)std::floor(seconds) / 60) % 60;
+		int hour = seconds / 3600;
+
+		return { hour, minute, sec, msec };
+	}
+
+	const TimeInBeats splitBeat(uint64_t measures, double beats) {
+		int mbeat = (uint64_t)(beats * (uint64_t)100) % 100;
+		int beat = (uint64_t)std::floor(beats) % 100;
+		int measure = (uint64_t)std::floor(measures) % 10000;
+
+		return { measure, beat, mbeat };
+	}
+
+	const std::array<uint8_t, 8> createTimeStringBase(const TimeInSeconds& time) {
+		std::array<uint8_t, 8> num = { 0 };
+		auto& [hour, minute, sec, msec] = time;
+
+		num[0] = (hour / 1) % 10;
+		num[1] = (minute / 10) % 10;
+		num[2] = (minute / 1) % 10;
+		num[3] = (sec / 10) % 10;
+		num[4] = (sec / 1) % 10;
+		num[5] = (msec / 100) % 10;
+		num[6] = (msec / 10) % 10;
+		num[7] = (msec / 1) % 10;
+
+		return num;
+	}
+
+	const std::array<uint8_t, 8> createBeatStringBase(const TimeInBeats& time) {
+		std::array<uint8_t, 8> num = { 0 };
+		auto& [measure, beat, mbeat] = time;
+
+		num[0] = (measure / 1000) % 10;
+		num[1] = (measure / 100) % 10;
+		num[2] = (measure / 10) % 10;
+		num[3] = (measure / 1) % 10;
+		num[4] = (beat / 10) % 10;
+		num[5] = (beat / 1) % 10;
+		num[6] = (mbeat / 10) % 10;
+		num[7] = (mbeat / 1) % 10;
+
+		return num;
+	}
+
+	const juce::String createTimeString(const TimeInSeconds& time) {
+		/** Get Num */
+		auto num = utils::createTimeStringBase(time);
+
+		/** Result */
+		return juce::String{ num[0] } + ":"
+			+ juce::String{ num[1] } + juce::String{ num[2] } + ":"
+			+ juce::String{ num[3] } + juce::String{ num[4] } + "."
+			+ juce::String{ num[5] } + juce::String{ num[6] } + juce::String{ num[7] };
+	}
+
+	const juce::String createBeatString(const TimeInBeats& time) {
+		/** Get Num */
+		auto num = utils::createBeatStringBase(time);
+
+		/** Result */
+		return juce::String{ num[0] } + juce::String{ num[1] } + juce::String{ num[2] } + juce::String{ num[3] } + ":"
+			+ juce::String{num[4]} + juce::String{ num[5] } + ":"
+			+ juce::String{num[6]} + juce::String{num[7]};
+	}
 }

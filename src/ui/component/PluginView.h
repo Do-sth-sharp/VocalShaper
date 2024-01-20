@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include <FlowUI.h>
 #include "../dataModel/PluginTreeModel.h"
+#include "../Utils.h"
 
 class PluginView final 
 	: public flowUI::FlowComponent,
@@ -31,10 +32,7 @@ private:
 
 	juce::String searchingMes;
 
-	enum class GroupType {
-		Format, Manufacturer, Category
-	};
-	GroupType groupType = GroupType::Manufacturer;
+	utils::PluginGroupType groupType = utils::PluginGroupType::Manufacturer;
 
 	void searchStart();
 	void searchEnd();
