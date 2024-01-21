@@ -1,5 +1,6 @@
 ﻿#include "QuickCheck.h"
 #include "../misc/Renderer.h"
+#include "../misc/PlayPosition.h"
 #include "../source/AudioIOList.h"
 #include "../source/CloneableSourceManager.h"
 #include "../source/CloneableAudioSource.h"
@@ -59,5 +60,15 @@ namespace quickAPI {
 	bool checkSourceSynthing(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
 		return ptr && ptr->isSynthRunning();
+	}
+
+	bool checkSourceRecording(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		return ptr && ptr->checkRecording();
+	}
+
+	bool checkSourceRecordingNow(int index) {
+		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
+		return ptr && ptr->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording();
 	}
 }

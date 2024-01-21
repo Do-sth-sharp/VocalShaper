@@ -80,9 +80,6 @@ bool CloneableAudioSource::clone(CloneableSource* dst) const {
 }
 
 bool CloneableAudioSource::load(const juce::File& file) {
-	/** Check Not Recording */
-	if (this->checkRecording()) { return false; }
-
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
@@ -139,9 +136,6 @@ void CloneableAudioSource::sampleRateChanged() {
 }
 
 void CloneableAudioSource::init(double sampleRate, int channelNum, int sampleNum) {
-	/** Check Not Recording */
-	if (this->checkRecording()) { return; }
-
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
@@ -166,43 +160,7 @@ void CloneableAudioSource::init(double sampleRate, int channelNum, int sampleNum
 }
 
 void CloneableAudioSource::prepareToRecord(
-	int inputChannels, double sampleRate, int blockSize, bool /*updateOnly*/) {
-	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getSourceLock());
-
-	/** Clear Buffer If Sample Rate Mismatch */
-	if (this->getSourceSampleRate() != sampleRate) {
-		this->sourceSampleRate = sampleRate;
-		this->buffer.setSize(this->buffer.getNumChannels(), 0, true, false, true);
-		vMath::zeroAllAudioData(this->buffer);
-
-		/** Set Flag */
-		this->changed();
-	}
-
-	/** Clear Audio Source */
-	this->source = nullptr;
-	this->memorySource = nullptr;
-
-	/** Init Buffer */
-	{
-		int currentChannels = this->buffer.getNumChannels();
-		if (inputChannels > currentChannels) {
-			this->buffer.setSize(inputChannels,
-				this->buffer.getNumSamples(), true, false, true);
-			for (int i = currentChannels; i < inputChannels; i++) {
-				vMath::zeroAllAudioDataOnChannel(this->buffer, i);
-			}
-		}
-	}
-
-	/** Create Audio Source */
-	this->memorySource = std::make_unique<juce::MemoryAudioSource>(this->buffer, false, false);
-	this->source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
-
-	/** Update Resampling Ratio */
-	this->sampleRateChanged();
-
+	int /*inputChannels*/, double /*sampleRate*/, int /*blockSize*/, bool /*updateOnly*/) {
 	/** Callback */
 	juce::MessageManager::callAsync([] {
 		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
@@ -210,13 +168,6 @@ void CloneableAudioSource::prepareToRecord(
 }
 
 void CloneableAudioSource::recordingFinished() {
-	/** Create Audio Source */
-	//this->memorySource = std::make_unique<juce::MemoryAudioSource>(this->buffer, false, false);
-	//this->source = std::make_unique<juce::ResamplingAudioSource>(this->memorySource.get(), false, this->buffer.getNumChannels());
-
-	/** Update Resampling Ratio */
-	//this->sampleRateChanged();
-
 	/** Callback */
 	juce::MessageManager::callAsync([] {
 		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
@@ -224,28 +175,41 @@ void CloneableAudioSource::recordingFinished() {
 }
 
 void CloneableAudioSource::writeData(
-	const juce::AudioBuffer<float>& buffer, int offset)	{
+	juce::AudioBuffer<float>& buffer, int offset)	{
 	/** Get Time */
-	int startSample = offset;
-	int srcStartSample = 0;
-	int length = buffer.getNumSamples();
-	if (startSample < 0) {
-		srcStartSample -= startSample;
-		length -= srcStartSample;
-		startSample = 0;
+	int srcLength = buffer.getNumSamples();
+	int srcStartSample = offset;
+	int bufferStartSample = 0;
+	if (srcStartSample < 0) {
+		bufferStartSample -= srcStartSample;
+		srcLength -= bufferStartSample;
+		srcStartSample = 0;
 	}
 
+	double resampleRatio = this->getSampleRate() / this->getSourceSampleRate();
+	int dstStartSample = srcStartSample / resampleRatio;
+	int dstLength = srcLength / resampleRatio;
+
 	/** Increase BufferLength */
-	if (startSample > this->buffer.getNumSamples() - length) {
-		int newLength = startSample + length;
+	if (dstStartSample > this->buffer.getNumSamples() - dstLength) {
+		int newLength = dstStartSample + dstLength;
 		this->buffer.setSize(
 			this->buffer.getNumChannels(), newLength, true, false, true);
 	}
 
+	/** Prepare Resampling */
+	int channelNum = std::min(buffer.getNumChannels(), this->buffer.getNumChannels());
+
+	juce::MemoryAudioSource memSource(buffer, false);
+	juce::ResamplingAudioSource resampleSource(&memSource, false, channelNum);
+
+	memSource.setNextReadPosition(bufferStartSample);
+	resampleSource.setResamplingRatio(resampleRatio);
+	resampleSource.prepareToPlay(dstLength, this->getSourceSampleRate());
+
 	/** CopyData */
-	for (int i = 0; i < buffer.getNumChannels() && i < this->buffer.getNumChannels(); i++) {
-		vMath::copyAudioData(this->buffer, buffer, startSample, srcStartSample, i, i, length);
-	}
+	resampleSource.getNextAudioBlock(juce::AudioSourceChannelInfo{
+						&(this->buffer), dstStartSample, dstLength });
 
 	/** Set Flag */
 	this->changed();

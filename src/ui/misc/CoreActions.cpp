@@ -487,7 +487,8 @@ bool CoreActions::askForSaveGUI() {
 void CoreActions::askForAudioPropGUIAsync(
 	const std::function<void(double, int, double)>& callback) {
 	/** Get Available Props */
-	auto availableSampleRate = quickAPI::getSampleRateSupported();
+	auto availableSampleRate = quickAPI::getSourceSampleRateSupported();
+	double currentSampleRate = quickAPI::getCurrentSampleRate();
 	juce::StringArray availableSampleRateList;
 	for (auto i : availableSampleRate) {
 		availableSampleRateList.add(juce::String{ i });
@@ -509,6 +510,7 @@ void CoreActions::askForAudioPropGUIAsync(
 	auto channelsEditor = configWindow->getTextEditor(TRANS("Channels"));
 	auto lengthEditor = configWindow->getTextEditor(TRANS("Length"));
 
+	sampleRateSeletor->setText(juce::String{ currentSampleRate });
 	channelsEditor->setInputFilter(new utils::TextIntegerFilter{ 0, 1024 }, true);
 	lengthEditor->setInputFilter(new utils::TextDoubleFilter{ 0, INT_MAX, 2 }, true);
 

@@ -187,6 +187,7 @@ void SourceComponent::update(int index, bool selected) {
 		this->sampleRate = quickAPI::getSourceSampleRate(index);
 		this->isIOTask = quickAPI::checkSourceIOTask(index);
 		this->isSynthing = quickAPI::checkSourceSynthing(index);
+		this->isRecording = quickAPI::checkSourceRecordingNow(index);
 
 		this->synthesizerButton->setButtonText(
 			this->synthButtonHeader + " " +
@@ -196,7 +197,10 @@ void SourceComponent::update(int index, bool selected) {
 
 		this->infoStr = TRANS(this->typeName) + ", ";
 		this->infoStr += (utils::createTimeString(utils::splitTime(this->length)) + ", ");
-		if (this->isIOTask) {
+		if (this->isRecording) {
+			this->infoStr += TRANS("Recording");
+		}
+		else if (this->isIOTask) {
 			this->infoStr += TRANS("IO Running");
 		}
 		else if (this->isSynthing) {
@@ -383,19 +387,19 @@ juce::PopupMenu SourceComponent::createSourceMenu() const {
 	menu.addSubMenu(TRANS("New"), this->createNewMenu());
 	menu.addItem(SourceActionType::Load, TRANS("Load"));
 	menu.addItem(SourceActionType::Save, TRANS("Save"),
-		(!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask) && (!this->isRecording));
 	menu.addItem(SourceActionType::Clone, TRANS("Clone"),
-		(!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask) && (!this->isRecording));
 	menu.addItem(SourceActionType::Remove, TRANS("Remove"), 
-		(!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask) && (!this->isRecording));
 	menu.addItem(SourceActionType::Replace, TRANS("Replace"),
-		(!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask) && (!this->isRecording));
 	menu.addSeparator();
 	menu.addItem(SourceActionType::SetName, TRANS("Set Name"));
 	menu.addItem(SourceActionType::SetSynthesizer, TRANS("Set Synthesizer"),
 		(!this->isSynthing) && (!this->isIOTask));
 	menu.addItem(SourceActionType::Synth, TRANS("Synth"),
-		(!this->isSynthing) && (!this->isIOTask)
+		(!this->isSynthing) && (!this->isIOTask) && (!this->isRecording)
 	&& (!quickAPI::checkSourceIOTask(this->dstIndex))
 	&& (!quickAPI::checkSourceSynthing(this->dstIndex)));
 

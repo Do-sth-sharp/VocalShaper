@@ -83,10 +83,9 @@ void SourceRecordProcessor::processBlock(
 	for (auto& [source, offset, compensate] : this->tasks) {
 		/** Get Task Info */
 		int offsetPos = std::floor(offset * this->getSampleRate());
-		if (static_cast<long long>(offsetPos - buffer.getNumSamples()) >
-			playPosition->getTimeInSamples().orFallback(0)) { continue; }
-		int startPos =
-			playPosition->getTimeInSamples().orFallback(0) - offsetPos;
+		int timeInSamples = playPosition->getTimeInSamples().orFallback(0);
+		if (static_cast<long long>(offsetPos - buffer.getNumSamples()) > timeInSamples) { continue; }
+		int startPos = timeInSamples - offsetPos;
 		startPos -= (compensate * this->getBlockSize());
 
 		/** Copy Data */

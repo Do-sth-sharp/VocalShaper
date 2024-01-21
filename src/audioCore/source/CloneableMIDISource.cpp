@@ -86,9 +86,6 @@ bool CloneableMIDISource::clone(CloneableSource* dst) const {
 }
 
 bool CloneableMIDISource::load(const juce::File& file) {
-	/** Check Not Recording */
-	if (this->checkRecording()) { return false; }
-
 	/** Create Input Stream */
 	juce::FileInputStream stream(file);
 	if (stream.failedToOpen()) { return false; }

@@ -1,5 +1,6 @@
 ﻿#include "QuickGet.h"
 #include "../AudioCore.h"
+#include "../Utils.h"
 #include "../source/CloneableSourceManager.h"
 #include "../plugin/Plugin.h"
 #include "../misc/Device.h"
@@ -278,6 +279,18 @@ namespace quickAPI {
 
 	const juce::Array<double> getSampleRateSupported() {
 		return Device::getInstance()->getCurrentAvailableSampleRates();
+	}
+
+	const juce::Array<double> getSourceSampleRateSupported() {
+		return utils::getSourceSampleRateSupported();
+	}
+
+	double getCurrentSampleRate() {
+		return Device::getInstance()->getAudioSampleRate();
+	}
+
+	double getCurrentBufferSize() {
+		return Device::getInstance()->getAudioBufferSize();
 	}
 
 	const juce::StringArray getPluginBlackList() {

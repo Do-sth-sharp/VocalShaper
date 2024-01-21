@@ -2,6 +2,7 @@
 #include "ActionDispatcher.h"
 
 #include "../AudioCore.h"
+#include "../misc/PlayPosition.h"
 #include "../plugin/Plugin.h"
 #include "../recovery/DataControl.hpp"
 #include "../Utils.h"
@@ -127,9 +128,21 @@ bool ActionSynthSource::doAction() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
+		if (src->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording()) {
+			this->error("Unavailable source status!");
+			ACTION_RESULT(false);
+		}
 
 		auto dst = src->getDstSource();
-		if (dst && (dst->isSynthRunning() || AudioIOList::getInstance()->isTask(dst))) {
+		if (dst && dst->isSynthRunning()) {
+			this->error("Unavailable dst source status!");
+			ACTION_RESULT(false);
+		}
+		if (dst && AudioIOList::getInstance()->isTask(dst)) {
+			this->error("Unavailable dst source status!");
+			ACTION_RESULT(false);
+		}
+		if (dst && dst->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording()) {
 			this->error("Unavailable dst source status!");
 			ACTION_RESULT(false);
 		}
@@ -162,6 +175,10 @@ bool ActionCloneSource::doAction() {
 				ACTION_RESULT(false);
 			}
 			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (src->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording()) {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
@@ -205,6 +222,10 @@ bool ActionReloadSource::doAction() {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
+			if (src->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
 		}
 
 		if (manager->reloadSourceAsync(ACTION_DATA(index),
@@ -239,6 +260,10 @@ bool ActionSaveSource::doAction() {
 				ACTION_RESULT(false);
 			}
 			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (src->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording()) {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}

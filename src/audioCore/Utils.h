@@ -122,6 +122,7 @@ namespace utils {
 
 	const juce::StringArray getProjectFormatsSupported(bool isWrite);
 	const juce::StringArray getPluginFormatsSupported();
+	const juce::Array<double> getSourceSampleRateSupported();
 
 	using AudioConnection = std::tuple<int, int, int, int>;
 	using AudioConnectionList = juce::Array<AudioConnection>;

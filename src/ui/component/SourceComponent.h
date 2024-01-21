@@ -40,7 +40,7 @@ private:
 	juce::String synthesizer;
 	double sampleRate = 0;
 	bool selected = false, itemDragAccepted = false;
-	bool isIOTask = false, isSynthing = false;
+	bool isIOTask = false, isSynthing = false, isRecording = false;
 
 	juce::String synthButtonHeader, synthButtonEmptyStr;
 	juce::String infoStr;

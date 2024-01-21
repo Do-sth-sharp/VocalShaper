@@ -25,6 +25,15 @@ SourceView::SourceView()
 			}
 		}
 	);
+
+	/** Recording Callback */
+	CoreCallbacks::getInstance()->addRecordingStatus(
+		[comp = SourceView::SafePointer(this)](bool) {
+			if (comp) {
+				comp->update();
+			}
+		}
+	);
 }
 
 SourceView::~SourceView() {

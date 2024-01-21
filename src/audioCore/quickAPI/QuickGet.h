@@ -56,6 +56,9 @@ namespace quickAPI {
 	int getFormatQualityOptionIndex(const juce::String& extension);
 
 	const juce::Array<double> getSampleRateSupported();
+	const juce::Array<double> getSourceSampleRateSupported();
+	double getCurrentSampleRate();
+	double getCurrentBufferSize();
 
 	const juce::StringArray getPluginBlackList();
 	const juce::StringArray getPluginSearchPath();

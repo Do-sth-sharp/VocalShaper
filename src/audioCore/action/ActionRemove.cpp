@@ -1,6 +1,7 @@
 ﻿#include "ActionRemove.h"
 
 #include "../AudioCore.h"
+#include "../misc/PlayPosition.h"
 #include "../plugin/Plugin.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -1035,6 +1036,10 @@ bool ActionRemoveSource::doAction() {
 				ACTION_RESULT(false);
 			}
 			if (src->isSynthRunning()) {
+				this->error("Unavailable source status!");
+				ACTION_RESULT(false);
+			}
+			if (src->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording()) {
 				this->error("Unavailable source status!");
 				ACTION_RESULT(false);
 			}
