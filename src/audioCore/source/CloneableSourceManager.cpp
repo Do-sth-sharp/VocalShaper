@@ -248,20 +248,21 @@ bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
 	}
 
 	/** Load Each Source */
-	for (auto& i : list) {
-		auto ptrSrc = this->getSource(this->getSourceNum() - 1);
+	for (int i = 0; i < list.size(); i++) {
+		auto& src = list[i];
+		auto ptrSrc = this->getSource(i);
 		if (!ptrSrc) { continue; }
 
-		ptrSrc->setId(i.id());
-		if (!ptrSrc->parse(&i)) {
+		ptrSrc->setId(src.id());
+		if (!ptrSrc->parse(&src)) {
 			return false;
 		}
 
-		auto dstSource = this->getSource(i.synthdst());
+		auto dstSource = this->getSource(src.synthdst());
 		ptrSrc->setDstSource(dstSource);
 
-		if (i.has_synthesizer()) {
-			auto& plugin = i.synthesizer();
+		if (src.has_synthesizer()) {
+			auto& plugin = src.synthesizer();
 
 			auto& pluginData = plugin.state().data();
 			juce::MemoryBlock state(pluginData.c_str(), pluginData.size());
@@ -289,28 +290,34 @@ std::unique_ptr<google::protobuf::Message> CloneableSourceManager::serialize() c
 	auto mes = std::make_unique<vsp4::SourceList>();
 
 	juce::ScopedReadLock locker(this->getLock());
+
+	/** Serialize Each Source */
 	auto list = mes->mutable_sources();
-	for (auto i : this->sourceList) {
-		auto smes = i->serialize();
+	for (int i = 0; i < this->sourceList.size(); i++) {
+		auto src = this->sourceList[i];
+		auto smes = src->serialize();
 
 		if (!dynamic_cast<vsp4::Source*>(smes.get())) { return nullptr; }
 		auto source = dynamic_cast<vsp4::Source*>(smes.get());
 
 		/** Plugin State */
-		if (i->pluginIdentifier.isNotEmpty()) {
+		if (src->pluginIdentifier.isNotEmpty()) {
 			if (auto plugin = source->mutable_synthesizer()) {
 				auto info = plugin->mutable_info();
-				info->set_id(i->pluginIdentifier.toStdString());
+				info->set_id(src->pluginIdentifier.toStdString());
 
-				auto pluginData = i->getSynthesizerState();
+				auto pluginData = src->getSynthesizerState();
 				plugin->mutable_state()->set_data(
 					pluginData.getData(), pluginData.getSize());
 			}
 		}
 
 		/** Dst Source */
-		int dstIndex = this->getSourceIndex(i->getDstSource());
+		int dstIndex = this->getSourceIndex(src->getDstSource());
 		source->set_synthdst(dstIndex);
+
+		/** Save Source */
+		this->saveSourceAsync(i, source->path());
 
 		list->AddAllocated(dynamic_cast<vsp4::Source*>(smes.release()));
 	}

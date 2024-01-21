@@ -207,19 +207,6 @@ bool AudioCore::save(const juce::String& name) {
 	juce::MemoryBlock projData;
 	projData.setSize(proj->ByteSizeLong());
 	if (!proj->SerializeToArray(projData.getData(), projData.getSize())) { ProjectInfoData::getInstance()->pop(); return false; }
-
-	/** Save Sources */
-	auto& srcList = proj->sources().sources();
-	for (int i = 0; i < srcList.size(); i++) {
-		juce::String srcPath = srcList.Get(i).path();
-		juce::File srcFile = utils::getSourceFile(srcPath);
-		srcFile.getParentDirectory().createDirectory();
-
-		auto src = CloneableSourceManager::getInstance()->getSource(i);
-		if (src && !src->checkSaved()) {
-			CloneableSourceManager::getInstance()->saveSourceAsync(i, srcFile.getFullPathName());
-		}
-	}
 	
 	/** Write Project File */
 	juce::FileOutputStream projStream(projFile);
