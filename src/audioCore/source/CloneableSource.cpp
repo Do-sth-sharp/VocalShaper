@@ -171,7 +171,7 @@ const juce::String CloneableSource::getSynthesizerName() const {
 }
 
 bool CloneableSource::isSynthRunning() const {
-	return this->synthThread->getImpl()->isThreadRunning();
+	return this->synthThread->getImpl()->isThreadRunning() || this->synthingByOther;
 }
 
 void CloneableSource::stopSynth() {
@@ -183,6 +183,7 @@ void CloneableSource::synth() {
 	if (!this->synthesizer) { return; }
 	auto dstSource = this->synthThread->getImpl()->getDstSource();
 	if (!dstSource) { return; }
+	if (dstSource->isSynthRunning()) { return; }
 
 	/** Stop Render */
 	this->synthThread->getImpl()->stopThread(3000);
@@ -203,7 +204,13 @@ void CloneableSource::synth() {
 }
 
 void CloneableSource::setDstSource(CloneableSource::SafePointer<> dst) {
+	if (dst == this) { return; }
 	this->synthThread->getImpl()->setDstSource(dst);
+
+	/** Callback */
+	juce::MessageManager::callAsync([] {
+		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+		});
 }
 
 CloneableSource::SafePointer<> CloneableSource::getDstSource() const {

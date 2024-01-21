@@ -43,21 +43,21 @@ namespace quickAPI {
 
 	bool checkForAudioSource(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return dynamic_cast<CloneableAudioSource*>(ptr.getSource());
+		return ptr && dynamic_cast<CloneableAudioSource*>(ptr.getSource());
 	}
 
 	bool checkForMidiSource(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return dynamic_cast<CloneableMIDISource*>(ptr.getSource());
+		return ptr && dynamic_cast<CloneableMIDISource*>(ptr.getSource());
 	}
 
 	bool checkSourceIOTask(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return AudioIOList::getInstance()->isTask(ptr);
+		return ptr && AudioIOList::getInstance()->isTask(ptr);
 	}
 
 	bool checkSourceSynthing(int index) {
 		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr->isSynthRunning();
+		return ptr && ptr->isSynthRunning();
 	}
 }

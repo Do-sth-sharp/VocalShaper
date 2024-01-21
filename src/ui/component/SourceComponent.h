@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "SourceDstComponent.h"
 
 class SourceComponent final
 	: public juce::Component,
@@ -29,7 +30,8 @@ private:
 
 	std::unique_ptr<juce::TextEditor> nameEditor = nullptr;
 	std::unique_ptr<juce::TextButton> synthesizerButton = nullptr;
-	int index = -1, id = -1;
+	std::unique_ptr<SourceDstComponent> dst = nullptr;
+	int index = -1, id = -1, dstIndex = -1, dstID = -1;
 	int type = 0;
 	juce::String typeName;
 	double length = 0;

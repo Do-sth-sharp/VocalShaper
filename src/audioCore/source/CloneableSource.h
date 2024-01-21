@@ -135,6 +135,7 @@ private:
 	std::unique_ptr<SourceRenderHelperBase> synthThread = nullptr;
 	std::unique_ptr<juce::AudioPluginInstance> synthesizer = nullptr;
 	juce::String pluginIdentifier;
+	std::atomic_bool synthingByOther = false;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(CloneableSource)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CloneableSource)

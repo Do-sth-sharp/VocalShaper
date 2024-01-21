@@ -105,6 +105,12 @@ void CoreActions::setSourceSynthesizer(int index, const juce::String& pid) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setSourceSynthDst(int index, int dstIndex) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetSourceSynthDst{ index, dstIndex });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::render(const juce::String& dirPath, const juce::String& fileName,
 	const juce::String& fileExtension, const juce::Array<int>& tracks) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRenderNow{
@@ -523,16 +529,12 @@ void CoreActions::askForAudioPropGUIAsync(
 void CoreActions::askForSourceIndexGUIAsync(
 	const std::function<void(int)>& callback) {
 	/** Get Source List */
-	auto sourceList = quickAPI::getSourceNames();
+	auto sourceList = quickAPI::getSourceNamesWithID();
 	if (sourceList.isEmpty()) {
 		juce::AlertWindow::showMessageBox(
 			juce::MessageBoxIconType::WarningIcon, TRANS("Source Selector"),
 			TRANS("The source list is empty!"));
 		return;
-	}
-	for (int i = 0; i < sourceList.size(); i++) {
-		auto& str = sourceList.getReference(i);
-		str = "[" + juce::String(i) + "] " + str;
 	}
 
 	/** Show Source Chooser */

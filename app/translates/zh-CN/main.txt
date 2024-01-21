@@ -85,6 +85,7 @@ countries: cn
 "Tracks:" = "轨道："
 "Events:" = "事件："
 "Synthesizer:" = "合成器："
+"Synth Destination:" = "合成目标："
 "Sample Rate:" = "采样率："
 
 "Sample Rate" = "采样率"
@@ -104,3 +105,5 @@ countries: cn
 "Synth" = "合成"
 "Synthesizer" = "合成器"
 "Empty" = "空"
+"IO Running" = "IO执行中"
+"Synthing" = "合成中"

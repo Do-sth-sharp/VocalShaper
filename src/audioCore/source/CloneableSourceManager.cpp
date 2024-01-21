@@ -257,11 +257,11 @@ bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
 			return false;
 		}
 
+		auto dstSource = this->getSource(i.synthdst());
+		ptrSrc->setDstSource(dstSource);
+
 		if (i.has_synthesizer()) {
 			auto& plugin = i.synthesizer();
-
-			auto dstSource = this->getSource(i.synthdst());
-			ptrSrc->setDstSource(dstSource);
 
 			auto& pluginData = plugin.state().data();
 			juce::MemoryBlock state(pluginData.c_str(), pluginData.size());
@@ -294,13 +294,18 @@ std::unique_ptr<google::protobuf::Message> CloneableSourceManager::serialize() c
 		auto smes = i->serialize();
 
 		if (!dynamic_cast<vsp4::Source*>(smes.get())) { return nullptr; }
-		auto source = dynamic_cast<vsp4::Source*>(mes.get());
+		auto source = dynamic_cast<vsp4::Source*>(smes.get());
 
 		/** Plugin State */
-		if (auto plugin = source->mutable_synthesizer()) {
-			auto pluginData = i->getSynthesizerState();
-			plugin->mutable_state()->set_data(
-				pluginData.getData(), pluginData.getSize());
+		if (i->pluginIdentifier.isNotEmpty()) {
+			if (auto plugin = source->mutable_synthesizer()) {
+				auto info = plugin->mutable_info();
+				info->set_id(i->pluginIdentifier.toStdString());
+
+				auto pluginData = i->getSynthesizerState();
+				plugin->mutable_state()->set_data(
+					pluginData.getData(), pluginData.getSize());
+			}
 		}
 
 		/** Dst Source */

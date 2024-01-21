@@ -127,6 +127,12 @@ bool ActionSynthSource::doAction() {
 			this->error("Unavailable source status!");
 			ACTION_RESULT(false);
 		}
+
+		auto dst = src->getDstSource();
+		if (dst && (dst->isSynthRunning() || AudioIOList::getInstance()->isTask(dst))) {
+			this->error("Unavailable dst source status!");
+			ACTION_RESULT(false);
+		}
 	}
 
 	if (CloneableSourceManager::getInstance()->synthSource(this->index)) {

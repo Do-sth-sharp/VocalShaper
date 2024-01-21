@@ -77,7 +77,14 @@ namespace quickAPI {
 
 	const juce::String getSourceName(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getName();
+			auto name = ptr->getName();
+			if (name.isEmpty()) {
+				auto path = ptr->getPath();
+				if (path.isNotEmpty()) {
+					name = utils::getProjectDir().getChildFile(path).getFileName();
+				}
+			}
+			return name;
 		}
 		return "";
 	}
@@ -147,7 +154,7 @@ namespace quickAPI {
 
 	double getSourceSampleRate(int index) {
 		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			ptr->getSourceSampleRate();
+			return ptr->getSourceSampleRate();
 		}
 		return 0;
 	}
@@ -171,9 +178,33 @@ namespace quickAPI {
 
 			juce::String name = ptr->getName();
 			if (name.isEmpty()) {
-				name = utils::getProjectDir().getChildFile(ptr->getPath()).getFileName();
+				auto path = ptr->getPath();
+				if (path.isNotEmpty()) {
+					name = utils::getProjectDir().getChildFile(path).getFileName();
+				}
 			}
 			result.add(name);
+		}
+
+		return result;
+	}
+
+	const juce::StringArray getSourceNamesWithID() {
+		juce::StringArray result;
+
+		int size = CloneableSourceManager::getInstance()->getSourceNum();
+		for (int i = 0; i < size; i++) {
+			auto ptr = CloneableSourceManager::getInstance()->getSource(i);
+			if (!ptr) { result.add("-"); continue; }
+
+			juce::String name = ptr->getName();
+			if (name.isEmpty()) {
+				auto path = ptr->getPath();
+				if (path.isNotEmpty()) {
+					name = utils::getProjectDir().getChildFile(path).getFileName();
+				}
+			}
+			result.add("#" + juce::String{ ptr->getId() } + " " + name);
 		}
 
 		return result;

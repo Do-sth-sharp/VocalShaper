@@ -42,6 +42,10 @@ SourceComponent::SourceComponent(
 	this->synthesizerButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->synthesizerButton->onClick = [this] { this->showSynthesizerMenu(); };
 	this->addAndMakeVisible(this->synthesizerButton.get());
+
+	/** Dst */
+	this->dst = std::make_unique<SourceDstComponent>();
+	this->addAndMakeVisible(this->dst.get());
 }
 
 void SourceComponent::resized() {
@@ -69,10 +73,16 @@ void SourceComponent::resized() {
 	auto nameRect = nameLineArea.withTrimmedLeft(idAreaWidth + splitWidth);
 	this->nameEditor->setBounds(nameRect);
 
+	/** Dst */
+	juce::Rectangle<int> dstRect(
+		selectBarWidth + paddingWidth, nameLineArea.getBottom() + splitHeight,
+		synthLineHeight, synthLineHeight);
+	this->dst->setBounds(dstRect);
+
 	/** Synthesizer */
 	juce::Rectangle<int> synthRect(
-		selectBarWidth + paddingWidth, nameLineArea.getBottom() + splitHeight,
-		nameLineArea.getWidth(), synthLineHeight);
+		selectBarWidth + paddingWidth + synthLineHeight + splitWidth, nameLineArea.getBottom() + splitHeight,
+		nameLineArea.getWidth() - synthLineHeight - splitWidth, synthLineHeight);
 	this->synthesizerButton->setBounds(synthRect);
 }
 
@@ -164,6 +174,8 @@ void SourceComponent::update(int index, bool selected) {
 	if (index >= 0 && index < quickAPI::getSourceNum()) {
 		this->index = index;
 		this->id = quickAPI::getSourceId(index);
+		this->dstIndex = quickAPI::getSourceSynthDstIndex(index);
+		this->dstID = quickAPI::getSourceId(this->dstIndex);
 		this->type = (int)(quickAPI::getSourceType(index));
 		this->nameEditor ->setText(quickAPI::getSourceName(index));
 		this->typeName = quickAPI::getSourceTypeName(index);
@@ -179,6 +191,8 @@ void SourceComponent::update(int index, bool selected) {
 		this->synthesizerButton->setButtonText(
 			this->synthButtonHeader + " " +
 			(this->synthesizer.isNotEmpty() ? this->synthesizer : this->synthButtonEmptyStr));
+
+		this->dst->update(this->index, this->dstIndex);
 
 		this->infoStr = TRANS(this->typeName) + ", ";
 		this->infoStr += (utils::createTimeString(utils::splitTime(this->length)) + ", ");
@@ -202,10 +216,19 @@ bool SourceComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
 	auto& des = dragSourceDetails.description;
 
-	if ((int)(des["type"]) != (int)(DragSourceType::Plugin)) { return false; }
-	if (!des["instrument"]) { return false; }
+	/** From Plugins */
+	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		if (!des["instrument"]) { return false; }
+		return true;
+	}
 
-	return true;
+	/** From Source Synth */
+	if ((int)(des["type"]) == (int)(DragSourceType::SourceSynth)) {
+		int srcIndex = des["src"];
+		return (srcIndex >= 0) && (srcIndex != this->index);
+	}
+
+	return false;
 }
 
 void SourceComponent::itemDragEnter(const SourceDetails& dragSourceDetails) {
@@ -226,9 +249,22 @@ void SourceComponent::itemDropped(const SourceDetails& dragSourceDetails) {
 	this->endDrop();
 
 	auto& des = dragSourceDetails.description;
-	juce::String pid = des["id"].toString();
 
-	CoreActions::setSourceSynthesizer(this->index, pid);
+	/** From Plugins */
+	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		juce::String pid = des["id"].toString();
+
+		CoreActions::setSourceSynthesizer(this->index, pid);
+		return;
+	}
+	
+	/** From Source Synth */
+	if ((int)(des["type"]) == (int)(DragSourceType::SourceSynth)) {
+		int srcIndex = des["src"];
+		
+		CoreActions::setSourceSynthDst(srcIndex, this->index);
+		return;
+	}
 }
 
 void SourceComponent::mouseDown(const juce::MouseEvent& /*event*/) {
@@ -359,7 +395,9 @@ juce::PopupMenu SourceComponent::createSourceMenu() const {
 	menu.addItem(SourceActionType::SetSynthesizer, TRANS("Set Synthesizer"),
 		(!this->isSynthing) && (!this->isIOTask));
 	menu.addItem(SourceActionType::Synth, TRANS("Synth"),
-		(!this->isSynthing) && (!this->isIOTask));
+		(!this->isSynthing) && (!this->isIOTask)
+	&& (!quickAPI::checkSourceIOTask(this->dstIndex))
+	&& (!quickAPI::checkSourceSynthing(this->dstIndex)));
 
 	return menu;
 }
@@ -400,6 +438,7 @@ juce::String SourceComponent::createTooltip() const {
 		result += (TRANS("Events:") + " " + juce::String{ this->events } + "\n");
 	}
 	result += (TRANS("Synthesizer:") + " " + this->synthesizer + "\n");
+	result += (TRANS("Synth Destination:") + ((this->dstID >= 0) ? (" #" + juce::String{ this->dstID }) : "-") + "\n");
 	result += (TRANS("Sample Rate:") + " " + juce::String{ this->sampleRate } + "Hz\n");
 
 	return result;

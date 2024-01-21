@@ -36,6 +36,7 @@ namespace quickAPI {
 	double getSourceSampleRate(int index);
 	int getSourceEventNum(int index);
 	const juce::StringArray getSourceNames();
+	const juce::StringArray getSourceNamesWithID();
 
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();

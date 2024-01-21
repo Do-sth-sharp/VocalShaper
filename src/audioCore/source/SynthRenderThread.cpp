@@ -45,6 +45,9 @@ void SynthRenderThread::run() {
 	if (!this->src->synthesizer) { return; }
 	if (!this->dst) { return; }
 
+	/** Mark As Dst */
+	this->dst->synthingByOther = true;
+
 	/** Get Input Data */
 	auto ptrMidiData = this->src->getMidiContentPtr();
 	auto ptrAudioData = this->src->getAudioContentPtr();
@@ -84,13 +87,27 @@ void SynthRenderThread::run() {
 
 	/** Render Audio Data */
 	double audioLength = this->src->getLength();
+	uint64_t totalSamples = audioLength * sampleRate;
 	playHead->transportPlay(true);
+
+	double dstSampleRate = this->dst->getSourceSampleRate();
+	uint64_t dstTotalSamples = audioLength * dstSampleRate;
+	double dstResampleRatio = sampleRate / dstSampleRate;
+
+	double srcSampleRate = this->src->getSourceSampleRate();
+	uint64_t srcTotalSamples = audioLength * srcSampleRate;
+	double srcResampleRatio = srcSampleRate / sampleRate;
 
 	if (ptrMidiOut) {
 		ptrMidiOut->addTrack(juce::MidiMessageSequence{});
 	}
+	if (ptrAudioOut) {
+		if (ptrAudioOut->getNumSamples() < dstTotalSamples) {
+			ptrAudioOut->setSize(ptrAudioOut->getNumChannels(),
+				dstTotalSamples, true, true, true);
+		}
+	}
 
-	uint64_t totalSamples = audioLength * sampleRate;
 	int clipNum = totalSamples / bufferSize;
 	for (int i = 0; !this->threadShouldExit() && (totalSamples > 0) && (i <= clipNum); i++) {
 		/** Clip Time */
@@ -121,10 +138,20 @@ void SynthRenderThread::run() {
 		
 		/** Get Audio Data */
 		if (ptrAudioData) {
-			for (int j = 0; j < inputChannels; j++) {
-				vMath::copyAudioData(audioBuffer, *ptrAudioData,
-					0, startPos, j, j,
-					(i == clipNum) ? (totalSamples % clipNum) : bufferSize);
+			juce::MemoryAudioSource memSource(*ptrAudioData, false, false);
+			juce::ResamplingAudioSource resampleSource(&memSource, false, inputChannels);
+			resampleSource.setResamplingRatio(srcResampleRatio);
+			memSource.setNextReadPosition(startPos * srcResampleRatio);
+			resampleSource.prepareToPlay(bufferSize, sampleRate);
+
+			int startSample = startPos;
+			if (startSample < totalSamples) {
+				int clipSize = bufferSize;
+				if (startSample + clipSize >= totalSamples) {
+					clipSize = totalSamples - startSample;
+				}
+				resampleSource.getNextAudioBlock(juce::AudioSourceChannelInfo{
+						&audioBuffer, 0, clipSize });
 			}
 		}
 
@@ -148,10 +175,20 @@ void SynthRenderThread::run() {
 
 		/** Copy Audio Data */
 		if (ptrAudioOut) {
-			for (int j = 0; j < outputChannels; j++) {
-				vMath::copyAudioData(*ptrAudioOut, audioBuffer,
-					startPos, 0, j, j,
-					(i == clipNum) ? (totalSamples % clipNum) : bufferSize);
+			juce::MemoryAudioSource memSource(audioBuffer, false, false);
+			juce::ResamplingAudioSource resampleSource(&memSource, false, outputChannels);
+			resampleSource.setResamplingRatio(dstResampleRatio);
+			int dstBufferSize = bufferSize / dstResampleRatio;
+			resampleSource.prepareToPlay(dstBufferSize, dstSampleRate);
+
+			int dstStartSample = startPos / dstResampleRatio;
+			if (dstStartSample < dstTotalSamples) {
+				int dstClipSize = dstBufferSize;
+				if (dstStartSample + dstClipSize >= dstTotalSamples) {
+					dstClipSize = dstTotalSamples - dstStartSample;
+				}
+				resampleSource.getNextAudioBlock(juce::AudioSourceChannelInfo{
+						ptrAudioOut, dstStartSample, dstClipSize });
 			}
 		}
 
@@ -179,6 +216,9 @@ void SynthRenderThread::run() {
 
 	/** Reset Play Head */
 	this->src->synthesizer->setPlayHead(nullptr);
+
+	/** Clear Dst Mark */
+	this->dst->synthingByOther = false;
 
 	/** Callback */
 	juce::MessageManager::callAsync([] {

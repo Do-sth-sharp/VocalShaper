@@ -2,5 +2,6 @@
 
 enum class DragSourceType {
 	Plugin = 0x1000,
-	Source
+	Source,
+	SourceSynth
 };

@@ -27,6 +27,7 @@ public:
 	static void removeSource(int index);
 	static void setSourceName(int index, const juce::String& name);
 	static void setSourceSynthesizer(int index, const juce::String& pid);
+	static void setSourceSynthDst(int index, int dstIndex);
 
 	static void render(const juce::String& dirPath, const juce::String& fileName,
 		const juce::String& fileExtension, const juce::Array<int>& tracks);
