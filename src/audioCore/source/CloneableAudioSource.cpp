@@ -175,7 +175,7 @@ void CloneableAudioSource::recordingFinished() {
 }
 
 void CloneableAudioSource::writeData(
-	juce::AudioBuffer<float>& buffer, int offset)	{
+	juce::AudioBuffer<float>& buffer, int offset) {
 	/** Get Time */
 	int srcLength = buffer.getNumSamples();
 	int srcStartSample = offset;
@@ -187,29 +187,82 @@ void CloneableAudioSource::writeData(
 	}
 
 	double resampleRatio = this->getSampleRate() / this->getSourceSampleRate();
-	int dstStartSample = srcStartSample / resampleRatio;
-	int dstLength = srcLength / resampleRatio;
+	int dstStartSample = std::floor(srcStartSample / resampleRatio);
+	int dstLength = std::floor(srcLength / resampleRatio);
 
-	/** Increase BufferLength */
+	/** Limit BufferLength */
 	if (dstStartSample > this->buffer.getNumSamples() - dstLength) {
-		int newLength = dstStartSample + dstLength;
-		this->buffer.setSize(
-			this->buffer.getNumChannels(), newLength, true, false, true);
+		dstLength = this->buffer.getNumSamples() - dstStartSample;
+		if (dstLength <= 0) {
+			return;
+		}
+	}
+
+	/** Change Record Buffer */
+	{
+		/** Get Buffer Size */
+		int rbSize = this->recordBuffer.getNumSamples();
+		int rbChannel = this->recordBuffer.getNumChannels();
+		
+		/** Copy Old Data to Temp */
+		if ((this->recordBufferTemp.getNumSamples() != srcLength) || (this->recordBufferTemp.getNumChannels() != rbChannel)) {
+			this->recordBufferTemp.setSize(rbChannel, srcLength, true, false, true);
+		}
+		if (rbSize < srcLength * 3) {
+			for (int i = 0; i < rbChannel; i++) {
+				vMath::copyAudioData(this->recordBufferTemp, this->recordBuffer,
+					srcLength - rbSize / 3, srcLength, i, i, rbSize / 3);
+			}
+		}
+		else {
+			for (int i = 0; i < rbChannel; i++) {
+				vMath::copyAudioData(this->recordBufferTemp, this->recordBuffer,
+					0, rbSize / 3, i, i, srcLength);
+			}
+		}
+
+		/** Change Buffer Size */
+		if ((rbSize != srcLength * 3) || (rbChannel != buffer.getNumChannels())) {
+			this->recordBuffer.setSize(buffer.getNumChannels(), srcLength * 3, true, true, true);
+		}
+
+		/** Copy Old Data */
+		for (int i = 0; i < rbChannel; i++) {
+			vMath::copyAudioData(this->recordBuffer, this->recordBufferTemp,
+				0, 0, i, i, srcLength);
+		}
+
+		/** Copy New Data */
+		for (int i = 0; i < buffer.getNumChannels(); i++) {
+			vMath::copyAudioData(this->recordBuffer, buffer,
+				srcLength, 0, i, i, srcLength);
+		}
+
+		/** Fill Tails Data */
+		for (int i = 0; i < buffer.getNumChannels(); i++) {
+			vMath::fillAudioData(this->recordBuffer,
+				buffer.getSample(i, buffer.getNumSamples() - 1),
+				srcLength * 2, i, srcLength);
+		}
 	}
 
 	/** Prepare Resampling */
 	int channelNum = std::min(buffer.getNumChannels(), this->buffer.getNumChannels());
 
-	juce::MemoryAudioSource memSource(buffer, false);
+	juce::MemoryAudioSource memSource(this->recordBuffer, false);
 	juce::ResamplingAudioSource resampleSource(&memSource, false, channelNum);
 
-	memSource.setNextReadPosition(bufferStartSample);
+	memSource.setNextReadPosition(srcLength + bufferStartSample);
 	resampleSource.setResamplingRatio(resampleRatio);
 	resampleSource.prepareToPlay(dstLength, this->getSourceSampleRate());
 
 	/** CopyData */
-	resampleSource.getNextAudioBlock(juce::AudioSourceChannelInfo{
-						&(this->buffer), dstStartSample, dstLength });
+	int trueStartSample = dstStartSample - 1;/** To Avoid sss Noise In Buffer Head */
+	if (srcLength > 0) {
+		resampleSource.getNextAudioBlock(juce::AudioSourceChannelInfo{
+						&(this->buffer), (trueStartSample >= 0) ? trueStartSample : 0,
+						(trueStartSample >= 0) ? (dstLength + 2) : (dstLength + 1) });
+	}
 
 	/** Set Flag */
 	this->changed();

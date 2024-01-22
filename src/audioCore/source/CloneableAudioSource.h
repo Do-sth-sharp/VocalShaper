@@ -36,7 +36,7 @@ private:
 	void writeData(juce::AudioBuffer<float>& buffer, int offset);
 
 private:
-	juce::AudioSampleBuffer buffer;
+	juce::AudioSampleBuffer buffer, recordBuffer, recordBufferTemp;
 	std::unique_ptr<juce::MemoryAudioSource> memorySource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> source = nullptr;
 	double sourceSampleRate = 0;

@@ -106,13 +106,13 @@ void SeqSourceProcessor::processBlock(
 			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
 			/** Get Block */
 			auto [blockStartTime, blockEndTime, blockOffset, blockPointer] = this->srcs.getUnchecked(i);
-			int blockStartTimeInSample = blockStartTime * sampleRate;
-			int blockEndTimeInSample = blockEndTime * sampleRate;
-			int blockOffsetInSample = blockOffset * sampleRate;
+			int blockStartTimeInSample = std::floor(blockStartTime * sampleRate);
+			int blockEndTimeInSample = std::floor(blockEndTime * sampleRate);
+			int blockOffsetInSample =std::floor(blockOffset * sampleRate);
 
 			if (CloneableSource::SafePointer<> ptr = blockPointer) {
 				/** Caculate Time */
-				int blockLengthInSample = ptr->getSourceLength() * sampleRate;
+				int blockLengthInSample = std::floor(ptr->getSourceLength() * sampleRate);
 				int dataStartTimeInSample = blockStartTimeInSample + std::max(blockOffsetInSample, 0);
 				int dataEndTimeInSample =
 					std::min(blockEndTimeInSample, blockStartTimeInSample + blockOffsetInSample + blockLengthInSample);

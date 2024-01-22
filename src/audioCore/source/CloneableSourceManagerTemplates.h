@@ -15,7 +15,7 @@ bool CloneableSourceManager::createNewSource(
 	if (!this->addSource(std::move(source))) { return false; }
 
 	/** Init */
-	ptr->initThis(sampleRate, channelNum, length * this->sampleRate);
+	ptr->initThis(sampleRate, channelNum, length * sampleRate);
 
 	/** Callback */
 	juce::MessageManager::callAsync([index = this->sourceList.size() - 1] {
