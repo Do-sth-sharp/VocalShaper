@@ -1,4 +1,5 @@
 ﻿#include "Utils.h"
+#include "misc/VMath.h"
 
 /** LAME Path */
 #if JUCE_WINDOWS
@@ -1005,5 +1006,89 @@ namespace utils {
 	const juce::Array<double> getSourceSampleRateSupported() {
 		return { 8000, 11025, 16000, 22050, 44100, 48000, 
 			88200, 96000, 176400, 192000, 352800, 384000 };
+	}
+
+	void bufferOutputResampledFixed(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
+		juce::AudioSampleBuffer& temp1, juce::AudioSampleBuffer& temp2,
+		double resampleRatio, int channels, double dstSampleRate,
+		int srcStart, int dstStart, int length) {
+		/** Change Record Buffer */
+		{
+			/** Get Buffer Size */
+			int rbSize = temp1.getNumSamples();
+			int rbChannel = temp1.getNumChannels();
+
+			/** Copy Old Data to Temp */
+			if ((temp2.getNumSamples() != length) || (temp2.getNumChannels() != rbChannel)) {
+				temp2.setSize(rbChannel, length, true, false, true);
+			}
+			if (rbSize < length * 3) {
+				for (int i = 0; i < rbChannel; i++) {
+					vMath::copyAudioData(temp2, temp1,
+						length - rbSize / 3, length, i, i, rbSize / 3);
+				}
+			}
+			else {
+				for (int i = 0; i < rbChannel; i++) {
+					vMath::copyAudioData(temp2, temp1,
+						0, rbSize / 3, i, i, length);
+				}
+			}
+
+			/** Change Buffer Size */
+			if ((rbSize != length * 3) || (rbChannel != channels)) {
+				temp1.setSize(channels, length * 3, true, true, true);
+			}
+
+			/** Copy Old Data */
+			for (int i = 0; i < rbChannel; i++) {
+				vMath::copyAudioData(temp1, temp2,
+					0, 0, i, i, length);
+			}
+
+			/** Copy New Data */
+			for (int i = 0; i < channels; i++) {
+				vMath::copyAudioData(temp1, src,
+					length, 0, i, i, length);
+			}
+
+			/** Fill Tails Data */
+			for (int i = 0; i < channels; i++) {
+				vMath::fillAudioData(temp1,
+					src.getSample(i, srcStart + length - 1),
+					length * 2, i, length);
+			}
+		}
+
+		juce::MemoryAudioSource memSource(temp1, false, false);
+		juce::ResamplingAudioSource resampleSource(&memSource, false, channels);
+		memSource.setNextReadPosition(length + srcStart);
+		resampleSource.setResamplingRatio(resampleRatio);
+		int dstBufferSize = std::floor(length / resampleRatio);
+		resampleSource.prepareToPlay(dstBufferSize, dstSampleRate);
+
+		int dstStartSample = std::floor(dstStart / resampleRatio);
+		if (dstStartSample < dst.getNumSamples()) {
+			int dstClipSize = dstBufferSize;
+			if (dstStartSample + dstClipSize >= dst.getNumSamples()) {
+				dstClipSize = dst.getNumSamples() - dstStartSample;
+				if (dstClipSize <= 0) {
+					return;
+				}
+			}
+
+			int trueStartSample = dstStartSample - 1;/** To Avoid sss Noise In Buffer Head */
+			int trueLength = dstClipSize + 2;
+			if (trueStartSample < 0) {
+				trueStartSample = 0;
+				trueLength = dstClipSize + 1;
+			}
+			trueLength = std::min(dst.getNumSamples() - trueStartSample, trueLength);
+
+			if (dstClipSize > 0) {
+				resampleSource.getNextAudioBlock(juce::AudioSourceChannelInfo{
+					&dst, trueStartSample, trueLength  });
+			}
+		}
 	}
 }

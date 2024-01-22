@@ -129,6 +129,11 @@ namespace utils {
 
 	using MidiConnection = std::tuple<int, int>;
 	using MidiConnectionList = juce::Array<MidiConnection>;
+
+	void bufferOutputResampledFixed(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
+		juce::AudioSampleBuffer& temp1, juce::AudioSampleBuffer& temp2,
+		double resampleRatio, int channels, double dstSampleRate,
+		int srcStart, int dstStart, int length);
 }
 
 #define UNUSED(var) (void)var
