@@ -46,6 +46,7 @@ public:
 	static void record(bool start);
 
 	static void insertInstr(int index, int type, const juce::String& pid);
+	static void bypassInstr(int index, bool bypass);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();

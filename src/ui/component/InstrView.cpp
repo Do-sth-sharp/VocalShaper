@@ -30,7 +30,7 @@ InstrView::InstrView()
 void InstrView::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
-	int listItemHeight = screenSize.getHeight() * 0.025;
+	int listItemHeight = screenSize.getHeight() * 0.03;
 
 	/** List Box */
 	this->instrList->setBounds(this->getLocalBounds());

@@ -1,4 +1,7 @@
 ﻿#include "InstrListModel.h"
+#include "../component/InstrComponent.h"
+#include "../misc/CoreActions.h"
+#include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
 int InstrListModel::getNumRows() {
@@ -8,24 +11,45 @@ int InstrListModel::getNumRows() {
 void InstrListModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 	int width, int height, bool rowIsSelected) {
 	/** Nothing To Do */
-	g.setColour(juce::Colours::white);
-	g.setFont(juce::Font{ (float)height });
-	juce::Rectangle<int> rect(0, 0, width, height);
-	juce::String str = "[" + juce::String{ rowNumber } + "] " + this->getNameForRow(rowNumber);
-	g.drawFittedText(str, rect,
-		juce::Justification::centredLeft, 1, 1.f);
 }
 
-juce::Component* InstrListModel::refreshComponentForRow(int rowNumber, bool isRowSelected,
+juce::Component* InstrListModel::refreshComponentForRow(int rowNumber, bool /*isRowSelected*/,
 	juce::Component* existingComponentToUpdate) {
-	/** TODO */
-	return existingComponentToUpdate;
+	if (rowNumber >= this->getNumRows()) { return existingComponentToUpdate; }
+
+	InstrComponent* comp = nullptr;
+	if (existingComponentToUpdate) {
+		comp = dynamic_cast<InstrComponent*>(existingComponentToUpdate);
+		if (!comp) { delete existingComponentToUpdate; }
+	}
+	if (!comp) { comp = new InstrComponent; }
+
+	comp->update(rowNumber);
+
+	return comp;
 }
 
 juce::String InstrListModel::getNameForRow(int rowNumber) {
 	return quickAPI::getInstrName(rowNumber);
 }
 
-void InstrListModel::backgroundClicked(const juce::MouseEvent&) {
-	/** TODO */
+void InstrListModel::backgroundClicked(const juce::MouseEvent& event) {
+	if (event.mods.isRightButtonDown()) {
+		auto callback = [this](const juce::PluginDescription& plugin) {
+			CoreActions::insertInstrGUI(
+				this->getNumRows(), plugin.createIdentifierString());
+			};
+
+		auto menu = this->createBackgroundMenu(callback);
+		menu.show();
+	}
+}
+
+juce::PopupMenu InstrListModel::createBackgroundMenu(
+	const std::function<void(const juce::PluginDescription&)>& callback) {
+	/** Create Menu */
+	auto [valid, list] = quickAPI::getPluginList(true, true);
+	if (!valid) { return juce::PopupMenu{}; }
+	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
+	return utils::createPluginMenu(groups, callback);
 }

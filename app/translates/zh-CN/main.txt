@@ -111,3 +111,7 @@ countries: cn
 
 "Instrument List" = "乐器列表"
 "Type" = "类型"
+"Bypass Instrument" = "旁路乐器"
+
+"Name:" = "名称："
+"Bypassed:" = "旁路："

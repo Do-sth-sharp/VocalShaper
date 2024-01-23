@@ -179,6 +179,12 @@ void CoreActions::insertInstr(int index, int type, const juce::String& pid) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::bypassInstr(int index, bool bypass) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrBypass{ index, bypass });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

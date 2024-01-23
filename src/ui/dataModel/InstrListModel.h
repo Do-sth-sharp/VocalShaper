@@ -15,5 +15,8 @@ public:
 	void backgroundClicked(const juce::MouseEvent&) override;
 
 private:
+	juce::PopupMenu createBackgroundMenu(
+		const std::function<void(const juce::PluginDescription&)>& callback);
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InstrListModel)
 };
