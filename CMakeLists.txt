@@ -127,6 +127,11 @@ add_dependencies (engines_copy
 # Plugin Searcher Target
 file (GLOB_RECURSE PLUGINSEARCHER_SRC CONFIGURE_DEPENDS "./pluginSearcher/*.cpp")
 add_executable (PluginSearcher ${PLUGINSEARCHER_SRC})
+target_compile_definitions (PluginSearcher PRIVATE
+	"PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}"
+	"PROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR}"
+	"PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
+)
 if (NOT MSVC)
 	target_compile_options (PluginSearcher PRIVATE
 		-pthread -fPIE)
@@ -147,6 +152,11 @@ set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT
 # File Registrar Target
 file (GLOB_RECURSE FILEREGISTRAR_SRC CONFIGURE_DEPENDS "./fileRegistrar/*.cpp")
 add_executable (FileRegistrar ${FILEREGISTRAR_SRC})
+target_compile_definitions (FileRegistrar PRIVATE
+	"PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}"
+	"PROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR}"
+	"PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
+)
 if (NOT MSVC)
 	target_compile_options (FileRegistrar PRIVATE
 		-pthread -fPIE)
@@ -169,6 +179,11 @@ file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.c" "
 add_executable (VocalShaper ${VOCALSHAPER_SRC} "./JuceFix/fix.cpp")
 target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./sigar/include" "./src")
 target_compile_definitions (VocalShaper PRIVATE ${COMPILE_SYS_DEF})
+target_compile_definitions (VocalShaper PRIVATE
+	"PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}"
+	"PROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR}"
+	"PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
+)
 target_link_libraries (VocalShaper PRIVATE
 	flowui::flowui
 	${LUA_LIBRARIES}

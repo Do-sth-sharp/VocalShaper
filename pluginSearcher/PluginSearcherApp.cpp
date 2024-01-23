@@ -11,12 +11,14 @@ class PluginSearchApp final : public juce::JUCEApplication {
 
 public:
 	const juce::String getApplicationName() override { return "VocalShaper.PluginSearcher"; };
-	const juce::String getApplicationVersion() override { return "0.0.1"; };
+	const juce::String getApplicationVersion() override {
+        return juce::String{ PROJECT_VERSION_MAJOR } + "." + juce::String{ PROJECT_VERSION_MINOR } + "." + juce::String{ PROJECT_VERSION_PATCH };
+    };
 	bool moreThanOneInstanceAllowed() override { return false; };
 
     void initialise(const juce::String& commandLine) override {
-        OUT("VocalShaper Plugin Searcher v0.0.1");
-        OUT("Copyright 2023 VocalSharp Org. All rights reserved.");
+        OUT("VocalShaper Plugin Searcher v" + this->getApplicationVersion());
+        OUT("Copyright 2023-2024 VocalSharp Org. All rights reserved.");
         OUT("");
 
         juce::StringArray commandArray = juce::StringArray::fromTokens(commandLine, " ", "\"");
