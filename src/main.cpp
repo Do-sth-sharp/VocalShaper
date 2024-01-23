@@ -29,6 +29,19 @@ class MainApplication : public juce::JUCEApplication {
 private:
 	std::unique_ptr<Splash> splash = nullptr;
 
+	void initCrashHandler() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Init Crash Handler..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				::initCrashHandler(utils::getAppRootDir().getFullPathName());
+			}
+		);
+	};
+
 	void loadConfig() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -404,7 +417,7 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
-				auto dumpList = getAllDumpFiles();
+				auto dumpList = ::getAllDumpFiles();
 				if (!dumpList.isEmpty()) {
 					juce::String mes = TRANS("Found the following crash dump files. These files take up {DMPSIZE} of storage space, should they be deleted to save disk space?") + "\n";
 					size_t dumpSize = 0;
@@ -476,7 +489,7 @@ private:
 	void setCrashHandler() {
 		InitTaskList::getInstance()->add(
 			[] {
-				juce::SystemStats::setApplicationCrashHandler(applicationCrashHandler);
+				juce::SystemStats::setApplicationCrashHandler(::applicationCrashHandler);
 			}
 		);
 	};
@@ -492,6 +505,9 @@ public:
 		/** Show Splash */
 		this->splash = std::make_unique<Splash>();
 		this->splash->setVisible(true);
+
+		/** Init Crash Handler */
+		this->initCrashHandler();
 
 		/** Load Config */
 		this->loadConfig();

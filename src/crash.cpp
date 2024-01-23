@@ -9,6 +9,8 @@
 #include <Windows.h>
 #endif //JUCE_WINDOWS
 
+static std::string hostPath;
+
 std::string getLocalTime() {
 	time_t nowTime;
 	time(&nowTime);
@@ -36,7 +38,7 @@ void applicationCrashHandler(void* info) {
 	std::replace(time.begin(), time.end(), ':', '_');
 
 	/** Get File Path */
-	std::filesystem::path projPath = std::filesystem::current_path();
+	std::filesystem::path projPath = std::filesystem::path{ ::hostPath };
 	std::filesystem::path projHLPath = projPath / (time + ".vshl.dmp");
 	std::filesystem::path projMLPath = projPath / (time + ".vsml.dmp");
 	std::filesystem::path projLLPath = projPath / (time + ".vsll.dmp");
@@ -71,4 +73,8 @@ const juce::Array<juce::File> getAllDumpFiles() {
 	auto appDir = utils::getAppRootDir();
 	return appDir.findChildFiles(juce::File::findFiles, false,
 		"*.vsll.dmp;*.vsml.dmp;*.vshl.dmp", juce::File::FollowSymlinks::no);
+}
+
+void initCrashHandler(const juce::String& path) {
+	::hostPath = path.toStdString();
 }
