@@ -69,4 +69,13 @@ namespace quickAPI {
 
 	const std::tuple<bool, juce::Array<juce::PluginDescription>>
 		getPluginList(bool filter = false, bool instr = true);
+
+	/** ID, Name */
+	using TrackType = std::tuple<int, juce::String>;
+	const juce::Array<TrackType> createAllTrackTypeWithName();
+	const juce::Array<TrackType> getAllTrackTypeWithName();
+
+	int getInstrNum();
+	const juce::String getInstrName(int index);
+	bool getInstrBypass(int index);
 }

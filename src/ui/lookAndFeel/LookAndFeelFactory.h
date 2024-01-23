@@ -19,6 +19,7 @@ public:
 	juce::LookAndFeel_V4* forMessageView() const;
 	juce::LookAndFeel_V4* forPluginView() const;
 	juce::LookAndFeel_V4* forSourceView() const;
+	juce::LookAndFeel_V4* forInstrView() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -32,6 +33,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> messageViewLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> pluginViewLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> sourceViewLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> instrViewLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

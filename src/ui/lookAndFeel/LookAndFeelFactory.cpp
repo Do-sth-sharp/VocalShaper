@@ -10,6 +10,7 @@
 #include "MessageViewLookAndFeel.h"
 #include "PluginViewLookAndFeel.h"
 #include "SourceViewLookAndFeel.h"
+#include "InstrViewLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -74,6 +75,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Source View */
 	this->sourceViewLAF = std::make_unique<SourceViewLookAndFeel>();
+
+	/** Instrument View */
+	this->instrViewLAF = std::make_unique<InstrViewLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -119,6 +123,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forPluginView() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forSourceView() const {
 	return this->sourceViewLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forInstrView() const {
+	return this->instrViewLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

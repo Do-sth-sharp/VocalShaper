@@ -88,6 +88,7 @@ countries: cn
 "Synth Destination:" = "合成目标："
 "Sample Rate:" = "采样率："
 
+"Source List" = "源列表"
 "Sample Rate" = "采样率"
 "Channels" = "通道"
 "Length" = "长度"
@@ -107,3 +108,6 @@ countries: cn
 "Empty" = "空"
 "IO Running" = "IO执行中"
 "Synthing" = "合成中"
+
+"Instrument List" = "乐器列表"
+"Type" = "类型"

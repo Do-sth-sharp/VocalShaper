@@ -45,6 +45,8 @@ public:
 	static void rewind();
 	static void record(bool start);
 
+	static void insertInstr(int index, int type, const juce::String& pid);
+
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
 	static void newProjectGUI();
@@ -56,7 +58,6 @@ public:
 	static bool removePluginSearchPathGUI(const juce::String& path);
 
 	static void loadSourceGUI();
-	static void loadSynthSourceGUI();
 	static void newMIDISourceGUI();
 	static void newAudioSourceGUI(double sampleRate, int channels, double length);
 	static void newAudioSourceGUI();
@@ -75,6 +76,10 @@ public:
 	static void renderGUI(const juce::Array<int>& tracks);
 	static void renderGUI();
 
+	static void insertInstrGUI(int index, const juce::String& pid);
+	static void insertInstrGUI(int index);
+	static void insertInstrGUI();
+
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(
 		const std::function<void(double, int, double)>& callback);
@@ -88,4 +93,7 @@ public:
 	static void askForPluginGUIAsync(
 		const std::function<void(const juce::String&)>& callback,
 		bool filter = false, bool instr = true);
+	static void askForBusTypeGUIAsync(
+		const std::function<void(int)>& callback,
+		int defaultType = 20);
 };

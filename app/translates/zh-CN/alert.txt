@@ -16,6 +16,7 @@ countries: cn
 "Name Editor" = "名称编辑器"
 "Plugin Selector" = "插件选择器"
 "Remove Source" = "删除源"
+"Bus Type Selector" = "总线类型选择器"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
@@ -46,3 +47,4 @@ countries: cn
 "Input the name in the editor:" = "在编辑器中输入名称："
 "Select a plugin in the list:" = "在列表中选择一个插件："
 "Remove the source from source list. Continue?" = "从源列表中删除源。继续？"
+"Select a bus type in the list:" = "在列表中选择一个总线类型："

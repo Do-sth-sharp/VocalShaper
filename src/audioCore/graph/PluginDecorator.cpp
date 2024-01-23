@@ -68,6 +68,11 @@ void PluginDecorator::setPlugin(
 	this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 	//this->updatePluginBuses();
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 bool PluginDecorator::canPluginAddBus(bool isInput) const {
@@ -85,6 +90,11 @@ void PluginDecorator::setMIDIChannel(int channel) {
 		channel = 0;
 	}
 	this->midiChannel = channel;
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 int PluginDecorator::getMIDIChannel() const {
@@ -126,6 +136,11 @@ void PluginDecorator::setParamValue(int index, float value) {
 
 	auto param = paramList.getUnchecked(index);
 	param->setValue(value);
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
@@ -138,6 +153,11 @@ void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
 	}
 
 	this->paramCCList[CCIndex] = paramIndex;
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 int PluginDecorator::getCCParamConnection(int CCIndex) const {
@@ -158,6 +178,11 @@ int PluginDecorator::getParamCCConnection(int paramIndex) const {
 void PluginDecorator::removeCCParamConnection(int CCIndex) {
 	if (CCIndex < 0 || CCIndex >= this->paramCCList.size()) { return; }
 	this->paramCCList[CCIndex] = -1;
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 //void PluginDecorator::setParamCCListenning(int paramIndex) {
@@ -176,6 +201,11 @@ void PluginDecorator::removeCCParamConnection(int CCIndex) {
 
 void PluginDecorator::setMIDICCIntercept(bool midiCCShouldIntercept) {
 	this->midiCCShouldIntercept = midiCCShouldIntercept;
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 bool PluginDecorator::getMIDICCIntercept() const {
@@ -184,6 +214,11 @@ bool PluginDecorator::getMIDICCIntercept() const {
 
 void PluginDecorator::setMIDIOutput(bool midiShouldOutput) {
 	this->midiShouldOutput = midiShouldOutput;
+
+	/** Callback */
+	if (this->isInstr) {
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
 }
 
 bool PluginDecorator::getMIDIOutput() const {

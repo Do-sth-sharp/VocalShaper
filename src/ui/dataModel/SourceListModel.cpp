@@ -20,6 +20,8 @@ void SourceListModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 juce::Component* SourceListModel::refreshComponentForRow(
 	int rowNumber, bool isRowSelected,
 	juce::Component* existingComponentToUpdate) {
+	if (rowNumber >= this->getNumRows()) { return existingComponentToUpdate; }
+
 	SourceComponent* comp = nullptr;
 	if (existingComponentToUpdate) {
 		comp = dynamic_cast<SourceComponent*>(existingComponentToUpdate);

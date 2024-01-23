@@ -555,6 +555,53 @@ namespace utils {
 		return {};
 	}
 
+	const juce::Array<TrackType> getAllTrackTypes() {
+		return {
+			TrackType::DISABLED,
+			TrackType::MONO,
+			TrackType::STEREO,
+			TrackType::LCR,
+			TrackType::LRS,
+			TrackType::LCRS,
+			TrackType::SUR_5_0,
+			TrackType::SUR_5_1,
+			TrackType::SUR_5_0_2,
+			TrackType::SUR_5_1_2,
+			TrackType::SUR_5_0_4,
+			TrackType::SUR_5_1_4,
+			TrackType::SUR_6_0,
+			TrackType::SUR_6_1,
+			TrackType::SUR_6_0_M,
+			TrackType::SUR_6_1_M,
+			TrackType::SUR_7_0,
+			TrackType::SUR_7_0_SDSS,
+			TrackType::SUR_7_1,
+			TrackType::SUR_7_1_SDSS,
+			TrackType::SUR_7_0_2,
+			TrackType::SUR_7_1_2,
+			TrackType::SUR_7_0_4,
+			TrackType::SUR_7_1_4,
+			TrackType::SUR_7_0_6,
+			TrackType::SUR_7_1_6,
+			TrackType::SUR_9_0_4,
+			TrackType::SUR_9_1_4,
+			TrackType::SUR_9_0_6,
+			TrackType::SUR_9_1_6,
+			TrackType::QUADRAPHONIC,
+			TrackType::PENTAGONAL,
+			TrackType::HEXAGONAL,
+			TrackType::OCTAGONAL,
+			TrackType::AMBISONIC_0,
+			TrackType::AMBISONIC_1,
+			TrackType::AMBISONIC_2,
+			TrackType::AMBISONIC_3,
+			TrackType::AMBISONIC_4,
+			TrackType::AMBISONIC_5,
+			TrackType::AMBISONIC_6,
+			TrackType::AMBISONIC_7
+		};
+	}
+
 	const juce::AudioChannelSet getChannelSet(TrackType type) {
 		juce::AudioChannelSet trackType;
 

@@ -329,4 +329,43 @@ namespace quickAPI {
 
 		return { result, listRes };
 	}
+
+	const juce::Array<TrackType> createAllTrackTypeWithName() {
+		auto list = utils::getAllTrackTypes();
+
+		juce::Array<TrackType> result;
+		for (auto i : list) {
+			auto channelSet = utils::getChannelSet(i);
+			result.add({ (int)i, channelSet.getDescription() });
+		}
+		return result;
+	}
+
+	const juce::Array<TrackType> getAllTrackTypeWithName() {
+		static juce::Array<TrackType> list = createAllTrackTypeWithName();
+		return list;
+	}
+
+	int getInstrNum() {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getInstrumentNum();
+		}
+		return 0;
+	}
+
+	const juce::String getInstrName(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto instr = graph->getInstrumentProcessor(index)) {
+				return instr->getName();
+			}
+		}
+		return "";
+	}
+
+	bool getInstrBypass(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getInstrumentBypass(index);
+		}
+		return false;
+	}
 }

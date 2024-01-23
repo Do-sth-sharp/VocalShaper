@@ -1,4 +1,5 @@
 ﻿#include "MainGraph.h"
+#include "../uiCallback/UICallback.h"
 
 void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 	/** Add To The Graph */
@@ -66,6 +67,10 @@ PluginDecorator::SafePointer MainGraph::insertInstrument(std::unique_ptr<juce::A
 	/** Add To The Graph */
 	if (auto ptr = this->insertInstrument(index, type)) {
 		ptr->setPlugin(std::move(processor), identifier);
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, index);
+
 		return ptr;
 	}
 	else {
@@ -89,6 +94,9 @@ PluginDecorator::SafePointer MainGraph::insertInstrument(int index,
 		/** Prepare To Play */
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, index);
 
 		return PluginDecorator::SafePointer{ dynamic_cast<PluginDecorator*>(ptrNode->getProcessor()) };
 	}
@@ -134,6 +142,9 @@ void MainGraph::removeInstrument(int index) {
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, index);
 }
 
 int MainGraph::getSourceNum() const {
@@ -175,6 +186,9 @@ void MainGraph::setInstrumentBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return; }
 	if (auto node = this->instrumentNodeList.getUnchecked(index)) {
 		node->setBypassed(bypass);
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, index);
 	}
 }
 
@@ -201,6 +215,9 @@ void MainGraph::setMIDII2InstrConnection(int instrIndex) {
 	{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {nodeID, this->midiChannelIndex} };
 	this->addConnection(connection);
 	this->midiI2InstrConnectionList.add(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
 }
 
 void MainGraph::removeMIDII2InstrConnection(int instrIndex) {
@@ -219,6 +236,9 @@ void MainGraph::removeMIDII2InstrConnection(int instrIndex) {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
 }
 
 void MainGraph::setMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
@@ -238,6 +258,9 @@ void MainGraph::setMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
 	{ {nodeID, this->midiChannelIndex}, {dstNodeID, this->midiChannelIndex} };
 	this->addConnection(connection);
 	this->midiSrc2InstrConnectionList.add(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
 }
 
 void MainGraph::removeMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
@@ -259,6 +282,9 @@ void MainGraph::removeMIDISrc2InstrConnection(int sourceIndex, int instrIndex) {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
 }
 
 bool MainGraph::isMIDII2InstrConnected(int instrIndex) const {

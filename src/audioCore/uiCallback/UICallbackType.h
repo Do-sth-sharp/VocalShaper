@@ -7,6 +7,7 @@ enum class UICallbackType : int {
 	ErrorMessage,
 	PluginSearchStateChanged,
 	SourceChanged,
+	InstrChanged,
 
 	TypeMaxNum
 };

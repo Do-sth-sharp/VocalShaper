@@ -173,6 +173,12 @@ void CoreActions::record(bool start) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::insertInstr(int index, int type, const juce::String& pid) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionAddInstr{ index, type, pid });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 
@@ -474,6 +480,24 @@ void CoreActions::renderGUI() {
 	CoreActions::askForMixerTracksListGUIAsync(callback);
 }
 
+void CoreActions::insertInstrGUI(int index, const juce::String& pid) {
+	if (pid.isEmpty()) { return; }
+
+	auto callback = [index, pid](int type) {
+		CoreActions::insertInstr(index, type, pid); };
+	CoreActions::askForBusTypeGUIAsync(callback);
+}
+
+void CoreActions::insertInstrGUI(int index) {
+	auto callback = [index](const juce::String& id) {
+		CoreActions::insertInstrGUI(index, id); };
+	CoreActions::askForPluginGUIAsync(callback, true, true);
+}
+
+void CoreActions::insertInstrGUI() {
+	CoreActions::insertInstrGUI(quickAPI::getInstrNum());
+}
+
 bool CoreActions::askForSaveGUI() {
 	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
 		return true;
@@ -723,6 +747,44 @@ void CoreActions::askForPluginGUIAsync(
 			if(pluginDes.name != name){ return; }
 
 			callback(pluginDes.createIdentifierString());
+		}
+	), true);
+}
+
+void CoreActions::askForBusTypeGUIAsync(
+	const std::function<void(int)>& callback, int defaultType) {
+	/** Get Track Type List */
+	auto list = quickAPI::getAllTrackTypeWithName();
+	juce::StringArray typeNames;
+	int defaultIndex = 0;
+	for (int i = 0; i < list.size(); i++) {
+		auto& [id, name] = list.getReference(i);
+
+		typeNames.add("[" + juce::String{ id } + "] " + name);
+		if (id == defaultType) { defaultIndex = i; }
+	}
+
+	/** Create Selector */
+	auto selectorWindow = new juce::AlertWindow{
+		TRANS("Bus Type Selector"), TRANS("Select a bus type in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	selectorWindow->addButton(TRANS("OK"), 1);
+	selectorWindow->addButton(TRANS("Cancel"), 0);
+	selectorWindow->addComboBox(TRANS("Type"), typeNames, TRANS("Type"));
+
+	/** Set Default Type */
+	auto combo = selectorWindow->getComboBoxComponent(TRANS("Type"));
+	combo->setSelectedItemIndex(defaultIndex);
+
+	/** Show Selector Async */
+	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo, callback, list](int result) {
+			if (result != 1) { return; }
+
+			int index = combo->getSelectedItemIndex();
+			auto& [id, name] = list.getReference(index);
+
+			callback(id);
 		}
 	), true);
 }

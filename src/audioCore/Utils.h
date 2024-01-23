@@ -82,7 +82,7 @@ namespace utils {
 		AMBISONIC_6 = 106,
 		AMBISONIC_7 = 107
 	};
-
+	const juce::Array<TrackType> getAllTrackTypes();
 	const juce::AudioChannelSet getChannelSet(TrackType type);
 	TrackType getTrackType(const juce::AudioChannelSet& channels);
 

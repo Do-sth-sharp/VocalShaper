@@ -1,4 +1,5 @@
-#include "MainGraph.h"
+﻿#include "MainGraph.h"
+#include "../uiCallback/UICallback.h"
 
 void MainGraph::setMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
 	/** Limit Index */
@@ -107,6 +108,9 @@ void MainGraph::setAudioInstr2TrkConnection(int instrIndex, int trackIndex, int 
 		this->addConnection(connection);
 		this->audioInstr2TrkConnectionList.add(connection);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
 }
 
 void MainGraph::removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -123,6 +127,9 @@ void MainGraph::removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, i
 	{ {insNodeID, srcChannel}, {trkNodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioInstr2TrkConnectionList.removeAllInstancesOf(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
 }
 
 bool MainGraph::isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const {
