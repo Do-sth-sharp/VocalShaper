@@ -3,6 +3,7 @@
 #include "../plugin/PluginLoader.h"
 #include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
+#include "../misc/VMath.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -273,13 +274,17 @@ void PluginDecorator::processBlock(
 			this->buffer->setSize(this->buffer->getNumChannels(), buffer.getNumSamples(), true, false, true);
 
 			for (int i = 0; i < buffer.getNumChannels() && i < this->buffer->getNumChannels(); i++) {
-				this->buffer->copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
+				vMath::copyAudioData(
+					*(this->buffer.get()), buffer,
+					0, 0, i, i, buffer.getNumSamples());
 			}
 
 			this->plugin->processBlock(*(this->buffer.get()), midiMessages);
 
 			for (int i = 0; i < buffer.getNumChannels() && i < this->buffer->getNumChannels(); i++) {
-				buffer.copyFrom(i, 0, this->buffer->getReadPointer(i), buffer.getNumSamples());
+				vMath::copyAudioData(
+					buffer, *(this->buffer.get()),
+					0, 0, i, i, buffer.getNumSamples());
 			}
 		}
 	}
