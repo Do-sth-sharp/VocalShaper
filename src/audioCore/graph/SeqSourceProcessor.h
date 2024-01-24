@@ -49,6 +49,27 @@ public:
 
 	void clearGraph();
 
+	class SafePointer {
+	private:
+		juce::WeakReference<SeqSourceProcessor> weakRef;
+
+	public:
+		SafePointer() = default;
+		SafePointer(SeqSourceProcessor* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (SeqSourceProcessor* newSource) { weakRef = newSource; return *this; };
+
+		SeqSourceProcessor* getSourceSeq() const noexcept { return dynamic_cast<SeqSourceProcessor*> (weakRef.get()); };
+		operator SeqSourceProcessor* () const noexcept { return getSourceSeq(); };
+		SeqSourceProcessor* operator->() const noexcept { return getSourceSeq(); };
+		void deleteAndZero() { delete getSourceSeq(); };
+
+		bool operator== (SeqSourceProcessor* component) const noexcept { return weakRef == component; };
+		bool operator!= (SeqSourceProcessor* component) const noexcept { return weakRef != component; };
+	};
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
@@ -62,5 +83,6 @@ private:
 	juce::String trackName;
 	juce::Colour trackColor;
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)
 };

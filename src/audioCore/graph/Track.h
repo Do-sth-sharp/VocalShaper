@@ -43,6 +43,27 @@ public:
 
 	void clearGraph();
 
+	class SafePointer {
+	private:
+		juce::WeakReference<Track> weakRef;
+
+	public:
+		SafePointer() = default;
+		SafePointer(Track* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (Track* newSource) { weakRef = newSource; return *this; };
+
+		Track* getTrack() const noexcept { return dynamic_cast<Track*> (weakRef.get()); };
+		operator Track* () const noexcept { return getTrack(); };
+		Track* operator->() const noexcept { return getTrack(); };
+		void deleteAndZero() { delete getTrack(); };
+
+		bool operator== (Track* component) const noexcept { return weakRef == component; };
+		bool operator!= (Track* component) const noexcept { return weakRef != component; };
+	};
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
@@ -69,5 +90,6 @@ private:
 
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(Track)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Track)
 };

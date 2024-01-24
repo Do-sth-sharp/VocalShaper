@@ -38,6 +38,8 @@ public:
 	bool getInstrumentBypass(int index) const;
 	void setTrackBypass(int index, bool bypass);
 	bool getTrackBypass(int index) const;
+	static void setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass);
+	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
 
 	void setMIDII2InstrConnection(int instrIndex);
 	void removeMIDII2InstrConnection(int instrIndex);
@@ -114,6 +116,27 @@ public:
 
 	const juce::Array<float> getOutputLevels() const;
 
+	class SafePointer {
+	private:
+		juce::WeakReference<MainGraph> weakRef;
+
+	public:
+		SafePointer() = default;
+		SafePointer(MainGraph* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (MainGraph* newSource) { weakRef = newSource; return *this; };
+
+		MainGraph* getGraph() const noexcept { return dynamic_cast<MainGraph*> (weakRef.get()); };
+		operator MainGraph* () const noexcept { return getGraph(); };
+		MainGraph* operator->() const noexcept { return getGraph(); };
+		void deleteAndZero() { delete getGraph(); };
+
+		bool operator== (MainGraph* component) const noexcept { return weakRef == component; };
+		bool operator!= (MainGraph* component) const noexcept { return weakRef != component; };
+	};
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
@@ -154,5 +177,6 @@ private:
 	friend class RenderThread;
 	void processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) override;
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(MainGraph)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGraph)
 };

@@ -185,17 +185,36 @@ bool MainGraph::getSourceBypass(int index) const {
 void MainGraph::setInstrumentBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return; }
 	if (auto node = this->instrumentNodeList.getUnchecked(index)) {
-		node->setBypassed(bypass);
-
-		/** Callback */
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, index);
+		MainGraph::setInstrumentBypass(PluginDecorator::SafePointer{
+			dynamic_cast<PluginDecorator*>(node->getProcessor()) }, bypass);
 	}
 }
 
 bool MainGraph::getInstrumentBypass(int index) const {
 	if (index < 0 || index >= this->instrumentNodeList.size()) { return false; }
 	if (auto node = this->instrumentNodeList.getUnchecked(index)) {
-		return node->isBypassed();
+		return MainGraph::getInstrumentBypass(PluginDecorator::SafePointer{
+			dynamic_cast<PluginDecorator*>(node->getProcessor()) });
+	}
+	return false;
+}
+
+void MainGraph::setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass) {
+	if (instr) {
+		if (auto bypassParam = instr->getBypassParameter()) {
+			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
+
+			/** Callback */
+			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		}
+	}
+}
+
+bool MainGraph::getInstrumentBypass(PluginDecorator::SafePointer instr) {
+	if (instr) {
+		if (auto bypassParam = instr->getBypassParameter()) {
+			return !juce::approximatelyEqual(bypassParam->getValue(), 0.0f);
+		}
 	}
 	return false;
 }

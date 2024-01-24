@@ -45,6 +45,27 @@ public:
 
 	double getTailLengthSeconds() const override;
 
+	class SafePointer {
+	private:
+		juce::WeakReference<SourceRecordProcessor> weakRef;
+
+	public:
+		SafePointer() = default;
+		SafePointer(SourceRecordProcessor* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (SourceRecordProcessor* newSource) { weakRef = newSource; return *this; };
+
+		SourceRecordProcessor* getRecorder() const noexcept { return dynamic_cast<SourceRecordProcessor*> (weakRef.get()); };
+		operator SourceRecordProcessor* () const noexcept { return getRecorder(); };
+		SourceRecordProcessor* operator->() const noexcept { return getRecorder(); };
+		void deleteAndZero() { delete getRecorder(); };
+
+		bool operator== (SourceRecordProcessor* component) const noexcept { return weakRef == component; };
+		bool operator!= (SourceRecordProcessor* component) const noexcept { return weakRef != component; };
+	};
+
 public:
 	bool parse(const google::protobuf::Message* data) override;
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
@@ -53,5 +74,6 @@ private:
 	juce::Array<RecorderTask> tasks;
 	LimitedCall limitedCall;
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(SourceRecordProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceRecordProcessor)
 };

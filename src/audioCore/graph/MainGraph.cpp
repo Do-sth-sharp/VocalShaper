@@ -233,8 +233,8 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 	for (auto& i : instrs) {
 		this->insertInstrument(-1, utils::getChannelSet(static_cast<utils::TrackType>(i.info().decoratortype())));
 		if (auto instrNode = this->instrumentNodeList.getLast()) {
-			instrNode->setBypassed(i.bypassed());
 			if (auto instr = dynamic_cast<PluginDecorator*>(instrNode->getProcessor())) {
+				MainGraph::setInstrumentBypass(PluginDecorator::SafePointer{ instr }, i.bypassed());
 				if (!instr->parse(&i)) { return false; }
 			}
 		}
@@ -328,7 +328,8 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 		if (auto instr = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
 			auto imes = instr->serialize();
 			if (!dynamic_cast<vsp4::Plugin*>(imes.get())) { return nullptr; }
-			dynamic_cast<vsp4::Plugin*>(imes.get())->set_bypassed(i->isBypassed());
+			dynamic_cast<vsp4::Plugin*>(imes.get())->set_bypassed(
+				MainGraph::getInstrumentBypass(PluginDecorator::SafePointer{ instr }));
 			instrs->AddAllocated(dynamic_cast<vsp4::Plugin*>(imes.release()));
 		}
 	}

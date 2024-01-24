@@ -185,6 +185,18 @@ void CoreActions::bypassInstr(int index, bool bypass) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::bypassInstr(quickAPI::PluginHolder instr, bool bypass) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrBypassByPtr{ instr, bypass });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::bypassEffect(quickAPI::PluginHolder effect, bool bypass) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectBypassByPtr{ effect, bypass });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

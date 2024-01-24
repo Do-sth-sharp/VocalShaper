@@ -205,14 +205,33 @@ PluginDecorator* PluginDock::getPluginProcessor(int index) const {
 void PluginDock::setPluginBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
 	if (auto node = this->pluginNodeList.getUnchecked(index)) {
-		node->setBypassed(bypass);
+		PluginDock::setPluginBypass(PluginDecorator::SafePointer{
+			dynamic_cast<PluginDecorator*>(node->getProcessor()) }, bypass);
 	}
 }
 
 bool PluginDock::getPluginBypass(int index) const {
 	if (index < 0 || index >= this->pluginNodeList.size()) { return false; }
 	if (auto node = this->pluginNodeList.getUnchecked(index)) {
-		return node->isBypassed();
+		return PluginDock::getPluginBypass(PluginDecorator::SafePointer{
+			dynamic_cast<PluginDecorator*>(node->getProcessor()) });
+	}
+	return false;
+}
+
+void PluginDock::setPluginBypass(PluginDecorator::SafePointer plugin, bool bypass) {
+	if (plugin) {
+		if (auto bypassParam = plugin->getBypassParameter()) {
+			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
+		}
+	}
+}
+
+bool PluginDock::getPluginBypass(PluginDecorator::SafePointer plugin) {
+	if (plugin) {
+		if (auto bypassParam = plugin->getBypassParameter()) {
+			return !juce::approximatelyEqual(bypassParam->getValue(), 0.0f);
+		}
 	}
 	return false;
 }
@@ -438,8 +457,8 @@ bool PluginDock::parse(const google::protobuf::Message* data) {
 	for (auto& i : plugins) {
 		this->insertPlugin(-1);
 		if (auto pluginNode = this->pluginNodeList.getLast()) {
-			pluginNode->setBypassed(i.bypassed());
 			if (auto plugin = dynamic_cast<PluginDecorator*>(pluginNode->getProcessor())) {
+				PluginDock::setPluginBypass(PluginDecorator::SafePointer{ plugin }, i.bypassed());
 				if (!plugin->parse(&i)) { return false; }
 			}
 		}
@@ -461,7 +480,8 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize() const {
 		if (auto plugin = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
 			if (auto item = plugin->serialize()) {
 				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
-					plu->set_bypassed(i->isBypassed());
+					plu->set_bypassed(PluginDock::getPluginBypass(
+						PluginDecorator::SafePointer{ plugin }));
 
 					plugins->AddAllocated(dynamic_cast<vsp4::Plugin*>(item.release()));
 				}

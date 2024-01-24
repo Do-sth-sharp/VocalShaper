@@ -2,6 +2,7 @@
 
 #include "ActionUndoableBase.h"
 #include "ActionUtils.h"
+#include "../quickAPI/QuickGet.h"
 #include "../Utils.h"
 
 class ActionSetDeviceAudioType final : public ActionBase {
@@ -244,6 +245,29 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectBypass)
 };
 
+class ActionSetEffectBypassByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectBypassByPtr() = delete;
+	ActionSetEffectBypassByPtr(
+		quickAPI::PluginHolder effect, bool bypass);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Bypass By Pointer";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const bool bypass;
+
+		bool oldBypass = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectBypassByPtr)
+};
+
 class ActionSetInstrWindow final : public ActionBase {
 public:
 	ActionSetInstrWindow() = delete;
@@ -283,6 +307,29 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrBypass)
+};
+
+class ActionSetInstrBypassByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrBypassByPtr() = delete;
+	ActionSetInstrBypassByPtr(
+		quickAPI::PluginHolder instr, bool bypass);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Bypass By Pointer";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const bool bypass;
+
+		bool oldBypass = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrBypassByPtr)
 };
 
 class ActionSetInstrMidiChannel final : public ActionUndoableBase {

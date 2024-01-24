@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../../audioCore/AC_API.h"
 
 class CoreActions final {
 	CoreActions() = delete;
@@ -47,6 +48,9 @@ public:
 
 	static void insertInstr(int index, int type, const juce::String& pid);
 	static void bypassInstr(int index, bool bypass);
+	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
+
+	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();

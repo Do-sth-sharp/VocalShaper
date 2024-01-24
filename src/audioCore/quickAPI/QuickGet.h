@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../graph/PluginDecorator.h"
 
 namespace quickAPI {
 	juce::Component* getAudioDebugger();
@@ -75,7 +76,15 @@ namespace quickAPI {
 	const juce::Array<TrackType> createAllTrackTypeWithName();
 	const juce::Array<TrackType> getAllTrackTypeWithName();
 
+	using PluginHolder = PluginDecorator::SafePointer;
+
 	int getInstrNum();
+	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
 	bool getInstrBypass(int index);
+	const juce::String getInstrName(PluginHolder pointer);
+	bool getInstrBypass(PluginHolder pointer);
+
+	const juce::String getEffectName(PluginHolder pointer);
+	bool getEffectBypass(PluginHolder pointer);
 }

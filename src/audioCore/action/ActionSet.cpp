@@ -359,6 +359,48 @@ bool ActionSetEffectBypass::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetEffectBypassByPtr::ActionSetEffectBypassByPtr(
+	quickAPI::PluginHolder effect, bool bypass)
+	: ACTION_DB{ effect, bypass } {}
+
+bool ActionSetEffectBypassByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffectBypassByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(oldBypass) = PluginDock::getPluginBypass(ACTION_DATA(effect));
+
+		PluginDock::setPluginBypass(ACTION_DATA(effect), ACTION_DATA(bypass));
+
+		this->output("Plugin Bypass: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffectBypassByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffectBypassByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		PluginDock::setPluginBypass(ACTION_DATA(effect), ACTION_DATA(oldBypass));
+
+		this->output("Undo Plugin Bypass: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
 ActionSetInstrBypass::ActionSetInstrBypass(
 	int instr, bool bypass)
 	: ACTION_DB{ instr, bypass } {}
@@ -396,6 +438,48 @@ bool ActionSetInstrBypass::undo() {
 		graph->setInstrumentBypass(ACTION_DATA(instr), ACTION_DATA(oldBypass));
 
 		this->output("Undo Plugin Bypass: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSetInstrBypassByPtr::ActionSetInstrBypassByPtr(
+	quickAPI::PluginHolder instr, bool bypass)
+	: ACTION_DB{ instr, bypass } {}
+
+bool ActionSetInstrBypassByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetInstrBypassByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(oldBypass) = MainGraph::getInstrumentBypass(ACTION_DATA(instr));
+
+		MainGraph::setInstrumentBypass(ACTION_DATA(instr), ACTION_DATA(bypass));
+
+		this->output("Plugin Bypass: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetInstrBypassByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetInstrBypassByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		MainGraph::setInstrumentBypass(ACTION_DATA(instr), ACTION_DATA(oldBypass));
+
+		this->output("Undo Plugin Bypass: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);

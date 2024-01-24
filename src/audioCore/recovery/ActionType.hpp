@@ -64,5 +64,7 @@ enum class ActionType : unsigned int {
 	ActionSetSequencerTrackBypass,
 	ActionSetSourceSynthesizer,
 	ActionSetSourceName,
-	ActionSetSourceSynthDst
+	ActionSetSourceSynthDst,
+	ActionSetEffectBypassByPtr,
+	ActionSetInstrBypassByPtr,
 };
