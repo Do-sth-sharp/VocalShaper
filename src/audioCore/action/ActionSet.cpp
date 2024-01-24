@@ -1103,35 +1103,6 @@ bool ActionSetEffectWindow::doAction() {
 	return false;
 }
 
-ActionSetInstrWindow::ActionSetInstrWindow(
-	int instr, bool visible)
-	: instr(instr), visible(visible) {}
-
-bool ActionSetInstrWindow::doAction() {
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto plugin = graph->getInstrumentProcessor(this->instr)) {
-			if (auto editor = plugin->createEditorIfNeeded()) {
-				if (this->visible) {
-					editor->setName(plugin->getName());
-					editor->addToDesktop(
-						juce::ComponentPeer::windowAppearsOnTaskbar |
-						juce::ComponentPeer::windowHasTitleBar |
-						juce::ComponentPeer::windowHasDropShadow);
-				}
-				editor->setVisible(this->visible);
-
-				if (this->visible) {
-					editor->centreWithSize(editor->getWidth(), editor->getHeight());
-				}
-
-				this->output("Plugin Window: [" + juce::String(this->instr) + "] " + juce::String(this->visible ? "ON" : "OFF") + "\n");
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 ActionSetPlayPosition::ActionSetPlayPosition(double pos)
 	: pos(pos) {}
 

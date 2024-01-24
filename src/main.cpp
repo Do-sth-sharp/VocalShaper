@@ -9,6 +9,7 @@
 #include "ui/misc/ConfigManager.h"
 #include "ui/misc/SysStatus.h"
 #include "ui/misc/CoreCallbacks.h"
+#include "ui/misc/PluginEditorHub.h"
 #include "ui/debug/AudioDebuggerComponent.h"
 #include "ui/debug/MidiDebuggerComponent.h"
 #include "ui/lookAndFeel/LookAndFeelFactory.h"
@@ -578,6 +579,7 @@ public:
 		flowUI::FlowWindowHub::shutdown();
 
 		/** Release Components */
+		PluginEditorHub::releaseInstance();
 		CompManager::releaseInstance();
 		LookAndFeelFactory::releaseInstance();
 

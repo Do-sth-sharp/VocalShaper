@@ -268,24 +268,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectBypassByPtr)
 };
 
-class ActionSetInstrWindow final : public ActionBase {
-public:
-	ActionSetInstrWindow() = delete;
-	ActionSetInstrWindow(
-		int instr, bool visible);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Instr Window";
-	};
-
-private:
-	const int instr;
-	const bool visible;
-
-	JUCE_LEAK_DETECTOR(ActionSetInstrWindow)
-};
-
 class ActionSetInstrBypass final : public ActionUndoableBase {
 public:
 	ActionSetInstrBypass() = delete;

@@ -12,10 +12,6 @@ AC.addInstrOutput(0, 1, 0, 1);
 -- Remove Instrument Plugin
 AC.removeInstr(0);
 
--- Instrument Plugin Window
-AC.setInstrWindow(0, true);
-AC.setInstrWindow(0, false);
-
 -- Instrument Plugin Bypass
 AC.setInstrBypass(0, true);
 AC.setInstrBypass(0, false);

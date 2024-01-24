@@ -22,13 +22,13 @@ InstrViewLookAndFeel::InstrViewLookAndFeel()
 	this->setColour(juce::Label::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));/** Item Background */
 	this->setColour(juce::Label::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
+		ColorMap::getInstance()->get("ThemeColorB9"));/** Item Name */
 	this->setColour(juce::Label::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB4"));
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+		ColorMap::getInstance()->get("ThemeColorB1"));/** Item Background Opened */
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));
+		ColorMap::getInstance()->get("ThemeColorB10"));/** Item Name Opened */
 	this->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorA2"));/** Drop Line */
 

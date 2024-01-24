@@ -5,23 +5,28 @@
 #include "../misc/PluginType.h"
 #include "../../audioCore/AC_API.h"
 
-class PluginEditor final 
-	: public flowUI::FlowComponent,
+class PluginEditor;
+
+class PluginEditorContent final 
+	: public juce::Component,
 	public juce::ComponentListener {
 public:
-	PluginEditor(const juce::String& name, PluginType type,
-		quickAPI::PluginHolder plugin,
-		juce::Component::SafePointer<juce::AudioProcessorEditor> editor);
-	~PluginEditor();
+	PluginEditorContent(PluginEditor* parent, const juce::String& name, PluginType type,
+		quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor);
+	~PluginEditorContent();
 
+	quickAPI::EditorPointer getEditor() const;
+
+	juce::Point<int> getPerferedSize();
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
 	void update();
 
 private:
+	PluginEditor* const parent;
 	const quickAPI::PluginHolder plugin;
-	const juce::Component::SafePointer<juce::AudioProcessorEditor> editor;
+	const quickAPI::EditorPointer editor;
 	const PluginType type;
 
 	std::unique_ptr<juce::Viewport> editorViewport = nullptr;
@@ -34,9 +39,32 @@ private:
 	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
 
 	void componentBeingDeleted(juce::Component&) override;
+	void componentMovedOrResized(juce::Component&,
+		bool wasMoved, bool wasResized) override;
 
 	void bypass();
 	void config();
 
+	friend class PluginEditor;
+	void deleteEditor();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditorContent)
+};
+
+class PluginEditor final : public juce::DocumentWindow {
+public:
+	PluginEditor() = delete;
+	PluginEditor(const juce::String& name, PluginType type,
+		quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor);
+
+	quickAPI::EditorPointer getEditor() const;
+
+	void update();
+	void updateSize();
+
+private:
+	void closeButtonPressed() override;
+
+private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

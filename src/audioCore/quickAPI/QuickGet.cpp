@@ -378,6 +378,15 @@ namespace quickAPI {
 		return false;
 	}
 
+	EditorPointer getInstrEditor(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto instr = graph->getInstrumentProcessor(index)) {
+				return instr->createEditorIfNeeded();
+			}
+		}
+		return nullptr;
+	}
+
 	const juce::String getInstrName(PluginHolder pointer) {
 		if (pointer) {
 			return pointer->getName();
@@ -387,6 +396,13 @@ namespace quickAPI {
 
 	bool getInstrBypass(PluginHolder pointer) {
 		return MainGraph::getInstrumentBypass(pointer);
+	}
+
+	EditorPointer getInstrEditor(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->createEditorIfNeeded();
+		}
+		return nullptr;
 	}
 
 	const juce::String getEffectName(PluginHolder pointer) {

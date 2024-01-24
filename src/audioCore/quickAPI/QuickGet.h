@@ -77,13 +77,16 @@ namespace quickAPI {
 	const juce::Array<TrackType> getAllTrackTypeWithName();
 
 	using PluginHolder = PluginDecorator::SafePointer;
+	using EditorPointer = juce::Component::SafePointer<juce::AudioProcessorEditor>;
 
 	int getInstrNum();
 	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
 	bool getInstrBypass(int index);
+	EditorPointer getInstrEditor(int index);
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);
+	EditorPointer getInstrEditor(PluginHolder pointer);
 
 	const juce::String getEffectName(PluginHolder pointer);
 	bool getEffectBypass(PluginHolder pointer);

@@ -1,6 +1,7 @@
 ﻿#include "InstrComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
+#include "../misc/PluginEditorHub.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -63,10 +64,12 @@ void InstrComponent::paint(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(
-		juce::Label::ColourIds::backgroundColourId);
-	juce::Colour textColor = laf.findColour(
-		juce::Label::ColourIds::textColourId);
+	juce::Colour backgroundColor = laf.findColour(this->editorOpened
+		? juce::Label::ColourIds::backgroundWhenEditingColourId
+		: juce::Label::ColourIds::backgroundColourId);
+	juce::Colour textColor = laf.findColour(this->editorOpened
+		? juce::Label::ColourIds::textWhenEditingColourId
+		: juce::Label::ColourIds::textColourId);
 
 	/** Font */
 	juce::Font textFont(textHeight);
@@ -90,6 +93,7 @@ void InstrComponent::update(int index) {
 	if (index >= 0 && index < quickAPI::getInstrNum()) {
 		this->index = index;
 		this->name = quickAPI::getInstrName(index);
+		this->editorOpened = PluginEditorHub::getInstance()->checkInstr(index);
 
 		this->bypassButton->setToggleState(!quickAPI::getInstrBypass(index),
 			juce::NotificationType::dontSendNotification);
@@ -100,9 +104,24 @@ void InstrComponent::update(int index) {
 	}
 }
 
+void InstrComponent::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		this->editorShow();
+	}
+}
+
 void InstrComponent::bypass() {
 	CoreActions::bypassInstr(this->index,
 		this->bypassButton->getToggleState());
+}
+
+void InstrComponent::editorShow() {
+	if (this->editorOpened) {
+		PluginEditorHub::getInstance()->closeInstr(this->index);
+	}
+	else {
+		PluginEditorHub::getInstance()->openInstr(this->index);
+	}
 }
 
 juce::String InstrComponent::createToolTip() const {

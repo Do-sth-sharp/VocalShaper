@@ -96,13 +96,6 @@ AUDIOCORE_FUNC(setEffectBypass) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setInstrWindow) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrWindow{
-		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(setInstrBypass) {
 	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrBypass{
 		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
@@ -247,7 +240,6 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectWindow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectBypass);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrWindow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDIChannel);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectMIDIChannel);

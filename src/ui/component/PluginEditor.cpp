@@ -1,13 +1,15 @@
 ﻿#include "PluginEditor.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
+#include "../misc/PluginEditorHub.h"
 #include "../Utils.h"
 #include <IconManager.h>
 
-PluginEditor::PluginEditor(const juce::String& name, PluginType type,
-	quickAPI::PluginHolder plugin,
-	juce::Component::SafePointer<juce::AudioProcessorEditor> editor)
-	: FlowComponent(name), plugin(plugin), editor(editor), type(type) {
+PluginEditorContent::PluginEditorContent(PluginEditor* parent, 
+	const juce::String& name, PluginType type,
+	quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor)
+	: Component(name), parent(parent), plugin(plugin),
+	editor(editor), type(type) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forPluginEditor());
@@ -20,6 +22,7 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 	/** Editor Viewport */
 	this->editorViewport = std::make_unique<juce::Viewport>(TRANS("Plugin Editor"));
 	this->editorViewport->setViewedComponent(editor, false);
+	this->editorViewport->setScrollBarPosition(false, false);
 	this->editorViewport->setScrollOnDragMode(
 		juce::Viewport::ScrollOnDragMode::nonHover);
 	this->addAndMakeVisible(this->editorViewport.get());
@@ -77,19 +80,34 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 	this->update();
 }
 
-PluginEditor::~PluginEditor() {
+PluginEditorContent::~PluginEditorContent() {
 	if (this->editor) {
 		this->editor->removeComponentListener(this);
 	}
 }
 
-void PluginEditor::resized() {
+quickAPI::EditorPointer PluginEditorContent::getEditor() const {
+	return this->editor;
+}
+
+juce::Point<int> PluginEditorContent::getPerferedSize() {
+	auto screenSize = utils::getScreenSize(this);
+	int toolBarHeight = screenSize.getHeight() * 0.03;
+	if (this->editor) {
+		/** Can't Get The Actual Size */
+		return { (int)(this->editor->getWidth() * 1.03),
+			(int)(this->editor->getHeight() * 1.13) + toolBarHeight };
+	}
+	return { screenSize.getWidth() / 4, screenSize.getHeight() / 4 };
+}
+
+void PluginEditorContent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
-	int toolBarHeight = screenSize.getHeight() * 0.015;
-	int toolPaddingHeight = screenSize.getHeight() * 0.0025;
-	int toolPaddingWidth = screenSize.getWidth() * 0.0025;
-	int toolSplitWidth = screenSize.getWidth() * 0.0025;
+	int toolBarHeight = screenSize.getHeight() * 0.03;
+	int toolPaddingHeight = screenSize.getHeight() * 0.003;
+	int toolPaddingWidth = screenSize.getWidth() * 0.003;
+	int toolSplitWidth = screenSize.getWidth() * 0.003;
 
 	int buttonHeight = toolBarHeight - toolPaddingHeight * 2;
 
@@ -111,7 +129,7 @@ void PluginEditor::resized() {
 	this->configViewport->setBounds(contentRect);
 }
 
-void PluginEditor::paint(juce::Graphics& g) {
+void PluginEditorContent::paint(juce::Graphics& g) {
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
@@ -122,8 +140,8 @@ void PluginEditor::paint(juce::Graphics& g) {
 	g.fillAll();
 }
 
-void PluginEditor::update() {
-	if (this->editor) {
+void PluginEditorContent::update() {
+	if (this->plugin) {
 		this->bypassButton->setEnabled(true);
 		
 		switch (this->type) {
@@ -146,13 +164,24 @@ void PluginEditor::update() {
 	}
 }
 
-void PluginEditor::componentBeingDeleted(juce::Component&) {
+void PluginEditorContent::componentBeingDeleted(juce::Component&) {
+	/** Remove Editor */
 	this->editorViewport->setViewedComponent(nullptr, false);
 	this->update();
+
+	/** Delete From Hub */
+	this->deleteEditor();
 }
 
-void PluginEditor::bypass() {
-	if (this->editor) {
+void PluginEditorContent::componentMovedOrResized(
+	juce::Component&, bool wasMoved, bool wasResized) {
+	if (wasResized) {
+		this->parent->updateSize();
+	}
+}
+
+void PluginEditorContent::bypass() {
+	if (this->plugin) {
 		switch (this->type) {
 		case PluginType::Instr: {
 			CoreActions::bypassInstr(this->plugin,
@@ -168,10 +197,74 @@ void PluginEditor::bypass() {
 	}
 }
 
-void PluginEditor::config() {
+void PluginEditorContent::config() {
 	bool newState = !(this->configButton->getToggleState());
 	this->editorViewport->setVisible(!newState);
 	this->configViewport->setVisible(newState);
 	this->configButton->setToggleState(newState,
 		juce::NotificationType::dontSendNotification);
+}
+
+void PluginEditorContent::deleteEditor() {
+	switch (this->type) {
+	case PluginType::Instr: {
+		PluginEditorHub::getInstance()->
+			deleteInstrEditor(this->parent);
+		break;
+	}
+	case PluginType::Effect: {
+		PluginEditorHub::getInstance()->
+			deleteEffectEditor(this->parent);
+		break;
+	}
+	}
+}
+
+PluginEditor::PluginEditor(const juce::String& name, PluginType type,
+	quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor)
+	: DocumentWindow(name, juce::LookAndFeel::getDefaultLookAndFeel().findColour(
+		juce::ResizableWindow::ColourIds::backgroundColourId), 
+		juce::DocumentWindow::allButtons, true) {
+	this->setUsingNativeTitleBar(true);
+	this->setResizable(true, false);
+
+	this->setContentOwned(
+		new PluginEditorContent{
+			this, name, type, plugin, editor }, false);
+
+	juce::MessageManager::callAsync(
+		[this] {
+			this->updateSize();
+		}
+	);
+}
+
+quickAPI::EditorPointer PluginEditor::getEditor() const {
+	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
+		return ptr->getEditor();
+	}
+	return nullptr;
+}
+
+void PluginEditor::update() {
+	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
+		return ptr->update();
+	}
+}
+
+void PluginEditor::updateSize() {
+	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
+		auto size = ptr->getPerferedSize();
+
+		this->setResizeLimits(
+			size.getX() / 2, size.getY() / 2,
+			size.getX(), size.getY());
+		this->centreWithSize(size.getX(), size.getY());
+	}
+}
+
+void PluginEditor::closeButtonPressed() {
+	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
+		return ptr->deleteEditor();
+	}
 }
