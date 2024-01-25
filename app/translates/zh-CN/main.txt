@@ -120,3 +120,8 @@ countries: cn
 "Config Plugin" = "设置插件"
 "Plugin Config" = "插件设置"
 "Pin Plugin Window" = "固定插件窗口"
+"MIDI Properties" = "MIDI属性"
+"Automation" = "自动化"
+"MIDI Channel" = "MIDI通道"
+"CC Intercept" = "CC截断"
+"MIDI Output" = "MIDI输出"

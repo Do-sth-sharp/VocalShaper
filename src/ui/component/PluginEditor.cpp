@@ -28,7 +28,9 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->addAndMakeVisible(this->editorViewport.get());
 
 	/** Config Viewport */
+	this->pluginProp = std::make_unique<PluginPropComponent>(type, plugin);
 	this->configViewport = std::make_unique<juce::Viewport>(TRANS("Plugin Config"));
+	this->configViewport->setViewedComponent(this->pluginProp.get(), false);
 	this->configViewport->setScrollBarsShown(true, false);
 	this->configViewport->setScrollOnDragMode(
 		juce::Viewport::ScrollOnDragMode::nonHover);
@@ -147,11 +149,23 @@ void PluginEditorContent::resized() {
 		buttonHeight, buttonHeight);
 	this->pinButton->setBounds(pinRect);
 
+	/** Config View Pos */
+	auto configViewPos = this->configViewport->getViewPosition();
+
 	/** Content */
 	juce::Rectangle<int> contentRect =
 		this->getLocalBounds().withTrimmedTop(toolBarHeight);
 	this->editorViewport->setBounds(contentRect);
 	this->configViewport->setBounds(contentRect);
+
+	/** Config View Port */
+	{
+		int contentWidth = this->configViewport->getMaximumVisibleWidth();
+		int contentHeight = this->pluginProp->getPreferedHeight();
+		this->pluginProp->setBounds(0, 0,
+			contentWidth, std::max(contentHeight, contentRect.getHeight()));
+		this->configViewport->setViewPosition(configViewPos);
+	}
 }
 
 void PluginEditorContent::paint(juce::Graphics& g) {
@@ -187,6 +201,7 @@ void PluginEditorContent::update() {
 	else {
 		this->bypassButton->setEnabled(false);
 	}
+	this->pluginProp->update();
 }
 
 void PluginEditorContent::componentBeingDeleted(juce::Component&) {

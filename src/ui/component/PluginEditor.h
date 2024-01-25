@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include <FlowUI.h>
+#include "PluginPropComponent.h"
 #include "../misc/PluginType.h"
 #include "../../audioCore/AC_API.h"
 
@@ -40,6 +41,7 @@ private:
 	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> pinButton = nullptr;
+	std::unique_ptr<PluginPropComponent> pluginProp = nullptr;
 
 	void componentBeingDeleted(juce::Component&) override;
 	void componentMovedOrResized(juce::Component&,
