@@ -55,6 +55,16 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->configIconOn->replaceColour(juce::Colours::black,
 		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
 
+	this->pinIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Map", "pushpin-line").getFullPathName());
+	this->pinIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+
+	this->pinIconOn = flowUI::IconManager::getSVG(
+		utils::getIconFile("Map", "pushpin-line").getFullPathName());
+	this->pinIconOn->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+
 	/** Buttons */
 	this->bypassButton = std::make_unique<juce::DrawableButton>(
 		TRANS("Bypass Plugin"), juce::DrawableButton::ImageOnButtonBackground);
@@ -75,6 +85,16 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->configButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->configButton->onClick = [this] { this->config(); };
 	this->addAndMakeVisible(this->configButton.get());
+
+	this->pinButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Pin Plugin Window"), juce::DrawableButton::ImageOnButtonBackground);
+	this->pinButton->setImages(
+		this->pinIcon.get(), nullptr, nullptr, nullptr,
+		this->pinIconOn.get(), nullptr, nullptr, nullptr);
+	this->pinButton->setWantsKeyboardFocus(false);
+	this->pinButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->pinButton->onClick = [this] { this->pin(); };
+	this->addAndMakeVisible(this->pinButton.get());
 
 	/** Update Now */
 	this->update();
@@ -121,6 +141,11 @@ void PluginEditorContent::resized() {
 		bypassRect.getRight() + toolSplitWidth, toolPaddingHeight,
 		buttonHeight, buttonHeight);
 	this->configButton->setBounds(configRect);
+
+	juce::Rectangle<int> pinRect(
+		configRect.getRight() + toolSplitWidth, toolPaddingHeight,
+		buttonHeight, buttonHeight);
+	this->pinButton->setBounds(pinRect);
 
 	/** Content */
 	juce::Rectangle<int> contentRect =
@@ -205,6 +230,13 @@ void PluginEditorContent::config() {
 		juce::NotificationType::dontSendNotification);
 }
 
+void PluginEditorContent::pin() {
+	bool newState = !(this->pinButton->getToggleState());
+	this->parent->setPinned(newState);
+	this->pinButton->setToggleState(newState,
+		juce::NotificationType::dontSendNotification);
+}
+
 void PluginEditorContent::deleteEditor() {
 	switch (this->type) {
 	case PluginType::Instr: {
@@ -280,6 +312,14 @@ void PluginEditor::setOpenGL(bool openGLOn) {
 void PluginEditor::setWindowIcon(const juce::Image& icon) {
 	this->setIcon(icon);
 	this->getPeer()->setIcon(icon);
+}
+
+void PluginEditor::setPinned(bool pin) {
+	this->setAlwaysOnTop(pin);
+}
+
+bool PluginEditor::getPinned() const {
+	return this->isAlwaysOnTop();
 }
 
 void PluginEditor::closeButtonPressed() {

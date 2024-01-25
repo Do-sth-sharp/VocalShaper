@@ -35,8 +35,11 @@ private:
 	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;
 	std::unique_ptr<juce::Drawable> configIcon = nullptr;
 	std::unique_ptr<juce::Drawable> configIconOn = nullptr;
+	std::unique_ptr<juce::Drawable> pinIcon = nullptr;
+	std::unique_ptr<juce::Drawable> pinIconOn = nullptr;
 	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> pinButton = nullptr;
 
 	void componentBeingDeleted(juce::Component&) override;
 	void componentMovedOrResized(juce::Component&,
@@ -44,6 +47,7 @@ private:
 
 	void bypass();
 	void config();
+	void pin();
 
 	friend class PluginEditor;
 	void deleteEditor();
@@ -65,6 +69,9 @@ public:
 
 	void setOpenGL(bool openGLOn);
 	void setWindowIcon(const juce::Image& icon);
+
+	void setPinned(bool pin);
+	bool getPinned() const;
 
 private:
 	void closeButtonPressed() override;
