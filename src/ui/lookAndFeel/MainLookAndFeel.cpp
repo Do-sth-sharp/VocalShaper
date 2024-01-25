@@ -151,6 +151,14 @@ MainLookAndFeel::MainLookAndFeel()
 		ColorMap::getInstance()->get("ThemeColorB2"));
 	this->setColour(juce::KeyMappingEditorComponent::ColourIds::textColourId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
+
+	/** Set Toggle Button Color */
+	this->setColour(juce::ToggleButton::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->setColour(juce::ToggleButton::ColourIds::tickColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->setColour(juce::ToggleButton::ColourIds::tickDisabledColourId,
+		ColorMap::getInstance()->get("ThemeColorB7"));
 }
 
 void MainLookAndFeel::drawTableHeaderColumn(

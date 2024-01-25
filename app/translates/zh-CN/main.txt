@@ -125,3 +125,5 @@ countries: cn
 "MIDI Channel" = "MIDI通道"
 "CC Intercept" = "CC截断"
 "MIDI Output" = "MIDI输出"
+"Parameter" = "参数"
+"CC Channel" = "CC通道"

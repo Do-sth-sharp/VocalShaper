@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../dataModel/PluginAutomationModel.h"
 #include "../misc/PluginType.h"
 #include "../../audioCore/AC_API.h"
 
@@ -26,6 +27,7 @@ private:
 	std::unique_ptr<juce::ToggleButton> midiCCIntercept = nullptr;
 	std::unique_ptr<juce::ToggleButton> midiOutput = nullptr;
 	std::unique_ptr<juce::TableListBox> automaticList = nullptr;
+	std::unique_ptr<PluginAutomationModel> automaticModel = nullptr;
 
 	void changeMIDIChannel();
 	void changeMIDICCIntercept();

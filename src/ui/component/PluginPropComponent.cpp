@@ -39,8 +39,19 @@ PluginPropComponent::PluginPropComponent(
 	this->addAndMakeVisible(this->midiOutput.get());
 
 	/** Automation List */
+	this->automaticModel = std::make_unique<PluginAutomationModel>(plugin, type);
 	this->automaticList = std::make_unique<juce::TableListBox>(
-		TRANS("Automation"), nullptr);
+		TRANS("Automation"), this->automaticModel.get());
+	this->automaticList->getHeader().addColumn(
+		TRANS("Parameter"), 1, 30, 30, -1,
+		juce::TableHeaderComponent::ColumnPropertyFlags::visible |
+		juce::TableHeaderComponent::ColumnPropertyFlags::resizable |
+		juce::TableHeaderComponent::ColumnPropertyFlags::sortable);
+	this->automaticList->getHeader().addColumn(
+		TRANS("CC Channel"), 2, 30, 30, -1,
+		juce::TableHeaderComponent::ColumnPropertyFlags::visible |
+		juce::TableHeaderComponent::ColumnPropertyFlags::resizable |
+		juce::TableHeaderComponent::ColumnPropertyFlags::sortable);
 	this->addAndMakeVisible(this->automaticList.get());
 }
 
@@ -60,6 +71,7 @@ void PluginPropComponent::resized() {
 	int titleHeight = screenSize.getHeight() * 0.04;
 	int lineHeight = screenSize.getHeight() * 0.04;
 	int columnWidth = screenSize.getWidth() * 0.06;
+	int tableColumnWidth = screenSize.getWidth() * 0.15;
 
 	/** MIDI Title */
 	juce::Rectangle<int> midiTitleRect(
@@ -99,6 +111,10 @@ void PluginPropComponent::resized() {
 		this->getWidth() - paddingWidth * 2,
 		this->getHeight() - paddingHeight - autoTitleRect.getBottom() - splitHeight);
 	this->automaticList->setBounds(autoListRect);
+	this->automaticList->setHeaderHeight(lineHeight);
+	this->automaticList->getHeader().setColumnWidth(1, tableColumnWidth);
+	this->automaticList->getHeader().setColumnWidth(2, tableColumnWidth);
+	this->automaticList->setRowHeight(lineHeight);
 }
 
 void PluginPropComponent::paint(juce::Graphics& g) {
@@ -184,6 +200,9 @@ void PluginPropComponent::update() {
 			break;
 		}
 		}
+
+		this->automaticModel->update();
+		this->automaticList->updateContent();
 	}
 }
 
