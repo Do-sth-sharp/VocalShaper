@@ -203,8 +203,24 @@ private:
 				auto& funcVar = ConfigManager::getInstance()->get("function");
 
 				flowUI::FlowWindowHub::setTitle(utils::getAudioPlatformName());
-				flowUI::FlowWindowHub::setIcon("./rc/logo.png");
+				flowUI::FlowWindowHub::setIcon(utils::getResourceFile("logo.png").getFullPathName());
 				flowUI::FlowWindowHub::setOpenGL(!((bool)(funcVar["cpu-painting"])));
+			}
+		);
+	};
+
+	void configPluginEditor() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Config Plugin Editor..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				auto& funcVar = ConfigManager::getInstance()->get("function");
+
+				PluginEditorHub::getInstance()->setIcon(utils::getResourceFile("logo.png").getFullPathName());
+				PluginEditorHub::getInstance()->setOpenGL(!((bool)(funcVar["cpu-painting"])));
 			}
 		);
 	};
@@ -530,6 +546,9 @@ public:
 
 		/** Config Flow Window */
 		this->configFlowUI();
+
+		/** Config Plugin Editor */
+		this->configPluginEditor();
 
 		/** Load UI Translate */
 		this->loadUITranslate();

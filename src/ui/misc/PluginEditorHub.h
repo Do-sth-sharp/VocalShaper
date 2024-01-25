@@ -11,9 +11,14 @@ public:
 	void closeInstr(int index);
 	bool checkInstr(int index) const;
 
+	void setOpenGL(bool opneGLOn);
+	void setIcon(const juce::String& path);
+
 private:
 	juce::OwnedArray<PluginEditor> instrEditors;
 	juce::OwnedArray<PluginEditor> effectEditors;
+	bool openGLOn = true;
+	juce::Image iconTemp;
 
 	friend class PluginEditorContent;
 	void deleteInstrEditor(PluginEditor* ptr);

@@ -239,6 +239,10 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 	);
 }
 
+PluginEditor::~PluginEditor() {
+	this->renderer = nullptr;
+}
+
 quickAPI::EditorPointer PluginEditor::getEditor() const {
 	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
 		return ptr->getEditor();
@@ -261,6 +265,21 @@ void PluginEditor::updateSize() {
 			size.getX(), size.getY());
 		this->centreWithSize(size.getX(), size.getY());
 	}
+}
+
+void PluginEditor::setOpenGL(bool openGLOn) {
+	if (openGLOn) {
+		this->renderer = std::make_unique<juce::OpenGLContext>();
+		this->renderer->attachTo(*this);
+	}
+	else {
+		this->renderer = nullptr;
+	}
+}
+
+void PluginEditor::setWindowIcon(const juce::Image& icon) {
+	this->setIcon(icon);
+	this->getPeer()->setIcon(icon);
 }
 
 void PluginEditor::closeButtonPressed() {

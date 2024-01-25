@@ -56,15 +56,21 @@ public:
 	PluginEditor() = delete;
 	PluginEditor(const juce::String& name, PluginType type,
 		quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor);
+	~PluginEditor();
 
 	quickAPI::EditorPointer getEditor() const;
 
 	void update();
 	void updateSize();
 
+	void setOpenGL(bool openGLOn);
+	void setWindowIcon(const juce::Image& icon);
+
 private:
 	void closeButtonPressed() override;
 
 private:
+	std::unique_ptr<juce::OpenGLContext> renderer = nullptr;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

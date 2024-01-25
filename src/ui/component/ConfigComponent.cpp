@@ -4,6 +4,7 @@
 #include "PluginConfigComponent.h"
 #include "KeyMappingEditorComponent.h"
 #include "../misc/MainThreadPool.h"
+#include "../misc/PluginEditorHub.h"
 #include "../menuAndCommand/CommandManager.h"
 #include "../menuAndCommand/CommandTypes.h"
 #include "../Utils.h"
@@ -303,6 +304,7 @@ void ConfigComponent::createFunctionPage() {
 
 	auto cpuPaintingUpdateCallback = [](const juce::var& data) {
 		flowUI::FlowWindowHub::setOpenGL(!((bool)data));
+		PluginEditorHub::getInstance()->setOpenGL(!((bool)data));
 		return true;
 		};
 

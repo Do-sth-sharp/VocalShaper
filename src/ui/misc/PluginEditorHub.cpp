@@ -1,5 +1,6 @@
 ﻿#include "PluginEditorHub.h"
 #include "CoreCallbacks.h"
+#include "RCManager.h"
 #include "../../audioCore/AC_API.h"
 
 PluginEditorHub::PluginEditorHub() {
@@ -20,6 +21,8 @@ void PluginEditorHub::openInstr(int index) {
 			auto container = std::make_unique<PluginEditor>(
 				quickAPI::getInstrName(plugin),
 				PluginType::Instr, plugin, editor);
+			container->setOpenGL(this->openGLOn);
+			container->setWindowIcon(this->iconTemp);
 
 			/** Show */
 			this->openEditor(container.get());
@@ -68,6 +71,31 @@ bool PluginEditorHub::checkInstr(int index) const {
 		}
 	}
 	return false;
+}
+
+void PluginEditorHub::setOpenGL(bool opneGLOn) {
+	this->openGLOn = openGLOn;
+	for (auto i : this->instrEditors) {
+		i->setOpenGL(openGLOn);
+	}
+	for (auto i : this->effectEditors) {
+		i->setOpenGL(openGLOn);
+	}
+}
+
+void PluginEditorHub::setIcon(const juce::String& path) {
+	/** Load Icon */
+	juce::File iconFile = juce::File::getSpecialLocation(
+		juce::File::SpecialLocationType::hostApplicationPath).getParentDirectory().getChildFile(path);
+	this->iconTemp = RCManager::getInstance()->loadImage(iconFile);
+
+	/** Set All Windows */
+	for (auto i : this->instrEditors) {
+		i->setWindowIcon(this->iconTemp);
+	}
+	for (auto i : this->effectEditors) {
+		i->setWindowIcon(this->iconTemp);
+	}
 }
 
 void PluginEditorHub::deleteInstrEditor(PluginEditor* ptr) {
