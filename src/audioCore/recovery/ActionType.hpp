@@ -67,4 +67,10 @@ enum class ActionType : unsigned int {
 	ActionSetSourceSynthDst,
 	ActionSetEffectBypassByPtr,
 	ActionSetInstrBypassByPtr,
+	ActionSetInstrMidiChannelByPtr,
+	ActionSetEffectMidiChannelByPtr,
+	ActionSetInstrMidiCCInterceptByPtr,
+	ActionSetEffectMidiCCInterceptByPtr,
+	ActionSetInstrMidiOutputByPtr,
+	ActionSetEffectMidiOutputByPtr
 };

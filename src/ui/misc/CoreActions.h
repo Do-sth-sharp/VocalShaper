@@ -49,8 +49,14 @@ public:
 	static void insertInstr(int index, int type, const juce::String& pid);
 	static void bypassInstr(int index, bool bypass);
 	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
+	static void setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel);
+	static void setInstrMIDICCIntercept(quickAPI::PluginHolder instr, bool intercept);
+	static void setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output);
 
 	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
+	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
+	static void setEffectMIDICCIntercept(quickAPI::PluginHolder effect, bool intercept);
+	static void setEffectMIDIOutput(quickAPI::PluginHolder effect, bool output);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();

@@ -531,6 +531,48 @@ bool ActionSetInstrMidiChannel::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetInstrMidiChannelByPtr::ActionSetInstrMidiChannelByPtr(
+	quickAPI::PluginHolder instr, int channel)
+	: ACTION_DB{ instr, channel } {}
+
+bool ActionSetInstrMidiChannelByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetInstrMidiChannelByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(oldChannel) = ACTION_DATA(instr)->getMIDIChannel();
+
+		ACTION_DATA(instr)->setMIDIChannel(ACTION_DATA(channel));
+
+		this->output("Plugin MIDI Channel: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIChannel()) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetInstrMidiChannelByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiChannelByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(instr)->setMIDIChannel(ACTION_DATA(oldChannel));
+
+		this->output("Undo Plugin MIDI Channel: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIChannel()) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
 ActionSetEffectMidiChannel::ActionSetEffectMidiChannel(
 	int track, int effect, int channel)
 	: ACTION_DB{ track, effect, channel } {}
@@ -581,6 +623,48 @@ bool ActionSetEffectMidiChannel::undo() {
 				}
 			}
 		}
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSetEffectMidiChannelByPtr::ActionSetEffectMidiChannelByPtr(
+	quickAPI::PluginHolder effect, int channel)
+	: ACTION_DB{ effect, channel } {}
+
+bool ActionSetEffectMidiChannelByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffectMidiChannelByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(oldChannel) = ACTION_DATA(effect)->getMIDIChannel();
+
+		ACTION_DATA(effect)->setMIDIChannel(ACTION_DATA(channel));
+
+		this->output("Plugin MIDI Channel: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIChannel()) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffectMidiChannelByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiChannelByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(effect)->setMIDIChannel(ACTION_DATA(oldChannel));
+
+		this->output("Undo Plugin MIDI Channel: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIChannel()) + "\n");
+		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
 }
@@ -839,6 +923,48 @@ bool ActionSetInstrMidiCCIntercept::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetInstrMidiCCInterceptByPtr::ActionSetInstrMidiCCInterceptByPtr(
+	quickAPI::PluginHolder instr, bool intercept)
+	: ACTION_DB{ instr, intercept } {}
+
+bool ActionSetInstrMidiCCInterceptByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetInstrMidiCCInterceptByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(oldIntercept) = ACTION_DATA(instr)->getMIDICCIntercept();
+
+		ACTION_DATA(instr)->setMIDICCIntercept(ACTION_DATA(intercept));
+
+		this->output("Set Instr MIDI CC Intercept: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetInstrMidiCCInterceptByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiCCInterceptByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(instr)->setMIDICCIntercept(ACTION_DATA(oldIntercept));
+
+		this->output("Undo Set Instr MIDI CC Intercept: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
 ActionSetEffectMidiCCIntercept::ActionSetEffectMidiCCIntercept(
 	int track, int effect, bool intercept)
 	: ACTION_DB{ track, effect, intercept } {}
@@ -889,6 +1015,132 @@ bool ActionSetEffectMidiCCIntercept::undo() {
 				}
 			}
 		}
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSetEffectMidiCCInterceptByPtr::ActionSetEffectMidiCCInterceptByPtr(
+	quickAPI::PluginHolder effect, bool intercept)
+	: ACTION_DB{ effect, intercept } {}
+
+bool ActionSetEffectMidiCCInterceptByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffectMidiCCInterceptByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(oldIntercept) = ACTION_DATA(effect)->getMIDICCIntercept();
+
+		ACTION_DATA(effect)->setMIDICCIntercept(ACTION_DATA(intercept));
+
+		this->output("Set Effect MIDI CC Intercept: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffectMidiCCInterceptByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiCCInterceptByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(effect)->setMIDICCIntercept(ACTION_DATA(oldIntercept));
+
+		this->output("Undo Set Effect MIDI CC Intercept: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSetInstrMidiOutputByPtr::ActionSetInstrMidiOutputByPtr(
+	quickAPI::PluginHolder instr, bool output)
+	: ACTION_DB{ instr, output} {}
+
+bool ActionSetInstrMidiOutputByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetInstrMidiOutputByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(oldOutput) = ACTION_DATA(instr)->getMIDIOutput();
+
+		ACTION_DATA(instr)->setMIDIOutput(ACTION_DATA(output));
+
+		this->output("Set Instr MIDI Output: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetInstrMidiOutputByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiOutputByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(instr)->setMIDIOutput(ACTION_DATA(oldOutput));
+
+		this->output("Undo Set Instr MIDI Output: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSetEffectMidiOutputByPtr::ActionSetEffectMidiOutputByPtr(
+	quickAPI::PluginHolder effect, bool output)
+	: ACTION_DB{ effect, output } {}
+
+bool ActionSetEffectMidiOutputByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffectMidiOutputByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(oldOutput) = ACTION_DATA(effect)->getMIDIOutput();
+
+		ACTION_DATA(effect)->setMIDIOutput(ACTION_DATA(output));
+
+		this->output("Set Effect MIDI Output: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffectMidiOutputByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiOutputByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(effect)->setMIDIOutput(ACTION_DATA(oldOutput));
+
+		this->output("Set Effect MIDI Output: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
 }

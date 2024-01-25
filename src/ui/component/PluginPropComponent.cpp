@@ -1,4 +1,5 @@
 ﻿#include "PluginPropComponent.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 
 PluginPropComponent::PluginPropComponent(
@@ -22,16 +23,19 @@ PluginPropComponent::PluginPropComponent(
 	this->midiChannel = std::make_unique<juce::ComboBox>(TRANS("MIDI Channel"));
 	this->midiChannel->addItemList(midiChannelList, 1);
 	this->midiChannel->setWantsKeyboardFocus(false);
+	this->midiChannel->onChange = [this] { this->changeMIDIChannel(); };
 	this->addAndMakeVisible(this->midiChannel.get());
 
 	/** MIDI CC Intercept */
 	this->midiCCIntercept = std::make_unique<juce::ToggleButton>(TRANS("CC Intercept"));
 	this->midiCCIntercept->setWantsKeyboardFocus(false);
+	this->midiCCIntercept->onClick = [this] { this->changeMIDICCIntercept(); };
 	this->addAndMakeVisible(this->midiCCIntercept.get());
 
 	/** MIDI Output */
 	this->midiOutput = std::make_unique<juce::ToggleButton>(TRANS("MIDI Output"));
 	this->midiOutput->setWantsKeyboardFocus(false);
+	this->midiOutput->onClick = [this] { this->changeMIDIOutput(); };
 	this->addAndMakeVisible(this->midiOutput.get());
 
 	/** Automation List */
@@ -153,5 +157,80 @@ void PluginPropComponent::paint(juce::Graphics& g) {
 }
 
 void PluginPropComponent::update() {
-	/** TODO */
+	if (this->plugin) {
+		switch (this->type) {
+		case PluginType::Instr: {
+			this->midiChannel->setSelectedItemIndex(
+				quickAPI::getInstrMIDIChannel(this->plugin),
+				juce::NotificationType::dontSendNotification);
+			this->midiCCIntercept->setToggleState(
+				quickAPI::getInstrMIDICCIntercept(this->plugin),
+				juce::NotificationType::dontSendNotification);
+			this->midiOutput->setToggleState(
+				quickAPI::getInstrMIDIOutput(this->plugin),
+				juce::NotificationType::dontSendNotification);
+			break;
+		}
+		case PluginType::Effect: {
+			this->midiChannel->setSelectedItemIndex(
+				quickAPI::getEffectMIDIChannel(this->plugin),
+				juce::NotificationType::dontSendNotification);
+			this->midiCCIntercept->setToggleState(
+				quickAPI::getEffectMIDICCIntercept(this->plugin),
+				juce::NotificationType::dontSendNotification);
+			this->midiOutput->setToggleState(
+				quickAPI::getEffectMIDIOutput(this->plugin),
+				juce::NotificationType::dontSendNotification);
+			break;
+		}
+		}
+	}
+}
+
+void PluginPropComponent::changeMIDIChannel() {
+	int channel = this->midiChannel->getSelectedItemIndex();
+	if (this->plugin) {
+		switch (this->type) {
+		case PluginType::Instr: {
+			CoreActions::setInstrMIDIChannel(this->plugin, channel);
+			break;
+		}
+		case PluginType::Effect: {
+			CoreActions::setEffectMIDIChannel(this->plugin, channel);
+			break;
+		}
+		}
+	}
+}
+
+void PluginPropComponent::changeMIDICCIntercept() {
+	bool intercept = this->midiCCIntercept->getToggleState();
+	if (this->plugin) {
+		switch (this->type) {
+		case PluginType::Instr: {
+			CoreActions::setInstrMIDICCIntercept(this->plugin, intercept);
+			break;
+		}
+		case PluginType::Effect: {
+			CoreActions::setEffectMIDICCIntercept(this->plugin, intercept);
+			break;
+		}
+		}
+	}
+}
+
+void PluginPropComponent::changeMIDIOutput() {
+	bool output = this->midiOutput->getToggleState();
+	if (this->plugin) {
+		switch (this->type) {
+		case PluginType::Instr: {
+			CoreActions::setInstrMIDIOutput(this->plugin, output);
+			break;
+		}
+		case PluginType::Effect: {
+			CoreActions::setEffectMIDIOutput(this->plugin, output);
+			break;
+		}
+		}
+	}
 }

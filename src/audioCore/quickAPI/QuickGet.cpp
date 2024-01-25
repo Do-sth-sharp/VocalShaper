@@ -405,6 +405,27 @@ namespace quickAPI {
 		return nullptr;
 	}
 
+	int getInstrMIDIChannel(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDIChannel();
+		}
+		return 0;
+	}
+
+	bool getInstrMIDICCIntercept(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDICCIntercept();
+		}
+		return false;
+	}
+
+	bool getInstrMIDIOutput(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDIOutput();
+		}
+		return false;
+	}
+
 	const juce::String getEffectName(PluginHolder pointer) {
 		if (pointer) {
 			return pointer->getName();
@@ -414,5 +435,26 @@ namespace quickAPI {
 
 	bool getEffectBypass(PluginHolder pointer) {
 		return PluginDock::getPluginBypass(pointer);
+	}
+
+	int getEffectMIDIChannel(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDIChannel();
+		}
+		return 0;
+	}
+
+	bool getEffectMIDICCIntercept(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDICCIntercept();
+		}
+		return false;
+	}
+
+	bool getEffectMIDIOutput(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDIOutput();
+		}
+		return false;
 	}
 }

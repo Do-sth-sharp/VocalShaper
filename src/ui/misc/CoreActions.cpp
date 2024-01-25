@@ -191,9 +191,45 @@ void CoreActions::bypassInstr(quickAPI::PluginHolder instr, bool bypass) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrMidiChannelByPtr{ instr, channel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setInstrMIDICCIntercept(quickAPI::PluginHolder instr, bool intercept) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrMidiCCInterceptByPtr{ instr, intercept });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrMidiOutputByPtr{ instr, output });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::bypassEffect(quickAPI::PluginHolder effect, bool bypass) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetEffectBypassByPtr{ effect, bypass });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectMidiChannelByPtr{ effect, channel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setEffectMIDICCIntercept(quickAPI::PluginHolder effect, bool intercept) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectMidiCCInterceptByPtr{ effect, intercept });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setEffectMIDIOutput(quickAPI::PluginHolder effect, bool output) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectMidiOutputByPtr{ effect, output });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 

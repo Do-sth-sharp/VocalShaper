@@ -254,7 +254,7 @@ public:
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Effect Bypass By Pointer";
+		return "Set Effect Bypass";
 	};
 
 private:
@@ -300,7 +300,7 @@ public:
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Instr Bypass By Pointer";
+		return "Set Instr Bypass";
 	};
 
 private:
@@ -337,6 +337,29 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannel)
 };
 
+class ActionSetInstrMidiChannelByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrMidiChannelByPtr() = delete;
+	ActionSetInstrMidiChannelByPtr(
+		quickAPI::PluginHolder instr, int channel);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Midi Channel";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const int channel;
+
+		int oldChannel = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannelByPtr)
+};
+
 class ActionSetEffectMidiChannel final : public ActionUndoableBase {
 public:
 	ActionSetEffectMidiChannel() = delete;
@@ -358,6 +381,29 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannel)
+};
+
+class ActionSetEffectMidiChannelByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectMidiChannelByPtr() = delete;
+	ActionSetEffectMidiChannelByPtr(
+		quickAPI::PluginHolder effect, int channel);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi Channel";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const int channel;
+
+		int oldChannel = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannelByPtr)
 };
 
 class ActionSetInstrParamValue final : public ActionUndoableBase {
@@ -477,6 +523,29 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCIntercept)
 };
 
+class ActionSetInstrMidiCCInterceptByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrMidiCCInterceptByPtr() = delete;
+	ActionSetInstrMidiCCInterceptByPtr(
+		quickAPI::PluginHolder instr, bool intercept);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Midi CC Intercept";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const bool intercept;
+
+		bool oldIntercept = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCInterceptByPtr)
+};
+
 class ActionSetEffectMidiCCIntercept final : public ActionUndoableBase {
 public:
 	ActionSetEffectMidiCCIntercept() = delete;
@@ -498,6 +567,75 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
+};
+
+class ActionSetEffectMidiCCInterceptByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectMidiCCInterceptByPtr() = delete;
+	ActionSetEffectMidiCCInterceptByPtr(
+		quickAPI::PluginHolder effect, bool intercept);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi CC Intercept";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const bool intercept;
+
+		bool oldIntercept = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCInterceptByPtr)
+};
+
+class ActionSetInstrMidiOutputByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrMidiOutputByPtr() = delete;
+	ActionSetInstrMidiOutputByPtr(
+		quickAPI::PluginHolder instr, bool output);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Midi Output";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const bool output;
+
+		bool oldOutput = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrMidiOutputByPtr)
+};
+
+class ActionSetEffectMidiOutputByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectMidiOutputByPtr() = delete;
+	ActionSetEffectMidiOutputByPtr(
+		quickAPI::PluginHolder effect, bool output);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi Output";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const bool output;
+
+		bool oldOutput = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectMidiOutputByPtr)
 };
 
 class ActionSetSequencerTrackBypass final : public ActionUndoableBase {

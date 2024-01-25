@@ -27,5 +27,9 @@ private:
 	std::unique_ptr<juce::ToggleButton> midiOutput = nullptr;
 	std::unique_ptr<juce::TableListBox> automaticList = nullptr;
 
+	void changeMIDIChannel();
+	void changeMIDICCIntercept();
+	void changeMIDIOutput();
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginPropComponent)
 };
