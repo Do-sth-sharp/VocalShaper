@@ -125,11 +125,34 @@ void PluginAutomationModel::update() {
 }
 
 void PluginAutomationModel::addItem() {
-	/** TODO */
+	if (!this->plugin) { return; }
+
+	switch (this->type) {
+	case PluginType::Instr: {
+		CoreActions::addInstrParamCCLinkGUI(this->plugin);
+		break;
+	}
+	case PluginType::Effect: {
+		CoreActions::addEffectParamCCLinkGUI(this->plugin);
+		break;
+	}
+	}
 }
 
 void PluginAutomationModel::editItem(int itemIndex) {
-	/** TODO */
+	if (!this->plugin) { return; }
+	auto& [param, paramName, cc, ccName] = this->listTemp.getReference(itemIndex);
+
+	switch (this->type) {
+	case PluginType::Instr: {
+		CoreActions::editInstrParamCCLinkGUI(this->plugin, param, cc);
+		break;
+	}
+	case PluginType::Effect: {
+		CoreActions::editEffectParamCCLinkGUI(this->plugin, param, cc);
+		break;
+	}
+	}
 }
 
 void PluginAutomationModel::removeItem(int itemIndex) {

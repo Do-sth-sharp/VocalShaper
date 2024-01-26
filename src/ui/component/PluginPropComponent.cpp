@@ -203,6 +203,7 @@ void PluginPropComponent::update() {
 
 		this->automaticModel->update();
 		this->automaticList->updateContent();
+		this->automaticList->repaint();
 	}
 }
 

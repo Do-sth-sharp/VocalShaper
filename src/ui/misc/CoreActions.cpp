@@ -574,20 +574,24 @@ void CoreActions::insertInstrGUI() {
 
 void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
 	int paramIndex, int defaultCC) {
-	/** TODO */
+	auto callback = [instr, paramIndex](int cc) { CoreActions::setInstrParamCCLink(instr, paramIndex, cc); };
+	CoreActions::askForPluginMIDICCGUIAsync(callback, instr, PluginType::Instr, defaultCC);
 }
 
 void CoreActions::addInstrParamCCLinkGUI(quickAPI::PluginHolder instr) {
-	/** TODO */
+	auto callback = [instr](int param) { CoreActions::editInstrParamCCLinkGUI(instr, param); };
+	CoreActions::askForPluginParamGUIAsync(callback, instr, PluginType::Instr);
 }
 
 void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
 	int paramIndex, int defaultCC) {
-	/** TODO */
+	auto callback = [effect, paramIndex](int cc) { CoreActions::setEffectParamCCLink(effect, paramIndex, cc); };
+	CoreActions::askForPluginMIDICCGUIAsync(callback, effect, PluginType::Effect, defaultCC);
 }
 
 void CoreActions::addEffectParamCCLinkGUI(quickAPI::PluginHolder effect) {
-	/** TODO */
+	auto callback = [effect](int param) { CoreActions::editEffectParamCCLinkGUI(effect, param); };
+	CoreActions::askForPluginParamGUIAsync(callback, effect, PluginType::Effect);
 }
 
 bool CoreActions::askForSaveGUI() {
@@ -983,6 +987,7 @@ void CoreActions::askForPluginMIDICCGUIAsync(
 		if (name.isNotEmpty()) {
 			item += (" (" + name + ")");
 		}
+		ccItemList.add(item);
 	}
 
 	/** Create Selector */
@@ -999,6 +1004,9 @@ void CoreActions::askForPluginMIDICCGUIAsync(
 	if (defaultCCChannel > -1) {
 		combo->setSelectedItemIndex(defaultCCChannel);
 	}
+	auto chooserSize = selectorWindow->getLocalBounds();
+	combo->setBounds(0, 0,
+		chooserSize.getWidth() / 6 * 5, chooserSize.getHeight() / 5);
 	selectorWindow->addCustomComponent(combo.get());
 
 	/** Show Selector Async */
