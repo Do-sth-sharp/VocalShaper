@@ -1138,4 +1138,8 @@ namespace utils {
 			}
 		}
 	}
+
+	const juce::String getMIDICCChannelName(int channel) {
+		return juce::MidiMessage::getControllerName(channel);
+	}
 }

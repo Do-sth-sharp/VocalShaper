@@ -24,6 +24,7 @@ public:
 	int getMIDIChannel() const;
 
 	const juce::Array<juce::AudioProcessorParameter*>& getPluginParamList() const;
+	const juce::StringArray getParamNameList() const;
 	const juce::String getParamName(int index) const;
 	float getParamValue(int index) const;
 	float getParamDefaultValue(int index) const;
@@ -40,6 +41,10 @@ public:
 
 	void setMIDIOutput(bool midiShouldOutput);
 	bool getMIDIOutput() const;
+
+	using MIDICCListener = std::function<void(int)>;
+	void setMIDICCListener(const MIDICCListener& listener);
+	void clearMIDICCListener();
 
 	class SafePointer {
 	private:
@@ -137,6 +142,8 @@ private:
 	std::atomic_bool midiCCShouldIntercept = true;
 	juce::AudioChannelSet audioChannels;
 	const bool isInstr = false;
+
+	MIDICCListener ccListener;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;

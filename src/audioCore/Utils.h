@@ -134,6 +134,8 @@ namespace utils {
 		juce::AudioSampleBuffer& temp1, juce::AudioSampleBuffer& temp2,
 		double resampleRatio, int channels, double dstSampleRate,
 		int srcStart, int dstStart, int length);
+
+	const juce::String getMIDICCChannelName(int channel);
 }
 
 #define UNUSED(var) (void)var

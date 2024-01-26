@@ -24,7 +24,7 @@ void MetaDataModel::paintRowBackground(juce::Graphics& g, int /*rowNumber*/,
 void MetaDataModel::paintCell(juce::Graphics& g, int rowNumber, int columnId,
 	int width, int height, bool rowIsSelected) {
 	/** Data */
-	juce::String text = (columnId==1)
+	juce::String text = (columnId == 1)
 		? this->data.getAllKeys()[this->sortOrder ? rowNumber : this->data.size() - rowNumber - 1]
 		: this->data.getAllValues()[this->sortOrder ? rowNumber : this->data.size() - rowNumber - 1];
 

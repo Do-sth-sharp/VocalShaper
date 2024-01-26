@@ -209,6 +209,16 @@ void CoreActions::setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output) 
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setInstrParamCCLink(quickAPI::PluginHolder instr, int paramIndex, int ccChannel) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrParamConnectToCCByPtr{ instr, paramIndex, ccChannel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel) {
+	CoreActions::setInstrParamCCLink(instr, -1, ccChannel);
+}
+
 void CoreActions::bypassEffect(quickAPI::PluginHolder effect, bool bypass) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetEffectBypassByPtr{ effect, bypass });
@@ -231,6 +241,16 @@ void CoreActions::setEffectMIDIOutput(quickAPI::PluginHolder effect, bool output
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetEffectMidiOutputByPtr{ effect, output });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setEffectParamCCLink(quickAPI::PluginHolder effect, int paramIndex, int ccChannel) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectParamConnectToCCByPtr{ effect, paramIndex, ccChannel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel) {
+	CoreActions::setEffectParamCCLink(effect, -1, ccChannel);
 }
 
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
@@ -552,6 +572,24 @@ void CoreActions::insertInstrGUI() {
 	CoreActions::insertInstrGUI(quickAPI::getInstrNum());
 }
 
+void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
+	int paramIndex, int defaultCC) {
+	/** TODO */
+}
+
+void CoreActions::addInstrParamCCLinkGUI(quickAPI::PluginHolder instr) {
+	/** TODO */
+}
+
+void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
+	int paramIndex, int defaultCC) {
+	/** TODO */
+}
+
+void CoreActions::addEffectParamCCLinkGUI(quickAPI::PluginHolder effect) {
+	/** TODO */
+}
+
 bool CoreActions::askForSaveGUI() {
 	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
 		return true;
@@ -839,6 +877,139 @@ void CoreActions::askForBusTypeGUIAsync(
 			auto& [id, name] = list.getReference(index);
 
 			callback(id);
+		}
+	), true);
+}
+
+void CoreActions::askForPluginParamGUIAsync(
+	const std::function<void(int)>& callback,
+	quickAPI::PluginHolder plugin, PluginType type) {
+	/** Get Param List */
+	juce::StringArray paramList;
+	switch (type) {
+	case PluginType::Instr:
+		paramList = quickAPI::getInstrParamList(plugin);
+		break;
+	case PluginType::Effect:
+		paramList = quickAPI::getEffectParamList(plugin);
+		break;
+	}
+
+	juce::StringArray paramItemList;
+	for (int i = 0; i < paramList.size(); i++) {
+		paramItemList.add("#" + juce::String{ i } + " " + paramList[i]);
+	}
+
+	/** Create Selector */
+	auto selectorWindow = new juce::AlertWindow{
+		TRANS("Plugin Param Selector"), TRANS("Select a parameter in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	selectorWindow->addButton(TRANS("OK"), 1);
+	selectorWindow->addButton(TRANS("Cancel"), 0);
+	selectorWindow->addComboBox(TRANS("Parameter"), paramItemList, TRANS("Parameter"));
+
+	/** Show Selector Async */
+	auto combo = selectorWindow->getComboBoxComponent(TRANS("Parameter"));
+	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo, callback, size = paramList.size()](int result) {
+			if (result != 1) { return; }
+
+			int index = combo->getSelectedItemIndex();
+			if (index < 0 || index >= size) { return; }
+
+			callback(index);
+		}
+	), true);
+}
+
+class ListenableMIDICCCombo final : public juce::ComboBox {
+public:
+	ListenableMIDICCCombo() = delete;
+	ListenableMIDICCCombo(const juce::String& name,
+		quickAPI::PluginHolder plugin, PluginType type)
+		: ComboBox(name), plugin(plugin), type(type) {
+		/** Add Listener */
+		switch (type) {
+		case PluginType::Instr:
+			quickAPI::setInstrMIDICCListener(plugin,
+				[comp = juce::Component::SafePointer(this)](int index) {
+					if (comp) {
+						comp->setSelectedItemIndex(index);
+					}
+				}
+			);
+			break;
+		case PluginType::Effect:
+			quickAPI::setEffectMIDICCListener(plugin,
+				[comp = juce::Component::SafePointer(this)](int index) {
+					if (comp) {
+						comp->setSelectedItemIndex(index);
+					}
+				}
+			);
+			break;
+		}
+	};
+	~ListenableMIDICCCombo() {
+		/** Remove Listener */
+		switch (this->type) {
+		case PluginType::Instr:
+			quickAPI::clearInstrMIDICCListener(this->plugin);
+			break;
+		case PluginType::Effect:
+			quickAPI::clearEffectMIDICCListener(this->plugin);
+			break;
+		}
+	};
+
+private:
+	const quickAPI::PluginHolder plugin;
+	const PluginType type;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ListenableMIDICCCombo)
+};
+
+void CoreActions::askForPluginMIDICCGUIAsync(
+	const std::function<void(int)>& callback,
+	quickAPI::PluginHolder plugin, PluginType type,
+	int defaultCCChannel) {
+	/** Get MIDI CC List */
+	auto ccList = quickAPI::getMIDICCChannelNameList();
+
+	juce::StringArray ccItemList;
+	for (int i = 0; i < ccList.size(); i++) {
+		juce::String item = "MIDI CC #" + juce::String{ i };
+		juce::String name = ccList[i];
+		if (name.isNotEmpty()) {
+			item += (" (" + name + ")");
+		}
+	}
+
+	/** Create Selector */
+	auto selectorWindow = new juce::AlertWindow{
+		TRANS("MIDI CC Controller Selector"), TRANS("Select a MIDI CC controller in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	selectorWindow->addButton(TRANS("OK"), 1);
+	selectorWindow->addButton(TRANS("Cancel"), 0);
+
+	/** Create Combo */
+	auto combo = std::make_unique<ListenableMIDICCCombo>(
+		TRANS("CC Controller"), plugin, type);
+	combo->addItemList(ccItemList, 1);
+	if (defaultCCChannel > -1) {
+		combo->setSelectedItemIndex(defaultCCChannel);
+	}
+	selectorWindow->addCustomComponent(combo.get());
+
+	/** Show Selector Async */
+	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo = std::move(combo), callback, size = ccList.size()](int result) {
+			if (result != 1) { return; }
+
+			int index = combo->getSelectedItemIndex();
+			if (index < 0 || index >= size) { return; }
+
+			callback(index);
 		}
 	), true);
 }

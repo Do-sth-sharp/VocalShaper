@@ -500,6 +500,56 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCC)
 };
 
+class ActionSetInstrParamConnectToCCByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrParamConnectToCCByPtr() = delete;
+	ActionSetInstrParamConnectToCCByPtr(
+		quickAPI::PluginHolder instr, int param, int cc);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Param Connect To CC";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const int param;
+		const int cc;
+
+		int oldParam = -1;
+		int oldCC = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrParamConnectToCCByPtr)
+};
+
+class ActionSetEffectParamConnectToCCByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectParamConnectToCCByPtr() = delete;
+	ActionSetEffectParamConnectToCCByPtr(
+		quickAPI::PluginHolder effect, int param, int cc);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Param Connect To CC";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const int param;
+		const int cc;
+
+		int oldParam = -1;
+		int oldCC = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCCByPtr)
+};
+
 class ActionSetInstrMidiCCIntercept final : public ActionUndoableBase {
 public:
 	ActionSetInstrMidiCCIntercept() = delete;

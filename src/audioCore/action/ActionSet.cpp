@@ -877,6 +877,98 @@ bool ActionSetEffectParamConnectToCC::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetInstrParamConnectToCCByPtr::ActionSetInstrParamConnectToCCByPtr(
+	quickAPI::PluginHolder instr, int param, int cc)
+	: ACTION_DB{ instr, param, cc } {}
+
+bool ActionSetInstrParamConnectToCCByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetInstrParamConnectToCCByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(oldCC) = ACTION_DATA(instr)->getParamCCConnection(ACTION_DATA(param));
+		ACTION_DATA(oldParam) = ACTION_DATA(instr)->getCCParamConnection(ACTION_DATA(cc));
+
+		ACTION_DATA(instr)->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+
+		this->output("Connect Instr Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(instr)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(instr)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetInstrParamConnectToCCByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetInstrParamConnectToCCByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(instr)) {
+		ACTION_DATA(instr)->connectParamCC(ACTION_DATA(oldParam), ACTION_DATA(cc));
+		if (ACTION_DATA(oldCC) > -1) {
+			ACTION_DATA(instr)->connectParamCC(ACTION_DATA(param), ACTION_DATA(oldCC));
+		}
+
+		this->output("Undo Connect Instr Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(instr)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(instr)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSetEffectParamConnectToCCByPtr::ActionSetEffectParamConnectToCCByPtr(
+	quickAPI::PluginHolder effect, int param, int cc)
+	: ACTION_DB{ effect, param, cc } {}
+
+bool ActionSetEffectParamConnectToCCByPtr::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffectParamConnectToCCByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(oldCC) = ACTION_DATA(effect)->getParamCCConnection(ACTION_DATA(param));
+		ACTION_DATA(oldParam) = ACTION_DATA(effect)->getCCParamConnection(ACTION_DATA(cc));
+
+		ACTION_DATA(effect)->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+
+		this->output("Connect Effect Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(effect)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(effect)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffectParamConnectToCCByPtr::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffectParamConnectToCCByPtr);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(effect)) {
+		ACTION_DATA(effect)->connectParamCC(ACTION_DATA(oldParam), ACTION_DATA(cc));
+		if (ACTION_DATA(oldCC) > -1) {
+			ACTION_DATA(effect)->connectParamCC(ACTION_DATA(param), ACTION_DATA(oldCC));
+		}
+
+		this->output("Undo Connect Effect Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(effect)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(effect)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
 ActionSetInstrMidiCCIntercept::ActionSetInstrMidiCCIntercept(
 	int instr, bool intercept)
 	: ACTION_DB{ instr, intercept } {}

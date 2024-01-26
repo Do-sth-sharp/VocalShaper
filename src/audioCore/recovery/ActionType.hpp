@@ -72,5 +72,7 @@ enum class ActionType : unsigned int {
 	ActionSetInstrMidiCCInterceptByPtr,
 	ActionSetEffectMidiCCInterceptByPtr,
 	ActionSetInstrMidiOutputByPtr,
-	ActionSetEffectMidiOutputByPtr
+	ActionSetEffectMidiOutputByPtr,
+	ActionSetInstrParamConnectToCCByPtr,
+	ActionSetEffectParamConnectToCCByPtr,
 };

@@ -79,6 +79,8 @@ namespace quickAPI {
 	using PluginHolder = PluginDecorator::SafePointer;
 	using EditorPointer = juce::Component::SafePointer<juce::AudioProcessorEditor>;
 
+	/** Param Index，CC Channel  */
+	using PluginParamLink = std::tuple<int, int>;
 	int getInstrNum();
 	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
@@ -90,10 +92,19 @@ namespace quickAPI {
 	int getInstrMIDIChannel(PluginHolder pointer);
 	bool getInstrMIDICCIntercept(PluginHolder pointer);
 	bool getInstrMIDIOutput(PluginHolder pointer);
+	juce::Array<PluginParamLink> getInstrParamCCLink(PluginHolder pointer);
+	const juce::String getInstrParamName(PluginHolder pointer, int paramIndex);
+	const juce::StringArray getInstrParamList(PluginHolder pointer);
 
 	const juce::String getEffectName(PluginHolder pointer);
 	bool getEffectBypass(PluginHolder pointer);
 	int getEffectMIDIChannel(PluginHolder pointer);
 	bool getEffectMIDICCIntercept(PluginHolder pointer);
 	bool getEffectMIDIOutput(PluginHolder pointer);
+	juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer);
+	const juce::String getEffectParamName(PluginHolder pointer, int paramIndex);
+	const juce::StringArray getEffectParamList(PluginHolder pointer);
+
+	const juce::String getMIDICCChannelName(int channel);
+	const juce::StringArray getMIDICCChannelNameList();
 }

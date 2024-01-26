@@ -346,6 +346,70 @@ namespace quickAPI {
 		return list;
 	}
 
+	static const juce::String getPluginName(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getName();
+		}
+		return "";
+	}
+
+	static EditorPointer getPluginEditor(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->createEditorIfNeeded();
+		}
+		return nullptr;
+	}
+
+	static int getPluginMIDIChannel(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDIChannel();
+		}
+		return 0;
+	}
+
+	static bool getPluginMIDICCIntercept(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDICCIntercept();
+		}
+		return false;
+	}
+
+	static bool getPluginMIDIOutput(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getMIDIOutput();
+		}
+		return false;
+	}
+
+	static juce::Array<PluginParamLink> getPluginParamCCLink(PluginHolder pointer) {
+		if (pointer) {
+			juce::Array<PluginParamLink> result;
+
+			for (int i = 0; i < 128; i++) {
+				int param = pointer->getCCParamConnection(i);
+				if (param > -1) {
+					result.add({ param, i });
+				}
+			}
+
+			return result;
+		}
+		return {};
+	}
+
+	static const juce::String getPluginParamName(PluginHolder pointer, int paramIndex) {
+		if (pointer) {
+			return pointer->getParamName(paramIndex);
+		}
+		return "";
+	}
+
+	static const juce::StringArray getPluginParamList(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getParamNameList();
+		}
+	}
+
 	int getInstrNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getInstrumentNum();
@@ -388,10 +452,7 @@ namespace quickAPI {
 	}
 
 	const juce::String getInstrName(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getName();
-		}
-		return "";
+		return getPluginName(pointer);
 	}
 
 	bool getInstrBypass(PluginHolder pointer) {
@@ -399,38 +460,35 @@ namespace quickAPI {
 	}
 
 	EditorPointer getInstrEditor(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->createEditorIfNeeded();
-		}
-		return nullptr;
+		return getPluginEditor(pointer);
 	}
 
 	int getInstrMIDIChannel(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getMIDIChannel();
-		}
-		return 0;
+		return getPluginMIDIChannel(pointer);
 	}
 
 	bool getInstrMIDICCIntercept(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getMIDICCIntercept();
-		}
-		return false;
+		return getPluginMIDICCIntercept(pointer);
 	}
 
 	bool getInstrMIDIOutput(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getMIDIOutput();
-		}
-		return false;
+		return getPluginMIDIOutput(pointer);
+	}
+
+	juce::Array<PluginParamLink> getInstrParamCCLink(PluginHolder pointer) {
+		return getPluginParamCCLink(pointer);
+	}
+
+	const juce::String getInstrParamName(PluginHolder pointer, int paramIndex) {
+		return getPluginParamName(pointer, paramIndex);
+	}
+
+	const juce::StringArray getInstrParamList(PluginHolder pointer) {
+		return getPluginParamList(pointer);
 	}
 
 	const juce::String getEffectName(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getName();
-		}
-		return "";
+		return getPluginName(pointer);
 	}
 
 	bool getEffectBypass(PluginHolder pointer) {
@@ -438,23 +496,38 @@ namespace quickAPI {
 	}
 
 	int getEffectMIDIChannel(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getMIDIChannel();
-		}
-		return 0;
+		return getPluginMIDIChannel(pointer);
 	}
 
 	bool getEffectMIDICCIntercept(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getMIDICCIntercept();
-		}
-		return false;
+		return getPluginMIDICCIntercept(pointer);
 	}
 
 	bool getEffectMIDIOutput(PluginHolder pointer) {
-		if (pointer) {
-			return pointer->getMIDIOutput();
+		return getPluginMIDIOutput(pointer);
+	}
+
+	juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer) {
+		return getPluginParamCCLink(pointer);
+	}
+
+	const juce::String getEffectParamName(PluginHolder pointer, int paramIndex) {
+		return getPluginParamName(pointer, paramIndex);
+	}
+
+	const juce::StringArray getEffectParamList(PluginHolder pointer) {
+		return getPluginParamList(pointer);
+	}
+
+	const juce::String getMIDICCChannelName(int channel) {
+		return utils::getMIDICCChannelName(channel);
+	}
+
+	const juce::StringArray getMIDICCChannelNameList() {
+		juce::StringArray result;
+		for (int i = 0; i < 128; i++) {
+			result.add(getMIDICCChannelName(i));
 		}
-		return false;
+		return result;
 	}
 }

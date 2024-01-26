@@ -107,6 +107,17 @@ const juce::Array<juce::AudioProcessorParameter*>& PluginDecorator::getPluginPar
 	return this->plugin->getParameters();
 }
 
+const juce::StringArray PluginDecorator::getParamNameList() const {
+	auto& paramList = this->getPluginParamList();
+
+	juce::StringArray result;
+	for (auto i : paramList) {
+		result.add(i->getName(INT_MAX));
+	}
+
+	return result;
+}
+
 const juce::String PluginDecorator::getParamName(int index) const {
 	auto& paramList = this->getPluginParamList();
 	if (index < 0 || index >= paramList.size()) { return juce::String{}; }
@@ -224,6 +235,16 @@ void PluginDecorator::setMIDIOutput(bool midiShouldOutput) {
 
 bool PluginDecorator::getMIDIOutput() const {
 	return midiShouldOutput;
+}
+
+void PluginDecorator::setMIDICCListener(const MIDICCListener& listener) {
+	juce::ScopedWriteLock locker(audioLock::getPluginLock());
+	this->ccListener = listener;
+}
+
+void PluginDecorator::clearMIDICCListener() {
+	juce::ScopedWriteLock locker(audioLock::getPluginLock());
+	this->ccListener = MIDICCListener{};
 }
 
 const juce::String PluginDecorator::getName() const {
@@ -648,17 +669,14 @@ void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
 	std::map<int, float> paramTemp;
 
 	/** Parse Message */
+	int lastCCChannel = -1;
 	for (auto i : midiMessages) {
 		/** Get Message */
 		auto message = i.getMessage();
 		if (!message.isController()) { continue; }
 
 		/** Auto Link Param */
-		/*int paramListenningCC = this->paramListenningCC;
-		this->paramListenningCC = -1;
-		if (paramListenningCC > -1) {
-			this->paramCCList[message.getControllerNumber()] = paramListenningCC;
-		}*/
+		lastCCChannel = message.getControllerNumber();
 
 		/** Get Param Changed */
 		int paramIndex = this->paramCCList[message.getControllerNumber()];
@@ -677,5 +695,11 @@ void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
 			param->setValueNotifyingHost(i.second);
 			param->endChangeGesture();
 		}
+	}
+
+	/** Send Auto Connect */
+	if ((lastCCChannel > -1) && this->ccListener) {
+		juce::MessageManager::callAsync(
+			std::bind(this->ccListener, lastCCChannel));
 	}
 }

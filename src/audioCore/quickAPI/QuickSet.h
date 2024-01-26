@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "quickGet.h"
 
 namespace quickAPI {
 	void setPluginSearchPathListFilePath(const juce::String& path);
@@ -22,4 +23,10 @@ namespace quickAPI {
 	bool removeFromPluginSearchPath(const juce::String& path);
 
 	void setSIMDLevel(int level);
+
+	using MIDICCListener = std::function<void(int)>;
+	void setInstrMIDICCListener(PluginHolder pointer, const MIDICCListener& listener);
+	void setEffectMIDICCListener(PluginHolder pointer, const MIDICCListener& listener);
+	void clearInstrMIDICCListener(PluginHolder pointer);
+	void clearEffectMIDICCListener(PluginHolder pointer);
 }

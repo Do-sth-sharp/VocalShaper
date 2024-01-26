@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "PluginType.h"
 #include "../../audioCore/AC_API.h"
 
 class CoreActions final {
@@ -52,11 +53,15 @@ public:
 	static void setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel);
 	static void setInstrMIDICCIntercept(quickAPI::PluginHolder instr, bool intercept);
 	static void setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output);
+	static void setInstrParamCCLink(quickAPI::PluginHolder instr, int paramIndex, int ccChannel);
+	static void removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel);
 
 	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
 	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
 	static void setEffectMIDICCIntercept(quickAPI::PluginHolder effect, bool intercept);
 	static void setEffectMIDIOutput(quickAPI::PluginHolder effect, bool output);
+	static void setEffectParamCCLink(quickAPI::PluginHolder effect, int paramIndex, int ccChannel);
+	static void removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
@@ -90,6 +95,11 @@ public:
 	static void insertInstrGUI(int index, const juce::String& pid);
 	static void insertInstrGUI(int index);
 	static void insertInstrGUI();
+	static void editInstrParamCCLinkGUI(quickAPI::PluginHolder instr, int paramIndex, int defaultCC = -1);
+	static void addInstrParamCCLinkGUI(quickAPI::PluginHolder instr);
+
+	static void editEffectParamCCLinkGUI(quickAPI::PluginHolder effect, int paramIndex, int defaultCC = -1);
+	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
 
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(
@@ -107,4 +117,11 @@ public:
 	static void askForBusTypeGUIAsync(
 		const std::function<void(int)>& callback,
 		int defaultType = 20);
+	static void askForPluginParamGUIAsync(
+		const std::function<void(int)>& callback,
+		quickAPI::PluginHolder plugin, PluginType type);
+	static void askForPluginMIDICCGUIAsync(
+		const std::function<void(int)>& callback,
+		quickAPI::PluginHolder plugin, PluginType type,
+		int defaultCCChannel = -1);
 };

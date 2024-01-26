@@ -48,7 +48,7 @@ PluginPropComponent::PluginPropComponent(
 		juce::TableHeaderComponent::ColumnPropertyFlags::resizable |
 		juce::TableHeaderComponent::ColumnPropertyFlags::sortable);
 	this->automaticList->getHeader().addColumn(
-		TRANS("CC Channel"), 2, 30, 30, -1,
+		TRANS("CC Controller"), 2, 30, 30, -1,
 		juce::TableHeaderComponent::ColumnPropertyFlags::visible |
 		juce::TableHeaderComponent::ColumnPropertyFlags::resizable |
 		juce::TableHeaderComponent::ColumnPropertyFlags::sortable);
