@@ -34,6 +34,12 @@ InstrComponent::InstrComponent() {
 	this->bypassButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->bypassButton->onClick = [this] { this->bypass(); };
 	this->addAndMakeVisible(this->bypassButton.get());
+
+	/** IO Component */
+	this->input = std::make_unique<InstrIOComponent>(true);
+	this->addAndMakeVisible(this->input.get());
+	this->output = std::make_unique<InstrIOComponent>(false);
+	this->addAndMakeVisible(this->output.get());
 }
 
 void InstrComponent::resized() {
@@ -41,13 +47,37 @@ void InstrComponent::resized() {
 	auto screenSize = utils::getScreenSize(this);
 	int paddingHeight = screenSize.getHeight() * 0.005;
 	int paddingWidth = screenSize.getWidth() * 0.005;
-	int splitWidth = screenSize.getWidth() * 0.005;
+	int splitWidth = screenSize.getWidth() * 0.0025;
 
 	int buttonHeight = this->getHeight() - paddingHeight * 2;
+	int ioHideWidth = screenSize.getWidth() * 0.075;
+
+	int left = paddingWidth, right = (this->getWidth() - paddingWidth);
+	bool ioShown = this->getWidth() > ioHideWidth;
+
+	/** Input Comp */
+	if (ioShown) {
+		juce::Rectangle<int> inputRect(
+			left, paddingHeight,
+			buttonHeight, buttonHeight);
+		this->input->setBounds(inputRect);
+		left += (buttonHeight + splitWidth);
+	}
+	this->input->setVisible(ioShown);
+
+	/** Output Comp */
+	if (ioShown) {
+		juce::Rectangle<int> outputRect(
+			right - buttonHeight,
+			paddingHeight, buttonHeight, buttonHeight);
+		this->output->setBounds(outputRect);
+		right -= (buttonHeight + splitWidth);
+	}
+	this->output->setVisible(ioShown);
 
 	/** Bypass Button */
 	juce::Rectangle<int> bypassRect(
-		this->getWidth() - paddingWidth - buttonHeight,
+		right - buttonHeight,
 		paddingHeight, buttonHeight, buttonHeight);
 	this->bypassButton->setBounds(bypassRect);
 }
@@ -57,10 +87,13 @@ void InstrComponent::paint(juce::Graphics& g) {
 	auto screenSize = utils::getScreenSize(this);
 	int paddingHeight = screenSize.getHeight() * 0.0025;
 	int paddingWidth = screenSize.getWidth() * 0.01;
-	int splitWidth = screenSize.getWidth() * 0.005;
+	int splitWidth = screenSize.getWidth() * 0.0025;
 
 	int buttonHeight = this->getHeight() - paddingHeight * 2;
 	float textHeight = buttonHeight * 0.8;
+	int ioHideWidth = screenSize.getWidth() * 0.075;
+
+	bool ioShown = this->getWidth() > ioHideWidth;
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
@@ -79,9 +112,15 @@ void InstrComponent::paint(juce::Graphics& g) {
 	g.fillAll();
 
 	/** Text */
+	int textLeft = paddingWidth;
+	int textRight = this->getWidth() - paddingWidth - buttonHeight - splitWidth;
+	if (ioShown) {
+		textLeft += (buttonHeight + splitWidth);
+		textRight -= (buttonHeight + splitWidth);
+	}
 	juce::Rectangle<int> textRect(
-		paddingWidth, paddingHeight,
-		this->getWidth() - paddingWidth * 2 - buttonHeight - splitWidth,
+		textLeft, paddingHeight,
+		textRight - textLeft,
 		buttonHeight);
 	g.setColour(textColor);
 	g.setFont(textFont);
@@ -97,6 +136,9 @@ void InstrComponent::update(int index) {
 
 		this->bypassButton->setToggleState(!quickAPI::getInstrBypass(index),
 			juce::NotificationType::dontSendNotification);
+
+		this->input->update(index);
+		this->output->update(index);
 
 		this->repaint();
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "InstrIOComponent.h"
 
 class InstrComponent final
 	: public juce::Component,
@@ -23,6 +24,9 @@ private:
 	std::unique_ptr<juce::Drawable> bypassIcon = nullptr;
 	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;
 	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
+
+	std::unique_ptr<InstrIOComponent> input = nullptr;
+	std::unique_ptr<InstrIOComponent> output = nullptr;
 
 	void bypass();
 	void editorShow();
