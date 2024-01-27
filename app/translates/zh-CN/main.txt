@@ -127,3 +127,4 @@ countries: cn
 "MIDI Output" = "MIDI输出"
 "Parameter" = "参数"
 "CC Controller" = "CC控制器"
+"Scale Plugin Window" = "缩放插件窗口"

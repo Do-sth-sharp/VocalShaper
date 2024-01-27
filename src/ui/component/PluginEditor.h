@@ -42,6 +42,7 @@ private:
 	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> pinButton = nullptr;
 	std::unique_ptr<PluginPropComponent> pluginProp = nullptr;
+	std::unique_ptr<juce::TextButton> scaleButton = nullptr;
 
 	void componentBeingDeleted(juce::Component&) override;
 	void componentMovedOrResized(juce::Component&,
@@ -50,9 +51,16 @@ private:
 	void bypass();
 	void config();
 	void pin();
+	void changeScale();
+
+	float scale = 1.0;
+	void setEditorScale(float scale);
+	float getEditorScale() const;
 
 	friend class PluginEditor;
 	void deleteEditor();
+
+	juce::PopupMenu createScaleMenu();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditorContent)
 };
@@ -67,7 +75,7 @@ public:
 	quickAPI::EditorPointer getEditor() const;
 
 	void update();
-	void updateSize();
+	void sizeChanged(const juce::Point<int>& size);
 
 	void setOpenGL(bool openGLOn);
 	void setWindowIcon(const juce::Image& icon);

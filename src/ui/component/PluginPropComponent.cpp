@@ -92,7 +92,7 @@ void PluginPropComponent::resized() {
 	/** MIDI Toggle */
 	juce::Rectangle<int> ccInterceptRect(
 		paddingWidth, channelLabelRect.getBottom() + splitHeight,
-		(this->getWidth() - paddingWidth * 2 - splitWidth * 3) / 4, lineHeight);
+		columnWidth, lineHeight);
 	this->midiCCIntercept->setBounds(ccInterceptRect);
 
 	juce::Rectangle<int> midiOutputRect(

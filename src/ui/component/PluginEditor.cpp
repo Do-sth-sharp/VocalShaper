@@ -98,8 +98,28 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->pinButton->onClick = [this] { this->pin(); };
 	this->addAndMakeVisible(this->pinButton.get());
 
+	this->scaleButton = std::make_unique<juce::TextButton>(
+		TRANS("Scale Plugin Window"), TRANS("Scale Plugin Window"));
+	this->scaleButton->setWantsKeyboardFocus(false);
+	this->scaleButton->setToggleState(true, juce::NotificationType::dontSendNotification);
+	this->scaleButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->scaleButton->onClick = [this] { this->changeScale(); };
+	this->addAndMakeVisible(this->scaleButton.get());
+
 	/** Update Now */
 	this->update();
+
+	/** Update Scale */
+	this->setEditorScale(1.0f);
+
+	/** Update Size */
+	juce::MessageManager::callAsync(
+		[editor, comp = juce::Component::SafePointer(this)] {
+			if (editor && comp) {
+				comp->componentMovedOrResized(*editor, false, true);
+			}
+		}
+	);
 }
 
 PluginEditorContent::~PluginEditorContent() {
@@ -116,9 +136,10 @@ juce::Point<int> PluginEditorContent::getPerferedSize() {
 	auto screenSize = utils::getScreenSize(this);
 	int toolBarHeight = screenSize.getHeight() * 0.03;
 	if (this->editor) {
-		/** Can't Get The Actual Size */
-		return { (int)(this->editor->getWidth() * 1.03),
-			(int)(this->editor->getHeight() * 1.13) + toolBarHeight };
+		auto bounds = this->editor->getBounds();
+		int width = bounds.getWidth();
+		int height = bounds.getHeight();
+		return { width, height + toolBarHeight };
 	}
 	return { screenSize.getWidth() / 4, screenSize.getHeight() / 4 };
 }
@@ -132,6 +153,7 @@ void PluginEditorContent::resized() {
 	int toolSplitWidth = screenSize.getWidth() * 0.003;
 
 	int buttonHeight = toolBarHeight - toolPaddingHeight * 2;
+	int scaleButtonWidth = screenSize.getWidth() * 0.03;
 
 	/** Buttons */
 	juce::Rectangle<int> bypassRect(
@@ -148,6 +170,11 @@ void PluginEditorContent::resized() {
 		configRect.getRight() + toolSplitWidth, toolPaddingHeight,
 		buttonHeight, buttonHeight);
 	this->pinButton->setBounds(pinRect);
+
+	juce::Rectangle<int> scaleRect(
+		this->getWidth() - toolPaddingWidth - scaleButtonWidth,
+		toolPaddingHeight, scaleButtonWidth, buttonHeight);
+	this->scaleButton->setBounds(scaleRect);
 
 	/** Config View Pos */
 	auto configViewPos = this->configViewport->getViewPosition();
@@ -216,7 +243,8 @@ void PluginEditorContent::componentBeingDeleted(juce::Component&) {
 void PluginEditorContent::componentMovedOrResized(
 	juce::Component&, bool wasMoved, bool wasResized) {
 	if (wasResized) {
-		this->parent->updateSize();
+		auto size = this->getPerferedSize();
+		this->parent->sizeChanged(size);
 	}
 }
 
@@ -252,6 +280,72 @@ void PluginEditorContent::pin() {
 		juce::NotificationType::dontSendNotification);
 }
 
+enum PluginEditorScaleType {
+	Scale_0_25 = 1, Scale_0_5, Scale_0_75, Scale_1_0,
+	Scale_1_25, Scale_1_5, Scale_1_75, Scale_2_0,
+	Scale_3_0, Scale_4_0
+};
+
+void PluginEditorContent::changeScale() {
+	auto menu = this->createScaleMenu();
+	int result = menu.showAt(this->scaleButton.get());
+
+	switch (result) {
+	case PluginEditorScaleType::Scale_0_25: {
+		this->setEditorScale(0.25f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_0_5: {
+		this->setEditorScale(0.5f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_0_75: {
+		this->setEditorScale(0.75f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_1_0: {
+		this->setEditorScale(1.0f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_1_25: {
+		this->setEditorScale(1.25f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_1_5: {
+		this->setEditorScale(1.5f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_1_75: {
+		this->setEditorScale(1.75f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_2_0: {
+		this->setEditorScale(2.0f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_3_0: {
+		this->setEditorScale(3.0f);
+		break;
+	}
+	case PluginEditorScaleType::Scale_4_0: {
+		this->setEditorScale(4.0f);
+		break;
+	}
+	}
+}
+
+void PluginEditorContent::setEditorScale(float scale) {
+	this->scale = scale;
+	this->scaleButton->setButtonText(juce::String{ scale, 2 } + "x");
+	if (this->editor) {
+		this->editor->setScaleFactor(scale);
+	}
+}
+
+float PluginEditorContent::getEditorScale() const {
+	return this->scale;
+}
+
 void PluginEditorContent::deleteEditor() {
 	switch (this->type) {
 	case PluginType::Instr: {
@@ -267,6 +361,33 @@ void PluginEditorContent::deleteEditor() {
 	}
 }
 
+juce::PopupMenu PluginEditorContent::createScaleMenu() {
+	juce::PopupMenu menu;
+
+	menu.addItem(PluginEditorScaleType::Scale_0_25, "0.25x",
+		true, juce::approximatelyEqual(this->scale, 0.25f));
+	menu.addItem(PluginEditorScaleType::Scale_0_5, "0.5x",
+		true, juce::approximatelyEqual(this->scale, 0.5f));
+	menu.addItem(PluginEditorScaleType::Scale_0_75, "0.75x",
+		true, juce::approximatelyEqual(this->scale, 0.75f));
+	menu.addItem(PluginEditorScaleType::Scale_1_0, "1.0x",
+		true, juce::approximatelyEqual(this->scale, 1.0f));
+	menu.addItem(PluginEditorScaleType::Scale_1_25, "1.25x",
+		true, juce::approximatelyEqual(this->scale, 1.25f));
+	menu.addItem(PluginEditorScaleType::Scale_1_5, "1.5x",
+		true, juce::approximatelyEqual(this->scale, 1.5f));
+	menu.addItem(PluginEditorScaleType::Scale_1_75, "1.75x",
+		true, juce::approximatelyEqual(this->scale, 1.75f));
+	menu.addItem(PluginEditorScaleType::Scale_2_0, "2.0x",
+		true, juce::approximatelyEqual(this->scale, 2.0f));
+	menu.addItem(PluginEditorScaleType::Scale_3_0, "3.0x",
+		true, juce::approximatelyEqual(this->scale, 3.0f));
+	menu.addItem(PluginEditorScaleType::Scale_4_0, "4.0x",
+		true, juce::approximatelyEqual(this->scale, 4.0f));
+
+	return menu;
+}
+
 PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 	quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor)
 	: DocumentWindow(name, juce::LookAndFeel::getDefaultLookAndFeel().findColour(
@@ -278,12 +399,6 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 	this->setContentOwned(
 		new PluginEditorContent{
 			this, name, type, plugin, editor }, false);
-
-	juce::MessageManager::callAsync(
-		[this] {
-			this->updateSize();
-		}
-	);
 }
 
 PluginEditor::~PluginEditor() {
@@ -303,15 +418,10 @@ void PluginEditor::update() {
 	}
 }
 
-void PluginEditor::updateSize() {
-	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
-		auto size = ptr->getPerferedSize();
-
-		this->setResizeLimits(
-			size.getX() / 2, size.getY() / 2,
-			size.getX(), size.getY());
-		this->centreWithSize(size.getX(), size.getY());
-	}
+void PluginEditor::sizeChanged(const juce::Point<int>& size) {
+	int width = size.getX(), height = size.getY();
+	this->centreWithSize(width, height);
+	this->setResizeLimits(width / 2, height / 2, width, height);
 }
 
 void PluginEditor::setOpenGL(bool openGLOn) {
