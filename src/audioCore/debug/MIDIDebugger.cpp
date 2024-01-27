@@ -1,60 +1,68 @@
 ﻿#include "MIDIDebugger.h"
 
 MIDIDebugger::MIDIDebugger()
-	: Component("MIDIDebugger") {
-	this->messageOutput = std::make_unique<juce::TextEditor>();
-	this->messageOutput->setMultiLine(true);
-	this->messageOutput->setReadOnly(true);
-	this->messageOutput->setTabKeyUsedAsCharacter(true);
-	this->messageOutput->setScrollToShowCursor(true);
-	this->messageOutput->setScrollbarsShown(false);
-	this->addAndMakeVisible(this->messageOutput.get());
+	: AnimatedAppComponent() {
+	this->setFramesPerSecond(10);
 }
 
-void MIDIDebugger::resized() {
-	this->messageOutput->setBounds(this->getLocalBounds());
+void MIDIDebugger::update() {
+	/** Nothing To Do */
+}
+
+void MIDIDebugger::paint(juce::Graphics& g) {
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour textColor = laf.findColour(
+		juce::TextEditor::ColourIds::textColourId);
+	juce::Colour backgroundColor = laf.findColour(
+		juce::TextEditor::ColourIds::backgroundColourId);
+
+	/** Size */
+	int paddingWidth = 10, paddingHeight = 10;
+	int lineHeight = 20;
+	float fontHeight = 15.0f;
+
+	/** Font */
+	juce::Font textFont(fontHeight);
+
+	/** Background */
+	g.setColour(backgroundColor);
+	g.fillAll();
+
+	/** Text */
+	g.setColour(textColor);
+	g.setFont(textFont);
+
+	int top = paddingHeight;
+	for (auto& i : this->mesList) {
+		juce::Rectangle<int> textRect(
+			paddingWidth, top,
+			this->getWidth() - paddingWidth * 2, lineHeight);
+		g.drawFittedText(i, textRect,
+			juce::Justification::centredLeft, 1, 1.f);
+		top += lineHeight;
+	}
 }
 
 void MIDIDebugger::addMessage(const juce::MidiMessage& message, bool isInput) {
+	juce::Time current = juce::Time::getCurrentTime();
+
 	juce::String text;
-	text += isInput ? "[I] " : "[O] ";
+	text += current.formatted("[%H:%M:%S] ");
+	text += (isInput ? "[I] " : "[O] ");
 	text += message.getDescription();
 	text += " | ";
 	text += juce::String::toHexString(
 		message.getRawData(), message.getRawDataSize(), 1);
-	text += "\n";
-	juce::MessageManager::callAsync(
-		[output = juce::Component::SafePointer(this->messageOutput.get()),
-		text, maxNum = this->maxNum] {
-			if (output) {
-				juce::String current = output->getText();
-				juce::StringArray list = juce::StringArray::fromLines(current);
+	this->mesList.insert(this->mesList.begin(), text);
 
-				list.add(text);
-				list.removeEmptyStrings(true);
-				if (list.size() > maxNum) {
-					list.removeRange(0, list.size() - maxNum);
-				}
-
-				output->setText(list.joinIntoString("\n"));
-				output->moveCaretToEnd();
-			}
-		});
+	if (this->mesList.size() > this->maxNum) {
+		this->mesList.resize(this->maxNum);
+	}
 }
 
 void MIDIDebugger::setMaxNum(int num) {
 	this->maxNum = std::max(num, 0);
-
-	juce::String current = this->messageOutput->getText();
-	juce::StringArray list = juce::StringArray::fromLines(current);
-
-	list.removeEmptyStrings(true);
-	if (list.size() > maxNum) {
-		list.removeRange(0, list.size() - std::max(maxNum, 0));
-	}
-
-	this->messageOutput->setText(list.joinIntoString("\n"));
-	this->messageOutput->moveCaretToEnd();
 }
 
 int MIDIDebugger::getMaxNum() const {
