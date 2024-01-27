@@ -24,9 +24,9 @@ MainLookAndFeel::MainLookAndFeel()
 	this->setColour(juce::AlertWindow::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB3"));
 	this->setColour(juce::TextButton::ColourIds::buttonColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));
+		ColorMap::getInstance()->get("ThemeColorA1"));
 	this->setColour(juce::TextButton::ColourIds::buttonOnColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));
+		ColorMap::getInstance()->get("ThemeColorA1"));
 	this->setColour(juce::TextButton::ColourIds::textColourOffId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->setColour(juce::TextButton::ColourIds::textColourOnId,
