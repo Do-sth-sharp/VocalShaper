@@ -136,9 +136,10 @@ juce::Point<int> PluginEditorContent::getPerferedSize() {
 	auto screenSize = utils::getScreenSize(this);
 	int toolBarHeight = screenSize.getHeight() * 0.03;
 	if (this->editor) {
+		/** Have To Do This To Fix Editor Size, I Don't Know What Happend But This Works */
 		auto bounds = this->editor->getBounds();
-		int width = bounds.getWidth();
-		int height = bounds.getHeight();
+		int width = bounds.getWidth() + screenSize.getWidth() * 0.01;
+		int height = bounds.getHeight() + screenSize.getHeight() * 0.05;
 		return { width, height + toolBarHeight };
 	}
 	return { screenSize.getWidth() / 4, screenSize.getHeight() / 4 };
@@ -171,8 +172,12 @@ void PluginEditorContent::resized() {
 		buttonHeight, buttonHeight);
 	this->pinButton->setBounds(pinRect);
 
+	int right = this->getWidth();
+	if (this->editor) {
+		right = std::min(right, this->editor->getWidth());
+	}/**< Have To Do This To Fix Width, I Don't Know What Happend But This Works */
 	juce::Rectangle<int> scaleRect(
-		this->getWidth() - toolPaddingWidth - scaleButtonWidth,
+		right - toolPaddingWidth - scaleButtonWidth,
 		toolPaddingHeight, scaleButtonWidth, buttonHeight);
 	this->scaleButton->setBounds(scaleRect);
 
@@ -245,6 +250,15 @@ void PluginEditorContent::componentMovedOrResized(
 	if (wasResized) {
 		auto size = this->getPerferedSize();
 		this->parent->sizeChanged(size);
+
+		/** Update Size Again */
+		juce::MessageManager::callAsync(
+			[comp = juce::Component::SafePointer(this)] {
+				if (comp) {
+					comp->resized();
+				}
+			}
+		);
 	}
 }
 
@@ -420,8 +434,15 @@ void PluginEditor::update() {
 
 void PluginEditor::sizeChanged(const juce::Point<int>& size) {
 	int width = size.getX(), height = size.getY();
-	this->centreWithSize(width, height);
 	this->setResizeLimits(width / 2, height / 2, width, height);
+	juce::MessageManager::callAsync(
+		[width, height, comp = juce::Component::SafePointer(this)] {
+			if (comp) {
+				comp->centreWithSize(width, height);
+
+			}
+		}
+	);
 }
 
 void PluginEditor::setOpenGL(bool openGLOn) {
