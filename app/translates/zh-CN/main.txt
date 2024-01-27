@@ -128,3 +128,6 @@ countries: cn
 "Parameter" = "参数"
 "CC Controller" = "CC控制器"
 "Scale Plugin Window" = "缩放插件窗口"
+"MIDI Input" = "MIDI输入"
+"Sequencer Track" = "音序器轨道"
+"Mixer Track" = "混音器轨道"

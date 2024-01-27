@@ -81,10 +81,20 @@ namespace quickAPI {
 
 	/** Param Index，CC Channel  */
 	using PluginParamLink = std::tuple<int, int>;
+
+	/** Src Index, Dst Index */
+	using MIDILink = std::tuple<int, int>;
+
+	/** Src Index, Src Channel, Dst Index, Dst Channel */
+	using AudioLink = std::tuple<int, int, int, int>;
+
 	int getInstrNum();
 	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
 	bool getInstrBypass(int index);
+	bool getInstrMIDIInputFromDevice(int index);
+	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index);
+	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index);
 	EditorPointer getInstrEditor(int index);
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);
@@ -92,7 +102,7 @@ namespace quickAPI {
 	int getInstrMIDIChannel(PluginHolder pointer);
 	bool getInstrMIDICCIntercept(PluginHolder pointer);
 	bool getInstrMIDIOutput(PluginHolder pointer);
-	juce::Array<PluginParamLink> getInstrParamCCLink(PluginHolder pointer);
+	const juce::Array<PluginParamLink> getInstrParamCCLink(PluginHolder pointer);
 	const juce::String getInstrParamName(PluginHolder pointer, int paramIndex);
 	const juce::StringArray getInstrParamList(PluginHolder pointer);
 
@@ -101,9 +111,17 @@ namespace quickAPI {
 	int getEffectMIDIChannel(PluginHolder pointer);
 	bool getEffectMIDICCIntercept(PluginHolder pointer);
 	bool getEffectMIDIOutput(PluginHolder pointer);
-	juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer);
+	const juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer);
 	const juce::String getEffectParamName(PluginHolder pointer, int paramIndex);
 	const juce::StringArray getEffectParamList(PluginHolder pointer);
+
+	int getSeqTrackNum();
+	const juce::String getSeqTrackName(int index);
+	const juce::StringArray getSeqTrackNameList();
+
+	int getMixerTrackNum();
+	const juce::String getMixerTrackName(int index);
+	const juce::StringArray getMixerTrackNameList();
 
 	const juce::String getMIDICCChannelName(int channel);
 	const juce::StringArray getMIDICCChannelNameList();
