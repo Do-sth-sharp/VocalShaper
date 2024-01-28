@@ -76,6 +76,10 @@ void PluginDecorator::setPlugin(
 	}
 }
 
+const juce::AudioChannelSet& PluginDecorator::getAudioChannelSet() const {
+	return this->audioChannels;
+}
+
 bool PluginDecorator::canPluginAddBus(bool isInput) const {
 	if (!this->plugin) { return false; }
 	return this->plugin->canAddBus(isInput);

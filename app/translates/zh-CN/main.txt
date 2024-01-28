@@ -131,3 +131,4 @@ countries: cn
 "MIDI Input" = "MIDI输入"
 "Sequencer Track" = "音序器轨道"
 "Mixer Track" = "混音器轨道"
+"Channel Link" = "通道连接"

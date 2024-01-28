@@ -1,4 +1,5 @@
 ﻿#include "CoreActions.h"
+#include "../component/ChannelLinkView.h"
 #include "../dataModel/TrackListBoxModel.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
@@ -217,6 +218,29 @@ void CoreActions::setInstrParamCCLink(quickAPI::PluginHolder instr, int paramInd
 
 void CoreActions::removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel) {
 	CoreActions::setInstrParamCCLink(instr, -1, ccChannel);
+}
+
+void CoreActions::setInstrMIDIInputFromDevice(int index, bool input) {
+	auto action = input
+		? std::unique_ptr<ActionBase>(new ActionAddInstrMidiInput{ index })
+		: std::unique_ptr<ActionBase>(new ActionRemoveInstrMidiInput{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setInstrMIDIInputFromSeqTrack(
+	int index, int seqIndex, bool input) {
+	auto action = input
+		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackMidiOutputToInstr{ seqIndex, index })
+		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackMidiOutputToInstr{ seqIndex, index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setInstrAudioOutputToMixer(
+	int index, int channel, int mixerTrack, int mixerChannel, bool input) {
+	auto action = input
+		? std::unique_ptr<ActionBase>(new ActionAddInstrOutput{ index, channel, mixerTrack, mixerChannel })
+		: std::unique_ptr<ActionBase>(new ActionRemoveInstrOutput{ index, channel, mixerTrack, mixerChannel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::bypassEffect(quickAPI::PluginHolder effect, bool bypass) {
@@ -581,6 +605,37 @@ void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
 void CoreActions::addInstrParamCCLinkGUI(quickAPI::PluginHolder instr) {
 	auto callback = [instr](int param) { CoreActions::editInstrParamCCLinkGUI(instr, param); };
 	CoreActions::askForPluginParamGUIAsync(callback, instr, PluginType::Instr);
+}
+
+void CoreActions::setInstrAudioOutputToMixerGUI(int index, int track, bool output,
+	const juce::Array<std::tuple<int, int>>& links) {
+	/** Callback */
+	auto callback = [index, track](int srcc, int dstc, bool output) {
+		CoreActions::setInstrAudioOutputToMixer(index, srcc, track, dstc, output);
+		};
+
+	/** Remove */
+	if (!output) {
+		for (auto& [srcc, dstc] : links) {
+			callback(srcc, dstc, false);
+		}
+		return;
+	}
+
+	/** Name */
+	juce::String instrName = TRANS("Instrument") + " #" + juce::String{ index } + " " + quickAPI::getInstrName(index);
+	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ track } + " " + quickAPI::getMixerTrackName(track);
+
+	/** Channels */
+	auto instrChannelSet = quickAPI::getInstrChannelSet(index);
+	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(track);
+	int instrTotalChannels = quickAPI::getInstrOutputChannelNum(index);
+	int trackTotalChannels = quickAPI::getMixerTrackInputChannelNum(track);
+
+	/** Ask For Channels */
+	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
+		instrChannelSet, trackChannelSet, instrTotalChannels, trackTotalChannels,
+		instrName, trackName, true);
 }
 
 void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
@@ -1020,4 +1075,20 @@ void CoreActions::askForPluginMIDICCGUIAsync(
 			callback(index);
 		}
 	), true);
+}
+
+void CoreActions::askForAudioChannelLinkGUIAsync(
+	const std::function<void(int, int, bool)>& callback,
+	const juce::Array<std::tuple<int, int>>& initList,
+	const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
+	int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
+	bool initIfEmpty) {
+	/** Create Editor */
+	auto editor = new ChannelLinkView{
+		callback, initList, srcChannels, dstChannels,
+		srcChannelNum, dstChannelNum, srcName, dstName, initIfEmpty };
+
+	/** Show Selector Async */
+	editor->enterModalState(true, juce::ModalCallbackFunction::create(
+		[](int /*result*/) {}), true);
 }

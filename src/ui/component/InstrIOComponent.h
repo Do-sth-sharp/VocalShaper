@@ -34,6 +34,7 @@ private:
 	juce::var getDragSourceDescription() const;
 	juce::PopupMenu createLinkMenu();
 	juce::PopupMenu createUnlinkMenu();
+	const juce::Array<std::tuple<int, int>> getOutputChannelLinks(int track) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InstrIOComponent)
 };

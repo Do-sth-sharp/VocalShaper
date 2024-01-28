@@ -1,5 +1,6 @@
 ﻿#include "InstrIOComponent.h"
 #include "../misc/DragSourceType.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -108,14 +109,48 @@ void InstrIOComponent::showLinkMenu() {
 	auto menu = this->createLinkMenu();
 	int result = menu.showAt(this);
 
-	/** TODO */
+	if (this->isInput) {
+		if (result == InstrIOMenuType::Device) {
+			CoreActions::setInstrMIDIInputFromDevice(this->index, true);
+		}
+		else if (result >= InstrIOMenuType::NumBase) {
+			int src = result - InstrIOMenuType::NumBase;
+			CoreActions::setInstrMIDIInputFromSeqTrack(this->index, src, true);
+		}
+	}
+	else {
+		if (result >= InstrIOMenuType::NumBase) {
+			int track = result - InstrIOMenuType::NumBase;
+
+			auto links = this->getOutputChannelLinks(track);
+			CoreActions::setInstrAudioOutputToMixerGUI(
+				this->index, track, true, links);
+		}
+	}
 }
 
 void InstrIOComponent::showUnlinkMenu() {
 	auto menu = this->createUnlinkMenu();
 	int result = menu.showAt(this);
 
-	/** TODO */
+	if (this->isInput) {
+		if (result == InstrIOMenuType::Device) {
+			CoreActions::setInstrMIDIInputFromDevice(this->index, false);
+		}
+		else if (result >= InstrIOMenuType::NumBase) {
+			int src = result - InstrIOMenuType::NumBase;
+			CoreActions::setInstrMIDIInputFromSeqTrack(this->index, src, false);
+		}
+	}
+	else {
+		if (result >= InstrIOMenuType::NumBase) {
+			int track = result - InstrIOMenuType::NumBase;
+			
+			auto links = this->getOutputChannelLinks(track);
+			CoreActions::setInstrAudioOutputToMixerGUI(
+				this->index, track, false, links);
+		}
+	}
 }
 
 juce::var InstrIOComponent::getDragSourceDescription() const {
@@ -137,7 +172,8 @@ juce::PopupMenu InstrIOComponent::createLinkMenu() {
 	juce::PopupMenu menu;
 
 	if (this->isInput) {
-		menu.addItem(InstrIOMenuType::Device, TRANS("MIDI Input"), true, this->midiInputFromDevice);
+		menu.addItem(InstrIOMenuType::Device, TRANS("MIDI Input"),
+			!this->midiInputFromDevice, this->midiInputFromDevice);
 		menu.addSeparator();
 
 		auto seqTracks = quickAPI::getSeqTrackNameList();
@@ -180,4 +216,14 @@ juce::PopupMenu InstrIOComponent::createUnlinkMenu() {
 	}
 
 	return menu;
+}
+
+const juce::Array<std::tuple<int, int>> InstrIOComponent::getOutputChannelLinks(int track) const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioOutputToMixer) {
+		if ((src == this->index) && (dst == track)) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
 }

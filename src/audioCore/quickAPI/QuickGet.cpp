@@ -464,6 +464,33 @@ namespace quickAPI {
 		return {};
 	}
 
+	const juce::AudioChannelSet getInstrChannelSet(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto instr = graph->getInstrumentProcessor(index)) {
+				return instr->getAudioChannelSet();
+			}
+		}
+		return juce::AudioChannelSet{};
+	}
+
+	int getInstrInputChannelNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto instr = graph->getInstrumentProcessor(index)) {
+				return instr->getTotalNumInputChannels();
+			}
+		}
+		return 0;
+	}
+
+	int getInstrOutputChannelNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto instr = graph->getInstrumentProcessor(index)) {
+				return instr->getTotalNumOutputChannels();
+			}
+		}
+		return 0;
+	}
+
 	EditorPointer getInstrEditor(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto instr = graph->getInstrumentProcessor(index)) {
@@ -593,6 +620,33 @@ namespace quickAPI {
 		}
 
 		return result;
+	}
+
+	const juce::AudioChannelSet getMixerTrackChannelSet(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getAudioChannelSet();
+			}
+		}
+		return juce::AudioChannelSet{};
+	}
+
+	int getMixerTrackInputChannelNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getTotalNumInputChannels();
+			}
+		}
+		return 0;
+	}
+
+	int getMixerTrackOutputChannelNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getTotalNumOutputChannels();
+			}
+		}
+		return 0;
 	}
 
 	const juce::String getMIDICCChannelName(int channel) {

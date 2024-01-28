@@ -95,6 +95,9 @@ namespace quickAPI {
 	bool getInstrMIDIInputFromDevice(int index);
 	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index);
 	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index);
+	const juce::AudioChannelSet getInstrChannelSet(int index);
+	int getInstrInputChannelNum(int index);
+	int getInstrOutputChannelNum(int index);
 	EditorPointer getInstrEditor(int index);
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);
@@ -122,6 +125,9 @@ namespace quickAPI {
 	int getMixerTrackNum();
 	const juce::String getMixerTrackName(int index);
 	const juce::StringArray getMixerTrackNameList();
+	const juce::AudioChannelSet getMixerTrackChannelSet(int index);
+	int getMixerTrackInputChannelNum(int index);
+	int getMixerTrackOutputChannelNum(int index);
 
 	const juce::String getMIDICCChannelName(int channel);
 	const juce::StringArray getMIDICCChannelNameList();

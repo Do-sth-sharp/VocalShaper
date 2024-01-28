@@ -55,6 +55,9 @@ public:
 	static void setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output);
 	static void setInstrParamCCLink(quickAPI::PluginHolder instr, int paramIndex, int ccChannel);
 	static void removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel);
+	static void setInstrMIDIInputFromDevice(int index, bool input);
+	static void setInstrMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
+	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);
 
 	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
 	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
@@ -97,6 +100,8 @@ public:
 	static void insertInstrGUI();
 	static void editInstrParamCCLinkGUI(quickAPI::PluginHolder instr, int paramIndex, int defaultCC = -1);
 	static void addInstrParamCCLinkGUI(quickAPI::PluginHolder instr);
+	static void setInstrAudioOutputToMixerGUI(int index, int track, bool output,
+		const juce::Array<std::tuple<int, int>>& links);
 
 	static void editEffectParamCCLinkGUI(quickAPI::PluginHolder effect, int paramIndex, int defaultCC = -1);
 	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
@@ -124,4 +129,10 @@ public:
 		const std::function<void(int)>& callback,
 		quickAPI::PluginHolder plugin, PluginType type,
 		int defaultCCChannel = -1);
+	static void askForAudioChannelLinkGUIAsync(
+		const std::function<void(int, int, bool)>& callback,
+		const juce::Array<std::tuple<int, int>>& initList,
+		const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
+		int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
+		bool initIfEmpty);
 };
