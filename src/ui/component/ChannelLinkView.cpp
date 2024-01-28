@@ -32,19 +32,209 @@ ChannelLinkViewContent::ChannelLinkViewContent(
 
 juce::Point<int> ChannelLinkViewContent::getPreferedSize() const {
 	auto screenSize = utils::getScreenSize(this);
-	int paddingWidth = screenSize.getWidth() * 0.05;
-	int paddingHeight = screenSize.getHeight() * 0.05;
-	int titleWidth = screenSize.getWidth() * 0.05;
-	int titleHeight = screenSize.getHeight() * 0.05;
-	int cellWidth = screenSize.getWidth() * 0.025;
+	int paddingWidth = screenSize.getWidth() * 0.0125;
+	int paddingHeight = screenSize.getHeight() * 0.02;
+	int titleWidth = screenSize.getWidth() * 0.016;
+	int titleHeight = screenSize.getHeight() * 0.03;
+	int cellWidth = screenSize.getWidth() * 0.015;
 	int cellHeight = cellWidth;
 
-	return { paddingWidth * 2 + titleWidth + cellWidth * (this->dstChannelNum + 2),
-	paddingHeight * 2 + titleHeight + cellHeight * (this->srcChannelNum + 2) };
+	int width = paddingWidth * 2 + titleWidth + cellWidth * (this->dstChannelNum + 2);
+	int height = paddingHeight * 2 + titleHeight + cellHeight * (this->srcChannelNum + 2);
+
+	return { std::max(width, (int)(screenSize.getWidth() * 0.2)),
+		std::max(height, (int)(screenSize.getHeight() * 0.3)) };
 }
 
 void ChannelLinkViewContent::paint(juce::Graphics& g) {
-	/** TODO */
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int paddingWidth = screenSize.getWidth() * 0.0125;
+	int paddingHeight = screenSize.getHeight() * 0.02;
+	int titleWidth = screenSize.getWidth() * 0.016;
+	int titleHeight = screenSize.getHeight() * 0.03;
+	int cellWidth = screenSize.getWidth() * 0.015;
+	int cellHeight = cellWidth;
+
+	float linkPaddingWidth = screenSize.getWidth() * 0.005;
+	float linkPaddingHeight = linkPaddingWidth;
+
+	float lineThickness = screenSize.getHeight() * 0.0015;
+
+	float titleFontHeight = screenSize.getHeight() * 0.025;
+	float textFontHeight = screenSize.getHeight() * 0.02;
+
+	int tableWidth = this->getWidth() - paddingWidth * 2 - titleWidth;
+	int tableHeight = this->getHeight() - paddingHeight * 2 - titleHeight;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour titleColor = laf.findColour(
+		juce::Label::ColourIds::textWhenEditingColourId);
+	juce::Colour textColor = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+	juce::Colour lineColor = laf.findColour(
+		juce::Label::ColourIds::outlineColourId);
+	juce::Colour linkedBackgroundColor = laf.findColour(
+		juce::Label::ColourIds::backgroundWhenEditingColourId);
+	juce::Colour linkedColor = laf.findColour(
+		juce::Label::ColourIds::outlineWhenEditingColourId);
+
+	/** Fonts */
+	juce::Font titleFont(titleFontHeight);
+	juce::Font textFont(textFontHeight);
+
+	/** H Title */
+	juce::Rectangle<int> hTitleRect(
+		paddingWidth + titleWidth, paddingHeight,
+		tableWidth, titleHeight);
+	g.setColour(titleColor);
+	g.setFont(titleFont);
+	g.drawFittedText(this->dstName, hTitleRect,
+		juce::Justification::centred, 1, 0.f);
+
+	/** V Title */
+	juce::Rectangle<int> vTitleRect(
+		paddingWidth, paddingHeight + titleHeight,
+		titleWidth, tableHeight);
+	g.setColour(titleColor);
+	g.setFont(titleFont);
+	g.saveState();
+	g.addTransform(juce::AffineTransform{
+		0, 1, (float)(vTitleRect.getX()),
+		-1, 0, (float)(vTitleRect.getBottom())
+		});
+	g.drawFittedText(this->srcName,
+		vTitleRect.withZeroOrigin().transformedBy(
+			juce::AffineTransform{
+				0, 1, 0,
+				1, 0, 0 }),
+		juce::Justification::centred, 1, 0.f);
+	g.restoreState();
+
+	/** Table Rect */
+	juce::Rectangle<float> tableRect(
+		paddingWidth + titleWidth, paddingHeight + titleHeight,
+		tableWidth, tableHeight);
+	g.setColour(lineColor);
+	g.drawRect(tableRect, lineThickness);
+
+	/** H Line */
+	g.setColour(lineColor);
+	int dstChannelPerBus = this->dstChannels.size();
+	for (int i = 0; i <= this->dstChannelNum + 2; i++) {
+		if (i >= 2) {
+			bool longLine = ((i - 2) % dstChannelPerBus) == 0;
+			juce::Rectangle<float> lineRect(
+				paddingWidth + titleWidth + i * cellWidth - lineThickness / 2,
+				paddingHeight + titleHeight + (longLine ? 0 : cellHeight),
+				lineThickness,
+				(this->dstChannelNum + 2) * cellHeight - (longLine ? 0 : cellHeight));
+			g.fillRect(lineRect);
+		}
+	}
+
+	/** V Line */
+	g.setColour(lineColor);
+	int srcChannelPerBus = this->srcChannels.size();
+	for (int i = 0; i <= this->srcChannelNum + 2; i++) {
+		if (i >= 2) {
+			bool longLine = ((i - 2) % srcChannelPerBus) == 0;
+			juce::Rectangle<float> lineRect(
+				paddingWidth + titleWidth + (longLine ? 0 : cellWidth),
+				paddingHeight + titleHeight + i * cellHeight - lineThickness / 2,
+				(this->dstChannelNum + 2) * cellWidth - (longLine ? 0 : cellWidth),
+				lineThickness);
+			g.fillRect(lineRect);
+		}
+	}
+
+	/** Table Head */
+	g.setColour(lineColor);
+	juce::Line<float> headLine(
+		paddingWidth + titleWidth, paddingHeight + titleHeight,
+		paddingWidth + titleWidth + 2 * cellWidth,
+		paddingHeight + titleHeight + 2 * cellHeight);
+	g.drawLine(headLine, lineThickness);
+
+	/** H Bus ID */
+	g.setColour(textColor);
+	g.setFont(textFont);
+	int dstBusNum = this->dstChannelNum / dstChannelPerBus;
+	for (int i = 0; i < dstBusNum; i++) {
+		juce::Rectangle<int> textRect(
+			paddingWidth + titleWidth + cellWidth * 2 + i * cellWidth * dstChannelPerBus,
+			paddingHeight + titleHeight, cellWidth * dstChannelPerBus, cellHeight);
+		g.drawFittedText(juce::String{ i }, textRect,
+			juce::Justification::centred, 1, 0.f);
+	}
+
+	/** V Bus ID */
+	g.setColour(textColor);
+	g.setFont(textFont);
+	int srcBusNum = this->srcChannelNum / srcChannelPerBus;
+	for (int i = 0; i < srcBusNum; i++) {
+		juce::Rectangle<int> textRect(paddingWidth + titleWidth,
+			paddingHeight + titleHeight + cellHeight * 2 + i * cellHeight * srcChannelPerBus,
+			cellWidth, cellHeight * srcChannelPerBus);
+		g.drawFittedText(juce::String{ i }, textRect,
+			juce::Justification::centred, 1, 0.f);
+	}
+
+	/** H Channel Name */
+	g.setColour(textColor);
+	g.setFont(textFont);
+	for (int i = 0; i < this->dstChannelNum + 2; i++) {
+		if (i >= 2) {
+			juce::String name =
+				juce::AudioChannelSet::getAbbreviatedChannelTypeName(
+					this->dstChannels.getTypeOfChannel((i - 2) % dstChannelPerBus));
+			juce::Rectangle<int> textRect(
+				paddingWidth + titleWidth + cellWidth * i,
+				paddingHeight + titleHeight + cellWidth,
+				cellWidth, cellHeight);
+			g.drawFittedText(name, textRect,
+				juce::Justification::centred, 1, 0.f);
+		}
+	}
+
+	/** V Channel Name */
+	g.setColour(textColor);
+	g.setFont(textFont);
+	for (int i = 0; i < this->srcChannelNum + 2; i++) {
+		if (i >= 2) {
+			juce::String name =
+				juce::AudioChannelSet::getAbbreviatedChannelTypeName(
+					this->srcChannels.getTypeOfChannel((i - 2) % srcChannelPerBus));
+			juce::Rectangle<int> textRect(
+				paddingWidth + titleWidth + cellWidth,
+				paddingHeight + titleHeight + cellHeight * i,
+				cellWidth, cellHeight);
+			g.drawFittedText(name, textRect,
+				juce::Justification::centred, 1, 0.f);
+		}
+	}
+
+	/** Link */
+	for (int i = 0; i < this->srcChannelNum; i++) {
+		for (int j = 0; j < this->dstChannelNum; j++) {
+			if (this->checkLink(i, j)) {
+				juce::Rectangle<float> backRect(
+					paddingWidth + titleWidth + cellWidth * 2 + cellWidth * i + lineThickness / 2,
+					paddingHeight + titleHeight + cellHeight * 2 + cellHeight * j + lineThickness / 2,
+					cellWidth - lineThickness, cellHeight - lineThickness);
+				g.setColour(linkedBackgroundColor);
+				g.fillRect(backRect);
+
+				juce::Rectangle<float> frontRect(
+					paddingWidth + titleWidth + cellWidth * 2 + cellWidth * i + linkPaddingWidth,
+					paddingHeight + titleHeight + cellHeight * 2 + cellHeight * j + linkPaddingHeight,
+					cellWidth - linkPaddingWidth * 2, cellHeight - linkPaddingHeight * 2);
+				g.setColour(linkedColor);
+				g.fillEllipse(frontRect);
+			}
+		}
+	}
 }
 
 bool ChannelLinkViewContent::checkLink(int srcc, int dstc) {

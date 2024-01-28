@@ -11,7 +11,7 @@ ChannelLinkLookAndFeel::ChannelLinkLookAndFeel()
 	this->setColour(juce::Label::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 	this->setColour(juce::Label::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));/**< Channel Name */
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Channel Name */
 	this->setColour(juce::Label::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB9"));/**< Table Border */
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
@@ -19,5 +19,5 @@ ChannelLinkLookAndFeel::ChannelLinkLookAndFeel()
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB10"));/**< Title */
 	this->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorA2"));/**< Link */
+		juce::Colours::lightgreen);/**< Link */
 }
