@@ -15,6 +15,11 @@ public:
 
 	void paint(juce::Graphics& g) override;
 
+	void mouseMove(const juce::MouseEvent& event) override;
+	void mouseDrag(const juce::MouseEvent& event) override;
+	void mouseExit(const juce::MouseEvent& event) override;
+	void mouseUp(const juce::MouseEvent& event) override;
+
 private:
 	const std::function<void(int, int, bool)> callback;
 	const juce::AudioChannelSet srcChannels, dstChannels;
@@ -22,6 +27,7 @@ private:
 	const juce::String srcName, dstName;
 
 	juce::BigInteger temp;
+	std::tuple<int, int> hovered = { -1, -1 };
 
 	bool checkLink(int srcc, int dstc);
 	void setLink(int srcc, int dstc, bool link);

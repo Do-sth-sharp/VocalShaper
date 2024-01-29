@@ -75,7 +75,7 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::textColourId);
 	juce::Colour lineColor = laf.findColour(
 		juce::Label::ColourIds::outlineColourId);
-	juce::Colour linkedBackgroundColor = laf.findColour(
+	juce::Colour hoveredColor = laf.findColour(
 		juce::Label::ColourIds::backgroundWhenEditingColourId);
 	juce::Colour linkedColor = laf.findColour(
 		juce::Label::ColourIds::outlineWhenEditingColourId);
@@ -129,7 +129,7 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 				paddingWidth + titleWidth + i * cellWidth - lineThickness / 2,
 				paddingHeight + titleHeight + (longLine ? 0 : cellHeight),
 				lineThickness,
-				(this->dstChannelNum + 2) * cellHeight - (longLine ? 0 : cellHeight));
+				(this->srcChannelNum + 2) * cellHeight - (longLine ? 0 : cellHeight));
 			g.fillRect(lineRect);
 		}
 	}
@@ -216,16 +216,21 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 	}
 
 	/** Link */
-	for (int i = 0; i < this->srcChannelNum; i++) {
-		for (int j = 0; j < this->dstChannelNum; j++) {
-			if (this->checkLink(i, j)) {
+	auto& [hoverSrc, hoverDst] = this->hovered;
+	for (int i = 0; i < this->dstChannelNum; i++) {
+		for (int j = 0; j < this->srcChannelNum; j++) {
+			bool linked = this->checkLink(j, i);
+			bool hovered = (hoverSrc == j) && (hoverDst == i);
+
+			if (hovered) {
 				juce::Rectangle<float> backRect(
 					paddingWidth + titleWidth + cellWidth * 2 + cellWidth * i + lineThickness / 2,
 					paddingHeight + titleHeight + cellHeight * 2 + cellHeight * j + lineThickness / 2,
 					cellWidth - lineThickness, cellHeight - lineThickness);
-				g.setColour(linkedBackgroundColor);
+				g.setColour(hoveredColor);
 				g.fillRect(backRect);
-
+			}
+			if (linked) {
 				juce::Rectangle<float> frontRect(
 					paddingWidth + titleWidth + cellWidth * 2 + cellWidth * i + linkPaddingWidth,
 					paddingHeight + titleHeight + cellHeight * 2 + cellHeight * j + linkPaddingHeight,
@@ -233,6 +238,78 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 				g.setColour(linkedColor);
 				g.fillEllipse(frontRect);
 			}
+		}
+	}
+}
+
+void ChannelLinkViewContent::mouseMove(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int paddingWidth = screenSize.getWidth() * 0.0125;
+	int paddingHeight = screenSize.getHeight() * 0.02;
+	int titleWidth = screenSize.getWidth() * 0.016;
+	int titleHeight = screenSize.getHeight() * 0.03;
+	int cellWidth = screenSize.getWidth() * 0.015;
+	int cellHeight = cellWidth;
+
+	int left = paddingWidth + titleWidth + cellWidth * 2;
+	int right = left + cellWidth * this->dstChannelNum;
+	int top = paddingHeight + titleHeight + cellHeight * 2;
+	int bottom = top + cellHeight * this->srcChannelNum;
+
+	int x = event.position.getX(), y = event.position.getY();
+
+	if (x >= left && x < right && y >= top && y < bottom) {
+		this->hovered = { (y - top) / cellHeight, (x - left) / cellWidth };
+		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	}
+	else {
+		this->hovered = { -1, -1 };
+		this->setMouseCursor(juce::MouseCursor::NormalCursor);
+	}
+
+	this->repaint();
+}
+
+void ChannelLinkViewContent::mouseDrag(const juce::MouseEvent& event) {
+	this->mouseMove(event);
+}
+
+void ChannelLinkViewContent::mouseExit(const juce::MouseEvent& /*event*/) {
+	this->hovered = { -1, -1 };
+	this->setMouseCursor(juce::MouseCursor::NormalCursor);
+	this->repaint();
+}
+
+void ChannelLinkViewContent::mouseUp(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int paddingWidth = screenSize.getWidth() * 0.0125;
+	int paddingHeight = screenSize.getHeight() * 0.02;
+	int titleWidth = screenSize.getWidth() * 0.016;
+	int titleHeight = screenSize.getHeight() * 0.03;
+	int cellWidth = screenSize.getWidth() * 0.015;
+	int cellHeight = cellWidth;
+
+	int left = paddingWidth + titleWidth + cellWidth * 2;
+	int right = left + cellWidth * this->dstChannelNum;
+	int top = paddingHeight + titleHeight + cellHeight * 2;
+	int bottom = top + cellHeight * this->srcChannelNum;
+
+	int x = event.position.getX(), y = event.position.getY();
+
+	if (x >= left && x < right && y >= top && y < bottom) {
+		int src = (y - top) / cellHeight;
+		int dst = (x - left) / cellWidth;
+
+		bool linked = this->checkLink(src, dst);
+		if (event.mods.isLeftButtonDown() && (!linked)) {
+			this->setLink(src, dst, true);
+			this->repaint();
+		}
+		else if (event.mods.isRightButtonDown() && linked) {
+			this->setLink(src, dst, false);
+			this->repaint();
 		}
 	}
 }
