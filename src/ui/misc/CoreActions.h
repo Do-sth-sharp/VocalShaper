@@ -58,6 +58,7 @@ public:
 	static void setInstrMIDIInputFromDevice(int index, bool input);
 	static void setInstrMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
 	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);
+	static void removeInstr(int index);
 
 	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
 	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
@@ -102,6 +103,7 @@ public:
 	static void addInstrParamCCLinkGUI(quickAPI::PluginHolder instr);
 	static void setInstrAudioOutputToMixerGUI(int index, int track, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
+	static void removeInstrGUI(int index);
 
 	static void editEffectParamCCLinkGUI(quickAPI::PluginHolder effect, int paramIndex, int defaultCC = -1);
 	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);

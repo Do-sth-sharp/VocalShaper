@@ -30,8 +30,10 @@ private:
 
 	void bypass();
 	void editorShow();
+	void showMenu();
 
 	juce::String createToolTip() const;
+	juce::PopupMenu createMenu() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InstrComponent)
 };

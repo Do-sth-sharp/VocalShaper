@@ -150,6 +150,9 @@ void InstrComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		this->editorShow();
 	}
+	else if (event.mods.isRightButtonDown()) {
+		this->showMenu();
+	}
 }
 
 void InstrComponent::bypass() {
@@ -166,6 +169,26 @@ void InstrComponent::editorShow() {
 	}
 }
 
+enum InstrMenuActionType {
+	Bypass = 1, Remove
+};
+
+void InstrComponent::showMenu() {
+	auto menu = this->createMenu();
+	int result = menu.show();
+
+	switch (result) {
+	case InstrMenuActionType::Bypass: {
+		this->bypass();
+		break;
+	}
+	case InstrMenuActionType::Remove: {
+		CoreActions::removeInstrGUI(this->index);
+		break;
+	}
+	}
+}
+
 juce::String InstrComponent::createToolTip() const {
 	juce::String result =
 		"#" + juce::String{ this->index } + "\n"
@@ -173,4 +196,13 @@ juce::String InstrComponent::createToolTip() const {
 		+ TRANS("Bypassed:") + " " + TRANS(this->bypassButton->getToggleState() ? "No" : "Yes") + "\n";
 
 	return result;
+}
+
+juce::PopupMenu InstrComponent::createMenu() const {
+	juce::PopupMenu menu;
+
+	menu.addItem(InstrMenuActionType::Bypass, TRANS("Bypass"), true, !(this->bypassButton->getToggleState()));
+	menu.addItem(InstrMenuActionType::Remove, TRANS("Remove"));
+
+	return menu;
 }

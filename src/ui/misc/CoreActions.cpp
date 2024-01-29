@@ -243,6 +243,12 @@ void CoreActions::setInstrAudioOutputToMixer(
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::removeInstr(int index) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionRemoveInstr{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::bypassEffect(quickAPI::PluginHolder effect, bool bypass) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetEffectBypassByPtr{ effect, bypass });
@@ -430,7 +436,7 @@ void CoreActions::newAudioSourceGUI() {
 }
 
 void CoreActions::saveSourceGUI(int index) {
-	if (index == -1) { return; }
+	if (index <= -1) { return; }
 
 	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
 	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(true);
@@ -467,7 +473,7 @@ void CoreActions::saveSourceGUI() {
 }
 
 void CoreActions::reloadSourceGUI(int index) {
-	if (index == -1) { return; }
+	if (index <= -1) { return; }
 
 	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
 	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
@@ -495,7 +501,7 @@ void CoreActions::reloadSourceGUI() {
 }
 
 void CoreActions::synthSourceGUI(int index) {
-	if (index == -1) { return; }
+	if (index <= -1) { return; }
 
 	CoreActions::synthSource(index);
 }
@@ -506,7 +512,7 @@ void CoreActions::synthSourceGUI() {
 }
 
 void CoreActions::removeSourceGUI(int index) {
-	if (index == -1) { return; }
+	if (index <= -1) { return; }
 
 	if (!juce::AlertWindow::showOkCancelBox(
 		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Source"),
@@ -518,7 +524,7 @@ void CoreActions::removeSourceGUI(int index) {
 }
 
 void CoreActions::setSourceNameGUI(int index) {
-	if (index == -1) { return; }
+	if (index <= -1) { return; }
 
 	auto oldName = quickAPI::getSourceName(index);
 
@@ -532,7 +538,7 @@ void CoreActions::setSourceNameGUI() {
 }
 
 void CoreActions::setSourceSynthesizerGUI(int index) {
-	if (index == -1) { return; }
+	if (index <= -1) { return; }
 
 	auto callback = [index](const juce::String& id) {
 		if (id.isEmpty()) { return; }
@@ -636,6 +642,18 @@ void CoreActions::setInstrAudioOutputToMixerGUI(int index, int track, bool outpu
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		instrChannelSet, trackChannelSet, instrTotalChannels, trackTotalChannels,
 		instrName, trackName, true);
+}
+
+void CoreActions::removeInstrGUI(int index) {
+	if (index <= -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Instrument"),
+		TRANS("Remove the instrument from instrument list. Continue?"))) {
+		return;
+	}
+
+	CoreActions::removeInstr(index);
 }
 
 void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,

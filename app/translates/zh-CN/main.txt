@@ -132,3 +132,4 @@ countries: cn
 "Sequencer Track" = "音序器轨道"
 "Mixer Track" = "混音器轨道"
 "Channel Link" = "通道连接"
+"Bypass" = "旁路"
