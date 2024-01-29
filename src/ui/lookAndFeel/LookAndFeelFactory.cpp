@@ -13,6 +13,7 @@
 #include "InstrViewLookAndFeel.h"
 #include "PluginEditorLookAndFeel.h"
 #include "ChannelLinkLookAndFeel.h"
+#include "MixerLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -86,6 +87,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Channel Link */
 	this->channelLinkLAF = std::make_unique<ChannelLinkLookAndFeel>();
+
+	/** Mixer */
+	this->mixerLAF = std::unique_ptr<MixerLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -143,6 +147,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forPluginEditor() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forChannelLink() const {
 	return this->channelLinkLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forMixer() const {
+	return this->mixerLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

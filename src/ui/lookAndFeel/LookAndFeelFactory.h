@@ -22,6 +22,7 @@ public:
 	juce::LookAndFeel_V4* forInstrView() const;
 	juce::LookAndFeel_V4* forPluginEditor() const;
 	juce::LookAndFeel_V4* forChannelLink() const;
+	juce::LookAndFeel_V4* forMixer() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -38,6 +39,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> instrViewLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> pluginEditorLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> channelLinkLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> mixerLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

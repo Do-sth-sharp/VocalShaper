@@ -1,6 +1,5 @@
 ﻿#include "MessageViewLookAndFeel.h"
 #include "../misc/ColorMap.h"
-#include "../Utils.h"
 
 MessageViewLookAndFeel::MessageViewLookAndFeel()
 	: MainLookAndFeel() {
