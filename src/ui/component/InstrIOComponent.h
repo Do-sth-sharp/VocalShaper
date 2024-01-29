@@ -2,7 +2,9 @@
 
 #include <JuceHeader.h>
 
-class InstrIOComponent final : public juce::Component {
+class InstrIOComponent final
+	: public juce::Component,
+	public juce::SettableTooltipClient {
 public:
 	InstrIOComponent() = delete;
 	InstrIOComponent(bool isInput);
@@ -35,6 +37,7 @@ private:
 	juce::PopupMenu createLinkMenu();
 	juce::PopupMenu createUnlinkMenu();
 	const juce::Array<std::tuple<int, int>> getOutputChannelLinks(int track) const;
+	juce::String createToolTipString() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InstrIOComponent)
 };

@@ -133,3 +133,4 @@ countries: cn
 "Mixer Track" = "混音器轨道"
 "Channel Link" = "通道连接"
 "Bypass" = "旁路"
+"Unlinked" = "未连接"

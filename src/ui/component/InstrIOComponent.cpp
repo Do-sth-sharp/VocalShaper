@@ -78,6 +78,7 @@ void InstrIOComponent::update(int index) {
 			this->linked = !(this->outputMixerTemp.empty());
 		}
 		this->repaint();
+		this->setTooltip(this->createToolTipString());
 	}
 }
 
@@ -225,5 +226,34 @@ const juce::Array<std::tuple<int, int>> InstrIOComponent::getOutputChannelLinks(
 			result.add({ srcc, dstc });
 		}
 	}
+	return result;
+}
+
+juce::String InstrIOComponent::createToolTipString() const {
+	juce::String result;
+
+	if (this->isInput) {
+		if (this->midiInputFromDevice) {
+			result += TRANS("MIDI Input") + "\n";
+		}
+
+		for (auto i : this->inputSourceTemp) {
+			auto trackName = quickAPI::getSeqTrackName(i);
+			juce::String name = TRANS("Sequencer Track") + " #" + juce::String{ i } + " " + trackName;
+			result += name + "\n";
+		}
+	}
+	else {
+		for (auto i : this->outputMixerTemp) {
+			auto trackName = quickAPI::getMixerTrackName(i);
+			juce::String name = TRANS("Mixer Track") + " #" + juce::String{ i } + " " + trackName;
+			result += name + "\n";
+		}
+	}
+
+	if (result.isEmpty()) {
+		result = TRANS("Unlinked");
+	}
+
 	return result;
 }
