@@ -1,6 +1,8 @@
 ﻿#include "ScrollerBase.h"
 #include "../Utils.h"
 
+#define DELTA 0.000001
+
 ScrollerBase::ScrollerBase(bool vertical)
 	: vertical(vertical) {
 	/** Update Later */
@@ -38,9 +40,7 @@ void ScrollerBase::paint(juce::Graphics& g) {
 	this->paintPreview(g, this->vertical);
 
 	/** Paint Item Preview */
-	int actualTotalSize = this->getActualTotalSize();
-	int trackLength = this->vertical ? this->getHeight() : this->getWidth();
-	int itemAreaSize = (this->itemSize / (double)actualTotalSize) * trackLength;
+	int itemAreaSize = this->getTrackLength() / this->itemNum;
 	for (int i = 0; i < this->itemNum; i++) {
 		/** Get Paint Area */
 		juce::Rectangle<int> itemRect(
@@ -69,8 +69,7 @@ void ScrollerBase::paint(juce::Graphics& g) {
 	g.drawRect(totalRect.toFloat(), outlineThickness);
 
 	/** Thumb */
-	int startPos = (this->viewPos / (double)actualTotalSize) * trackLength;
-	int endPos = ((this->viewPos + this->viewSize) / (double)actualTotalSize) * trackLength;
+	auto [startPos, endPos] = this->getThumb();
 	juce::Rectangle<float> thumbRect(
 		this->vertical ? paddingWidth : startPos,
 		this->vertical ? startPos : paddingHeight,
@@ -84,7 +83,7 @@ void ScrollerBase::update() {
 	/** Get Size */
 	this->viewSize = this->createViewSize();
 	std::tie(this->itemMinSize, this->itemMaxSize) = this->createItemSizeLimit();
-	this->itemNum = this->createItemNum();
+	this->itemNum = this->limitItemNum(this->createItemNum());
 	this->itemSize = this->limitItemSize(this->itemSize);
 
 	/** Update Pos */
@@ -103,6 +102,20 @@ void ScrollerBase::setPos(int pos) {
 
 	/** Update Content */
 	this->updatePos(pos, this->itemSize);
+}
+
+void ScrollerBase::setItemSize(int size) {
+	/** Limit Size */
+	size = this->limitItemSize(size);
+
+	/** Set Size */
+	this->itemSize = size;
+
+	/** Repaint */
+	this->repaint();
+
+	/** Update Content */
+	this->updatePos(this->viewPos, size);
 }
 
 int ScrollerBase::getViewPos() const {
@@ -130,7 +143,7 @@ int ScrollerBase::getItemMaxSize() const {
 }
 
 int ScrollerBase::getActualTotalSize() const {
-	return std::max(this->viewSize, this->itemSize * this->itemNum);
+	return this->itemSize * this->itemNum;
 }
 
 void ScrollerBase::mouseMove(const juce::MouseEvent& event) {
@@ -138,19 +151,150 @@ void ScrollerBase::mouseMove(const juce::MouseEvent& event) {
 }
 
 void ScrollerBase::mouseDrag(const juce::MouseEvent& event) {
-	/** TODO */
+	if (event.mods.isLeftButtonDown()) {
+		auto pos = event.getPosition();
+		auto caredPos = this->getCaredPos(pos);
+
+		/** Check State */
+		switch (this->state) {
+		case State::PressedStart:
+			this->setStart(caredPos);
+			break;
+		case State::PressedEnd:
+			this->setEnd(caredPos);
+			break;
+		case State::PressedThumb: {
+			auto [startPos, endPos] = this->getThumb();
+			int halfThumbSize = (endPos - startPos) * this->thumbPressedPer;
+			int newThumbStartPos = caredPos - halfThumbSize;
+			int newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
+			this->setPos(newPos);
+			break;
+		}
+		}
+	}
 }
 
 void ScrollerBase::mouseDown(const juce::MouseEvent& event) {
-	/** TODO */
+	if (event.mods.isLeftButtonDown()) {
+		auto pos = event.getPosition();
+		auto caredPos = this->getCaredPos(pos);
+
+		/** Change State */
+		this->updateState(pos, true);
+
+		/** Check State */
+		switch (this->state) {
+		case State::PressedStart:
+			this->setStart(caredPos);
+			break;
+		case State::PressedEnd:
+			this->setEnd(caredPos);
+			break;
+		case State::PressedThumb: {
+			auto [startPos, endPos] = this->getThumb();
+			if (caredPos >= startPos && caredPos < endPos) {
+				/** Press On Thumb */
+				this->recordThumbPress(caredPos);
+			}
+			else {
+				/** Press On Track */
+				int halfThumbSize = (endPos - startPos) / 2;
+				int newThumbStartPos = caredPos - halfThumbSize;
+				int newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
+				this->setPos(newPos);
+				this->recordThumbPress(caredPos);
+			}
+			break;
+		}
+		}
+	}
 }
 
 void ScrollerBase::mouseUp(const juce::MouseEvent& event) {
-	/** TODO */
+	if (event.mods.isLeftButtonDown()) {
+		auto pos = event.getPosition();
+		auto caredPos = this->getCaredPos(pos);
+
+		/** Check State */
+		switch (this->state) {
+		case State::PressedStart:
+			this->setStart(caredPos);
+			break;
+		case State::PressedEnd:
+			this->setEnd(caredPos);
+			break;
+		case State::PressedThumb: {
+			auto [startPos, endPos] = this->getThumb();
+			int halfThumbSize = (endPos - startPos) * this->thumbPressedPer;
+			int newThumbStartPos = caredPos - halfThumbSize;
+			int newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
+			this->setPos(newPos);
+			break;
+		}
+		}
+
+		/** Update State */
+		this->updateState(pos, false);
+	}
 }
 
 void ScrollerBase::mouseExit(const juce::MouseEvent& /*event*/) {
 	this->resetState();
+}
+
+void ScrollerBase::recordThumbPress(int pos) {
+	auto [startPos, endPos] = this->getThumb();
+	this->thumbPressedPer = (pos - startPos) / (double)(endPos - startPos);
+}
+
+void ScrollerBase::setStart(int start) {
+	/** Get Size */
+	double startPer = start / (double)this->getTrackLength();
+	double endPer = (this->viewPos + this->viewSize) / (double)this->getActualTotalSize();
+	if (startPer > (endPer - DELTA)) { startPer = endPer - DELTA; }
+	double viewNum = (endPer - startPer) * this->itemNum;
+	int itemSize = this->limitItemSize(this->viewSize / viewNum);
+	
+	/** Set Size */
+	this->itemSize = itemSize;
+
+	/** Get Pos */
+	int endPos = endPer * this->getActualTotalSize();
+	int pos = endPos - this->viewSize;
+
+	/** Set Pos */
+	this->viewPos = pos;
+
+	/** Repaint */
+	this->repaint();
+
+	/** Update Content */
+	this->updatePos(pos, itemSize);
+}
+
+void ScrollerBase::setEnd(int end) {
+	/** Get Size */
+	double startPer = this->viewPos / (double)this->getActualTotalSize();
+	double endPer = end / (double)this->getTrackLength();
+	if (endPer < (startPer + DELTA)) { endPer = startPer + DELTA; }
+	double viewNum = (endPer - startPer) * this->itemNum;
+	int itemSize = this->limitItemSize(this->viewSize / viewNum);
+
+	/** Set Size */
+	this->itemSize = itemSize;
+
+	/** Get Pos */
+	int pos = startPer * this->getActualTotalSize();
+
+	/** Set Pos */
+	this->viewPos = pos;
+
+	/** Repaint */
+	this->repaint();
+
+	/** Update Content */
+	this->updatePos(pos, itemSize);
 }
 
 int ScrollerBase::limitPos(int pos) const {
@@ -165,9 +309,29 @@ int ScrollerBase::limitItemSize(int size) const {
 	return size;
 }
 
+int ScrollerBase::limitItemNum(int num) const {
+	return std::max(num, (int)std::ceil(this->viewSize / (double)this->itemMinSize));
+}
+
 int ScrollerBase::getJudgeSize() const {
 	auto screenSize = utils::getScreenSize(this);
 	return screenSize.getHeight() * 0.0075;
+}
+
+int ScrollerBase::getTrackLength() const {
+	return this->vertical ? this->getHeight() : this->getWidth();
+}
+
+int ScrollerBase::getCaredPos(const juce::Point<int>& pos) const {
+	return this->vertical ? pos.getY() : pos.getX();
+}
+
+std::tuple<int, int> ScrollerBase::getThumb() const {
+	int actualTotalSize = this->getActualTotalSize();
+	int trackLength = this->vertical ? this->getHeight() : this->getWidth();
+	int startPos = (this->viewPos / (double)actualTotalSize) * trackLength;
+	int endPos = ((this->viewPos + this->viewSize) / (double)actualTotalSize) * trackLength;
+	return { startPos, endPos };
 }
 
 void ScrollerBase::resetState() {
@@ -178,12 +342,9 @@ void ScrollerBase::resetState() {
 
 void ScrollerBase::updateState(const juce::Point<int>& pos, bool pressed) {
 	/** Get Size */
-	int position = this->vertical ? pos.getY() : pos.getX();
+	int position = this->getCaredPos(pos);
 
-	int actualTotalSize = this->getActualTotalSize();
-	int trackLength = this->vertical ? this->getHeight() : this->getWidth();
-	int startPos = (this->viewPos / (double)actualTotalSize) * trackLength;
-	int endPos = ((this->viewPos + this->viewSize) / (double)actualTotalSize) * trackLength;
+	auto [startPos, endPos] = this->getThumb();
 
 	int judgeSize = this->getJudgeSize();
 	int startJudgeS = startPos - judgeSize / 2;

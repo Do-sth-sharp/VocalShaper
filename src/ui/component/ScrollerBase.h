@@ -12,6 +12,7 @@ public:
 
 	void update();
 	void setPos(int pos);
+	void setItemSize(int size);
 
 	int getViewPos() const;
 	int getViewSize() const;
@@ -52,10 +53,20 @@ private:
 	};
 	State state = State::Normal;
 
+	double thumbPressedPer = -1;
+	void recordThumbPress(int pos);
+
+	void setStart(int start);
+	void setEnd(int end);
+
 	int limitPos(int pos) const;
 	int limitItemSize(int size) const;
+	int limitItemNum(int num) const;
 
 	int getJudgeSize() const;
+	int getTrackLength() const;
+	int getCaredPos(const juce::Point<int>& pos) const;
+	std::tuple<int, int> getThumb() const;
 
 	void resetState();
 	void updateState(const juce::Point<int>& pos, bool pressed);
