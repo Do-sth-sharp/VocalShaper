@@ -13,6 +13,9 @@ public:
 
 private:
 	const Callback callback;
+	const juce::Array<juce::Colour> themeColors;
+	const juce::Array<juce::Colour> themeAlertColors;
+	const juce::Array<juce::Colour> historyList;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ColorEditorContent)
 };
