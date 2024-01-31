@@ -10,6 +10,9 @@ public:
 
 	void update(int index);
 
+	void mouseMove(const juce::MouseEvent& event) override;
+	void mouseUp(const juce::MouseEvent& event) override;
+
 private:
 	int index = -1;
 	juce::Colour trackColor, nameColor;

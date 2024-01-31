@@ -204,6 +204,52 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetMixerTrackSlider)
 };
 
+class ActionSetMixerTrackName final : public ActionUndoableBase {
+public:
+	ActionSetMixerTrackName() = delete;
+	ActionSetMixerTrackName(
+		int track, const juce::String& name);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Mixer Track Name";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const juce::String name;
+
+		juce::String oldName;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetMixerTrackName)
+};
+
+class ActionSetMixerTrackColor final : public ActionUndoableBase {
+public:
+	ActionSetMixerTrackColor() = delete;
+	ActionSetMixerTrackColor(
+		int track, const juce::Colour& color);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Mixer Track Color";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const juce::Colour color;
+
+		juce::Colour oldColor;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetMixerTrackColor)
+};
+
 class ActionSetEffectWindow final : public ActionBase {
 public:
 	ActionSetEffectWindow() = delete;

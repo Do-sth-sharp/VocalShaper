@@ -134,3 +134,5 @@ countries: cn
 "Channel Link" = "通道连接"
 "Bypass" = "旁路"
 "Unlinked" = "未连接"
+
+"Color Editor" = "颜色编辑器"

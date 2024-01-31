@@ -1,5 +1,6 @@
 ﻿#include "CoreActions.h"
 #include "../component/ChannelLinkView.h"
+#include "../component/ColorEditor.h"
 #include "../dataModel/TrackListBoxModel.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
@@ -281,6 +282,12 @@ void CoreActions::setEffectParamCCLink(quickAPI::PluginHolder effect, int paramI
 
 void CoreActions::removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel) {
 	CoreActions::setEffectParamCCLink(effect, -1, ccChannel);
+}
+
+void CoreActions::setTrackColor(int index, const juce::Colour& color) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetMixerTrackColor{ index, color });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
@@ -665,6 +672,19 @@ void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
 void CoreActions::addEffectParamCCLinkGUI(quickAPI::PluginHolder effect) {
 	auto callback = [effect](int param) { CoreActions::editEffectParamCCLinkGUI(effect, param); };
 	CoreActions::askForPluginParamGUIAsync(callback, effect, PluginType::Effect);
+}
+
+void CoreActions::setTrackColorGUI(int index) {
+	/** Callback */
+	auto callback = [index](const juce::Colour& color) {
+		CoreActions::setTrackColor(index, color);
+		};
+
+	/** Get Default Color */
+	juce::Colour defaultColor = quickAPI::getMixerTrackColor(index);
+
+	/** Ask For Color */
+	CoreActions::askForColorGUIAsync(callback, defaultColor);
 }
 
 bool CoreActions::askForSaveGUI() {
@@ -1105,6 +1125,17 @@ void CoreActions::askForAudioChannelLinkGUIAsync(
 	auto editor = new ChannelLinkView{
 		callback, initList, srcChannels, dstChannels,
 		srcChannelNum, dstChannelNum, srcName, dstName, initIfEmpty };
+
+	/** Show Selector Async */
+	editor->enterModalState(true, juce::ModalCallbackFunction::create(
+		[](int /*result*/) {}), true);
+}
+
+void CoreActions::askForColorGUIAsync(
+	const std::function<void(const juce::Colour&)>& callback,
+	const juce::Colour& defaultColor) {
+	/** Create Editor */
+	auto editor = new ColorEditor{ callback, defaultColor };
 
 	/** Show Selector Async */
 	editor->enterModalState(true, juce::ModalCallbackFunction::create(

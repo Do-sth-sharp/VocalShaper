@@ -1,4 +1,5 @@
 ﻿#include "MixerTrackComponent.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -64,6 +65,31 @@ void MixerTrackComponent::update(int index) {
 		else {
 			this->nameColor = laf.findColour(
 				juce::Label::ColourIds::textColourId);
+		}
+	}
+}
+
+void MixerTrackComponent::mouseMove(const juce::MouseEvent& event) {
+	auto screenSize = utils::getScreenSize(this);
+	int colorHeight = screenSize.getHeight() * 0.015;
+	int y = event.position.getY();
+
+	if (y >= 0 && y < colorHeight) {
+		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	}
+	else {
+		this->setMouseCursor(juce::MouseCursor::NormalCursor);
+	}
+}
+
+void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
+	auto screenSize = utils::getScreenSize(this);
+	int colorHeight = screenSize.getHeight() * 0.015;
+	int y = event.position.getY();
+
+	if (event.mods.isRightButtonDown()) {
+		if (y >= 0 && y < colorHeight) {
+			CoreActions::setTrackColorGUI(this->index);
 		}
 	}
 }

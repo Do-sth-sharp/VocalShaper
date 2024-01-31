@@ -67,6 +67,8 @@ public:
 	static void setEffectParamCCLink(quickAPI::PluginHolder effect, int paramIndex, int ccChannel);
 	static void removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel);
 
+	static void setTrackColor(int index, const juce::Colour& color);
+
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
 	static void newProjectGUI();
@@ -108,6 +110,8 @@ public:
 	static void editEffectParamCCLinkGUI(quickAPI::PluginHolder effect, int paramIndex, int defaultCC = -1);
 	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
 
+	static void setTrackColorGUI(int index);
+
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(
 		const std::function<void(double, int, double)>& callback);
@@ -137,4 +141,7 @@ public:
 		const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
 		int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
 		bool initIfEmpty);
+	static void askForColorGUIAsync(
+		const std::function<void(const juce::Colour&)>& callback,
+		const juce::Colour& defaultColor);
 };

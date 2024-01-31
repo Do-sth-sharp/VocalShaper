@@ -1414,6 +1414,92 @@ bool ActionSetSourceName::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetMixerTrackName::ActionSetMixerTrackName(
+	int track, const juce::String& name)
+	: ACTION_DB{ track, name } {}
+
+bool ActionSetMixerTrackName::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetMixerTrackName);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+	ACTION_WRITE_STRING(oldName);
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldName) = track->getTrackName();
+			track->setTrackName(ACTION_DATA(name));
+
+			this->output("Set track name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set track name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetMixerTrackName::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetMixerTrackName);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+	ACTION_WRITE_STRING(oldName);
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			track->setTrackName(ACTION_DATA(oldName));
+
+			this->output("Undo set track name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set track name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
+}
+
+ActionSetMixerTrackColor::ActionSetMixerTrackColor(
+	int track, const juce::Colour& color)
+	: ACTION_DB{ track, color } {}
+
+bool ActionSetMixerTrackColor::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetMixerTrackColor);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldColor) = track->getTrackColor();
+			track->setTrackColor(ACTION_DATA(color));
+
+			this->output("Set track color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set track color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetMixerTrackColor::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetMixerTrackColor);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			track->setTrackColor(ACTION_DATA(oldColor));
+
+			this->output("Undo set track color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set track color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+	ACTION_RESULT(false);
+}
+
 ActionSetEffectWindow::ActionSetEffectWindow(
 	int track, int effect, bool visible)
 	: track(track), effect(effect), visible(visible) {}
