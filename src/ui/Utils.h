@@ -124,4 +124,6 @@ namespace utils {
 	const std::array<uint8_t, 8> createBeatStringBase(const TimeInBeats& time);
 	const juce::String createTimeString(const TimeInSeconds& time);
 	const juce::String createBeatString(const TimeInBeats& time);
+
+	bool isLightColor(const juce::Colour& color);
 }

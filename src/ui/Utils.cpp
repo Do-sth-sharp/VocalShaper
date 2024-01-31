@@ -556,4 +556,8 @@ namespace utils {
 			+ juce::String{num[4]} + juce::String{ num[5] } + ":"
 			+ juce::String{num[6]} + juce::String{num[7]};
 	}
+
+	bool isLightColor(const juce::Colour& color) {
+		return color.getLightness() > 0.6f;
+	}
 }

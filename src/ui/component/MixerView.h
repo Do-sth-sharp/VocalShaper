@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include <FlowUI.h>
 #include "Scroller.h"
+#include "MixerTrackComponent.h"
 
 class MixerView final : public flowUI::FlowComponent {
 public:
@@ -11,8 +12,12 @@ public:
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
+	void update();
+
 private:
 	std::unique_ptr<Scroller> hScroller = nullptr;
+	juce::OwnedArray<MixerTrackComponent> trackList;
+	juce::Array<juce::Colour> colorTemp;
 
 	int getViewWidth() const;
 	int getTrackNum() const;

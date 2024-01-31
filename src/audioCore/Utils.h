@@ -124,6 +124,8 @@ namespace utils {
 	const juce::StringArray getPluginFormatsSupported();
 	const juce::Array<double> getSourceSampleRateSupported();
 
+	juce::Colour getDefaultColour();
+
 	using AudioConnection = std::tuple<int, int, int, int>;
 	using AudioConnectionList = juce::Array<AudioConnection>;
 

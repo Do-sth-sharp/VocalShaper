@@ -4,6 +4,7 @@
 #include "../misc/Renderer.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
+#include "../uiCallback/UICallback.h"
 #include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
@@ -205,6 +206,10 @@ void MainGraph::clearGraph() {
 		this->removeNode(i->nodeID);
 	}
 	this->audioSourceNodeList.clear();
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
 }
 
 const juce::Array<float> MainGraph::getOutputLevels() const {

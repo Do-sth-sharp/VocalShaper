@@ -12,6 +12,9 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	/** Set Channel Layout */
 	this->setChannelLayoutOfBus(true, 0, type);
 	this->setChannelLayoutOfBus(false, 0, type);
+
+	/** Default Color */
+	this->trackColor = utils::getDefaultColour();
 }
 
 int SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {

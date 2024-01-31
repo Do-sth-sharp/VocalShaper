@@ -1,4 +1,5 @@
 ﻿#include "MainGraph.h"
+#include "../uiCallback/UICallback.h"
 
 void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 	/** Add Node To Graph */
@@ -19,6 +20,9 @@ void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 		/** Prepare To Play */
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
 	}
 	else {
 		jassertfalse;
@@ -102,6 +106,9 @@ void MainGraph::removeTrack(int index) {
 
 	/** Remove Node From Graph */
 	this->removeNode(nodeID);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
 }
 
 int MainGraph::getTrackNum() const {
@@ -117,6 +124,9 @@ void MainGraph::setTrackBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->trackNodeList.size()) { return; }
 	if (auto node = this->trackNodeList.getUnchecked(index)) {
 		node->setBypassed(bypass);
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
 	}
 }
 
@@ -144,6 +154,9 @@ void MainGraph::setMIDII2TrkConnection(int trackIndex) {
 	{nodeID, this->midiChannelIndex} };
 	this->addConnection(connection);
 	this->midiI2TrkConnectionList.add(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeMIDII2TrkConnection(int trackIndex) {
@@ -162,6 +175,9 @@ void MainGraph::removeMIDII2TrkConnection(int trackIndex) {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel) {
@@ -183,6 +199,9 @@ void MainGraph::setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstC
 		this->addConnection(connection);
 		this->audioI2TrkConnectionList.add(connection);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel) {
@@ -194,6 +213,9 @@ void MainGraph::removeAudioI2TrkConnection(int trackIndex, int srcChannel, int d
 	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioI2TrkConnectionList.removeAllInstancesOf(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::setAudioTrk2OConnection(int trackIndex, int srcChannel, int dstChannel) {
@@ -215,6 +237,9 @@ void MainGraph::setAudioTrk2OConnection(int trackIndex, int srcChannel, int dstC
 		this->addConnection(connection);
 		this->audioTrk2OConnectionList.add(connection);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeAudioTrk2OConnection(int trackIndex, int srcChannel, int dstChannel) {
@@ -226,6 +251,9 @@ void MainGraph::removeAudioTrk2OConnection(int trackIndex, int srcChannel, int d
 	{ {nodeID, srcChannel}, {this->audioOutputNode->nodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioTrk2OConnectionList.removeAllInstancesOf(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::setAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) {
@@ -255,6 +283,10 @@ void MainGraph::setAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int
 		this->addConnection(connection);
 		this->audioTrk2TrkConnectionList.add(connection);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, dstTrackIndex);
 }
 
 void MainGraph::removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) {
@@ -274,6 +306,10 @@ void MainGraph::removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, 
 	{ {nodeID, srcChannel}, {dstNodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioTrk2TrkConnectionList.removeAllInstancesOf(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, dstTrackIndex);
 }
 
 void MainGraph::setMIDITrk2OConnection(int trackIndex) {
@@ -292,6 +328,9 @@ void MainGraph::setMIDITrk2OConnection(int trackIndex) {
 		{this->midiOutputNode->nodeID, this->midiChannelIndex} };
 	this->addConnection(connection);
 	this->midiTrk2OConnectionList.add(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeMIDITrk2OConnection(int trackIndex) {
@@ -310,6 +349,9 @@ void MainGraph::removeMIDITrk2OConnection(int trackIndex) {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 bool MainGraph::isMIDII2TrkConnected(int trackIndex) const {
@@ -723,6 +765,9 @@ void MainGraph::removeIllegalAudioI2TrkConnections() {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
 }
 
 void MainGraph::removeIllegalAudioTrk2OConnections() {
@@ -734,6 +779,9 @@ void MainGraph::removeIllegalAudioTrk2OConnections() {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
 }
 
 int MainGraph::findTrack(const Track* ptr) const {

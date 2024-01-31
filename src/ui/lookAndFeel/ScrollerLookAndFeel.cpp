@@ -11,7 +11,7 @@ ScrollerLookAndFeel::ScrollerLookAndFeel()
 	this->setColour(juce::ScrollBar::ColourIds::backgroundColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));
 	this->setColour(juce::ScrollBar::ColourIds::thumbColourId,
-		ColorMap::getInstance()->get("ThemeColorB4").withAlpha(0.9f));
+		ColorMap::getInstance()->get("ThemeColorB4").withAlpha(0.7f));
 	this->setColour(juce::ScrollBar::ColourIds::trackColourId,
 		ColorMap::getInstance()->get("ThemeColorB3"));/** Outline */
 }

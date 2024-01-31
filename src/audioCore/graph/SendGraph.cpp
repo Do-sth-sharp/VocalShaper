@@ -19,6 +19,9 @@ void MainGraph::setMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
 	{trkNodeID, this->midiChannelIndex} };
 	this->addConnection(connection);
 	this->midiSrc2TrkConnectionList.add(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
@@ -40,6 +43,9 @@ void MainGraph::removeMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
 			}
 			return false;
 		});
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::setAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -66,6 +72,9 @@ void MainGraph::setAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int s
 		this->addConnection(connection);
 		this->audioSrc2TrkConnectionList.add(connection);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -82,6 +91,9 @@ void MainGraph::removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, in
 	{ {srcNodeID, srcChannel}, {trkNodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->audioSrc2TrkConnectionList.removeAllInstancesOf(connection);
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::setAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -111,6 +123,7 @@ void MainGraph::setAudioInstr2TrkConnection(int instrIndex, int trackIndex, int 
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 void MainGraph::removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -130,6 +143,7 @@ void MainGraph::removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, i
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
 bool MainGraph::isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const {

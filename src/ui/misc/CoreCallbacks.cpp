@@ -30,6 +30,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](int index) {
 			CoreCallbacks::getInstance()->invokeInstrChanged(index);
 		});
+	UICallbackAPI<int>::set(UICallbackType::TrackChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeTrackChanged(index);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -58,6 +62,10 @@ void CoreCallbacks::addSourceChanged(const SourceChangedCallback& callback) {
 
 void CoreCallbacks::addInstrChanged(const InstrChangedCallback& callback) {
 	this->instrChanged.add(callback);
+}
+
+void CoreCallbacks::addTrackChanged(const TrackChangedCallback& callback) {
+	this->trackChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -99,6 +107,12 @@ void CoreCallbacks::invokeSourceChanged(int index) const {
 
 void CoreCallbacks::invokeInstrChanged(int index) const {
 	for (auto& i : this->instrChanged) {
+		i(index);
+	}
+}
+
+void CoreCallbacks::invokeTrackChanged(int index) const {
+	for (auto& i : this->trackChanged) {
 		i(index);
 	}
 }

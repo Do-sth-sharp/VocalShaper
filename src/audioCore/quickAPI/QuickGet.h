@@ -125,6 +125,7 @@ namespace quickAPI {
 	int getMixerTrackNum();
 	const juce::String getMixerTrackName(int index);
 	const juce::StringArray getMixerTrackNameList();
+	const juce::Colour getMixerTrackColor(int index);
 	const juce::AudioChannelSet getMixerTrackChannelSet(int index);
 	int getMixerTrackInputChannelNum(int index);
 	int getMixerTrackOutputChannelNum(int index);

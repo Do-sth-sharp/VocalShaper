@@ -622,6 +622,15 @@ namespace quickAPI {
 		return result;
 	}
 
+	const juce::Colour getMixerTrackColor(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getTrackColor();
+			}
+		}
+		return utils::getDefaultColour();
+	}
+
 	const juce::AudioChannelSet getMixerTrackChannelSet(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getTrackProcessor(index)) {

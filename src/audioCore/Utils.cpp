@@ -1055,6 +1055,10 @@ namespace utils {
 			88200, 96000, 176400, 192000, 352800, 384000 };
 	}
 
+	juce::Colour getDefaultColour() {
+		return juce::Colour::fromRGB(98, 111, 252);
+	}
+
 	void bufferOutputResampledFixed(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
 		juce::AudioSampleBuffer& temp1, juce::AudioSampleBuffer& temp2,
 		double resampleRatio, int channels, double dstSampleRate,

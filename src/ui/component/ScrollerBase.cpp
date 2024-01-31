@@ -252,6 +252,7 @@ void ScrollerBase::setStart(int start) {
 	/** Get Size */
 	double startPer = start / (double)this->getTrackLength();
 	double endPer = (this->viewPos + this->viewSize) / (double)this->getActualTotalSize();
+	if (startPer < 0.0) { startPer = 0.0; }
 	if (startPer > (endPer - DELTA)) { startPer = endPer - DELTA; }
 	double viewNum = (endPer - startPer) * this->itemNum;
 	int itemSize = this->limitItemSize(this->viewSize / viewNum);
@@ -262,6 +263,7 @@ void ScrollerBase::setStart(int start) {
 	/** Get Pos */
 	int endPos = endPer * this->getActualTotalSize();
 	int pos = endPos - this->viewSize;
+	if (pos < 0) { pos = 0; }
 
 	/** Set Pos */
 	this->viewPos = pos;
@@ -277,6 +279,7 @@ void ScrollerBase::setEnd(int end) {
 	/** Get Size */
 	double startPer = this->viewPos / (double)this->getActualTotalSize();
 	double endPer = end / (double)this->getTrackLength();
+	if (endPer > 1.0) { endPer = 1.0; }
 	if (endPer < (startPer + DELTA)) { endPer = startPer + DELTA; }
 	double viewNum = (endPer - startPer) * this->itemNum;
 	int itemSize = this->limitItemSize(this->viewSize / viewNum);
@@ -286,6 +289,7 @@ void ScrollerBase::setEnd(int end) {
 
 	/** Get Pos */
 	int pos = startPer * this->getActualTotalSize();
+	if (pos < 0) { pos = 0; }
 
 	/** Set Pos */
 	this->viewPos = pos;

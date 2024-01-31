@@ -8,6 +8,7 @@ enum class UICallbackType : int {
 	PluginSearchStateChanged,
 	SourceChanged,
 	InstrChanged,
+	TrackChanged,
 
 	TypeMaxNum
 };
