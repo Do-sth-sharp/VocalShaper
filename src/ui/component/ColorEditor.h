@@ -2,17 +2,24 @@
 
 #include <JuceHeader.h>
 
+class ColorEditor;
+
 class ColorEditorContent final : public juce::Component {
 public:
 	using Callback = std::function<void(const juce::Colour&)>;
 
 public:
 	ColorEditorContent() = delete;
-	ColorEditorContent(const Callback& callback,
+	ColorEditorContent(ColorEditor* parent,
+		const Callback& callback,
 		const juce::Colour& defaultColor);
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
+
+	void mouseDrag(const juce::MouseEvent& event) override;
+	void mouseMove(const juce::MouseEvent& event) override;
+	void mouseUp(const juce::MouseEvent& event) override;
 
 	void selectColor(float hue, float sat, float bri);
 
@@ -103,6 +110,7 @@ private:
 	};
 
 private:
+	ColorEditor* const parent;
 	const Callback callback;
 	const juce::Array<juce::Colour> themeColors;
 	const juce::Array<juce::Colour> themeAlertColors;
@@ -118,6 +126,15 @@ private:
 
 	juce::String commonTitle, historyTitle;
 	juce::String rTitle, gTitle, bTitle, hexTitle;
+
+	juce::Colour color;
+
+	void updateColor(const juce::Colour& color, bool updateRGB = true, bool updateHex = true);
+	void updateComponents(bool updateRGB = true, bool updateHex = true);
+
+	int getThemeColorIndex(const juce::Point<int>& pos) const;
+	int getThemeAlertColorIndex(const juce::Point<int>& pos) const;
+	int getHistoryColorIndex(const juce::Point<int>& pos) const;
 
 	void rgbValueChanged();
 	void hexValueChanged();

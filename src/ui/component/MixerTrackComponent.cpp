@@ -66,6 +66,8 @@ void MixerTrackComponent::update(int index) {
 			this->nameColor = laf.findColour(
 				juce::Label::ColourIds::textColourId);
 		}
+
+		this->repaint();
 	}
 }
 

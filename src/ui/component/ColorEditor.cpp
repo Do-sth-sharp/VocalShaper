@@ -54,9 +54,10 @@ void ColorHistory::releaseInstance() {
 ColorHistory* ColorHistory::instance = nullptr;
 
 ColorEditorContent::ColorEditorContent(
+	ColorEditor* parent,
 	const Callback& callback,
 	const juce::Colour& defaultColor)
-	: callback(callback),
+	: parent(parent), callback(callback),
 	historyList(ColorHistory::getInstance()->getList()),
 	themeColors({ ColorMap::getInstance()->get("ThemeColorA2") }),
 	themeAlertColors({ ColorMap::getInstance()->get("ThemeColorC1"),
@@ -137,6 +138,9 @@ ColorEditorContent::ColorEditorContent(
 	this->okButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->okButton->onClick = [this] { this->okButtonPressed(); };
 	this->addAndMakeVisible(this->okButton.get());
+
+	/** Set Default Color */
+	this->updateColor(defaultColor.withAlpha(1.f));
 }
 
 void ColorEditorContent::resized() {
@@ -380,9 +384,65 @@ void ColorEditorContent::paint(juce::Graphics& g) {
 		juce::Justification::centredLeft, 1, 0.f);
 }
 
+void ColorEditorContent::mouseDrag(const juce::MouseEvent& event) {
+	this->mouseMove(event);
+}
+
+void ColorEditorContent::mouseMove(const juce::MouseEvent& event) {
+	auto pos = event.getPosition();
+
+	int themeIndex = this->getThemeColorIndex(pos);
+	if (themeIndex > -1) {
+		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		return;
+	}
+
+	int themeAlertIndex = this->getThemeAlertColorIndex(pos);
+	if (themeAlertIndex > -1) {
+		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		return;
+	}
+
+	int historyIndex = this->getHistoryColorIndex(pos);
+	if (historyIndex > -1) {
+		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		return;
+	}
+
+	this->setMouseCursor(juce::MouseCursor::NormalCursor);
+}
+
+void ColorEditorContent::mouseUp(const juce::MouseEvent& event) {
+	auto pos = event.getPosition();
+
+	int themeIndex = this->getThemeColorIndex(pos);
+	if (themeIndex > -1) {
+		auto color = this->themeColors[themeIndex];
+		this->selectColor(
+			color.getHue(), color.getSaturation(), color.getBrightness());
+		return;
+	}
+
+	int themeAlertIndex = this->getThemeAlertColorIndex(pos);
+	if (themeAlertIndex > -1) {
+		auto color = this->themeAlertColors[themeAlertIndex];
+		this->selectColor(
+			color.getHue(), color.getSaturation(), color.getBrightness());
+		return;
+	}
+
+	int historyIndex = this->getHistoryColorIndex(pos);
+	if (historyIndex > -1) {
+		auto color = this->historyList[historyIndex];
+		this->selectColor(
+			color.getHue(), color.getSaturation(), color.getBrightness());
+		return;
+	}
+}
+
 void ColorEditorContent::selectColor(
 	float hue, float sat, float bri) {
-	/** TODO */
+	this->updateColor(juce::Colour::fromHSV(hue, sat, bri, 1.f));
 }
 
 ColorEditorContent::ColourSpaceView::ColourSpaceView(
@@ -637,16 +697,144 @@ void ColorEditorContent::ColorViewer::paint(juce::Graphics& g) {
 		this->hue, this->sat, this->bri, 1.f));
 }
 
+void ColorEditorContent::updateColor(
+	const juce::Colour& color, bool updateRGB, bool updateHex) {
+	this->color = color;
+	this->updateComponents(updateRGB, updateHex);
+}
+
+void ColorEditorContent::updateComponents(bool updateRGB, bool updateHex) {
+	float hue = this->color.getHue();
+	float sat = this->color.getSaturation();
+	float bri = this->color.getBrightness();
+
+	this->colorSpace->setCurrentColor(hue, sat, bri);
+	this->hueSelector->setCurrentColor(hue, sat, bri);
+	this->colorViewer->setCurrentColor(hue, sat, bri);
+
+	if (updateRGB) {
+		this->rEditor->setText(juce::String{ this->color.getRed() }, false);
+		this->gEditor->setText(juce::String{ this->color.getGreen() }, false);
+		this->bEditor->setText(juce::String{ this->color.getBlue() }, false);
+	}
+
+	if (updateHex) {
+		this->hexEditor->setText(this->color.toDisplayString(false), false);
+	}
+}
+
+int ColorEditorContent::getThemeColorIndex(
+	const juce::Point<int>& pos) const {
+	auto screenSize = utils::getScreenSize(this);
+	int paddingHeight = screenSize.getHeight() * 0.015;
+	int padddingWidth = screenSize.getWidth() * 0.01;
+	int splitHeight = screenSize.getHeight() * 0.0075;
+	int splitWidth = screenSize.getWidth() * 0.005;
+
+	int colorHeight = screenSize.getHeight() * 0.02;
+	int colorWidth = screenSize.getWidth() * 0.015;
+
+	int titleHeight = screenSize.getHeight() * 0.0225;
+
+	constexpr int colorColumn = 6;
+	constexpr int colorHistoryRow = 5;
+
+	int colorNum = std::min(this->themeColors.size(), colorColumn);
+	for (int i = 0; i < colorNum; i++) {
+		juce::Rectangle<int> colorRect(
+			padddingWidth + (colorWidth + splitWidth) * i,
+			paddingHeight + titleHeight + splitHeight,
+			colorWidth, colorHeight);
+		if (colorRect.contains(pos)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+int ColorEditorContent::getThemeAlertColorIndex(
+	const juce::Point<int>& pos) const {
+	auto screenSize = utils::getScreenSize(this);
+	int paddingHeight = screenSize.getHeight() * 0.015;
+	int padddingWidth = screenSize.getWidth() * 0.01;
+	int splitHeight = screenSize.getHeight() * 0.0075;
+	int splitWidth = screenSize.getWidth() * 0.005;
+
+	int colorHeight = screenSize.getHeight() * 0.02;
+	int colorWidth = screenSize.getWidth() * 0.015;
+
+	int titleHeight = screenSize.getHeight() * 0.0225;
+
+	constexpr int colorColumn = 6;
+	constexpr int colorHistoryRow = 5;
+
+	int colorNum = std::min(this->themeAlertColors.size(), colorColumn);
+	for (int i = 0; i < colorNum; i++) {
+		juce::Rectangle<int> colorRect(
+			padddingWidth + (colorWidth + splitWidth) * i,
+			paddingHeight + titleHeight + splitHeight * 2 + colorHeight,
+			colorWidth, colorHeight);
+		if (colorRect.contains(pos)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+int ColorEditorContent::getHistoryColorIndex(
+	const juce::Point<int>& pos) const {
+	auto screenSize = utils::getScreenSize(this);
+	int paddingHeight = screenSize.getHeight() * 0.015;
+	int padddingWidth = screenSize.getWidth() * 0.01;
+	int splitHeight = screenSize.getHeight() * 0.0075;
+	int splitWidth = screenSize.getWidth() * 0.005;
+
+	int colorHeight = screenSize.getHeight() * 0.02;
+	int colorWidth = screenSize.getWidth() * 0.015;
+
+	int titleHeight = screenSize.getHeight() * 0.0225;
+
+	constexpr int colorColumn = 6;
+	constexpr int colorHistoryRow = 5;
+
+	int colorNum = this->historyList.size();
+	for (int i = 0; i < colorHistoryRow; i++) {
+		for (int j = 0; j < colorColumn; j++) {
+			int index = i * colorColumn + j;
+			if (index < colorNum) {
+				juce::Rectangle<int> colorRect(
+					padddingWidth + (colorWidth + splitWidth) * j,
+					paddingHeight + titleHeight * 2 + splitHeight * 4 + colorHeight * 2 + (splitHeight + colorHeight) * i,
+					colorWidth, colorHeight);
+				if (colorRect.contains(pos)) {
+					return index;
+				}
+			}
+		}
+	}
+
+	return -1;
+}
+
 void ColorEditorContent::rgbValueChanged() {
-	/** TODO */
+	int r = this->rEditor->getText().getIntValue();
+	int g = this->gEditor->getText().getIntValue();
+	int b = this->bEditor->getText().getIntValue();
+
+	this->updateColor(juce::Colour::fromRGB(r, g, b), false, true);
 }
 
 void ColorEditorContent::hexValueChanged() {
-	/** TODO */
+	auto color = juce::Colour::fromString(this->hexEditor->getText()).withAlpha(1.f);
+	this->updateColor(color, true, false);
 }
 
 void ColorEditorContent::okButtonPressed() {
-	/** TODO */
+	ColorHistory::getInstance()->add(this->color);
+	this->callback(this->color);
+	this->parent->closeButtonPressed();
 }
 
 ColorEditor::ColorEditor(const Callback& callback,
@@ -664,7 +852,7 @@ ColorEditor::ColorEditor(const Callback& callback,
 
 	/** Content */
 	this->setContentOwned(
-		new ColorEditorContent{ callback, defaultColor }, false);
+		new ColorEditorContent{ this, callback, defaultColor }, false);
 
 	/** Size */
 	juce::MessageManager::callAsync(
