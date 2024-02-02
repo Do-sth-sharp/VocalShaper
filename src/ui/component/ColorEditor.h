@@ -11,11 +11,117 @@ public:
 	ColorEditorContent(const Callback& callback,
 		const juce::Colour& defaultColor);
 
+	void resized() override;
+	void paint(juce::Graphics& g) override;
+
+	void selectColor(float hue, float sat, float bri);
+
+private:
+	class ColourSpaceView final : public juce::Component {
+	public:
+		ColourSpaceView(ColorEditorContent* parent);
+
+		void setCurrentColor(float hue, float sat, float bri);
+
+		void paint(juce::Graphics& g) override;
+
+		void mouseDown(const juce::MouseEvent& e) override;
+		void mouseDrag(const juce::MouseEvent& e) override;
+
+		void resized() override;
+
+	private:
+		ColorEditorContent* const parent;
+		float h = 0.f, s = 0.f, b = 0.f;
+		juce::Image colours;
+
+		class ColourSpaceMarker final : public juce::Component {
+		public:
+			ColourSpaceMarker();
+
+			void paint(juce::Graphics& g) override;
+
+			void setPos(float pX, float pY);
+
+		private:
+			float pX = 0.f, pY = 0.f;
+		};
+
+		ColourSpaceMarker marker;
+
+		void updateMarker();
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ColourSpaceView)
+	};
+
+	class HueSelectorComp final : public juce::Component {
+	public:
+		HueSelectorComp(ColorEditorContent* parent);
+
+		void setCurrentColor(float hue, float sat, float bri);
+
+		void paint(juce::Graphics& g) override;
+		void resized() override;
+
+		void mouseDown(const juce::MouseEvent& e) override;
+		void mouseDrag(const juce::MouseEvent& e) override;
+
+		void updateMarker();
+
+	private:
+		ColorEditorContent* const parent;
+		float h = 0.f, s = 0.f, b = 0.f;
+
+		struct HueSelectorMarker : public juce::Component {
+		public:
+			HueSelectorMarker();
+
+			void paint(juce::Graphics& g) override;
+
+			void setPos(float pY);
+
+		private:
+			float pY = 0.f;
+		};
+
+		HueSelectorMarker marker;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HueSelectorComp)
+	};
+	class ColorViewer final : public juce::Component {
+	public:
+		ColorViewer() = default;
+
+		void setCurrentColor(float hue, float sat, float bri);
+
+		void paint(juce::Graphics& g) override;
+
+	private:
+		float hue = 0.f, sat = 0.f, bri = 0.f;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ColorViewer)
+	};
+
 private:
 	const Callback callback;
 	const juce::Array<juce::Colour> themeColors;
 	const juce::Array<juce::Colour> themeAlertColors;
 	const juce::Array<juce::Colour> historyList;
+
+	std::unique_ptr<ColourSpaceView> colorSpace = nullptr;
+	std::unique_ptr<HueSelectorComp> hueSelector = nullptr;
+	std::unique_ptr<ColorViewer> colorViewer = nullptr;
+	std::unique_ptr<juce::TextEditor> rEditor = nullptr,
+		gEditor = nullptr, bEditor = nullptr, hexEditor = nullptr;
+
+	std::unique_ptr<juce::TextButton> okButton = nullptr;
+
+	juce::String commonTitle, historyTitle;
+	juce::String rTitle, gTitle, bTitle, hexTitle;
+
+	void rgbValueChanged();
+	void hexValueChanged();
+	void okButtonPressed();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ColorEditorContent)
 };

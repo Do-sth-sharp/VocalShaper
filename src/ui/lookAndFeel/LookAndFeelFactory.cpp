@@ -15,6 +15,7 @@
 #include "ChannelLinkLookAndFeel.h"
 #include "MixerLookAndFeel.h"
 #include "ScrollerLookAndFeel.h"
+#include "ColorEditorLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -94,6 +95,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Scroller */
 	this->scrollerLAF = std::make_unique<ScrollerLookAndFeel>();
+
+	/** Color Editor */
+	this->colorEditorLAF = std::make_unique<ColorEditorLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -159,6 +163,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forMixer() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forScroller() const {
 	return this->scrollerLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forColorEditor() const {
+	return this->colorEditorLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

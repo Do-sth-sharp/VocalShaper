@@ -107,6 +107,26 @@ namespace utils {
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextDoubleFilter)
 	};
 
+	class TextColorRGBFilter final : public juce::TextEditor::InputFilter {
+	public:
+		TextColorRGBFilter() = default;
+
+	private:
+		juce::String filterNewText(juce::TextEditor& e, const juce::String& newInput) override;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextColorRGBFilter)
+	};
+
+	class TextColorHexFilter final : public juce::TextEditor::InputFilter {
+	public:
+		TextColorHexFilter() = default;
+
+	private:
+		juce::String filterNewText(juce::TextEditor& e, const juce::String& newInput) override;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextColorHexFilter)
+	};
+
 	using PluginGroup = std::tuple<juce::String, juce::Array<juce::PluginDescription>>;
 	enum class PluginGroupType {
 		Format, Manufacturer, Category

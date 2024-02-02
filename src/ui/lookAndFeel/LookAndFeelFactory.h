@@ -24,6 +24,7 @@ public:
 	juce::LookAndFeel_V4* forChannelLink() const;
 	juce::LookAndFeel_V4* forMixer() const;
 	juce::LookAndFeel_V4* forScroller() const;
+	juce::LookAndFeel_V4* forColorEditor() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -42,6 +43,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> channelLinkLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> mixerLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> scrollerLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> colorEditorLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

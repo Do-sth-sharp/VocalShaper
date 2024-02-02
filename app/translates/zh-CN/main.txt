@@ -136,3 +136,9 @@ countries: cn
 "Unlinked" = "未连接"
 
 "Color Editor" = "颜色编辑器"
+"Common Colors" = "常用颜色"
+"History Colors" = "历史颜色"
+"Red" = "红"
+"Green" = "绿"
+"Blue" = "蓝"
+"Hex" = "十六进制"

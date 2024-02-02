@@ -427,6 +427,31 @@ namespace utils {
 		return newInput;
 	}
 
+	juce::String TextColorRGBFilter::filterNewText(
+		juce::TextEditor& e, const juce::String& newInput) {
+		juce::String t(newInput);
+
+		t = t.retainCharacters("0123456789");
+		t = t.substring(0, 3 - (e.getTotalNumChars() - e.getHighlightedRegion().getLength()));
+
+		auto caret = e.getCaretPosition();
+		auto num = e.getText().replaceSection(caret, 0, newInput).getIntValue();
+		if (num > 255) {
+			return juce::String{};
+		}
+		return t;
+	};
+
+	juce::String TextColorHexFilter::filterNewText(
+		juce::TextEditor& e, const juce::String& newInput) {
+		juce::String t(newInput);
+
+		t = t.retainCharacters("0123456789abcdefABCDEF");
+		t = t.substring(0, 6 - (e.getTotalNumChars() - e.getHighlightedRegion().getLength()));
+
+		return t;
+	};
+
 	const juce::Array<PluginGroup> groupPlugin(const juce::Array<juce::PluginDescription>& list,
 		PluginGroupType groupType, bool search, const juce::String& searchText) {
 		/** Plugin Groups */
