@@ -586,11 +586,11 @@ namespace utils {
 
 		/** Result */
 		return juce::String{ num[0] } + juce::String{ num[1] } + juce::String{ num[2] } + juce::String{ num[3] } + ":"
-			+ juce::String{num[4]} + juce::String{ num[5] } + ":"
-			+ juce::String{num[6]} + juce::String{num[7]};
+			+ juce::String{ num[4] } + juce::String{ num[5] } + ":"
+			+ juce::String{ num[6] } + juce::String{ num[7] };
 	}
 
 	bool isLightColor(const juce::Colour& color) {
-		return color.getLightness() > 0.6f;
+		return color.getLightness() > 0.65f;
 	}
 }
