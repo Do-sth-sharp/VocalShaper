@@ -71,6 +71,10 @@ namespace utils {
 		return getDataDir().getChildFile("./audio/");
 	}
 
+	const juce::File getEditorDir() {
+		return getDataDir().getChildFile("./editor/");
+	}
+
 	const juce::File getThemeRootDir(const juce::String& name) {
 		return getThemeDir().getChildFile("./" + name + "/");
 	}
@@ -86,6 +90,10 @@ namespace utils {
 	const juce::File getConfigFile(const juce::String& name,
 		const juce::String& type) {
 		return getConfigDir().getChildFile(name + type);
+	}
+
+	const juce::File getEditorDataFile(const juce::String& name) {
+		return getEditorDir().getChildFile(name);
 	}
 
 	const juce::File getKeyMappingFile(

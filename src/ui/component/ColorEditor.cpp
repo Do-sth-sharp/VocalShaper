@@ -6,7 +6,9 @@
 
 class ColorHistory final : private juce::DeletedAtShutdown {
 public:
-	ColorHistory() = default;
+	ColorHistory() {
+		this->load();
+	}
 
 	void add(const juce::Colour& color) {
 		/** Remove If Already In List */
@@ -19,10 +21,48 @@ public:
 		if (this->colorList.size() > this->maxSize) {
 			this->colorList.resize(this->maxSize);
 		}
+
+		/** Save History */
+		this->save();
 	};
 
 	const juce::Array<juce::Colour>& getList() const {
 		return this->colorList;
+	};
+
+	void load() {
+		this->colorList.clear();
+
+		auto obj = juce::JSON::parse(utils::getEditorDataFile("colorHistory.json"));
+		if (obj.isArray()) {
+			auto array = obj.getArray();
+			for (auto& i : *array) {
+				this->colorList.add(
+					juce::Colour::fromString(i.toString()).withAlpha(1.f));
+			}
+		}
+
+		if (this->colorList.size() > this->maxSize) {
+			this->colorList.resize(this->maxSize);
+		}
+	};
+
+	void save() {
+		juce::Array<juce::var> array;
+
+		for (auto& i : this->colorList) {
+			array.add(juce::var{ i.toDisplayString(false) });
+		}
+
+		juce::File file = utils::getEditorDataFile("colorHistory.json");
+		file.getParentDirectory().createDirectory();
+
+		juce::FileOutputStream stream(file);
+		stream.setPosition(0);
+		stream.truncate();
+		
+		juce::var obj(array);
+		juce::JSON::writeToStream(stream, obj, true);
 	};
 
 private:

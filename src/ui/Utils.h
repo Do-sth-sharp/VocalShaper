@@ -19,12 +19,14 @@ namespace utils {
 
 	const juce::File getConfigDir();
 	const juce::File getAudioDir();
+	const juce::File getEditorDir();
 	const juce::File getThemeRootDir(const juce::String& name);
 	const juce::File getTransRootDir(const juce::String& name);
 	const juce::File getIconClassDir(const juce::String& name);
 
 	const juce::File getConfigFile(const juce::String& name,
 		const juce::String& type = ".json");
+	const juce::File getEditorDataFile(const juce::String& name);
 	const juce::File getKeyMappingFile(
 		const juce::String& file = "keyMapping.xml");
 	const juce::File getThemeColorFile(const juce::String& name,
