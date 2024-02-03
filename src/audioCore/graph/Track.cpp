@@ -113,7 +113,7 @@ bool Track::addAdditionalAudioBus() {
 
 bool Track::removeAdditionalAudioBus() {
 	/** Check Channel Num */
-	if (this->getTotalNumInputChannels() - this->audioChannels.size() <= this->audioChannels.size()) {
+	if (this->getTotalNumInputChannels() - this->audioChannels.size() < this->audioChannels.size()) {
 		return false;
 	}
 

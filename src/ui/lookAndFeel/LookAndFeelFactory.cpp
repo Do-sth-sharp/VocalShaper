@@ -16,6 +16,7 @@
 #include "MixerLookAndFeel.h"
 #include "ScrollerLookAndFeel.h"
 #include "ColorEditorLookAndFeel.h"
+#include "SideChainLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -98,6 +99,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Color Editor */
 	this->colorEditorLAF = std::make_unique<ColorEditorLookAndFeel>();
+
+	/** Side Chain */
+	this->sideChainLAF = std::make_unique<SideChainLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -167,6 +171,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forScroller() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forColorEditor() const {
 	return this->colorEditorLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forSideChain() const {
+	return this->sideChainLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

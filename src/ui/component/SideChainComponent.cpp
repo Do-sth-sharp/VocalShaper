@@ -1,10 +1,15 @@
 ﻿#include "SideChainComponent.h"
+#include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
 
 SideChainComponent::SideChainComponent() {
+	/** Look And Feel */
+	this->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forSideChain());
+
 	/** Icons */
 	this->addIcon = flowUI::IconManager::getSVG(
 		utils::getIconFile("System", "add-line").getFullPathName());
