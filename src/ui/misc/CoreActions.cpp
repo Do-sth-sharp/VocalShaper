@@ -290,6 +290,12 @@ void CoreActions::setTrackColor(int index, const juce::Colour& color) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setTrackName(int index, const juce::String& name) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetMixerTrackName{ index, name });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 
@@ -685,6 +691,19 @@ void CoreActions::setTrackColorGUI(int index) {
 
 	/** Ask For Color */
 	CoreActions::askForColorGUIAsync(callback, defaultColor);
+}
+
+void CoreActions::setTrackNameGUI(int index) {
+	/** Callback */
+	auto callback = [index](const juce::String& name) {
+		CoreActions::setTrackName(index, name);
+		};
+
+	/** Get Default Name */
+	juce::String defaultName = quickAPI::getMixerTrackName(index);
+
+	/** Ask For Name */
+	CoreActions::askForNameGUIAsync(callback, defaultName);
 }
 
 bool CoreActions::askForSaveGUI() {

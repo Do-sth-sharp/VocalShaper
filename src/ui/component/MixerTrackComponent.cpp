@@ -94,4 +94,9 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 			CoreActions::setTrackColorGUI(this->index);
 		}
 	}
+	else if (event.mods.isLeftButtonDown()) {
+		if (y >= 0 && y < colorHeight) {
+			CoreActions::setTrackNameGUI(this->index);
+		}
+	}
 }
