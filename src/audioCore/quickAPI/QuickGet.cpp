@@ -658,6 +658,15 @@ namespace quickAPI {
 		return 0;
 	}
 
+	int getMixerTrackSideChainBusNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getAdditionalAudioBusNum();
+			}
+		}
+		return 0;
+	}
+
 	const juce::String getMIDICCChannelName(int channel) {
 		return utils::getMIDICCChannelName(channel);
 	}

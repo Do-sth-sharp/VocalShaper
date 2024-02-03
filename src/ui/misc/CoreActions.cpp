@@ -296,6 +296,18 @@ void CoreActions::setTrackName(int index, const juce::String& name) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::addTrackSideChain(int index) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionAddMixerTrackSideChainBus{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::removeTrackSideChain(int index) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionRemoveMixerTrackSideChainBus{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

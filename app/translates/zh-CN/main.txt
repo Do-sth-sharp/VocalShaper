@@ -142,3 +142,6 @@ countries: cn
 "Green" = "绿"
 "Blue" = "蓝"
 "Hex" = "十六进制"
+
+"Add Side Chain Bus" = "添加侧链总线"
+"Remove Side Chain Bus" = "移除侧链总线"

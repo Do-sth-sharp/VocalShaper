@@ -632,7 +632,11 @@ void PluginDecorator::updatePluginBuses() {
 		}
 	}
 
-	this->plugin->setBusesLayout(currentBusesLayout);
+	pluginBusesLayout = this->plugin->getBusesLayout();
+	if (pluginBusesLayout.inputBuses.size() == currentBusesLayout.inputBuses.size()
+		&& pluginBusesLayout.outputBuses.size() == currentBusesLayout.outputBuses.size()) {
+		this->plugin->setBusesLayout(currentBusesLayout);
+	}
 }
 
 void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages) {

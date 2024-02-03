@@ -440,6 +440,83 @@ bool ActionRemoveMixerTrackOutput::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionRemoveMixerTrackSideChainBus::ActionRemoveMixerTrackSideChainBus(
+	int track) : ACTION_DB{ track } {}
+
+bool ActionRemoveMixerTrackSideChainBus::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionRemoveMixerTrackSideChainBus);
+	ACTION_WRITE_DB();
+
+	writeRecoverySizeValue(ACTION_DATA(audioAdditionalLink).size());
+	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioAdditionalLink)) {
+		writeRecoveryIntValue(src);
+		writeRecoveryIntValue(srcc);
+		writeRecoveryIntValue(dst);
+		writeRecoveryIntValue(dstc);
+	}
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (auto dock = track->getPluginDock()) {
+				/** Save Connections */
+				ACTION_DATA(audioAdditionalLink).clear();
+				for (int i = 0; i < dock->getPluginNum(); i++) {
+					ACTION_DATA(audioAdditionalLink).addArray(
+						dock->getPluginAdditionalBusConnections(i));
+				}
+			}
+
+			/** Remove Bus */
+			if (track->removeAdditionalAudioBus()) {
+				this->output("Remove mixer track side chain bus: " + juce::String(ACTION_DATA(track)));
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionRemoveMixerTrackSideChainBus::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionRemoveMixerTrackSideChainBus);
+	ACTION_WRITE_DB();
+
+	writeRecoverySizeValue(ACTION_DATA(audioAdditionalLink).size());
+	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioAdditionalLink)) {
+		writeRecoveryIntValue(src);
+		writeRecoveryIntValue(srcc);
+		writeRecoveryIntValue(dst);
+		writeRecoveryIntValue(dstc);
+	}
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (auto dock = track->getPluginDock()) {
+				/** Restore Connections */
+				for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioAdditionalLink)) {
+					dock->addAdditionalBusConnection(dst, srcc, dstc);
+				}
+			}
+
+			/** Add Bus */
+			if (track->addAdditionalAudioBus()) {
+				this->output("Undo remove mixer track side chain bus: " + juce::String(ACTION_DATA(track)));
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
+}
+
 ActionRemoveEffect::ActionRemoveEffect(
 	int track, int effect)
 	: ACTION_DB{ track, effect } {}

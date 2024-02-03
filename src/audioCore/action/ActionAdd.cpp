@@ -531,6 +531,49 @@ bool ActionAddMixerTrackMidiOutput::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionAddMixerTrackSideChainBus::ActionAddMixerTrackSideChainBus(
+	int track) : ACTION_DB{ track } {}
+
+bool ActionAddMixerTrackSideChainBus::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionAddMixerTrackSideChainBus);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (track->addAdditionalAudioBus()) {
+				this->output("Add mixer track side chain bus: " + juce::String(ACTION_DATA(track)));
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionAddMixerTrackSideChainBus::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionAddMixerTrackSideChainBus);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (track->removeAdditionalAudioBus()) {
+				this->output("Undo add mixer track side chain bus: " + juce::String(ACTION_DATA(track)));
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
+}
+
 ActionAddAudioSourceThenLoad::ActionAddAudioSourceThenLoad(
 	const juce::String& path, bool copy)
 	: ACTION_DB{ path, copy } {}

@@ -22,6 +22,7 @@ enum class ActionType : unsigned int {
 	ActionAddSequencerTrackOutput,
 	ActionAddSequencerSourceInstance,
 	ActionAddRecorderSourceInstance,
+	ActionAddMixerTrackSideChainBus,
 
 	ActionCloneSource = 0x0101,
 	ActionSave,
@@ -47,6 +48,7 @@ enum class ActionType : unsigned int {
 	ActionRemoveSequencerTrackOutput,
 	ActionRemoveSequencerSourceInstance,
 	ActionRemoveRecorderSourceInstance,
+	ActionRemoveMixerTrackSideChainBus,
 
 	ActionSetMixerTrackGain = 0x0301,
 	ActionSetMixerTrackPan,

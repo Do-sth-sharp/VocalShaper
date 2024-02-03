@@ -126,6 +126,27 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackOutput)
 };
 
+class ActionRemoveMixerTrackSideChainBus final : public ActionUndoableBase {
+public:
+	ActionRemoveMixerTrackSideChainBus() = delete;
+	ActionRemoveMixerTrackSideChainBus(int track);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Mixer Track Side Chain Bus";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+
+		utils::AudioConnectionList audioAdditionalLink;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackSideChainBus)
+};
+
 class ActionRemoveEffect final : public ActionUndoableBase {
 public:
 	ActionRemoveEffect() = delete;

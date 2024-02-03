@@ -344,7 +344,7 @@ bool Track::canRemoveBus(bool isInput) const {
 void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Process Gain And Panner */
 	auto block = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(
-		0, this->getMainBusNumInputChannels());
+		0, this->audioChannels.size());
 	this->gainAndPanner.process(juce::dsp::ProcessContextReplacing<float>(block));
 
 	/** Process Current Graph */

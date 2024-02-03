@@ -69,6 +69,8 @@ public:
 
 	static void setTrackColor(int index, const juce::Colour& color);
 	static void setTrackName(int index, const juce::String& name);
+	static void addTrackSideChain(int index);
+	static void removeTrackSideChain(int index);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
