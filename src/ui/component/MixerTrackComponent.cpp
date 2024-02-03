@@ -7,6 +7,19 @@ MixerTrackComponent::MixerTrackComponent() {
 	/** Side Chain */
 	this->sideChain = std::make_unique<SideChainComponent>();
 	this->addAndMakeVisible(this->sideChain.get());
+
+	/** IO */
+	this->midiInput = std::make_unique<MixerTrackIOComponent>(true, true);
+	this->addAndMakeVisible(this->midiInput.get());
+
+	this->audioInput = std::make_unique<MixerTrackIOComponent>(true, false);
+	this->addAndMakeVisible(this->audioInput.get());
+
+	this->midiOutput = std::make_unique<MixerTrackIOComponent>(false, true);
+	this->addAndMakeVisible(this->midiOutput.get());
+
+	this->audioOutput = std::make_unique<MixerTrackIOComponent>(false, false);
+	this->addAndMakeVisible(this->audioOutput.get());
 }
 
 void MixerTrackComponent::resized() {
@@ -17,6 +30,11 @@ void MixerTrackComponent::resized() {
 	int sideChainHeight = screenSize.getHeight() * 0.02;
 	int sideChainHideHeight = screenSize.getHeight() * 0.3;
 	bool sideChainShown = this->getHeight() >= sideChainHideHeight;
+
+	int ioHeight = screenSize.getHeight() * 0.02;
+	int ioWidth = ioHeight;
+	int ioHideHeight = screenSize.getHeight() * 0.2;
+	bool ioShown = this->getHeight() >= ioHideHeight;
 
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;
@@ -30,6 +48,40 @@ void MixerTrackComponent::resized() {
 		top += sideChainRect.getHeight();
 	}
 	this->sideChain->setVisible(sideChainShown);
+
+	/** Input */
+	if (ioShown) {
+		juce::Rectangle<int> midiRect(
+			this->getWidth() * 3 / 10 - ioWidth / 2,
+			top, ioWidth, ioHeight);
+		this->midiInput->setBounds(midiRect);
+
+		juce::Rectangle<int> audioRect(
+			this->getWidth() * 7 / 10 - ioWidth / 2,
+			top, ioWidth, ioHeight);
+		this->audioInput->setBounds(audioRect);
+
+		top += ioHeight;
+	}
+	this->midiInput->setVisible(ioShown);
+	this->audioInput->setVisible(ioShown);
+
+	/** Output */
+	if (ioShown) {
+		juce::Rectangle<int> midiRect(
+			this->getWidth() * 3 / 10 - ioWidth / 2,
+			bottom - ioHeight, ioWidth, ioHeight);
+		this->midiOutput->setBounds(midiRect);
+
+		juce::Rectangle<int> audioRect(
+			this->getWidth() * 7 / 10 - ioWidth / 2,
+			bottom - ioHeight, ioWidth, ioHeight);
+		this->audioOutput->setBounds(audioRect);
+
+		bottom -= ioHeight;
+	}
+	this->midiOutput->setVisible(ioShown);
+	this->audioOutput->setVisible(ioShown);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {

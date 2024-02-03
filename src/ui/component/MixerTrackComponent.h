@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "SideChainComponent.h"
+#include "MixerTrackIOComponent.h"
 
 class MixerTrackComponent final : public juce::Component {
 public:
@@ -22,6 +23,10 @@ private:
 	juce::String name;
 
 	std::unique_ptr<SideChainComponent> sideChain = nullptr;
+	std::unique_ptr<MixerTrackIOComponent> midiInput = nullptr;
+	std::unique_ptr<MixerTrackIOComponent> audioInput = nullptr;
+	std::unique_ptr<MixerTrackIOComponent> midiOutput = nullptr;
+	std::unique_ptr<MixerTrackIOComponent> audioOutput = nullptr;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerTrackComponent)
 };
