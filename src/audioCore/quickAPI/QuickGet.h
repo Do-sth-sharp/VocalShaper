@@ -130,6 +130,15 @@ namespace quickAPI {
 	int getMixerTrackInputChannelNum(int index);
 	int getMixerTrackOutputChannelNum(int index);
 	int getMixerTrackSideChainBusNum(int index);
+	bool getMixerTrackMIDIInputFromDevice(int index);
+	const juce::Array<MIDILink> getMixerTrackMIDIInputFromSource(int index);
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromDevice(int index);
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index);
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index);
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromSend(int index);
+	bool getMixerTrackMIDIOutputToDevice(int index);
+	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index);
+	const juce::Array<AudioLink> getMixerTrackAudioOutputToSend(int index);
 
 	const juce::String getMIDICCChannelName(int channel);
 	const juce::StringArray getMIDICCChannelNameList();

@@ -667,6 +667,69 @@ namespace quickAPI {
 		return 0;
 	}
 
+	bool getMixerTrackMIDIInputFromDevice(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackMidiInputFromDeviceConnections(index).size() > 0;
+		}
+		return false;
+	}
+
+	const juce::Array<MIDILink> getMixerTrackMIDIInputFromSource(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackMidiInputFromSrcConnections(index);
+		}
+		return {};
+	}
+
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromDevice(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackInputFromDeviceConnections(index);
+		}
+		return {};
+	}
+
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackInputFromSrcConnections(index);
+		}
+		return {};
+	}
+
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackInputFromInstrConnections(index);
+		}
+		return {};
+	}
+
+	const juce::Array<AudioLink> getMixerTrackAudioInputFromSend(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackInputFromTrackConnections(index);
+		}
+		return {};
+	}
+
+	bool getMixerTrackMIDIOutputToDevice(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackMidiOutputToDeviceConnections(index).size() > 0;
+		}
+		return false;
+	}
+
+	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackOutputToDeviceConnections(index);
+		}
+		return {};
+	}
+
+	const juce::Array<AudioLink> getMixerTrackAudioOutputToSend(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackOutputToTrackConnections(index);
+		}
+		return {};
+	}
+
 	const juce::String getMIDICCChannelName(int channel) {
 		return utils::getMIDICCChannelName(channel);
 	}

@@ -102,6 +102,14 @@ void InstrIOComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
+void InstrIOComponent::outputTo(int trackIndex) {
+	if (!(this->isInput)) {
+		auto links = this->getOutputChannelLinks(trackIndex);
+		CoreActions::setInstrAudioOutputToMixerGUI(
+			this->index, trackIndex, true, links);
+	}
+}
+
 enum InstrIOMenuType {
 	Device = 1, NumBase
 };

@@ -156,6 +156,11 @@ void MixerTrackComponent::update(int index) {
 
 		this->sideChain->update(index);
 
+		this->midiInput->update(index);
+		this->audioInput->update(index);
+		this->midiOutput->update(index);
+		this->audioOutput->update(index);
+
 		this->repaint();
 	}
 }
@@ -188,4 +193,25 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 			CoreActions::setTrackNameGUI(this->index);
 		}
 	}
+}
+
+bool MixerTrackComponent::isInterestedInDragSource(
+	const SourceDetails& dragSourceDetails) {
+	/** TODO */
+	return false;
+}
+
+void MixerTrackComponent::itemDragEnter(
+	const SourceDetails& dragSourceDetails) {
+	/** TODO */
+}
+
+void MixerTrackComponent::itemDragExit(
+	const SourceDetails& dragSourceDetails) {
+	/** TODO */
+}
+
+void MixerTrackComponent::itemDropped(
+	const SourceDetails& dragSourceDetails) {
+	/** TODO */
 }

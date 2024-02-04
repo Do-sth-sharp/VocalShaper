@@ -5,5 +5,9 @@ enum class DragSourceType {
 	Source,
 	SourceSynth,
 	InstrInput,
-	InstrOutput
+	InstrOutput,
+	TrackMidiInput,
+	TrackAudioInput,
+	TrackMidiOutput,
+	TrackAudioOutput
 };

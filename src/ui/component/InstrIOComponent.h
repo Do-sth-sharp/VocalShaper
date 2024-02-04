@@ -16,6 +16,8 @@ public:
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 
+	void outputTo(int trackIndex);
+
 private:
 	const bool isInput;
 	int index = -1;

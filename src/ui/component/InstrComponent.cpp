@@ -2,6 +2,7 @@
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
 #include "../misc/PluginEditorHub.h"
+#include "../misc/DragSourceType.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -89,6 +90,8 @@ void InstrComponent::paint(juce::Graphics& g) {
 	int paddingWidth = screenSize.getWidth() * 0.01;
 	int splitWidth = screenSize.getWidth() * 0.0025;
 
+	float borderThickness = screenSize.getHeight() * 0.0025;
+
 	int buttonHeight = this->getHeight() - paddingHeight * 2;
 	float textHeight = buttonHeight * 0.8;
 	int ioHideWidth = screenSize.getWidth() * 0.075;
@@ -103,6 +106,8 @@ void InstrComponent::paint(juce::Graphics& g) {
 	juce::Colour textColor = laf.findColour(this->editorOpened
 		? juce::Label::ColourIds::textWhenEditingColourId
 		: juce::Label::ColourIds::textColourId);
+	juce::Colour borderColor = laf.findColour(
+		juce::Label::ColourIds::outlineWhenEditingColourId);
 
 	/** Font */
 	juce::Font textFont(textHeight);
@@ -110,6 +115,13 @@ void InstrComponent::paint(juce::Graphics& g) {
 	/** Background */
 	g.setColour(backgroundColor);
 	g.fillAll();
+
+	/** Outline */
+	if (this->dragHovered) {
+		auto totalRect = this->getLocalBounds();
+		g.setColour(borderColor);
+		g.drawRect(totalRect.toFloat(), borderThickness);
+	}
 
 	/** Text */
 	int textLeft = paddingWidth;
@@ -153,6 +165,59 @@ void InstrComponent::mouseUp(const juce::MouseEvent& event) {
 	else if (event.mods.isRightButtonDown()) {
 		this->showMenu();
 	}
+}
+
+bool InstrComponent::isInterestedInDragSource(
+	const SourceDetails& dragSourceDetails) {
+	auto& des = dragSourceDetails.description;
+
+	/** From Track Audio Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+		return true;
+	}
+
+	return false;
+}
+
+void InstrComponent::itemDragEnter(
+	const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->preDrop();
+}
+
+void InstrComponent::itemDragExit(
+	const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->endDrop();
+}
+
+void InstrComponent::itemDropped(
+	const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->endDrop();
+
+	auto& des = dragSourceDetails.description;
+
+	/** From Track Audio Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+		int track = des["track"];
+
+		this->output->outputTo(track);
+		return;
+	}
+}
+
+void InstrComponent::preDrop() {
+	this->dragHovered = true;
+	this->repaint();
+}
+
+void InstrComponent::endDrop() {
+	this->dragHovered = false;
+	this->repaint();
 }
 
 void InstrComponent::bypass() {

@@ -5,7 +5,9 @@
 #include "Scroller.h"
 #include "MixerTrackComponent.h"
 
-class MixerView final : public flowUI::FlowComponent {
+class MixerView final
+	: public flowUI::FlowComponent,
+	public juce::DragAndDropContainer {
 public:
 	MixerView();
 

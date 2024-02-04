@@ -4,7 +4,9 @@
 #include "SideChainComponent.h"
 #include "MixerTrackIOComponent.h"
 
-class MixerTrackComponent final : public juce::Component {
+class MixerTrackComponent final
+	: public juce::Component,
+	public juce::DragAndDropTarget {
 public:
 	MixerTrackComponent();
 
@@ -16,6 +18,12 @@ public:
 
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+
+	bool isInterestedInDragSource(
+		const SourceDetails& dragSourceDetails) override;
+	void itemDragEnter(const SourceDetails& dragSourceDetails) override;
+	void itemDragExit(const SourceDetails& dragSourceDetails) override;
+	void itemDropped(const SourceDetails& dragSourceDetails) override;
 
 private:
 	int index = -1;
