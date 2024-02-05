@@ -29,12 +29,16 @@ private:
 	int index = -1;
 	juce::Colour trackColor, nameColor;
 	juce::String name;
+	bool dragHovered = false;
 
 	std::unique_ptr<SideChainComponent> sideChain = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> midiInput = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> audioInput = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> midiOutput = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> audioOutput = nullptr;
+
+	void preDrop();
+	void endDrop();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerTrackComponent)
 };

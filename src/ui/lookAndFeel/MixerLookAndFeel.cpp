@@ -9,15 +9,15 @@ MixerLookAndFeel::MixerLookAndFeel()
 
 	/** Track */
 	this->setColour(juce::Label::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));/** Track Background */
+		ColorMap::getInstance()->get("ThemeColorB2"));/**< Track Background */
 	this->setColour(juce::Label::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB10"));/** Item Name Light */
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Item Name Light */
 	this->setColour(juce::Label::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));/** Track Outline */
+		ColorMap::getInstance()->get("ThemeColorB1"));/**< Track Outline */
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB0"));/** Item Name Dark */
+		ColorMap::getInstance()->get("ThemeColorB0"));/**< Item Name Dark */
 	this->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB4"));
+		ColorMap::getInstance()->get("ThemeColorA2"));/**< Track Hovered Outline */
 }

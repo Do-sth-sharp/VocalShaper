@@ -16,6 +16,10 @@ public:
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 
+	void setAudioInputFromInstr(int instrIndex, bool link);
+	void setAudioInputFromSend(int trackIndex, bool link);
+	void setAudioOutputToSend(int trackIndex, bool link);
+
 private:
 	const bool isInput, isMidi;
 	int index = -1;

@@ -149,6 +149,33 @@ void MixerTrackIOComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
+void MixerTrackIOComponent::setAudioInputFromInstr(
+	int instrIndex, bool link) {
+	if ((!(this->isMidi)) && this->isInput) {
+		auto links = this->getInputFromInstrChannelLinks(instrIndex);
+		CoreActions::setTrackAudioInputFromInstrGUI(
+			this->index, instrIndex, link, links);
+	}
+}
+
+void MixerTrackIOComponent::setAudioInputFromSend(
+	int trackIndex, bool link) {
+	if ((!(this->isMidi)) && this->isInput) {
+		auto links = this->getInputFromSendChannelLinks(trackIndex);
+		CoreActions::setTrackAudioInputFromSendGUI(
+			this->index, trackIndex, link, links);
+	}
+}
+
+void MixerTrackIOComponent::setAudioOutputToSend(
+	int trackIndex, bool link) {
+	if ((!(this->isMidi)) && (!(this->isInput))) {
+		auto links = this->getOutputToSendChannelLinks(trackIndex);
+		CoreActions::setTrackAudioOutputToSendGUI(
+			this->index, trackIndex, link, links);
+	}
+}
+
 enum MixerTrackIOAction {
 	Device = 1,
 	NumBase0 = 2,
@@ -187,17 +214,11 @@ void MixerTrackIOComponent::showLinkMenu(bool link) {
 			else if (result >= MixerTrackIOAction::NumBase1
 				&& result < MixerTrackIOAction::NumBase2) {
 				int src = result - MixerTrackIOAction::NumBase1;
-
-				auto links = this->getInputFromInstrChannelLinks(src);
-				CoreActions::setTrackAudioInputFromInstrGUI(
-					this->index, src, link, links);
+				this->setAudioInputFromInstr(src, link);
 			}
 			else if (result >= MixerTrackIOAction::NumBase2) {
 				int src = result - MixerTrackIOAction::NumBase2;
-
-				auto links = this->getInputFromSendChannelLinks(src);
-				CoreActions::setTrackAudioInputFromSendGUI(
-					this->index, src, link, links);
+				this->setAudioInputFromSend(src, link);
 			}
 		}
 	}
@@ -216,10 +237,7 @@ void MixerTrackIOComponent::showLinkMenu(bool link) {
 			else if (result >= MixerTrackIOAction::NumBase0
 				&& result < MixerTrackIOAction::NumBase1) {
 				int dst = result - MixerTrackIOAction::NumBase0;
-
-				auto links = this->getOutputToSendChannelLinks(dst);
-				CoreActions::setTrackAudioOutputToSendGUI(
-					this->index, dst, link, links);
+				this->setAudioOutputToSend(dst, link);
 			}
 		}
 	}

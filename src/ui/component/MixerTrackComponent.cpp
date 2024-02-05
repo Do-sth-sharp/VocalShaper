@@ -1,5 +1,6 @@
 ﻿#include "MixerTrackComponent.h"
 #include "../misc/CoreActions.h"
+#include "../misc/DragSourceType.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -129,8 +130,9 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour outlineColor = laf.findColour(
-		juce::Label::ColourIds::outlineColourId);
+	juce::Colour outlineColor = laf.findColour(this->dragHovered
+		? juce::Label::ColourIds::outlineWhenEditingColourId
+		: juce::Label::ColourIds::outlineColourId);
 
 	/** Outline */
 	auto totalRect = this->getLocalBounds();
@@ -197,21 +199,82 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 
 bool MixerTrackComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
-	/** TODO */
+	auto& des = dragSourceDetails.description;
+
+	/** From Instr Audio Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::InstrOutput)) {
+		int instrIndex = des["instr"];
+		return instrIndex >= 0;
+	}
+
+	/** From Track Audio Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+		int trackIndex = des["track"];
+		return (trackIndex >= 0) && (trackIndex != this->index);
+	}
+
+	/** From Track Audio Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioOutput)) {
+		int trackIndex = des["track"];
+		return (trackIndex >= 0) && (trackIndex != this->index);
+	}
+
 	return false;
 }
 
 void MixerTrackComponent::itemDragEnter(
 	const SourceDetails& dragSourceDetails) {
-	/** TODO */
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->preDrop();
 }
 
 void MixerTrackComponent::itemDragExit(
 	const SourceDetails& dragSourceDetails) {
-	/** TODO */
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->endDrop();
 }
 
 void MixerTrackComponent::itemDropped(
 	const SourceDetails& dragSourceDetails) {
-	/** TODO */
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->endDrop();
+
+	auto& des = dragSourceDetails.description;
+
+	/** From Instr Audio Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::InstrOutput)) {
+		int instrIndex = des["instr"];
+
+		this->audioInput->setAudioInputFromInstr(instrIndex, true);
+		return;
+	}
+
+	/** From Track Audio Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+		int trackIndex = des["track"];
+
+		this->audioOutput->setAudioOutputToSend(trackIndex, true);
+		return;
+	}
+
+	/** From Track Audio Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioOutput)) {
+		int trackIndex = des["track"];
+
+		this->audioInput->setAudioInputFromSend(trackIndex, true);
+		return;
+	}
+}
+
+void MixerTrackComponent::preDrop() {
+	this->dragHovered = true;
+	this->repaint();
+}
+
+void MixerTrackComponent::endDrop() {
+	this->dragHovered = false;
+	this->repaint();
 }
