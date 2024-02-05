@@ -1,5 +1,6 @@
 ﻿#include "MixerTrackIOComponent.h"
 #include "../misc/DragSourceType.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -138,7 +139,127 @@ void MixerTrackIOComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void MixerTrackIOComponent::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		if (!event.mouseWasDraggedSinceMouseDown()) {
+			this->showLinkMenu();
+		}
+	}
+	else if (event.mods.isRightButtonDown()) {
+		this->showUnlinkMenu();
+	}
+}
+
+enum MixerTrackIOAction {
+	Device = 1,
+	NumBase0 = 2,
+	NumBase1 = 0x4000,
+	NumBase2 = 0x8000
+};
+
+void MixerTrackIOComponent::showLinkMenu() {
+	auto menu = this->createLinkMenu();
+	int result = menu.showAt(this);
+
+	if (this->isInput) {
+		if (this->isMidi) {
+			if (result == MixerTrackIOAction::Device) {
+				CoreActions::setTrackMIDIInputFromDevice(this->index, true);
+			}
+			else if (result >= MixerTrackIOAction::NumBase0) {
+				int src = result - MixerTrackIOAction::NumBase0;
+				CoreActions::setTrackMIDIInputFromSeqTrack(this->index, src, true);
+			}
+		}
+		else {
+			if (result == MixerTrackIOAction::Device) {
+				auto links = this->getInputFromDeviceChannelLinks();
+				CoreActions::setTrackAudioInputFromDeviceGUI(
+					this->index, true, links);
+			}
+			else if (result >= MixerTrackIOAction::NumBase0
+				&& result < MixerTrackIOAction::NumBase1) {
+				int src = result - MixerTrackIOAction::NumBase0;
+
+				auto links = this->getInputFromSourceChannelLinks(src);
+				CoreActions::setTrackAudioInputFromSourceGUI(
+					this->index, src, true, links);
+			}
+			else if (result >= MixerTrackIOAction::NumBase1
+				&& result < MixerTrackIOAction::NumBase2) {
+				int src = result - MixerTrackIOAction::NumBase1;
+
+				auto links = this->getInputFromInstrChannelLinks(src);
+				CoreActions::setTrackAudioInputFromInstrGUI(
+					this->index, src, true, links);
+			}
+			else if (result >= MixerTrackIOAction::NumBase2) {
+				int src = result - MixerTrackIOAction::NumBase2;
+
+				auto links = this->getInputFromSendChannelLinks(src);
+				CoreActions::setTrackAudioInputFromSendGUI(
+					this->index, src, true, links);
+			}
+		}
+	}
+	else {
+		if (this->isMidi) {
+			/** TODO */
+		}
+		else {
+			/** TODO */
+		}
+	}
+}
+
+void MixerTrackIOComponent::showUnlinkMenu() {
+	auto menu = this->createUnlinkMenu();
+	int result = menu.showAt(this);
+
 	/** TODO */
+}
+
+const juce::Array<std::tuple<int, int>> 
+MixerTrackIOComponent::getInputFromDeviceChannelLinks() const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioInputFromDevice) {
+		if ((dst == this->index)) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
+}
+
+const juce::Array<std::tuple<int, int>>
+MixerTrackIOComponent::getInputFromSourceChannelLinks(int seqIndex) const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioInputFromSource) {
+		if ((src == seqIndex) && (dst == this->index)) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
+}
+
+const juce::Array<std::tuple<int, int>>
+MixerTrackIOComponent::getInputFromInstrChannelLinks(int instrIndex) const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioInputFromInstr) {
+		if ((src == instrIndex) && (dst == this->index)) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
+}
+
+const juce::Array<std::tuple<int, int>>
+MixerTrackIOComponent::getInputFromSendChannelLinks(int trackIndex) const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioInputFromSend) {
+		if ((src == trackIndex) && (dst == this->index)) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
 }
 
 juce::var MixerTrackIOComponent::getDragSourceDescription() const {
@@ -229,4 +350,129 @@ juce::String MixerTrackIOComponent::createToolTipString() const {
 	}
 
 	return result;
+}
+
+juce::PopupMenu MixerTrackIOComponent::createLinkMenu() const {
+	juce::PopupMenu menu;
+
+	if (this->isInput) {
+		if (this->isMidi) {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("MIDI Input"),
+				!this->midiInputFromDevice, this->midiInputFromDevice);
+			menu.addSeparator();
+
+			auto seqTracks = quickAPI::getSeqTrackNameList();
+			for (int i = 0; i < seqTracks.size(); i++) {
+				juce::String name = TRANS("Sequencer Track") + " #" + juce::String{ i } + " " + seqTracks[i];
+				menu.addItem(MixerTrackIOAction::NumBase0 + i, name, true, this->midiInputSourceTemp.contains(i));
+			}
+		}
+		else {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("Audio Input"),
+				true, this->audioInputFromDevice.size() > 0);
+			menu.addSeparator();
+
+			auto seqTracks = quickAPI::getSeqTrackNameList();
+			for (int i = 0; i < seqTracks.size(); i++) {
+				juce::String name = TRANS("Sequencer Track") + " #" + juce::String{ i } + " " + seqTracks[i];
+				menu.addItem(MixerTrackIOAction::NumBase0 + i, name, true, this->audioInputSourceTemp.contains(i));
+			}
+			menu.addSeparator();
+
+			auto instrs = quickAPI::getInstrNameList();
+			for (int i = 0; i < instrs.size(); i++) {
+				juce::String name = TRANS("Instrument") + " #" + juce::String{ i } + " " + instrs[i];
+				menu.addItem(MixerTrackIOAction::NumBase1 + i, name, true, this->audioInputInstrTemp.contains(i));
+			}
+			menu.addSeparator();
+
+			auto mixerTracks = quickAPI::getMixerTrackNameList();
+			for (int i = 0; i < mixerTracks.size(); i++) {
+				juce::String name = TRANS("Mixer Track") + " #" + juce::String{ i } + " " + mixerTracks[i];
+				menu.addItem(MixerTrackIOAction::NumBase2 + i, name, i != this->index, this->audioInputSendTemp.contains(i));
+			}
+		}
+		
+	}
+	else {
+		if (this->isMidi) {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("MIDI Output"),
+				!this->midiOutputToDevice, this->midiOutputToDevice);
+		}
+		else {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("Audio Output"),
+				true, this->audioOutputToDevice.size() > 0);
+			menu.addSeparator();
+
+			auto mixerTracks = quickAPI::getMixerTrackNameList();
+			for (int i = 0; i < mixerTracks.size(); i++) {
+				juce::String name = TRANS("Mixer Track") + " #" + juce::String{ i } + " " + mixerTracks[i];
+				menu.addItem(MixerTrackIOAction::NumBase0 + i, name, i != this->index, this->audioOutputSendTemp.contains(i));
+			}
+		}
+	}
+
+	return menu;
+}
+
+juce::PopupMenu MixerTrackIOComponent::createUnlinkMenu() const {
+	juce::PopupMenu menu;
+
+	if (this->isInput) {
+		if (this->isMidi) {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("MIDI Input"),
+				this->midiInputFromDevice, this->midiInputFromDevice);
+			menu.addSeparator();
+
+			for (auto i : this->midiInputSourceTemp) {
+				auto trackName = quickAPI::getSeqTrackName(i);
+				juce::String name = TRANS("Sequencer Track") + " #" + juce::String{ i } + " " + trackName;
+				menu.addItem(MixerTrackIOAction::NumBase0 + i, name, true, true);
+			}
+		}
+		else {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("Audio Input"),
+				this->audioInputFromDevice.size() > 0, this->audioInputFromDevice.size() > 0);
+			menu.addSeparator();
+
+			for (auto i : this->audioInputSourceTemp) {
+				auto trackName = quickAPI::getSeqTrackName(i);
+				juce::String name = TRANS("Sequencer Track") + " #" + juce::String{ i } + " " + trackName;
+				menu.addItem(MixerTrackIOAction::NumBase0 + i, name, true, true);
+			}
+			menu.addSeparator();
+
+			for (auto i : this->audioInputInstrTemp) {
+				auto instrName = quickAPI::getInstrName(i);
+				juce::String name = TRANS("Instrument") + " #" + juce::String{ i } + " " + instrName;
+				menu.addItem(MixerTrackIOAction::NumBase1 + i, name, true, true);
+			}
+			menu.addSeparator();
+
+			for (auto i : this->audioInputSendTemp) {
+				auto trackName = quickAPI::getMixerTrackName(i);
+				juce::String name = TRANS("Mixer Track") + " #" + juce::String{ i } + " " + trackName;
+				menu.addItem(MixerTrackIOAction::NumBase2 + i, name, true, true);
+			}
+		}
+	}
+	else {
+		if (this->isMidi) {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("MIDI Output"),
+				this->midiOutputToDevice, this->midiOutputToDevice);
+		}
+		else {
+			menu.addItem(MixerTrackIOAction::Device, TRANS("Audio Output"),
+				this->audioOutputToDevice.size() > 0, this->audioOutputToDevice.size() > 0);
+			menu.addSeparator();
+
+			for (auto i : this->audioOutputSendTemp) {
+				auto trackName = quickAPI::getMixerTrackName(i);
+				juce::String name = TRANS("Mixer Track") + " #" + juce::String{ i } + " " + trackName;
+				menu.addItem(MixerTrackIOAction::NumBase0 + i, name, true, true);
+			}
+		}
+	}
+
+	return menu;
 }

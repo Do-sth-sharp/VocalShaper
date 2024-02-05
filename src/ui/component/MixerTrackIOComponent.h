@@ -41,8 +41,18 @@ private:
 	juce::Array<AudioLink> audioOutputToSend;
 	std::set<int> audioOutputSendTemp;
 
+	void showLinkMenu();
+	void showUnlinkMenu();
+
+	const juce::Array<std::tuple<int, int>> getInputFromDeviceChannelLinks() const;
+	const juce::Array<std::tuple<int, int>> getInputFromSourceChannelLinks(int seqIndex) const;
+	const juce::Array<std::tuple<int, int>> getInputFromInstrChannelLinks(int instrIndex) const;
+	const juce::Array<std::tuple<int, int>> getInputFromSendChannelLinks(int trackIndex) const;
+
 	juce::var getDragSourceDescription() const;
 	juce::String createToolTipString() const;
+	juce::PopupMenu createLinkMenu() const;
+	juce::PopupMenu createUnlinkMenu() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerTrackIOComponent)
 };

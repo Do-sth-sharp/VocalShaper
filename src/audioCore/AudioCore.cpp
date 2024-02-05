@@ -350,16 +350,17 @@ void AudioCore::updateAudioBuses() {
 	/** Link Audio Bus To Sequencer And Mixer */
 	if (auto mainGraph = this->mainAudioGraph.get()) {
 		/** Get Input Channel Num */
-		auto audioDeviceSetup = Device::getInstance()->getAudioDeviceSetup();
-		auto inputChannelNum = audioDeviceSetup.inputChannels.countNumberOfSetBits();
-		auto outputChannelNum = audioDeviceSetup.outputChannels.countNumberOfSetBits();
+		auto inputChannelNum = Device::getInstance()->getAudioInputDeviceChannelNum();
+		auto outputChannelNum = Device::getInstance()->getAudioOutputDeviceChannelNum();
 
 		/** Set Buses Layout Of Main Graph */
 		mainGraph->setAudioLayout(inputChannelNum, outputChannelNum);
 
 		/** Change Main Graph SampleRate And Set Play Head */
 		mainGraph->setPlayHead(PlayPosition::getInstance());
-		mainGraph->prepareToPlay(audioDeviceSetup.sampleRate, audioDeviceSetup.bufferSize);
+		mainGraph->prepareToPlay(
+			Device::getInstance()->getAudioSampleRate(),
+			Device::getInstance()->getAudioBufferSize());
 	}
 
 	/** Add MIDI Callback */

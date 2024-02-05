@@ -49,6 +49,10 @@ const juce::Colour SeqSourceProcessor::getTrackColor() const {
 	return this->trackColor;
 }
 
+const juce::AudioChannelSet& SeqSourceProcessor::getAudioChannelSet() const {
+	return this->audioChannels;
+}
+
 void SeqSourceProcessor::closeAllNote() {
 	this->noteCloseFlag = true;
 }

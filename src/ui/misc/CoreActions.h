@@ -71,6 +71,12 @@ public:
 	static void setTrackName(int index, const juce::String& name);
 	static void addTrackSideChain(int index);
 	static void removeTrackSideChain(int index);
+	static void setTrackMIDIInputFromDevice(int index, bool input);
+	static void setTrackMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
+	static void setTrackAudioInputFromDevice(int index, int channel, int srcChannel, bool input);
+	static void setTrackAudioInputFromSource(int index, int channel, int seqIndex, int srcChannel, bool input);
+	static void setTrackAudioInputFromInstr(int index, int channel, int instrIndex, int srcChannel, bool input);
+	static void setTrackAudioInputFromSend(int index, int channel, int trackIndex, int srcChannel, bool input);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
@@ -115,6 +121,14 @@ public:
 
 	static void setTrackColorGUI(int index);
 	static void setTrackNameGUI(int index);
+	static void setTrackAudioInputFromDeviceGUI(int index, bool input,
+		const juce::Array<std::tuple<int, int>>& links);
+	static void setTrackAudioInputFromSourceGUI(int index, int seqIndex, bool input,
+		const juce::Array<std::tuple<int, int>>& links);
+	static void setTrackAudioInputFromInstrGUI(int index, int instrIndex, bool input,
+		const juce::Array<std::tuple<int, int>>& links);
+	static void setTrackAudioInputFromSendGUI(int index, int trackIndex, bool input,
+		const juce::Array<std::tuple<int, int>>& links);
 
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(

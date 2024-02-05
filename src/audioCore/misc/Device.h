@@ -58,6 +58,8 @@ public:
 	const juce::String setAudioOutputDevice(const juce::String& deviceName);
 	const juce::String getAudioInputDeviceName() const;
 	const juce::String getAudioOutputDeviceName() const;
+	int getAudioInputDeviceChannelNum() const;
+	int getAudioOutputDeviceChannelNum() const;
 
 	void setCurrentAudioDeviceType(const juce::String& typeName);
 	const juce::String getCurrentAudioDeivceType() const;

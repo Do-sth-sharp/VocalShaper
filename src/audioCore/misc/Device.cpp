@@ -225,6 +225,16 @@ const juce::String Device::getAudioOutputDeviceName() const {
 	return audioSetup.outputDeviceName;
 }
 
+int Device::getAudioInputDeviceChannelNum() const {
+	auto audioSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	return audioSetup.inputChannels.countNumberOfSetBits();
+}
+
+int Device::getAudioOutputDeviceChannelNum() const {
+	auto audioSetup = this->audioDeviceManager->getAudioDeviceSetup();
+	return audioSetup.outputChannels.countNumberOfSetBits();
+}
+
 void Device::setCurrentAudioDeviceType(const juce::String& typeName) {
 	this->audioDeviceManager->setCurrentAudioDeviceType(typeName, true);
 }

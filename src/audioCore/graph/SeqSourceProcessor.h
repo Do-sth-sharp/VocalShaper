@@ -21,6 +21,8 @@ public:
 	void setTrackColor(const juce::Colour& color);
 	const juce::Colour getTrackColor() const;
 
+	const juce::AudioChannelSet& getAudioChannelSet() const;
+
 	void closeAllNote();
 
 public:

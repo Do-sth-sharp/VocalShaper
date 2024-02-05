@@ -436,6 +436,17 @@ namespace quickAPI {
 		return "";
 	}
 
+	const juce::StringArray getInstrNameList() {
+		int size = getInstrNum();
+
+		juce::StringArray result;
+		for (int i = 0; i < size; i++) {
+			result.add(getInstrName(i));
+		}
+
+		return result;
+	}
+
 	bool getInstrBypass(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getInstrumentBypass(index);
@@ -595,6 +606,33 @@ namespace quickAPI {
 		return result;
 	}
 
+	const juce::AudioChannelSet getSeqTrackChannelSet(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getAudioChannelSet();
+			}
+		}
+		return juce::AudioChannelSet{};
+	}
+
+	int getSeqTrackInputChannelNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getTotalNumInputChannels();
+			}
+		}
+		return 0;
+	}
+
+	int getSeqTrackOutputChannelNum(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getTotalNumOutputChannels();
+			}
+		}
+		return 0;
+	}
+
 	int getMixerTrackNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getTrackNum();
@@ -728,6 +766,18 @@ namespace quickAPI {
 			return graph->getTrackOutputToTrackConnections(index);
 		}
 		return {};
+	}
+
+	const juce::String getAudioDeviceName(bool isInput) {
+		return isInput
+			? Device::getInstance()->getAudioInputDeviceName()
+			: Device::getInstance()->getAudioOutputDeviceName();
+	}
+
+	int getAudioDeviceChannelNum(bool isInput) {
+		return isInput
+			? Device::getInstance()->getAudioInputDeviceChannelNum()
+			: Device::getInstance()->getAudioOutputDeviceChannelNum();
 	}
 
 	const juce::String getMIDICCChannelName(int channel) {
