@@ -77,6 +77,9 @@ public:
 	static void setTrackAudioInputFromSource(int index, int channel, int seqIndex, int srcChannel, bool input);
 	static void setTrackAudioInputFromInstr(int index, int channel, int instrIndex, int srcChannel, bool input);
 	static void setTrackAudioInputFromSend(int index, int channel, int trackIndex, int srcChannel, bool input);
+	static void setTrackMIDIOutputToDevice(int index, bool output);
+	static void setTrackAudioOutputToDevice(int index, int channel, int dstChannel, bool output);
+	static void setTrackAudioOutputToSend(int index, int channel, int trackIndex, int dstChannel, bool output);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
@@ -128,6 +131,10 @@ public:
 	static void setTrackAudioInputFromInstrGUI(int index, int instrIndex, bool input,
 		const juce::Array<std::tuple<int, int>>& links);
 	static void setTrackAudioInputFromSendGUI(int index, int trackIndex, bool input,
+		const juce::Array<std::tuple<int, int>>& links);
+	static void setTrackAudioOutputToDeviceGUI(int index, bool output,
+		const juce::Array<std::tuple<int, int>>& links);
+	static void setTrackAudioOutputToSendGUI(int index, int trackIndex, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
 
 	static bool askForSaveGUI();

@@ -141,11 +141,11 @@ void MixerTrackIOComponent::mouseDrag(const juce::MouseEvent& event) {
 void MixerTrackIOComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		if (!event.mouseWasDraggedSinceMouseDown()) {
-			this->showLinkMenu();
+			this->showLinkMenu(true);
 		}
 	}
 	else if (event.mods.isRightButtonDown()) {
-		this->showUnlinkMenu();
+		this->showLinkMenu(false);
 	}
 }
 
@@ -156,25 +156,25 @@ enum MixerTrackIOAction {
 	NumBase2 = 0x8000
 };
 
-void MixerTrackIOComponent::showLinkMenu() {
-	auto menu = this->createLinkMenu();
+void MixerTrackIOComponent::showLinkMenu(bool link) {
+	auto menu = link ? this->createLinkMenu() : this->createUnlinkMenu();
 	int result = menu.showAt(this);
 
 	if (this->isInput) {
 		if (this->isMidi) {
 			if (result == MixerTrackIOAction::Device) {
-				CoreActions::setTrackMIDIInputFromDevice(this->index, true);
+				CoreActions::setTrackMIDIInputFromDevice(this->index, link);
 			}
 			else if (result >= MixerTrackIOAction::NumBase0) {
 				int src = result - MixerTrackIOAction::NumBase0;
-				CoreActions::setTrackMIDIInputFromSeqTrack(this->index, src, true);
+				CoreActions::setTrackMIDIInputFromSeqTrack(this->index, src, link);
 			}
 		}
 		else {
 			if (result == MixerTrackIOAction::Device) {
 				auto links = this->getInputFromDeviceChannelLinks();
 				CoreActions::setTrackAudioInputFromDeviceGUI(
-					this->index, true, links);
+					this->index, link, links);
 			}
 			else if (result >= MixerTrackIOAction::NumBase0
 				&& result < MixerTrackIOAction::NumBase1) {
@@ -182,7 +182,7 @@ void MixerTrackIOComponent::showLinkMenu() {
 
 				auto links = this->getInputFromSourceChannelLinks(src);
 				CoreActions::setTrackAudioInputFromSourceGUI(
-					this->index, src, true, links);
+					this->index, src, link, links);
 			}
 			else if (result >= MixerTrackIOAction::NumBase1
 				&& result < MixerTrackIOAction::NumBase2) {
@@ -190,39 +190,46 @@ void MixerTrackIOComponent::showLinkMenu() {
 
 				auto links = this->getInputFromInstrChannelLinks(src);
 				CoreActions::setTrackAudioInputFromInstrGUI(
-					this->index, src, true, links);
+					this->index, src, link, links);
 			}
 			else if (result >= MixerTrackIOAction::NumBase2) {
 				int src = result - MixerTrackIOAction::NumBase2;
 
 				auto links = this->getInputFromSendChannelLinks(src);
 				CoreActions::setTrackAudioInputFromSendGUI(
-					this->index, src, true, links);
+					this->index, src, link, links);
 			}
 		}
 	}
 	else {
 		if (this->isMidi) {
-			/** TODO */
+			if (result == MixerTrackIOAction::Device) {
+				CoreActions::setTrackMIDIOutputToDevice(this->index, link);
+			}
 		}
 		else {
-			/** TODO */
+			if (result == MixerTrackIOAction::Device) {
+				auto links = this->getOutputToDeviceChannelLinks();
+				CoreActions::setTrackAudioOutputToDeviceGUI(
+					this->index, link, links);
+			}
+			else if (result >= MixerTrackIOAction::NumBase0
+				&& result < MixerTrackIOAction::NumBase1) {
+				int dst = result - MixerTrackIOAction::NumBase0;
+
+				auto links = this->getOutputToSendChannelLinks(dst);
+				CoreActions::setTrackAudioOutputToSendGUI(
+					this->index, dst, link, links);
+			}
 		}
 	}
-}
-
-void MixerTrackIOComponent::showUnlinkMenu() {
-	auto menu = this->createUnlinkMenu();
-	int result = menu.showAt(this);
-
-	/** TODO */
 }
 
 const juce::Array<std::tuple<int, int>> 
 MixerTrackIOComponent::getInputFromDeviceChannelLinks() const {
 	juce::Array<std::tuple<int, int>> result;
 	for (auto& [src, srcc, dst, dstc] : this->audioInputFromDevice) {
-		if ((dst == this->index)) {
+		if (dst == this->index) {
 			result.add({ srcc, dstc });
 		}
 	}
@@ -256,6 +263,28 @@ MixerTrackIOComponent::getInputFromSendChannelLinks(int trackIndex) const {
 	juce::Array<std::tuple<int, int>> result;
 	for (auto& [src, srcc, dst, dstc] : this->audioInputFromSend) {
 		if ((src == trackIndex) && (dst == this->index)) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
+}
+
+const juce::Array<std::tuple<int, int>>
+MixerTrackIOComponent::getOutputToDeviceChannelLinks() const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioOutputToDevice) {
+		if (src == this->index) {
+			result.add({ srcc, dstc });
+		}
+	}
+	return result;
+}
+
+const juce::Array<std::tuple<int, int>>
+MixerTrackIOComponent::getOutputToSendChannelLinks(int trackIndex) const {
+	juce::Array<std::tuple<int, int>> result;
+	for (auto& [src, srcc, dst, dstc] : this->audioOutputToSend) {
+		if ((src == this->index) && (dst == trackIndex)) {
 			result.add({ srcc, dstc });
 		}
 	}

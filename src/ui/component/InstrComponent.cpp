@@ -205,7 +205,7 @@ void InstrComponent::itemDropped(
 	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
 		int track = des["track"];
 
-		this->output->outputTo(track);
+		this->output->outputTo(track, true);
 		return;
 	}
 }

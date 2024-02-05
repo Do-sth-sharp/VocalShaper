@@ -41,13 +41,14 @@ private:
 	juce::Array<AudioLink> audioOutputToSend;
 	std::set<int> audioOutputSendTemp;
 
-	void showLinkMenu();
-	void showUnlinkMenu();
+	void showLinkMenu(bool link);
 
 	const juce::Array<std::tuple<int, int>> getInputFromDeviceChannelLinks() const;
 	const juce::Array<std::tuple<int, int>> getInputFromSourceChannelLinks(int seqIndex) const;
 	const juce::Array<std::tuple<int, int>> getInputFromInstrChannelLinks(int instrIndex) const;
 	const juce::Array<std::tuple<int, int>> getInputFromSendChannelLinks(int trackIndex) const;
+	const juce::Array<std::tuple<int, int>> getOutputToDeviceChannelLinks() const;
+	const juce::Array<std::tuple<int, int>> getOutputToSendChannelLinks(int trackIndex) const;
 
 	juce::var getDragSourceDescription() const;
 	juce::String createToolTipString() const;

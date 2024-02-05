@@ -94,19 +94,19 @@ void InstrIOComponent::mouseDrag(const juce::MouseEvent& event) {
 void InstrIOComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		if (!event.mouseWasDraggedSinceMouseDown()) {
-			this->showLinkMenu();
+			this->showLinkMenu(true);
 		}
 	}
 	else if (event.mods.isRightButtonDown()) {
-		this->showUnlinkMenu();
+		this->showLinkMenu(false);
 	}
 }
 
-void InstrIOComponent::outputTo(int trackIndex) {
+void InstrIOComponent::outputTo(int trackIndex, bool link) {
 	if (!(this->isInput)) {
 		auto links = this->getOutputChannelLinks(trackIndex);
 		CoreActions::setInstrAudioOutputToMixerGUI(
-			this->index, trackIndex, true, links);
+			this->index, trackIndex, link, links);
 	}
 }
 
@@ -114,50 +114,23 @@ enum InstrIOMenuType {
 	Device = 1, NumBase
 };
 
-void InstrIOComponent::showLinkMenu() {
-	auto menu = this->createLinkMenu();
+void InstrIOComponent::showLinkMenu(bool link) {
+	auto menu = link ? this->createLinkMenu() : this->createUnlinkMenu();
 	int result = menu.showAt(this);
 
 	if (this->isInput) {
 		if (result == InstrIOMenuType::Device) {
-			CoreActions::setInstrMIDIInputFromDevice(this->index, true);
+			CoreActions::setInstrMIDIInputFromDevice(this->index, link);
 		}
 		else if (result >= InstrIOMenuType::NumBase) {
 			int src = result - InstrIOMenuType::NumBase;
-			CoreActions::setInstrMIDIInputFromSeqTrack(this->index, src, true);
+			CoreActions::setInstrMIDIInputFromSeqTrack(this->index, src, link);
 		}
 	}
 	else {
 		if (result >= InstrIOMenuType::NumBase) {
 			int track = result - InstrIOMenuType::NumBase;
-
-			auto links = this->getOutputChannelLinks(track);
-			CoreActions::setInstrAudioOutputToMixerGUI(
-				this->index, track, true, links);
-		}
-	}
-}
-
-void InstrIOComponent::showUnlinkMenu() {
-	auto menu = this->createUnlinkMenu();
-	int result = menu.showAt(this);
-
-	if (this->isInput) {
-		if (result == InstrIOMenuType::Device) {
-			CoreActions::setInstrMIDIInputFromDevice(this->index, false);
-		}
-		else if (result >= InstrIOMenuType::NumBase) {
-			int src = result - InstrIOMenuType::NumBase;
-			CoreActions::setInstrMIDIInputFromSeqTrack(this->index, src, false);
-		}
-	}
-	else {
-		if (result >= InstrIOMenuType::NumBase) {
-			int track = result - InstrIOMenuType::NumBase;
-			
-			auto links = this->getOutputChannelLinks(track);
-			CoreActions::setInstrAudioOutputToMixerGUI(
-				this->index, track, false, links);
+			this->outputTo(track, link);
 		}
 	}
 }

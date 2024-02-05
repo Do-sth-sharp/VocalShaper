@@ -355,6 +355,29 @@ void CoreActions::setTrackAudioInputFromSend(
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setTrackMIDIOutputToDevice(int index, bool output) {
+	auto action = output
+		? std::unique_ptr<ActionBase>(new ActionAddMixerTrackMidiOutput{ index })
+		: std::unique_ptr<ActionBase>(new ActionRemoveMixerTrackMidiOutput{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackAudioOutputToDevice(
+	int index, int channel, int dstChannel, bool output) {
+	auto action = output
+		? std::unique_ptr<ActionBase>(new ActionAddMixerTrackOutput{ index, channel, dstChannel })
+		: std::unique_ptr<ActionBase>(new ActionRemoveMixerTrackOutput{ index, channel, dstChannel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackAudioOutputToSend(
+	int index, int channel, int trackIndex, int dstChannel, bool output) {
+	auto action = output
+		? std::unique_ptr<ActionBase>(new ActionAddMixerTrackSend{ index, channel, trackIndex, dstChannel })
+		: std::unique_ptr<ActionBase>(new ActionRemoveMixerTrackSend{ index, channel, trackIndex, dstChannel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 
@@ -887,6 +910,68 @@ void CoreActions::setTrackAudioInputFromSendGUI(int index, int trackIndex, bool 
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		sendChannelSet, trackChannelSet, sendTotalChannels, trackTotalChannels,
 		sendName, trackName, true);
+}
+
+void CoreActions::setTrackAudioOutputToDeviceGUI(int index, bool output,
+	const juce::Array<std::tuple<int, int>>& links) {
+	/** Callback */
+	auto callback = [index](int srcc, int dstc, bool output) {
+		CoreActions::setTrackAudioOutputToDevice(index, srcc, dstc, output);
+		};
+
+	/** Remove */
+	if (!output) {
+		for (auto& [srcc, dstc] : links) {
+			callback(srcc, dstc, false);
+		}
+		return;
+	}
+
+	/** Name */
+	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ index } + " " + quickAPI::getMixerTrackName(index);
+	juce::String deviceName = quickAPI::getAudioDeviceName(false);
+
+	/** Channels */
+	int trackTotalChannels = quickAPI::getMixerTrackOutputChannelNum(index);
+	int deviceTotalChannels = quickAPI::getAudioDeviceChannelNum(false);
+	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(index);
+	auto deviceChannelSet = juce::AudioChannelSet::discreteChannels(deviceTotalChannels);
+
+	/** Ask For Channels */
+	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
+		trackChannelSet, deviceChannelSet, trackTotalChannels, deviceTotalChannels,
+		trackName, deviceName, true);
+}
+
+void CoreActions::setTrackAudioOutputToSendGUI(int index, int trackIndex, bool output,
+	const juce::Array<std::tuple<int, int>>& links) {
+	/** Callback */
+	auto callback = [index, trackIndex](int srcc, int dstc, bool output) {
+		CoreActions::setTrackAudioOutputToSend(index, srcc, trackIndex, dstc, output);
+		};
+
+	/** Remove */
+	if (!output) {
+		for (auto& [srcc, dstc] : links) {
+			callback(srcc, dstc, false);
+		}
+		return;
+	}
+
+	/** Name */
+	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ index } + " " + quickAPI::getMixerTrackName(index);
+	juce::String sendName = TRANS("Mixer Track") + " #" + juce::String{ trackIndex } + " " + quickAPI::getMixerTrackName(trackIndex);
+
+	/** Channels */
+	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(index);
+	auto sendChannelSet = quickAPI::getMixerTrackChannelSet(trackIndex);
+	int trackTotalChannels = quickAPI::getMixerTrackOutputChannelNum(index);
+	int sendTotalChannels = quickAPI::getMixerTrackInputChannelNum(trackIndex);
+
+	/** Ask For Channels */
+	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
+		trackChannelSet, sendChannelSet, trackTotalChannels, sendTotalChannels,
+		trackName, sendName, true);
 }
 
 bool CoreActions::askForSaveGUI() {

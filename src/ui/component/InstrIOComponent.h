@@ -16,7 +16,7 @@ public:
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 
-	void outputTo(int trackIndex);
+	void outputTo(int trackIndex, bool link);
 
 private:
 	const bool isInput;
@@ -32,8 +32,7 @@ private:
 	std::set<int> inputSourceTemp;
 	std::set<int> outputMixerTemp;
 
-	void showLinkMenu();
-	void showUnlinkMenu();
+	void showLinkMenu(bool link);
 
 	juce::var getDragSourceDescription() const;
 	juce::PopupMenu createLinkMenu();
