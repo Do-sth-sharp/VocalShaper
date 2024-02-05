@@ -460,7 +460,7 @@ private:
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
 				if (splash) {
-					splash->showMessage("Ready.");
+					splash->showMessage("Ready. Special thanks to Warsic Music Club.");
 					splash->ready();
 				}
 			}
