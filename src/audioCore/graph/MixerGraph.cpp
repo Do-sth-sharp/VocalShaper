@@ -21,8 +21,12 @@ void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
-		/** Callback */
-		UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+		/** Set Index */
+		dynamic_cast<Track*>(ptrNode->getProcessor())->updateIndex(index);
+		for (int i = index + 1; i < this->trackNodeList.size(); i++) {
+			auto node = this->trackNodeList[i];
+			dynamic_cast<Track*>(node->getProcessor())->updateIndex(i);
+		}
 	}
 	else {
 		jassertfalse;
@@ -107,8 +111,11 @@ void MainGraph::removeTrack(int index) {
 	/** Remove Node From Graph */
 	this->removeNode(nodeID);
 
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+	/** Set Index */
+	for (int i = index; i < this->trackNodeList.size(); i++) {
+		auto node = this->trackNodeList[i];
+		dynamic_cast<Track*>(node->getProcessor())->updateIndex(i);
+	}
 }
 
 int MainGraph::getTrackNum() const {

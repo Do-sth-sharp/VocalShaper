@@ -16,15 +16,21 @@ public:
 
 	void paint(juce::Graphics& g) override;
 
+	void mouseDown(const juce::MouseEvent& event) override;
+	void mouseDrag(const juce::MouseEvent& event) override;
+
 public:
 	std::function<void(double)> onChange;
 
 private:
 	const juce::String name;
+	const double defaultValue;
 	const double minValue, maxValue;
 	const int numberOfDecimalPlaces;
 	double value = 0;
 	juce::String valueStr;
+
+	double pressedValue = 0;
 
 	double limitValue(double value) const;
 

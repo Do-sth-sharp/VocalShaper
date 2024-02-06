@@ -80,6 +80,9 @@ public:
 	static void setTrackMIDIOutputToDevice(int index, bool output);
 	static void setTrackAudioOutputToDevice(int index, int channel, int dstChannel, bool output);
 	static void setTrackAudioOutputToSend(int index, int channel, int trackIndex, int dstChannel, bool output);
+	static void setTrackGain(int index, float value);
+	static void setTrackPan(int index, float value);
+	static void setTrackFader(int index, float value);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();

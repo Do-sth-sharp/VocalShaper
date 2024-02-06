@@ -768,6 +768,37 @@ namespace quickAPI {
 		return {};
 	}
 
+	float getMixerTrackGain(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getGain();
+			}
+		}
+		return 0;
+	}
+
+	float getMixerTrackPan(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getPan();
+			}
+		}
+		return 0;
+	}
+
+	float getMixerTrackFader(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getSlider();
+			}
+		}
+		return 1;
+	}
+
+	bool isMixerTrackPanValid(int index) {
+		return getMixerTrackChannelSet(index).size() == 2;
+	}
+
 	const juce::String getAudioDeviceName(bool isInput) {
 		return isInput
 			? Device::getInstance()->getAudioInputDeviceName()

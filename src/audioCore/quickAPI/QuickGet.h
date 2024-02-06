@@ -143,6 +143,10 @@ namespace quickAPI {
 	bool getMixerTrackMIDIOutputToDevice(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioOutputToSend(int index);
+	float getMixerTrackGain(int index);
+	float getMixerTrackPan(int index);
+	float getMixerTrackFader(int index);
+	bool isMixerTrackPanValid(int index);
 
 	const juce::String getAudioDeviceName(bool isInput);
 	int getAudioDeviceChannelNum(bool isInput);

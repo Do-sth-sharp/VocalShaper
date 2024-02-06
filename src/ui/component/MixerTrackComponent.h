@@ -16,6 +16,10 @@ public:
 	void paintOverChildren(juce::Graphics& g) override;
 
 	void update(int index);
+	void updateGain();
+	void updatePan();
+	void updateFader();
+	void updateMute();
 
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
@@ -31,6 +35,7 @@ private:
 	juce::Colour trackColor, nameColor;
 	juce::String name;
 	bool dragHovered = false;
+	bool panValid = true;
 
 	std::unique_ptr<SideChainComponent> sideChain = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> midiInput = nullptr;

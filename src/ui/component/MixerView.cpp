@@ -24,9 +24,37 @@ MixerView::MixerView()
 
 	/** Update Callback */
 	CoreCallbacks::getInstance()->addTrackChanged(
-		[comp = MixerView::SafePointer(this)](int) {
+		[comp = MixerView::SafePointer(this)](int index) {
 			if (comp) {
-				comp->update();
+				comp->update(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addTrackGainChanged(
+		[comp = MixerView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateGain(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addTrackPanChanged(
+		[comp = MixerView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updatePan(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addTrackFaderChanged(
+		[comp = MixerView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateFader(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addTrackMuteChanged(
+		[comp = MixerView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateMute(index);
 			}
 		}
 	);
@@ -58,7 +86,7 @@ void MixerView::paint(juce::Graphics& g) {
 	g.fillAll();
 }
 
-void MixerView::update() {
+void MixerView::update(int index) {
 	/** Create Or Remove Track */
 	int currentSize = this->trackList.size();
 	int newSize = quickAPI::getMixerTrackNum();
@@ -76,18 +104,52 @@ void MixerView::update() {
 	}
 
 	/** Update Tracks */
-	for (int i = 0; i < this->trackList.size(); i++) {
-		this->trackList[i]->update(i);
+	if (index >= 0 && index < this->trackList.size()) {
+		this->trackList[index]->update(index);
+	}
+	else {
+		for (int i = 0; i < this->trackList.size(); i++) {
+			this->trackList[i]->update(i);
+		}
 	}
 
 	/** Update Color Temp */
-	this->colorTemp.clear();
-	for (int i = 0; i < this->trackList.size(); i++) {
-		this->colorTemp.add(quickAPI::getMixerTrackColor(i));
+	if (index >= 0 && index < this->colorTemp.size()) {
+		this->colorTemp.getReference(index) = quickAPI::getMixerTrackColor(index);
+	}
+	else {
+		this->colorTemp.clear();
+		for (int i = 0; i < this->trackList.size(); i++) {
+			this->colorTemp.add(quickAPI::getMixerTrackColor(i));
+		}
 	}
 
 	/** Update View Pos */
 	this->hScroller->update();
+}
+
+void MixerView::updateGain(int index) {
+	if (index >= 0 && index < this->trackList.size()) {
+		this->trackList[index]->updateGain();
+	}
+}
+
+void MixerView::updatePan(int index) {
+	if (index >= 0 && index < this->trackList.size()) {
+		this->trackList[index]->updatePan();
+	}
+}
+
+void MixerView::updateFader(int index) {
+	if (index >= 0 && index < this->trackList.size()) {
+		this->trackList[index]->updateFader();
+	}
+}
+
+void MixerView::updateMute(int index) {
+	if (index >= 0 && index < this->trackList.size()) {
+		this->trackList[index]->updateMute();
+	}
 }
 
 int MixerView::getViewWidth() const {

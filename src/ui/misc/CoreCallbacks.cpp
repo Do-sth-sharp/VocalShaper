@@ -34,6 +34,22 @@ CoreCallbacks::CoreCallbacks() {
 		[](int index) {
 			CoreCallbacks::getInstance()->invokeTrackChanged(index);
 		});
+	UICallbackAPI<int>::set(UICallbackType::TrackGainChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeTrackGainChanged(index);
+		});
+	UICallbackAPI<int>::set(UICallbackType::TrackPanChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeTrackPanChanged(index);
+		});
+	UICallbackAPI<int>::set(UICallbackType::TrackFaderChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeTrackFaderChanged(index);
+		});
+	UICallbackAPI<int>::set(UICallbackType::TrackMuteChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeTrackMuteChanged(index);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -66,6 +82,22 @@ void CoreCallbacks::addInstrChanged(const InstrChangedCallback& callback) {
 
 void CoreCallbacks::addTrackChanged(const TrackChangedCallback& callback) {
 	this->trackChanged.add(callback);
+}
+
+void CoreCallbacks::addTrackGainChanged(const TrackChangedCallback& callback) {
+	this->trackGainChanged.add(callback);
+}
+
+void CoreCallbacks::addTrackPanChanged(const TrackChangedCallback& callback) {
+	this->trackPanChanged.add(callback);
+}
+
+void CoreCallbacks::addTrackFaderChanged(const TrackChangedCallback& callback) {
+	this->trackFaderChanged.add(callback);
+}
+
+void CoreCallbacks::addTrackMuteChanged(const TrackChangedCallback& callback) {
+	this->trackMuteChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -113,6 +145,30 @@ void CoreCallbacks::invokeInstrChanged(int index) const {
 
 void CoreCallbacks::invokeTrackChanged(int index) const {
 	for (auto& i : this->trackChanged) {
+		i(index);
+	}
+}
+
+void CoreCallbacks::invokeTrackGainChanged(int index) const {
+	for (auto& i : this->trackGainChanged) {
+		i(index);
+	}
+}
+
+void CoreCallbacks::invokeTrackPanChanged(int index) const {
+	for (auto& i : this->trackPanChanged) {
+		i(index);
+	}
+}
+
+void CoreCallbacks::invokeTrackFaderChanged(int index) const {
+	for (auto& i : this->trackFaderChanged) {
+		i(index);
+	}
+}
+
+void CoreCallbacks::invokeTrackMuteChanged(int index) const {
+	for (auto& i : this->trackMuteChanged) {
 		i(index);
 	}
 }

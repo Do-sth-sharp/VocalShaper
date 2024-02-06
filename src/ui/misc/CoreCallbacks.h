@@ -22,6 +22,10 @@ public:
 	void addInstrChanged(const InstrChangedCallback& callback);
 	using TrackChangedCallback = std::function<void(int)>;
 	void addTrackChanged(const TrackChangedCallback& callback);
+	void addTrackGainChanged(const TrackChangedCallback& callback);
+	void addTrackPanChanged(const TrackChangedCallback& callback);
+	void addTrackFaderChanged(const TrackChangedCallback& callback);
+	void addTrackMuteChanged(const TrackChangedCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
@@ -31,6 +35,10 @@ public:
 	void invokeSourceChanged(int index) const;
 	void invokeInstrChanged(int index) const;
 	void invokeTrackChanged(int index) const;
+	void invokeTrackGainChanged(int index) const;
+	void invokeTrackPanChanged(int index) const;
+	void invokeTrackFaderChanged(int index) const;
+	void invokeTrackMuteChanged(int index) const;
 
 private:
 	juce::Array<ErrorCallback> error;
@@ -41,6 +49,10 @@ private:
 	juce::Array<SourceChangedCallback> sourceChanged;
 	juce::Array<InstrChangedCallback> instrChanged;
 	juce::Array<TrackChangedCallback> trackChanged;
+	juce::Array<TrackChangedCallback> trackGainChanged;
+	juce::Array<TrackChangedCallback> trackPanChanged;
+	juce::Array<TrackChangedCallback> trackFaderChanged;
+	juce::Array<TrackChangedCallback> trackMuteChanged;
 
 public:
 	static CoreCallbacks* getInstance();

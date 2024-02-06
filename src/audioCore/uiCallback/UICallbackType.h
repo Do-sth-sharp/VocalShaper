@@ -9,6 +9,10 @@ enum class UICallbackType : int {
 	SourceChanged,
 	InstrChanged,
 	TrackChanged,
+	TrackGainChanged,
+	TrackPanChanged,
+	TrackFaderChanged,
+	TrackMuteChanged,
 
 	TypeMaxNum
 };

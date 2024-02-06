@@ -378,6 +378,21 @@ void CoreActions::setTrackAudioOutputToSend(
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setTrackGain(int index, float value) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackGain{ index, value });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackPan(int index, float value) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackPan{ index, value });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackFader(int index, float value) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackSlider{ index, value });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

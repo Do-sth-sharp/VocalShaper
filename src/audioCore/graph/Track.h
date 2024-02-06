@@ -10,6 +10,8 @@ public:
 	Track() = delete;
 	Track(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
+	void updateIndex(int index);
+
 	/**
 	 * @brief	Add an audio input bus onto the track.
 	 */
@@ -69,6 +71,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
+	int index = -1;
+
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioChannelSet audioChannels;
@@ -79,7 +83,7 @@ private:
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> slider;
 	std::atomic<bool> isMute = false;
 
-	float panValue = 0.0;
+	std::atomic<float> panValue = 0.0;
 
 	juce::String trackName;
 	juce::Colour trackColor;

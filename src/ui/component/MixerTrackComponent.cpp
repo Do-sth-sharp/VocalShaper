@@ -25,10 +25,16 @@ MixerTrackComponent::MixerTrackComponent() {
 	/** Knob */
 	this->gainKnob = std::make_unique<KnobBase>(
 		TRANS("Gain"), 0, -10, 10, 1);
+	this->gainKnob->onChange = [this](double value) {
+		CoreActions::setTrackGain(this->index, (float)value);
+		};
 	this->addAndMakeVisible(this->gainKnob.get());
 
 	this->panKnob = std::make_unique<KnobBase>(
 		TRANS("Pan"), 0, -1, 1, 2);
+	this->panKnob->onChange = [this](double value) {
+		CoreActions::setTrackPan(this->index, (float)value);
+		};
 	this->addAndMakeVisible(this->panKnob.get());
 }
 
@@ -48,7 +54,7 @@ void MixerTrackComponent::resized() {
 
 	int knobPaddingWidth = screenSize.getWidth() * 0.0025;
 	int knobHeight = screenSize.getHeight() * 0.075;
-	int knobWidth = (this->getWidth()- knobPaddingWidth * 2) / 2;
+	int knobWidth = (this->getWidth()- knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
 	int knobHideHeight = screenSize.getHeight() * 0.2;
 	bool knobShown = this->getHeight() >= knobHideHeight;
 
@@ -89,15 +95,17 @@ void MixerTrackComponent::resized() {
 			knobWidth, knobHeight);
 		this->gainKnob->setBounds(gainRect);
 
-		juce::Rectangle<int> panRect(
-			this->getWidth() - knobPaddingWidth - knobWidth, top,
-			knobWidth, knobHeight);
-		this->panKnob->setBounds(panRect);
+		if (this->panValid) {
+			juce::Rectangle<int> panRect(
+				this->getWidth() - knobPaddingWidth - knobWidth, top,
+				knobWidth, knobHeight);
+			this->panKnob->setBounds(panRect);
+		}
 
 		top += knobHeight;
 	}
 	this->gainKnob->setVisible(knobShown);
-	this->panKnob->setVisible(knobShown);
+	this->panKnob->setVisible(knobShown && this->panValid);
 
 	/** Output */
 	if (ioShown) {
@@ -195,8 +203,29 @@ void MixerTrackComponent::update(int index) {
 		this->midiOutput->update(index);
 		this->audioOutput->update(index);
 
+		this->gainKnob->setValue(quickAPI::getMixerTrackGain(index));
+		this->panKnob->setValue(quickAPI::getMixerTrackPan(index));
+		this->panValid = quickAPI::isMixerTrackPanValid(index);
+
+		this->resized();
 		this->repaint();
 	}
+}
+
+void MixerTrackComponent::updateGain() {
+	this->gainKnob->setValue(quickAPI::getMixerTrackGain(this->index));
+}
+
+void MixerTrackComponent::updatePan() {
+	this->panKnob->setValue(quickAPI::getMixerTrackPan(this->index));
+}
+
+void MixerTrackComponent::updateFader() {
+	/** TODO */
+}
+
+void MixerTrackComponent::updateMute() {
+	/** TODO */
 }
 
 void MixerTrackComponent::mouseMove(const juce::MouseEvent& event) {

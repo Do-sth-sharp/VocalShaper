@@ -69,6 +69,13 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->trackColor = utils::getDefaultColour();
 }
 
+void Track::updateIndex(int index) {
+	this->index = index;
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+}
+
 bool Track::addAdditionalAudioBus() {
 	/** Check Channel Num */
 	if (this->getTotalNumInputChannels() + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
@@ -106,7 +113,7 @@ bool Track::addAdditionalAudioBus() {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
 
 	return true;
 }
@@ -144,7 +151,7 @@ bool Track::removeAdditionalAudioBus() {
 	this->removeIllegalConnections();
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
 
 	return true;
 }
@@ -157,7 +164,7 @@ void Track::setMute(bool mute) {
 	this->isMute = mute;
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackMuteChanged, this->index);
 }
 
 bool Track::getMute() const {
@@ -169,7 +176,7 @@ void Track::setGain(float gain) {
 	gainDsp.setGainDecibels(gain);
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackGainChanged, this->index);
 }
 
 float Track::getGain() const {
@@ -185,7 +192,7 @@ void Track::setPan(float pan) {
 	panDsp.setPan(pan);
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackPanChanged, this->index);
 }
 
 float Track::getPan() const {
@@ -197,7 +204,7 @@ void Track::setSlider(float slider) {
 	sliderDsp.setGainLinear(slider);
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackFaderChanged, this->index);
 }
 
 float Track::getSlider() const {
@@ -209,7 +216,7 @@ void Track::setTrackName(const juce::String& name) {
 	this->trackName = name;
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
 }
 
 const juce::String Track::getTrackName() const {
@@ -220,7 +227,7 @@ void Track::setTrackColor(const juce::Colour& color) {
 	this->trackColor = color;
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
 }
 
 const juce::Colour Track::getTrackColor() const {

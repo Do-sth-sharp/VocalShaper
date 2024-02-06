@@ -5,7 +5,8 @@
 
 KnobBase::KnobBase(const juce::String& name, double defaultValue,
 	double minValue, double maxValue, int numberOfDecimalPlaces)
-	: name(name), minValue(minValue), maxValue(maxValue),
+	: name(name), defaultValue(defaultValue),
+	minValue(minValue), maxValue(maxValue),
 	numberOfDecimalPlaces(numberOfDecimalPlaces) {
 	this->setValue(defaultValue);
 	this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
@@ -108,6 +109,26 @@ void KnobBase::paint(juce::Graphics& g) {
 	g.setFont(valueFont);
 	g.drawFittedText(this->valueStr, valueRect.toNearestInt(),
 		juce::Justification::centred, 1, 0.f);
+}
+
+void KnobBase::mouseDown(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		this->pressedValue = this->value;
+	}
+	else if (event.mods.isRightButtonDown()) {
+		this->setValue(this->defaultValue, true);
+	}
+}
+
+void KnobBase::mouseDrag(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()
+		&& event.mouseWasDraggedSinceMouseDown()) {
+		int dy = event.getDistanceFromDragStartY();
+
+		double dValue = -dy * (this->maxValue - this->minValue) / 200;
+
+		this->setValue(this->pressedValue + dValue, true);
+	}
 }
 
 double KnobBase::limitValue(double value) const {
