@@ -21,6 +21,15 @@ MixerTrackComponent::MixerTrackComponent() {
 
 	this->audioOutput = std::make_unique<MixerTrackIOComponent>(false, false);
 	this->addAndMakeVisible(this->audioOutput.get());
+
+	/** Knob */
+	this->gainKnob = std::make_unique<KnobBase>(
+		TRANS("Gain"), 0, -10, 10, 1);
+	this->addAndMakeVisible(this->gainKnob.get());
+
+	this->panKnob = std::make_unique<KnobBase>(
+		TRANS("Pan"), 0, -1, 1, 2);
+	this->addAndMakeVisible(this->panKnob.get());
 }
 
 void MixerTrackComponent::resized() {
@@ -34,8 +43,14 @@ void MixerTrackComponent::resized() {
 
 	int ioHeight = screenSize.getHeight() * 0.02;
 	int ioWidth = ioHeight;
-	int ioHideHeight = screenSize.getHeight() * 0.2;
+	int ioHideHeight = screenSize.getHeight() * 0.25;
 	bool ioShown = this->getHeight() >= ioHideHeight;
+
+	int knobPaddingWidth = screenSize.getWidth() * 0.0025;
+	int knobHeight = screenSize.getHeight() * 0.075;
+	int knobWidth = (this->getWidth()- knobPaddingWidth * 2) / 2;
+	int knobHideHeight = screenSize.getHeight() * 0.2;
+	bool knobShown = this->getHeight() >= knobHideHeight;
 
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;
@@ -66,6 +81,23 @@ void MixerTrackComponent::resized() {
 	}
 	this->midiInput->setVisible(ioShown);
 	this->audioInput->setVisible(ioShown);
+
+	/** Knob */
+	if (knobShown) {
+		juce::Rectangle<int> gainRect(
+			knobPaddingWidth, top,
+			knobWidth, knobHeight);
+		this->gainKnob->setBounds(gainRect);
+
+		juce::Rectangle<int> panRect(
+			this->getWidth() - knobPaddingWidth - knobWidth, top,
+			knobWidth, knobHeight);
+		this->panKnob->setBounds(panRect);
+
+		top += knobHeight;
+	}
+	this->gainKnob->setVisible(knobShown);
+	this->panKnob->setVisible(knobShown);
 
 	/** Output */
 	if (ioShown) {

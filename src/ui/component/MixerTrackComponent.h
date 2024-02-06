@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "SideChainComponent.h"
 #include "MixerTrackIOComponent.h"
+#include "KnobBase.h"
 
 class MixerTrackComponent final
 	: public juce::Component,
@@ -36,6 +37,8 @@ private:
 	std::unique_ptr<MixerTrackIOComponent> audioInput = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> midiOutput = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> audioOutput = nullptr;
+	std::unique_ptr<KnobBase> gainKnob = nullptr;
+	std::unique_ptr<KnobBase> panKnob = nullptr;
 
 	void preDrop();
 	void endDrop();
