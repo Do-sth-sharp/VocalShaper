@@ -171,10 +171,6 @@ bool ActionSetMixerTrackGain::doAction() {
 			ACTION_DATA(oldValue) = track->getGain();
 
 			track->setGain(ACTION_DATA(value));
-
-			juce::String result;
-			result += "Set Mixer Track Gain Value: <" + juce::String(ACTION_DATA(track)) + "> " + juce::String(track->getGain()) + "\n";
-			this->output(result);
 			ACTION_RESULT(true);
 		}
 	}
@@ -236,10 +232,6 @@ bool ActionSetMixerTrackPan::doAction() {
 			ACTION_DATA(oldValue) = track->getPan();
 
 			track->setPan(ACTION_DATA(value));
-
-			juce::String result;
-			result += "Set Mixer Track Pan Value: <" + juce::String(ACTION_DATA(track)) + "> " + juce::String(track->getPan()) + "\n";
-			this->output(result);
 			ACTION_RESULT(true);
 		}
 	}
@@ -301,10 +293,6 @@ bool ActionSetMixerTrackSlider::doAction() {
 			ACTION_DATA(oldValue) = track->getSlider();
 
 			track->setSlider(ACTION_DATA(value));
-
-			juce::String result;
-			result += "Set Mixer Track Slider Value: <" + juce::String(ACTION_DATA(track)) + "> " + juce::String(track->getSlider()) + "\n";
-			this->output(result);
 			ACTION_RESULT(true);
 		}
 	}
