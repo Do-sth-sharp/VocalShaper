@@ -4,6 +4,7 @@
 #include "SideChainComponent.h"
 #include "MixerTrackIOComponent.h"
 #include "KnobBase.h"
+#include "FaderBase.h"
 
 class MixerTrackComponent final
 	: public juce::Component,
@@ -44,6 +45,7 @@ private:
 	std::unique_ptr<MixerTrackIOComponent> audioOutput = nullptr;
 	std::unique_ptr<KnobBase> gainKnob = nullptr;
 	std::unique_ptr<KnobBase> panKnob = nullptr;
+	std::unique_ptr<FaderBase> fader = nullptr;
 
 	void preDrop();
 	void endDrop();

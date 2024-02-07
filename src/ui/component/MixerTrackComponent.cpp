@@ -36,6 +36,12 @@ MixerTrackComponent::MixerTrackComponent() {
 		CoreActions::setTrackPan(this->index, (float)value);
 		};
 	this->addAndMakeVisible(this->panKnob.get());
+
+	/** Fader */
+	this->fader = std::make_unique<FaderBase>(
+		1.0, juce::Array<double>{ 6.0, 0.0, -5.0, -10.0, -15.0, -20.0, -30.0, -40.0, -60.0, -100.0 },
+		0.0, 2.0, 0);
+	this->addAndMakeVisible(this->fader.get());
 }
 
 void MixerTrackComponent::resized() {
@@ -58,6 +64,12 @@ void MixerTrackComponent::resized() {
 	int knobHideHeight = screenSize.getHeight() * 0.2;
 	bool knobShown = this->getHeight() >= knobHideHeight;
 
+	int faderPaddingWidth = screenSize.getWidth() * 0.0025;
+	int faderHeight = screenSize.getHeight() * 0.1;
+	int faderWidth = (this->getWidth() - faderPaddingWidth * 2) / 2;
+	int faderHideHeight = screenSize.getHeight() * 0.2;
+	bool faderShown = this->getHeight() >= faderHideHeight;
+
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;
 
@@ -67,7 +79,7 @@ void MixerTrackComponent::resized() {
 			0, top, this->getWidth(), sideChainHeight);
 		this->sideChain->setBounds(sideChainRect);
 
-		top += sideChainRect.getHeight();
+		top += sideChainHeight;
 	}
 	this->sideChain->setVisible(sideChainShown);
 
@@ -123,6 +135,17 @@ void MixerTrackComponent::resized() {
 	}
 	this->midiOutput->setVisible(ioShown);
 	this->audioOutput->setVisible(ioShown);
+
+	/** Fader */
+	if (faderShown) {
+		juce::Rectangle<int> faderRect(
+			faderPaddingWidth, bottom - faderHeight,
+			faderWidth, faderHeight);
+		this->fader->setBounds(faderRect);
+
+		bottom -= faderHeight;
+	}
+	this->fader->setVisible(faderShown);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {
