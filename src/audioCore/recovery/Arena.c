@@ -29,16 +29,13 @@ void arenaClearQuick(Arena* a) {
 char* arenaAlloc(Arena* a, size_t size) {
 	if (!a) { return NULL; }
 
-	/** Allocated Enough */
-	if (a->sizeAllocated >= (a->sizeUsed + size)) {
-		goto getPointer;
+	/** Allocate Next Block */
+	while (a->sizeAllocated < (a->sizeUsed + size)) {
+		a->ptr = realloc(a->ptr, (a->sizeAllocated += a->sizeNextAlloc));
+		a->sizeNextAlloc *= 2;
 	}
 
-	/** Allocate Next Block */
-	a->ptr = realloc(a->ptr, (a->sizeAllocated += a->sizeNextAlloc));
-	a->sizeNextAlloc *= 2;
-
-getPointer:
+	/** Alloc From  Pool */
 	char* ptr = &((a->ptr)[a->sizeUsed]);
 	a->sizeUsed += size;
 	return ptr;
