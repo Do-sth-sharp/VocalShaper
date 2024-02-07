@@ -147,6 +147,9 @@ public:
 		return "Set Mixer Track Gain";
 	};
 
+	juce::UndoableAction* createCoalescedAction(
+		juce::UndoableAction* nextAction) override;
+
 private:
 	ACTION_DATABLOCK{
 		const int track;
@@ -170,6 +173,9 @@ public:
 		return "Set Mixer Track Pan";
 	};
 
+	juce::UndoableAction* createCoalescedAction(
+		juce::UndoableAction* nextAction) override;
+
 private:
 	ACTION_DATABLOCK{
 		const int track;
@@ -192,6 +198,9 @@ public:
 	const juce::String getName() override {
 		return "Set Mixer Track Slider";
 	};
+
+	juce::UndoableAction* createCoalescedAction(
+		juce::UndoableAction* nextAction) override;
 
 private:
 	ACTION_DATABLOCK{

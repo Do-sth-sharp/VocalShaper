@@ -205,6 +205,19 @@ bool ActionSetMixerTrackGain::undo() {
 	ACTION_RESULT(false);
 }
 
+juce::UndoableAction* ActionSetMixerTrackGain::createCoalescedAction(
+	juce::UndoableAction* nextAction) {
+	if (auto action = dynamic_cast<ActionSetMixerTrackGain*>(nextAction)) {
+		if (this->_data.track == action->_data.track) {
+			auto newAction = std::make_unique<ActionSetMixerTrackGain>(
+				action->_data.track, action->_data.value);
+			newAction->_data.oldValue = this->_data.oldValue;
+			return newAction.release();
+		}
+	}
+	return nullptr;
+}
+
 ActionSetMixerTrackPan::ActionSetMixerTrackPan(
 	int track, float value)
 	: ACTION_DB{ track, value } {}
@@ -257,6 +270,19 @@ bool ActionSetMixerTrackPan::undo() {
 	ACTION_RESULT(false);
 }
 
+juce::UndoableAction* ActionSetMixerTrackPan::createCoalescedAction(
+	juce::UndoableAction* nextAction) {
+	if (auto action = dynamic_cast<ActionSetMixerTrackPan*>(nextAction)) {
+		if (this->_data.track == action->_data.track) {
+			auto newAction = std::make_unique<ActionSetMixerTrackPan>(
+				action->_data.track, action->_data.value);
+			newAction->_data.oldValue = this->_data.oldValue;
+			return newAction.release();
+		}
+	}
+	return nullptr;
+}
+
 ActionSetMixerTrackSlider::ActionSetMixerTrackSlider(
 	int track, float value)
 	: ACTION_DB{ track, value } {}
@@ -307,6 +333,19 @@ bool ActionSetMixerTrackSlider::undo() {
 	}
 
 	ACTION_RESULT(false);
+}
+
+juce::UndoableAction* ActionSetMixerTrackSlider::createCoalescedAction(
+	juce::UndoableAction* nextAction) {
+	if (auto action = dynamic_cast<ActionSetMixerTrackSlider*>(nextAction)) {
+		if (this->_data.track == action->_data.track) {
+			auto newAction = std::make_unique<ActionSetMixerTrackSlider>(
+				action->_data.track, action->_data.value);
+			newAction->_data.oldValue = this->_data.oldValue;
+			return newAction.release();
+		}
+	}
+	return nullptr;
 }
 
 ActionSetEffectBypass::ActionSetEffectBypass(
