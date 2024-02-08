@@ -8,6 +8,7 @@
 #include "../component/ConfigWindow.h"
 #include "../misc/MainThreadPool.h"
 #include "../misc/Tools.h"
+#include "../misc/ConfigManager.h"
 #include <FlowUI.h>
 
 juce::ApplicationCommandTarget* GUICommandTarget::getNextCommandTarget() {
@@ -474,8 +475,13 @@ void GUICommandTarget::openConfig(int page) const {
 }
 
 void GUICommandTarget::help() const {
+	/** Get Config */
+	auto& conf = ConfigManager::getInstance()->get("startup");
+	juce::String transName = conf["language"].toString();
+
+	/** Launch Page */
 	utils::getHelpPage(utils::getAudioPlatformVersionString(),
-		utils::getReleaseBranch()).launchInDefaultBrowser();
+		utils::getReleaseBranch(), transName).launchInDefaultBrowser();
 }
 
 void GUICommandTarget::update() const {
