@@ -8,6 +8,7 @@ namespace audioLock {
 		juce::ReadWriteLock pluginLock;
 		juce::ReadWriteLock positionLock;
 		juce::ReadWriteLock mackieLock;
+		juce::ReadWriteLock levelMeterLock;
 	};
 
 	static LockHelper* lock = new LockHelper;
@@ -30,5 +31,9 @@ namespace audioLock {
 
 	juce::ReadWriteLock& getMackieLock() {
 		return lock->mackieLock;
+	}
+
+	juce::ReadWriteLock& getLevelMeterLock() {
+		return lock->levelMeterLock;
 	}
 }

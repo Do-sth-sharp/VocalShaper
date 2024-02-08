@@ -1,6 +1,7 @@
 ﻿#include "Track.h"
 
 #include "../misc/Renderer.h"
+#include "../misc/AudioLock.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -64,6 +65,9 @@ Track::Track(const juce::AudioChannelSet& type)
 	/** Connect MIDI IO Node */
 	this->addConnection(
 		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->midiOutputNode->nodeID, this->midiChannelIndex} });
+
+	/** Set Level Size */
+	this->outputLevels.resize(mainBusOutputChannels);
 
 	/** Default Color */
 	this->trackColor = utils::getDefaultColour();
@@ -290,6 +294,11 @@ void Track::clearGraph() {
 	this->setSlider(1);
 }
 
+const juce::Array<float> Track::getOutputLevels() const {
+	juce::ScopedReadLock locker(audioLock::getLevelMeterLock());
+	return this->outputLevels;
+}
+
 bool Track::parse(const google::protobuf::Message* data) {
 	auto mes = dynamic_cast<const vsp4::MixerTrack*>(data);
 	if (!mes) { return false; }
@@ -364,6 +373,12 @@ void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& mid
 
 	/** Process Slider */
 	this->slider.process(juce::dsp::ProcessContextReplacing<float>(block));
+
+	/** Update Level Meter */
+	for (int i = 0; i < buffer.getNumChannels() && i < this->outputLevels.size(); i++) {
+		this->outputLevels.getReference(i) =
+			buffer.getRMSLevel(i, 0, buffer.getNumSamples());
+	}
 
 	/** Render */
 	if (Renderer::getInstance()->getRendering()) {

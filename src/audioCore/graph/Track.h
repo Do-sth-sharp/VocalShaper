@@ -45,6 +45,8 @@ public:
 
 	void clearGraph();
 
+	const juce::Array<float> getOutputLevels() const;
+
 	class SafePointer {
 	private:
 		juce::WeakReference<Track> weakRef;
@@ -87,6 +89,8 @@ private:
 
 	juce::String trackName;
 	juce::Colour trackColor;
+
+	juce::Array<float> outputLevels;
 
 private:
 	bool canAddBus(bool isInput) const override;

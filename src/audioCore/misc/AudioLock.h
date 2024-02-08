@@ -8,4 +8,5 @@ namespace audioLock {
 	juce::ReadWriteLock& getPluginLock();
 	juce::ReadWriteLock& getPositionLock();
 	juce::ReadWriteLock& getMackieLock();
+	juce::ReadWriteLock& getLevelMeterLock();
 }

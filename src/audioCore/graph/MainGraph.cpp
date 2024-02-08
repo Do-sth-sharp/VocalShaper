@@ -66,7 +66,7 @@ void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 
 	/** Set Level Size */
 	{
-		juce::ScopedWriteLock locker(this->levelsLock);
+		juce::ScopedWriteLock locker(audioLock::getLevelMeterLock());
 		this->outputLevels.resize(outputChannelNum);
 	}
 }
@@ -213,7 +213,7 @@ void MainGraph::clearGraph() {
 }
 
 const juce::Array<float> MainGraph::getOutputLevels() const {
-	juce::ScopedReadLock locker(this->levelsLock);
+	juce::ScopedReadLock locker(audioLock::getLevelMeterLock());
 	return this->outputLevels;
 }
 
@@ -500,6 +500,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Lock */
+	juce::ScopedWriteLock levelLocker(audioLock::getLevelMeterLock());
 	juce::ScopedTryReadLock audioLocker(audioLock::getAudioLock());
 	juce::ScopedTryWriteLock sourceLocker(audioLock::getAudioLock());
 	juce::ScopedTryReadLock pluginLocker(audioLock::getPluginLock());
@@ -565,7 +566,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Process Audio Block */
 	{
-		juce::ScopedTryReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
+		juce::ScopedReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
 		this->recorder->processBlock(audio, midi);
 		this->juce::AudioProcessorGraph::processBlock(audio, midi);
 	}
@@ -577,12 +578,9 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	}
 
 	/** Get Level */
-	{
-		juce::ScopedWriteLock locker(this->levelsLock);
-		for (int i = 0; i < audio.getNumChannels() && i < this->outputLevels.size(); i++) {
-			this->outputLevels.getReference(i) =
-				audio.getRMSLevel(i, 0, audio.getNumSamples());
-		}
+	for (int i = 0; i < audio.getNumChannels() && i < this->outputLevels.size(); i++) {
+		this->outputLevels.getReference(i) =
+			audio.getRMSLevel(i, 0, audio.getNumSamples());
 	}
 
 	/** MIDI Output */

@@ -147,6 +147,7 @@ namespace quickAPI {
 	float getMixerTrackPan(int index);
 	float getMixerTrackFader(int index);
 	bool isMixerTrackPanValid(int index);
+	const juce::Array<float> getMixerTrackOutputLevel(int index);
 
 	const juce::String getAudioDeviceName(bool isInput);
 	int getAudioDeviceChannelNum(bool isInput);

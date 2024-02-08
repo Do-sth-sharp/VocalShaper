@@ -5,9 +5,6 @@
 #include "../../audioCore/AC_API.h"
 
 TimeComponent::TimeComponent() {
-	/** Animate */
-	this->setFramesPerSecond(25);
-
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSysStatus());
@@ -18,7 +15,7 @@ TimeComponent::TimeComponent() {
 	this->showSec = conf["show-sec"];
 }
 
-void TimeComponent::update() {
+void TimeComponent::updateLevelMeter() {
 	/** Get Values From Audio Core */
 	std::tie(this->timeInMeasure, this->timeInBeat) = quickAPI::getTimeInBeat();
 	this->timeInSec = quickAPI::getTimeInSecond();
@@ -28,6 +25,9 @@ void TimeComponent::update() {
 		(levels.size() > 1) ? levels[1] : 0.f };
 	this->isPlaying = quickAPI::isPlaying();
 	this->isRecording = quickAPI::isRecording();
+
+	/** Repaint */
+	this->repaint();
 }
 
 void TimeComponent::paint(juce::Graphics& g) {

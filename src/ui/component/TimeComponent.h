@@ -1,13 +1,16 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../misc/LevelMeterHub.h"
 
-class TimeComponent final : public juce::AnimatedAppComponent,
+class TimeComponent final
+	: public juce::Component,
+	public LevelMeterHub::Target,
 	public juce::SettableTooltipClient {
 public:
 	TimeComponent();
 
-	void update() override;
+	void updateLevelMeter() override;
 	void paint(juce::Graphics& g) override;
 
 	void mouseUp(const juce::MouseEvent& event) override;
