@@ -568,9 +568,9 @@ void TimeComponent::paintLevelMeter(
 
 	/** Log Value */
 	if (logMeter) {
-		constexpr float rmsNum = 70.f;
-		left = std::max(utils::getLogLevelPercent(utils::logRMS(left)), 0.f);
-		right = std::max(utils::getLogLevelPercent(utils::logRMS(right)), 0.f);
+		constexpr float rmsNum = 60.f;
+		left = std::max(utils::getLogLevelPercent(utils::logRMS(left), rmsNum), 0.f);
+		right = std::max(utils::getLogLevelPercent(utils::logRMS(right), rmsNum), 0.f);
 	}
 
 	/** Level Color */

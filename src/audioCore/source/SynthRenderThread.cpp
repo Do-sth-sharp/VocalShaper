@@ -16,8 +16,8 @@ SynthRenderThread::~SynthRenderThread() {
 }
 
 void SynthRenderThread::setDstSource(CloneableSource::SafePointer<> dst) {
-	/** Lock Buffer */
-	juce::ScopedWriteLock audioLocker(audioLock::getAudioLock());
+	/** Check Thread Running */
+	if (this->isThreadRunning()) { return; }
 
 	/** Set Source */
 	this->dst = dst;

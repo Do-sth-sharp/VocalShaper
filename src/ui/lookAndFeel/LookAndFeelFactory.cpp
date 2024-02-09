@@ -17,6 +17,7 @@
 #include "ScrollerLookAndFeel.h"
 #include "ColorEditorLookAndFeel.h"
 #include "SideChainLookAndFeel.h"
+#include "LevelMeterLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -102,6 +103,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Side Chain */
 	this->sideChainLAF = std::make_unique<SideChainLookAndFeel>();
+
+	/** Level Meter */
+	this->levelMeterLAF = std::make_unique<LevelMeterLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -175,6 +179,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forColorEditor() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forSideChain() const {
 	return this->sideChainLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forLevelMeter() const {
+	return this->levelMeterLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

@@ -45,6 +45,10 @@ MixerTrackComponent::MixerTrackComponent() {
 		CoreActions::setTrackFader(this->index, (float)value);
 		};
 	this->addAndMakeVisible(this->fader.get());
+
+	/** Level Meter */
+	this->levelMeter = std::make_unique<MixerTrackLevelMeter>();
+	this->addAndMakeVisible(this->levelMeter.get());
 }
 
 void MixerTrackComponent::resized() {
@@ -139,16 +143,22 @@ void MixerTrackComponent::resized() {
 	this->midiOutput->setVisible(ioShown);
 	this->audioOutput->setVisible(ioShown);
 
-	/** Fader */
+	/** Fader And Level Meter */
 	if (faderShown) {
 		juce::Rectangle<int> faderRect(
 			faderPaddingWidth, bottom - faderHeight,
 			faderWidth, faderHeight);
 		this->fader->setBounds(faderRect);
 
+		juce::Rectangle<int> levelRect(
+			this->getWidth() - faderPaddingWidth - faderWidth, bottom - faderHeight,
+			faderWidth, faderHeight);
+		this->levelMeter->setBounds(levelRect);
+
 		bottom -= faderHeight;
 	}
 	this->fader->setVisible(faderShown);
+	this->levelMeter->setVisible(faderShown);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {
@@ -233,6 +243,8 @@ void MixerTrackComponent::update(int index) {
 		this->panKnob->setValue(quickAPI::getMixerTrackPan(index));
 		this->panValid = quickAPI::isMixerTrackPanValid(index);
 
+		this->levelMeter->update(index);
+
 		this->resized();
 		this->repaint();
 	}
@@ -247,7 +259,7 @@ void MixerTrackComponent::updatePan() {
 }
 
 void MixerTrackComponent::updateFader() {
-	/** TODO */
+	this->fader->setValue(quickAPI::getMixerTrackFader(this->index));
 }
 
 void MixerTrackComponent::updateMute() {
