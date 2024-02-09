@@ -1,54 +1,78 @@
-﻿{
-	"toolBar": {
-		"id": 0,
-		"size": 0.09
-	},
-	"window": [
-		{
-			"grid": {
-				"vertical": false,
-				"size": [ 0.15, 0.85 ],
-				"unit": [
-					{
-						"vertical": true,
-						"size": [ 0.6, 0.4 ],
-						"unit": [
-							{
-								"vertical": false,
-								"id": [ 1, 2 ]
-							},
-							{
-								"vertical": false,
-								"id": [ 4 ]
-							}
-						]
-					},
-					{
-						"vertical": true,
-						"size": [ 0.5, 0.5 ],
-						"unit": [
-							{
-								"vertical": false,
-								"size": [ 0.5, 0.5 ],
-								"unit": [
-									{
-										"vertical": true,
-										"id": [ 3 ]
-									},
-									{
-										"vertical": true,
-										"id": [ 5 ]
-									}
-								]
-							},
-							{
-								"vertical": true,
-								"id": [ 6, 7 ]
-							}
-						]
-					}
-				]
-			}
-		}
-	]
+{
+  "toolBar": {
+    "id": 0,
+    "size": 0.09
+  },
+  "window": [
+    {
+      "grid": {
+        "vertical": false,
+        "size": [
+          0.1537254901960784,
+          0.6470588235294118,
+          0.1992156862745098
+        ],
+        "unit": [
+          {
+            "vertical": true,
+            "size": [
+              0.599388379204893,
+              0.400611620795107
+            ],
+            "unit": [
+              {
+                "vertical": false,
+                "id": [
+                  1,
+                  2
+                ]
+              },
+              {
+                "vertical": false,
+                "id": [
+                  4
+                ]
+              }
+            ]
+          },
+          {
+            "vertical": true,
+            "size": [
+              0.5,
+              0.5
+            ],
+            "unit": [
+              {
+                "vertical": false,
+                "size": [
+                  1.0
+                ],
+                "unit": [
+                  {
+                    "vertical": true,
+                    "id": [
+                      3
+                    ]
+                  }
+                ]
+              },
+              {
+                "vertical": true,
+                "id": [
+                  6,
+                  7
+                ]
+              }
+            ]
+          },
+          {
+            "vertical": true,
+            "id": [
+              5
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }
