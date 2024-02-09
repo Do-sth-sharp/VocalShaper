@@ -795,6 +795,15 @@ namespace quickAPI {
 		return 1;
 	}
 
+	bool getMixerTrackMute(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getMute();
+			}
+		}
+		return false;
+	}
+
 	bool isMixerTrackPanValid(int index) {
 		return getMixerTrackChannelSet(index).size() == 2;
 	}
