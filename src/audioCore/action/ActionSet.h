@@ -213,6 +213,29 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetMixerTrackSlider)
 };
 
+class ActionSetMixerTrackMute final : public ActionUndoableBase {
+public:
+	ActionSetMixerTrackMute() = delete;
+	ActionSetMixerTrackMute(
+		int track, bool mute);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Mixer Track Mute";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const bool mute;
+
+		bool oldMute = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetMixerTrackMute)
+};
+
 class ActionSetMixerTrackName final : public ActionUndoableBase {
 public:
 	ActionSetMixerTrackName() = delete;

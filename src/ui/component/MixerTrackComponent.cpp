@@ -49,6 +49,10 @@ MixerTrackComponent::MixerTrackComponent() {
 	/** Level Meter */
 	this->levelMeter = std::make_unique<MixerTrackLevelMeter>();
 	this->addAndMakeVisible(this->levelMeter.get());
+
+	/** Mute */
+	this->muteButton = std::make_unique<MixerTrackMuteComponent>();
+	this->addAndMakeVisible(this->muteButton.get());
 }
 
 void MixerTrackComponent::resized() {
@@ -57,25 +61,29 @@ void MixerTrackComponent::resized() {
 	int colorHeight = screenSize.getHeight() * 0.015;
 
 	int sideChainHeight = screenSize.getHeight() * 0.02;
-	int sideChainHideHeight = screenSize.getHeight() * 0.35;
+	int sideChainHideHeight = screenSize.getHeight() * 0.4;
 	bool sideChainShown = this->getHeight() >= sideChainHideHeight;
 
 	int ioHeight = screenSize.getHeight() * 0.02;
 	int ioWidth = ioHeight;
-	int ioHideHeight = screenSize.getHeight() * 0.3;
+	int ioHideHeight = screenSize.getHeight() * 0.35;
 	bool ioShown = this->getHeight() >= ioHideHeight;
 
 	int knobPaddingWidth = screenSize.getWidth() * 0.0025;
 	int knobHeight = screenSize.getHeight() * 0.075;
 	int knobWidth = (this->getWidth()- knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
-	int knobHideHeight = screenSize.getHeight() * 0.25;
+	int knobHideHeight = screenSize.getHeight() * 0.3;
 	bool knobShown = this->getHeight() >= knobHideHeight;
 
 	int faderPaddingWidth = screenSize.getWidth() * 0.0025;
 	int faderHeight = screenSize.getHeight() * 0.15;
 	int faderWidth = (this->getWidth() - faderPaddingWidth * 2) / 2;
-	int faderHideHeight = screenSize.getHeight() * 0.25;
+	int faderHideHeight = screenSize.getHeight() * 0.3;
 	bool faderShown = this->getHeight() >= faderHideHeight;
+
+	int muteHeight = screenSize.getHeight() * 0.03;
+	int muteHideHeight = screenSize.getHeight() * 0.25;
+	bool muteShown = this->getHeight() >= muteHideHeight;
 
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;
@@ -159,6 +167,17 @@ void MixerTrackComponent::resized() {
 	}
 	this->fader->setVisible(faderShown);
 	this->levelMeter->setVisible(faderShown);
+
+	/** Mute */
+	if (muteShown) {
+		juce::Rectangle<int> muteRect(
+			0, bottom - muteHeight,
+			this->getWidth(), muteHeight);
+		this->muteButton->setBounds(muteRect);
+
+		bottom -= muteHeight;
+	}
+	this->muteButton->setVisible(muteShown);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {
@@ -263,7 +282,7 @@ void MixerTrackComponent::updateFader() {
 }
 
 void MixerTrackComponent::updateMute() {
-	/** TODO */
+	this->muteButton->update(this->index);
 }
 
 void MixerTrackComponent::mouseMove(const juce::MouseEvent& event) {

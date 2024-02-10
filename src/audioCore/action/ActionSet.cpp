@@ -1441,6 +1441,47 @@ bool ActionSetSourceName::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetMixerTrackMute::ActionSetMixerTrackMute(
+	int track, bool mute)
+	: ACTION_DB{ track, mute } {}
+
+bool ActionSetMixerTrackMute::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetMixerTrackMute);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldMute) = track->getMute();
+			track->setMute(ACTION_DATA(mute));
+
+			this->output("Set track mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");;
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set track mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetMixerTrackMute::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetMixerTrackMute);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			track->setMute(ACTION_DATA(oldMute));
+
+			this->output("Undo set track mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");;
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set track mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");
+	ACTION_RESULT(false);
+}
+
 ActionSetMixerTrackName::ActionSetMixerTrackName(
 	int track, const juce::String& name)
 	: ACTION_DB{ track, name } {}

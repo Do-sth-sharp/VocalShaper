@@ -83,6 +83,9 @@ public:
 	static void setTrackGain(int index, float value);
 	static void setTrackPan(int index, float value);
 	static void setTrackFader(int index, float value);
+	static void setTrackMute(int index, bool mute);
+	static void setTrackSolo(int index);
+	static void setTrackMuteAll(bool mute);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();

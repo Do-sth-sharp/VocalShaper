@@ -393,6 +393,27 @@ void CoreActions::setTrackFader(int index, float value) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setTrackMute(int index, bool mute) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackMute{ index, mute });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackSolo(int index) {
+	int trackNum = quickAPI::getMixerTrackNum();
+	for (int i = 0; i < trackNum; i++) {
+		auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackMute{ i, i != index });
+		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
+}
+
+void CoreActions::setTrackMuteAll(bool mute) {
+	int trackNum = quickAPI::getMixerTrackNum();
+	for (int i = 0; i < trackNum; i++) {
+		auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackMute{ i, mute });
+		ActionDispatcher::getInstance()->dispatch(std::move(action));
+	}
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

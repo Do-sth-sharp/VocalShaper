@@ -78,5 +78,6 @@ enum class ActionType : unsigned int {
 	ActionSetInstrParamConnectToCCByPtr,
 	ActionSetEffectParamConnectToCCByPtr,
 	ActionSetMixerTrackName,
-	ActionSetMixerTrackColor
+	ActionSetMixerTrackColor,
+	ActionSetMixerTrackMute
 };

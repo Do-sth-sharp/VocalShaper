@@ -149,3 +149,7 @@ countries: cn
 "Audio Output" = "音频输出"
 "Gain" = "激励"
 "Pan" = "声像"
+"Mute" = "静音"
+"Solo" = "独奏"
+"Mute All" = "全部静音"
+"Unmute All" = "全部取消静音"

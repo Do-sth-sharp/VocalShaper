@@ -6,6 +6,7 @@
 #include "KnobBase.h"
 #include "FaderBase.h"
 #include "MixerTrackLevelMeter.h"
+#include "MixerTrackMuteComponent.h"
 
 class MixerTrackComponent final
 	: public juce::Component,
@@ -48,6 +49,7 @@ private:
 	std::unique_ptr<KnobBase> panKnob = nullptr;
 	std::unique_ptr<FaderBase> fader = nullptr;
 	std::unique_ptr<MixerTrackLevelMeter> levelMeter = nullptr;
+	std::unique_ptr<MixerTrackMuteComponent> muteButton = nullptr;
 
 	void preDrop();
 	void endDrop();
