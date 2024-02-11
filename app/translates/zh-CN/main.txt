@@ -153,3 +153,4 @@ countries: cn
 "Solo" = "独奏"
 "Mute All" = "全部静音"
 "Unmute All" = "全部取消静音"
+"Fx List" = "效果器列表"

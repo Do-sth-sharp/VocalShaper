@@ -50,6 +50,7 @@ private:
 	std::unique_ptr<FaderBase> fader = nullptr;
 	std::unique_ptr<MixerTrackLevelMeter> levelMeter = nullptr;
 	std::unique_ptr<MixerTrackMuteComponent> muteButton = nullptr;
+	std::unique_ptr<juce::ListBox> effectList = nullptr;
 
 	void preDrop();
 	void endDrop();

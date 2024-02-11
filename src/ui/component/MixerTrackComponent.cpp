@@ -53,6 +53,11 @@ MixerTrackComponent::MixerTrackComponent() {
 	/** Mute */
 	this->muteButton = std::make_unique<MixerTrackMuteComponent>();
 	this->addAndMakeVisible(this->muteButton.get());
+
+	/** Effect List */
+	this->effectList = std::make_unique<juce::ListBox>(
+		TRANS("Fx List"));
+	this->addAndMakeVisible(this->effectList.get());
 }
 
 void MixerTrackComponent::resized() {
@@ -81,7 +86,7 @@ void MixerTrackComponent::resized() {
 	int faderHideHeight = screenSize.getHeight() * 0.3;
 	bool faderShown = this->getHeight() >= faderHideHeight;
 
-	int muteHeight = screenSize.getHeight() * 0.03;
+	int muteHeight = screenSize.getHeight() * 0.035;
 	int muteHideHeight = screenSize.getHeight() * 0.25;
 	bool muteShown = this->getHeight() >= muteHideHeight;
 
@@ -178,6 +183,11 @@ void MixerTrackComponent::resized() {
 		bottom -= muteHeight;
 	}
 	this->muteButton->setVisible(muteShown);
+
+	/** Effects */
+	juce::Rectangle<int> effectRect(
+		0, top, this->getWidth(), bottom - top);
+	this->effectList->setBounds(effectRect);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {
@@ -225,6 +235,8 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
+	juce::Colour backgroundColor = laf.findColour(
+		juce::Label::ColourIds::backgroundColourId);
 	juce::Colour outlineColor = laf.findColour(this->dragHovered
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
@@ -233,6 +245,11 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	auto totalRect = this->getLocalBounds();
 	g.setColour(outlineColor);
 	g.drawRect(totalRect, outlineThickness);
+
+	/** Effect Rect */
+	auto effectRect = this->effectList->getBounds();
+	g.setColour(backgroundColor);
+	g.drawRect(effectRect, outlineThickness);
 }
 
 void MixerTrackComponent::update(int index) {
