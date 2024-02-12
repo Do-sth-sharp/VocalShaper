@@ -55,8 +55,9 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->addAndMakeVisible(this->muteButton.get());
 
 	/** Effect List */
+	this->effectListModel = std::make_unique<EffectListModel>();
 	this->effectList = std::make_unique<juce::ListBox>(
-		TRANS("Fx List"));
+		TRANS("Fx List"), this->effectListModel.get());
 	this->addAndMakeVisible(this->effectList.get());
 }
 
@@ -89,6 +90,8 @@ void MixerTrackComponent::resized() {
 	int muteHeight = screenSize.getHeight() * 0.035;
 	int muteHideHeight = screenSize.getHeight() * 0.25;
 	bool muteShown = this->getHeight() >= muteHideHeight;
+
+	int listItemHeight = screenSize.getHeight() * 0.03;
 
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;
@@ -188,6 +191,7 @@ void MixerTrackComponent::resized() {
 	juce::Rectangle<int> effectRect(
 		0, top, this->getWidth(), bottom - top);
 	this->effectList->setBounds(effectRect);
+	this->effectList->setRowHeight(listItemHeight);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {
@@ -280,6 +284,9 @@ void MixerTrackComponent::update(int index) {
 		this->panValid = quickAPI::isMixerTrackPanValid(index);
 
 		this->levelMeter->update(index);
+
+		this->effectListModel->update(index);
+		this->effectList->updateContent();
 
 		this->resized();
 		this->repaint();

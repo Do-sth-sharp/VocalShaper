@@ -7,6 +7,7 @@
 #include "FaderBase.h"
 #include "MixerTrackLevelMeter.h"
 #include "MixerTrackMuteComponent.h"
+#include "../dataModel/EffectListModel.h"
 
 class MixerTrackComponent final
 	: public juce::Component,
@@ -51,6 +52,7 @@ private:
 	std::unique_ptr<MixerTrackLevelMeter> levelMeter = nullptr;
 	std::unique_ptr<MixerTrackMuteComponent> muteButton = nullptr;
 	std::unique_ptr<juce::ListBox> effectList = nullptr;
+	std::unique_ptr<EffectListModel> effectListModel = nullptr;
 
 	void preDrop();
 	void endDrop();

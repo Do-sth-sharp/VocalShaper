@@ -547,6 +547,43 @@ namespace quickAPI {
 		return getPluginParamList(pointer);
 	}
 
+	int getEffectNum(int trackIndex) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					return pluginDock->getPluginNum();
+				}
+			}
+		}
+		return 0;
+	}
+
+	PluginHolder getEffectPointer(int trackIndex, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					if (auto plugin = pluginDock->getPluginProcessor(index)) {
+						return PluginHolder{ plugin };
+					}
+				}
+			}
+		}
+		return PluginHolder{};
+	}
+
+	const juce::String getEffectName(int trackIndex, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					if (auto plugin = pluginDock->getPluginProcessor(index)) {
+						return plugin->getName();
+					}
+				}
+			}
+		}
+		return "";
+	}
+
 	const juce::String getEffectName(PluginHolder pointer) {
 		return getPluginName(pointer);
 	}
