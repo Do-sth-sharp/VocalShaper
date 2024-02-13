@@ -1,4 +1,5 @@
 ﻿#include "EffectListModel.h"
+#include "../component/EffectComponent.h"
 #include "../../audioCore/AC_API.h"
 
 int EffectListModel::getNumRows() {
@@ -12,8 +13,18 @@ void EffectListModel::paintListBoxItem(
 }
 juce::Component* EffectListModel::refreshComponentForRow(int rowNumber, bool isRowSelected,
 	juce::Component* existingComponentToUpdate) {
-	/** TODO */
-	return existingComponentToUpdate;
+	if (rowNumber >= this->getNumRows()) { return existingComponentToUpdate; }
+
+	EffectComponent* comp = nullptr;
+	if (existingComponentToUpdate) {
+		comp = dynamic_cast<EffectComponent*>(existingComponentToUpdate);
+		if (!comp) { delete existingComponentToUpdate; }
+	}
+	if (!comp) { comp = new EffectComponent; }
+
+	comp->update(this->index, rowNumber);
+
+	return comp;
 }
 
 juce::String EffectListModel::getNameForRow(int rowNumber) {

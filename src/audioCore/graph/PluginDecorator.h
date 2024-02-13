@@ -142,7 +142,7 @@ private:
 	//std::atomic_int paramListenningCC = -1;
 	std::atomic_bool midiShouldOutput = false;
 	std::atomic_bool midiCCShouldIntercept = true;
-	juce::AudioChannelSet audioChannels;
+	const juce::AudioChannelSet audioChannels;
 	const bool isInstr = false;
 
 	MIDICCListener ccListener;

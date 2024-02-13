@@ -33,7 +33,7 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
 	/** Connect The Audio Input And Output Node */
-	int mainBusChannels = this->getMainBusNumInputChannels();
+	int mainBusChannels = type.size();
 	for (int i = 0; i < mainBusChannels; i++) {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
@@ -91,7 +91,7 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 			}
 
 			/** Get Main Bus */
-			int mainBusChannels = this->getMainBusNumInputChannels();
+			int mainBusChannels = this->audioChannels.size();
 
 			/** Get Plugin Bus */
 			int pluginInputChannels = ptrNode->getProcessor()->getMainBusNumInputChannels();
@@ -182,7 +182,7 @@ void PluginDock::removePlugin(int index) {
 		}
 
 		/** Get Main Bus */
-		int mainBusChannels = this->getMainBusNumInputChannels();
+		int mainBusChannels = this->audioChannels.size();
 
 		/** Add Connection Between Hot Spot Nodes */
 		for (int i = 0; i < mainBusChannels; i++) {
@@ -406,7 +406,7 @@ void PluginDock::clearGraph() {
 
 	this->removeIllegalConnections();
 
-	int mainBusChannels = this->getMainBusNumInputChannels();
+	int mainBusChannels = this->audioChannels.size();
 	for (int i = 0; i < mainBusChannels; i++) {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });

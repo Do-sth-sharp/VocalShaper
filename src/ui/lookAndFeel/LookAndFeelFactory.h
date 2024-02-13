@@ -28,6 +28,7 @@ public:
 	juce::LookAndFeel_V4* forSideChain() const;
 	juce::LookAndFeel_V4* forLevelMeter() const;
 	juce::LookAndFeel_V4* forMuteButton() const;
+	juce::LookAndFeel_V4* forEffect() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -50,6 +51,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> sideChainLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> levelMeterLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> muteButtonLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> effectLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

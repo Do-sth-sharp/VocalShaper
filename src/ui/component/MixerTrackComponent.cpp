@@ -91,7 +91,7 @@ void MixerTrackComponent::resized() {
 	int muteHideHeight = screenSize.getHeight() * 0.25;
 	bool muteShown = this->getHeight() >= muteHideHeight;
 
-	int listItemHeight = screenSize.getHeight() * 0.03;
+	int listItemHeight = screenSize.getHeight() * 0.02;
 
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;

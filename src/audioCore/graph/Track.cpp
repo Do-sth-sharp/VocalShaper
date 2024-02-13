@@ -49,7 +49,7 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(type));
 
 	/** Connect Plugin Dock Node To IO Node */
-	int mainBusInputChannels = this->getMainBusNumInputChannels();
+	int mainBusInputChannels = this->audioChannels.size();
 	for (int i = 0; i < mainBusInputChannels; i++) {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i}, {this->pluginDockNode->nodeID, i} });
@@ -254,13 +254,13 @@ void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 	/** Prepare Gain And Panner */
 	this->gainAndPanner.prepare(juce::dsp::ProcessSpec(
 		sampleRate, maximumExpectedSamplesPerBlock,
-		this->getMainBusNumInputChannels()
+		this->audioChannels.size()
 	));
 
 	/** Prepare Slider */
 	this->slider.prepare(juce::dsp::ProcessSpec(
 		sampleRate, maximumExpectedSamplesPerBlock,
-		this->getMainBusNumInputChannels()
+		this->audioChannels.size()
 	));
 
 	/** Prepare Current Graph */
