@@ -154,3 +154,4 @@ countries: cn
 "Mute All" = "全部静音"
 "Unmute All" = "全部取消静音"
 "Fx List" = "效果器列表"
+"Bypass Effect" = "旁路效果器"

@@ -584,6 +584,17 @@ namespace quickAPI {
 		return "";
 	}
 
+	bool getEffectBypass(int trackIndex, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					return pluginDock->getPluginBypass(index);
+				}
+			}
+		}
+		return false;
+	}
+
 	const juce::String getEffectName(PluginHolder pointer) {
 		return getPluginName(pointer);
 	}
