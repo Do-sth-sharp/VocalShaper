@@ -13,6 +13,8 @@ public:
 	PluginDock(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	~PluginDock() override;
 	
+	void updateIndex(int index);
+
 	/**
 	 * @brief	Insert a plugin onto the plugin dock.
 	 */
@@ -84,6 +86,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
+	int index = -1;
+
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 	const juce::AudioChannelSet audioChannels;

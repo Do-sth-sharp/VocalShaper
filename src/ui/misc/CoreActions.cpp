@@ -250,6 +250,12 @@ void CoreActions::removeInstr(int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::bypassEffect(int track, int index, bool bypass) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectBypass{ track, index, bypass });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::bypassEffect(quickAPI::PluginHolder effect, bool bypass) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetEffectBypassByPtr{ effect, bypass });

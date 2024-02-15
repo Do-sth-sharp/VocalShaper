@@ -19,6 +19,7 @@ public:
 	void updatePan(int index);
 	void updateFader(int index);
 	void updateMute(int index);
+	void updateEffect(int track, int index);
 
 private:
 	std::unique_ptr<Scroller> hScroller = nullptr;

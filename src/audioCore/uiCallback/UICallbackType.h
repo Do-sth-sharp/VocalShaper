@@ -13,6 +13,7 @@ enum class UICallbackType : int {
 	TrackPanChanged,
 	TrackFaderChanged,
 	TrackMuteChanged,
+	EffectChanged,
 
 	TypeMaxNum
 };

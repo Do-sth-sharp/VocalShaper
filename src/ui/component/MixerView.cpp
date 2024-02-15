@@ -58,6 +58,13 @@ MixerView::MixerView()
 			}
 		}
 	);
+	CoreCallbacks::getInstance()->addEffectChanged(
+		[comp = MixerView::SafePointer(this)](int track, int index) {
+			if (comp) {
+				comp->updateEffect(track, index);
+			}
+		}
+	);
 }
 
 void MixerView::resized() {
@@ -149,6 +156,17 @@ void MixerView::updateFader(int index) {
 void MixerView::updateMute(int index) {
 	if (index >= 0 && index < this->trackList.size()) {
 		this->trackList[index]->updateMute();
+	}
+}
+
+void MixerView::updateEffect(int track, int index) {
+	if (index >= 0 && index < this->trackList.size()) {
+		this->trackList[index]->updateEffect(index);
+	}
+	else {
+		for (auto i : this->trackList) {
+			i->updateEffect(index);
+		}
 	}
 }
 

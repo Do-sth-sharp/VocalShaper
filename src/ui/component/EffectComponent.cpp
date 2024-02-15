@@ -1,5 +1,6 @@
 ﻿#include "EffectComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -73,5 +74,6 @@ void EffectComponent::update(int track, int index) {
 }
 
 void EffectComponent::bypass() {
-	/** TODO */
+	CoreActions::bypassEffect(this->track, this->index,
+		this->bypassButton->getToggleState());
 }

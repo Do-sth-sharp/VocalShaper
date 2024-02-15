@@ -26,6 +26,8 @@ public:
 	void addTrackPanChanged(const TrackChangedCallback& callback);
 	void addTrackFaderChanged(const TrackChangedCallback& callback);
 	void addTrackMuteChanged(const TrackChangedCallback& callback);
+	using EffectChangedCallback = std::function<void(int, int)>;
+	void addEffectChanged(const EffectChangedCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
@@ -39,6 +41,7 @@ public:
 	void invokeTrackPanChanged(int index) const;
 	void invokeTrackFaderChanged(int index) const;
 	void invokeTrackMuteChanged(int index) const;
+	void invokeEffectChanged(int track, int index) const;
 
 private:
 	juce::Array<ErrorCallback> error;
@@ -53,6 +56,7 @@ private:
 	juce::Array<TrackChangedCallback> trackPanChanged;
 	juce::Array<TrackChangedCallback> trackFaderChanged;
 	juce::Array<TrackChangedCallback> trackMuteChanged;
+	juce::Array<EffectChangedCallback> effectChanged;
 
 public:
 	static CoreCallbacks* getInstance();

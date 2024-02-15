@@ -74,6 +74,9 @@ void PluginDecorator::setPlugin(
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
 	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+	}
 }
 
 const juce::AudioChannelSet& PluginDecorator::getAudioChannelSet() const {
@@ -99,6 +102,9 @@ void PluginDecorator::setMIDIChannel(int channel) {
 	/** Callback */
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
 	}
 }
 
@@ -157,6 +163,9 @@ void PluginDecorator::setParamValue(int index, float value) {
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
 	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+	}
 }
 
 void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
@@ -173,6 +182,9 @@ void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
 	/** Callback */
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
 	}
 }
 
@@ -199,6 +211,9 @@ void PluginDecorator::removeCCParamConnection(int CCIndex) {
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
 	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+	}
 }
 
 //void PluginDecorator::setParamCCListenning(int paramIndex) {
@@ -222,6 +237,9 @@ void PluginDecorator::setMIDICCIntercept(bool midiCCShouldIntercept) {
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
 	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+	}
 }
 
 bool PluginDecorator::getMIDICCIntercept() const {
@@ -234,6 +252,9 @@ void PluginDecorator::setMIDIOutput(bool midiShouldOutput) {
 	/** Callback */
 	if (this->isInstr) {
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+	}
+	else {
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
 	}
 }
 

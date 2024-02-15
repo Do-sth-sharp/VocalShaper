@@ -24,6 +24,7 @@ public:
 	void updatePan();
 	void updateFader();
 	void updateMute();
+	void updateEffect(int index);
 
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;

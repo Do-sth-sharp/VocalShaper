@@ -60,6 +60,7 @@ public:
 	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);
 	static void removeInstr(int index);
 
+	static void bypassEffect(int track, int index, bool bypass);
 	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
 	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
 	static void setEffectMIDICCIntercept(quickAPI::PluginHolder effect, bool intercept);

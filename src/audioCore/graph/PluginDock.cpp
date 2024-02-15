@@ -1,4 +1,5 @@
 ﻿#include "PluginDock.h"
+#include "../uiCallback/UICallback.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
@@ -42,6 +43,10 @@ PluginDock::PluginDock(const juce::AudioChannelSet& type)
 
 PluginDock::~PluginDock() {
 	/** Nothing To Do */
+}
+
+void PluginDock::updateIndex(int index) {
+	this->index = index;
 }
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,
@@ -129,6 +134,9 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, index);
+
 		return PluginDecorator::SafePointer{ dynamic_cast<PluginDecorator*>(ptrNode->getProcessor()) };
 	}
 	else {
@@ -190,6 +198,9 @@ void PluginDock::removePlugin(int index) {
 				{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
 		}
 	}
+
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, index);
 }
 
 int PluginDock::getPluginNum() const {
@@ -223,6 +234,9 @@ void PluginDock::setPluginBypass(PluginDecorator::SafePointer plugin, bool bypas
 	if (plugin) {
 		if (auto bypassParam = plugin->getBypassParameter()) {
 			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
+
+			/** Callback */
+			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
 		}
 	}
 }
@@ -328,6 +342,9 @@ void PluginDock::addAdditionalBusConnection(int pluginIndex, int srcChannel, int
 		this->addConnection(connection);
 		this->additionalConnectionList.add(connection);
 	}
+
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, pluginIndex);
 }
 
 void PluginDock::removeAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel) {
@@ -344,6 +361,9 @@ void PluginDock::removeAdditionalBusConnection(int pluginIndex, int srcChannel, 
 	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
 	this->removeConnection(connection);
 	this->additionalConnectionList.removeAllInstancesOf(connection);
+
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, pluginIndex);
 }
 
 bool PluginDock::isAdditionalBusConnected(int pluginIndex, int srcChannel, int dstChannel) const {
@@ -411,6 +431,9 @@ void PluginDock::clearGraph() {
 		this->addConnection(
 			{ {this->audioInputNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
 	}
+
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, -1);
 }
 
 utils::AudioConnectionList PluginDock::getPluginAdditionalBusConnections(int index) const {

@@ -309,6 +309,11 @@ void MixerTrackComponent::updateMute() {
 	this->muteButton->update(this->index);
 }
 
+void MixerTrackComponent::updateEffect(int /*index*/) {
+	this->effectListModel->update(this->index);
+	this->effectList->updateContent();
+}
+
 void MixerTrackComponent::mouseMove(const juce::MouseEvent& event) {
 	auto screenSize = utils::getScreenSize(this);
 	int colorHeight = screenSize.getHeight() * 0.015;
