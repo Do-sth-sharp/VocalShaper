@@ -13,6 +13,7 @@ public:
 
 private:
 	int track = -1, index = -1;
+	juce::String name;
 
 	std::unique_ptr<juce::Drawable> bypassIcon = nullptr;
 	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;

@@ -51,20 +51,47 @@ void EffectComponent::resized() {
 }
 
 void EffectComponent::paint(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int textPaddingWidth = screenSize.getWidth() * 0.0025;
+	float textHeight = this->getHeight() * 0.8;
+
+	int buttonHeight = this->getHeight();
+	int buttonWidth = buttonHeight;
+
+	int right = this->getWidth();
+	right -= buttonWidth;
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
+	juce::Colour textColor = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+
+	/** Font */
+	juce::Font textFont(textHeight);
 
 	/** Background */
 	g.setColour(backgroundColor);
 	g.fillAll();
+
+	/** Text */
+	juce::Rectangle<int> textRect(
+		textPaddingWidth, 0,
+		right - textPaddingWidth * 2, this->getHeight());
+	g.setColour(textColor);
+	g.setFont(textFont);
+	g.drawFittedText(this->name, textRect,
+		juce::Justification::centredLeft, 1, 0.5f);
 }
 
 void EffectComponent::update(int track, int index) {
 	this->track = track;
 	this->index = index;
 	if (this->track > -1 && this->index > -1) {
+		this->name = quickAPI::getEffectName(track, index);
+
 		this->bypassButton->setToggleState(
 			!quickAPI::getEffectBypass(track, index),
 			juce::NotificationType::dontSendNotification);
