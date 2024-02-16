@@ -36,7 +36,7 @@ AboutComponent::AboutComponent() {
 		TRANS("LV2 SDK Version:") + " " + utils::getLV2Version() + "\n" +
 #endif //JUCE_PLUGINHOST_LV2
 		TRANS("DMDA SDK Version:") + " " + utils::getDMDAVersion();
-	this->copyMes = TRANS("This product available under the MPL 2.0 license.") + "\n" +
+	this->copyMes = TRANS("This product available under the GPLv3 license.") + "\n" +
 		TRANS("VocalSharp Org.") + " © 2023-2024 " + TRANS("All Rights Reserved.");
 
 	/** Staff Text */
