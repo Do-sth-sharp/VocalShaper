@@ -2,7 +2,9 @@
 
 #include <JuceHeader.h>
 
-class EffectComponent final : public juce::Component {
+class EffectComponent final
+	: public juce::Component,
+	public juce::SettableTooltipClient {
 public:
 	EffectComponent();
 
@@ -20,6 +22,8 @@ private:
 	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
 
 	void bypass();
+
+	juce::String createToolTip() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EffectComponent)
 };

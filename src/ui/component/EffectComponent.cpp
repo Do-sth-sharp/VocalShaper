@@ -97,10 +97,21 @@ void EffectComponent::update(int track, int index) {
 			juce::NotificationType::dontSendNotification);
 
 		this->repaint();
+
+		this->setTooltip(this->createToolTip());
 	}
 }
 
 void EffectComponent::bypass() {
 	CoreActions::bypassEffect(this->track, this->index,
 		this->bypassButton->getToggleState());
+}
+
+juce::String EffectComponent::createToolTip() const {
+	juce::String result =
+		"#" + juce::String{ this->index } + "\n"
+		+ TRANS("Name:") + " " + this->name + "\n"
+		+ TRANS("Bypassed:") + " " + TRANS(this->bypassButton->getToggleState() ? "No" : "Yes") + "\n";
+
+	return result;
 }
