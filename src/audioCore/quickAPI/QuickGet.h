@@ -116,6 +116,7 @@ namespace quickAPI {
 	bool getEffectBypass(int trackIndex, int index);
 	const juce::String getEffectName(PluginHolder pointer);
 	bool getEffectBypass(PluginHolder pointer);
+	EditorPointer getEffectEditor(PluginHolder pointer);
 	int getEffectMIDIChannel(PluginHolder pointer);
 	bool getEffectMIDICCIntercept(PluginHolder pointer);
 	bool getEffectMIDIOutput(PluginHolder pointer);

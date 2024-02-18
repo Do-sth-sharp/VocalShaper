@@ -603,6 +603,10 @@ namespace quickAPI {
 		return PluginDock::getPluginBypass(pointer);
 	}
 
+	EditorPointer getEffectEditor(PluginHolder pointer) {
+		return getPluginEditor(pointer);
+	}
+
 	int getEffectMIDIChannel(PluginHolder pointer) {
 		return getPluginMIDIChannel(pointer);
 	}

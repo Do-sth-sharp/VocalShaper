@@ -10,6 +10,13 @@ PluginEditorHub::PluginEditorHub() {
 			PluginEditorHub::getInstance()->updateInstr();
 		}
 	);
+
+	/** Effect Update Callback */
+	CoreCallbacks::getInstance()->addEffectChanged(
+		[](int, int) {
+			PluginEditorHub::getInstance()->updateEffect();
+		}
+	);
 }
 
 void PluginEditorHub::openInstr(int index) {
@@ -73,6 +80,67 @@ bool PluginEditorHub::checkInstr(int index) const {
 	return false;
 }
 
+void PluginEditorHub::openEffect(int track, int index) {
+	if (this->checkEffect(track, index)) { return; }
+
+	if (auto plugin = quickAPI::getEffectPointer(track, index)) {
+		if (auto editor = quickAPI::getEffectEditor(plugin)) {
+			/** Create */
+			auto container = std::make_unique<PluginEditor>(
+				quickAPI::getEffectName(plugin),
+				PluginType::Effect, plugin, editor);
+			container->setOpenGL(this->openGLOn);
+			container->setWindowIcon(this->iconTemp);
+
+			/** Show */
+			this->openEditor(container.get());
+
+			/** Add To List */
+			this->effectEditors.add(std::move(container));
+
+			/** Callback */
+			CoreCallbacks::getInstance()->invokeEffectChanged(track, index);
+		}
+	}
+}
+
+void PluginEditorHub::closeEffect(int track, int index) {
+	if (auto plugin = quickAPI::getEffectPointer(track, index)) {
+		if (auto editor = quickAPI::getEffectEditor(plugin)) {
+			for (int i = 0; i < this->effectEditors.size(); i++) {
+				auto container = this->effectEditors.getUnchecked(i);
+				if (container->getEditor() == editor) {
+					/** Close */
+					this->closeEditor(container);
+
+					/** Remove From List */
+					this->effectEditors.removeObject(container, true);
+
+					/** Callback */
+					CoreCallbacks::getInstance()->invokeEffectChanged(track, index);
+
+					/** End Loop */
+					break;
+				}
+			}
+		}
+	}
+}
+
+bool PluginEditorHub::checkEffect(int track, int index) const {
+	if (auto plugin = quickAPI::getEffectPointer(track, index)) {
+		if (auto editor = quickAPI::getEffectEditor(plugin)) {
+			for (int i = 0; i < this->effectEditors.size(); i++) {
+				auto container = this->effectEditors.getUnchecked(i);
+				if (container->getEditor() == editor) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void PluginEditorHub::setOpenGL(bool opneGLOn) {
 	this->openGLOn = openGLOn;
 	for (auto i : this->instrEditors) {
@@ -117,7 +185,7 @@ void PluginEditorHub::deleteEffectEditor(PluginEditor* ptr) {
 	this->effectEditors.removeObject(ptr, true);
 
 	/** Callback */
-	CoreCallbacks::getInstance()->invokeInstrChanged(-1);
+	CoreCallbacks::getInstance()->invokeEffectChanged(-1, -1);
 }
 
 void PluginEditorHub::closeEditor(PluginEditor* ptr) {
@@ -130,6 +198,12 @@ void PluginEditorHub::openEditor(PluginEditor* ptr) {
 
 void PluginEditorHub::updateInstr() {
 	for (auto i : this->instrEditors) {
+		i->update();
+	}
+}
+
+void PluginEditorHub::updateEffect() {
+	for (auto i : this->effectEditors) {
 		i->update();
 	}
 }

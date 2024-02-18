@@ -11,6 +11,10 @@ public:
 	void closeInstr(int index);
 	bool checkInstr(int index) const;
 
+	void openEffect(int track, int index);
+	void closeEffect(int track, int index);
+	bool checkEffect(int track, int index) const;
+
 	void setOpenGL(bool opneGLOn);
 	void setIcon(const juce::String& path);
 
@@ -27,6 +31,7 @@ private:
 	void openEditor(PluginEditor* ptr);
 
 	void updateInstr();
+	void updateEffect();
 
 public:
 	static PluginEditorHub* getInstance();

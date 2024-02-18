@@ -160,8 +160,8 @@ void MixerView::updateMute(int index) {
 }
 
 void MixerView::updateEffect(int track, int index) {
-	if (index >= 0 && index < this->trackList.size()) {
-		this->trackList[index]->updateEffect(index);
+	if (track >= 0 && track < this->trackList.size()) {
+		this->trackList[track]->updateEffect(index);
 	}
 	else {
 		for (auto i : this->trackList) {

@@ -1,6 +1,7 @@
 ﻿#include "EffectComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
+#include "../misc/PluginEditorHub.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -64,10 +65,12 @@ void EffectComponent::paint(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(
-		juce::Label::ColourIds::backgroundColourId);
-	juce::Colour textColor = laf.findColour(
-		juce::Label::ColourIds::textColourId);
+	juce::Colour backgroundColor = laf.findColour(this->editorOpened
+		? juce::Label::ColourIds::backgroundWhenEditingColourId
+		: juce::Label::ColourIds::backgroundColourId);
+	juce::Colour textColor = laf.findColour(this->editorOpened
+		? juce::Label::ColourIds::textWhenEditingColourId
+		: juce::Label::ColourIds::textColourId);
 
 	/** Font */
 	juce::Font textFont(textHeight);
@@ -91,6 +94,7 @@ void EffectComponent::update(int track, int index) {
 	this->index = index;
 	if (this->track > -1 && this->index > -1) {
 		this->name = quickAPI::getEffectName(track, index);
+		this->editorOpened = PluginEditorHub::getInstance()->checkEffect(track, index);
 
 		this->bypassButton->setToggleState(
 			!quickAPI::getEffectBypass(track, index),
@@ -102,9 +106,24 @@ void EffectComponent::update(int track, int index) {
 	}
 }
 
+void EffectComponent::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		this->editorShow();
+	}
+}
+
 void EffectComponent::bypass() {
 	CoreActions::bypassEffect(this->track, this->index,
 		this->bypassButton->getToggleState());
+}
+
+void EffectComponent::editorShow() {
+	if (this->editorOpened) {
+		PluginEditorHub::getInstance()->closeEffect(this->track, this->index);
+	}
+	else {
+		PluginEditorHub::getInstance()->openEffect(this->track, this->index);
+	}
 }
 
 juce::String EffectComponent::createToolTip() const {
