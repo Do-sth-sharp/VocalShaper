@@ -60,6 +60,7 @@ public:
 	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);
 	static void removeInstr(int index);
 
+	static void insertEffect(int track, int index, const juce::String& pid);
 	static void bypassEffect(int track, int index, bool bypass);
 	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
 	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
@@ -126,6 +127,8 @@ public:
 		const juce::Array<std::tuple<int, int>>& links);
 	static void removeInstrGUI(int index);
 
+	static void insertEffectGUI(int track, int index);
+	static void insertEffectGUI(int track);
 	static void editEffectParamCCLinkGUI(quickAPI::PluginHolder effect, int paramIndex, int defaultCC = -1);
 	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
 

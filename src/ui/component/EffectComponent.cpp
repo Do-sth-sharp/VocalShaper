@@ -86,7 +86,7 @@ void EffectComponent::paint(juce::Graphics& g) {
 	g.setColour(textColor);
 	g.setFont(textFont);
 	g.drawFittedText(this->name, textRect,
-		juce::Justification::centredLeft, 1, 0.5f);
+		juce::Justification::centredLeft, 1, 0.75f);
 }
 
 void EffectComponent::update(int track, int index) {

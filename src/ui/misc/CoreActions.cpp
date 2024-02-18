@@ -250,6 +250,12 @@ void CoreActions::removeInstr(int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::insertEffect(int track, int index, const juce::String& pid) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionAddEffect{ track, index, pid });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::bypassEffect(int track, int index, bool bypass) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetEffectBypass{ track, index, bypass });
@@ -791,6 +797,16 @@ void CoreActions::removeInstrGUI(int index) {
 	}
 
 	CoreActions::removeInstr(index);
+}
+
+void CoreActions::insertEffectGUI(int track, int index) {
+	auto callback = [track, index](const juce::String& id) {
+		CoreActions::insertEffect(track, index, id); };
+	CoreActions::askForPluginGUIAsync(callback, true, false);
+}
+
+void CoreActions::insertEffectGUI(int track) {
+	CoreActions::insertEffectGUI(quickAPI::getEffectNum(track));
 }
 
 void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,

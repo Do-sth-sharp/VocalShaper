@@ -1,5 +1,7 @@
 ﻿#include "EffectListModel.h"
 #include "../component/EffectComponent.h"
+#include "../misc/CoreActions.h"
+#include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
 int EffectListModel::getNumRows() {
@@ -31,10 +33,27 @@ juce::String EffectListModel::getNameForRow(int rowNumber) {
 	return quickAPI::getEffectName(this->index, rowNumber);
 }
 
-void EffectListModel::backgroundClicked(const juce::MouseEvent&) {
-	/** TODO */
+void EffectListModel::backgroundClicked(const juce::MouseEvent& event) {
+	if (event.mods.isRightButtonDown()) {
+		auto callback = [this](const juce::PluginDescription& plugin) {
+			CoreActions::insertEffect(this->index,
+				this->getNumRows(), plugin.createIdentifierString());
+			};
+
+		auto menu = this->createBackgroundMenu(callback);
+		menu.show();
+	}
 }
 
 void EffectListModel::update(int index) {
 	this->index = index;
+}
+
+juce::PopupMenu EffectListModel::createBackgroundMenu(
+	const std::function<void(const juce::PluginDescription&)>& callback) {
+	/** Create Menu */
+	auto [valid, list] = quickAPI::getPluginList(true, false);
+	if (!valid) { return juce::PopupMenu{}; }
+	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
+	return utils::createPluginMenu(groups, callback);
 }
