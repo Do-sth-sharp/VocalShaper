@@ -110,6 +110,9 @@ void EffectComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		this->editorShow();
 	}
+	else if (event.mods.isRightButtonDown()) {
+		this->showMenu();
+	}
 }
 
 void EffectComponent::bypass() {
@@ -126,6 +129,40 @@ void EffectComponent::editorShow() {
 	}
 }
 
+enum EffectMenuActionType {
+	Bypass = 1, Remove
+};
+
+void EffectComponent::showMenu() {
+	/** Callback */
+	auto addCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
+		if (comp) {
+			comp->addEffect(pluginDes);
+		}
+		};
+
+	/** Create Menu */
+	auto menu = this->createMenu(addCallback);
+	int result = menu.show();
+
+	switch (result) {
+	case EffectMenuActionType::Bypass: {
+		this->bypass();
+		break;
+	}
+	case EffectMenuActionType::Remove: {
+		CoreActions::removeEffectGUI(this->track, this->index);
+		break;
+	}
+	}
+}
+
+void EffectComponent::addEffect(
+	const juce::PluginDescription& pluginDes) {
+	CoreActions::insertEffect(this->track, this->index + 1,
+		pluginDes.createIdentifierString());
+}
+
 juce::String EffectComponent::createToolTip() const {
 	juce::String result =
 		"#" + juce::String{ this->index } + "\n"
@@ -133,4 +170,24 @@ juce::String EffectComponent::createToolTip() const {
 		+ TRANS("Bypassed:") + " " + TRANS(this->bypassButton->getToggleState() ? "No" : "Yes") + "\n";
 
 	return result;
+}
+
+juce::PopupMenu EffectComponent::createMenu(
+	const std::function<void(const juce::PluginDescription&)>& addCallback) const {
+	juce::PopupMenu menu;
+
+	menu.addSubMenu(TRANS("Add"), this->createAddMenu(addCallback));
+	menu.addItem(EffectMenuActionType::Bypass, TRANS("Bypass"), true, !(this->bypassButton->getToggleState()));
+	menu.addItem(EffectMenuActionType::Remove, TRANS("Remove"));
+
+	return menu;
+}
+
+juce::PopupMenu EffectComponent::createAddMenu(
+	const std::function<void(const juce::PluginDescription&)>& callback) const {
+	/** Create Menu */
+	auto [valid, list] = quickAPI::getPluginList(true, false);
+	if (!valid) { return juce::PopupMenu{}; }
+	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
+	return utils::createPluginMenu(groups, callback);
 }

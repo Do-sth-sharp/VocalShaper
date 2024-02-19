@@ -296,6 +296,12 @@ void CoreActions::removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccC
 	CoreActions::setEffectParamCCLink(effect, -1, ccChannel);
 }
 
+void CoreActions::removeEffect(int track, int index) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionRemoveEffect{ track, index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::setTrackColor(int index, const juce::Colour& color) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetMixerTrackColor{ index, color });
@@ -818,6 +824,18 @@ void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
 void CoreActions::addEffectParamCCLinkGUI(quickAPI::PluginHolder effect) {
 	auto callback = [effect](int param) { CoreActions::editEffectParamCCLinkGUI(effect, param); };
 	CoreActions::askForPluginParamGUIAsync(callback, effect, PluginType::Effect);
+}
+
+void CoreActions::removeEffectGUI(int track, int index) {
+	if (track <= -1 || index <= -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Effect"),
+		TRANS("Remove the effect from effect list. Continue?"))) {
+		return;
+	}
+
+	CoreActions::removeEffect(track, index);
 }
 
 void CoreActions::setTrackColorGUI(int index) {
