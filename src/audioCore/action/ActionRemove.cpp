@@ -452,25 +452,10 @@ bool ActionRemoveMixerTrackSideChainBus::doAction() {
 	ACTION_WRITE_TYPE(ActionRemoveMixerTrackSideChainBus);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(ACTION_DATA(audioAdditionalLink).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioAdditionalLink)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
+	writeRecoverySizeValue(0);
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
-			if (auto dock = track->getPluginDock()) {
-				/** Save Connections */
-				ACTION_DATA(audioAdditionalLink).clear();
-				for (int i = 0; i < dock->getPluginNum(); i++) {
-					ACTION_DATA(audioAdditionalLink).addArray(
-						dock->getPluginAdditionalBusConnections(i));
-				}
-			}
-
 			/** Remove Bus */
 			if (track->removeAdditionalAudioBus()) {
 				this->output("Remove mixer track side chain bus: " + juce::String(ACTION_DATA(track)));
@@ -490,23 +475,10 @@ bool ActionRemoveMixerTrackSideChainBus::undo() {
 	ACTION_WRITE_TYPE_UNDO(ActionRemoveMixerTrackSideChainBus);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(ACTION_DATA(audioAdditionalLink).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioAdditionalLink)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
+	writeRecoverySizeValue(0);
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
-			if (auto dock = track->getPluginDock()) {
-				/** Restore Connections */
-				for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioAdditionalLink)) {
-					dock->addAdditionalBusConnection(dst, srcc, dstc);
-				}
-			}
-
 			/** Add Bus */
 			if (track->addAdditionalAudioBus()) {
 				this->output("Undo remove mixer track side chain bus: " + juce::String(ACTION_DATA(track)));
@@ -530,13 +502,7 @@ bool ActionRemoveEffect::doAction() {
 	ACTION_WRITE_TYPE(ActionRemoveEffect);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(ACTION_DATA(additional).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(additional)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
+	writeRecoverySizeValue(0);
 
 	writeRecoverySizeValue(ACTION_DATA(data).getSize());
 	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
@@ -546,9 +512,6 @@ bool ActionRemoveEffect::doAction() {
 			if (auto dock = track->getPluginDock()) {
 				/** Check Effect */
 				if (ACTION_DATA(effect) < 0 || ACTION_DATA(effect) >= dock->getPluginNum()) { ACTION_RESULT(false); }
-
-				/** Save Connections */
-				ACTION_DATA(additional) = dock->getPluginAdditionalBusConnections(ACTION_DATA(effect));
 
 				/** Save Effect State */
 				auto effect = dock->getPluginProcessor(ACTION_DATA(effect));
@@ -584,13 +547,7 @@ bool ActionRemoveEffect::undo() {
 	ACTION_WRITE_TYPE_UNDO(ActionRemoveEffect);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(ACTION_DATA(additional).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(additional)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
+	writeRecoverySizeValue(0);
 
 	writeRecoverySizeValue(ACTION_DATA(data).getSize());
 	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
@@ -612,65 +569,7 @@ bool ActionRemoveEffect::undo() {
 				dock->setPluginBypass(ACTION_DATA(effect), state->bypassed());
 				effect->parse(state.get());
 
-				/** Recover Connections */
-				for (auto [src, srcc, dst, dstc] : ACTION_DATA(additional)) {
-					dock->addAdditionalBusConnection(dst, srcc, dstc);
-				}
-
 				this->output("Undo Remove Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "]" + "\n");
-				ACTION_RESULT(true);
-			}
-		}
-	}
-	ACTION_RESULT(false);
-}
-
-ActionRemoveEffectAdditionalInput::ActionRemoveEffectAdditionalInput(
-	int track, int effect, int srcc, int dstc)
-	: ACTION_DB{ track, effect, srcc, dstc } {}
-
-bool ActionRemoveEffectAdditionalInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveEffectAdditionalInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
-			if (auto pluginDock = track->getPluginDock()) {
-				if (!pluginDock->isAdditionalBusConnected(
-					ACTION_DATA(effect), ACTION_DATA(srcc), ACTION_DATA(dstc))) {
-					ACTION_RESULT(false);
-				}
-
-				pluginDock->removeAdditionalBusConnection(ACTION_DATA(effect), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-				this->output("Unlink Plugin Channel: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dstc)) + "\n");
-				ACTION_RESULT(true);
-			}
-		}
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionRemoveEffectAdditionalInput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveEffectAdditionalInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
-			if (auto pluginDock = track->getPluginDock()) {
-				pluginDock->addAdditionalBusConnection(ACTION_DATA(effect), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-				this->output("Undo Unlink Plugin Channel: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dstc)) + "\n");
 				ACTION_RESULT(true);
 			}
 		}

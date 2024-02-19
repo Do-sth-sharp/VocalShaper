@@ -6,7 +6,7 @@ enum class ActionType : unsigned int {
 	ActionAddMixerTrackInputFromDevice,
 	ActionAddMixerTrackOutput,
 	ActionAddEffect,
-	ActionAddEffectAdditionalInput,
+	ActionAddEffectAdditionalInput,/**< deprecated */
 	ActionAddInstr,
 	ActionAddInstrOutput,
 	ActionAddInstrMidiInput,
@@ -33,7 +33,7 @@ enum class ActionType : unsigned int {
 	ActionRemoveMixerTrackInputFromDevice,
 	ActionRemoveMixerTrackOutput,
 	ActionRemoveEffect,
-	ActionRemoveEffectAdditionalInput,
+	ActionRemoveEffectAdditionalInput,/**< deprecated */
 	ActionRemoveInstr,
 	ActionRemoveInstrOutput,
 	ActionRemoveInstrMidiInput,

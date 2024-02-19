@@ -52,14 +52,6 @@ AUDIOCORE_FUNC(removeEffect) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(removeEffectAdditionalInput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionRemoveEffectAdditionalInput{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(removeInstr) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveInstr{
 		(int)luaL_checkinteger(L, 1) });
@@ -169,7 +161,6 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffect);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectAdditionalInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrMidiInput);

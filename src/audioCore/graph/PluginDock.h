@@ -45,10 +45,6 @@ public:
 	 */
 	bool removeAdditionalAudioBus();
 
-	void addAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel);
-	void removeAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel);
-	bool isAdditionalBusConnected(int pluginIndex, int srcChannel, int dstChannel) const;
-
 	using PluginState = std::tuple<juce::String, bool>;
 	using PluginStateList = juce::Array<PluginState>;
 	PluginStateList getPluginList() const;
@@ -57,8 +53,6 @@ public:
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 
 	void clearGraph();
-
-	utils::AudioConnectionList getPluginAdditionalBusConnections(int index) const;
 
 	class SafePointer {
 	private:
@@ -93,8 +87,6 @@ private:
 	const juce::AudioChannelSet audioChannels;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> pluginNodeList;
-
-	juce::Array<juce::AudioProcessorGraph::Connection> additionalConnectionList;
 
 	int findPlugin(const PluginDecorator* ptr) const;
 

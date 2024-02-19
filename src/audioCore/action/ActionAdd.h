@@ -135,26 +135,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionAddEffect)
 };
 
-class ActionAddEffectAdditionalInput final : public ActionUndoableBase {
-public:
-	ActionAddEffectAdditionalInput() = delete;
-	ActionAddEffectAdditionalInput(
-		int track, int effect, int srcc, int dstc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Add Effect Additional Input";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track, effect, srcc, dstc;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionAddEffectAdditionalInput)
-};
-
 class ActionAddInstr final : public ActionUndoableBase {
 public:
 	ActionAddInstr() = delete;

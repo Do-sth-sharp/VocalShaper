@@ -631,6 +631,32 @@ namespace quickAPI {
 		return getPluginParamList(pointer);
 	}
 
+	const juce::AudioChannelSet getEffectChannelSet(int trackIndex, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					if (auto plugin = pluginDock->getPluginProcessor(index)) {
+						return plugin->getAudioChannelSet();
+					}
+				}
+			}
+		}
+		return {};
+	}
+
+	int getEffectInputChannelNum(int trackIndex, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(trackIndex)) {
+				if (auto pluginDock = track->getPluginDock()) {
+					if (auto plugin = pluginDock->getPluginProcessor(index)) {
+						return plugin->getTotalNumInputChannels();
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
 	int getSeqTrackNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getSourceNum();

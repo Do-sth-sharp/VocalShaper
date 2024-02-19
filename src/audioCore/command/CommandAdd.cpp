@@ -54,14 +54,6 @@ AUDIOCORE_FUNC(addEffect) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(addEffectAdditionalInput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddEffectAdditionalInput{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(addInstr) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddInstr{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
@@ -183,7 +175,6 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackInputFromDevice);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addEffect);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addEffectAdditionalInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrMidiInput);

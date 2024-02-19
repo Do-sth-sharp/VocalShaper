@@ -140,8 +140,6 @@ public:
 private:
 	ACTION_DATABLOCK{
 		const int track;
-
-		utils::AudioConnectionList audioAdditionalLink;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackSideChainBus)
@@ -162,32 +160,10 @@ public:
 private:
 	ACTION_DATABLOCK{
 		const int track, effect;
-
-		utils::AudioConnectionList additional;
 		juce::MemoryBlock data;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveEffect)
-};
-
-class ActionRemoveEffectAdditionalInput final : public ActionUndoableBase {
-public:
-	ActionRemoveEffectAdditionalInput() = delete;
-	ActionRemoveEffectAdditionalInput(
-		int track, int effect, int srcc, int dstc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Effect Additional Input";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track, effect, srcc, dstc;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveEffectAdditionalInput)
 };
 
 class ActionRemoveInstr final : public ActionUndoableBase {

@@ -123,6 +123,13 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 			}
 		}
 
+		/** Connect Additional Bus */
+		for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
+			juce::AudioProcessorGraph::Connection connection =
+			{ {this->audioInputNode->nodeID, i}, {ptrNode->nodeID, i} };
+			this->addConnection(connection);
+		}
+
 		/** Connect Node To MIDI Input */
 		this->addConnection(
 			{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptrNode->nodeID, this->midiChannelIndex} });
@@ -160,14 +167,11 @@ void PluginDock::removePlugin(int index) {
 	}
 
 	/** Remove Additional Connection */
-	this->additionalConnectionList.removeIf(
-		[this, nodeID = ptrNode->nodeID](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.destination.nodeID == nodeID) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
+	for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {this->audioInputNode->nodeID, i}, {ptrNode->nodeID, i} };
+		this->removeConnection(connection);
+	}
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
@@ -252,7 +256,8 @@ bool PluginDock::getPluginBypass(PluginDecorator::SafePointer plugin) {
 
 bool PluginDock::addAdditionalAudioBus() {
 	/** Check Channel Num */
-	if (this->getTotalNumInputChannels() + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
+	int oldNum = this->getTotalNumInputChannels();
+	if (oldNum + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
 		return false;
 	}
 
@@ -262,15 +267,16 @@ bool PluginDock::addAdditionalAudioBus() {
 	/** Set Additional Channel Num */
 	layout.inputBuses.clear();
 	layout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels() + this->audioChannels.size()));
+		juce::AudioChannelSet::discreteChannels(oldNum + this->audioChannels.size()));
 
 	/** Set Bus Layout Of Current Graph */
 	this->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Input Node */
+	int newNum = this->getTotalNumInputChannels();
 	juce::AudioProcessorGraph::BusesLayout inputLayout;
 	inputLayout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
+		juce::AudioChannelSet::discreteChannels(newNum));
 	inputLayout.outputBuses = inputLayout.inputBuses;
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
@@ -279,12 +285,22 @@ bool PluginDock::addAdditionalAudioBus() {
 		p->getProcessor()->addBus(true);
 	}
 
+	/** Connect Additional Bus */
+	for (auto& p : this->pluginNodeList) {
+		for (int i = oldNum; i < newNum; i++) {
+			juce::AudioProcessorGraph::Connection connection =
+			{ {this->audioInputNode->nodeID, i}, {p->nodeID, i} };
+			this->addConnection(connection);
+		}
+	}
+
 	return true;
 }
 
 bool PluginDock::removeAdditionalAudioBus() {
 	/** Check Channel Num */
-	if (this->getTotalNumInputChannels() - this->audioChannels.size() < this->audioChannels.size()) {
+	int oldNum = this->getTotalNumInputChannels();
+	if (oldNum - this->audioChannels.size() < this->audioChannels.size()) {
 		return false;
 	}
 
@@ -294,15 +310,16 @@ bool PluginDock::removeAdditionalAudioBus() {
 	/** Set Additional Channel Num */
 	layout.inputBuses.clear();
 	layout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels() - this->audioChannels.size()));
+		juce::AudioChannelSet::discreteChannels(oldNum - this->audioChannels.size()));
 
 	/** Set Bus Layout Of Current Graph */
 	this->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Input Node */
+	int newNum = this->getTotalNumInputChannels();
 	juce::AudioProcessorGraph::BusesLayout inputLayout;
 	inputLayout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
+		juce::AudioChannelSet::discreteChannels(newNum));
 	inputLayout.outputBuses = inputLayout.inputBuses;
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
@@ -311,80 +328,16 @@ bool PluginDock::removeAdditionalAudioBus() {
 		p->getProcessor()->removeBus(true);
 	}
 
-	/** Auto Remove Connection */
-	this->removeIllegalConnections();
-
-	return true;
-}
-
-void PluginDock::addAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel) {
-	/** Limit Index */
-	if (pluginIndex < 0 || pluginIndex >= this->pluginNodeList.size()) {
-		return;
-	}
-	if (srcChannel < this->audioChannels.size() ||
-		srcChannel >= this->getTotalNumInputChannels()) {
-		return;
-	}
-
-	/** Get Node ID */
-	auto ptrNode = this->pluginNodeList.getUnchecked(pluginIndex);
-	auto nodeID = ptrNode->nodeID;
-
-	/** Get Channels */
-	int nodeChannels = ptrNode->getProcessor()->getTotalNumInputChannels();
-	if (dstChannel < 0 || dstChannel >= nodeChannels) { return; }
-
-	/** Link Bus */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
-	if (!this->isConnected(connection)) {
-		this->addConnection(connection);
-		this->additionalConnectionList.add(connection);
-	}
-
-	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, pluginIndex);
-}
-
-void PluginDock::removeAdditionalBusConnection(int pluginIndex, int srcChannel, int dstChannel) {
-	/** Limit Index */
-	if (pluginIndex < 0 || pluginIndex >= this->pluginNodeList.size()) {
-		return;
-	}
-
-	/** Get Node ID */
-	auto nodeID = this->pluginNodeList.getUnchecked(pluginIndex)->nodeID;
-
-	/** Remove Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {this->audioInputNode->nodeID, srcChannel}, {nodeID, dstChannel} };
-	this->removeConnection(connection);
-	this->additionalConnectionList.removeAllInstancesOf(connection);
-
-	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, pluginIndex);
-}
-
-bool PluginDock::isAdditionalBusConnected(int pluginIndex, int srcChannel, int dstChannel) const {
-	/** Limit Index */
-	if (pluginIndex < 0 || pluginIndex >= this->pluginNodeList.size()) {
-		return false;
-	}
-
-	/** Get Node ID */
-	auto nodeID = this->pluginNodeList.getUnchecked(pluginIndex)->nodeID;
-
-	/** Check Connection */
-	for (auto& i : this->additionalConnectionList) {
-		if (i.source.channelIndex == srcChannel &&
-			i.destination.nodeID == nodeID &&
-			i.destination.channelIndex == dstChannel) {
-			return true;
+	/** Remove Additional Connection */
+	for (auto& p : this->pluginNodeList) {
+		for (int i = newNum; i < oldNum; i++) {
+			juce::AudioProcessorGraph::Connection connection =
+			{ {this->audioInputNode->nodeID, i}, {p->nodeID, i} };
+			this->removeConnection(connection);
 		}
 	}
 
-	return false;
+	return true;
 }
 
 PluginDock::PluginStateList PluginDock::getPluginList() const {
@@ -414,11 +367,6 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 }
 
 void PluginDock::clearGraph() {
-	for (auto& i : this->additionalConnectionList) {
-		this->removeConnection(i);
-	}
-	this->additionalConnectionList.clear();
-
 	for (auto& i : this->pluginNodeList) {
 		this->removeNode(i->nodeID);
 	}
@@ -436,40 +384,6 @@ void PluginDock::clearGraph() {
 	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, -1);
 }
 
-utils::AudioConnectionList PluginDock::getPluginAdditionalBusConnections(int index) const {
-	/** Check Index */
-	if (index < 0 || index >= this->pluginNodeList.size()) {
-		return utils::AudioConnectionList{};
-	}
-
-	/** Get Current Track ID */
-	juce::AudioProcessorGraph::NodeID currentID
-		= this->pluginNodeList.getUnchecked(index)->nodeID;
-	utils::AudioConnectionList resultList;
-
-	for (auto& i : this->additionalConnectionList) {
-		if (i.destination.nodeID == currentID) {
-			/** Add To Result */
-			resultList.add(std::make_tuple(
-				-1, i.source.channelIndex, index, i.destination.channelIndex));
-		}
-	}
-
-	/** Sort Result */
-	class SortComparator {
-	public:
-		int compareElements(utils::AudioConnection& first, utils::AudioConnection& second) {
-			if (std::get<3>(first) == std::get<3>(second)) {
-				return std::get<1>(first) - std::get<1>(second);
-			}
-			return std::get<3>(first) - std::get<3>(second);
-		}
-	} comparator;
-	resultList.sort(comparator, true);
-
-	return resultList;
-}
-
 bool PluginDock::parse(const google::protobuf::Message* data) {
 	auto mes = dynamic_cast<const vsp4::PluginDock*>(data);
 	if (!mes) { return false; }
@@ -485,11 +399,6 @@ bool PluginDock::parse(const google::protobuf::Message* data) {
 				if (!plugin->parse(&i)) { return false; }
 			}
 		}
-	}
-
-	auto& connections = mes->connections();
-	for (auto& i : connections) {
-		this->addAdditionalBusConnection(i.dst(), i.srcchannel(), i.dstchannel());
 	}
 
 	return true;
@@ -513,21 +422,6 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize() const {
 				return nullptr;
 			}
 		}
-	}
-
-	auto connections = mes->mutable_connections();
-	for (auto& i : this->additionalConnectionList) {
-		auto dstNode = this->getNodeForId(i.destination.nodeID);
-		int srcChannel = i.source.channelIndex;
-		int dstChannel = i.destination.channelIndex;
-		if (!dstNode) { return nullptr; }
-
-		auto cmes = std::make_unique<vsp4::AudioInputConnection>();
-		cmes->set_dst(this->findPlugin(dynamic_cast<PluginDecorator*>(dstNode->getProcessor())));
-		cmes->set_srcchannel(srcChannel);
-		cmes->set_dstchannel(dstChannel);
-
-		connections->AddAllocated(cmes.release());
 	}
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());

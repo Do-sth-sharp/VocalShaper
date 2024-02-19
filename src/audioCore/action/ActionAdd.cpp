@@ -271,54 +271,6 @@ bool ActionAddEffect::undo() {
 	ACTION_RESULT(false);
 }
 
-ActionAddEffectAdditionalInput::ActionAddEffectAdditionalInput(
-	int track, int effect, int srcc, int dstc)
-	: ACTION_DB{ track, effect, srcc, dstc } {}
-
-bool ActionAddEffectAdditionalInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddEffectAdditionalInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
-			if (auto pluginDock = track->getPluginDock()) {
-				pluginDock->addAdditionalBusConnection(ACTION_DATA(effect), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-				this->output("Link Plugin Channel: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dstc)) + "\n");
-				ACTION_RESULT(true);
-			}
-		}
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddEffectAdditionalInput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddEffectAdditionalInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
-			if (auto pluginDock = track->getPluginDock()) {
-				pluginDock->removeAdditionalBusConnection(ACTION_DATA(effect), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-				this->output("Undo Link Plugin Channel: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dstc)) + "\n");
-				ACTION_RESULT(true);
-			}
-		}
-	}
-	ACTION_RESULT(false);
-}
-
 ActionAddInstr::ActionAddInstr(
 	int index, int type, const juce::String& pid)
 	: ACTION_DB{ index, type, pid } {}

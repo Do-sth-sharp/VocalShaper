@@ -123,6 +123,8 @@ namespace quickAPI {
 	const juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer);
 	const juce::String getEffectParamName(PluginHolder pointer, int paramIndex);
 	const juce::StringArray getEffectParamList(PluginHolder pointer);
+	const juce::AudioChannelSet getEffectChannelSet(int trackIndex, int index);
+	int getEffectInputChannelNum(int trackIndex, int index);
 
 	int getSeqTrackNum();
 	const juce::String getSeqTrackName(int index);
