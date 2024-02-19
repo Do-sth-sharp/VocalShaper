@@ -43,8 +43,13 @@ private:
 	void editorShow();
 	void showMenu();
 
+	void addEffect(const juce::PluginDescription& plugin);
+
 	juce::String createToolTip() const;
-	juce::PopupMenu createMenu() const;
+	juce::PopupMenu createMenu(
+		const std::function<void(const juce::PluginDescription&)>& addCallback) const;
+	juce::PopupMenu createAddMenu(
+		const std::function<void(const juce::PluginDescription&)>& callback) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InstrComponent)
 };

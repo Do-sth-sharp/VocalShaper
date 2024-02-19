@@ -239,7 +239,15 @@ enum InstrMenuActionType {
 };
 
 void InstrComponent::showMenu() {
-	auto menu = this->createMenu();
+	/** Callback */
+	auto addCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
+		if (comp) {
+			comp->addEffect(pluginDes);
+		}
+		};
+
+	/** Create Menu */
+	auto menu = this->createMenu(addCallback);
 	int result = menu.show();
 
 	switch (result) {
@@ -254,6 +262,11 @@ void InstrComponent::showMenu() {
 	}
 }
 
+void InstrComponent::addEffect(const juce::PluginDescription& plugin) {
+	CoreActions::insertInstrGUI(this->index + 1,
+		plugin.createIdentifierString());
+}
+
 juce::String InstrComponent::createToolTip() const {
 	juce::String result =
 		"#" + juce::String{ this->index } + "\n"
@@ -263,11 +276,22 @@ juce::String InstrComponent::createToolTip() const {
 	return result;
 }
 
-juce::PopupMenu InstrComponent::createMenu() const {
+juce::PopupMenu InstrComponent::createMenu(
+	const std::function<void(const juce::PluginDescription&)>& addCallback) const {
 	juce::PopupMenu menu;
 
+	menu.addSubMenu(TRANS("Add"), this->createAddMenu(addCallback));
 	menu.addItem(InstrMenuActionType::Bypass, TRANS("Bypass"), true, !(this->bypassButton->getToggleState()));
 	menu.addItem(InstrMenuActionType::Remove, TRANS("Remove"));
 
 	return menu;
+}
+
+juce::PopupMenu InstrComponent::createAddMenu(
+	const std::function<void(const juce::PluginDescription&)>& callback) const {
+	/** Create Menu */
+	auto [valid, list] = quickAPI::getPluginList(true, true);
+	if (!valid) { return juce::PopupMenu{}; }
+	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
+	return utils::createPluginMenu(groups, callback);
 }
