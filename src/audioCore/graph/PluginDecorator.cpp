@@ -57,11 +57,7 @@ void PluginDecorator::setPlugin(
 		this->plugin = std::move(plugin);
 		this->pluginIdentifier = pluginIdentifier;
 
-		int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());
-		this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
-		if (this->plugin->supportsDoublePrecisionProcessing()) {
-			this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
-		}
+		this->updateBuffer();
 	}
 
 	this->plugin->setPlayHead(this->getPlayHead());
@@ -317,20 +313,21 @@ void PluginDecorator::processBlock(
 	{
 		if (this->plugin && this->buffer) {
 			this->buffer->clear();
-			this->buffer->setSize(this->buffer->getNumChannels(), buffer.getNumSamples(), true, false, true);
 
-			for (int i = 0; i < buffer.getNumChannels() && i < this->buffer->getNumChannels(); i++) {
+			int totalChannels = std::min(buffer.getNumChannels(), this->buffer->getNumChannels());
+			int totalSamples = std::min(buffer.getNumSamples(), this->buffer->getNumSamples());
+			for (int i = 0; i < totalChannels; i++) {
 				vMath::copyAudioData(
 					*(this->buffer.get()), buffer,
-					0, 0, i, i, buffer.getNumSamples());
+					0, 0, i, i, totalSamples);
 			}
 
 			this->plugin->processBlock(*(this->buffer.get()), midiMessages);
 
-			for (int i = 0; i < buffer.getNumChannels() && i < this->buffer->getNumChannels(); i++) {
+			for (int i = 0; i < totalChannels; i++) {
 				vMath::copyAudioData(
 					buffer, *(this->buffer.get()),
-					0, 0, i, i, buffer.getNumSamples());
+					0, 0, i, i, totalSamples);
 			}
 		}
 	}
@@ -347,16 +344,17 @@ void PluginDecorator::processBlock(
 	{
 		if (this->plugin && this->doubleBuffer) {
 			this->doubleBuffer->clear();
-			this->doubleBuffer->setSize(this->doubleBuffer->getNumChannels(), buffer.getNumSamples(), true, false, true);
 
-			for (int i = 0; i < buffer.getNumChannels() && i < this->doubleBuffer->getNumChannels(); i++) {
-				this->doubleBuffer->copyFrom(i, 0, buffer.getReadPointer(i), buffer.getNumSamples());
+			int totalChannels = std::min(buffer.getNumChannels(), this->buffer->getNumChannels());
+			int totalSamples = std::min(buffer.getNumSamples(), this->buffer->getNumSamples());
+			for (int i = 0; i < totalChannels; i++) {
+				this->doubleBuffer->copyFrom(i, 0, buffer.getReadPointer(i), totalSamples);
 			}
 
 			this->plugin->processBlock(*(this->doubleBuffer.get()), midiMessages);
 
-			for (int i = 0; i < buffer.getNumChannels() && i < this->doubleBuffer->getNumChannels(); i++) {
-				buffer.copyFrom(i, 0, this->doubleBuffer->getReadPointer(i), buffer.getNumSamples());
+			for (int i = 0; i < totalChannels; i++) {
+				buffer.copyFrom(i, 0, this->doubleBuffer->getReadPointer(i), totalSamples);
 			}
 		}
 	}
@@ -493,7 +491,7 @@ void PluginDecorator::setCurrentProgramStateInformation(const void* data, int si
 }
 
 void PluginDecorator::processorLayoutsChanged() {
-	this->updatePluginBuses();
+	this->updateBuffer();
 }
 
 void PluginDecorator::addListener(juce::AudioProcessorListener* newListener) {
@@ -617,49 +615,6 @@ void PluginDecorator::numBusesChanged() {
 	//this->updatePluginBuses();
 }
 
-void PluginDecorator::updatePluginBuses() {
-	if (!this->plugin) { return; }
-
-	auto currentBusesLayout = this->getBusesLayout();
-	auto pluginBusesLayout = this->plugin->getBusesLayout();
-
-	if (pluginBusesLayout == currentBusesLayout) {
-		return;
-	}
-
-	int inputBusNumDefer = 
-		currentBusesLayout.inputBuses.size() - pluginBusesLayout.inputBuses.size();
-	int outputBusNumDefer =
-		currentBusesLayout.outputBuses.size() - pluginBusesLayout.outputBuses.size();
-
-	if (inputBusNumDefer > 0) {
-		for (int i = 0; i < inputBusNumDefer; i++) {
-			this->plugin->addBus(true);
-		}
-	}
-	else if (inputBusNumDefer < 0) {
-		for (int i = 0; i < -inputBusNumDefer; i++) {
-			this->plugin->removeBus(true);
-		}
-	}
-	if (outputBusNumDefer > 0) {
-		for (int i = 0; i < outputBusNumDefer; i++) {
-			this->plugin->addBus(false);
-		}
-	}
-	else if (outputBusNumDefer < 0) {
-		for (int i = 0; i < -outputBusNumDefer; i++) {
-			this->plugin->removeBus(false);
-		}
-	}
-
-	pluginBusesLayout = this->plugin->getBusesLayout();
-	if (pluginBusesLayout.inputBuses.size() == currentBusesLayout.inputBuses.size()
-		&& pluginBusesLayout.outputBuses.size() == currentBusesLayout.outputBuses.size()) {
-		this->plugin->setBusesLayout(currentBusesLayout);
-	}
-}
-
 void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages) {
 	/** Filter MIDI Channel */
 	if (channel >= 1 && channel <= 16) {
@@ -730,5 +685,16 @@ void PluginDecorator::parseMIDICC(juce::MidiBuffer& midiMessages) {
 	if ((lastCCChannel > -1) && this->ccListener) {
 		juce::MessageManager::callAsync(
 			std::bind(this->ccListener, lastCCChannel));
+	}
+}
+
+void PluginDecorator::updateBuffer() {
+	juce::ScopedWriteLock locker(audioLock::getPluginLock());
+	if (this->plugin) {
+		int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());
+		this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
+		if (this->plugin->supportsDoublePrecisionProcessing()) {
+			this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
+		}
 	}
 }

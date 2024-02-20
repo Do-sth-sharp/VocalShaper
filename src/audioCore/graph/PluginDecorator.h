@@ -150,13 +150,13 @@ private:
 	void numChannelsChanged() override;
 	void numBusesChanged() override;
 
-	void updatePluginBuses();
-
 	static void filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages);
 	static void interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages);
 	static void interceptMIDICCMessage(bool shouldMIDICCIntercept, juce::MidiBuffer& midiMessages);
 
 	void parseMIDICC(juce::MidiBuffer& midiMessages);
+	
+	void updateBuffer();
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDecorator)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)

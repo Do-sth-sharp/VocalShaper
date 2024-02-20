@@ -67,10 +67,8 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 	if (ptrNode) {
 		/** Set Bus Num */
 		{
-			int additionalBusNum = this->getBusCount(true) - 1;
-			for (int i = 0; i < additionalBusNum; i++) {
-				ptrNode->getProcessor()->addBus(true);
-			}
+			auto busLayout = this->getBusesLayout();
+			ptrNode->getProcessor()->setBusesLayout(busLayout);
 		}
 
 		/** Limit Index */
@@ -282,7 +280,7 @@ bool PluginDock::addAdditionalAudioBus() {
 
 	/** Set Bus Num Of Plugins */
 	for (auto& p : this->pluginNodeList) {
-		p->getProcessor()->addBus(true);
+		p->getProcessor()->setBusesLayout(layout);
 	}
 
 	/** Connect Additional Bus */
@@ -331,7 +329,7 @@ bool PluginDock::removeAdditionalAudioBus() {
 
 	/** Set Bus Num Of Plugins */
 	for (auto& p : this->pluginNodeList) {
-		p->getProcessor()->removeBus(true);
+		p->getProcessor()->setBusesLayout(layout);
 	}
 
 	/** Remove Additional Connection */
