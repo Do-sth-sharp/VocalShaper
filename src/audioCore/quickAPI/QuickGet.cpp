@@ -766,12 +766,7 @@ namespace quickAPI {
 	}
 
 	int getMixerTrackOutputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getTotalNumOutputChannels();
-			}
-		}
-		return 0;
+		return getMixerTrackChannelSet(index).size();
 	}
 
 	int getMixerTrackSideChainBusNum(int index) {

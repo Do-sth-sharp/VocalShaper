@@ -268,17 +268,17 @@ bool PluginDock::addAdditionalAudioBus() {
 	layout.inputBuses.clear();
 	layout.inputBuses.add(
 		juce::AudioChannelSet::discreteChannels(oldNum + this->audioChannels.size()));
+	layout.outputBuses.clear();
+	layout.outputBuses.add(
+		juce::AudioChannelSet::discreteChannels(oldNum + this->audioChannels.size()));
 
 	/** Set Bus Layout Of Current Graph */
 	this->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Input Node */
 	int newNum = this->getTotalNumInputChannels();
-	juce::AudioProcessorGraph::BusesLayout inputLayout;
-	inputLayout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(newNum));
-	inputLayout.outputBuses = inputLayout.inputBuses;
-	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+	this->audioInputNode->getProcessor()->setBusesLayout(layout);
+	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
 	/** Set Bus Num Of Plugins */
 	for (auto& p : this->pluginNodeList) {
@@ -292,6 +292,12 @@ bool PluginDock::addAdditionalAudioBus() {
 			{ {this->audioInputNode->nodeID, i}, {p->nodeID, i} };
 			this->addConnection(connection);
 		}
+	}
+	for (int i = oldNum; i < newNum; i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {this->audioInputNode->nodeID, i},
+			{this->audioOutputNode->nodeID, i} };
+		this->addConnection(connection);
 	}
 
 	return true;
@@ -329,13 +335,7 @@ bool PluginDock::removeAdditionalAudioBus() {
 	}
 
 	/** Remove Additional Connection */
-	for (auto& p : this->pluginNodeList) {
-		for (int i = newNum; i < oldNum; i++) {
-			juce::AudioProcessorGraph::Connection connection =
-			{ {this->audioInputNode->nodeID, i}, {p->nodeID, i} };
-			this->removeConnection(connection);
-		}
-	}
+	this->removeIllegalConnections();
 
 	return true;
 }

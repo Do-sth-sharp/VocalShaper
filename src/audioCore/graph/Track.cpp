@@ -2,6 +2,7 @@
 
 #include "../misc/Renderer.h"
 #include "../misc/AudioLock.h"
+#include "../misc/VMath.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -82,7 +83,8 @@ void Track::updateIndex(int index) {
 
 bool Track::addAdditionalAudioBus() {
 	/** Check Channel Num */
-	if (this->getTotalNumInputChannels() + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
+	int oldNum = this->getTotalNumInputChannels();
+	if (oldNum + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
 		return false;
 	}
 
@@ -92,17 +94,18 @@ bool Track::addAdditionalAudioBus() {
 	/** Set Additional Channel Num */
 	layout.inputBuses.clear();
 	layout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels() + this->audioChannels.size()));
+		juce::AudioChannelSet::discreteChannels(oldNum + this->audioChannels.size()));
+	layout.outputBuses.clear();
+	layout.outputBuses.add(
+		juce::AudioChannelSet::discreteChannels(oldNum + this->audioChannels.size()));
 
 	/** Set Bus Layout Of Current Graph */
 	this->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Input Node */
-	juce::AudioProcessorGraph::BusesLayout inputLayout;
-	inputLayout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
-	inputLayout.outputBuses = inputLayout.inputBuses;
-	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+	int newNum = this->getTotalNumInputChannels();
+	this->audioInputNode->getProcessor()->setBusesLayout(layout);
+	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Plugin Dock Node */
 	if (auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())) {
@@ -110,10 +113,11 @@ bool Track::addAdditionalAudioBus() {
 	}
 
 	/** Connect Bus To Plugin Dock */
-	int channelNum = this->getTotalNumInputChannels();
-	for (int i = channelNum - this->audioChannels.size(); i < channelNum; i++) {
+	for (int i = oldNum; i < newNum; i++) {
 		this->addConnection({ {this->audioInputNode->nodeID, i},
 			{this->pluginDockNode->nodeID, i} });
+		this->addConnection({ {this->pluginDockNode->nodeID, i},
+			{this->audioOutputNode->nodeID, i} });
 	}
 
 	/** Callback */
@@ -124,7 +128,8 @@ bool Track::addAdditionalAudioBus() {
 
 bool Track::removeAdditionalAudioBus() {
 	/** Check Channel Num */
-	if (this->getTotalNumInputChannels() - this->audioChannels.size() < this->audioChannels.size()) {
+	int oldNum = this->getTotalNumInputChannels();
+	if (oldNum - this->audioChannels.size() < this->audioChannels.size()) {
 		return false;
 	}
 
@@ -134,17 +139,17 @@ bool Track::removeAdditionalAudioBus() {
 	/** Set Additional Channel Num */
 	layout.inputBuses.clear();
 	layout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels() - this->audioChannels.size()));
+		juce::AudioChannelSet::discreteChannels(oldNum - this->audioChannels.size()));
+	layout.inputBuses.clear();
+	layout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(oldNum - this->audioChannels.size()));
 
 	/** Set Bus Layout Of Current Graph */
 	this->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Input Node */
-	juce::AudioProcessorGraph::BusesLayout inputLayout;
-	inputLayout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
-	inputLayout.outputBuses = inputLayout.inputBuses;
-	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+	this->audioInputNode->getProcessor()->setBusesLayout(layout);
+	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Plugin Dock Node */
 	if (auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())) {
@@ -359,8 +364,9 @@ bool Track::canRemoveBus(bool isInput) const {
 
 void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Process Gain And Panner */
+	int mainChannels = this->audioChannels.size();
 	auto block = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(
-		0, this->audioChannels.size());
+		0, mainChannels);
 	this->gainAndPanner.process(juce::dsp::ProcessContextReplacing<float>(block));
 
 	/** Process Current Graph */
