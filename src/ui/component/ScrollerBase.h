@@ -28,6 +28,8 @@ public:
 	void mouseDown(const juce::MouseEvent& event);
 	void mouseUp(const juce::MouseEvent& event);
 	void mouseExit(const juce::MouseEvent& event);
+	void mouseWheelMove(const juce::MouseEvent& event,
+		const juce::MouseWheelDetails& wheel);
 
 protected:
 	virtual int createViewSize() = 0;

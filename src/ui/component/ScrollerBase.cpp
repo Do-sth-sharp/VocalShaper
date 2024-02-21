@@ -243,6 +243,57 @@ void ScrollerBase::mouseExit(const juce::MouseEvent& /*event*/) {
 	this->resetState();
 }
 
+void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
+	const juce::MouseWheelDetails& wheel) {
+	if (this->state == State::PressedThumb
+		|| this->state == State::PressedStart
+		|| this->state == State::PressedEnd) {
+		return;
+	}
+
+	int totalSize = this->getActualTotalSize();
+	double delta = totalSize * wheel.deltaY
+		* (wheel.isReversed ? 1 : -1) * 0.15;
+
+	auto [startPos, endPos] = this->getThumb();
+	double startPer = startPos / (double)this->getTrackLength();
+	double endPer = endPos / (double)this->getTrackLength();
+
+	if (event.mods == juce::ModifierKeys::altModifier) {
+		auto pos = event.getPosition();
+		auto caredPos = this->getCaredPos(pos);
+		double thumbPer = (caredPos - startPos) / (double)(endPos - startPos);
+		double centerPer = caredPos / (double)this->getTrackLength();
+		if (thumbPer < 0) {
+			thumbPer = 0;
+			centerPer = startPer;
+		}
+		if (thumbPer > 1) {
+			thumbPer = 1;
+			centerPer = endPer;
+		}
+
+		double deltaPer = delta / totalSize;
+		double deltaL = deltaPer * thumbPer;
+		double deltaR = deltaPer - deltaL;
+		double newStartPer = startPer + deltaL;
+		double newEndPer = endPer - deltaR;
+
+		double itemSize = this->viewSize / ((newEndPer - newStartPer) * this->itemNum);
+		itemSize = this->limitItemSize(itemSize);
+
+		double newPer = (this->viewSize / itemSize) / this->itemNum;
+		newStartPer = centerPer - newPer * thumbPer;
+
+		this->setItemSize((int)itemSize);
+		this->setPos((int)(newStartPer * totalSize));
+	}
+	else {
+		double trueStartPos = startPer * totalSize;
+		this->setPos((int)(trueStartPos + delta));
+	}
+}
+
 void ScrollerBase::recordThumbPress(int pos) {
 	auto [startPos, endPos] = this->getThumb();
 	this->thumbPressedPer = (pos - startPos) / (double)(endPos - startPos);
