@@ -302,6 +302,12 @@ void CoreActions::removeEffect(int track, int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setEffectIndex(int track, int oldIndex, int newIndex) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffectIndex{ track, oldIndex, newIndex });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::insertTrack(int index, int type) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionAddMixerTrack{ index, type });

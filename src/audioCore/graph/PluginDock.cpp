@@ -71,69 +71,26 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 			ptrNode->getProcessor()->setBusesLayout(busLayout);
 		}
 
+		/** Get Main Bus */
+		int mainBusChannels = this->audioChannels.size();
+
+		/** Get Plugin Bus */
+		int pluginInputChannels = ptrNode->getProcessor()->getMainBusNumInputChannels();
+		int pluginOutputChannels = ptrNode->getProcessor()->getMainBusNumOutputChannels();
+
+		/** Check Channels */
+		if (pluginInputChannels < mainBusChannels || pluginOutputChannels < mainBusChannels) {
+			this->removeNode(ptrNode->nodeID);
+			return nullptr;
+		}
+
 		/** Limit Index */
 		if (index < 0 || index > this->pluginNodeList.size()) {
 			index = this->pluginNodeList.size();
 		}
 
-		/** Connect Node To The Audio Bus */
-		{
-			/** Find Hot Spot Nodes */
-			juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
-			if (index == 0) {
-				lastNode = this->audioInputNode;
-			}
-			else {
-				lastNode = this->pluginNodeList.getUnchecked(index - 1);
-			}
-			if (index == this->pluginNodeList.size()) {
-				nextNode = this->audioOutputNode;
-			}
-			else {
-				nextNode = this->pluginNodeList.getUnchecked(index);
-			}
-
-			/** Get Main Bus */
-			int mainBusChannels = this->audioChannels.size();
-
-			/** Get Plugin Bus */
-			int pluginInputChannels = ptrNode->getProcessor()->getMainBusNumInputChannels();
-			int pluginOutputChannels = ptrNode->getProcessor()->getMainBusNumOutputChannels();
-
-			/** Check Channels */
-			if (pluginInputChannels < mainBusChannels || pluginOutputChannels < mainBusChannels) {
-				this->removeNode(ptrNode->nodeID);
-				return nullptr;
-			}
-
-			/** Remove Connection Between Hot Spot Nodes */
-			for (int i = 0; i < mainBusChannels; i++) {
-				this->removeConnection(
-					{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
-			}
-
-			/** Add Connection To Hot Spot Nodes */
-			for (int i = 0; i < mainBusChannels; i++) {
-				this->addConnection(
-					{ {lastNode->nodeID, i}, {ptrNode->nodeID, i} });
-				this->addConnection(
-					{ {ptrNode->nodeID, i}, {nextNode->nodeID, i} });
-			}
-		}
-
-		/** Connect Additional Bus */
-		for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
-			juce::AudioProcessorGraph::Connection connection =
-			{ {this->audioInputNode->nodeID, i}, {ptrNode->nodeID, i} };
-			this->addConnection(connection);
-		}
-
-		/** Connect Node To MIDI Input */
-		this->addConnection(
-			{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptrNode->nodeID, this->midiChannelIndex} });
-
-		/** Add Node To The Plugin List */
-		this->pluginNodeList.insert(index, ptrNode);
+		/** Insert Node */
+		this->insertPluginInternal(index, ptrNode);
 
 		/** Prepare To Play */
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
@@ -155,7 +112,7 @@ void PluginDock::removePlugin(int index) {
 	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
 
 	/** Get The Node Ptr Then Remove From The List */
-	auto ptrNode = this->pluginNodeList.removeAndReturn(index);
+	auto ptrNode = this->removePluginInternal(index);
 
 	/** Close The Editor */
 	if (auto processor = ptrNode->getProcessor()) {
@@ -164,45 +121,30 @@ void PluginDock::removePlugin(int index) {
 		}
 	}
 
-	/** Remove Additional Connection */
-	for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
-		juce::AudioProcessorGraph::Connection connection =
-		{ {this->audioInputNode->nodeID, i}, {ptrNode->nodeID, i} };
-		this->removeConnection(connection);
-	}
-
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
 
-	/** Connect The Last Node With The Next Node */
-	{
-		/** Find Hot Spot Nodes */
-		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
-		if (index == 0) {
-			lastNode = this->audioInputNode;
-		}
-		else {
-			lastNode = this->pluginNodeList.getUnchecked(index - 1);
-		}
-		if (index == this->pluginNodeList.size()) {
-			nextNode = this->audioOutputNode;
-		}
-		else {
-			nextNode = this->pluginNodeList.getUnchecked(index);
-		}
-
-		/** Get Main Bus */
-		int mainBusChannels = this->audioChannels.size();
-
-		/** Add Connection Between Hot Spot Nodes */
-		for (int i = 0; i < mainBusChannels; i++) {
-			this->addConnection(
-				{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
-		}
-	}
-
 	/** Callback */
 	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, index);
+}
+
+void PluginDock::setPluginIndex(int oldIndex, int newIndex) {
+	/** Limit Index */
+	int totalNum = this->getPluginNum();
+	if (oldIndex < 0 || oldIndex >= totalNum) { return; }
+	if (newIndex < 0 || newIndex >= totalNum) { return; }
+	if (oldIndex == newIndex) { return; }
+
+	/** Remove Plugin From List */
+	auto ptr = this->removePluginInternal(oldIndex);
+	if (!ptr) { return; }
+
+	/** Insert Plugin */
+	this->insertPluginInternal(newIndex, ptr);
+
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, oldIndex);
+	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, newIndex);
 }
 
 int PluginDock::getPluginNum() const {
@@ -432,4 +374,119 @@ int PluginDock::findPlugin(const PluginDecorator* ptr) const {
 		}
 	}
 	return -1;
+}
+
+juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index) {
+	/** Get The Node Ptr Then Remove From The List */
+	auto ptrNode = this->pluginNodeList.removeAndReturn(index);
+
+	/** Remove MIDI Connection */
+	this->removeConnection(
+		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptrNode->nodeID, this->midiChannelIndex} });
+
+	/** Remove Additional Connection */
+	for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {this->audioInputNode->nodeID, i}, {ptrNode->nodeID, i} };
+		this->removeConnection(connection);
+	}
+
+	/** Connect The Last Node With The Next Node */
+	{
+		/** Find Hot Spot Nodes */
+		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
+		if (index == 0) {
+			lastNode = this->audioInputNode;
+		}
+		else {
+			lastNode = this->pluginNodeList.getUnchecked(index - 1);
+		}
+		if (index == this->pluginNodeList.size()) {
+			nextNode = this->audioOutputNode;
+		}
+		else {
+			nextNode = this->pluginNodeList.getUnchecked(index);
+		}
+
+		/** Get Main Bus */
+		int mainBusChannels = this->audioChannels.size();
+
+		/** Remove Connection To Hot Spot Nodes */
+		for (int i = 0; i < mainBusChannels; i++) {
+			this->removeConnection(
+				{ {lastNode->nodeID, i}, {ptrNode->nodeID, i} });
+			this->removeConnection(
+				{ {ptrNode->nodeID, i}, {nextNode->nodeID, i} });
+		}
+
+		/** Add Connection Between Hot Spot Nodes */
+		for (int i = 0; i < mainBusChannels; i++) {
+			this->addConnection(
+				{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
+		}
+	}
+
+	/** Return */
+	return ptrNode;
+}
+
+void PluginDock::insertPluginInternal(
+	int index, juce::AudioProcessorGraph::Node::Ptr ptr) {
+	/** Limit Index */
+	if (index < 0 || index > this->pluginNodeList.size()) {
+		index = this->pluginNodeList.size();
+	}
+
+	/** Get Main Bus */
+	int mainBusChannels = this->audioChannels.size();
+
+	/** Get Plugin Bus */
+	int pluginInputChannels = ptr->getProcessor()->getMainBusNumInputChannels();
+	int pluginOutputChannels = ptr->getProcessor()->getMainBusNumOutputChannels();
+
+	/** Connect Node To The Audio Bus */
+	{
+		/** Find Hot Spot Nodes */
+		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
+		if (index == 0) {
+			lastNode = this->audioInputNode;
+		}
+		else {
+			lastNode = this->pluginNodeList.getUnchecked(index - 1);
+		}
+		if (index == this->pluginNodeList.size()) {
+			nextNode = this->audioOutputNode;
+		}
+		else {
+			nextNode = this->pluginNodeList.getUnchecked(index);
+		}
+
+		/** Remove Connection Between Hot Spot Nodes */
+		for (int i = 0; i < mainBusChannels; i++) {
+			this->removeConnection(
+				{ {lastNode->nodeID, i}, {nextNode->nodeID, i} });
+		}
+
+		/** Add Connection To Hot Spot Nodes */
+		for (int i = 0; i < mainBusChannels; i++) {
+			this->addConnection(
+				{ {lastNode->nodeID, i}, {ptr->nodeID, i} });
+			this->addConnection(
+				{ {ptr->nodeID, i}, {nextNode->nodeID, i} });
+		}
+	}
+
+	/** Connect Additional Bus */
+	for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
+		juce::AudioProcessorGraph::Connection connection =
+		{ {this->audioInputNode->nodeID, i}, {ptr->nodeID, i} };
+		this->addConnection(connection);
+	}
+
+	/** Connect Node To MIDI Input */
+	this->addConnection(
+		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptr->nodeID, this->midiChannelIndex} });
+
+	/** Add Node To The Plugin List */
+	this->pluginNodeList.insert(index, ptr);
 }

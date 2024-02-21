@@ -2,6 +2,7 @@
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
 #include "../misc/PluginEditorHub.h"
+#include "../misc/DragSourceType.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -108,10 +109,19 @@ void EffectComponent::update(int track, int index) {
 
 void EffectComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
-		this->editorShow();
+		if (!event.mouseWasDraggedSinceMouseDown()) {
+			this->editorShow();
+		}
 	}
 	else if (event.mods.isRightButtonDown()) {
 		this->showMenu();
+	}
+}
+
+void EffectComponent::mouseDrag(const juce::MouseEvent& event) {
+	/** Start Drag */
+	if (event.mods.isLeftButtonDown()) {
+		this->startDrag();
 	}
 }
 
@@ -157,10 +167,28 @@ void EffectComponent::showMenu() {
 	}
 }
 
+void EffectComponent::startDrag() {
+	if (auto container = juce::DragAndDropContainer::findParentDragContainerFor(this)) {
+		container->startDragging(this->getDragSourceDescription(),
+			this, juce::ScaledImage{}, true);
+	}
+}
+
 void EffectComponent::addEffect(
 	const juce::PluginDescription& pluginDes) {
 	CoreActions::insertEffect(this->track, this->index + 1,
 		pluginDes.createIdentifierString());
+}
+
+juce::var EffectComponent::getDragSourceDescription() const {
+	auto object = std::make_unique<juce::DynamicObject>();
+
+	object->setProperty("type", (int)DragSourceType::Effect);
+	object->setProperty("name", this->name);
+	object->setProperty("track", this->track);
+	object->setProperty("index", this->index);
+
+	return juce::var{ object.release() };
 }
 
 juce::String EffectComponent::createToolTip() const {

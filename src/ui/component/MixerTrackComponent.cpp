@@ -393,6 +393,13 @@ bool MixerTrackComponent::isInterestedInDragSource(
 		return true;
 	}
 
+	/** From Effect */
+	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
+		int trackIndex = des["track"];
+		if (trackIndex != this->index) { return false; }
+		return true;
+	}
+
 	return false;
 }
 
@@ -402,6 +409,9 @@ void MixerTrackComponent::itemDragEnter(
 
 	auto& des = dragSourceDetails.description;
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		this->preEffectDrop(dragSourceDetails.localPosition);
+	}
+	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
 		this->preEffectDrop(dragSourceDetails.localPosition);
 	}
 	else {
@@ -415,6 +425,10 @@ void MixerTrackComponent::itemDragMove(const SourceDetails& dragSourceDetails) {
 		this->endEffectDrop();
 		this->preEffectDrop(dragSourceDetails.localPosition);
 	}
+	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
+		this->endEffectDrop();
+		this->preEffectDrop(dragSourceDetails.localPosition);
+	}
 }
 
 void MixerTrackComponent::itemDragExit(
@@ -423,6 +437,9 @@ void MixerTrackComponent::itemDragExit(
 
 	auto& des = dragSourceDetails.description;
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		this->endEffectDrop();
+	}
+	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
 		this->endEffectDrop();
 	}
 	else {
@@ -436,6 +453,9 @@ void MixerTrackComponent::itemDropped(
 
 	auto& des = dragSourceDetails.description;
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		this->endEffectDrop();
+	}
+	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
 		this->endEffectDrop();
 	}
 	else {
@@ -473,6 +493,23 @@ void MixerTrackComponent::itemDropped(
 		int index = this->getInsertIndex(dragSourceDetails.localPosition);
 		if (index > -1) {
 			CoreActions::insertEffect(this->index, index, pid);
+		}
+
+		return;
+	}
+
+	/** From Effect */
+	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
+		int trackIndex = des["track"];
+		int oldIndex = des["index"];
+
+		int newIndex = this->getInsertIndex(dragSourceDetails.localPosition);
+		if (newIndex > oldIndex) {
+			newIndex--;
+		}
+
+		if (newIndex > -1) {
+			CoreActions::setEffectIndex(trackIndex, oldIndex, newIndex);
 		}
 
 		return;

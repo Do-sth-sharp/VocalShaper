@@ -28,6 +28,7 @@ public:
 	 * @brief	Remove a plugin from the plugin dock.
 	 */
 	void removePlugin(int index);
+	void setPluginIndex(int oldIndex, int newIndex);
 
 	int getPluginNum() const;
 	PluginDecorator* getPluginProcessor(int index) const;
@@ -89,6 +90,9 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> pluginNodeList;
 
 	int findPlugin(const PluginDecorator* ptr) const;
+
+	juce::AudioProcessorGraph::Node::Ptr removePluginInternal(int index);
+	void insertPluginInternal(int index, juce::AudioProcessorGraph::Node::Ptr ptr);
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDock)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDock)

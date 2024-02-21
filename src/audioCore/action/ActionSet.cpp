@@ -796,6 +796,54 @@ bool ActionSetEffectParamValue::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetEffectIndex::ActionSetEffectIndex(
+	int track, int oldIndex, int newIndex)
+	: ACTION_DB{ track, oldIndex, newIndex } {}
+
+bool ActionSetEffectIndex::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffectIndex);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->setPluginIndex(ACTION_DATA(oldIndex), ACTION_DATA(newIndex));
+
+				this->output("Set Effect Index: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(oldIndex)) + "] " + juce::String(ACTION_DATA(newIndex)) + "\n");
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffectIndex::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffectIndex);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (auto pluginDock = track->getPluginDock()) {
+				pluginDock->setPluginIndex(ACTION_DATA(newIndex), ACTION_DATA(oldIndex));
+
+				this->output("Undo Set Effect Index: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(oldIndex)) + "] " + juce::String(ACTION_DATA(newIndex)) + "\n");
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
+}
+
 ActionSetInstrParamConnectToCC::ActionSetInstrParamConnectToCC(
 	int instr, int param, int cc)
 	: ACTION_DB{ instr, param, cc } {}

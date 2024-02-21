@@ -14,6 +14,7 @@ public:
 	void update(int track, int index);
 
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseDrag(const juce::MouseEvent& event) override;
 
 private:
 	int track = -1, index = -1;
@@ -27,9 +28,11 @@ private:
 	void bypass();
 	void editorShow();
 	void showMenu();
+	void startDrag();
 
 	void addEffect(const juce::PluginDescription& plugin);
 
+	juce::var getDragSourceDescription() const;
 	juce::String createToolTip() const;
 	juce::PopupMenu createMenu(
 		const std::function<void(const juce::PluginDescription&)>& addCallback) const;

@@ -530,6 +530,26 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamValue)
 };
 
+class ActionSetEffectIndex final : public ActionUndoableBase {
+public:
+	ActionSetEffectIndex() = delete;
+	ActionSetEffectIndex(
+		int track, int oldIndex, int newIndex);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Index";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track, oldIndex, newIndex;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectIndex)
+};
+
 class ActionSetInstrParamConnectToCC final : public ActionUndoableBase {
 public:
 	ActionSetInstrParamConnectToCC() = delete;

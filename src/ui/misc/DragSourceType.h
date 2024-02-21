@@ -9,5 +9,6 @@ enum class DragSourceType {
 	TrackMidiInput,
 	TrackAudioInput,
 	TrackMidiOutput,
-	TrackAudioOutput
+	TrackAudioOutput,
+	Effect
 };
