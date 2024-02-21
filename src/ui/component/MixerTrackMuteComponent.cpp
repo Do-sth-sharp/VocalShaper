@@ -4,7 +4,9 @@
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
-MixerTrackMuteComponent::MixerTrackMuteComponent() {
+MixerTrackMuteComponent::MixerTrackMuteComponent(
+	const RightButtonCallback& rightCallback)
+	: rightCallback(rightCallback) {
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forMuteButton());
 }
@@ -82,6 +84,11 @@ void MixerTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
 		}
 		else if (event.mods.isRightButtonDown()) {
 			this->showMenu();
+		}
+	}
+	else {
+		if (event.mods.isRightButtonDown()) {
+			this->rightCallback();
 		}
 	}
 }

@@ -70,6 +70,7 @@ public:
 	static void removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel);
 	static void removeEffect(int track, int index);
 
+	static void insertTrack(int index, int type);
 	static void setTrackColor(int index, const juce::Colour& color);
 	static void setTrackName(int index, const juce::String& name);
 	static void addTrackSideChain(int index);
@@ -89,6 +90,7 @@ public:
 	static void setTrackMute(int index, bool mute);
 	static void setTrackSolo(int index);
 	static void setTrackMuteAll(bool mute);
+	static void removeTrack(int index);
 
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
@@ -134,6 +136,8 @@ public:
 	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
 	static void removeEffectGUI(int track, int index);
 
+	static void insertTrackGUI(int index);
+	static void insertTrackGUI();
 	static void setTrackColorGUI(int index);
 	static void setTrackNameGUI(int index);
 	static void setTrackAudioInputFromDeviceGUI(int index, bool input,
@@ -148,6 +152,7 @@ public:
 		const juce::Array<std::tuple<int, int>>& links);
 	static void setTrackAudioOutputToSendGUI(int index, int trackIndex, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
+	static void removeTrackGUI(int index);
 
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(

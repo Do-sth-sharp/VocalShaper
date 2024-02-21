@@ -51,7 +51,8 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->addAndMakeVisible(this->levelMeter.get());
 
 	/** Mute */
-	this->muteButton = std::make_unique<MixerTrackMuteComponent>();
+	this->muteButton = std::make_unique<MixerTrackMuteComponent>(
+		[this] { this->showMenu(); });
 	this->addAndMakeVisible(this->muteButton.get());
 
 	/** Effect List */
@@ -353,6 +354,9 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 		if (y >= 0 && y < colorHeight) {
 			CoreActions::setTrackColorGUI(this->index);
 		}
+		else {
+			this->showMenu();
+		}
 	}
 	else if (event.mods.isLeftButtonDown()) {
 		if (y >= 0 && y < colorHeight) {
@@ -510,6 +514,34 @@ void MixerTrackComponent::endEffectDrop() {
 	this->repaint();
 }
 
+enum MixerTrackActionType {
+	Add = 1, Remove
+};
+
+void MixerTrackComponent::showMenu() {
+	auto menu = this->createMenu();
+	int result = menu.show();
+
+	switch (result) {
+	case MixerTrackActionType::Add: {
+		this->add();
+		break;
+	}
+	case MixerTrackActionType::Remove: {
+		this->remove();
+		break;
+	}
+	}
+}
+
+void MixerTrackComponent::add() {
+	CoreActions::insertTrackGUI(this->index + 1);
+}
+
+void MixerTrackComponent::remove() {
+	CoreActions::removeTrackGUI(this->index);
+}
+
 int MixerTrackComponent::getInsertIndex(const juce::Point<int>& pos) {
 	auto listRect = this->effectList->getBounds();
 	if (listRect.contains(pos)) {
@@ -520,4 +552,13 @@ int MixerTrackComponent::getInsertIndex(const juce::Point<int>& pos) {
 	else {
 		return -1;
 	}
+}
+
+juce::PopupMenu MixerTrackComponent::createMenu() const {
+	juce::PopupMenu menu;
+
+	menu.addItem(MixerTrackActionType::Add, TRANS("Add"));
+	menu.addItem(MixerTrackActionType::Remove, TRANS("Remove"));
+
+	return menu;
 }

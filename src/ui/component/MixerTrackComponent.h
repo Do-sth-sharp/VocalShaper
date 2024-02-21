@@ -65,7 +65,12 @@ private:
 	void preEffectDrop(const juce::Point<int>& pos);
 	void endEffectDrop();
 
+	void showMenu();
+	void add();
+	void remove();
+
 	int getInsertIndex(const juce::Point<int>& pos);
+	juce::PopupMenu createMenu() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerTrackComponent)
 };

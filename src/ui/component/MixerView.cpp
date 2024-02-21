@@ -1,6 +1,7 @@
 ﻿#include "MixerView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreCallbacks.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -122,7 +123,12 @@ void MixerView::update(int index) {
 
 	/** Update Color Temp */
 	if (index >= 0 && index < this->colorTemp.size()) {
-		this->colorTemp.getReference(index) = quickAPI::getMixerTrackColor(index);
+		if (index < newSize) {
+			this->colorTemp.getReference(index) = quickAPI::getMixerTrackColor(index);
+		}
+		if (this->colorTemp.size() > newSize) {
+			this->colorTemp.resize(newSize);
+		}
 	}
 	else {
 		this->colorTemp.clear();
@@ -168,6 +174,16 @@ void MixerView::updateEffect(int track, int index) {
 			i->updateEffect(index);
 		}
 	}
+}
+
+void MixerView::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isRightButtonDown()) {
+		this->add();
+	}
+}
+
+void MixerView::add() {
+	CoreActions::insertTrackGUI();
 }
 
 int MixerView::getViewWidth() const {

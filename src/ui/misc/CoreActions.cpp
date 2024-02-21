@@ -302,6 +302,12 @@ void CoreActions::removeEffect(int track, int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::insertTrack(int index, int type) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionAddMixerTrack{ index, type });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::setTrackColor(int index, const juce::Colour& color) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetMixerTrackColor{ index, color });
@@ -430,6 +436,11 @@ void CoreActions::setTrackMuteAll(bool mute) {
 		auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackMute{ i, mute });
 		ActionDispatcher::getInstance()->dispatch(std::move(action));
 	}
+}
+
+void CoreActions::removeTrack(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveMixerTrack{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
@@ -838,6 +849,17 @@ void CoreActions::removeEffectGUI(int track, int index) {
 	CoreActions::removeEffect(track, index);
 }
 
+void CoreActions::insertTrackGUI(int index) {
+	auto callback = [index](int type) {
+		CoreActions::insertTrack(index, type); };
+	CoreActions::askForBusTypeGUIAsync(callback);
+}
+
+void CoreActions::insertTrackGUI() {
+	int num = quickAPI::getMixerTrackNum();
+	CoreActions::insertTrackGUI(num);
+}
+
 void CoreActions::setTrackColorGUI(int index) {
 	/** Callback */
 	auto callback = [index](const juce::Colour& color) {
@@ -1048,6 +1070,18 @@ void CoreActions::setTrackAudioOutputToSendGUI(int index, int trackIndex, bool o
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		trackChannelSet, sendChannelSet, trackTotalChannels, sendTotalChannels,
 		trackName, sendName, true);
+}
+
+void CoreActions::removeTrackGUI(int index) {
+	if (index <= -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Track"),
+		TRANS("Remove the track from mixer. Continue?"))) {
+		return;
+	}
+
+	CoreActions::removeTrack(index);
 }
 
 bool CoreActions::askForSaveGUI() {

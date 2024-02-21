@@ -27,6 +27,9 @@ void MainGraph::insertTrack(int index, const juce::AudioChannelSet& type) {
 			auto node = this->trackNodeList[i];
 			dynamic_cast<Track*>(node->getProcessor())->updateIndex(i);
 		}
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
 	}
 	else {
 		jassertfalse;
@@ -116,6 +119,9 @@ void MainGraph::removeTrack(int index) {
 		auto node = this->trackNodeList[i];
 		dynamic_cast<Track*>(node->getProcessor())->updateIndex(i);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
 }
 
 int MainGraph::getTrackNum() const {

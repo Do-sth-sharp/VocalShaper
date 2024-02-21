@@ -21,10 +21,14 @@ public:
 	void updateMute(int index);
 	void updateEffect(int track, int index);
 
+	void mouseUp(const juce::MouseEvent& event) override;
+
 private:
 	std::unique_ptr<Scroller> hScroller = nullptr;
 	juce::OwnedArray<MixerTrackComponent> trackList;
 	juce::Array<juce::Colour> colorTemp;
+
+	void add();
 
 	int getViewWidth() const;
 	int getTrackNum() const;

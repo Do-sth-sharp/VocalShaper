@@ -6,7 +6,8 @@ class MixerTrackMuteComponent final
 	: public juce::Component,
 	public juce::SettableTooltipClient {
 public:
-	MixerTrackMuteComponent();
+	using RightButtonCallback = std::function<void(void)>;
+	MixerTrackMuteComponent(const RightButtonCallback& rightCallback);
 
 	void paint(juce::Graphics& g) override;
 
@@ -17,6 +18,8 @@ public:
 	void update(int index);
 
 private:
+	const RightButtonCallback rightCallback;
+
 	int index = -1;
 	bool mute = false;
 

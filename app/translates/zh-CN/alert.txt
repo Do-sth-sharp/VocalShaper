@@ -22,6 +22,7 @@ countries: cn
 "Audio Channel Link" = "音频通道连接"
 "Remove Instrument" = "移除乐器"
 "Remove Effect" = "移除效果器"
+"Remove Track" = "移除轨道"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
@@ -57,3 +58,4 @@ countries: cn
 "Select a MIDI CC controller in the list:" = "在列表中选择一个 MIDI CC 控制器："
 "Remove the instrument from instrument list. Continue?" = "从乐器列表中移除乐器。继续？"
 "Remove the effect from effect list. Continue?" = "从效果器列表中移除效果器。继续？"
+"Remove the track from mixer. Continue?" = "从混音器中移除轨道。继续？"
