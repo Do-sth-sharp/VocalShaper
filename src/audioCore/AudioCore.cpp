@@ -299,9 +299,6 @@ bool AudioCore::parse(const google::protobuf::Message* data) {
 	ProjectInfoData::getInstance()->init();
 	if (!ProjectInfoData::getInstance()->parse(&(mes->info()))) { return false; }
 
-	/** Load Sources */
-	if (!CloneableSourceManager::getInstance()->parse(&(mes->sources()))) { return false; }
-
 	/** Load Graph */
 	if (!this->mainAudioGraph->parse(&(mes->graph()))) { return false; }
 
@@ -320,10 +317,6 @@ std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {
 	version->set_major(majorVer);
 	version->set_minor(minorVer);
 	version->set_patch(patchVer);
-
-	auto sources = CloneableSourceManager::getInstance()->serialize();
-	if (!dynamic_cast<vsp4::SourceList*>(sources.get())) { return nullptr; }
-	mes->set_allocated_sources(dynamic_cast<vsp4::SourceList*>(sources.release()));
 
 	auto graph = this->mainAudioGraph->serialize();
 	if (!dynamic_cast<vsp4::MainGraph*>(graph.get())) { return nullptr; }

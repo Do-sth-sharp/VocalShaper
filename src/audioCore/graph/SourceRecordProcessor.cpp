@@ -115,32 +115,9 @@ double SourceRecordProcessor::getTailLengthSeconds() const {
 }
 
 bool SourceRecordProcessor::parse(const google::protobuf::Message* data) {
-	auto mes = dynamic_cast<const vsp4::Recorder*>(data);
-	if (!mes) { return false; }
-
-	this->clearGraph();
-
-	auto& list = mes->sources();
-	for (auto& i : list) {
-		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(i.index())) {
-			this->insertTask({ ptrSrc, i.offset(), i.compensate()});
-		}
-	}
-
 	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> SourceRecordProcessor::serialize() const {
-	auto mes = std::make_unique<vsp4::Recorder>();
-
-	auto list = mes->mutable_sources();
-	for (auto& [source, offset, compensate] : this->tasks) {
-		auto smes = std::make_unique<vsp4::SourceRecorderInstance>();
-		smes->set_index(CloneableSourceManager::getInstance()->getSourceIndex(source));
-		smes->set_offset(offset);
-		smes->set_compensate(compensate);
-		list->AddAllocated(smes.release());
-	}
-
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return nullptr;
 }

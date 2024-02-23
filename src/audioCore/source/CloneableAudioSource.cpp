@@ -29,27 +29,11 @@ int CloneableAudioSource::getChannelNum() const {
 }
 
 bool CloneableAudioSource::parse(const google::protobuf::Message* data) {
-	auto src = dynamic_cast<const vsp4::Source*>(data);
-	if (!src) { return false; }
-
-	this->setName(src->name());
-	this->setPath(src->path());
 	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableAudioSource::serialize() const {
-	auto mes = std::make_unique<vsp4::Source>();
-
-	mes->set_type(vsp4::Source_Type_AUDIO);
-	mes->set_id(this->getId());
-	mes->set_name(this->getName().toStdString());
-	juce::String path = this->getPath();
-	mes->set_path(
-		juce::String{ path.isNotEmpty() ? path
-		: utils::getSourceDefaultPathForAudio(
-			this->getId(), this->getName()) }.toStdString());
-
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return nullptr;
 }
 
 std::unique_ptr<CloneableSource> CloneableAudioSource::createThisType() const {

@@ -225,104 +225,11 @@ void CloneableSourceManager::clearGraph() {
 }
 
 bool CloneableSourceManager::parse(const google::protobuf::Message* data) {
-	auto mes = dynamic_cast<const vsp4::SourceList*>(data);
-	if (!mes) { return false; }
-
-	juce::ScopedWriteLock locker(this->getLock());
-
-	/** Clear List */
-	this->clearGraph();
-
-	/** Create Each Source */
-	auto& list = mes->sources();
-	for (auto& i : list) {
-		juce::String path = i.path();
-		switch (i.type()) {
-		case vsp4::Source_Type_AUDIO:
-			if (!this->createNewSourceThenLoadAsync<CloneableAudioSource>(path, false)) { return false; }
-			break;
-		case vsp4::Source_Type_MIDI:
-			if (!this->createNewSourceThenLoadAsync<CloneableMIDISource>(path, false)) { return false; }
-			break;
-		}
-	}
-
-	/** Load Each Source */
-	for (int i = 0; i < list.size(); i++) {
-		auto& src = list[i];
-		auto ptrSrc = this->getSource(i);
-		if (!ptrSrc) { continue; }
-
-		ptrSrc->setId(src.id());
-		if (!ptrSrc->parse(&src)) {
-			return false;
-		}
-
-		auto dstSource = this->getSource(src.synthdst());
-		ptrSrc->setDstSource(dstSource);
-
-		if (src.has_synthesizer()) {
-			auto& plugin = src.synthesizer();
-
-			auto& pluginData = plugin.state().data();
-			juce::MemoryBlock state(pluginData.c_str(), pluginData.size());
-
-			auto callback = [state, ptrSrc] {
-				if (!ptrSrc) { return; }
-				ptrSrc->setSynthesizerState(state);
-			};
-
-			auto pluginDes = Plugin::getInstance()->findPlugin(plugin.info().id(), true);
-			PluginLoader::getInstance()->loadPlugin(
-				*(pluginDes.get()), ptrSrc, callback);
-		}
-	}
-
-	/** Callback */
-	juce::MessageManager::callAsync([] {
-		UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
-		});
-
 	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> CloneableSourceManager::serialize() const {
-	auto mes = std::make_unique<vsp4::SourceList>();
-
-	juce::ScopedReadLock locker(this->getLock());
-
-	/** Serialize Each Source */
-	auto list = mes->mutable_sources();
-	for (int i = 0; i < this->sourceList.size(); i++) {
-		auto src = this->sourceList[i];
-		auto smes = src->serialize();
-
-		if (!dynamic_cast<vsp4::Source*>(smes.get())) { return nullptr; }
-		auto source = dynamic_cast<vsp4::Source*>(smes.get());
-
-		/** Plugin State */
-		if (src->pluginIdentifier.isNotEmpty()) {
-			if (auto plugin = source->mutable_synthesizer()) {
-				auto info = plugin->mutable_info();
-				info->set_id(src->pluginIdentifier.toStdString());
-
-				auto pluginData = src->getSynthesizerState();
-				plugin->mutable_state()->set_data(
-					pluginData.getData(), pluginData.getSize());
-			}
-		}
-
-		/** Dst Source */
-		int dstIndex = this->getSourceIndex(src->getDstSource());
-		source->set_synthdst(dstIndex);
-
-		/** Save Source */
-		this->saveSourceAsync(i, source->path());
-
-		list->AddAllocated(dynamic_cast<vsp4::Source*>(smes.release()));
-	}
-
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return nullptr;
 }
 
 CloneableSourceManager* CloneableSourceManager::getInstance() {
