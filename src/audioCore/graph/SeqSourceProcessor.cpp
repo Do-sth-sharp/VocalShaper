@@ -1,5 +1,6 @@
 ﻿#include "SeqSourceProcessor.h"
 #include "../misc/PlayPosition.h"
+#include "../uiCallback/UICallback.h"
 #include "../source/CloneableSourceManager.h"
 #include "../source/CloneableAudioSource.h"
 #include "../source/CloneableMIDISource.h"
@@ -10,8 +11,40 @@ using namespace org::vocalsharp::vocalshaper;
 SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	: audioChannels(type) {
 	/** Set Channel Layout */
-	this->setChannelLayoutOfBus(true, 0, type);
-	this->setChannelLayoutOfBus(false, 0, type);
+	juce::AudioProcessorGraph::BusesLayout layout;
+	layout.inputBuses.add(
+		juce::AudioChannelSet::discreteChannels(type.size()));
+	layout.outputBuses.add(
+		juce::AudioChannelSet::discreteChannels(type.size()));
+	this->setBusesLayout(layout);
+
+	/** The Main Audio IO Node Of The Track */
+	this->audioInputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode));
+	this->audioOutputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode));
+
+	/** The Main MIDI IO Node Of The Track */
+	this->midiInputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode));
+	this->midiOutputNode = this->addNode(
+		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
+			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
+
+	/** Set Audio IO Node Channel Num */
+	this->audioInputNode->getProcessor()->setBusesLayout(layout);
+	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
+
+	/** Connect IO Node */
+	this->addConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+	for (int i = 0; i < type.size(); i++) {
+		this->addConnection({ { this->audioInputNode->nodeID, i },
+			{ this->audioOutputNode->nodeID, i } });
+	}
 
 	/** Default Color */
 	this->trackColor = utils::getDefaultColour();
@@ -55,6 +88,106 @@ const juce::AudioChannelSet& SeqSourceProcessor::getAudioChannelSet() const {
 
 void SeqSourceProcessor::closeAllNote() {
 	this->noteCloseFlag = true;
+}
+
+void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> processor,
+	const juce::String& identifier) {
+	/** Remove Current Instr */
+	this->removeInstr();
+
+	/** Check Processor */
+	if (!processor) { return; }
+
+	/** Add Node */
+	if (auto ptrNode = this->addNode(
+		std::make_unique<PluginDecorator>(true, this->audioChannels))) {
+		/** Set Instr */
+		this->instr = ptrNode;
+
+		/** Get Decorator */
+		auto decorator = dynamic_cast<PluginDecorator*>(ptrNode->getProcessor());
+
+		/** Set Plugin */
+		decorator->setPlugin(std::move(processor), identifier);
+
+		/** Prepare To Play */
+		decorator->setPlayHead(this->getPlayHead());
+		decorator->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+		/** Connect IO */
+		this->addConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ ptrNode->nodeID, this->midiChannelIndex } });
+		this->addConnection({ { ptrNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+		for (int i = 0; i < this->audioChannels.size(); i++) {
+			this->addConnection({ { this->audioInputNode->nodeID, i },
+				{ ptrNode->nodeID, i } });
+			this->addConnection({ { ptrNode->nodeID, i },
+				{ this->audioOutputNode->nodeID, i } });
+		}
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);/**< TODO */
+	}
+}
+
+void SeqSourceProcessor::removeInstr() {
+	if (auto ptrNode = this->instr) {
+		/** Remove Instr */
+		this->instr = nullptr;
+
+		/** Disconnect IO */
+		this->removeConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ ptrNode->nodeID, this->midiChannelIndex } });
+		this->removeConnection({ { ptrNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+		for (int i = 0; i < this->audioChannels.size(); i++) {
+			this->removeConnection({ { this->audioInputNode->nodeID, i },
+				{ ptrNode->nodeID, i } });
+			this->removeConnection({ { ptrNode->nodeID, i },
+				{ this->audioOutputNode->nodeID, i } });
+		}
+
+		/** Remove Node */
+		this->removeNode(ptrNode->nodeID);
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);/**< TODO */
+	}
+}
+
+PluginDecorator* SeqSourceProcessor::getInstrProcessor() const {
+	return dynamic_cast<PluginDecorator*>(this->instr->getProcessor());
+}
+
+void SeqSourceProcessor::setInstrumentBypass(bool bypass) {
+	SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{
+			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) }, bypass);
+}
+
+bool SeqSourceProcessor::getInstrumentBypass() const {
+	return SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer{
+			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) });
+}
+
+void SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass) {
+	if (instr) {
+		if (auto bypassParam = instr->getBypassParameter()) {
+			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
+
+			/** Callback */
+			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		}
+	}
+}
+
+bool SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer instr) {
+	if (instr) {
+		if (auto bypassParam = instr->getBypassParameter()) {
+			return !juce::approximatelyEqual(bypassParam->getValue(), 0.0f);
+		}
+	}
+	return false;
 }
 
 void SeqSourceProcessor::prepareToPlay(
@@ -161,6 +294,9 @@ void SeqSourceProcessor::processBlock(
 			this->activeNoteSet.erase({ mes.getChannel(), mes.getNoteNumber() });
 		}
 	}
+
+	/** Process Graph */
+	this->juce::AudioProcessorGraph::processBlock(buffer, midiMessages);
 }
 
 double SeqSourceProcessor::getTailLengthSeconds() const {
