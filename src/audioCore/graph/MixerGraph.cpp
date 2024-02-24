@@ -77,14 +77,6 @@ void MainGraph::removeTrack(int index) {
 			}
 			return false;
 		});
-	this->audioInstr2TrkConnectionList.removeIf(
-		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
-			if (element.destination.nodeID == nodeID) {
-				this->removeConnection(element);
-				return true;
-			}
-			return false;
-		});
 	this->audioI2TrkConnectionList.removeIf(
 		[this, nodeID](const juce::AudioProcessorGraph::Connection& element) {
 			if (element.destination.nodeID == nodeID) {
@@ -489,50 +481,6 @@ utils::AudioConnectionList MainGraph::getTrackInputFromSrcConnections(int index)
 			int sourceIndex = this->audioSourceNodeList.indexOf(
 				this->getNodeForId(i.source.nodeID));
 			if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) {
-				continue;
-			}
-
-			/** Add To Result */
-			resultList.add(std::make_tuple(
-				sourceIndex, i.source.channelIndex, index, i.destination.channelIndex));
-		}
-	}
-
-	/** Sort Result */
-	class SortComparator {
-	public:
-		int compareElements(utils::AudioConnection& first, utils::AudioConnection& second) {
-			if (std::get<3>(first) == std::get<3>(second)) {
-				if (std::get<0>(first) == std::get<0>(second)) {
-					return std::get<1>(first) - std::get<1>(second);
-				}
-				return std::get<0>(first) - std::get<0>(second);
-			}
-			return std::get<3>(first) - std::get<3>(second);
-		}
-	} comparator;
-	resultList.sort(comparator, true);
-
-	return resultList;
-}
-
-utils::AudioConnectionList MainGraph::getTrackInputFromInstrConnections(int index) const {
-	/** Check Index */
-	if (index < 0 || index >= this->trackNodeList.size()) {
-		return utils::AudioConnectionList{};
-	}
-
-	/** Get Current Track ID */
-	juce::AudioProcessorGraph::NodeID currentID
-		= this->trackNodeList.getUnchecked(index)->nodeID;
-	utils::AudioConnectionList resultList;
-
-	for (auto& i : this->audioInstr2TrkConnectionList) {
-		if (i.destination.nodeID == currentID) {
-			/** Get Source Track Index */
-			int sourceIndex = this->instrumentNodeList.indexOf(
-				this->getNodeForId(i.source.nodeID));
-			if (sourceIndex < 0 || sourceIndex >= this->instrumentNodeList.size()) {
 				continue;
 			}
 

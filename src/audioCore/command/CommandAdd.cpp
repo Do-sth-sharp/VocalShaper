@@ -56,23 +56,7 @@ AUDIOCORE_FUNC(addEffect) {
 
 AUDIOCORE_FUNC(addInstr) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddInstr{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		juce::String::fromUTF8(luaL_checkstring(L, 3)) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(addInstrOutput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddInstrOutput{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(addInstrMidiInput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddInstrMidiInput{
-		(int)luaL_checkinteger(L, 1) });
+		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
@@ -135,13 +119,6 @@ AUDIOCORE_FUNC(addSequencerTrackMidiOutputToMixer) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(addSequencerTrackMidiOutputToInstr) {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddSequencerTrackMidiOutputToInstr{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(addSequencerTrackOutput) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddSequencerTrackOutput{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
@@ -176,15 +153,12 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addEffect);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstr);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstrMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addAudioSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMIDISource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToMixer);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerSourceInstance);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addRecorderSourceInstance);

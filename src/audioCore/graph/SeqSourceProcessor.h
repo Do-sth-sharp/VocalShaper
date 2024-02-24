@@ -28,6 +28,7 @@ public:
 
 	void setInstr(std::unique_ptr<juce::AudioPluginInstance> processor,
 		const juce::String& identifier);
+	PluginDecorator::SafePointer prepareInstr();
 	void removeInstr();
 	PluginDecorator* getInstrProcessor() const;
 	void setInstrumentBypass(bool bypass);

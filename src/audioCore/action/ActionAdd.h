@@ -139,7 +139,7 @@ class ActionAddInstr final : public ActionUndoableBase {
 public:
 	ActionAddInstr() = delete;
 	ActionAddInstr(
-		int index, int type, const juce::String& pid);
+		int index, const juce::String& pid);
 
 	bool doAction() override;
 	bool undo() override;
@@ -149,50 +149,11 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int index, type;
+		const int index;
 		const juce::String pid;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddInstr)
-};
-
-class ActionAddInstrOutput final : public ActionUndoableBase {
-public:
-	ActionAddInstrOutput() = delete;
-	ActionAddInstrOutput(
-		int src, int srcc, int dst, int dstc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Add Instr Output";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int src, srcc, dst, dstc;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionAddInstrOutput)
-};
-
-class ActionAddInstrMidiInput final : public ActionUndoableBase {
-public:
-	ActionAddInstrMidiInput() = delete;
-	ActionAddInstrMidiInput(int dst);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Add Instr Midi Input";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int dst;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionAddInstrMidiInput)
 };
 
 class ActionAddMixerTrackMidiInput final : public ActionUndoableBase {
@@ -368,26 +329,6 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackMidiOutputToMixer)
-};
-
-class ActionAddSequencerTrackMidiOutputToInstr final : public ActionUndoableBase {
-public:
-	ActionAddSequencerTrackMidiOutputToInstr() = delete;
-	ActionAddSequencerTrackMidiOutputToInstr(
-		int src, int dst);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Add Sequencer Track Midi Output To Instr";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int src, dst;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionAddSequencerTrackMidiOutputToInstr)
 };
 
 class ActionAddSequencerTrackOutput final : public ActionUndoableBase {

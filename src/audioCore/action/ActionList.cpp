@@ -221,53 +221,55 @@ ActionListInstrParam::ActionListInstrParam(int instr)
 
 bool ActionListInstrParam::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
-			juce::String result;
+		if (auto track = graph->getSourceProcessor(this->instr)) {
+			if (auto instr = track->getInstrProcessor()) {
+				juce::String result;
 
-			auto& paramList = instr->getPluginParamList();
+				auto& paramList = instr->getPluginParamList();
 
-			result += "========================================================================\n";
-			result += "Param List Of Instr [" + juce::String(this->instr) + "]\n";
-			result += "========================================================================\n";
+				result += "========================================================================\n";
+				result += "Param List Of Instr [" + juce::String(this->instr) + "]\n";
+				result += "========================================================================\n";
 
-			for (int i = 0; i < paramList.size(); i++) {
-				if (auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i))) {
-					result += "[" + juce::String(i) + "] " + param->getName(INT_MAX) + "\n";
-					result += "    Value: " + param->getCurrentValueAsText() + "\n";
-					result += "    Label: " + param->getLabel() + "\n";
-					switch (param->getCategory()) {
-						PLUGIN_PARAM_CATEGORY_CASE(genericParameter);
-						PLUGIN_PARAM_CATEGORY_CASE(inputGain);
-						PLUGIN_PARAM_CATEGORY_CASE(outputGain);
-						PLUGIN_PARAM_CATEGORY_CASE(inputMeter);
-						PLUGIN_PARAM_CATEGORY_CASE(outputMeter);
-						PLUGIN_PARAM_CATEGORY_CASE(compressorLimiterGainReductionMeter);
-						PLUGIN_PARAM_CATEGORY_CASE(expanderGateGainReductionMeter);
-						PLUGIN_PARAM_CATEGORY_CASE(analysisMeter);
-						PLUGIN_PARAM_CATEGORY_CASE(otherMeter);
-					default:
-						result += "    Category: " "undefined" "\n";
-						break;
-					}
-					result += "    Num Steps: " + juce::String(param->getNumSteps()) + "\n";
-					result += "    Possible States: " + param->getAllValueStrings().joinIntoString(", ") + "\n";
-					result += "    Is Discrete : " + juce::String(param->isDiscrete() ? "true" : "false") + "\n";
-					result += "    Is Boolean : " + juce::String(param->isBoolean() ? "true" : "false") + "\n";
-					result += "    Is Orientation Inverted: " + juce::String(param->isOrientationInverted() ? "true" : "false") + "\n";
-					result += "    Is Automatable: " + juce::String(param->isAutomatable() ? "true" : "false") + "\n";
-					result += "    Is Meta Parameter: " + juce::String(param->isMetaParameter() ? "true" : "false") + "\n";
-					result += "    Version Hint: " + juce::String(param->getVersionHint()) + "\n";
+				for (int i = 0; i < paramList.size(); i++) {
+					if (auto param = dynamic_cast<juce::HostedAudioProcessorParameter*>(paramList.getUnchecked(i))) {
+						result += "[" + juce::String(i) + "] " + param->getName(INT_MAX) + "\n";
+						result += "    Value: " + param->getCurrentValueAsText() + "\n";
+						result += "    Label: " + param->getLabel() + "\n";
+						switch (param->getCategory()) {
+							PLUGIN_PARAM_CATEGORY_CASE(genericParameter);
+							PLUGIN_PARAM_CATEGORY_CASE(inputGain);
+							PLUGIN_PARAM_CATEGORY_CASE(outputGain);
+							PLUGIN_PARAM_CATEGORY_CASE(inputMeter);
+							PLUGIN_PARAM_CATEGORY_CASE(outputMeter);
+							PLUGIN_PARAM_CATEGORY_CASE(compressorLimiterGainReductionMeter);
+							PLUGIN_PARAM_CATEGORY_CASE(expanderGateGainReductionMeter);
+							PLUGIN_PARAM_CATEGORY_CASE(analysisMeter);
+							PLUGIN_PARAM_CATEGORY_CASE(otherMeter);
+						default:
+							result += "    Category: " "undefined" "\n";
+							break;
+						}
+						result += "    Num Steps: " + juce::String(param->getNumSteps()) + "\n";
+						result += "    Possible States: " + param->getAllValueStrings().joinIntoString(", ") + "\n";
+						result += "    Is Discrete : " + juce::String(param->isDiscrete() ? "true" : "false") + "\n";
+						result += "    Is Boolean : " + juce::String(param->isBoolean() ? "true" : "false") + "\n";
+						result += "    Is Orientation Inverted: " + juce::String(param->isOrientationInverted() ? "true" : "false") + "\n";
+						result += "    Is Automatable: " + juce::String(param->isAutomatable() ? "true" : "false") + "\n";
+						result += "    Is Meta Parameter: " + juce::String(param->isMetaParameter() ? "true" : "false") + "\n";
+						result += "    Version Hint: " + juce::String(param->getVersionHint()) + "\n";
 
-					if (auto ptr = dynamic_cast<juce::AudioProcessorParameterWithID*>(param)) {
-						result += "    ID: " + ptr->getParameterID() + "\n";
+						if (auto ptr = dynamic_cast<juce::AudioProcessorParameterWithID*>(param)) {
+							result += "    ID: " + ptr->getParameterID() + "\n";
+						}
 					}
 				}
+
+				result += "========================================================================\n";
+
+				this->output(result);
+				return true;
 			}
-
-			result += "========================================================================\n";
-
-			this->output(result);
-			return true;
 		}
 	}
 

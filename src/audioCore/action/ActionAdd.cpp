@@ -272,8 +272,8 @@ bool ActionAddEffect::undo() {
 }
 
 ActionAddInstr::ActionAddInstr(
-	int index, int type, const juce::String& pid)
-	: ACTION_DB{ index, type, pid } {}
+	int index, const juce::String& pid)
+	: ACTION_DB{ index, pid } {}
 
 bool ActionAddInstr::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -287,19 +287,20 @@ bool ActionAddInstr::doAction() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(ACTION_DATA(type)));
 	if (auto des = Plugin::getInstance()->findPlugin(ACTION_DATA(pid), true)) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto ptr = graph->insertInstrument(ACTION_DATA(index), pluginType)) {
-				PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+			if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
+				if (auto ptr = track->prepareInstr()) {
+					PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
 
-				this->output("Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
-				ACTION_RESULT(true);
+					this->output("Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
+					ACTION_RESULT(true);
+				}
 			}
 		}
 	}
 
-	this->error("Can't Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
+	this->error("Can't Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -313,95 +314,16 @@ bool ActionAddInstr::undo() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(ACTION_DATA(type)));
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeInstrument((ACTION_DATA(index) > -1 && ACTION_DATA(index) < graph->getInstrumentNum())
-			? ACTION_DATA(index) : (graph->getInstrumentNum() - 1));
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
+			track->removeInstr();
 
-		this->output("Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
-		ACTION_RESULT(true);
+			this->output("Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
+			ACTION_RESULT(true);
+		}
 	}
 	
-	this->error("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
-	ACTION_RESULT(false);
-}
-
-ActionAddInstrOutput::ActionAddInstrOutput(
-	int src, int srcc, int dst, int dstc)
-	: ACTION_DB{ src, srcc, dst, dstc } {}
-
-bool ActionAddInstrOutput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddInstrOutput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setAudioInstr2TrkConnection(ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output(juce::String(ACTION_DATA(src)) + ", " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dst)) + ", " + juce::String(ACTION_DATA(dstc)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddInstrOutput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddInstrOutput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeAudioInstr2TrkConnection(ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output("Undo " + juce::String(ACTION_DATA(src)) + ", " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dst)) + ", " + juce::String(ACTION_DATA(dstc)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-ActionAddInstrMidiInput::ActionAddInstrMidiInput(int dst)
-	: ACTION_DB{ dst } {}
-
-bool ActionAddInstrMidiInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddInstrMidiInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setMIDII2InstrConnection(ACTION_DATA(dst));
-
-		this->output(juce::String("[MIDI Input]") + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddInstrMidiInput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddInstrMidiInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeMIDII2InstrConnection(ACTION_DATA(dst));
-
-		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
+	this->error("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -803,46 +725,6 @@ bool ActionAddSequencerTrackMidiOutputToMixer::undo() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->removeMIDISrc2TrkConnection(ACTION_DATA(src), ACTION_DATA(dst));
-
-		this->output("Undo " + juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-ActionAddSequencerTrackMidiOutputToInstr::ActionAddSequencerTrackMidiOutputToInstr(
-	int src, int dst)
-	: ACTION_DB{ src, dst } {}
-
-bool ActionAddSequencerTrackMidiOutputToInstr::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddSequencerTrackMidiOutputToInstr);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setMIDISrc2InstrConnection(ACTION_DATA(src), ACTION_DATA(dst));
-
-		this->output(juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddSequencerTrackMidiOutputToInstr::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddSequencerTrackMidiOutputToInstr);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeMIDISrc2InstrConnection(ACTION_DATA(src), ACTION_DATA(dst));
 
 		this->output("Undo " + juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + "\n");
 		ACTION_RESULT(true);

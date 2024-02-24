@@ -177,7 +177,7 @@ void CoreActions::record(bool start) {
 
 void CoreActions::insertInstr(int index, int type, const juce::String& pid) {
 	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddInstr{ index, type, pid });
+		new ActionAddInstr{ index, pid });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -222,26 +222,14 @@ void CoreActions::removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccCha
 }
 
 void CoreActions::setInstrMIDIInputFromDevice(int index, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddInstrMidiInput{ index })
-		: std::unique_ptr<ActionBase>(new ActionRemoveInstrMidiInput{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setInstrMIDIInputFromSeqTrack(
 	int index, int seqIndex, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackMidiOutputToInstr{ seqIndex, index })
-		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackMidiOutputToInstr{ seqIndex, index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setInstrAudioOutputToMixer(
 	int index, int channel, int mixerTrack, int mixerChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddInstrOutput{ index, channel, mixerTrack, mixerChannel })
-		: std::unique_ptr<ActionBase>(new ActionRemoveInstrOutput{ index, channel, mixerTrack, mixerChannel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::removeInstr(int index) {
@@ -371,10 +359,6 @@ void CoreActions::setTrackAudioInputFromSource(
 
 void CoreActions::setTrackAudioInputFromInstr(
 	int index, int channel, int instrIndex, int srcChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddInstrOutput{ instrIndex, srcChannel, index, channel })
-		: std::unique_ptr<ActionBase>(new ActionRemoveInstrOutput{ instrIndex, srcChannel, index, channel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setTrackAudioInputFromSend(
@@ -829,7 +813,7 @@ void CoreActions::insertEffectGUI(int track, int index) {
 }
 
 void CoreActions::insertEffectGUI(int track) {
-	CoreActions::insertEffectGUI(quickAPI::getEffectNum(track));
+	CoreActions::insertEffectGUI(track, quickAPI::getEffectNum(track));
 }
 
 void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,

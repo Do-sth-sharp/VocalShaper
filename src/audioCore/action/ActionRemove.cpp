@@ -67,14 +67,6 @@ bool ActionRemoveMixerTrack::doAction() {
 		writeRecoveryIntValue(dstc);
 	}
 
-	writeRecoverySizeValue(ACTION_DATA(audioInstr2Trk).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioInstr2Trk)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
-
 	writeRecoverySizeValue(ACTION_DATA(audioI2Trk).size());
 	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioI2Trk)) {
 		writeRecoveryIntValue(src);
@@ -127,7 +119,6 @@ bool ActionRemoveMixerTrack::doAction() {
 		/** Save Connections */
 		ACTION_DATA(audioT2Trk) = graph->getTrackInputFromTrackConnections(ACTION_DATA(index));
 		ACTION_DATA(audioSrc2Trk) = graph->getTrackInputFromSrcConnections(ACTION_DATA(index));
-		ACTION_DATA(audioInstr2Trk) = graph->getTrackInputFromInstrConnections(ACTION_DATA(index));
 		ACTION_DATA(audioI2Trk) = graph->getTrackInputFromDeviceConnections(ACTION_DATA(index));
 		ACTION_DATA(audioTrk2T) = graph->getTrackOutputToTrackConnections(ACTION_DATA(index));
 		ACTION_DATA(audioTrk2O) = graph->getTrackOutputToDeviceConnections(ACTION_DATA(index));
@@ -178,14 +169,6 @@ bool ActionRemoveMixerTrack::undo() {
 
 	writeRecoverySizeValue(ACTION_DATA(audioSrc2Trk).size());
 	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioSrc2Trk)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(audioInstr2Trk).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioInstr2Trk)) {
 		writeRecoveryIntValue(src);
 		writeRecoveryIntValue(srcc);
 		writeRecoveryIntValue(dst);
@@ -260,10 +243,6 @@ bool ActionRemoveMixerTrack::undo() {
 
 		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioSrc2Trk)) {
 			graph->setAudioSrc2TrkConnection(src, dst, srcc, dstc);
-		}
-
-		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioInstr2Trk)) {
-			graph->setAudioInstr2TrkConnection(src, dst, srcc, dstc);
 		}
 
 		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioI2Trk)) {
@@ -452,8 +431,6 @@ bool ActionRemoveMixerTrackSideChainBus::doAction() {
 	ACTION_WRITE_TYPE(ActionRemoveMixerTrackSideChainBus);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(0);
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
 			/** Remove Bus */
@@ -474,8 +451,6 @@ bool ActionRemoveMixerTrackSideChainBus::undo() {
 
 	ACTION_WRITE_TYPE_UNDO(ActionRemoveMixerTrackSideChainBus);
 	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(0);
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
@@ -501,8 +476,6 @@ bool ActionRemoveEffect::doAction() {
 
 	ACTION_WRITE_TYPE(ActionRemoveEffect);
 	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(0);
 
 	writeRecoverySizeValue(ACTION_DATA(data).getSize());
 	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
@@ -547,8 +520,6 @@ bool ActionRemoveEffect::undo() {
 	ACTION_WRITE_TYPE_UNDO(ActionRemoveEffect);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(0);
-
 	writeRecoverySizeValue(ACTION_DATA(data).getSize());
 	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
 
@@ -589,55 +560,29 @@ bool ActionRemoveInstr::doAction() {
 	ACTION_WRITE_TYPE(ActionRemoveInstr);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(ACTION_DATA(audioInstr2Trk).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioInstr2Trk)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(midiSrc2Instr).size());
-	for (auto [src, dst] : ACTION_DATA(midiSrc2Instr)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(dst);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(midiI2Instr).size());
-	for (auto [src, dst] : ACTION_DATA(midiI2Instr)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(dst);
-	}
-
 	writeRecoverySizeValue(ACTION_DATA(data).getSize());
 	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		/** Check Instr */
-		if (ACTION_DATA(index) < 0 || ACTION_DATA(index) >= graph->getInstrumentNum()) { ACTION_RESULT(false); }
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
+			/** Save Instr State */
+			auto instr = track->getInstrProcessor();
+			if (!instr) { ACTION_RESULT(false); }
+			auto state = instr->serialize();
 
-		/** Save Connections */
-		ACTION_DATA(audioInstr2Trk) = graph->getInstrOutputToTrackConnections(ACTION_DATA(index));
-		ACTION_DATA(midiSrc2Instr) = graph->getInstrMidiInputFromSrcConnections(ACTION_DATA(index));
-		ACTION_DATA(midiI2Instr) = graph->getInstrMidiInputFromDeviceConnections(ACTION_DATA(index));
+			auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
+			if (!statePtr) { ACTION_RESULT(false); }
+			statePtr->set_bypassed(track->getInstrumentBypass());
 
-		/** Save Instr State */
-		auto instr = graph->getInstrumentProcessor(ACTION_DATA(index));
-		if (!instr) { ACTION_RESULT(false); }
-		auto state = instr->serialize();
+			ACTION_DATA(data).setSize(state->ByteSizeLong());
+			state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
 
-		auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
-		if (!statePtr) { ACTION_RESULT(false); }
-		statePtr->set_bypassed(graph->getInstrumentBypass(ACTION_DATA(index)));
+			/** Remove Instr */
+			track->removeInstr();
 
-		ACTION_DATA(data).setSize(state->ByteSizeLong());
-		state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
-
-		/** Remove Instr */
-		graph->removeInstrument(ACTION_DATA(index));
-
-		this->output("Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
-		ACTION_RESULT(true);
+			this->output("Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
+			ACTION_RESULT(true);
+		}
 	}
 	ACTION_RESULT(false);
 }
@@ -653,155 +598,29 @@ bool ActionRemoveInstr::undo() {
 	ACTION_WRITE_TYPE_UNDO(ActionRemoveInstr);
 	ACTION_WRITE_DB();
 
-	writeRecoverySizeValue(ACTION_DATA(audioInstr2Trk).size());
-	for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioInstr2Trk)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(srcc);
-		writeRecoveryIntValue(dst);
-		writeRecoveryIntValue(dstc);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(midiSrc2Instr).size());
-	for (auto [src, dst] : ACTION_DATA(midiSrc2Instr)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(dst);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(midiI2Instr).size());
-	for (auto [src, dst] : ACTION_DATA(midiI2Instr)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(dst);
-	}
-
 	writeRecoverySizeValue(ACTION_DATA(data).getSize());
 	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		/** Prepare Instr State */
-		auto state = std::make_unique<vsp4::Plugin>();
-		if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
-			ACTION_RESULT(false);
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
+			/** Prepare Instr State */
+			auto state = std::make_unique<vsp4::Plugin>();
+			if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
+				ACTION_RESULT(false);
+			}
+
+			/** Add Instr */
+			track->prepareInstr();
+
+			/** Recover Instr State */
+			auto instr = track->getInstrProcessor();
+			track->setInstrumentBypass(state->bypassed());
+			instr->parse(state.get());
+
+			this->output("Undo Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
+			ACTION_RESULT(true);
 		}
-
-		/** Add Instr */
-		graph->insertInstrument(ACTION_DATA(index),
-			utils::getChannelSet(static_cast<utils::TrackType>(state->info().decoratortype())));
-
-		/** Recover Instr State */
-		auto instr = graph->getInstrumentProcessor(ACTION_DATA(index));
-		graph->setInstrumentBypass(ACTION_DATA(index), state->bypassed());
-		instr->parse(state.get());
-
-		/** Recover Connections */
-		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioInstr2Trk)) {
-			graph->setAudioInstr2TrkConnection(src, dst, srcc, dstc);
-		}
-
-		for (auto [src, dst] : ACTION_DATA(midiSrc2Instr)) {
-			graph->setMIDISrc2InstrConnection(src, dst);
-		}
-
-		for (auto [src, dst] : ACTION_DATA(midiI2Instr)) {
-			graph->setMIDII2InstrConnection(dst);
-		}
-
-		this->output("Undo Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
-		ACTION_RESULT(true);
 	}
-	ACTION_RESULT(false);
-}
-
-ActionRemoveInstrOutput::ActionRemoveInstrOutput(
-	int src, int srcc, int dst, int dstc)
-	: ACTION_DB{ src, srcc, dst, dstc } {}
-
-bool ActionRemoveInstrOutput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveInstrOutput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (!graph->isAudioInstr2TrkConnected(
-			ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc))) {
-			ACTION_RESULT(false);
-		}
-
-		graph->removeAudioInstr2TrkConnection(
-			ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output(juce::String(ACTION_DATA(src)) + ", " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dst)) + ", " + juce::String(ACTION_DATA(dstc)) + " (Removed)\n");
-		ACTION_RESULT(true);
-	}
-
-	ACTION_RESULT(false);
-}
-
-bool ActionRemoveInstrOutput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveInstrOutput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setAudioInstr2TrkConnection(
-			ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output("Undo " + juce::String(ACTION_DATA(src)) + ", " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dst)) + ", " + juce::String(ACTION_DATA(dstc)) + " (Removed)\n");
-		ACTION_RESULT(true);
-	}
-
-	ACTION_RESULT(false);
-}
-
-ActionRemoveInstrMidiInput::ActionRemoveInstrMidiInput(int dst)
-	: ACTION_DB{ dst } {}
-
-bool ActionRemoveInstrMidiInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveInstrMidiInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (!graph->isMIDII2InstrConnected(ACTION_DATA(dst))) {
-			ACTION_RESULT(false);
-		}
-
-		graph->removeMIDII2InstrConnection(ACTION_DATA(dst));
-
-		this->output(juce::String("[MIDI Input]") + " - " + juce::String(ACTION_DATA(dst)) + " (Removed)\n");
-		ACTION_RESULT(true);
-	}
-
-	ACTION_RESULT(false);
-}
-
-bool ActionRemoveInstrMidiInput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveInstrMidiInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setMIDII2InstrConnection(ACTION_DATA(dst));
-
-		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(ACTION_DATA(dst)) + " (Removed)\n");
-		ACTION_RESULT(true);
-	}
-
 	ACTION_RESULT(false);
 }
 
@@ -819,13 +638,15 @@ bool ActionRemoveInstrParamCCConnection::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto instr = graph->getInstrumentProcessor(ACTION_DATA(instr))) {
-			ACTION_DATA(param) = instr->getCCParamConnection(ACTION_DATA(cc));
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(instr))) {
+			if (auto instr = track->getInstrProcessor()) {
+				ACTION_DATA(param) = instr->getCCParamConnection(ACTION_DATA(cc));
 
-			instr->removeCCParamConnection(ACTION_DATA(cc));
+				instr->removeCCParamConnection(ACTION_DATA(cc));
 
-			this->output("Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
-			ACTION_RESULT(true);
+				this->output("Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
+				ACTION_RESULT(true);
+			}
 		}
 	}
 	ACTION_RESULT(false);
@@ -841,11 +662,13 @@ bool ActionRemoveInstrParamCCConnection::undo() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto instr = graph->getInstrumentProcessor(ACTION_DATA(instr))) {
-			instr->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(instr))) {
+			if (auto instr = track->getInstrProcessor()) {
+				instr->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
 
-			this->output("Undo Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
-			ACTION_RESULT(true);
+				this->output("Undo Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
+				ACTION_RESULT(true);
+			}
 		}
 	}
 	ACTION_RESULT(false);
@@ -1048,12 +871,6 @@ bool ActionRemoveSequencerTrack::doAction() {
 		writeRecoveryIntValue(dstc);
 	}
 
-	writeRecoverySizeValue(ACTION_DATA(midiSrc2Instr).size());
-	for (auto [src, dst] : ACTION_DATA(midiSrc2Instr)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(dst);
-	}
-
 	writeRecoverySizeValue(ACTION_DATA(midiSrc2Trk).size());
 	for (auto [src, dst] : ACTION_DATA(midiSrc2Trk)) {
 		writeRecoveryIntValue(src);
@@ -1069,7 +886,6 @@ bool ActionRemoveSequencerTrack::doAction() {
 
 		/** Save Connections */
 		ACTION_DATA(audioSrc2Trk) = graph->getSourceOutputToTrackConnections(ACTION_DATA(index));
-		ACTION_DATA(midiSrc2Instr) = graph->getSourceMidiOutputToInstrConnections(ACTION_DATA(index));
 		ACTION_DATA(midiSrc2Trk) = graph->getSourceMidiOutputToTrackConnections(ACTION_DATA(index));
 
 		/** Save Track State */
@@ -1113,12 +929,6 @@ bool ActionRemoveSequencerTrack::undo() {
 		writeRecoveryIntValue(dstc);
 	}
 
-	writeRecoverySizeValue(ACTION_DATA(midiSrc2Instr).size());
-	for (auto [src, dst] : ACTION_DATA(midiSrc2Instr)) {
-		writeRecoveryIntValue(src);
-		writeRecoveryIntValue(dst);
-	}
-
 	writeRecoverySizeValue(ACTION_DATA(midiSrc2Trk).size());
 	for (auto [src, dst] : ACTION_DATA(midiSrc2Trk)) {
 		writeRecoveryIntValue(src);
@@ -1147,10 +957,6 @@ bool ActionRemoveSequencerTrack::undo() {
 		/** Recover Connections */
 		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioSrc2Trk)) {
 			graph->setAudioSrc2TrkConnection(src, dst, srcc, dstc);
-		}
-		
-		for (auto [src, dst] : ACTION_DATA(midiSrc2Instr)) {
-			graph->setMIDISrc2InstrConnection(src, dst);
 		}
 
 		for (auto [src, dst] : ACTION_DATA(midiSrc2Trk)) {
@@ -1203,50 +1009,6 @@ bool ActionRemoveSequencerTrackMidiOutputToMixer::undo() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->setMIDISrc2TrkConnection(ACTION_DATA(src), ACTION_DATA(dst));
-
-		this->output("Undo " + juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + " (Removed)\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-ActionRemoveSequencerTrackMidiOutputToInstr::ActionRemoveSequencerTrackMidiOutputToInstr(
-	int src, int dst)
-	: ACTION_DB{ src, dst } {}
-
-bool ActionRemoveSequencerTrackMidiOutputToInstr::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveSequencerTrackMidiOutputToInstr);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (!graph->isMIDISrc2InstrConnected(ACTION_DATA(src), ACTION_DATA(dst))) {
-			ACTION_RESULT(false);
-		}
-
-		graph->removeMIDISrc2InstrConnection(ACTION_DATA(src), ACTION_DATA(dst));
-
-		this->output(juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + " (Removed)\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionRemoveSequencerTrackMidiOutputToInstr::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveSequencerTrackMidiOutputToInstr);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setMIDISrc2InstrConnection(ACTION_DATA(src), ACTION_DATA(dst));
 
 		this->output("Undo " + juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + " (Removed)\n");
 		ACTION_RESULT(true);

@@ -112,12 +112,6 @@ void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 		src->setPlayHead(newPlayHead);
 	}
 
-	/** Instrument */
-	for (auto& i : this->instrumentNodeList) {
-		auto instr = i->getProcessor();
-		instr->setPlayHead(newPlayHead);
-	}
-
 	/** Track */
 	for (auto& i : this->trackNodeList) {
 		auto track = i->getProcessor();
@@ -142,16 +136,6 @@ void MainGraph::clearGraph() {
 		recorder->clearGraph();
 	}
 
-	for (auto& i : this->midiI2InstrConnectionList) {
-		this->removeConnection(i);
-	}
-	this->midiI2InstrConnectionList.clear();
-
-	for (auto& i : this->midiSrc2InstrConnectionList) {
-		this->removeConnection(i);
-	}
-	this->midiSrc2InstrConnectionList.clear();
-
 	for (auto& i : this->midiSrc2TrkConnectionList) {
 		this->removeConnection(i);
 	}
@@ -161,11 +145,6 @@ void MainGraph::clearGraph() {
 		this->removeConnection(i);
 	}
 	this->audioSrc2TrkConnectionList.clear();
-
-	for (auto& i : this->audioInstr2TrkConnectionList) {
-		this->removeConnection(i);
-	}
-	this->audioInstr2TrkConnectionList.clear();
 
 	for (auto& i : this->midiI2TrkConnectionList) {
 		this->removeConnection(i);
@@ -196,11 +175,6 @@ void MainGraph::clearGraph() {
 		this->removeNode(i->nodeID);
 	}
 	this->trackNodeList.clear();
-
-	for (auto& i : this->instrumentNodeList) {
-		this->removeNode(i->nodeID);
-	}
-	this->instrumentNodeList.clear();
 
 	for (auto& i : this->audioSourceNodeList) {
 		this->removeNode(i->nodeID);

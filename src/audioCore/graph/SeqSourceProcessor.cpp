@@ -92,11 +92,25 @@ void SeqSourceProcessor::closeAllNote() {
 
 void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> processor,
 	const juce::String& identifier) {
+	/** Check Processor */
+	if (!processor) { jassertfalse; return; }
+
+	/** Add Node */
+	if (auto ptrNode = this->prepareInstr()) {
+		/** Set Plugin */
+		ptrNode->setPlugin(std::move(processor), identifier);
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);/**< TODO */
+	}
+	else {
+		jassertfalse;
+	}
+}
+
+PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 	/** Remove Current Instr */
 	this->removeInstr();
-
-	/** Check Processor */
-	if (!processor) { return; }
 
 	/** Add Node */
 	if (auto ptrNode = this->addNode(
@@ -106,9 +120,6 @@ void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> pro
 
 		/** Get Decorator */
 		auto decorator = dynamic_cast<PluginDecorator*>(ptrNode->getProcessor());
-
-		/** Set Plugin */
-		decorator->setPlugin(std::move(processor), identifier);
 
 		/** Prepare To Play */
 		decorator->setPlayHead(this->getPlayHead());
@@ -128,6 +139,12 @@ void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> pro
 
 		/** Callback */
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);/**< TODO */
+
+		return PluginDecorator::SafePointer{ decorator };
+	}
+	else {
+		jassertfalse;
+		return nullptr;
 	}
 }
 

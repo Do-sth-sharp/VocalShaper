@@ -47,7 +47,7 @@ public:
 	static void rewind();
 	static void record(bool start);
 
-	static void insertInstr(int index, int type, const juce::String& pid);
+	static void insertInstr(int index, int type, const juce::String& pid);/**< TODO */
 	static void bypassInstr(int index, bool bypass);
 	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
 	static void setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel);
@@ -55,9 +55,9 @@ public:
 	static void setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output);
 	static void setInstrParamCCLink(quickAPI::PluginHolder instr, int paramIndex, int ccChannel);
 	static void removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel);
-	static void setInstrMIDIInputFromDevice(int index, bool input);
-	static void setInstrMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
-	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);
+	static void setInstrMIDIInputFromDevice(int index, bool input);/**< Deprecated */
+	static void setInstrMIDIInputFromSeqTrack(int index, int seqIndex, bool input);/**< Deprecated */
+	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);/**< Deprecated */
 	static void removeInstr(int index);
 
 	static void insertEffect(int track, int index, const juce::String& pid);
@@ -80,7 +80,7 @@ public:
 	static void setTrackMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
 	static void setTrackAudioInputFromDevice(int index, int channel, int srcChannel, bool input);
 	static void setTrackAudioInputFromSource(int index, int channel, int seqIndex, int srcChannel, bool input);
-	static void setTrackAudioInputFromInstr(int index, int channel, int instrIndex, int srcChannel, bool input);
+	static void setTrackAudioInputFromInstr(int index, int channel, int instrIndex, int srcChannel, bool input);/**< Deprecated */
 	static void setTrackAudioInputFromSend(int index, int channel, int trackIndex, int srcChannel, bool input);
 	static void setTrackMIDIOutputToDevice(int index, bool output);
 	static void setTrackAudioOutputToDevice(int index, int channel, int dstChannel, bool output);

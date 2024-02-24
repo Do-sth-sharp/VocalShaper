@@ -16,41 +16,22 @@ public:
 
 	void insertSource(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeSource(int index);
-	PluginDecorator::SafePointer insertInstrument(
-		std::unique_ptr<juce::AudioPluginInstance> processor,
-		const juce::String& identifier, int index = -1,
-		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
-	PluginDecorator::SafePointer insertInstrument(int index = -1,
-		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
-	void removeInstrument(int index);
 	void insertTrack(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	void removeTrack(int index);
 
 	int getSourceNum() const;
 	SeqSourceProcessor* getSourceProcessor(int index) const;
-	int getInstrumentNum() const;
-	PluginDecorator* getInstrumentProcessor(int index) const;
 	int getTrackNum() const;
 	Track* getTrackProcessor(int index) const;
 	void setSourceBypass(int index, bool bypass);
 	bool getSourceBypass(int index) const;
-	void setInstrumentBypass(int index, bool bypass);
-	bool getInstrumentBypass(int index) const;
 	void setTrackBypass(int index, bool bypass);
 	bool getTrackBypass(int index) const;
-	static void setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass);
-	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
 
-	void setMIDII2InstrConnection(int instrIndex);
-	void removeMIDII2InstrConnection(int instrIndex);
-	void setMIDISrc2InstrConnection(int sourceIndex, int instrIndex);
-	void removeMIDISrc2InstrConnection(int sourceIndex, int instrIndex);
 	void setMIDISrc2TrkConnection(int sourceIndex, int trackIndex);
 	void removeMIDISrc2TrkConnection(int sourceIndex, int trackIndex);
 	void setAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel);
 	void removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel);
-	void setAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel);
-	void removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel);
 	void setMIDII2TrkConnection(int trackIndex);
 	void removeMIDII2TrkConnection(int trackIndex);
 	void setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel);
@@ -62,11 +43,8 @@ public:
 	void setMIDITrk2OConnection(int trackIndex);
 	void removeMIDITrk2OConnection(int trackIndex);
 
-	bool isMIDII2InstrConnected(int instrIndex) const;
-	bool isMIDISrc2InstrConnected(int sourceIndex, int instrIndex) const;
 	bool isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const;
 	bool isAudioSrc2TrkConnected(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) const;
-	bool isAudioInstr2TrkConnected(int instrIndex, int trackIndex, int srcChannel, int dstChannel) const;
 	bool isMIDII2TrkConnected(int trackIndex) const;
 	bool isAudioI2TrkConnected(int trackIndex, int srcChannel, int dstChannel) const;
 	bool isAudioTrk2OConnected(int trackIndex, int srcChannel, int dstChannel) const;
@@ -75,7 +53,6 @@ public:
 
 	utils::AudioConnectionList getTrackInputFromTrackConnections(int index) const;
 	utils::AudioConnectionList getTrackInputFromSrcConnections(int index) const;
-	utils::AudioConnectionList getTrackInputFromInstrConnections(int index) const;
 	utils::AudioConnectionList getTrackInputFromDeviceConnections(int index) const;
 	utils::AudioConnectionList getTrackOutputToTrackConnections(int index) const;
 	utils::AudioConnectionList getTrackOutputToDeviceConnections(int index) const;
@@ -84,14 +61,8 @@ public:
 	utils::MidiConnectionList getTrackMidiInputFromDeviceConnections(int index) const;
 	utils::MidiConnectionList getTrackMidiOutputToDeviceConnections(int index) const;
 
-	utils::AudioConnectionList getInstrOutputToTrackConnections(int index) const;
-
-	utils::MidiConnectionList getInstrMidiInputFromSrcConnections(int index) const;
-	utils::MidiConnectionList getInstrMidiInputFromDeviceConnections(int index) const;
-
 	utils::AudioConnectionList getSourceOutputToTrackConnections(int index) const;
 
-	utils::MidiConnectionList getSourceMidiOutputToInstrConnections(int index) const;
 	utils::MidiConnectionList getSourceMidiOutputToTrackConnections(int index) const;
 
 	/**
@@ -147,14 +118,10 @@ private:
 	std::unique_ptr<SourceRecordProcessor> recorder = nullptr;
 
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> audioSourceNodeList;
-	juce::Array<juce::AudioProcessorGraph::Node::Ptr> instrumentNodeList;
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackNodeList;
 
-	juce::Array<juce::AudioProcessorGraph::Connection> midiI2InstrConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> midiSrc2InstrConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> midiSrc2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioSrc2TrkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioInstr2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> midiI2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioI2TrkConnectionList;
 	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2TrkConnectionList;
@@ -169,7 +136,6 @@ private:
 	void removeIllegalAudioTrk2OConnections();
 
 	int findSource(const SeqSourceProcessor* ptr) const;
-	int findInstr(const PluginDecorator* ptr) const;
 	int findTrack(const Track* ptr) const;
 
 	friend class Renderer;

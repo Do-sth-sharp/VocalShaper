@@ -96,56 +96,6 @@ void MainGraph::removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, in
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
 }
 
-void MainGraph::setAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel) {
-	/** Limit Index */
-	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
-	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
-
-	/** Get Node ID */
-	auto ptrInsNode = this->instrumentNodeList.getUnchecked(instrIndex);
-	auto insNodeID = ptrInsNode->nodeID;
-	auto ptrTrkNode = this->trackNodeList.getUnchecked(trackIndex);
-	auto trkNodeID = ptrTrkNode->nodeID;
-
-	/** Get Channels */
-	auto insNodeChannels = ptrInsNode->getProcessor()->getTotalNumOutputChannels();
-	if (srcChannel < 0 || srcChannel >= insNodeChannels) { return; }
-	auto trkNodeChannels = ptrTrkNode->getProcessor()->getTotalNumInputChannels();
-	if (dstChannel < 0 || dstChannel >= trkNodeChannels) { return; }
-
-	/** Link Bus */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {insNodeID, srcChannel}, {trkNodeID, dstChannel} };
-	if (!this->isConnected(connection)) {
-		this->addConnection(connection);
-		this->audioInstr2TrkConnectionList.add(connection);
-	}
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
-}
-
-void MainGraph::removeAudioInstr2TrkConnection(int instrIndex, int trackIndex, int srcChannel, int dstChannel) {
-	/** Limit Index */
-	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return; }
-	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return; }
-
-	/** Get Node ID */
-	auto insNodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
-	auto trkNodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
-
-	/** Remove Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {insNodeID, srcChannel}, {trkNodeID, dstChannel} };
-	this->removeConnection(connection);
-	this->audioInstr2TrkConnectionList.removeAllInstancesOf(connection);
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, instrIndex);
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
-}
-
 bool MainGraph::isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const {
 	/** Limit Index */
 	if (sourceIndex < 0 || sourceIndex >= this->audioSourceNodeList.size()) { return false; }
@@ -174,19 +124,4 @@ bool MainGraph::isAudioSrc2TrkConnected(int sourceIndex, int trackIndex, int src
 	juce::AudioProcessorGraph::Connection connection =
 	{ {srcNodeID, srcChannel}, {trkNodeID, dstChannel} };
 	return this->audioSrc2TrkConnectionList.contains(connection);
-}
-
-bool MainGraph::isAudioInstr2TrkConnected(int instrIndex, int trackIndex, int srcChannel, int dstChannel) const {
-	/** Limit Index */
-	if (instrIndex < 0 || instrIndex >= this->instrumentNodeList.size()) { return false; }
-	if (trackIndex < 0 || trackIndex >= this->trackNodeList.size()) { return false; }
-
-	/** Get Node ID */
-	auto insNodeID = this->instrumentNodeList.getUnchecked(instrIndex)->nodeID;
-	auto trkNodeID = this->trackNodeList.getUnchecked(trackIndex)->nodeID;
-
-	/** Remove Connection */
-	juce::AudioProcessorGraph::Connection connection =
-	{ {insNodeID, srcChannel}, {trkNodeID, dstChannel} };
-	return this->audioInstr2TrkConnectionList.contains(connection);
 }

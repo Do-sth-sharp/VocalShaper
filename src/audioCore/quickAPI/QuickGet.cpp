@@ -413,15 +413,17 @@ namespace quickAPI {
 
 	int getInstrNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrumentNum();
+			return graph->getSourceNum();
 		}
 		return 0;
 	}
 
 	PluginHolder getInstrPointer(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return PluginHolder{ instr };
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return PluginHolder{ instr };
+				}
 			}
 		}
 		return PluginHolder{};
@@ -429,8 +431,10 @@ namespace quickAPI {
 
 	const juce::String getInstrName(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getName();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->getName();
+				}
 			}
 		}
 		return "";
@@ -449,36 +453,31 @@ namespace quickAPI {
 
 	bool getInstrBypass(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrumentBypass(index);
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getInstrumentBypass();
+			}
 		}
 		return false;
 	}
 
 	bool getInstrMIDIInputFromDevice(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrMidiInputFromDeviceConnections(index).size() > 0;
-		}
 		return false;
 	}
 
 	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrMidiInputFromSrcConnections(index);
-		}
 		return {};
 	}
 
 	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrOutputToTrackConnections(index);
-		}
 		return {};
 	}
 
 	const juce::AudioChannelSet getInstrChannelSet(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getAudioChannelSet();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->getAudioChannelSet();
+				}
 			}
 		}
 		return juce::AudioChannelSet{};
@@ -486,8 +485,10 @@ namespace quickAPI {
 
 	int getInstrInputChannelNum(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getTotalNumInputChannels();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->getTotalNumInputChannels();
+				}
 			}
 		}
 		return 0;
@@ -495,8 +496,10 @@ namespace quickAPI {
 
 	int getInstrOutputChannelNum(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getTotalNumOutputChannels();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->getTotalNumOutputChannels();
+				}
 			}
 		}
 		return 0;
@@ -504,8 +507,10 @@ namespace quickAPI {
 
 	EditorPointer getInstrEditor(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->createEditorIfNeeded();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->createEditorIfNeeded();
+				}
 			}
 		}
 		return nullptr;
@@ -516,7 +521,7 @@ namespace quickAPI {
 	}
 
 	bool getInstrBypass(PluginHolder pointer) {
-		return MainGraph::getInstrumentBypass(pointer);
+		return SeqSourceProcessor::getInstrumentBypass(pointer);
 	}
 
 	EditorPointer getInstrEditor(PluginHolder pointer) {
@@ -807,9 +812,6 @@ namespace quickAPI {
 	}
 
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackInputFromInstrConnections(index);
-		}
 		return {};
 	}
 

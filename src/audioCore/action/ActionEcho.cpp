@@ -184,17 +184,6 @@ bool ActionEchoMixerTrackInfo::doAction() {
 					+ "\n";
 			}
 
-			result += "Input From Instrument:\n";
-			auto inputFromInstrumentConnectiones = graph->getTrackInputFromInstrConnections(trackId);
-			for (int i = 0; i < inputFromInstrumentConnectiones.size(); i++) {
-				auto connection = inputFromInstrumentConnectiones.getUnchecked(i);
-				result += "\t[" + juce::String(i) + "] "
-					+ juce::String(std::get<0>(connection)) + ", " + juce::String(std::get<1>(connection))
-					+ " - "
-					+ juce::String(std::get<2>(connection)) + ", " + juce::String(std::get<3>(connection))
-					+ "\n";
-			}
-
 			result += "Input From Device:\n";
 			auto inputFromDeviceConnectiones = graph->getTrackInputFromDeviceConnections(trackId);
 			for (int i = 0; i < inputFromDeviceConnectiones.size(); i++) {
@@ -298,9 +287,11 @@ ActionEchoInstrParamValue::ActionEchoInstrParamValue(
 
 bool ActionEchoInstrParamValue::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
-			this->output("Instr Param Value: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - " + juce::String(instr->getParamValue(this->param)) + "\n");
-			return true;
+		if (auto track = graph->getSourceProcessor(this->instr)) {
+			if (auto instr = track->getInstrProcessor()) {
+				this->output("Instr Param Value: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - " + juce::String(instr->getParamValue(this->param)) + "\n");
+				return true;
+			}
 		}
 	}
 	return false;
@@ -312,9 +303,11 @@ ActionEchoInstrParamDefaultValue::ActionEchoInstrParamDefaultValue(
 
 bool ActionEchoInstrParamDefaultValue::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
-			this->output("Instr Param Default Value: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - " + juce::String(instr->getParamDefaultValue(this->param)) + "\n");
-			return true;
+		if (auto track = graph->getSourceProcessor(this->instr)) {
+			if (auto instr = track->getInstrProcessor()) {
+				this->output("Instr Param Default Value: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - " + juce::String(instr->getParamDefaultValue(this->param)) + "\n");
+				return true;
+			}
 		}
 	}
 	return false;
@@ -362,10 +355,11 @@ ActionEchoInstrParamCC::ActionEchoInstrParamCC(
 
 bool ActionEchoInstrParamCC::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		auto instr = graph->getInstrumentProcessor(this->instr);
-		if (instr) {
-			this->output("Instr Param MIDI CC: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - MIDI CC " + juce::String(instr->getParamCCConnection(this->param)) + "\n");
-			return true;
+		if (auto track = graph->getSourceProcessor(this->instr)) {
+			if (auto instr = track->getInstrProcessor()) {
+				this->output("Instr Param MIDI CC: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - MIDI CC " + juce::String(instr->getParamCCConnection(this->param)) + "\n");
+				return true;
+			}
 		}
 	}
 	return false;
@@ -395,19 +389,21 @@ ActionEchoInstrCCParam::ActionEchoInstrCCParam(
 
 bool ActionEchoInstrCCParam::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto instr = graph->getInstrumentProcessor(this->instr)) {
-			juce::String result;
+		if (auto track = graph->getSourceProcessor(this->instr)) {
+			if (auto instr = track->getInstrProcessor()) {
+				juce::String result;
 
-			int paramIndex = instr->getCCParamConnection(this->cc);
-			if (paramIndex > -1) {
-				result += "Instr Param MIDI CC: MIDI CC " + juce::String(this->cc) + " - [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + "\n";
-			}
-			else {
-				result += "Instr Param MIDI CC: MIDI CC " + juce::String(this->cc) + " - Disabled\n";
-			}
+				int paramIndex = instr->getCCParamConnection(this->cc);
+				if (paramIndex > -1) {
+					result += "Instr Param MIDI CC: MIDI CC " + juce::String(this->cc) + " - [" + juce::String(paramIndex) + "] " + instr->getParamName(paramIndex) + "\n";
+				}
+				else {
+					result += "Instr Param MIDI CC: MIDI CC " + juce::String(this->cc) + " - Disabled\n";
+				}
 
-			this->output(result);
-			return true;
+				this->output(result);
+				return true;
+			}
 		}
 	}
 	return false;
