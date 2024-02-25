@@ -74,7 +74,6 @@ juce::PopupMenu MainMenuModel::createView() const {
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::PluginView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::TrackView);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::InstrView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MixerView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceEditView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceRecordView);

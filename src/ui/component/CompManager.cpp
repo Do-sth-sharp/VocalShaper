@@ -64,7 +64,6 @@ const juce::Array<flowUI::FlowComponent*> CompManager::getLayoutList() const {
 		this->get(CompType::PluginView),
 		this->get(CompType::SourceView),
 		this->get(CompType::TrackView),
-		this->get(CompType::InstrView),
 		this->get(CompType::MixerView),
 		this->get(CompType::SourceEditView),
 		this->get(CompType::SourceRecordView),

@@ -19,7 +19,6 @@ public:
 	juce::LookAndFeel_V4* forMessageView() const;
 	juce::LookAndFeel_V4* forPluginView() const;
 	juce::LookAndFeel_V4* forSourceView() const;
-	juce::LookAndFeel_V4* forInstrView() const;
 	juce::LookAndFeel_V4* forPluginEditor() const;
 	juce::LookAndFeel_V4* forChannelLink() const;
 	juce::LookAndFeel_V4* forMixer() const;
@@ -42,7 +41,6 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> messageViewLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> pluginViewLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> sourceViewLAF = nullptr;
-	std::unique_ptr<juce::LookAndFeel_V4> instrViewLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> pluginEditorLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> channelLinkLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> mixerLAF = nullptr;

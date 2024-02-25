@@ -47,7 +47,7 @@ public:
 	static void rewind();
 	static void record(bool start);
 
-	static void insertInstr(int index, int type, const juce::String& pid);/**< TODO */
+	static void insertInstr(int index, const juce::String& pid);
 	static void bypassInstr(int index, bool bypass);
 	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
 	static void setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel);
@@ -55,9 +55,6 @@ public:
 	static void setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output);
 	static void setInstrParamCCLink(quickAPI::PluginHolder instr, int paramIndex, int ccChannel);
 	static void removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel);
-	static void setInstrMIDIInputFromDevice(int index, bool input);/**< Deprecated */
-	static void setInstrMIDIInputFromSeqTrack(int index, int seqIndex, bool input);/**< Deprecated */
-	static void setInstrAudioOutputToMixer(int index, int channel, int mixerTrack, int mixerChannel, bool input);/**< Deprecated */
 	static void removeInstr(int index);
 
 	static void insertEffect(int track, int index, const juce::String& pid);
@@ -80,7 +77,6 @@ public:
 	static void setTrackMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
 	static void setTrackAudioInputFromDevice(int index, int channel, int srcChannel, bool input);
 	static void setTrackAudioInputFromSource(int index, int channel, int seqIndex, int srcChannel, bool input);
-	static void setTrackAudioInputFromInstr(int index, int channel, int instrIndex, int srcChannel, bool input);/**< Deprecated */
 	static void setTrackAudioInputFromSend(int index, int channel, int trackIndex, int srcChannel, bool input);
 	static void setTrackMIDIOutputToDevice(int index, bool output);
 	static void setTrackAudioOutputToDevice(int index, int channel, int dstChannel, bool output);
@@ -122,13 +118,9 @@ public:
 	static void renderGUI(const juce::Array<int>& tracks);
 	static void renderGUI();
 
-	static void insertInstrGUI(int index, const juce::String& pid);
 	static void insertInstrGUI(int index);
-	static void insertInstrGUI();
 	static void editInstrParamCCLinkGUI(quickAPI::PluginHolder instr, int paramIndex, int defaultCC = -1);
 	static void addInstrParamCCLinkGUI(quickAPI::PluginHolder instr);
-	static void setInstrAudioOutputToMixerGUI(int index, int track, bool output,
-		const juce::Array<std::tuple<int, int>>& links);
 	static void removeInstrGUI(int index);
 
 	static void insertEffectGUI(int track, int index);
@@ -144,8 +136,6 @@ public:
 	static void setTrackAudioInputFromDeviceGUI(int index, bool input,
 		const juce::Array<std::tuple<int, int>>& links);
 	static void setTrackAudioInputFromSourceGUI(int index, int seqIndex, bool input,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setTrackAudioInputFromInstrGUI(int index, int instrIndex, bool input,
 		const juce::Array<std::tuple<int, int>>& links);
 	static void setTrackAudioInputFromSendGUI(int index, int trackIndex, bool input,
 		const juce::Array<std::tuple<int, int>>& links);

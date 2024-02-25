@@ -32,7 +32,6 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::PluginView),
 		(juce::CommandID)(GUICommandType::SourceView),
 		(juce::CommandID)(GUICommandType::TrackView),
-		(juce::CommandID)(GUICommandType::InstrView),
 		(juce::CommandID)(GUICommandType::MixerView),
 		(juce::CommandID)(GUICommandType::SourceEditView),
 		(juce::CommandID)(GUICommandType::SourceRecordView),
@@ -131,12 +130,6 @@ void GUICommandTarget::getCommandInfo(
 		result.setInfo(TRANS("Track"), TRANS("Show track view component."), TRANS("View"), 0);
 		result.setTicked(CompManager::getInstance()->isOpened(
 			CompManager::CompType::TrackView));
-		result.setActive(true);
-		break;
-	case GUICommandType::InstrView:
-		result.setInfo(TRANS("Instrument"), TRANS("Show instrument view component."), TRANS("View"), 0);
-		result.setTicked(CompManager::getInstance()->isOpened(
-			CompManager::CompType::InstrView));
 		result.setActive(true);
 		break;
 	case GUICommandType::MixerView:
@@ -329,9 +322,6 @@ bool GUICommandTarget::perform(
 		return true;
 	case GUICommandType::TrackView:
 		this->changeOpened(CompManager::CompType::TrackView);
-		return true;
-	case GUICommandType::InstrView:
-		this->changeOpened(CompManager::CompType::InstrView);
 		return true;
 	case GUICommandType::MixerView:
 		this->changeOpened(CompManager::CompType::MixerView);

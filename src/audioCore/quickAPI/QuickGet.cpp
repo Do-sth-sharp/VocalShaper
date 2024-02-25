@@ -411,13 +411,6 @@ namespace quickAPI {
 		return {};
 	}
 
-	int getInstrNum() {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getSourceNum();
-		}
-		return 0;
-	}
-
 	PluginHolder getInstrPointer(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
@@ -440,17 +433,6 @@ namespace quickAPI {
 		return "";
 	}
 
-	const juce::StringArray getInstrNameList() {
-		int size = getInstrNum();
-
-		juce::StringArray result;
-		for (int i = 0; i < size; i++) {
-			result.add(getInstrName(i));
-		}
-
-		return result;
-	}
-
 	bool getInstrBypass(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
@@ -458,51 +440,6 @@ namespace quickAPI {
 			}
 		}
 		return false;
-	}
-
-	bool getInstrMIDIInputFromDevice(int index) {
-		return false;
-	}
-
-	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index) {
-		return {};
-	}
-
-	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index) {
-		return {};
-	}
-
-	const juce::AudioChannelSet getInstrChannelSet(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				if (auto instr = track->getInstrProcessor()) {
-					return instr->getAudioChannelSet();
-				}
-			}
-		}
-		return juce::AudioChannelSet{};
-	}
-
-	int getInstrInputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				if (auto instr = track->getInstrProcessor()) {
-					return instr->getTotalNumInputChannels();
-				}
-			}
-		}
-		return 0;
-	}
-
-	int getInstrOutputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				if (auto instr = track->getInstrProcessor()) {
-					return instr->getTotalNumOutputChannels();
-				}
-			}
-		}
-		return 0;
 	}
 
 	EditorPointer getInstrEditor(int index) {
@@ -808,10 +745,6 @@ namespace quickAPI {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getTrackInputFromSrcConnections(index);
 		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index) {
 		return {};
 	}
 

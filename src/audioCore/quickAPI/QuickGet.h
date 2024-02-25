@@ -88,17 +88,9 @@ namespace quickAPI {
 	/** Src Index, Src Channel, Dst Index, Dst Channel */
 	using AudioLink = std::tuple<int, int, int, int>;
 
-	int getInstrNum();/**< Deprecated */
 	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
-	const juce::StringArray getInstrNameList();
 	bool getInstrBypass(int index);
-	bool getInstrMIDIInputFromDevice(int index);/**< Deprecated */
-	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index);/**< Deprecated */
-	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index);/**< Deprecated */
-	const juce::AudioChannelSet getInstrChannelSet(int index);/**< Deprecated */
-	int getInstrInputChannelNum(int index);/**< Deprecated */
-	int getInstrOutputChannelNum(int index);/**< Deprecated */
 	EditorPointer getInstrEditor(int index);
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);
@@ -145,7 +137,6 @@ namespace quickAPI {
 	const juce::Array<MIDILink> getMixerTrackMIDIInputFromSource(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromDevice(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index);/**< Deprecated */
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromSend(int index);
 	bool getMixerTrackMIDIOutputToDevice(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index);

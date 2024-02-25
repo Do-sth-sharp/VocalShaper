@@ -369,12 +369,6 @@ bool MixerTrackComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
 	auto& des = dragSourceDetails.description;
 
-	/** From Instr Audio Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::InstrOutput)) {
-		int instrIndex = des["instr"];
-		return instrIndex >= 0;
-	}
-
 	/** From Track Audio Input */
 	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
 		int trackIndex = des["track"];
@@ -460,14 +454,6 @@ void MixerTrackComponent::itemDropped(
 	}
 	else {
 		this->endDrop();
-	}
-
-	/** From Instr Audio Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::InstrOutput)) {
-		int instrIndex = des["instr"];
-
-		this->audioInput->setAudioInputFromInstr(instrIndex, true);
-		return;
 	}
 
 	/** From Track Audio Input */

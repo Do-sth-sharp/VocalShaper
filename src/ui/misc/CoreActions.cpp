@@ -175,7 +175,7 @@ void CoreActions::record(bool start) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::insertInstr(int index, int type, const juce::String& pid) {
+void CoreActions::insertInstr(int index, const juce::String& pid) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionAddInstr{ index, pid });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -219,17 +219,6 @@ void CoreActions::setInstrParamCCLink(quickAPI::PluginHolder instr, int paramInd
 
 void CoreActions::removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel) {
 	CoreActions::setInstrParamCCLink(instr, -1, ccChannel);
-}
-
-void CoreActions::setInstrMIDIInputFromDevice(int index, bool input) {
-}
-
-void CoreActions::setInstrMIDIInputFromSeqTrack(
-	int index, int seqIndex, bool input) {
-}
-
-void CoreActions::setInstrAudioOutputToMixer(
-	int index, int channel, int mixerTrack, int mixerChannel, bool input) {
 }
 
 void CoreActions::removeInstr(int index) {
@@ -355,10 +344,6 @@ void CoreActions::setTrackAudioInputFromSource(
 		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackOutput{ seqIndex, srcChannel, index, channel })
 		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackOutput{ seqIndex, srcChannel, index, channel });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioInputFromInstr(
-	int index, int channel, int instrIndex, int srcChannel, bool input) {
 }
 
 void CoreActions::setTrackAudioInputFromSend(
@@ -734,22 +719,10 @@ void CoreActions::renderGUI() {
 	CoreActions::askForMixerTracksListGUIAsync(callback);
 }
 
-void CoreActions::insertInstrGUI(int index, const juce::String& pid) {
-	if (pid.isEmpty()) { return; }
-
-	auto callback = [index, pid](int type) {
-		CoreActions::insertInstr(index, type, pid); };
-	CoreActions::askForBusTypeGUIAsync(callback);
-}
-
 void CoreActions::insertInstrGUI(int index) {
 	auto callback = [index](const juce::String& id) {
-		CoreActions::insertInstrGUI(index, id); };
+		CoreActions::insertInstr(index, id); };
 	CoreActions::askForPluginGUIAsync(callback, true, true);
-}
-
-void CoreActions::insertInstrGUI() {
-	CoreActions::insertInstrGUI(quickAPI::getInstrNum());
 }
 
 void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
@@ -761,37 +734,6 @@ void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
 void CoreActions::addInstrParamCCLinkGUI(quickAPI::PluginHolder instr) {
 	auto callback = [instr](int param) { CoreActions::editInstrParamCCLinkGUI(instr, param); };
 	CoreActions::askForPluginParamGUIAsync(callback, instr, PluginType::Instr);
-}
-
-void CoreActions::setInstrAudioOutputToMixerGUI(int index, int track, bool output,
-	const juce::Array<std::tuple<int, int>>& links) {
-	/** Callback */
-	auto callback = [index, track](int srcc, int dstc, bool output) {
-		CoreActions::setInstrAudioOutputToMixer(index, srcc, track, dstc, output);
-		};
-
-	/** Remove */
-	if (!output) {
-		for (auto& [srcc, dstc] : links) {
-			callback(srcc, dstc, false);
-		}
-		return;
-	}
-
-	/** Name */
-	juce::String instrName = TRANS("Instrument") + " #" + juce::String{ index } + " " + quickAPI::getInstrName(index);
-	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ track } + " " + quickAPI::getMixerTrackName(track);
-
-	/** Channels */
-	auto instrChannelSet = quickAPI::getInstrChannelSet(index);
-	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(track);
-	int instrTotalChannels = quickAPI::getInstrOutputChannelNum(index);
-	int trackTotalChannels = quickAPI::getMixerTrackInputChannelNum(track);
-
-	/** Ask For Channels */
-	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
-		instrChannelSet, trackChannelSet, instrTotalChannels, trackTotalChannels,
-		instrName, trackName, true);
 }
 
 void CoreActions::removeInstrGUI(int index) {
@@ -936,37 +878,6 @@ void CoreActions::setTrackAudioInputFromSourceGUI(int index, int seqIndex, bool 
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		seqChannelSet, trackChannelSet, seqTotalChannels, trackTotalChannels,
 		seqName, trackName, true);
-}
-
-void CoreActions::setTrackAudioInputFromInstrGUI(int index, int instrIndex, bool input,
-	const juce::Array<std::tuple<int, int>>& links) {
-	/** Callback */
-	auto callback = [index, instrIndex](int srcc, int dstc, bool input) {
-		CoreActions::setTrackAudioInputFromInstr(index, dstc, instrIndex, srcc, input);
-		};
-
-	/** Remove */
-	if (!input) {
-		for (auto& [srcc, dstc] : links) {
-			callback(srcc, dstc, false);
-		}
-		return;
-	}
-
-	/** Name */
-	juce::String instrName = TRANS("Instrument") + " #" + juce::String{ instrIndex } + " " + quickAPI::getInstrName(instrIndex);
-	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ index } + " " + quickAPI::getMixerTrackName(index);
-
-	/** Channels */
-	auto instrChannelSet = quickAPI::getInstrChannelSet(instrIndex);
-	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(index);
-	int instrTotalChannels = quickAPI::getInstrOutputChannelNum(instrIndex);
-	int trackTotalChannels = quickAPI::getMixerTrackInputChannelNum(index);
-
-	/** Ask For Channels */
-	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
-		instrChannelSet, trackChannelSet, instrTotalChannels, trackTotalChannels,
-		instrName, trackName, true);
 }
 
 void CoreActions::setTrackAudioInputFromSendGUI(int index, int trackIndex, bool input,

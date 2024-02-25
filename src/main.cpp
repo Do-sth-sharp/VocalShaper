@@ -19,7 +19,6 @@
 #include "ui/component/CompManager.h"
 #include "ui/component/PluginView.h"
 #include "ui/component/SourceView.h"
-#include "ui/component/InstrView.h"
 #include "ui/component/MixerView.h"
 #include "ui/menuAndCommand/CommandManager.h"
 #include "ui/menuAndCommand/CoreCommandTarget.h"
@@ -302,8 +301,6 @@ private:
 					std::unique_ptr<flowUI::FlowComponent>(new SourceView));
 				CompManager::getInstance()->set(CompManager::CompType::TrackView,
 					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
-				CompManager::getInstance()->set(CompManager::CompType::InstrView,
-					std::unique_ptr<flowUI::FlowComponent>(new InstrView));
 				CompManager::getInstance()->set(CompManager::CompType::MixerView,
 					std::unique_ptr<flowUI::FlowComponent>(new MixerView));
 				CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
