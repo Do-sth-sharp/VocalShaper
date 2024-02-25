@@ -339,6 +339,15 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 	auto& sources = mes->sources();
 	if (!this->srcs.parse(&sources)) { return false; }
 
+	if (mes->has_instr()) {
+		auto& instr = mes->instr();
+
+		if (auto plugin = this->prepareInstr()) {
+			SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{ plugin }, instr.bypassed());
+			if (!plugin->parse(&instr)) { return false; }
+		}
+	}
+
 	return true;
 }
 
@@ -353,6 +362,22 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	auto srcs = this->srcs.serialize();
 	if (!dynamic_cast<vsp4::SourceInstanceList*>(srcs.get())) { return nullptr; }
 	mes->set_allocated_sources(dynamic_cast<vsp4::SourceInstanceList*>(srcs.release()));
+
+	if (this->instr) {
+		if (auto plugin = dynamic_cast<PluginDecorator*>(this->instr->getProcessor())) {
+			if (auto item = plugin->serialize()) {
+				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
+					plu->set_bypassed(SeqSourceProcessor::getInstrumentBypass(
+						PluginDecorator::SafePointer{ plugin }));
+
+					mes->set_allocated_instr(dynamic_cast<vsp4::Plugin*>(item.release()));
+				}
+			}
+			else {
+				return nullptr;
+			}
+		}
+	}
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
