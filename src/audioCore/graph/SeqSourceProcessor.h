@@ -36,6 +36,8 @@ public:
 	static void setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass);
 	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
 
+	double getSourceLength() const;
+
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void releaseResources() override {};

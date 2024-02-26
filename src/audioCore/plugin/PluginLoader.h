@@ -12,9 +12,6 @@ public:
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
 		PluginDecorator::SafePointer ptr,
 		const Callback& callback = [] {});
-	void loadPlugin(const juce::PluginDescription& pluginInfo,
-		CloneableSource::SafePointer<> ptr,
-		const Callback& callback = [] {});
 
 	bool isRunning() const;
 

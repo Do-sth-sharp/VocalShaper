@@ -5,7 +5,6 @@
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
 #include "../uiCallback/UICallback.h"
-#include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include "SourceRecordProcessor.h"
@@ -83,10 +82,6 @@ void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 		position->setSampleRate(sampleRate);
 	}
 
-	/** Source */
-	CloneableSourceManager::getInstance()->prepareToPlay(
-		sampleRate, maximumExpectedSamplesPerBlock);
-
 	/** Renderer */
 	Renderer::getInstance()->updateSampleRateAndBufferSize(
 		sampleRate, maximumExpectedSamplesPerBlock);
@@ -132,10 +127,6 @@ SourceRecordProcessor* MainGraph::getRecorder() const {
 }
 
 void MainGraph::clearGraph() {
-	if (auto recorder = this->getRecorder()) {
-		recorder->clearGraph();
-	}
-
 	for (auto& i : this->midiSrc2TrkConnectionList) {
 		this->removeConnection(i);
 	}
@@ -454,7 +445,6 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Process Audio Block */
 	{
-		juce::ScopedReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
 		this->recorder->processBlock(audio, midi);
 		this->juce::AudioProcessorGraph::processBlock(audio, midi);
 	}

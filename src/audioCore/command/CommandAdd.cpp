@@ -75,36 +75,6 @@ AUDIOCORE_FUNC(addMixerTrackMidiOutput) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(addAudioSource) {
-	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
-		auto action = std::unique_ptr<ActionBase>(new ActionAddAudioSourceThenLoad{
-		juce::String::fromUTF8(lua_tostring(L, 1)), (bool)lua_toboolean(L, 2) });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
-	else {
-		auto action = std::unique_ptr<ActionBase>(new ActionAddAudioSourceThenInit{
-		luaL_checknumber(L, 1), (int)luaL_checkinteger(L, 2),
-		luaL_checknumber(L, 3) });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
-
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(addMIDISource) {
-	if (lua_isstring(L, 1) && !lua_isnumber(L, 1)) {
-		auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenLoad{
-		juce::String::fromUTF8(lua_tostring(L, 1)), (bool)lua_toboolean(L, 2) });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
-	else {
-		auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenInit);
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
-	}
-
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(addSequencerTrack) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddSequencerTrack{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
@@ -127,23 +97,6 @@ AUDIOCORE_FUNC(addSequencerTrackOutput) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(addSequencerSourceInstance) {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddSequencerSourceInstance{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		luaL_checknumber(L, 3), luaL_checknumber(L, 4),
-		luaL_checknumber(L, 5) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(addRecorderSourceInstance) {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddRecorderSourceInstance{
-		(int)luaL_checkinteger(L, 1), luaL_checknumber(L, 2),
-		(int)luaL_checkinteger(L, 3) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -155,11 +108,7 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMixerTrackMidiOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addAudioSource);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addMIDISource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToMixer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerSourceInstance);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addRecorderSourceInstance);
 }

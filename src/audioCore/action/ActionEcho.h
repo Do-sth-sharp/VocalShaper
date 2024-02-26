@@ -253,32 +253,3 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionEchoEffectCCParam)
 };
-
-class ActionEchoSourceNum final : public ActionBase {
-public:
-	ActionEchoSourceNum();
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Echo Source Num";
-	};
-
-private:
-	JUCE_LEAK_DETECTOR(ActionEchoSourceNum)
-};
-
-class ActionEchoSource final : public ActionBase {
-public:
-	ActionEchoSource() = delete;
-	ActionEchoSource(int index);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Echo Source";
-	};
-
-private:
-	const int index;
-
-	JUCE_LEAK_DETECTOR(ActionEchoSource)
-};

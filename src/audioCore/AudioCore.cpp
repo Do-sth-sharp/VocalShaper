@@ -89,8 +89,6 @@ AudioCore::~AudioCore() {
 	this->mainGraphPlayer->setProcessor(nullptr);
 	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
-	AudioIOList::releaseInstance();
-	CloneableSourceManager::releaseInstance();
 	Plugin::releaseInstance();
 	UICallback::releaseInstance();
 }
@@ -196,9 +194,6 @@ bool AudioCore::save(const juce::String& name) {
 	ProjectInfoData::getInstance()->push();
 	ProjectInfoData::getInstance()->update();
 
-	/** Lock Sources */
-	juce::ScopedReadLock locker(CloneableSourceManager::getInstance()->getLock());
-
 	/** Get Project Data */
 	auto mes = this->serialize();
 	if (!dynamic_cast<vsp4::Project*>(mes.get())) { ProjectInfoData::getInstance()->pop(); return false; };
@@ -286,9 +281,6 @@ bool AudioCore::newProj(const juce::String& workingPath) {
 void AudioCore::clearGraph() {
 	/** Clear MainGraph */
 	this->mainAudioGraph->clearGraph();
-
-	/** Clear Sources */
-	CloneableSourceManager::getInstance()->clearGraph();
 }
 
 bool AudioCore::parse(const google::protobuf::Message* data) {

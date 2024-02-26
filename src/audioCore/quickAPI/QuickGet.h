@@ -20,24 +20,22 @@ namespace quickAPI {
 	bool isPlaying();
 	bool isRecording();
 
-	enum SourceType {
-		UnknownSource, AudioSource, MIDISource
-	};
-	int getSourceNum();
-	int getSourceId(int index);
-	const juce::String getSourceName(int index);
-	SourceType getSourceType(int index);
-	const juce::String getSourceTypeName(int index);
-	const juce::StringArray getAllSourceTypeName();
-	double getSourceLength(int index);
-	int getSourceChannelNum(int index);
-	int getSourceTrackNum(int index);
-	const juce::String getSourceSynthesizerName(int index);
-	int getSourceSynthDstIndex(int index);
-	double getSourceSampleRate(int index);
-	int getSourceEventNum(int index);
-	const juce::StringArray getSourceNames();
-	const juce::StringArray getSourceNamesWithID();
+	enum SourceType { UnknownSource, AudioSource, MIDISource };/**< Deprecated */
+	int getSourceNum();/**< Deprecated */
+	int getSourceId(int index);/**< Deprecated */
+	const juce::String getSourceName(int index);/**< Deprecated */
+	SourceType getSourceType(int index);/**< Deprecated */
+	const juce::String getSourceTypeName(int index);/**< Deprecated */
+	const juce::StringArray getAllSourceTypeName();/**< Deprecated */
+	double getSourceLength(int index);/**< Deprecated */
+	int getSourceChannelNum(int index);/**< Deprecated */
+	int getSourceTrackNum(int index);/**< Deprecated */
+	const juce::String getSourceSynthesizerName(int index);/**< Deprecated */
+	int getSourceSynthDstIndex(int index);/**< Deprecated */
+	double getSourceSampleRate(int index);/**< Deprecated */
+	int getSourceEventNum(int index);/**< Deprecated */
+	const juce::StringArray getSourceNames();/**< Deprecated */
+	const juce::StringArray getSourceNamesWithID();/**< Deprecated */
 
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();

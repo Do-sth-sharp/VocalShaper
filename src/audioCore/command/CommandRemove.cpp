@@ -88,13 +88,6 @@ AUDIOCORE_FUNC(removeMixerTrackMidiOutput) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(removeSource) {
-	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSource{
-		(int)luaL_checkinteger(L, 1) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(removeSequencerTrack) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{
 		(int)luaL_checkinteger(L, 1) });
@@ -117,20 +110,6 @@ AUDIOCORE_FUNC(removeSequencerTrackOutput) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(removeSequencerSourceInstance) {
-	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerSourceInstance{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(removeRecorderSourceInstance) {
-	auto action = std::unique_ptr<ActionBase>(new ActionRemoveRecorderSourceInstance{
-		(int)luaL_checkinteger(L, 1) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -144,10 +123,7 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeMixerTrackMidiOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSource);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackMidiOutputToMixer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerSourceInstance);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeRecorderSourceInstance);
 }

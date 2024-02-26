@@ -3,10 +3,6 @@
 #include <JuceHeader.h>
 #include "AudioConfig.h"
 #include "graph/MainGraph.h"
-#include "source/CloneableSourceManager.h"
-#include "source/CloneableAudioSource.h"
-#include "source/CloneableMIDISource.h"
-#include "source/AudioIOList.h"
 #include "misc/MackieControlHub.h"
 #include "project/Serializable.h"
 

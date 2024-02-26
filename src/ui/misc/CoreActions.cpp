@@ -44,73 +44,41 @@ bool CoreActions::removePluginSearchPath(const juce::String& path) {
 }
 
 void CoreActions::loadMIDISource(const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddMidiSourceThenLoad{ filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::loadAudioSource(const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddAudioSourceThenLoad{ filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::newMIDISource() {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenInit);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::newAudioSource(
 	double sampleRate, int channels, double length) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddAudioSourceThenInit{ sampleRate, channels, length });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::saveSource(int index, const juce::String& filePath) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSaveSourceAsync{ index, filePath });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::cloneSource(int index) {
-	auto action = std::unique_ptr<ActionBase>(new ActionCloneSource{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::reloadSource(
 	int index, const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionReloadSource{ index, filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::synthSource(int index) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSynthSource{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::removeSource(int index) {
-	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSource{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setSourceName(int index, const juce::String& name) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSetSourceName{ index, name });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setSourceSynthesizer(int index, const juce::String& pid) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSetSourceSynthesizer{ index, pid });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setSourceSynthDst(int index, int dstIndex) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSetSourceSynthDst{ index, dstIndex });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::render(const juce::String& dirPath, const juce::String& fileName,

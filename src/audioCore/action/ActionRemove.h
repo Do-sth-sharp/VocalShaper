@@ -265,24 +265,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiOutput)
 };
 
-class ActionRemoveSource final : public ActionBase {
-public:
-	ActionRemoveSource() = delete;
-	ActionRemoveSource(int index);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Remove Source";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSource)
-};
-
 class ActionRemoveSequencerTrack final : public ActionUndoableBase {
 public:
 	ActionRemoveSequencerTrack() = delete;
@@ -344,50 +326,4 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
-};
-
-class ActionRemoveSequencerSourceInstance final : public ActionUndoableBase {
-public:
-	ActionRemoveSequencerSourceInstance() = delete;
-	ActionRemoveSequencerSourceInstance(
-		int track, int seq);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Sequencer Source Instance";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track, seq;
-
-		int index;
-		double start, end, offset;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerSourceInstance)
-};
-
-class ActionRemoveRecorderSourceInstance final : public ActionUndoableBase {
-public:
-	ActionRemoveRecorderSourceInstance() = delete;
-	ActionRemoveRecorderSourceInstance(int seq);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Recorder Source Instance";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int seq;
-
-		int index;
-		double offset;
-		int compensate;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveRecorderSourceInstance)
 };

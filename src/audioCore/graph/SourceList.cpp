@@ -1,5 +1,4 @@
 ﻿#include "SourceList.h"
-#include "../source/CloneableSourceManager.h"
 #include "../misc/AudioLock.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -126,9 +125,7 @@ bool SourceList::parse(const google::protobuf::Message* data) {
 
 	auto& list = mes->sources();
 	for (auto& i : list) {
-		if (auto ptrSrc = CloneableSourceManager::getInstance()->getSource(-1)) {
-			this->add({ i.startpos(), i.endpos(), 0, ptrSrc });
-		}
+		this->add({ i.startpos(), i.endpos(), i.offset() });
 	}
 
 	return true;
@@ -138,10 +135,11 @@ std::unique_ptr<google::protobuf::Message> SourceList::serialize() const {
 	auto mes = std::make_unique<vsp4::SourceInstanceList>();
 
 	auto list = mes->mutable_sources();
-	for (auto& [startTime, endTime, offset, ptr] : this->list) {
+	for (auto& [startTime, endTime, offset] : this->list) {
 		auto instance = std::make_unique<vsp4::SeqSourceInstance>();
 		instance->set_startpos(startTime);
 		instance->set_endpos(endTime);
+		instance->set_offset(offset);
 		list->AddAllocated(instance.release());
 	}
 

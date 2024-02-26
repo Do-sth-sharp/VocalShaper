@@ -18,18 +18,18 @@ public:
 	static bool addPluginSearchPath(const juce::String& path);
 	static bool removePluginSearchPath(const juce::String& path);
 
-	static void loadMIDISource(const juce::String& filePath, bool copy);
-	static void loadAudioSource(const juce::String& filePath, bool copy);
-	static void newMIDISource();
-	static void newAudioSource(double sampleRate, int channels, double length);
-	static void saveSource(int index, const juce::String& filePath);
-	static void cloneSource(int index);
-	static void reloadSource(int index, const juce::String& filePath, bool copy);
-	static void synthSource(int index);
-	static void removeSource(int index);
-	static void setSourceName(int index, const juce::String& name);
-	static void setSourceSynthesizer(int index, const juce::String& pid);
-	static void setSourceSynthDst(int index, int dstIndex);
+	static void loadMIDISource(const juce::String& filePath, bool copy);/**< Deprecated */
+	static void loadAudioSource(const juce::String& filePath, bool copy);/**< Deprecated */
+	static void newMIDISource();/**< Deprecated */
+	static void newAudioSource(double sampleRate, int channels, double length);/**< Deprecated */
+	static void saveSource(int index, const juce::String& filePath);/**< Deprecated */
+	static void cloneSource(int index);/**< Deprecated */
+	static void reloadSource(int index, const juce::String& filePath, bool copy);/**< Deprecated */
+	static void synthSource(int index);/**< Deprecated */
+	static void removeSource(int index);/**< Deprecated */
+	static void setSourceName(int index, const juce::String& name);/**< Deprecated */
+	static void setSourceSynthesizer(int index, const juce::String& pid);/**< Deprecated */
+	static void setSourceSynthDst(int index, int dstIndex);/**< Deprecated */
 
 	static void render(const juce::String& dirPath, const juce::String& fileName,
 		const juce::String& fileExtension, const juce::Array<int>& tracks);

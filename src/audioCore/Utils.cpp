@@ -989,16 +989,6 @@ namespace utils {
 			"\\/:*?\"<>|", "_________");
 	}
 
-	juce::String getSourceDefaultPathForAudio(int id, const juce::String& name) {
-		juce::String legalName = getLegalFileName(name);
-		return "./" + juce::String(id) + "_" + legalName + ".wav";
-	}
-
-	juce::String getSourceDefaultPathForMIDI(int id, const juce::String& name) {
-		juce::String legalName = getLegalFileName(name);
-		return "./" + juce::String(id) + "_" + legalName + ".mid";
-	}
-
 	bool projectVersionHighEnough(const Version& version) {
 		return versionCompare(version, getAudioPlatformVersionMinimumSupported()) >= 0;
 	}
@@ -1017,10 +1007,6 @@ namespace utils {
 		if (!dir.isDirectory()) { return false; }
 		projectDirectory = dir;
 		return true;
-	}
-
-	juce::File getSourceFile(const juce::String& path) {
-		return utils::getProjectDir().getChildFile(path);
 	}
 
 	juce::File getDefaultWorkingDir() {

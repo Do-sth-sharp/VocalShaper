@@ -14,40 +14,7 @@ AC.addSequencerTrackOutput(0, 1, 0, 1);
 AC.setSequencerTrackBypass(0, true);
 AC.setSequencerTrackBypass(0, false);
 
--- Add Source
-AC.addAudioSource("./test.wav", true);
-AC.addMIDISource("./test.mid", true);
-AC.addAudioSource(48000, 2, 10.0);
-AC.addMIDISource();
-
--- Remove Source
-AC.removeSource(0);
-
--- Get Source Info
-AC.echoSourceNum();
-AC.echoSource(0);
-
--- Save Source
-AC.saveSource(0, "./test.wav");
-AC.saveSourceAsync(0, "./test.wav");
-
--- Set Synthesizer
-AC.setSourceSynthesizer(0, "VST3-SynthEngineDemo-768e251b-8e107a81");
-
--- Synth
-AC.synthSource(0);
-
--- Add Instance
-AC.addSequencerSourceInstance(0, 0, 0, 10, 0);
-
--- Remove Instance
-AC.removeSequencerSourceInstance(0, 0);
-
 -- Audio Save Config
 AC.setAudioSaveBitsPerSample(".wav", 32);
 AC.setAudioSaveMetaData(".wav", { ["bwav description"] = "test description", ["bwav origination date"] = "2023-08-26", ["bwav origination time"] = "00:42:00" });
 AC.setAudioSaveQualityOptionIndex(".wav", 0);
-
--- Record
-AC.addRecorderSourceInstance(0, 0, 1);
-AC.removeRecorderSourceInstance(0);

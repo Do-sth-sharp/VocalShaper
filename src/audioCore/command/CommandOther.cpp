@@ -48,34 +48,6 @@ AUDIOCORE_FUNC(stopRecord) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(synthSource) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSynthSource{
-		(int)luaL_checkinteger(L, 1) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(cloneSource) {
-	auto action = std::unique_ptr<ActionBase>(new ActionCloneSource{
-		(int)luaL_checkinteger(L, 1) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(saveSource) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSaveSource{
-		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(saveSourceAsync) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSaveSourceAsync{
-		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(renderNow) {
 	juce::String result;
 
@@ -128,10 +100,6 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, rewind);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, startRecord);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, stopRecord);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, synthSource);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, cloneSource);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveSource);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveSourceAsync);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, renderNow);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, newProject);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, save);

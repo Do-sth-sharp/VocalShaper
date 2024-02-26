@@ -1,9 +1,6 @@
 ﻿#include "SeqSourceProcessor.h"
 #include "../misc/PlayPosition.h"
 #include "../uiCallback/UICallback.h"
-#include "../source/CloneableSourceManager.h"
-#include "../source/CloneableAudioSource.h"
-#include "../source/CloneableMIDISource.h"
 #include "../Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -207,6 +204,11 @@ bool SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer instr)
 	return false;
 }
 
+double SeqSourceProcessor::getSourceLength() const {
+	/** TODO */
+	return 0;
+}
+
 void SeqSourceProcessor::prepareToPlay(
 	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {}
 
@@ -262,40 +264,28 @@ void SeqSourceProcessor::processBlock(
 		for (int i = std::get<0>(index);
 			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
 			/** Get Block */
-			auto [blockStartTime, blockEndTime, blockOffset, blockPointer] = this->srcs.getUnchecked(i);
+			auto [blockStartTime, blockEndTime, blockOffset] = this->srcs.getUnchecked(i);
 			int blockStartTimeInSample = std::floor(blockStartTime * sampleRate);
 			int blockEndTimeInSample = std::floor(blockEndTime * sampleRate);
-			int blockOffsetInSample =std::floor(blockOffset * sampleRate);
+			int blockOffsetInSample = std::floor(blockOffset * sampleRate);
 
-			if (CloneableSource::SafePointer<> ptr = blockPointer) {
-				/** Caculate Time */
-				int blockLengthInSample = std::floor(ptr->getSourceLength() * sampleRate);
-				int dataStartTimeInSample = blockStartTimeInSample + std::max(blockOffsetInSample, 0);
-				int dataEndTimeInSample =
-					std::min(blockEndTimeInSample, blockStartTimeInSample + blockOffsetInSample + blockLengthInSample);
+			/** Caculate Time */
+			int blockLengthInSample = std::floor(this->getSourceLength() * sampleRate);
+			int dataStartTimeInSample = blockStartTimeInSample + std::max(blockOffsetInSample, 0);
+			int dataEndTimeInSample =
+				std::min(blockEndTimeInSample, blockStartTimeInSample + blockOffsetInSample + blockLengthInSample);
 
-				if (dataEndTimeInSample > dataStartTimeInSample) {
-					int hotStartTimeInSample = std::max(startTimeInSample, dataStartTimeInSample);
-					int hotEndTimeInSample = std::min(endTimeInSample, dataEndTimeInSample);
+			if (dataEndTimeInSample > dataStartTimeInSample) {
+				int hotStartTimeInSample = std::max(startTimeInSample, dataStartTimeInSample);
+				int hotEndTimeInSample = std::min(endTimeInSample, dataEndTimeInSample);
 
-					if (hotEndTimeInSample > hotStartTimeInSample) {
-						int dataTimeInSample = blockStartTimeInSample + blockOffsetInSample;
-						int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
-						int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
-						int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
+				if (hotEndTimeInSample > hotStartTimeInSample) {
+					int dataTimeInSample = blockStartTimeInSample + blockOffsetInSample;
+					int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
+					int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
+					int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
 
-						if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-							/** Copy Audio Data */
-							p->readData(buffer, bufferOffsetInSample, hotOffsetInSample, hotLengthInSample);
-						}
-						else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-							/** Copy MIDI Message */
-							p->readData(midiMessages,
-								dataTimeInSample - startTimeInSample,
-								hotOffsetInSample,
-								hotEndTimeInSample - dataTimeInSample);
-						}
-					}
+					/** TODO */
 				}
 			}
 		}

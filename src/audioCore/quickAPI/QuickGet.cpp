@@ -1,7 +1,6 @@
 ﻿#include "QuickGet.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
-#include "../source/CloneableSourceManager.h"
 #include "../plugin/Plugin.h"
 #include "../misc/Device.h"
 #include "../misc/PlayPosition.h"
@@ -66,149 +65,63 @@ namespace quickAPI {
 	}
 
 	int getSourceNum() {
-		return CloneableSourceManager::getInstance()->getSourceNum();
+		return 0;
 	}
 
 	int getSourceId(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getId();
-		}
 		return -1;
 	}
 
 	const juce::String getSourceName(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			auto name = ptr->getName();
-			if (name.isEmpty()) {
-				auto path = ptr->getPath();
-				if (path.isNotEmpty()) {
-					name = utils::getProjectDir().getChildFile(path).getFileName();
-				}
-			}
-			return name;
-		}
 		return "";
 	}
 
-	constexpr std::array<const char*, 4> sourceTypeNameList{
-		"Unknown", "Audio", "MIDI" };
-
 	SourceType getSourceType(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-				return SourceType::AudioSource;
-			}
-			else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-				return SourceType::MIDISource;
-			}
-		}
 		return SourceType::UnknownSource;
 	}
 
 	const juce::String getSourceTypeName(int index) {
-		return sourceTypeNameList[getSourceType(index)];
+		return "";
 	}
 
 	const juce::StringArray getAllSourceTypeName() {
-		juce::StringArray result;
-		for (auto s : sourceTypeNameList) {
-			result.add(juce::String{ s });
-		}
-		return result;
+		return {};
 	}
 
 	double getSourceLength(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getSourceLength();
-		}
 		return 0;
 	}
 
 	int getSourceChannelNum(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getChannelNum();
-		}
 		return 0;
 	}
 
 	int getSourceTrackNum(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getTrackNum();
-		}
 		return 0;
 	}
 	
 	const juce::String getSourceSynthesizerName(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getSynthesizerName();
-		}
 		return "";
 	}
 
 	int getSourceSynthDstIndex(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return CloneableSourceManager::getInstance()->getSourceIndex(
-				ptr->getDstSource());
-		}
 		return -1;
 	}
 
 	double getSourceSampleRate(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getSourceSampleRate();
-		}
 		return 0;
 	}
 
 	int getSourceEventNum(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-				return p->getEventNum();
-			}
-		}
 		return 0;
 	}
 
 	const juce::StringArray getSourceNames() {
-		juce::StringArray result;
-
-		int size = CloneableSourceManager::getInstance()->getSourceNum();
-		for (int i = 0; i < size; i++) {
-			auto ptr = CloneableSourceManager::getInstance()->getSource(i);
-			if (!ptr) { result.add("-"); continue; }
-
-			juce::String name = ptr->getName();
-			if (name.isEmpty()) {
-				auto path = ptr->getPath();
-				if (path.isNotEmpty()) {
-					name = utils::getProjectDir().getChildFile(path).getFileName();
-				}
-			}
-			result.add(name);
-		}
-
-		return result;
+		return {};
 	}
 
 	const juce::StringArray getSourceNamesWithID() {
-		juce::StringArray result;
-
-		int size = CloneableSourceManager::getInstance()->getSourceNum();
-		for (int i = 0; i < size; i++) {
-			auto ptr = CloneableSourceManager::getInstance()->getSource(i);
-			if (!ptr) { result.add("-"); continue; }
-
-			juce::String name = ptr->getName();
-			if (name.isEmpty()) {
-				auto path = ptr->getPath();
-				if (path.isNotEmpty()) {
-					name = utils::getProjectDir().getChildFile(path).getFileName();
-				}
-			}
-			result.add("#" + juce::String{ ptr->getId() } + " " + name);
-		}
-
-		return result;
+		return {};
 	}
 
 	const juce::Array<TrackInfo> getMixerTrackInfos() {

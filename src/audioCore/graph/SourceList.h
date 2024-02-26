@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "../source/CloneableSource.h"
 #include "../project/Serializable.h"
 
 class SourceList final : public Serializable {
@@ -9,11 +8,10 @@ public:
 	SourceList() = default;
 
 	/**
-	 * StartTime, EndTime, Offset, Pointer.
+	 * StartTime, EndTime, Offset.
 	 */
 	using SeqBlock = std::tuple<
-		double, double, double,
-		CloneableSource::SafePointer<>>;
+		double, double, double>;
 
 	/**
 	 * @attention Call this only on audio thread. Get the lock before use this method.
