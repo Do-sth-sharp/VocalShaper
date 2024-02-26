@@ -18,19 +18,6 @@ public:
 	static bool addPluginSearchPath(const juce::String& path);
 	static bool removePluginSearchPath(const juce::String& path);
 
-	static void loadMIDISource(const juce::String& filePath, bool copy);/**< Deprecated */
-	static void loadAudioSource(const juce::String& filePath, bool copy);/**< Deprecated */
-	static void newMIDISource();/**< Deprecated */
-	static void newAudioSource(double sampleRate, int channels, double length);/**< Deprecated */
-	static void saveSource(int index, const juce::String& filePath);/**< Deprecated */
-	static void cloneSource(int index);/**< Deprecated */
-	static void reloadSource(int index, const juce::String& filePath, bool copy);/**< Deprecated */
-	static void synthSource(int index);/**< Deprecated */
-	static void removeSource(int index);/**< Deprecated */
-	static void setSourceName(int index, const juce::String& name);/**< Deprecated */
-	static void setSourceSynthesizer(int index, const juce::String& pid);/**< Deprecated */
-	static void setSourceSynthDst(int index, int dstIndex);/**< Deprecated */
-
 	static void render(const juce::String& dirPath, const juce::String& fileName,
 		const juce::String& fileExtension, const juce::Array<int>& tracks);
 
@@ -99,22 +86,6 @@ public:
 	static bool addPluginSearchPathGUI(const juce::String& path);
 	static bool removePluginSearchPathGUI(const juce::String& path);
 
-	static void loadSourceGUI();
-	static void newMIDISourceGUI();
-	static void newAudioSourceGUI(double sampleRate, int channels, double length);
-	static void newAudioSourceGUI();
-	static void saveSourceGUI(int index);
-	static void saveSourceGUI();
-	static void reloadSourceGUI(int index);
-	static void reloadSourceGUI();
-	static void synthSourceGUI(int index);
-	static void synthSourceGUI();
-	static void removeSourceGUI(int index);
-	static void setSourceNameGUI(int index);
-	static void setSourceNameGUI();
-	static void setSourceSynthesizerGUI(int index);
-	static void setSourceSynthesizerGUI();
-
 	static void renderGUI(const juce::Array<int>& tracks);
 	static void renderGUI();
 
@@ -148,8 +119,6 @@ public:
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(
 		const std::function<void(double, int, double)>& callback);
-	static void askForSourceIndexGUIAsync(
-		const std::function<void(int)>& callback);
 	static void askForMixerTracksListGUIAsync(
 		const std::function<void(const juce::Array<int>&)>& callback);
 	static void askForNameGUIAsync(

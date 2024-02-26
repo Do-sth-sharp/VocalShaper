@@ -30,11 +30,9 @@ void GUICommandTarget::getAllCommands(
 		(juce::CommandID)(GUICommandType::LoadLayout),
 		(juce::CommandID)(GUICommandType::SaveLayout),
 		(juce::CommandID)(GUICommandType::PluginView),
-		(juce::CommandID)(GUICommandType::SourceView),
 		(juce::CommandID)(GUICommandType::TrackView),
 		(juce::CommandID)(GUICommandType::MixerView),
-		(juce::CommandID)(GUICommandType::SourceEditView),
-		(juce::CommandID)(GUICommandType::SourceRecordView),
+		(juce::CommandID)(GUICommandType::ResourceEditView),
 		(juce::CommandID)(GUICommandType::AudioDebugger),
 		(juce::CommandID)(GUICommandType::MidiDebugger),
 
@@ -120,12 +118,6 @@ void GUICommandTarget::getCommandInfo(
 			CompManager::CompType::PluginView));
 		result.setActive(true);
 		break;
-	case GUICommandType::SourceView:
-		result.setInfo(TRANS("Source"), TRANS("Show source view component."), TRANS("View"), 0);
-		result.setTicked(CompManager::getInstance()->isOpened(
-			CompManager::CompType::SourceView));
-		result.setActive(true);
-		break;
 	case GUICommandType::TrackView:
 		result.setInfo(TRANS("Track"), TRANS("Show track view component."), TRANS("View"), 0);
 		result.setTicked(CompManager::getInstance()->isOpened(
@@ -138,16 +130,10 @@ void GUICommandTarget::getCommandInfo(
 			CompManager::CompType::MixerView));
 		result.setActive(true);
 		break;
-	case GUICommandType::SourceEditView:
-		result.setInfo(TRANS("Source Editor"), TRANS("Show source editor component."), TRANS("View"), 0);
+	case GUICommandType::ResourceEditView:
+		result.setInfo(TRANS("Resource Editor"), TRANS("Show resource editor component."), TRANS("View"), 0);
 		result.setTicked(CompManager::getInstance()->isOpened(
-			CompManager::CompType::SourceEditView));
-		result.setActive(true);
-		break;
-	case GUICommandType::SourceRecordView:
-		result.setInfo(TRANS("Source Recorder"), TRANS("Show source recorder component."), TRANS("View"), 0);
-		result.setTicked(CompManager::getInstance()->isOpened(
-			CompManager::CompType::SourceRecordView));
+			CompManager::CompType::ResourceEditView));
 		result.setActive(true);
 		break;
 	case GUICommandType::AudioDebugger:
@@ -317,20 +303,14 @@ bool GUICommandTarget::perform(
 	case GUICommandType::PluginView:
 		this->changeOpened(CompManager::CompType::PluginView);
 		return true;
-	case GUICommandType::SourceView:
-		this->changeOpened(CompManager::CompType::SourceView);
-		return true;
 	case GUICommandType::TrackView:
 		this->changeOpened(CompManager::CompType::TrackView);
 		return true;
 	case GUICommandType::MixerView:
 		this->changeOpened(CompManager::CompType::MixerView);
 		return true;
-	case GUICommandType::SourceEditView:
-		this->changeOpened(CompManager::CompType::SourceEditView);
-		return true;
-	case GUICommandType::SourceRecordView:
-		this->changeOpened(CompManager::CompType::SourceRecordView);
+	case GUICommandType::ResourceEditView:
+		this->changeOpened(CompManager::CompType::ResourceEditView);
 		return true;
 	case GUICommandType::AudioDebugger:
 		this->changeOpened(CompManager::CompType::AudioDebugger);

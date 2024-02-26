@@ -11,7 +11,7 @@
 				"unit": [
 					{
 						"vertical": false,
-						"id": [ 1, 2 ]
+						"id": [ 1 ]
 					},
 					{
 						"vertical": true,
@@ -23,17 +23,17 @@
 								"unit": [
 									{
 										"vertical": true,
-										"id": [ 3 ]
+										"id": [ 2 ]
 									},
 									{
 										"vertical": true,
-										"id": [ 4 ]
+										"id": [ 3 ]
 									}
 								]
 							},
 							{
 								"vertical": true,
-								"id": [ 5, 6 ]
+								"id": [ 4 ]
 							}
 						]
 					}
@@ -47,11 +47,11 @@
 				"unit": [
 					{
 						"vertical": false,
-						"id": [ 7 ]
+						"id": [ 5 ]
 					},
 					{
 						"vertical": false,
-						"id": [ 8 ]
+						"id": [ 6 ]
 					}
 				]
 			}

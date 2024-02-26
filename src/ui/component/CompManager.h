@@ -11,11 +11,9 @@ public:
 		StartMenu,
 		ToolBar,
 		PluginView,
-		SourceView,
 		TrackView,
 		MixerView,
-		SourceEditView,
-		SourceRecordView,
+		ResourceEditView,
 		AudioDebugger,
 		MidiDebugger,
 

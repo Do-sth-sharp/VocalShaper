@@ -18,7 +18,6 @@
 #include "ui/component/Splash.h"
 #include "ui/component/CompManager.h"
 #include "ui/component/PluginView.h"
-#include "ui/component/SourceView.h"
 #include "ui/component/MixerView.h"
 #include "ui/menuAndCommand/CommandManager.h"
 #include "ui/menuAndCommand/CoreCommandTarget.h"
@@ -297,16 +296,12 @@ private:
 					std::unique_ptr<flowUI::FlowComponent>(new ToolBar));
 				CompManager::getInstance()->set(CompManager::CompType::PluginView,
 					std::unique_ptr<flowUI::FlowComponent>(new PluginView));
-				CompManager::getInstance()->set(CompManager::CompType::SourceView,
-					std::unique_ptr<flowUI::FlowComponent>(new SourceView));
 				CompManager::getInstance()->set(CompManager::CompType::TrackView,
 					std::make_unique<flowUI::FlowComponent>(TRANS("Track")));
 				CompManager::getInstance()->set(CompManager::CompType::MixerView,
 					std::unique_ptr<flowUI::FlowComponent>(new MixerView));
-				CompManager::getInstance()->set(CompManager::CompType::SourceEditView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Source Editor")));
-				CompManager::getInstance()->set(CompManager::CompType::SourceRecordView,
-					std::make_unique<flowUI::FlowComponent>(TRANS("Source Recorder")));
+				CompManager::getInstance()->set(CompManager::CompType::ResourceEditView,
+					std::make_unique<flowUI::FlowComponent>(TRANS("Resource Editor")));
 				CompManager::getInstance()->set(CompManager::CompType::AudioDebugger,
 					std::unique_ptr<flowUI::FlowComponent>(new AudioDebuggerComponent));
 				CompManager::getInstance()->set(CompManager::CompType::MidiDebugger,

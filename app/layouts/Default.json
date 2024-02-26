@@ -16,8 +16,7 @@
           {
             "vertical": false,
             "id": [
-              1,
-              2
+              1
             ]
           },
           {
@@ -36,7 +35,7 @@
                   {
                     "vertical": true,
                     "id": [
-                      3
+                      2
                     ]
                   }
                 ]
@@ -44,8 +43,7 @@
               {
                 "vertical": true,
                 "id": [
-                  5,
-                  6
+                  4
                 ]
               }
             ]
@@ -53,7 +51,7 @@
           {
             "vertical": true,
             "id": [
-              4
+              3
             ]
           }
         ]

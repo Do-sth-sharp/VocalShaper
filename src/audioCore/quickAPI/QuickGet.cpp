@@ -64,66 +64,6 @@ namespace quickAPI {
 		return pos->getIsRecording();
 	}
 
-	int getSourceNum() {
-		return 0;
-	}
-
-	int getSourceId(int index) {
-		return -1;
-	}
-
-	const juce::String getSourceName(int index) {
-		return "";
-	}
-
-	SourceType getSourceType(int index) {
-		return SourceType::UnknownSource;
-	}
-
-	const juce::String getSourceTypeName(int index) {
-		return "";
-	}
-
-	const juce::StringArray getAllSourceTypeName() {
-		return {};
-	}
-
-	double getSourceLength(int index) {
-		return 0;
-	}
-
-	int getSourceChannelNum(int index) {
-		return 0;
-	}
-
-	int getSourceTrackNum(int index) {
-		return 0;
-	}
-	
-	const juce::String getSourceSynthesizerName(int index) {
-		return "";
-	}
-
-	int getSourceSynthDstIndex(int index) {
-		return -1;
-	}
-
-	double getSourceSampleRate(int index) {
-		return 0;
-	}
-
-	int getSourceEventNum(int index) {
-		return 0;
-	}
-
-	const juce::StringArray getSourceNames() {
-		return {};
-	}
-
-	const juce::StringArray getSourceNamesWithID() {
-		return {};
-	}
-
 	const juce::Array<TrackInfo> getMixerTrackInfos() {
 		juce::Array<TrackInfo> result;
 

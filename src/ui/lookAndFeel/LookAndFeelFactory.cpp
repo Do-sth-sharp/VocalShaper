@@ -9,7 +9,6 @@
 #include "MessageLookAndFeel.h"
 #include "MessageViewLookAndFeel.h"
 #include "PluginViewLookAndFeel.h"
-#include "SourceViewLookAndFeel.h"
 #include "PluginEditorLookAndFeel.h"
 #include "ChannelLinkLookAndFeel.h"
 #include "MixerLookAndFeel.h"
@@ -81,9 +80,6 @@ void LookAndFeelFactory::initialise() {
 	/** Plugin View */
 	this->pluginViewLAF = std::make_unique<PluginViewLookAndFeel>();
 
-	/** Source View */
-	this->sourceViewLAF = std::make_unique<SourceViewLookAndFeel>();
-
 	/** Plugin Editor */
 	this->pluginEditorLAF = std::make_unique<PluginEditorLookAndFeel>();
 
@@ -151,10 +147,6 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forMessageView() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forPluginView() const {
 	return this->pluginViewLAF.get();
-}
-
-juce::LookAndFeel_V4* LookAndFeelFactory::forSourceView() const {
-	return this->sourceViewLAF.get();
 }
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forPluginEditor() const {

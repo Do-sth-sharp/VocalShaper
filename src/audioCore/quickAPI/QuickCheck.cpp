@@ -28,15 +28,8 @@ namespace quickAPI {
 	}
 
 	bool checkSourcesSaved() {
+		/** TODO */
 		return true;
-	}
-
-	bool checkForAudioSource(int index) {
-		return false;
-	}
-
-	bool checkForMidiSource(int index) {
-		return false;
 	}
 
 	bool checkSourceIOTask(int index) {

@@ -11,9 +11,6 @@ namespace quickAPI {
 	bool checkProjectSaved();
 	bool checkSourcesSaved();
 
-	bool checkForAudioSource(int index);/**< Deprecated */
-	bool checkForMidiSource(int index);/**< Deprecated */
-
 	bool checkSourceIOTask(int index);
 	bool checkSourceSynthing(int index);
 	bool checkSourceRecording(int index);
