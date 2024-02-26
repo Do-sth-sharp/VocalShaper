@@ -5,6 +5,7 @@
 #include "PlayPosition.h"
 #include "../plugin/PluginLoader.h"
 #include "../misc/VMath.h"
+#include "../misc/AudioLock.h"
 
 class RenderThread final : public juce::Thread {
 public:
@@ -75,6 +76,7 @@ void RenderThread::run() {
 	this->renderer->setRendering(true);
 
 	/** Get Total Time */
+	juce::ScopedReadLock sourceLocker(audioLock::getSourceLock());
 	double totalLength = mainGraph->getTailLengthSeconds();
 	totalLength = std::min(totalLength, INT_MAX / PlayPosition::getInstance()->getSampleRate());
 

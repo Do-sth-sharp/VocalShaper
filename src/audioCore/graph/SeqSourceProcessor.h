@@ -37,6 +37,11 @@ public:
 	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
 
 	double getSourceLength() const;
+	double getMIDILength() const;
+	double getAudioLength() const;
+
+	void initAudio(double sampleRate, int channelNum, int sampleNum);
+	void initMIDI();
 
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -73,7 +78,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	juce::AudioChannelSet audioChannels;
+	const juce::AudioChannelSet audioChannels;
+
 	SourceList srcs;
 	std::set<std::tuple<int, int>> activeNoteSet;
 	std::atomic_bool noteCloseFlag = false;
@@ -84,6 +90,20 @@ private:
 
 	juce::String trackName;
 	juce::Colour trackColor;
+
+	std::unique_ptr<juce::MidiFile> midiData = nullptr;
+	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
+	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
+	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
+	double audioSampleRate = 0;
+
+	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
+	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
+
+	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
+		int dataOffset, int length) const;
+	void readMIDIData(juce::MidiBuffer& buffer, int baseTime,
+		int startTime, int endTime) const;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)

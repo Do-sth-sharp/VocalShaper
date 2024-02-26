@@ -1,5 +1,8 @@
 ﻿#include "SeqSourceProcessor.h"
 #include "../misc/PlayPosition.h"
+#include "../misc/AudioLock.h"
+#include "../misc/VMath.h"
+#include "../AudioConfig.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -205,12 +208,60 @@ bool SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer instr)
 }
 
 double SeqSourceProcessor::getSourceLength() const {
-	/** TODO */
-	return 0;
+	return std::max(this->getMIDILength(), this->getAudioLength());
+}
+
+double SeqSourceProcessor::getMIDILength() const {
+	if (!this->midiData) { return 0; }
+	return this->midiData->getLastTimestamp() + AudioConfig::getMidiTail();
+}
+
+double SeqSourceProcessor::getAudioLength() const {
+	if (!this->audioData) { return 0; }
+	return this->audioData->getNumSamples() / this->audioSampleRate;
+}
+
+void SeqSourceProcessor::initAudio(double sampleRate, int channelNum, int sampleNum) {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	/** Clear Audio Source */
+	this->resampleSource = nullptr;
+	this->memSource = nullptr;
+	this->audioData = nullptr;
+
+	/** Create Buffer */
+	this->audioData = std::make_unique<juce::AudioSampleBuffer>(channelNum, sampleNum);
+	vMath::zeroAllAudioData(*(this->audioData.get()));
+	this->audioSampleRate = sampleRate;
+
+	/** Create Audio Source */
+	this->memSource = std::make_unique<juce::MemoryAudioSource>(
+		*(this->audioData.get()), false, false);
+	auto resSource = std::make_unique<juce::ResamplingAudioSource>(
+		this->memSource.get(), false, channelNum);
+
+	/** Set Sample Rate */
+	resSource->setResamplingRatio(sampleRate / this->getSampleRate());
+	resSource->prepareToPlay(this->getBlockSize(), this->getSampleRate());
+
+	/** Set Resample Source */
+	this->resampleSource = std::move(resSource);
+}
+
+void SeqSourceProcessor::initMIDI() {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	/** Create MIDI Data */
+	this->midiData = std::make_unique<juce::MidiFile>();
 }
 
 void SeqSourceProcessor::prepareToPlay(
-	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {}
+	double sampleRate, int maximumExpectedSamplesPerBlock) {
+	this->prepareMIDIPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	this->prepareAudioPlay(sampleRate, maximumExpectedSamplesPerBlock);
+}
 
 void SeqSourceProcessor::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
@@ -285,7 +336,13 @@ void SeqSourceProcessor::processBlock(
 					int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
 					int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
 
-					/** TODO */
+					/** Read Data */
+					this->readAudioData(buffer, bufferOffsetInSample,
+						hotOffsetInSample, hotLengthInSample);
+					this->readMIDIData(midiMessages,
+						dataTimeInSample - startTimeInSample,
+						hotOffsetInSample,
+						hotEndTimeInSample - dataTimeInSample);
 				}
 			}
 		}
@@ -370,4 +427,63 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	}
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
+}
+
+void SeqSourceProcessor::prepareAudioPlay(
+	double sampleRate, int maximumExpectedSamplesPerBlock) {
+	/** Lock */
+	juce::ScopedWriteLock sourceLock(audioLock::getSourceLock());
+
+	/** Update Audio Sample Rate */
+	if (this->resampleSource) {
+		this->resampleSource->setResamplingRatio(this->audioSampleRate / sampleRate);
+		this->resampleSource->prepareToPlay(maximumExpectedSamplesPerBlock, sampleRate);
+	}
+}
+
+void SeqSourceProcessor::prepareMIDIPlay(
+	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {
+	/** Nothing To Do */
+}
+
+void SeqSourceProcessor::readAudioData(
+	juce::AudioBuffer<float>& buffer, int bufferOffset,
+	int dataOffset, int length) const {
+	/** Check Source */
+	if (!this->resampleSource) { return; }
+	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
+
+	/** Get Data */
+	if (this->resampleSource && this->memSource) {
+		this->memSource->setNextReadPosition(
+			(int64_t)(dataOffset * this->resampleSource->getResamplingRatio()));
+		int startSample = bufferOffset;
+		this->resampleSource->getNextAudioBlock(juce::AudioSourceChannelInfo{
+			&buffer, startSample,
+				std::min(buffer.getNumSamples() - startSample, length) });
+	}
+}
+
+void SeqSourceProcessor::readMIDIData(
+	juce::MidiBuffer& buffer, int baseTime,
+	int startTime, int endTime) const {
+	/** Check Source */
+	if (!this->midiData) { return; }
+
+	/** Get MIDI Data */
+	juce::MidiMessageSequence total;
+	for (int i = 0; i < this->midiData->getNumTracks(); i++) {
+		if (auto track = this->midiData->getTrack(i)) {
+			total.addSequence(*track, 0,
+				startTime / this->getSampleRate(), endTime / this->getSampleRate());
+		}
+	}
+
+	/** Copy Data */
+	for (auto i : total) {
+		auto& message = i->message;
+		double time = message.getTimeStamp();
+		buffer.addEvent(message,
+			std::floor((time + baseTime / this->getSampleRate()) * this->getSampleRate()));
+	}
 }
