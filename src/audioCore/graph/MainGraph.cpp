@@ -34,7 +34,7 @@ MainGraph::MainGraph() {
 }
 
 MainGraph::~MainGraph() {
-	/** Nothing To Do */
+	this->clearGraph();
 }
 
 void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
@@ -127,6 +127,9 @@ SourceRecordProcessor* MainGraph::getRecorder() const {
 }
 
 void MainGraph::clearGraph() {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
 	for (auto& i : this->midiSrc2TrkConnectionList) {
 		this->removeConnection(i);
 	}

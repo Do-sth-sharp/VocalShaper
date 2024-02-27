@@ -1,7 +1,11 @@
 ﻿#include "MainGraph.h"
+#include "../misc/AudioLock.h"
 #include "../uiCallback/UICallback.h"
 
 void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
 	/** Add To The Graph */
 	if (auto ptrNode = this->addNode(std::make_unique<SeqSourceProcessor>(type))) {
 		/** Limit Index */
@@ -22,6 +26,9 @@ void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 }
 
 void MainGraph::removeSource(int index) {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
 	/** Limit Index */
 	if (index < 0 || index >= this->audioSourceNodeList.size()) { return; }
 

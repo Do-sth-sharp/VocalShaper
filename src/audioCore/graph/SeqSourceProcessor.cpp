@@ -235,18 +235,8 @@ void SeqSourceProcessor::initAudio(double sampleRate, int channelNum, int sample
 	vMath::zeroAllAudioData(*(this->audioData.get()));
 	this->audioSampleRate = sampleRate;
 
-	/** Create Audio Source */
-	this->memSource = std::make_unique<juce::MemoryAudioSource>(
-		*(this->audioData.get()), false, false);
-	auto resSource = std::make_unique<juce::ResamplingAudioSource>(
-		this->memSource.get(), false, channelNum);
-
-	/** Set Sample Rate */
-	resSource->setResamplingRatio(sampleRate / this->getSampleRate());
-	resSource->prepareToPlay(this->getBlockSize(), this->getSampleRate());
-
-	/** Set Resample Source */
-	this->resampleSource = std::move(resSource);
+	/** Update Resample Source */
+	this->updateAudioResampler();
 }
 
 void SeqSourceProcessor::initMIDI() {
@@ -255,6 +245,57 @@ void SeqSourceProcessor::initMIDI() {
 
 	/** Create MIDI Data */
 	this->midiData = std::make_unique<juce::MidiFile>();
+}
+
+void SeqSourceProcessor::setAudio(double sampleRate, const juce::AudioSampleBuffer& data) {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	/** Clear Audio Source */
+	this->resampleSource = nullptr;
+	this->memSource = nullptr;
+	this->audioData = nullptr;
+
+	/** Create Buffer */
+	this->audioData = std::make_unique<juce::AudioSampleBuffer>(data);
+	this->audioSampleRate = sampleRate;
+
+	/** Update Resample Source */
+	this->updateAudioResampler();
+}
+
+void SeqSourceProcessor::setMIDI(const juce::MidiFile& data) {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	/** Create MIDI Data */
+	this->midiData = std::make_unique<juce::MidiFile>(data);
+}
+
+const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio() const {
+	/** Lock */
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	/** Check Data */
+	if (!this->audioData) {
+		return { 0, juce::AudioSampleBuffer{} };
+	}
+
+	/** Copy Data */
+	return { this->audioSampleRate, *(this->audioData.get()) };
+}
+
+const juce::MidiFile SeqSourceProcessor::getMIDI() const {
+	/** Lock */
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	/** Check Data */
+	if (!this->midiData) {
+		return juce::MidiFile{};
+	}
+
+	/** Copy Data */
+	return *(this->midiData.get());
 }
 
 void SeqSourceProcessor::prepareToPlay(
@@ -486,4 +527,28 @@ void SeqSourceProcessor::readMIDIData(
 		buffer.addEvent(message,
 			std::floor((time + baseTime / this->getSampleRate()) * this->getSampleRate()));
 	}
+}
+
+void SeqSourceProcessor::updateAudioResampler() {
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	/** Check Audio Data */
+	if (!this->audioData) { return; }
+
+	/** Remove Resample Source */
+	this->resampleSource = nullptr;
+
+	/** Create Audio Source */
+	this->memSource = std::make_unique<juce::MemoryAudioSource>(
+		*(this->audioData.get()), false, false);
+	auto resSource = std::make_unique<juce::ResamplingAudioSource>(
+		this->memSource.get(), false, this->audioData->getNumChannels());
+
+	/** Set Sample Rate */
+	resSource->setResamplingRatio(this->audioSampleRate / this->getSampleRate());
+	resSource->prepareToPlay(this->getBlockSize(), this->getSampleRate());
+
+	/** Set Resample Source */
+	this->resampleSource = std::move(resSource);
 }

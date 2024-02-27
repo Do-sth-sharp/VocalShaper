@@ -42,6 +42,10 @@ public:
 
 	void initAudio(double sampleRate, int channelNum, int sampleNum);
 	void initMIDI();
+	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data);
+	void setMIDI(const juce::MidiFile& data);
+	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
+	const juce::MidiFile getMIDI() const;
 
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -104,6 +108,8 @@ private:
 		int dataOffset, int length) const;
 	void readMIDIData(juce::MidiBuffer& buffer, int baseTime,
 		int startTime, int endTime) const;
+
+	void updateAudioResampler();
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)
