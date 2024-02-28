@@ -42,6 +42,7 @@ void SourceIO::run() {
 
 			juce::File file = utils::getProjectDir().getChildFile(path);
 			juce::String extension = file.getFileExtension();
+			juce::String name = file.getFileNameWithoutExtension();
 			
 			auto& audioTypes = ((type == TaskType::Read) ? this->audioFormatsIn : this->audioFormatsOut);
 			auto& midiTypes = ((type == TaskType::Read) ? this->midiFormatsIn : this->midiFormatsOut);
@@ -54,9 +55,9 @@ void SourceIO::run() {
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[sampleRate, buffer, ptr] {
+						[sampleRate, buffer, name, ptr] {
 							if (ptr) {
-								ptr->setAudio(sampleRate, buffer);
+								ptr->setAudio(sampleRate, buffer, name);
 							}
 						}
 					);
@@ -95,9 +96,9 @@ void SourceIO::run() {
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[buffer, ptr] {
+						[buffer, name, ptr] {
 							if (ptr) {
-								ptr->setMIDI(buffer);
+								ptr->setMIDI(buffer, name);
 							}
 						}
 					);

@@ -1004,7 +1004,9 @@ namespace utils {
 	}
 
 	bool setProjectDir(const juce::File& dir) {
-		if (!dir.isDirectory()) { return false; }
+		if (!dir.isDirectory()) {
+			dir.createDirectory();
+		}
 		projectDirectory = dir;
 		return true;
 	}

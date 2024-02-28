@@ -19,6 +19,13 @@ void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 		/** Prepare To Play */
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+
+		/** Set Index */
+		dynamic_cast<SeqSourceProcessor*>(ptrNode->getProcessor())->updateIndex(index);
+		for (int i = index + 1; i < this->audioSourceNodeList.size(); i++) {
+			auto node = this->audioSourceNodeList[i];
+			dynamic_cast<SeqSourceProcessor*>(node->getProcessor())->updateIndex(i);
+		}
 	}
 	else {
 		jassertfalse;
@@ -57,6 +64,12 @@ void MainGraph::removeSource(int index) {
 
 	/** Remove Node From Graph */
 	this->removeNode(ptrNode->nodeID);
+
+	/** Set Index */
+	for (int i = index; i < this->audioSourceNodeList.size(); i++) {
+		auto node = this->audioSourceNodeList[i];
+		dynamic_cast<SeqSourceProcessor*>(node->getProcessor())->updateIndex(i);
+	}
 }
 
 int MainGraph::getSourceNum() const {

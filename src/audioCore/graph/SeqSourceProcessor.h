@@ -12,6 +12,8 @@ public:
 	SeqSourceProcessor() = delete;
 	SeqSourceProcessor(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 
+	void updateIndex(int index);
+
 	int addSeq(const SourceList::SeqBlock& block);
 	void removeSeq(int index);
 	int getSeqNum() const;
@@ -42,10 +44,16 @@ public:
 
 	void initAudio(double sampleRate, int channelNum, int sampleNum);
 	void initMIDI();
-	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data);
-	void setMIDI(const juce::MidiFile& data);
+	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
+	void setMIDI(const juce::MidiFile& data, const juce::String& name);
 	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
 	const juce::MidiFile getMIDI() const;
+	void saveAudio(const juce::String& path = "") const;
+	void saveMIDI(const juce::String& path = "") const;
+	void loadAudio(const juce::String& path);
+	void loadMIDI(const juce::String& path, bool getTempo = false);
+	const juce::String getAudioFileName() const;
+	const juce::String getMIDIFileName() const;
 
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -82,6 +90,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
+	int index = -1;
+
 	const juce::AudioChannelSet audioChannels;
 
 	SourceList srcs;
@@ -100,6 +110,7 @@ private:
 	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
 	double audioSampleRate = 0;
+	juce::String audioName, midiName;
 
 	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
 	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);

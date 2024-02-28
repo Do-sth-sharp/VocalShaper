@@ -2,6 +2,7 @@
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
+#include "../misc/SourceIO.h"
 #include "../AudioConfig.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
@@ -48,6 +49,12 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 
 	/** Default Color */
 	this->trackColor = utils::getDefaultColour();
+}
+
+void SeqSourceProcessor::updateIndex(int index) {
+	this->index = index;
+
+	/** TODO Callback */
 }
 
 int SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {
@@ -247,7 +254,8 @@ void SeqSourceProcessor::initMIDI() {
 	this->midiData = std::make_unique<juce::MidiFile>();
 }
 
-void SeqSourceProcessor::setAudio(double sampleRate, const juce::AudioSampleBuffer& data) {
+void SeqSourceProcessor::setAudio(double sampleRate,
+	const juce::AudioSampleBuffer& data, const juce::String& name) {
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
@@ -259,17 +267,20 @@ void SeqSourceProcessor::setAudio(double sampleRate, const juce::AudioSampleBuff
 	/** Create Buffer */
 	this->audioData = std::make_unique<juce::AudioSampleBuffer>(data);
 	this->audioSampleRate = sampleRate;
+	this->audioName = name;
 
 	/** Update Resample Source */
 	this->updateAudioResampler();
 }
 
-void SeqSourceProcessor::setMIDI(const juce::MidiFile& data) {
+void SeqSourceProcessor::setMIDI(
+	const juce::MidiFile& data, const juce::String& name) {
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Create MIDI Data */
 	this->midiData = std::make_unique<juce::MidiFile>(data);
+	this->midiName = name;
 }
 
 const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio() const {
@@ -296,6 +307,78 @@ const juce::MidiFile SeqSourceProcessor::getMIDI() const {
 
 	/** Copy Data */
 	return *(this->midiData.get());
+}
+
+void SeqSourceProcessor::saveAudio(const juce::String& path) const {
+	/** Get Path */
+	juce::String savePath = path;
+	if (savePath.isEmpty()) {
+		savePath = utils::getProjectDir().getChildFile(
+			this->getAudioFileName()).getFullPathName();
+	}
+
+	/** Get Pointer */
+	auto ptr = SeqSourceProcessor::SafePointer{
+		const_cast<SeqSourceProcessor*>(this) };
+
+	/** Save */
+	SourceIO::getInstance()->addTask(
+		{ SourceIO::TaskType::Write, ptr, savePath, false });
+}
+
+void SeqSourceProcessor::saveMIDI(const juce::String& path) const {
+	/** Get Path */
+	juce::String savePath = path;
+	if (savePath.isEmpty()) {
+		savePath = utils::getProjectDir().getChildFile(
+			this->getMIDIFileName()).getFullPathName();
+	}
+
+	/** Get Pointer */
+	auto ptr = SeqSourceProcessor::SafePointer{
+		const_cast<SeqSourceProcessor*>(this) };
+
+	/** Save */
+	SourceIO::getInstance()->addTask(
+		{ SourceIO::TaskType::Write, ptr, savePath, false });
+}
+
+void SeqSourceProcessor::loadAudio(const juce::String& path) {
+	/** Get Pointer */
+	auto ptr = SeqSourceProcessor::SafePointer{ this };
+
+	/** Load */
+	SourceIO::getInstance()->addTask(
+		{ SourceIO::TaskType::Read, ptr, path, false });
+}
+
+void SeqSourceProcessor::loadMIDI(const juce::String& path, bool getTempo) {
+	/** Get Pointer */
+	auto ptr = SeqSourceProcessor::SafePointer{ this };
+
+	/** Load */
+	SourceIO::getInstance()->addTask(
+		{ SourceIO::TaskType::Read, ptr, path, getTempo });
+}
+
+const juce::String SeqSourceProcessor::getAudioFileName() const {
+	juce::String name = this->audioName;
+	if (name.isEmpty()) { name = this->trackName; }
+	if (name.isEmpty()) { name = juce::String{ this->index }; }
+	
+	juce::String extension = utils::getAudioFormatsSupported(true)[0]
+		.trimCharactersAtStart("*");
+	return utils::getLegalFileName(name) + extension;
+}
+
+const juce::String SeqSourceProcessor::getMIDIFileName() const {
+	juce::String name = this->midiName;
+	if (name.isEmpty()) { name = this->trackName; }
+	if (name.isEmpty()) { name = juce::String{ this->index }; }
+
+	juce::String extension = utils::getMidiFormatsSupported(true)[0]
+		.trimCharactersAtStart("*");
+	return utils::getLegalFileName(name) + extension;
 }
 
 void SeqSourceProcessor::prepareToPlay(
@@ -436,6 +519,17 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 		}
 	}
 
+	if (!mes->audiosrc().empty()) {
+		juce::String path = utils::getProjectDir()
+			.getChildFile(mes->audiosrc()).getFullPathName();
+		this->loadAudio(path);
+	}
+	if (!mes->midisrc().empty()) {
+		juce::String path = utils::getProjectDir()
+			.getChildFile(mes->midisrc()).getFullPathName();
+		this->loadMIDI(path, false);
+	}
+
 	return true;
 }
 
@@ -465,6 +559,23 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 				return nullptr;
 			}
 		}
+	}
+
+	if (this->audioData) {
+		juce::String name = this->getAudioFileName();
+		juce::String path = utils::getProjectDir()
+			.getChildFile(name).getFullPathName();
+
+		mes->set_audiosrc(name.toStdString());
+		this->saveAudio(path);
+	}
+	if (this->midiData) {
+		juce::String name = this->getMIDIFileName();
+		juce::String path = utils::getProjectDir()
+			.getChildFile(name).getFullPathName();
+
+		mes->set_midisrc(name.toStdString());
+		this->saveMIDI(path);
 	}
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());

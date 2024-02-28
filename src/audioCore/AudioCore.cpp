@@ -252,7 +252,13 @@ bool AudioCore::load(const juce::String& path) {
 	juce::File projDir = projFile.getParentDirectory();
 	utils::setProjectDir(projDir);
 
-	return this->parse(proj.get());
+	/** Change Graph */
+	if (this->parse(proj.get())) {
+		return true;
+	}
+
+	utils::setProjectDir(utils::getDefaultWorkingDir());
+	return false;
 }
 
 bool AudioCore::newProj(const juce::String& workingPath) {
