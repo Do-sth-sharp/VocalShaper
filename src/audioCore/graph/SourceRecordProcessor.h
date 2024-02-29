@@ -5,9 +5,11 @@
 #include "../project/Serializable.h"
 #include "../uiCallback/LimitedCall.h"
 
+class MainGraph;
+
 class SourceRecordProcessor final : public juce::AudioProcessor {
 public:
-	SourceRecordProcessor();
+	SourceRecordProcessor(MainGraph* parent);
 	~SourceRecordProcessor();
 
 public:
@@ -56,6 +58,7 @@ public:
 	};
 
 private:
+	MainGraph* const parent;
 	LimitedCall limitedCall;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SourceRecordProcessor)

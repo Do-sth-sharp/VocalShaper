@@ -75,7 +75,12 @@ void SourceIO::run() {
 					if (sampleRate <= 0) { continue; }
 
 					/** Save Audio Data */
-					SourceIO::saveAudio(file, sampleRate, buffer);
+					if (SourceIO::saveAudio(file, sampleRate, buffer)) {
+						juce::ScopedReadLock locker(audioLock::getSourceLock());
+						if (ptr) {
+							ptr->audioSaved();
+						}
+					}
 				}
 			}
 			else if (midiTypes.contains(extension)) {
@@ -124,8 +129,13 @@ void SourceIO::run() {
 					/** Merge Data */
 					auto data = SourceIO::mergeMIDI(buffer, tempo);
 
-					/** Save Audio Data */
-					SourceIO::saveMIDI(file, data);
+					/** Save MIDI Data */
+					if (SourceIO::saveMIDI(file, data)) {
+						juce::ScopedReadLock locker(audioLock::getSourceLock());
+						if (ptr) {
+							ptr->midiSaved();
+						}
+					}
 				}
 			}
 		}

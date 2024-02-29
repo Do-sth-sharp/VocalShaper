@@ -42,7 +42,7 @@ public:
 	double getMIDILength() const;
 	double getAudioLength() const;
 
-	void initAudio(double sampleRate, int channelNum, int sampleNum);
+	void initAudio(double sampleRate, int sampleNum);
 	void initMIDI();
 	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
 	void setMIDI(const juce::MidiFile& data, const juce::String& name);
@@ -54,6 +54,15 @@ public:
 	void loadMIDI(const juce::String& path, bool getTempo = false);
 	const juce::String getAudioFileName() const;
 	const juce::String getMIDIFileName() const;
+	void audioChanged();
+	void midiChanged();
+	void audioSaved();
+	void midiSaved();
+	bool isAudioSaved() const;
+	bool isMIDISaved() const;
+
+	void setRecording(bool recording);
+	bool getRecording() const;
 
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -111,16 +120,27 @@ private:
 	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
 	double audioSampleRate = 0;
 	juce::String audioName, midiName;
+	std::atomic_bool audioSavedFlag = true, midiSavedFlag = true;
+
+	std::atomic_bool recordingFlag = false;
+	const double recordInitLength = 30;
+	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
 
 	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
 	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
 
+	friend class SourceRecordProcessor;
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
 	void readMIDIData(juce::MidiBuffer& buffer, int baseTime,
 		int startTime, int endTime) const;
+	void writeAudioData(juce::AudioBuffer<float>& buffer, int offset);
+	void writeMIDIData(const juce::MidiBuffer& buffer, int offset);
 
 	void updateAudioResampler();
+	void prepareRecord();
+	void prepareAudioRecord();
+	void prepareMIDIRecord();
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)

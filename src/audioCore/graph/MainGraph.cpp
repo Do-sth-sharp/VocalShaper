@@ -30,7 +30,7 @@ MainGraph::MainGraph() {
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
 	/** The Source Recorder Node */
-	this->recorder = std::make_unique<SourceRecordProcessor>();
+	this->recorder = std::make_unique<SourceRecordProcessor>(this);
 }
 
 MainGraph::~MainGraph() {
