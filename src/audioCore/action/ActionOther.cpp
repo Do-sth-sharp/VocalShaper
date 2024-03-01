@@ -209,3 +209,130 @@ bool ActionLoad::doAction() {
 	this->error("Can't load project data from: " + this->path + "\n");
 	return false;
 }
+
+ActionInitAudioSource::ActionInitAudioSource(int index,
+	double sampleRate, double length)
+	: index(index), sampleRate(sampleRate), length(length) {};
+
+bool ActionInitAudioSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(this->index)) {
+			track->initAudio(this->sampleRate, this->length);
+
+			this->output("Init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->length } + "s\n");
+			return true;
+		}
+	}
+	this->error("Can't init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->length } + "s\n");
+	return false;
+}
+
+ActionInitMidiSource::ActionInitMidiSource(int index)
+	: index(index) {}
+
+bool ActionInitMidiSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(this->index)) {
+			track->initMIDI();
+
+			this->output("Init midi source: [" + juce::String{ this->index } + "]\n");
+			return true;
+		}
+	}
+	this->error("Can't init midi source: [" + juce::String{ this->index } + "]\n");
+	return false;
+}
+
+ActionLoadAudioSource::ActionLoadAudioSource(int index,
+	const juce::String& path)
+	: index(index), path(path) {};
+
+bool ActionLoadAudioSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(this->index)) {
+			track->loadAudio(this->path);
+
+			this->output("Load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+			return true;
+		}
+	}
+	this->error("Can't load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+	return false;
+}
+
+ActionLoadMidiSource::ActionLoadMidiSource(int index,
+	const juce::String& path, bool getTempo)
+	: index(index), path(path), getTempo(getTempo) {}
+
+bool ActionLoadMidiSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(this->index)) {
+			track->loadMIDI(this->path, this->getTempo);
+
+			this->output("Load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+			return true;
+		}
+	}
+	this->error("Can't load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+	return false;
+}
+
+ActionSaveAudioSource::ActionSaveAudioSource(int index,
+	const juce::String& path)
+	: index(index), path(path) {}
+
+bool ActionSaveAudioSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(this->index)) {
+			track->saveAudio(this->path);
+
+			this->output("Save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+			return true;
+		}
+	}
+	this->error("Can't save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+	return false;
+}
+
+ActionSaveMidiSource::ActionSaveMidiSource(int index,
+	const juce::String& path)
+	: index(index), path(path) {}
+
+bool ActionSaveMidiSource::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(this->index)) {
+			track->saveMIDI(this->path);
+
+			this->output("Save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+			return true;
+		}
+	}
+	this->error("Can't save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+	return false;
+}

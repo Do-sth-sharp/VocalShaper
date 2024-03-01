@@ -228,7 +228,7 @@ double SeqSourceProcessor::getAudioLength() const {
 	return this->audioData->getNumSamples() / this->audioSampleRate;
 }
 
-void SeqSourceProcessor::initAudio(double sampleRate, int sampleNum) {
+void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
@@ -238,7 +238,8 @@ void SeqSourceProcessor::initAudio(double sampleRate, int sampleNum) {
 	this->audioData = nullptr;
 
 	/** Create Buffer */
-	this->audioData = std::make_unique<juce::AudioSampleBuffer>(this->audioChannels.size(), sampleNum);
+	this->audioData = std::make_unique<juce::AudioSampleBuffer>(
+		this->audioChannels.size(), (int)std::ceil(length * sampleRate));
 	vMath::zeroAllAudioData(*(this->audioData.get()));
 	this->audioSampleRate = sampleRate;
 

@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 
 #include "../misc/Renderer.h"
+#include "../misc/SourceIO.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
 #include "../project/ProjectInfoData.h"
@@ -19,7 +20,10 @@
 
 #define ACTION_CHECK_SOURCE_IO_RUNNING(s) \
 	do { \
-		/** TODO */ \
+		if(SourceIO::getInstance()->isThreadRunning()) { \
+			this->error(s); \
+			return false; \
+		} \
 	} while(false)
 
 #define ACTION_CHECK_PLUGIN_LOADING(s) \

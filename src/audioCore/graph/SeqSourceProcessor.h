@@ -42,7 +42,7 @@ public:
 	double getMIDILength() const;
 	double getAudioLength() const;
 
-	void initAudio(double sampleRate, int sampleNum);
+	void initAudio(double sampleRate, double length);
 	void initMIDI();
 	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
 	void setMIDI(const juce::MidiFile& data, const juce::String& name);
