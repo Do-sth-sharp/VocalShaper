@@ -8,6 +8,7 @@
 #include "misc/PlayWatcher.h"
 #include "misc/Renderer.h"
 #include "misc/Device.h"
+#include "misc/AudioLock.h"
 #include "project/ProjectInfoData.h"
 #include "action/ActionDispatcher.h"
 #include "uiCallback/UICallback.h"
@@ -297,6 +298,23 @@ bool AudioCore::parse(const google::protobuf::Message* data) {
 	ProjectInfoData::getInstance()->init();
 	if (!ProjectInfoData::getInstance()->parse(&(mes->info()))) { return false; }
 
+	/** Set Tempo */
+	{
+		juce::MemoryBlock tempoData(mes->tempoevents().c_str(), mes->tempoevents().length());
+		juce::MemoryInputStream tempoStream(tempoData, false);
+		juce::MidiFile tempoFile;
+		tempoFile.readFrom(tempoStream);
+
+		{
+			juce::ScopedTryWriteLock locker(audioLock::getPositionLock());
+			auto& tempos = PlayPosition::getInstance()->getTempoSequence();
+			tempos.clear();
+			if (tempoFile.getNumTracks() > 0) {
+				tempos = *(tempoFile.getTrack(0));
+			}
+		}
+	}
+
 	/** Load Graph */
 	if (!this->mainAudioGraph->parse(&(mes->graph()))) { return false; }
 
@@ -306,16 +324,33 @@ bool AudioCore::parse(const google::protobuf::Message* data) {
 std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {
 	auto mes = std::make_unique<vsp4::Project>();
 
+	/** Get Info */
 	auto info = ProjectInfoData::getInstance()->serialize();
 	if (!dynamic_cast<vsp4::ProjectInfo*>(info.get())) { return nullptr; }
 	mes->set_allocated_info(dynamic_cast<vsp4::ProjectInfo*>(info.release()));
 
+	/** Get Version */
 	auto [majorVer, minorVer, patchVer] = utils::getAudioPlatformVersion();
 	auto version = mes->mutable_version();
 	version->set_major(majorVer);
 	version->set_minor(minorVer);
 	version->set_patch(patchVer);
 
+	/** Get Tempo */
+	{
+		auto& tempos = PlayPosition::getInstance()->getTempoSequence();
+		juce::MidiFile tempoFile;
+		tempoFile.addTrack(tempos);
+
+		juce::MemoryBlock tempoData;
+		juce::MemoryOutputStream tempoStream(tempoData, false);
+		tempoFile.writeTo(tempoStream);
+		tempoStream.flush();
+		
+		mes->set_tempoevents(tempoData.getData(), tempoData.getSize());
+	}
+
+	/** Get Graph */
 	auto graph = this->mainAudioGraph->serialize();
 	if (!dynamic_cast<vsp4::MainGraph*>(graph.get())) { return nullptr; }
 	mes->set_allocated_graph(dynamic_cast<vsp4::MainGraph*>(graph.release()));
