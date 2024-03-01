@@ -479,6 +479,8 @@ void SeqSourceProcessor::processBlock(
 	int durationInSample = buffer.getNumSamples();
 	int endTimeInSample = startTimeInSample + durationInSample;
 
+	int sourceLengthInSample = std::floor(this->getSourceLength() * sampleRate);
+
 	/** Copy Source Data */
 	{
 		/** Find Hot Block */
@@ -487,34 +489,32 @@ void SeqSourceProcessor::processBlock(
 		for (int i = std::get<0>(index);
 			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
 			/** Get Block */
-			auto [blockStartTime, blockEndTime, blockOffset] = this->srcs.getUnchecked(i);
+			auto [blockStartTime, blockEndTime, sourceOffset] = this->srcs.getUnchecked(i);
 			int blockStartTimeInSample = std::floor(blockStartTime * sampleRate);
 			int blockEndTimeInSample = std::floor(blockEndTime * sampleRate);
-			int blockOffsetInSample = std::floor(blockOffset * sampleRate);
+			int sourceOffsetInSample = std::floor(sourceOffset * sampleRate);
 
 			/** Caculate Time */
-			int dataLengthInSample = std::floor(this->getSourceLength() * sampleRate);
-			int dataStartTimeInSample = std::max(blockOffsetInSample, 0);
-			int dataEndTimeInSample =
-				std::min(blockEndTimeInSample, blockOffsetInSample + dataLengthInSample);
+			int sourceStartTimeInSample = sourceOffsetInSample;
+			int sourceEndTimeInSample = sourceStartTimeInSample + sourceLengthInSample;
+			int dataStartTimeInSample = std::max(blockStartTimeInSample, sourceStartTimeInSample);
+			int dataEndTimeInSample = std::min(blockEndTimeInSample, sourceEndTimeInSample);
 
 			if (dataEndTimeInSample > dataStartTimeInSample) {
 				int hotStartTimeInSample = std::max(startTimeInSample, dataStartTimeInSample);
 				int hotEndTimeInSample = std::min(endTimeInSample, dataEndTimeInSample);
+				int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
 
-				if (hotEndTimeInSample > hotStartTimeInSample) {
-					int dataTimeInSample = blockOffsetInSample;
+				if (hotLengthInSample > 0) {
 					int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
-					int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
-					int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
+					int sourceOffsetInSample = hotStartTimeInSample - sourceStartTimeInSample;
 
 					/** Read Data */
 					this->readAudioData(buffer, bufferOffsetInSample,
-						hotOffsetInSample, hotLengthInSample);
-					this->readMIDIData(midiMessages,
-						dataTimeInSample - startTimeInSample,
-						hotOffsetInSample,
-						hotEndTimeInSample - dataTimeInSample);
+						sourceOffsetInSample, hotLengthInSample);
+					this->readMIDIData(midiMessages, sourceOffsetInSample,
+						bufferOffsetInSample,
+						bufferOffsetInSample + hotLengthInSample);
 				}
 			}
 		}
