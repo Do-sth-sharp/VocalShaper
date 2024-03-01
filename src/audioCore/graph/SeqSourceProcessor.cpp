@@ -493,17 +493,17 @@ void SeqSourceProcessor::processBlock(
 			int blockOffsetInSample = std::floor(blockOffset * sampleRate);
 
 			/** Caculate Time */
-			int blockLengthInSample = std::floor(this->getSourceLength() * sampleRate);
-			int dataStartTimeInSample = blockStartTimeInSample + std::max(blockOffsetInSample, 0);
+			int dataLengthInSample = std::floor(this->getSourceLength() * sampleRate);
+			int dataStartTimeInSample = std::max(blockOffsetInSample, 0);
 			int dataEndTimeInSample =
-				std::min(blockEndTimeInSample, blockStartTimeInSample + blockOffsetInSample + blockLengthInSample);
+				std::min(blockEndTimeInSample, blockOffsetInSample + dataLengthInSample);
 
 			if (dataEndTimeInSample > dataStartTimeInSample) {
 				int hotStartTimeInSample = std::max(startTimeInSample, dataStartTimeInSample);
 				int hotEndTimeInSample = std::min(endTimeInSample, dataEndTimeInSample);
 
 				if (hotEndTimeInSample > hotStartTimeInSample) {
-					int dataTimeInSample = blockStartTimeInSample + blockOffsetInSample;
+					int dataTimeInSample = blockOffsetInSample;
 					int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
 					int hotOffsetInSample = hotStartTimeInSample - dataTimeInSample;
 					int hotLengthInSample = hotEndTimeInSample - hotStartTimeInSample;
