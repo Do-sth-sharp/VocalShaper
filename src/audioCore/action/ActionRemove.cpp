@@ -1025,3 +1025,54 @@ bool ActionRemoveSequencerTrackOutput::undo() {
 	}
 	ACTION_RESULT(false);
 }
+
+ActionRemoveSequencerBlock::ActionRemoveSequencerBlock(
+	int seqIndex, int index)
+	: ACTION_DB{ seqIndex, index } {}
+
+bool ActionRemoveSequencerBlock::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionRemoveSequencerBlock);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(seqIndex))) {
+			std::tie(ACTION_DATA(startTime), ACTION_DATA(endTime), ACTION_DATA(offset))
+				= track->getSeq(ACTION_DATA(index));
+			track->removeSeq(ACTION_DATA(index));
+
+			this->output("Remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
+				+ "Total sequencer blocks: " + juce::String(track->getSeqNum()) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionRemoveSequencerBlock::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionRemoveSequencerBlock);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(seqIndex))) {
+			track->addSeq(
+				{ ACTION_DATA(startTime), ACTION_DATA(endTime), ACTION_DATA(offset) });
+
+			this->output("Undo remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
+				+ "Total sequencer blocks: " + juce::String(track->getSeqNum()) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
+	ACTION_RESULT(false);
+}

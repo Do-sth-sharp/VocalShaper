@@ -13,6 +13,7 @@ enum class ActionType : unsigned int {
 	ActionAddSequencerTrackMidiOutputToMixer,
 	ActionAddSequencerTrackOutput,
 	ActionAddMixerTrackSideChainBus,
+	ActionAddSequencerBlock,
 
 	ActionSave = 0x0101,
 
@@ -30,6 +31,7 @@ enum class ActionType : unsigned int {
 	ActionRemoveSequencerTrackMidiOutputToMixer,
 	ActionRemoveSequencerTrackOutput,
 	ActionRemoveMixerTrackSideChainBus,
+	ActionRemoveSequencerBlock,
 
 	ActionSetMixerTrackGain = 0x0301,
 	ActionSetMixerTrackPan,
@@ -61,5 +63,6 @@ enum class ActionType : unsigned int {
 	ActionSetMixerTrackName,
 	ActionSetMixerTrackColor,
 	ActionSetMixerTrackMute,
-	ActionSetEffectIndex
+	ActionSetEffectIndex,
+	ActionSetSequencerTrackRecording
 };

@@ -894,3 +894,26 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetAudioSaveQualityOptionIndex)
 };
+
+class ActionSetSequencerTrackRecording final : public ActionUndoableBase {
+public:
+	ActionSetSequencerTrackRecording() = delete;
+	ActionSetSequencerTrackRecording(
+		int track, bool recording);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Track Recording";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const bool recording;
+
+		bool oldRecording = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackRecording)
+};

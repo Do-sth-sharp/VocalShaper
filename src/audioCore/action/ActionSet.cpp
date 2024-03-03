@@ -1615,3 +1615,49 @@ bool ActionSetAudioSaveQualityOptionIndex::doAction() {
 		+ juce::String(AudioSaveConfig::getInstance()->getQualityOptionIndex(this->format)) + "\n");
 	return true;
 }
+
+ActionSetSequencerTrackRecording::ActionSetSequencerTrackRecording(
+	int track, bool recording)
+	: ACTION_DB{ track, recording } {}
+
+bool ActionSetSequencerTrackRecording::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerTrackRecording);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldRecording) = track->getRecording();
+
+			track->setRecording(ACTION_DATA(recording));
+
+			this->output("Sequencer Track Recording: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ track->getRecording() ? "ON" : "OFF" } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerTrackRecording::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerTrackRecording);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->setRecording(ACTION_DATA(oldRecording));
+
+			this->output("Undo sequencer Track Recording: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ track->getRecording() ? "ON" : "OFF" } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	ACTION_RESULT(false);
+}

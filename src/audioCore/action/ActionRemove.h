@@ -327,3 +327,24 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
 };
+
+class ActionRemoveSequencerBlock final : public ActionUndoableBase {
+public:
+	ActionRemoveSequencerBlock() = delete;
+	ActionRemoveSequencerBlock(
+		int seqIndex, int index);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Sequencer Block";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int seqIndex, index;
+		double startTime = 0, endTime = 0, offset = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerBlock)
+};

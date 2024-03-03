@@ -571,3 +571,52 @@ bool ActionAddSequencerTrackOutput::undo() {
 	}
 	ACTION_RESULT(false);
 }
+
+ActionAddSequencerBlock::ActionAddSequencerBlock(
+	int seqIndex, double startTime, double endTime, double offset)
+	: ACTION_DB{ seqIndex, startTime, endTime, offset } {}
+
+bool ActionAddSequencerBlock::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionAddSequencerBlock);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(seqIndex))) {
+			ACTION_DATA(index) = track->addSeq(
+				{ ACTION_DATA(startTime), ACTION_DATA(endTime), ACTION_DATA(offset) });
+
+			this->output("Add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
+				+ "Total sequencer blocks: " + juce::String(track->getSeqNum()) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionAddSequencerBlock::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionAddSequencerBlock);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(seqIndex))) {
+			track->removeSeq(ACTION_DATA(index));
+
+			this->output("Undo add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
+				+ "Total sequencer blocks: " + juce::String(track->getSeqNum()) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
+	ACTION_RESULT(false);
+}
