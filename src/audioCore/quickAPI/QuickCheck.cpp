@@ -1,9 +1,11 @@
 ﻿#include "QuickCheck.h"
 #include "../misc/Renderer.h"
 #include "../misc/PlayPosition.h"
+#include "../misc/SourceIO.h"
 #include "../plugin/PluginLoader.h"
 #include "../plugin/Plugin.h"
 #include "../project/ProjectInfoData.h"
+#include "../AudioCore.h"
 
 namespace quickAPI {
 	bool checkRendering() {
@@ -11,8 +13,7 @@ namespace quickAPI {
 	}
 
 	bool checkSourceIORunning() {
-		/** TODO */
-		return false;
+		return SourceIO::getInstance()->isThreadRunning();
 	}
 
 	bool checkPluginLoading() {
@@ -28,27 +29,16 @@ namespace quickAPI {
 	}
 
 	bool checkSourcesSaved() {
-		/** TODO */
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			int size = graph->getSourceNum();
+			for (int i = 0; i < size; i++) {
+				if (auto ptr = graph->getSourceProcessor(i)) {
+					if ((!ptr->isAudioSaved()) || (!ptr->isMIDISaved())) {
+						return false;
+					}
+				}
+			}
+		}
 		return true;
-	}
-
-	bool checkSourceIOTask(int index) {
-		/** TODO */
-		return false;
-	}
-
-	bool checkSourceSynthing(int index) {
-		/** TODO */
-		return false;
-	}
-
-	bool checkSourceRecording(int index) {
-		/** TODO */
-		return false;
-	}
-
-	bool checkSourceRecordingNow(int index) {
-		/** TODO */
-		return false;
 	}
 }
