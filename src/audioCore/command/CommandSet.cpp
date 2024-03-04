@@ -220,6 +220,13 @@ AUDIOCORE_FUNC(setAudioSaveQualityOptionIndex) {
 	return CommandFuncResult{ true, "" };
 }
 
+AUDIOCORE_FUNC(setSequencerTrackRecording) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackRecording{
+		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -248,4 +255,5 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveBitsPerSample);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveMetaData);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveQualityOptionIndex);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackRecording);
 }

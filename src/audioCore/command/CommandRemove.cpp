@@ -110,6 +110,13 @@ AUDIOCORE_FUNC(removeSequencerTrackOutput) {
 	return CommandFuncResult{ true, "" };
 }
 
+AUDIOCORE_FUNC(removeSequencerBlock) {
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerBlock{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
 void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removePluginSearchPath);
@@ -126,4 +133,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackMidiOutputToMixer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerTrackOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerBlock);
 }

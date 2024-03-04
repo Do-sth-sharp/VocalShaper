@@ -17,6 +17,7 @@ SourceIO::~SourceIO() {
 void SourceIO::addTask(const Task& task) {
 	juce::GenericScopedLock locker(this->lock);
 	this->list.push(task);
+	this->startThread();
 }
 
 void SourceIO::run() {

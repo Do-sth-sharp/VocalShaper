@@ -432,6 +432,8 @@ bool SeqSourceProcessor::getRecording() const {
 
 void SeqSourceProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
+	this->juce::AudioProcessorGraph::prepareToPlay(
+		sampleRate, maximumExpectedSamplesPerBlock);
 	this->prepareMIDIPlay(sampleRate, maximumExpectedSamplesPerBlock);
 	this->prepareAudioPlay(sampleRate, maximumExpectedSamplesPerBlock);
 }

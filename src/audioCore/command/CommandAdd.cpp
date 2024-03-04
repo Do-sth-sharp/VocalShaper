@@ -97,6 +97,14 @@ AUDIOCORE_FUNC(addSequencerTrackOutput) {
 	return CommandFuncResult{ true, "" };
 }
 
+AUDIOCORE_FUNC(addSequencerBlock) {
+	auto action = std::unique_ptr<ActionBase>(new ActionAddSequencerBlock{
+		(int)luaL_checkinteger(L, 1), (double)luaL_checknumber(L, 2),
+		(double)luaL_checknumber(L, 3), (double)luaL_checknumber(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
 void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginBlackList);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addPluginSearchPath);
@@ -111,4 +119,5 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackMidiOutputToMixer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerTrackOutput);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerBlock);
 }
