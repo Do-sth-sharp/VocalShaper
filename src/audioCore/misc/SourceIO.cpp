@@ -59,6 +59,7 @@ void SourceIO::run() {
 						[sampleRate, buffer, name, ptr] {
 							if (ptr) {
 								ptr->setAudio(sampleRate, buffer, name);
+								ptr->audioSaved();
 							}
 						}
 					);
@@ -105,6 +106,7 @@ void SourceIO::run() {
 						[buffer, name, ptr] {
 							if (ptr) {
 								ptr->setMIDI(buffer, name);
+								ptr->midiSaved();
 							}
 						}
 					);
@@ -247,6 +249,10 @@ const juce::MidiFile SourceIO::mergeMIDI(const juce::MidiFile& data,
 	SourceIO::copyMIDITimeFormat(result, data);
 
 	result.addTrack(timeSeq);
+	for (int i = 0; i < data.getNumTracks(); i++) {
+		auto seq = data.getTrack(i);
+		result.addTrack(*seq);
+	}
 
 	return result;
 }
