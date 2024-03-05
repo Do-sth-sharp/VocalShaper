@@ -516,8 +516,7 @@ void SeqSourceProcessor::processBlock(
 					this->readAudioData(buffer, bufferOffsetInSample,
 						sourceOffsetInSample, hotLengthInSample);
 					this->readMIDIData(midiMessages, sourceOffsetInSample,
-						bufferOffsetInSample,
-						bufferOffsetInSample + hotLengthInSample);
+						hotStartTimeInSample, hotEndTimeInSample);
 				}
 			}
 		}
@@ -691,7 +690,7 @@ void SeqSourceProcessor::readMIDIData(
 		auto& message = i->message;
 		double time = message.getTimeStamp();
 		buffer.addEvent(message,
-			std::floor((time + baseTime / this->getSampleRate()) * this->getSampleRate()));
+			std::floor((time - baseTime / this->getSampleRate()) * this->getSampleRate()));
 	}
 }
 
