@@ -133,16 +133,7 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 		decorator->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 		/** Connect IO */
-		this->addConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
-			{ ptrNode->nodeID, this->midiChannelIndex } });
-		this->addConnection({ { ptrNode->nodeID, this->midiChannelIndex },
-			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
-		for (int i = 0; i < this->audioChannels.size(); i++) {
-			this->addConnection({ { this->audioInputNode->nodeID, i },
-				{ ptrNode->nodeID, i } });
-			this->addConnection({ { ptrNode->nodeID, i },
-				{ this->audioOutputNode->nodeID, i } });
-		}
+		this->linkInstr();
 
 		/** Callback */
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);/**< TODO */
@@ -161,16 +152,7 @@ void SeqSourceProcessor::removeInstr() {
 		this->instr = nullptr;
 
 		/** Disconnect IO */
-		this->removeConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
-			{ ptrNode->nodeID, this->midiChannelIndex } });
-		this->removeConnection({ { ptrNode->nodeID, this->midiChannelIndex },
-			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
-		for (int i = 0; i < this->audioChannels.size(); i++) {
-			this->removeConnection({ { this->audioInputNode->nodeID, i },
-				{ ptrNode->nodeID, i } });
-			this->removeConnection({ { ptrNode->nodeID, i },
-				{ this->audioOutputNode->nodeID, i } });
-		}
+		this->unlinkInstr();
 
 		/** Remove Node */
 		this->removeNode(ptrNode->nodeID);
@@ -212,6 +194,27 @@ bool SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer instr)
 		}
 	}
 	return false;
+}
+
+void SeqSourceProcessor::setInstrOffline(bool offline) {
+	if (offline) {
+		/** Unlink Channels */
+		this->unlinkInstr();
+
+		/** Set Flag */
+		this->instrOffline = offline;
+	}
+	else {
+		/** Set Flag */
+		this->instrOffline = offline;
+
+		/** Link Channels */
+		this->linkInstr();
+	}
+}
+
+bool SeqSourceProcessor::getInstrOffline() const {
+	return this->instrOffline;
 }
 
 double SeqSourceProcessor::getSourceLength() const {
@@ -782,12 +785,60 @@ void SeqSourceProcessor::prepareRecord() {
 
 void SeqSourceProcessor::prepareAudioRecord() {
 	if (!this->audioData) {
-		this->initAudio(this->getSampleRate(), this->recordInitLength);
+		this->prepareAudioData(this->recordInitLength);
 	}
 }
 
 void SeqSourceProcessor::prepareMIDIRecord() {
 	if ((!this->midiData) || (this->midiData->getNumTracks() <= 0)) {
-		this->initMIDI();
+		this->prepareMIDIData();
+	}
+}
+
+void SeqSourceProcessor::prepareAudioData(double length) {
+	double sampleRate = 0;
+
+	{
+		juce::ScopedReadLock locker(audioLock::getSourceLock());
+		sampleRate = this->audioSampleRate;
+		if (sampleRate <= 0) {
+			sampleRate = this->getSampleRate();
+		}
+	}
+
+	this->initAudio(sampleRate, length);
+}
+
+void SeqSourceProcessor::prepareMIDIData() {
+	this->initMIDI();
+}
+
+void SeqSourceProcessor::linkInstr() {
+	if (auto ptrNode = this->instr) {
+		this->addConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ ptrNode->nodeID, this->midiChannelIndex } });
+		this->addConnection({ { ptrNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+		for (int i = 0; i < this->audioChannels.size(); i++) {
+			this->addConnection({ { this->audioInputNode->nodeID, i },
+				{ ptrNode->nodeID, i } });
+			this->addConnection({ { ptrNode->nodeID, i },
+				{ this->audioOutputNode->nodeID, i } });
+		}
+	}
+}
+
+void SeqSourceProcessor::unlinkInstr() {
+	if (auto ptrNode = this->instr) {
+		this->removeConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ ptrNode->nodeID, this->midiChannelIndex } });
+		this->removeConnection({ { ptrNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+		for (int i = 0; i < this->audioChannels.size(); i++) {
+			this->removeConnection({ { this->audioInputNode->nodeID, i },
+				{ ptrNode->nodeID, i } });
+			this->removeConnection({ { ptrNode->nodeID, i },
+				{ this->audioOutputNode->nodeID, i } });
+		}
 	}
 }

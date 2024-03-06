@@ -37,6 +37,8 @@ public:
 	bool getInstrumentBypass() const;
 	static void setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass);
 	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
+	void setInstrOffline(bool offline);
+	bool getInstrOffline() const;
 
 	double getSourceLength() const;
 	double getMIDILength() const;
@@ -110,6 +112,7 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr instr = nullptr;
+	std::atomic_bool instrOffline = false;
 
 	juce::String trackName;
 	juce::Colour trackColor;
@@ -141,6 +144,13 @@ private:
 	void prepareRecord();
 	void prepareAudioRecord();
 	void prepareMIDIRecord();
+
+	friend class SynthThread;
+	void prepareAudioData(double length);
+	void prepareMIDIData();
+
+	void linkInstr();
+	void unlinkInstr();
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)

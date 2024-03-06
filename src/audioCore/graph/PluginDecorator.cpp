@@ -7,6 +7,7 @@
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
+#include <DMDA.h>
 using namespace org::vocalsharp::vocalshaper;
 
 PluginDecorator::PluginDecorator(bool isInstr,
@@ -65,6 +66,11 @@ void PluginDecorator::setPlugin(
 	this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 	//this->updatePluginBuses();
+
+	/** DMDA Hand Shake */
+	DMDA::PluginHandler handShakeHandler(
+		[](DMDA::Context* context) { context->handShake(); });
+	this->plugin->getExtensions(handShakeHandler);
 
 	/** Callback */
 	if (this->isInstr) {
