@@ -68,9 +68,7 @@ void PluginDecorator::setPlugin(
 	//this->updatePluginBuses();
 
 	/** DMDA Hand Shake */
-	DMDA::PluginHandler handShakeHandler(
-		[](DMDA::Context* context) { context->handShake(); });
-	this->plugin->getExtensions(handShakeHandler);
+	this->doDMDAHandShake();
 
 	/** Callback */
 	if (this->isInstr) {
@@ -272,6 +270,27 @@ void PluginDecorator::setMIDICCListener(const MIDICCListener& listener) {
 void PluginDecorator::clearMIDICCListener() {
 	juce::ScopedWriteLock locker(audioLock::getPluginLock());
 	this->ccListener = MIDICCListener{};
+}
+
+void PluginDecorator::doDMDAHandShake() {
+	if (!this->plugin) { return; }
+
+	DMDA::PluginHandler handShakeHandler(
+		[](DMDA::Context* context) { context->handShake(); });
+	this->plugin->getExtensions(handShakeHandler);
+}
+
+void PluginDecorator::setDMDAData(const juce::MidiFile* ptrData) {
+	if (!this->plugin) { return; }
+
+	DMDA::PluginHandler contextDataHandler(
+		[ptrData](DMDA::Context* context) {
+			if (auto ptrContext = dynamic_cast<DMDA::MidiFileContext*>(context)) {
+				juce::ScopedWriteLock locker(ptrContext->getLock());
+				ptrContext->setData(ptrData);
+			}
+		});
+	this->plugin->getExtensions(contextDataHandler);
 }
 
 const juce::String PluginDecorator::getName() const {
