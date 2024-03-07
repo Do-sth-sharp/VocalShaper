@@ -44,22 +44,20 @@ PluginDecorator::~PluginDecorator() {
 
 void PluginDecorator::setPlugin(
 	std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier) {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	if (!plugin) { return; }
 
-	{
-		juce::ScopedWriteLock locker(audioLock::getPluginLock());
-
-		if (this->plugin) {
-			if (auto editor = this->plugin->getActiveEditor()) {
-				delete editor;
-			}
+	if (this->plugin) {
+		if (auto editor = this->plugin->getActiveEditor()) {
+			delete editor;
 		}
-
-		this->plugin = std::move(plugin);
-		this->pluginIdentifier = pluginIdentifier;
-
-		this->updateBuffer();
 	}
+
+	this->plugin = std::move(plugin);
+	this->pluginIdentifier = pluginIdentifier;
+
+	this->updateBuffer();
 
 	this->plugin->setPlayHead(this->getPlayHead());
 	this->plugin->setNonRealtime(this->isNonRealtime());

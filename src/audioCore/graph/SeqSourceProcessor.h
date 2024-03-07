@@ -40,6 +40,9 @@ public:
 	void setInstrOffline(bool offline);
 	bool getInstrOffline() const;
 
+	bool isSynthRunning() const;
+	void startSynth();
+
 	double getSourceLength() const;
 	double getMIDILength() const;
 	double getAudioLength() const;
@@ -113,6 +116,7 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr instr = nullptr;
 	std::atomic_bool instrOffline = false;
+	std::unique_ptr<juce::Thread> synthThread = nullptr;
 
 	juce::String trackName;
 	juce::Colour trackColor;

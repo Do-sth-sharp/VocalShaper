@@ -3,6 +3,7 @@
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
 #include "../misc/SourceIO.h"
+#include "../misc/SynthThread.h"
 #include "../AudioConfig.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
@@ -46,6 +47,9 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 		this->addConnection({ { this->audioInputNode->nodeID, i },
 			{ this->audioOutputNode->nodeID, i } });
 	}
+
+	/** Synth Thread */
+	this->synthThread = std::make_unique<SynthThread>(this);
 
 	/** Default Color */
 	this->trackColor = utils::getDefaultColour();
@@ -99,6 +103,8 @@ void SeqSourceProcessor::closeAllNote() {
 
 void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> processor,
 	const juce::String& identifier) {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	/** Check Processor */
 	if (!processor) { jassertfalse; return; }
 
@@ -116,6 +122,8 @@ void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> pro
 }
 
 PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	/** Remove Current Instr */
 	this->removeInstr();
 
@@ -133,7 +141,9 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 		decorator->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 		/** Connect IO */
-		this->linkInstr();
+		if (!(this->instrOffline)) {
+			this->linkInstr();
+		}
 
 		/** Callback */
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);/**< TODO */
@@ -147,12 +157,16 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 }
 
 void SeqSourceProcessor::removeInstr() {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	if (auto ptrNode = this->instr) {
 		/** Remove Instr */
 		this->instr = nullptr;
 
 		/** Disconnect IO */
-		this->unlinkInstr();
+		if (!(this->instrOffline)) {
+			this->unlinkInstr();
+		}
 
 		/** Remove Node */
 		this->removeNode(ptrNode->nodeID);
@@ -167,6 +181,8 @@ PluginDecorator* SeqSourceProcessor::getInstrProcessor() const {
 }
 
 void SeqSourceProcessor::setInstrumentBypass(bool bypass) {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{
 			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) }, bypass);
 }
@@ -177,6 +193,8 @@ bool SeqSourceProcessor::getInstrumentBypass() const {
 }
 
 void SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass) {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	if (instr) {
 		if (auto bypassParam = instr->getBypassParameter()) {
 			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
@@ -197,6 +215,8 @@ bool SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer instr)
 }
 
 void SeqSourceProcessor::setInstrOffline(bool offline) {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	if (offline) {
 		/** Unlink Channels */
 		this->unlinkInstr();
@@ -215,6 +235,16 @@ void SeqSourceProcessor::setInstrOffline(bool offline) {
 
 bool SeqSourceProcessor::getInstrOffline() const {
 	return this->instrOffline;
+}
+
+bool SeqSourceProcessor::isSynthRunning() const {
+	return this->synthThread->isThreadRunning();
+}
+
+void SeqSourceProcessor::startSynth() {
+	if (auto thread = dynamic_cast<SynthThread*>(this->synthThread.get())) {
+		thread->synthNow();
+	}
 }
 
 double SeqSourceProcessor::getSourceLength() const {
@@ -571,6 +601,7 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 			if (!plugin->parse(&instr)) { return false; }
 		}
 	}
+	this->setInstrOffline(mes->offline());
 
 	if (!mes->audiosrc().empty()) {
 		juce::String path = utils::getProjectDir()
@@ -615,6 +646,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 			}
 		}
 	}
+	mes->set_offline(this->getInstrOffline());
 
 	if (this->audioData) {
 		juce::String name = this->getAudioFileName();
