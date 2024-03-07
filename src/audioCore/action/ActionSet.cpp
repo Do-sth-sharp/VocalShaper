@@ -1661,3 +1661,49 @@ bool ActionSetSequencerTrackRecording::undo() {
 	}
 	ACTION_RESULT(false);
 }
+
+ActionSetInstrOffline::ActionSetInstrOffline(
+	int instr, bool offline)
+	: ACTION_DB{ instr, offline } {}
+
+bool ActionSetInstrOffline::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetInstrOffline);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(instr))) {
+			ACTION_DATA(oldOffline) = track->getInstrOffline();
+
+			track->setInstrOffline(ACTION_DATA(offline));
+
+			this->output("Instr Offline: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String{ track->getInstrOffline() ? "ON" : "OFF" } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetInstrOffline::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetInstrOffline);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(instr))) {
+			track->setInstrOffline(ACTION_DATA(oldOffline));
+
+			this->output("Undo Instr Offline: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String{ track->getInstrOffline() ? "ON" : "OFF" } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	ACTION_RESULT(false);
+}

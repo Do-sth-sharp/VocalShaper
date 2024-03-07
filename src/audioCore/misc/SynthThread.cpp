@@ -16,6 +16,7 @@ void SynthThread::synthNow() {
 	if (this->isThreadRunning()) { return; }
 
 	/** Check Synth Plugin */
+	if (!this->parent->getInstrOffline()) { return; }
 	auto plugin = dynamic_cast<PluginDecorator*>(
 		this->parent->instr->getProcessor());
 	if (!plugin) { return; }
@@ -42,6 +43,7 @@ void SynthThread::run() {
 	juce::ScopedReadLock pluginLocker(audioLock::getPluginLock());
 
 	/** Check Synth Plugin */
+	if (!this->parent->getInstrOffline()) { return; }
 	auto plugin = dynamic_cast<PluginDecorator*>(
 		this->parent->instr->getProcessor());
 	if (!plugin) { return; }
@@ -62,9 +64,20 @@ void SynthThread::run() {
 	/** Set Play Head */
 	auto playHead = std::make_unique<MovablePlayHead>();
 	playHead->setSampleRate(sampleRate);
-	playHead->getTempoSequence() = PlayPosition::getInstance()->getTempoSequence();
+	{
+		juce::ScopedReadLock pluginLocker(audioLock::getPositionLock());
+		playHead->getTempoSequence() = PlayPosition::getInstance()->getTempoSequence();
+	}
 	auto oldPlayHead = plugin->getPlayHead();
 	plugin->setPlayHead(playHead.get());
+
+	/** Set Flag */
+	if (midiMode) {
+		this->parent->midiChanged();
+	}
+	else {
+		this->parent->audioChanged();
+	}
 
 	/** DMDA Update Context Data */
 	plugin->setDMDAData(ptrMidiData);
@@ -78,7 +91,7 @@ void SynthThread::run() {
 
 	double sourceSampleRate = this->parent->audioSampleRate;
 	uint64_t sourceTotalSamples = sourceLength * sourceSampleRate;
-	double sourceResampleRatio = sourceTotalSamples / sampleRate;
+	double sourceResampleRatio = sourceSampleRate / sampleRate;
 	double sourceOutResampleRatio = 1 / sourceResampleRatio;
 
 	if (ptrMidiData && midiMode) {

@@ -283,3 +283,19 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSaveMidiSource)
 };
+
+class ActionSynth final : public ActionBase {
+public:
+	ActionSynth() = delete;
+	ActionSynth(int index);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Synth";
+	};
+
+private:
+	const int index;
+
+	JUCE_LEAK_DETECTOR(ActionSynth)
+};

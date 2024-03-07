@@ -917,3 +917,27 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackRecording)
 };
+
+class ActionSetInstrOffline final : public ActionUndoableBase {
+public:
+	ActionSetInstrOffline() = delete;
+	ActionSetInstrOffline(
+		int instr, bool offline);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instrument Offline";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int instr;
+		const bool offline;
+
+		bool oldOffline = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrOffline)
+};
+
