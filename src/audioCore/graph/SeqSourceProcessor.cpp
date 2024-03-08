@@ -567,7 +567,9 @@ void SeqSourceProcessor::processBlock(
 	}
 
 	/** Process Graph */
-	this->juce::AudioProcessorGraph::processBlock(buffer, midiMessages);
+	if (!(this->instrOffline)) {
+		this->juce::AudioProcessorGraph::processBlock(buffer, midiMessages);
+	}
 }
 
 double SeqSourceProcessor::getTailLengthSeconds() const {
