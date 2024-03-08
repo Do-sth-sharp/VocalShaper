@@ -481,47 +481,42 @@ void SeqSourceProcessor::processBlock(
 		0, buffer.getNumChannels());
 	dspBlock.fill(0);
 
-	/** Clear MIDI Buffer */
-	midiMessages.clear();
-
-	/** Close Note */
-	if (this->noteCloseFlag) {
-		this->noteCloseFlag = false;
-
-		for (auto& i : this->activeNoteSet) {
-			midiMessages.addEvent(
-				juce::MidiMessage::noteOff(std::get<0>(i), std::get<1>(i)), 0);
-		}
-	}
+	/** Play Flag */
+	bool isPlaying = true;
 
 	/** Get Play Head */
 	auto playHead = dynamic_cast<PlayPosition*>(this->getPlayHead());
-	if (!playHead) { return; }
+	if (!playHead) { isPlaying = false; }
 
 	/** Get Current Position */
 	juce::Optional<juce::AudioPlayHead::PositionInfo> position = playHead->getPosition();
-	if (!position) { return; }
+	if (!position) { isPlaying = false; }
 
 	/** Check Play State */
-	if (!position->getIsPlaying()) { return; }
+	if (!position->getIsPlaying()) { isPlaying = false; }
 
-	/** Get Time */
-	double startTime = position->getTimeInSeconds().orFallback(-1);
-	double sampleRate = this->getSampleRate();
-	double duration = buffer.getNumSamples() / sampleRate;
-	double endTime = startTime + duration;
+	/** Clear MIDI Buffer */
+	if ((isPlaying && position->getIsRecording()) || (!this->recordingFlag)) {
+		midiMessages.clear();
+	}
 
-	int startTimeInSample = position->getTimeInSamples().orFallback(-1);
-	int durationInSample = buffer.getNumSamples();
-	int endTimeInSample = startTimeInSample + durationInSample;
+	if (isPlaying) {
+		/** Get Time */
+		double startTime = position->getTimeInSeconds().orFallback(-1);
+		double sampleRate = this->getSampleRate();
+		double duration = buffer.getNumSamples() / sampleRate;
+		double endTime = startTime + duration;
 
-	int sourceLengthInSample = std::floor(this->getSourceLength() * sampleRate);
+		int startTimeInSample = position->getTimeInSamples().orFallback(-1);
+		int durationInSample = buffer.getNumSamples();
+		int endTimeInSample = startTimeInSample + durationInSample;
 
-	/** Copy Source Data */
-	{
+		int sourceLengthInSample = std::floor(this->getSourceLength() * sampleRate);
+
 		/** Find Hot Block */
 		auto index = this->srcs.match(startTime, endTime);
 
+		/** Copy Source Data */
 		for (int i = std::get<0>(index);
 			i <= std::get<1>(index) && i < this->srcs.size() && i >= 0; i++) {
 			/** Get Block */
@@ -563,6 +558,16 @@ void SeqSourceProcessor::processBlock(
 		}
 		else if (mes.isNoteOff(true)) {
 			this->activeNoteSet.erase({ mes.getChannel(), mes.getNoteNumber() });
+		}
+	}
+
+	/** Close Note */
+	if (this->noteCloseFlag) {
+		this->noteCloseFlag = false;
+
+		for (auto& i : this->activeNoteSet) {
+			midiMessages.addEvent(
+				juce::MidiMessage::noteOff(std::get<0>(i), std::get<1>(i)), 0);
 		}
 	}
 

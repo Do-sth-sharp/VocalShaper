@@ -20,6 +20,10 @@ void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
+		/** Link MIDI Input */
+		this->addConnection({ {this->midiInputNode->nodeID, this->midiChannelIndex},
+			{ptrNode->nodeID, this->midiChannelIndex} });
+
 		/** Set Index */
 		dynamic_cast<SeqSourceProcessor*>(ptrNode->getProcessor())->updateIndex(index);
 		for (int i = index + 1; i < this->audioSourceNodeList.size(); i++) {
@@ -41,6 +45,10 @@ void MainGraph::removeSource(int index) {
 
 	/** Get The Node Ptr Then Remove From The List */
 	auto ptrNode = this->audioSourceNodeList.removeAndReturn(index);
+
+	/** Unlink MIDI Input */
+	this->removeConnection({ {this->midiInputNode->nodeID, this->midiChannelIndex},
+		{ptrNode->nodeID, this->midiChannelIndex} });
 
 	/** Remove MIDI Send Connection */
 	this->midiSrc2TrkConnectionList.removeIf(
