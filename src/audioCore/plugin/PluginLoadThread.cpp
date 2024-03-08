@@ -94,23 +94,12 @@ void PluginLoadThread::run() {
 			[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
 			if (p) {
 				auto identifier = pluginDescription.createIdentifierString();
-				switch (ptr.type){
-				case DstPointer::Type::Plugin:
-					if (auto plugin = ptr.pluginPtr.getPlugin()) {
-						plugin->setPlugin(std::move(p), identifier);
-						callback();
-					}
-					break;
-				case DstPointer::Type::Synth:
-					if (auto source = ptr.synthPtr.getSource()) {
-						source->setSynthesizer(std::move(p), identifier);
-						callback();
-					}
-					break;
-				default:
-					jassertfalse;
-					break;
+				
+				if (auto plugin = ptr.getPlugin()) {
+					plugin->setPlugin(std::move(p), identifier);
+					callback();
 				}
+
 				return;
 			}
 

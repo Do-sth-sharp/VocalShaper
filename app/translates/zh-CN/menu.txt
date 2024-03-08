@@ -12,8 +12,6 @@ countries: cn
 "New Project" = "新建项目"
 "Open Project" = "打开项目"
 "Save Project" = "保存项目"
-"Load Playing Source" = "加载播放源"
-"Save Playing Source" = "保存播放源"
 "Render" = "渲染"
 
 "Undo" = "撤销"
@@ -27,8 +25,6 @@ countries: cn
 "Create an empty project." = "建立一个空项目。"
 "Open a project from disk." = "从本地磁盘打开项目。"
 "Save current project to disk." = "保存当前项目到本地磁盘。"
-"Load a playing source from disk." = "从本地磁盘加载播放源。"
-"Save a playing source to disk." = "保存播放源到本地磁盘。"
 "Render the tracks in current project to audio files on disk." = "渲染当前项目的轨道为本地磁盘上的音频文件。"
 
 "Undo the last action." = "撤销最后一个操作。"
@@ -94,12 +90,9 @@ countries: cn
 "Load a workspace layout file." = "加载一个工作区布局文件。"
 "Save workspace to layout file." = "保存工作区到布局文件。"
 "Show plugin view component." = "显示插件视图组件。"
-"Show source view component." = "显示源视图组件。"
 "Show track view component." = "显示轨道视图组件。"
-"Show instrument view component." = "显示乐器视图组件。"
 "Show mixer view component." = "显示混音器视图组件。"
-"Show source editor component." = "显示源编辑器组件。"
-"Show source recorder component." = "显示源录制器组件。"
+"Show resource editor component." = "显示资源编辑器组件。"
 "Show audio debugger component." = "显示音频调试器组件。"
 "Show MIDI debugger component." = "显示MIDI调试器组件。"
 

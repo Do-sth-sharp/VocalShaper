@@ -5,13 +5,6 @@
 #include "../plugin/PluginLoader.h"
 #include "../Utils.h"
 
-#include "../source/CloneableSourceManagerTemplates.h"
-
-template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableAudioSource>(
-	const juce::String& path, bool copy);
-template bool CloneableSourceManager::createNewSourceThenLoadAsync<CloneableMIDISource>(
-	const juce::String& path, bool copy);
-
 ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
 	: plugin(plugin) {}
 
@@ -272,8 +265,8 @@ bool ActionAddEffect::undo() {
 }
 
 ActionAddInstr::ActionAddInstr(
-	int index, int type, const juce::String& pid)
-	: ACTION_DB{ index, type, pid } {}
+	int index, const juce::String& pid)
+	: ACTION_DB{ index, pid } {}
 
 bool ActionAddInstr::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -287,19 +280,20 @@ bool ActionAddInstr::doAction() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(ACTION_DATA(type)));
 	if (auto des = Plugin::getInstance()->findPlugin(ACTION_DATA(pid), true)) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto ptr = graph->insertInstrument(ACTION_DATA(index), pluginType)) {
-				PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+			if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
+				if (auto ptr = track->prepareInstr()) {
+					PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
 
-				this->output("Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
-				ACTION_RESULT(true);
+					this->output("Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
+					ACTION_RESULT(true);
+				}
 			}
 		}
 	}
 
-	this->error("Can't Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
+	this->error("Can't Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -313,95 +307,16 @@ bool ActionAddInstr::undo() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	auto pluginType = utils::getChannelSet(static_cast<utils::TrackType>(ACTION_DATA(type)));
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeInstrument((ACTION_DATA(index) > -1 && ACTION_DATA(index) < graph->getInstrumentNum())
-			? ACTION_DATA(index) : (graph->getInstrumentNum() - 1));
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
+			track->removeInstr();
 
-		this->output("Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
-		ACTION_RESULT(true);
+			this->output("Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
+			ACTION_RESULT(true);
+		}
 	}
 	
-	this->error("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + " : " + pluginType.getDescription() + "\n");
-	ACTION_RESULT(false);
-}
-
-ActionAddInstrOutput::ActionAddInstrOutput(
-	int src, int srcc, int dst, int dstc)
-	: ACTION_DB{ src, srcc, dst, dstc } {}
-
-bool ActionAddInstrOutput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddInstrOutput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setAudioInstr2TrkConnection(ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output(juce::String(ACTION_DATA(src)) + ", " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dst)) + ", " + juce::String(ACTION_DATA(dstc)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddInstrOutput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddInstrOutput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeAudioInstr2TrkConnection(ACTION_DATA(src), ACTION_DATA(dst), ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output("Undo " + juce::String(ACTION_DATA(src)) + ", " + juce::String(ACTION_DATA(srcc)) + " - " + juce::String(ACTION_DATA(dst)) + ", " + juce::String(ACTION_DATA(dstc)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-ActionAddInstrMidiInput::ActionAddInstrMidiInput(int dst)
-	: ACTION_DB{ dst } {}
-
-bool ActionAddInstrMidiInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddInstrMidiInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setMIDII2InstrConnection(ACTION_DATA(dst));
-
-		this->output(juce::String("[MIDI Input]") + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddInstrMidiInput::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddInstrMidiInput);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeMIDII2InstrConnection(ACTION_DATA(dst));
-
-		this->output(juce::String("Undo [MIDI Input]") + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
+	this->error("Can't Undo Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -526,201 +441,6 @@ bool ActionAddMixerTrackSideChainBus::undo() {
 	ACTION_RESULT(false);
 }
 
-ActionAddAudioSourceThenLoad::ActionAddAudioSourceThenLoad(
-	const juce::String& path, bool copy)
-	: ACTION_DB{ path, copy } {}
-
-bool ActionAddAudioSourceThenLoad::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddAudioSourceThenLoad);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(path);
-
-	CloneableSourceManager::getInstance()
-		->createNewSourceThenLoadAsync<CloneableAudioSource>(ACTION_DATA(path), ACTION_DATA(copy));
-
-	this->output("Add Audio Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-bool ActionAddAudioSourceThenLoad::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddAudioSourceThenLoad);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(path);
-
-	int index = CloneableSourceManager::getInstance()->getSourceNum() - 1;
-	if (auto src = CloneableSourceManager::getInstance()->getSource(index)) {
-		if (AudioIOList::getInstance()->isTask(src)) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-		if (src->isSynthRunning()) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-	}
-
-	CloneableSourceManager::getInstance()->removeSource(index);
-
-	this->output("Undo Add Audio Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-ActionAddAudioSourceThenInit::ActionAddAudioSourceThenInit(
-	double sampleRate, int channels, double length)
-	: ACTION_DB{ sampleRate, channels, length } {}
-
-bool ActionAddAudioSourceThenInit::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddAudioSourceThenInit);
-	ACTION_WRITE_DB();
-
-	CloneableSourceManager::getInstance()
-		->createNewSource<CloneableAudioSource>(
-			ACTION_DATA(sampleRate), ACTION_DATA(channels), ACTION_DATA(length));
-
-	this->output("Add Audio Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-bool ActionAddAudioSourceThenInit::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddAudioSourceThenInit);
-	ACTION_WRITE_DB();
-
-	int index = CloneableSourceManager::getInstance()->getSourceNum() - 1;
-	if (auto src = CloneableSourceManager::getInstance()->getSource(index)) {
-		if (AudioIOList::getInstance()->isTask(src)) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-		if (src->isSynthRunning()) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-	}
-
-	CloneableSourceManager::getInstance()->removeSource(index);
-
-	this->output("Undo Add Audio Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-ActionAddMidiSourceThenLoad::ActionAddMidiSourceThenLoad(
-	const juce::String& path, bool copy)
-	: ACTION_DB{ path, copy } {}
-
-bool ActionAddMidiSourceThenLoad::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddMidiSourceThenLoad);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(path);
-
-	CloneableSourceManager::getInstance()
-		->createNewSourceThenLoadAsync<CloneableMIDISource>(ACTION_DATA(path), ACTION_DATA(copy));
-
-	this->output("Add MIDI Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-bool ActionAddMidiSourceThenLoad::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddMidiSourceThenLoad);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(path);
-
-	int index = CloneableSourceManager::getInstance()->getSourceNum() - 1;
-	if (auto src = CloneableSourceManager::getInstance()->getSource(index)) {
-		if (AudioIOList::getInstance()->isTask(src)) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-		if (src->isSynthRunning()) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-	}
-
-	CloneableSourceManager::getInstance()->removeSource(index);
-
-	this->output("Undo Add MIDI Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-ActionAddMidiSourceThenInit::ActionAddMidiSourceThenInit() {}
-
-bool ActionAddMidiSourceThenInit::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_WRITE_TYPE(ActionAddMidiSourceThenInit);
-
-	CloneableSourceManager::getInstance()
-		->createNewSource<CloneableMIDISource>();
-
-	this->output("Add MIDI Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
-bool ActionAddMidiSourceThenInit::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddMidiSourceThenInit);
-
-	int index = CloneableSourceManager::getInstance()->getSourceNum() - 1;
-	if (auto src = CloneableSourceManager::getInstance()->getSource(index)) {
-		if (AudioIOList::getInstance()->isTask(src)) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-		if (src->isSynthRunning()) {
-			this->error("Unavailable source status!");
-			ACTION_RESULT(false);
-		}
-	}
-
-	CloneableSourceManager::getInstance()->removeSource(index);
-
-	this->output("Undo Add MIDI Source.\n"
-		"Total Source Num: " + juce::String(CloneableSourceManager::getInstance()->getSourceNum()) + "\n");
-	ACTION_RESULT(true);
-}
-
 ActionAddSequencerTrack::ActionAddSequencerTrack(
 	int index, int type)
 	: ACTION_DB{ index, type } {}
@@ -810,46 +530,6 @@ bool ActionAddSequencerTrackMidiOutputToMixer::undo() {
 	ACTION_RESULT(false);
 }
 
-ActionAddSequencerTrackMidiOutputToInstr::ActionAddSequencerTrackMidiOutputToInstr(
-	int src, int dst)
-	: ACTION_DB{ src, dst } {}
-
-bool ActionAddSequencerTrackMidiOutputToInstr::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddSequencerTrackMidiOutputToInstr);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->setMIDISrc2InstrConnection(ACTION_DATA(src), ACTION_DATA(dst));
-
-		this->output(juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddSequencerTrackMidiOutputToInstr::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddSequencerTrackMidiOutputToInstr);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		graph->removeMIDISrc2InstrConnection(ACTION_DATA(src), ACTION_DATA(dst));
-
-		this->output("Undo " + juce::String(ACTION_DATA(src)) + " - " + juce::String(ACTION_DATA(dst)) + "\n");
-		ACTION_RESULT(true);
-	}
-	ACTION_RESULT(false);
-}
-
 ActionAddSequencerTrackOutput::ActionAddSequencerTrackOutput(
 	int src, int srcc, int dst, int dstc)
 	: ACTION_DB{ src, srcc, dst, dstc } {}
@@ -892,109 +572,51 @@ bool ActionAddSequencerTrackOutput::undo() {
 	ACTION_RESULT(false);
 }
 
-ActionAddSequencerSourceInstance::ActionAddSequencerSourceInstance(
-	int track, int src, double start, double end, double offset)
-	: ACTION_DB{ track, src, start, end, offset } {}
+ActionAddSequencerBlock::ActionAddSequencerBlock(
+	int seqIndex, double startTime, double endTime, double offset)
+	: ACTION_DB{ seqIndex, startTime, endTime, offset } {}
 
-bool ActionAddSequencerSourceInstance::doAction() {
+bool ActionAddSequencerBlock::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
 
 	ACTION_UNSAVE_PROJECT();
 
-	ACTION_WRITE_TYPE(ActionAddSequencerSourceInstance);
+	ACTION_WRITE_TYPE(ActionAddSequencerBlock);
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto seqTrack = graph->getSourceProcessor(ACTION_DATA(track))) {
-			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(src));
-			if (!ptrSrc) { ACTION_RESULT(false); }
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(seqIndex))) {
+			ACTION_DATA(index) = track->addSeq(
+				{ ACTION_DATA(startTime), ACTION_DATA(endTime), ACTION_DATA(offset) });
 
-			ACTION_DATA(index) = seqTrack->addSeq(
-				{ ACTION_DATA(start), ACTION_DATA(end), ACTION_DATA(offset), ptrSrc });
-
-			this->output("Add Sequencer Source Instance [" + juce::String(ACTION_DATA(track)) + "] : [" + juce::String(ACTION_DATA(src)) + "]\n"
-				+ "Total Sequencer Source Instance: " + juce::String(seqTrack->getSeqNum()) + "\n");
+			this->output("Add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
+				+ "Total sequencer blocks: " + juce::String(track->getSeqNum()) + "\n");
 			ACTION_RESULT(true);
 		}
 	}
+	this->output("Can't add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
 	ACTION_RESULT(false);
 }
 
-bool ActionAddSequencerSourceInstance::undo() {
+bool ActionAddSequencerBlock::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
 
 	ACTION_UNSAVE_PROJECT();
 
-	ACTION_WRITE_TYPE_UNDO(ActionAddSequencerSourceInstance);
+	ACTION_WRITE_TYPE_UNDO(ActionAddSequencerBlock);
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto seqTrack = graph->getSourceProcessor(ACTION_DATA(track))) {
-			seqTrack->removeSeq(ACTION_DATA(index));
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(seqIndex))) {
+			track->removeSeq(ACTION_DATA(index));
 
-			this->output("Undo Add Sequencer Source Instance [" + juce::String(ACTION_DATA(track)) + "] : [" + juce::String(ACTION_DATA(src)) + "]\n"
-				+ "Total Sequencer Source Instance: " + juce::String(seqTrack->getSeqNum()) + "\n");
+			this->output("Undo add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
+				+ "Total sequencer blocks: " + juce::String(track->getSeqNum()) + "\n");
 			ACTION_RESULT(true);
 		}
 	}
-	ACTION_RESULT(false);
-}
-
-ActionAddRecorderSourceInstance::ActionAddRecorderSourceInstance(
-	int src, double offset, int compensate)
-	: ACTION_DB{ src, offset, compensate } {}
-
-bool ActionAddRecorderSourceInstance::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionAddRecorderSourceInstance);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto recorder = graph->getRecorder()) {
-			auto ptrSrc = CloneableSourceManager::getInstance()->getSource(ACTION_DATA(src));
-			if (!ptrSrc) { ACTION_RESULT(false); }
-
-			recorder->insertTask({ ptrSrc, ACTION_DATA(offset), ACTION_DATA(compensate) });
-
-			this->output("Add Recorder Source Instance [" + juce::String(ACTION_DATA(src)) + "]\n"
-				+ "Total Recorder Source Instance: " + juce::String(recorder->getTaskNum()) + "\n");
-			ACTION_RESULT(true);
-		}
-	}
-	ACTION_RESULT(false);
-}
-
-bool ActionAddRecorderSourceInstance::undo() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionAddRecorderSourceInstance);
-	ACTION_WRITE_DB();
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto recorder = graph->getRecorder()) {
-			recorder->removeTask(recorder->getTaskNum() - 1);
-
-			this->output("Undo Add Recorder Source Instance [" + juce::String(ACTION_DATA(src)) + "]\n"
-				+ "Total Recorder Source Instance: " + juce::String(recorder->getTaskNum()) + "\n");
-			ACTION_RESULT(true);
-		}
-	}
+	this->output("Can't undo add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
 	ACTION_RESULT(false);
 }

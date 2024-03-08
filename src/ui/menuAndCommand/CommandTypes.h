@@ -5,15 +5,12 @@ enum class CoreCommandType : int {
 	OpenProject,
 	SaveProject,
 
-	LoadSource = 0x2100,
-	SaveSource,
+	Render = 0x2100,
 
-	Render = 0x2200,
-
-	Undo = 0x2300,
+	Undo = 0x2200,
 	Redo,
 
-	Play = 0x2400,
+	Play = 0x2300,
 	Stop,
 	Record,
 	Rewind
@@ -32,12 +29,9 @@ enum class GUICommandType : int {
 	LoadLayout = 0x3200,
 	SaveLayout,
 	PluginView,
-	SourceView,
 	TrackView,
-	InstrView,
 	MixerView,
-	SourceEditView,
-	SourceRecordView,
+	ResourceEditView,
 	AudioDebugger,
 	MidiDebugger,
 

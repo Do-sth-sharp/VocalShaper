@@ -7,6 +7,7 @@
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
+#include <DMDA.h>
 using namespace org::vocalsharp::vocalshaper;
 
 PluginDecorator::PluginDecorator(bool isInstr,
@@ -43,28 +44,29 @@ PluginDecorator::~PluginDecorator() {
 
 void PluginDecorator::setPlugin(
 	std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier) {
+	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
+
 	if (!plugin) { return; }
 
-	{
-		juce::ScopedWriteLock locker(audioLock::getPluginLock());
-
-		if (this->plugin) {
-			if (auto editor = this->plugin->getActiveEditor()) {
-				delete editor;
-			}
+	if (this->plugin) {
+		if (auto editor = this->plugin->getActiveEditor()) {
+			delete editor;
 		}
-
-		this->plugin = std::move(plugin);
-		this->pluginIdentifier = pluginIdentifier;
-
-		this->updateBuffer();
 	}
+
+	this->plugin = std::move(plugin);
+	this->pluginIdentifier = pluginIdentifier;
+
+	this->updateBuffer();
 
 	this->plugin->setPlayHead(this->getPlayHead());
 	this->plugin->setNonRealtime(this->isNonRealtime());
 	this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 	//this->updatePluginBuses();
+
+	/** DMDA Hand Shake */
+	this->doDMDAHandShake();
 
 	/** Callback */
 	if (this->isInstr) {
@@ -266,6 +268,27 @@ void PluginDecorator::setMIDICCListener(const MIDICCListener& listener) {
 void PluginDecorator::clearMIDICCListener() {
 	juce::ScopedWriteLock locker(audioLock::getPluginLock());
 	this->ccListener = MIDICCListener{};
+}
+
+void PluginDecorator::doDMDAHandShake() {
+	if (!this->plugin) { return; }
+
+	DMDA::PluginHandler handShakeHandler(
+		[](DMDA::Context* context) { context->handShake(); });
+	this->plugin->getExtensions(handShakeHandler);
+}
+
+void PluginDecorator::setDMDAData(const juce::MidiFile* ptrData) {
+	if (!this->plugin) { return; }
+
+	DMDA::PluginHandler contextDataHandler(
+		[ptrData](DMDA::Context* context) {
+			if (auto ptrContext = dynamic_cast<DMDA::MidiFileContext*>(context)) {
+				juce::ScopedWriteLock locker(ptrContext->getLock());
+				ptrContext->setData(ptrData);
+			}
+		});
+	this->plugin->getExtensions(contextDataHandler);
 }
 
 const juce::String PluginDecorator::getName() const {

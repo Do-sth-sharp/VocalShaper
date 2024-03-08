@@ -109,15 +109,12 @@ namespace utils {
 	juce::String getCompilerVersion();
 
 	juce::String getLegalFileName(const juce::String& name);
-	juce::String getSourceDefaultPathForAudio(int id, const juce::String& name);
-	juce::String getSourceDefaultPathForMIDI(int id, const juce::String& name);
 
 	bool projectVersionHighEnough(const Version& version);
 	bool projectVersionLowEnough(const Version& version);
 
 	juce::File getProjectDir();
 	bool setProjectDir(const juce::File& dir);
-	juce::File getSourceFile(const juce::String& path);
 	juce::File getDefaultWorkingDir();
 
 	const juce::StringArray getProjectFormatsSupported(bool isWrite);

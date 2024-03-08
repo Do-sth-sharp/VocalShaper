@@ -2,24 +2,15 @@
 
 #include <JuceHeader.h>
 
-#include "../source/CloneableSource.h"
 #include "../project/Serializable.h"
 #include "../uiCallback/LimitedCall.h"
 
-class SourceRecordProcessor final : public juce::AudioProcessor,
-	public Serializable {
+class MainGraph;
+
+class SourceRecordProcessor final : public juce::AudioProcessor {
 public:
-	SourceRecordProcessor();
+	SourceRecordProcessor(MainGraph* parent);
 	~SourceRecordProcessor();
-
-	/** Pointer, Offset, Compensate */
-	using RecorderTask = std::tuple<CloneableSource::SafePointer<>, double, int>;
-	void insertTask(const RecorderTask& task, int index = -1);
-	void removeTask(int index);
-	int getTaskNum() const;
-	const RecorderTask getTask(int index) const;
-
-	void clearGraph();
 
 public:
 	const juce::String getName() const override { return "Source Recorder"; };
@@ -66,12 +57,8 @@ public:
 		bool operator!= (SourceRecordProcessor* component) const noexcept { return weakRef != component; };
 	};
 
-public:
-	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<google::protobuf::Message> serialize() const override;
-
 private:
-	juce::Array<RecorderTask> tasks;
+	MainGraph* const parent;
 	LimitedCall limitedCall;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SourceRecordProcessor)

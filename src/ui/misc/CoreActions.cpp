@@ -43,76 +43,6 @@ bool CoreActions::removePluginSearchPath(const juce::String& path) {
 	return quickAPI::removeFromPluginSearchPath(path);
 }
 
-void CoreActions::loadMIDISource(const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddMidiSourceThenLoad{ filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::loadAudioSource(const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddAudioSourceThenLoad{ filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::newMIDISource() {
-	auto action = std::unique_ptr<ActionBase>(new ActionAddMidiSourceThenInit);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::newAudioSource(
-	double sampleRate, int channels, double length) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddAudioSourceThenInit{ sampleRate, channels, length });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::saveSource(int index, const juce::String& filePath) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSaveSourceAsync{ index, filePath });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::cloneSource(int index) {
-	auto action = std::unique_ptr<ActionBase>(new ActionCloneSource{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::reloadSource(
-	int index, const juce::String& filePath, bool copy) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionReloadSource{ index, filePath, copy });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::synthSource(int index) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSynthSource{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::removeSource(int index) {
-	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSource{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setSourceName(int index, const juce::String& name) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSetSourceName{ index, name });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setSourceSynthesizer(int index, const juce::String& pid) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSetSourceSynthesizer{ index, pid });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setSourceSynthDst(int index, int dstIndex) {
-	auto action = std::unique_ptr<ActionBase>(
-		new ActionSetSourceSynthDst{ index, dstIndex });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
 void CoreActions::render(const juce::String& dirPath, const juce::String& fileName,
 	const juce::String& fileExtension, const juce::Array<int>& tracks) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRenderNow{
@@ -175,9 +105,9 @@ void CoreActions::record(bool start) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::insertInstr(int index, int type, const juce::String& pid) {
+void CoreActions::insertInstr(int index, const juce::String& pid) {
 	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddInstr{ index, type, pid });
+		new ActionAddInstr{ index, pid });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -219,29 +149,6 @@ void CoreActions::setInstrParamCCLink(quickAPI::PluginHolder instr, int paramInd
 
 void CoreActions::removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel) {
 	CoreActions::setInstrParamCCLink(instr, -1, ccChannel);
-}
-
-void CoreActions::setInstrMIDIInputFromDevice(int index, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddInstrMidiInput{ index })
-		: std::unique_ptr<ActionBase>(new ActionRemoveInstrMidiInput{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setInstrMIDIInputFromSeqTrack(
-	int index, int seqIndex, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackMidiOutputToInstr{ seqIndex, index })
-		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackMidiOutputToInstr{ seqIndex, index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setInstrAudioOutputToMixer(
-	int index, int channel, int mixerTrack, int mixerChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddInstrOutput{ index, channel, mixerTrack, mixerChannel })
-		: std::unique_ptr<ActionBase>(new ActionRemoveInstrOutput{ index, channel, mixerTrack, mixerChannel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::removeInstr(int index) {
@@ -366,14 +273,6 @@ void CoreActions::setTrackAudioInputFromSource(
 	auto action = input
 		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackOutput{ seqIndex, srcChannel, index, channel })
 		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackOutput{ seqIndex, srcChannel, index, channel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioInputFromInstr(
-	int index, int channel, int instrIndex, int srcChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionBase>(new ActionAddInstrOutput{ instrIndex, srcChannel, index, channel })
-		: std::unique_ptr<ActionBase>(new ActionRemoveInstrOutput{ instrIndex, srcChannel, index, channel });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -545,178 +444,6 @@ bool CoreActions::removePluginSearchPathGUI(const juce::String& path) {
 	return true;
 }
 
-void CoreActions::loadSourceGUI() {
-	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
-	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Load Playing Source"), defaultPath,
-		audioFormats.joinIntoString(",") + ";" + midiFormats.joinIntoString(","));
-	if (chooser.browseForMultipleFilesToOpen()) {
-		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
-			juce::MessageBoxIconType::QuestionIcon, TRANS("Load Playing Source"),
-			TRANS("Copy source files to working directory?"));
-		if (shouldCopy == 0) { return; }
-
-		auto files = chooser.getResults();
-		for (auto& i : files) {
-			if (midiFormats.contains("*" + i.getFileExtension())) {
-				CoreActions::loadMIDISource(i.getFullPathName(), shouldCopy == 1);
-			}
-			else {
-				CoreActions::loadAudioSource(i.getFullPathName(), shouldCopy == 1);
-			}
-		}
-	}
-}
-
-void CoreActions::newMIDISourceGUI() {
-	CoreActions::newMIDISource();
-}
-
-void CoreActions::newAudioSourceGUI(
-	double sampleRate, int channels, double length) {
-	if (sampleRate <= 0) {
-		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-			TRANS("New Audio Source"), TRANS("Unavailable sample rate!"));
-		return;
-	}
-	if (channels <= 0) {
-		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-			TRANS("New Audio Source"), TRANS("Unavailable channel num!"));
-		return;
-	}
-	if (length <= 0) {
-		juce::AlertWindow::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-			TRANS("New Audio Source"), TRANS("Unavailable length!"));
-		return;
-	}
-
-	CoreActions::newAudioSource(sampleRate, channels, length);
-}
-
-void CoreActions::newAudioSourceGUI() {
-	auto callback = [](double sampleRate, int channels, double length) {
-		CoreActions::newAudioSourceGUI(sampleRate, channels, length); };
-	CoreActions::askForAudioPropGUIAsync(callback);
-}
-
-void CoreActions::saveSourceGUI(int index) {
-	if (index <= -1) { return; }
-
-	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
-	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(true);
-
-	bool isAudio = quickAPI::checkForAudioSource(index);
-	auto& formats = isAudio ? audioFormats : midiFormats;
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Save Playing Source"), defaultPath,
-		formats.joinIntoString(","));
-	if (chooser.browseForFileToSave(true)) {
-		auto file = chooser.getResult();
-		if (file.getFileExtension().isEmpty()) {
-			file = file.withFileExtension(isAudio
-				? audioFormats[0].trimCharactersAtStart("*.")
-				: midiFormats[0].trimCharactersAtStart("*."));
-		}
-
-		if (!file.isAChildOf(defaultPath)) {
-			if (!juce::AlertWindow::showOkCancelBox(
-				juce::MessageBoxIconType::QuestionIcon, TRANS("Save Playing Source"),
-				TRANS("Saving the source outside of the working directory may cause dependency problem with project files. Continue?"))) {
-				return;
-			}
-		}
-
-		CoreActions::saveSource(index, file.getFullPathName());
-	}
-}
-
-void CoreActions::saveSourceGUI() {
-	auto callback = [](int index) { CoreActions::saveSourceGUI(index); };
-	CoreActions::askForSourceIndexGUIAsync(callback);
-}
-
-void CoreActions::reloadSourceGUI(int index) {
-	if (index <= -1) { return; }
-
-	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
-	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
-
-	bool isAudio = quickAPI::checkForAudioSource(index);
-	auto& formats = isAudio ? audioFormats : midiFormats;
-
-	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Reload Source"), defaultPath,
-		formats.joinIntoString(","));
-	if (chooser.browseForFileToOpen()) {
-		int shouldCopy = juce::AlertWindow::showYesNoCancelBox(
-			juce::MessageBoxIconType::QuestionIcon, TRANS("Reload Source"),
-			TRANS("Copy source files to working directory?"));
-		if (shouldCopy == 0) { return; }
-
-		auto file = chooser.getResult();
-		CoreActions::reloadSource(index, file.getFullPathName(), shouldCopy == 1);
-	}
-}
-
-void CoreActions::reloadSourceGUI() {
-	auto callback = [](int index) { CoreActions::reloadSourceGUI(index); };
-	CoreActions::askForSourceIndexGUIAsync(callback);
-}
-
-void CoreActions::synthSourceGUI(int index) {
-	if (index <= -1) { return; }
-
-	CoreActions::synthSource(index);
-}
-
-void CoreActions::synthSourceGUI() {
-	auto callback = [](int index) { CoreActions::synthSourceGUI(index); };
-	CoreActions::askForSourceIndexGUIAsync(callback);
-}
-
-void CoreActions::removeSourceGUI(int index) {
-	if (index <= -1) { return; }
-
-	if (!juce::AlertWindow::showOkCancelBox(
-		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Source"),
-		TRANS("Remove the source from source list. Continue?"))) {
-		return;
-	}
-
-	CoreActions::removeSource(index);
-}
-
-void CoreActions::setSourceNameGUI(int index) {
-	if (index <= -1) { return; }
-
-	auto oldName = quickAPI::getSourceName(index);
-
-	auto callback = [index](const juce::String& name) { CoreActions::setSourceName(index, name); };
-	CoreActions::askForNameGUIAsync(callback, oldName);
-}
-
-void CoreActions::setSourceNameGUI() {
-	auto callback = [](int index) { CoreActions::setSourceNameGUI(index); };
-	CoreActions::askForSourceIndexGUIAsync(callback);
-}
-
-void CoreActions::setSourceSynthesizerGUI(int index) {
-	if (index <= -1) { return; }
-
-	auto callback = [index](const juce::String& id) {
-		if (id.isEmpty()) { return; }
-		CoreActions::setSourceSynthesizer(index, id); };
-	CoreActions::askForPluginGUIAsync(callback, true, true);
-}
-
-void CoreActions::setSourceSynthesizerGUI() {
-	auto callback = [](int index) { CoreActions::setSourceSynthesizerGUI(index); };
-	CoreActions::askForSourceIndexGUIAsync(callback);
-}
-
 void CoreActions::renderGUI(const juce::Array<int>& tracks) {
 	if (tracks.isEmpty()) { return; }
 
@@ -750,22 +477,10 @@ void CoreActions::renderGUI() {
 	CoreActions::askForMixerTracksListGUIAsync(callback);
 }
 
-void CoreActions::insertInstrGUI(int index, const juce::String& pid) {
-	if (pid.isEmpty()) { return; }
-
-	auto callback = [index, pid](int type) {
-		CoreActions::insertInstr(index, type, pid); };
-	CoreActions::askForBusTypeGUIAsync(callback);
-}
-
 void CoreActions::insertInstrGUI(int index) {
 	auto callback = [index](const juce::String& id) {
-		CoreActions::insertInstrGUI(index, id); };
+		CoreActions::insertInstr(index, id); };
 	CoreActions::askForPluginGUIAsync(callback, true, true);
-}
-
-void CoreActions::insertInstrGUI() {
-	CoreActions::insertInstrGUI(quickAPI::getInstrNum());
 }
 
 void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
@@ -777,37 +492,6 @@ void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
 void CoreActions::addInstrParamCCLinkGUI(quickAPI::PluginHolder instr) {
 	auto callback = [instr](int param) { CoreActions::editInstrParamCCLinkGUI(instr, param); };
 	CoreActions::askForPluginParamGUIAsync(callback, instr, PluginType::Instr);
-}
-
-void CoreActions::setInstrAudioOutputToMixerGUI(int index, int track, bool output,
-	const juce::Array<std::tuple<int, int>>& links) {
-	/** Callback */
-	auto callback = [index, track](int srcc, int dstc, bool output) {
-		CoreActions::setInstrAudioOutputToMixer(index, srcc, track, dstc, output);
-		};
-
-	/** Remove */
-	if (!output) {
-		for (auto& [srcc, dstc] : links) {
-			callback(srcc, dstc, false);
-		}
-		return;
-	}
-
-	/** Name */
-	juce::String instrName = TRANS("Instrument") + " #" + juce::String{ index } + " " + quickAPI::getInstrName(index);
-	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ track } + " " + quickAPI::getMixerTrackName(track);
-
-	/** Channels */
-	auto instrChannelSet = quickAPI::getInstrChannelSet(index);
-	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(track);
-	int instrTotalChannels = quickAPI::getInstrOutputChannelNum(index);
-	int trackTotalChannels = quickAPI::getMixerTrackInputChannelNum(track);
-
-	/** Ask For Channels */
-	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
-		instrChannelSet, trackChannelSet, instrTotalChannels, trackTotalChannels,
-		instrName, trackName, true);
 }
 
 void CoreActions::removeInstrGUI(int index) {
@@ -829,7 +513,7 @@ void CoreActions::insertEffectGUI(int track, int index) {
 }
 
 void CoreActions::insertEffectGUI(int track) {
-	CoreActions::insertEffectGUI(quickAPI::getEffectNum(track));
+	CoreActions::insertEffectGUI(track, quickAPI::getEffectNum(track));
 }
 
 void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
@@ -952,37 +636,6 @@ void CoreActions::setTrackAudioInputFromSourceGUI(int index, int seqIndex, bool 
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		seqChannelSet, trackChannelSet, seqTotalChannels, trackTotalChannels,
 		seqName, trackName, true);
-}
-
-void CoreActions::setTrackAudioInputFromInstrGUI(int index, int instrIndex, bool input,
-	const juce::Array<std::tuple<int, int>>& links) {
-	/** Callback */
-	auto callback = [index, instrIndex](int srcc, int dstc, bool input) {
-		CoreActions::setTrackAudioInputFromInstr(index, dstc, instrIndex, srcc, input);
-		};
-
-	/** Remove */
-	if (!input) {
-		for (auto& [srcc, dstc] : links) {
-			callback(srcc, dstc, false);
-		}
-		return;
-	}
-
-	/** Name */
-	juce::String instrName = TRANS("Instrument") + " #" + juce::String{ instrIndex } + " " + quickAPI::getInstrName(instrIndex);
-	juce::String trackName = TRANS("Mixer Track") + " #" + juce::String{ index } + " " + quickAPI::getMixerTrackName(index);
-
-	/** Channels */
-	auto instrChannelSet = quickAPI::getInstrChannelSet(instrIndex);
-	auto trackChannelSet = quickAPI::getMixerTrackChannelSet(index);
-	int instrTotalChannels = quickAPI::getInstrOutputChannelNum(instrIndex);
-	int trackTotalChannels = quickAPI::getMixerTrackInputChannelNum(index);
-
-	/** Ask For Channels */
-	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
-		instrChannelSet, trackChannelSet, instrTotalChannels, trackTotalChannels,
-		instrName, trackName, true);
 }
 
 void CoreActions::setTrackAudioInputFromSendGUI(int index, int trackIndex, bool input,
@@ -1140,38 +793,6 @@ void CoreActions::askForAudioPropGUIAsync(
 			double length = lengthEditor->getText().getDoubleValue();
 
 			callback(sampleRate, channels, length);
-		}
-	), true);
-}
-
-void CoreActions::askForSourceIndexGUIAsync(
-	const std::function<void(int)>& callback) {
-	/** Get Source List */
-	auto sourceList = quickAPI::getSourceNamesWithID();
-	if (sourceList.isEmpty()) {
-		juce::AlertWindow::showMessageBox(
-			juce::MessageBoxIconType::WarningIcon, TRANS("Source Selector"),
-			TRANS("The source list is empty!"));
-		return;
-	}
-
-	/** Show Source Chooser */
-	auto chooserWindow = new juce::AlertWindow{
-		TRANS("Source Selector"), TRANS("Select a source in the list:"),
-		juce::MessageBoxIconType::QuestionIcon };
-	chooserWindow->addButton(TRANS("OK"), 1);
-	chooserWindow->addButton(TRANS("Cancel"), 0);
-	chooserWindow->addComboBox(TRANS("Selector"), sourceList);
-
-	auto combo = chooserWindow->getComboBoxComponent(TRANS("Selector"));
-	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
-		[combo, callback, size = sourceList.size()](int result) {
-			if (result != 1) { return; }
-
-			int index = combo->getSelectedItemIndex();
-			if (index < 0 || index >= size) { return; }
-
-			callback(index);
 		}
 	), true);
 }

@@ -53,7 +53,6 @@ private:
 
 		utils::AudioConnectionList audioT2Trk;
 		utils::AudioConnectionList audioSrc2Trk;
-		utils::AudioConnectionList audioInstr2Trk;
 		utils::AudioConnectionList audioI2Trk;
 		utils::AudioConnectionList audioTrk2T;
 		utils::AudioConnectionList audioTrk2O;
@@ -180,53 +179,10 @@ public:
 private:
 	ACTION_DATABLOCK{
 		const int index;
-
-		utils::AudioConnectionList audioInstr2Trk;
-		utils::MidiConnectionList midiSrc2Instr;
-		utils::MidiConnectionList midiI2Instr;
 		juce::MemoryBlock data;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstr)
-};
-
-class ActionRemoveInstrOutput final : public ActionUndoableBase {
-public:
-	ActionRemoveInstrOutput() = delete;
-	ActionRemoveInstrOutput(
-		int src, int srcc, int dst, int dstc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Instr Output";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int src, srcc, dst, dstc;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveInstrOutput)
-};
-
-class ActionRemoveInstrMidiInput final : public ActionUndoableBase {
-public:
-	ActionRemoveInstrMidiInput() = delete;
-	ActionRemoveInstrMidiInput(int dst);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Instr Midi Input";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int dst;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveInstrMidiInput)
 };
 
 class ActionRemoveInstrParamCCConnection final : public ActionUndoableBase {
@@ -309,24 +265,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiOutput)
 };
 
-class ActionRemoveSource final : public ActionBase {
-public:
-	ActionRemoveSource() = delete;
-	ActionRemoveSource(int index);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Remove Source";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSource)
-};
-
 class ActionRemoveSequencerTrack final : public ActionUndoableBase {
 public:
 	ActionRemoveSequencerTrack() = delete;
@@ -343,7 +281,6 @@ private:
 		const int index;
 
 		utils::AudioConnectionList audioSrc2Trk;
-		utils::MidiConnectionList midiSrc2Instr;
 		utils::MidiConnectionList midiSrc2Trk;
 		juce::MemoryBlock data;
 	} ACTION_DB;
@@ -371,26 +308,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToMixer)
 };
 
-class ActionRemoveSequencerTrackMidiOutputToInstr final : public ActionUndoableBase {
-public:
-	ActionRemoveSequencerTrackMidiOutputToInstr() = delete;
-	ActionRemoveSequencerTrackMidiOutputToInstr(
-		int src, int dst);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Sequencer Track Midi Output To Instr";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int src, dst;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToInstr)
-};
-
 class ActionRemoveSequencerTrackOutput final : public ActionUndoableBase {
 public:
 	ActionRemoveSequencerTrackOutput() = delete;
@@ -411,48 +328,23 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
 };
 
-class ActionRemoveSequencerSourceInstance final : public ActionUndoableBase {
+class ActionRemoveSequencerBlock final : public ActionUndoableBase {
 public:
-	ActionRemoveSequencerSourceInstance() = delete;
-	ActionRemoveSequencerSourceInstance(
-		int track, int seq);
+	ActionRemoveSequencerBlock() = delete;
+	ActionRemoveSequencerBlock(
+		int seqIndex, int index);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Sequencer Source Instance";
+		return "Remove Sequencer Block";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int track, seq;
-
-		int index;
-		double start, end, offset;
+		const int seqIndex, index;
+		double startTime = 0, endTime = 0, offset = 0;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerSourceInstance)
-};
-
-class ActionRemoveRecorderSourceInstance final : public ActionUndoableBase {
-public:
-	ActionRemoveRecorderSourceInstance() = delete;
-	ActionRemoveRecorderSourceInstance(int seq);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Recorder Source Instance";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int seq;
-
-		int index;
-		double offset;
-		int compensate;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveRecorderSourceInstance)
+	JUCE_LEAK_DETECTOR(ActionRemoveSequencerBlock)
 };

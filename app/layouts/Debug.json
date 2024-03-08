@@ -10,18 +10,8 @@
 				"size": [ 0.15, 0.85 ],
 				"unit": [
 					{
-						"vertical": true,
-						"size": [ 0.6, 0.4 ],
-						"unit": [
-							{
-								"vertical": false,
-								"id": [ 1, 2 ]
-							},
-							{
-								"vertical": false,
-								"id": [ 4 ]
-							}
-						]
+						"vertical": false,
+						"id": [ 1 ]
 					},
 					{
 						"vertical": true,
@@ -33,17 +23,17 @@
 								"unit": [
 									{
 										"vertical": true,
-										"id": [ 3 ]
+										"id": [ 2 ]
 									},
 									{
 										"vertical": true,
-										"id": [ 5 ]
+										"id": [ 3 ]
 									}
 								]
 							},
 							{
 								"vertical": true,
-								"id": [ 6, 7 ]
+								"id": [ 4 ]
 							}
 						]
 					}
@@ -57,11 +47,11 @@
 				"unit": [
 					{
 						"vertical": false,
-						"id": [ 8 ]
+						"id": [ 5 ]
 					},
 					{
 						"vertical": false,
-						"id": [ 9 ]
+						"id": [ 6 ]
 					}
 				]
 			}

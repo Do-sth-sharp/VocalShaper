@@ -107,96 +107,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionStopRecord)
 };
 
-class ActionSynthSource final : public ActionBase {
-public:
-	ActionSynthSource() = delete;
-	ActionSynthSource(int index);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Synth Source";
-	};
-
-private:
-	const int index;
-
-	JUCE_LEAK_DETECTOR(ActionSynthSource)
-};
-
-class ActionCloneSource final : public ActionBase {
-public:
-	ActionCloneSource() = delete;
-	ActionCloneSource(int index);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Clone Source";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionCloneSource)
-};
-
-class ActionReloadSource final : public ActionBase {
-public:
-	ActionReloadSource() = delete;
-	ActionReloadSource(int index, const juce::String& path, bool copy);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Reload Source";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-		const juce::String path;
-		const bool copy;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionCloneSource)
-};
-
-class ActionSaveSource final : public ActionBase {
-public:
-	ActionSaveSource() = delete;
-	ActionSaveSource(
-		int index, const juce::String& path);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Save Source";
-	};
-
-private:
-	const int index;
-	const juce::String path;
-
-	JUCE_LEAK_DETECTOR(ActionSaveSource)
-};
-
-class ActionSaveSourceAsync final : public ActionBase {
-public:
-	ActionSaveSourceAsync() = delete;
-	ActionSaveSourceAsync(
-		int index, const juce::String& path);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Save Source Async";
-	};
-
-private:
-	const int index;
-	const juce::String path;
-
-	JUCE_LEAK_DETECTOR(ActionSaveSourceAsync)
-};
-
 class ActionRenderNow final : public ActionBase {
 public:
 	ActionRenderNow() = delete;
@@ -264,4 +174,128 @@ private:
 	const juce::String path;
 
 	JUCE_LEAK_DETECTOR(ActionLoad)
+};
+
+class ActionInitAudioSource final : public ActionBase {
+public:
+	ActionInitAudioSource() = delete;
+	ActionInitAudioSource(int index,
+		double sampleRate, double length);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Init Audio Source";
+	};
+
+private:
+	const int index;
+	const double sampleRate;
+	const double length;
+
+	JUCE_LEAK_DETECTOR(ActionInitAudioSource)
+};
+
+class ActionInitMidiSource final : public ActionBase {
+public:
+	ActionInitMidiSource() = delete;
+	ActionInitMidiSource(int index);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Init MIDI Source";
+	};
+
+private:
+	const int index;
+
+	JUCE_LEAK_DETECTOR(ActionInitMidiSource)
+};
+
+class ActionLoadAudioSource final : public ActionBase {
+public:
+	ActionLoadAudioSource() = delete;
+	ActionLoadAudioSource(int index,
+		const juce::String& path);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Load Audio Source";
+	};
+
+private:
+	const int index;
+	const juce::String path;
+
+	JUCE_LEAK_DETECTOR(ActionLoadAudioSource)
+};
+
+class ActionLoadMidiSource final : public ActionBase {
+public:
+	ActionLoadMidiSource() = delete;
+	ActionLoadMidiSource(int index,
+		const juce::String& path, bool getTempo = false);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Load MIDI Source";
+	};
+
+private:
+	const int index;
+	const juce::String path;
+	const bool getTempo;
+
+	JUCE_LEAK_DETECTOR(ActionLoadMidiSource)
+};
+
+class ActionSaveAudioSource final : public ActionBase {
+public:
+	ActionSaveAudioSource() = delete;
+	ActionSaveAudioSource(int index,
+		const juce::String& path);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Save Audio Source";
+	};
+
+private:
+	const int index;
+	const juce::String path;
+
+	JUCE_LEAK_DETECTOR(ActionSaveAudioSource)
+};
+
+class ActionSaveMidiSource final : public ActionBase {
+public:
+	ActionSaveMidiSource() = delete;
+	ActionSaveMidiSource(int index,
+		const juce::String& path);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Save MIDI Source";
+	};
+
+private:
+	const int index;
+	const juce::String path;
+
+	JUCE_LEAK_DETECTOR(ActionSaveMidiSource)
+};
+
+class ActionSynth final : public ActionBase {
+public:
+	ActionSynth() = delete;
+	ActionSynth(int index);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Synth";
+	};
+
+private:
+	const int index;
+
+	JUCE_LEAK_DETECTOR(ActionSynth)
 };

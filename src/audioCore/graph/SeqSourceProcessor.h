@@ -3,13 +3,16 @@
 #include <JuceHeader.h>
 
 #include "SourceList.h"
+#include "PluginDecorator.h"
 #include "../project/Serializable.h"
 
-class SeqSourceProcessor final : public juce::AudioProcessor,
+class SeqSourceProcessor final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
 	SeqSourceProcessor() = delete;
 	SeqSourceProcessor(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+
+	void updateIndex(int index);
 
 	int addSeq(const SourceList::SeqBlock& block);
 	void removeSeq(int index);
@@ -25,27 +28,51 @@ public:
 
 	void closeAllNote();
 
-public:
-	const juce::String getName() const override { return "SeqSource"; };
+	void setInstr(std::unique_ptr<juce::AudioPluginInstance> processor,
+		const juce::String& identifier);
+	PluginDecorator::SafePointer prepareInstr();
+	void removeInstr();
+	PluginDecorator* getInstrProcessor() const;
+	void setInstrumentBypass(bool bypass);
+	bool getInstrumentBypass() const;
+	static void setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass);
+	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
+	void setInstrOffline(bool offline);
+	bool getInstrOffline() const;
 
+	bool isSynthRunning() const;
+	void startSynth();
+
+	double getSourceLength() const;
+	double getMIDILength() const;
+	double getAudioLength() const;
+
+	void initAudio(double sampleRate, double length);
+	void initMIDI();
+	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
+	void setMIDI(const juce::MidiFile& data, const juce::String& name);
+	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
+	const juce::MidiFile getMIDI() const;
+	void saveAudio(const juce::String& path = "") const;
+	void saveMIDI(const juce::String& path = "") const;
+	void loadAudio(const juce::String& path);
+	void loadMIDI(const juce::String& path, bool getTempo = false);
+	const juce::String getAudioFileName() const;
+	const juce::String getMIDIFileName() const;
+	void audioChanged();
+	void midiChanged();
+	void audioSaved();
+	void midiSaved();
+	bool isAudioSaved() const;
+	bool isMIDISaved() const;
+
+	void setRecording(bool recording);
+	bool getRecording() const;
+
+public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void releaseResources() override {};
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
-
-	bool acceptsMidi() const override { return true; };
-	bool producesMidi() const override { return true; };
-
-	juce::AudioProcessorEditor* createEditor() override { return nullptr; };
-	bool hasEditor() const override { return false; };
-
-	int getNumPrograms() override { return 0; };
-	int getCurrentProgram() override { return 0; };
-	void setCurrentProgram(int index) override {};
-	const juce::String getProgramName(int index) override { return juce::String{}; };
-	void changeProgramName(int index, const juce::String& newName) override {};
-
-	void getStateInformation(juce::MemoryBlock& destData) override {};
-	void setStateInformation(const void* data, int sizeInBytes) override {};
 
 	double getTailLengthSeconds() const override;
 
@@ -77,13 +104,57 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	juce::AudioChannelSet audioChannels;
+	int index = -1;
+
+	const juce::AudioChannelSet audioChannels;
+
 	SourceList srcs;
 	std::set<std::tuple<int, int>> activeNoteSet;
 	std::atomic_bool noteCloseFlag = false;
 
+	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
+	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
+	juce::AudioProcessorGraph::Node::Ptr instr = nullptr;
+	std::atomic_bool instrOffline = false;
+	std::unique_ptr<juce::Thread> synthThread = nullptr;
+
 	juce::String trackName;
 	juce::Colour trackColor;
+
+	std::unique_ptr<juce::MidiFile> midiData = nullptr;
+	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
+	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
+	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
+	double audioSampleRate = 0;
+	juce::String audioName, midiName;
+	std::atomic_bool audioSavedFlag = true, midiSavedFlag = true;
+
+	std::atomic_bool recordingFlag = false;
+	const double recordInitLength = 30;
+	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
+
+	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
+	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
+
+	friend class SourceRecordProcessor;
+	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
+		int dataOffset, int length) const;
+	void readMIDIData(juce::MidiBuffer& buffer, int baseTime,
+		int startTime, int endTime) const;
+	void writeAudioData(juce::AudioBuffer<float>& buffer, int offset);
+	void writeMIDIData(const juce::MidiBuffer& buffer, int offset);
+
+	void updateAudioResampler();
+	void prepareRecord();
+	void prepareAudioRecord();
+	void prepareMIDIRecord();
+
+	friend class SynthThread;
+	void prepareAudioData(double length);
+	void prepareMIDIData();
+
+	void linkInstr();
+	void unlinkInstr();
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)

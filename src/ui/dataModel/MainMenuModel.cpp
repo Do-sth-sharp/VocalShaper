@@ -38,9 +38,6 @@ juce::PopupMenu MainMenuModel::createFile() const {
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::OpenProject);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::SaveProject);
 	menu.addSeparator();
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::LoadSource);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::SaveSource);
-	menu.addSeparator();
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)CoreCommandType::Render);
 	menu.addSeparator();
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::CloseEditor);
@@ -72,12 +69,9 @@ juce::PopupMenu MainMenuModel::createView() const {
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SaveLayout);
 	menu.addSeparator();
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::PluginView);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::TrackView);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::InstrView);
 	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::MixerView);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceEditView);
-	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::SourceRecordView);
+	menu.addCommandItem(CommandManager::getInstance(), (juce::CommandID)GUICommandType::ResourceEditView);
 
 	return menu;
 }

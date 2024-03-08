@@ -3,9 +3,9 @@
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include "PlayPosition.h"
-#include "../source/AudioIOList.h"
 #include "../plugin/PluginLoader.h"
 #include "../misc/VMath.h"
+#include "../misc/AudioLock.h"
 
 class RenderThread final : public juce::Thread {
 public:
@@ -76,6 +76,7 @@ void RenderThread::run() {
 	this->renderer->setRendering(true);
 
 	/** Get Total Time */
+	juce::ScopedReadLock sourceLocker(audioLock::getSourceLock());
 	double totalLength = mainGraph->getTailLengthSeconds();
 	totalLength = std::min(totalLength, INT_MAX / PlayPosition::getInstance()->getSampleRate());
 
@@ -129,7 +130,6 @@ Renderer::~Renderer() {
 bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 	const juce::String& name, const juce::String& extension) {
 	/** Async Protection */
-	if (AudioIOList::getInstance()->isThreadRunning()) { return false; }
 	if (PluginLoader::getInstance()->isRunning()) { return false; }
 
 	/** Thread Is Already Started */

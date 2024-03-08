@@ -1,7 +1,6 @@
 ﻿#include "QuickGet.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
-#include "../source/CloneableSourceManager.h"
 #include "../plugin/Plugin.h"
 #include "../misc/Device.h"
 #include "../misc/PlayPosition.h"
@@ -63,152 +62,6 @@ namespace quickAPI {
 	bool isRecording() {
 		auto pos = PlayPosition::getInstance()->getPosition();
 		return pos->getIsRecording();
-	}
-
-	int getSourceNum() {
-		return CloneableSourceManager::getInstance()->getSourceNum();
-	}
-
-	int getSourceId(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getId();
-		}
-		return -1;
-	}
-
-	const juce::String getSourceName(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			auto name = ptr->getName();
-			if (name.isEmpty()) {
-				auto path = ptr->getPath();
-				if (path.isNotEmpty()) {
-					name = utils::getProjectDir().getChildFile(path).getFileName();
-				}
-			}
-			return name;
-		}
-		return "";
-	}
-
-	constexpr std::array<const char*, 4> sourceTypeNameList{
-		"Unknown", "Audio", "MIDI" };
-
-	SourceType getSourceType(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableAudioSource*>(ptr.getSource())) {
-				return SourceType::AudioSource;
-			}
-			else if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-				return SourceType::MIDISource;
-			}
-		}
-		return SourceType::UnknownSource;
-	}
-
-	const juce::String getSourceTypeName(int index) {
-		return sourceTypeNameList[getSourceType(index)];
-	}
-
-	const juce::StringArray getAllSourceTypeName() {
-		juce::StringArray result;
-		for (auto s : sourceTypeNameList) {
-			result.add(juce::String{ s });
-		}
-		return result;
-	}
-
-	double getSourceLength(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getSourceLength();
-		}
-		return 0;
-	}
-
-	int getSourceChannelNum(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getChannelNum();
-		}
-		return 0;
-	}
-
-	int getSourceTrackNum(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getTrackNum();
-		}
-		return 0;
-	}
-	
-	const juce::String getSourceSynthesizerName(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getSynthesizerName();
-		}
-		return "";
-	}
-
-	int getSourceSynthDstIndex(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return CloneableSourceManager::getInstance()->getSourceIndex(
-				ptr->getDstSource());
-		}
-		return -1;
-	}
-
-	double getSourceSampleRate(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			return ptr->getSourceSampleRate();
-		}
-		return 0;
-	}
-
-	int getSourceEventNum(int index) {
-		if (auto ptr = CloneableSourceManager::getInstance()->getSource(index)) {
-			if (auto p = dynamic_cast<CloneableMIDISource*>(ptr.getSource())) {
-				return p->getEventNum();
-			}
-		}
-		return 0;
-	}
-
-	const juce::StringArray getSourceNames() {
-		juce::StringArray result;
-
-		int size = CloneableSourceManager::getInstance()->getSourceNum();
-		for (int i = 0; i < size; i++) {
-			auto ptr = CloneableSourceManager::getInstance()->getSource(i);
-			if (!ptr) { result.add("-"); continue; }
-
-			juce::String name = ptr->getName();
-			if (name.isEmpty()) {
-				auto path = ptr->getPath();
-				if (path.isNotEmpty()) {
-					name = utils::getProjectDir().getChildFile(path).getFileName();
-				}
-			}
-			result.add(name);
-		}
-
-		return result;
-	}
-
-	const juce::StringArray getSourceNamesWithID() {
-		juce::StringArray result;
-
-		int size = CloneableSourceManager::getInstance()->getSourceNum();
-		for (int i = 0; i < size; i++) {
-			auto ptr = CloneableSourceManager::getInstance()->getSource(i);
-			if (!ptr) { result.add("-"); continue; }
-
-			juce::String name = ptr->getName();
-			if (name.isEmpty()) {
-				auto path = ptr->getPath();
-				if (path.isNotEmpty()) {
-					name = utils::getProjectDir().getChildFile(path).getFileName();
-				}
-			}
-			result.add("#" + juce::String{ ptr->getId() } + " " + name);
-		}
-
-		return result;
 	}
 
 	const juce::Array<TrackInfo> getMixerTrackInfos() {
@@ -411,17 +264,12 @@ namespace quickAPI {
 		return {};
 	}
 
-	int getInstrNum() {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrumentNum();
-		}
-		return 0;
-	}
-
 	PluginHolder getInstrPointer(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return PluginHolder{ instr };
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return PluginHolder{ instr };
+				}
 			}
 		}
 		return PluginHolder{};
@@ -429,83 +277,30 @@ namespace quickAPI {
 
 	const juce::String getInstrName(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getName();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->getName();
+				}
 			}
 		}
 		return "";
 	}
 
-	const juce::StringArray getInstrNameList() {
-		int size = getInstrNum();
-
-		juce::StringArray result;
-		for (int i = 0; i < size; i++) {
-			result.add(getInstrName(i));
-		}
-
-		return result;
-	}
-
 	bool getInstrBypass(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrumentBypass(index);
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getInstrumentBypass();
+			}
 		}
 		return false;
-	}
-
-	bool getInstrMIDIInputFromDevice(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrMidiInputFromDeviceConnections(index).size() > 0;
-		}
-		return false;
-	}
-
-	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrMidiInputFromSrcConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getInstrOutputToTrackConnections(index);
-		}
-		return {};
-	}
-
-	const juce::AudioChannelSet getInstrChannelSet(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getAudioChannelSet();
-			}
-		}
-		return juce::AudioChannelSet{};
-	}
-
-	int getInstrInputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getTotalNumInputChannels();
-			}
-		}
-		return 0;
-	}
-
-	int getInstrOutputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->getTotalNumOutputChannels();
-			}
-		}
-		return 0;
 	}
 
 	EditorPointer getInstrEditor(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto instr = graph->getInstrumentProcessor(index)) {
-				return instr->createEditorIfNeeded();
+			if (auto track = graph->getSourceProcessor(index)) {
+				if (auto instr = track->getInstrProcessor()) {
+					return instr->createEditorIfNeeded();
+				}
 			}
 		}
 		return nullptr;
@@ -516,7 +311,7 @@ namespace quickAPI {
 	}
 
 	bool getInstrBypass(PluginHolder pointer) {
-		return MainGraph::getInstrumentBypass(pointer);
+		return SeqSourceProcessor::getInstrumentBypass(pointer);
 	}
 
 	EditorPointer getInstrEditor(PluginHolder pointer) {
@@ -802,13 +597,6 @@ namespace quickAPI {
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getTrackInputFromSrcConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackInputFromInstrConnections(index);
 		}
 		return {};
 	}

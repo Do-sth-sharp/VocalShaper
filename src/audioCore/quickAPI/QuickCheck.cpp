@@ -1,13 +1,11 @@
 ﻿#include "QuickCheck.h"
 #include "../misc/Renderer.h"
 #include "../misc/PlayPosition.h"
-#include "../source/AudioIOList.h"
-#include "../source/CloneableSourceManager.h"
-#include "../source/CloneableAudioSource.h"
-#include "../source/CloneableMIDISource.h"
+#include "../misc/SourceIO.h"
 #include "../plugin/PluginLoader.h"
 #include "../plugin/Plugin.h"
 #include "../project/ProjectInfoData.h"
+#include "../AudioCore.h"
 
 namespace quickAPI {
 	bool checkRendering() {
@@ -15,7 +13,7 @@ namespace quickAPI {
 	}
 
 	bool checkSourceIORunning() {
-		return AudioIOList::getInstance()->isThreadRunning();
+		return SourceIO::getInstance()->isThreadRunning();
 	}
 
 	bool checkPluginLoading() {
@@ -31,44 +29,16 @@ namespace quickAPI {
 	}
 
 	bool checkSourcesSaved() {
-		int size = CloneableSourceManager::getInstance()->getSourceNum();
-		for (int i = 0; i < size; i++) {
-			if (auto ptr = CloneableSourceManager::getInstance()->getSource(i)) {
-				if (!ptr->checkSaved()) {
-					return false;
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			int size = graph->getSourceNum();
+			for (int i = 0; i < size; i++) {
+				if (auto ptr = graph->getSourceProcessor(i)) {
+					if ((!ptr->isAudioSaved()) || (!ptr->isMIDISaved())) {
+						return false;
+					}
 				}
 			}
 		}
 		return true;
-	}
-
-	bool checkForAudioSource(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr && dynamic_cast<CloneableAudioSource*>(ptr.getSource());
-	}
-
-	bool checkForMidiSource(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr && dynamic_cast<CloneableMIDISource*>(ptr.getSource());
-	}
-
-	bool checkSourceIOTask(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr && AudioIOList::getInstance()->isTask(ptr);
-	}
-
-	bool checkSourceSynthing(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr && ptr->isSynthRunning();
-	}
-
-	bool checkSourceRecording(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr && ptr->checkRecording();
-	}
-
-	bool checkSourceRecordingNow(int index) {
-		auto ptr = CloneableSourceManager::getInstance()->getSource(index);
-		return ptr && ptr->checkRecording() && PlayPosition::getInstance()->getPosition()->getIsRecording();
 	}
 }

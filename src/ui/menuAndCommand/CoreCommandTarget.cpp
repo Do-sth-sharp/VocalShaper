@@ -16,8 +16,6 @@ void CoreCommandTarget::getAllCommands(
 		(juce::CommandID)(CoreCommandType::NewProject),
 		(juce::CommandID)(CoreCommandType::OpenProject),
 		(juce::CommandID)(CoreCommandType::SaveProject),
-		(juce::CommandID)(CoreCommandType::LoadSource),
-		(juce::CommandID)(CoreCommandType::SaveSource),
 		(juce::CommandID)(CoreCommandType::Render),
 
 		(juce::CommandID)(CoreCommandType::Undo),
@@ -48,14 +46,6 @@ void CoreCommandTarget::getCommandInfo(
 		result.setInfo(TRANS("Save Project"), TRANS("Save current project to disk."), TRANS("File"), 0);
 		result.addDefaultKeypress('s', juce::ModifierKeys::ctrlModifier);
 		result.setActive(!(quickAPI::checkRendering() || quickAPI::checkSourceIORunning()));
-		break;
-	case CoreCommandType::LoadSource:
-		result.setInfo(TRANS("Load Playing Source"), TRANS("Load a playing source from disk."), TRANS("File"), 0);
-		result.setActive(!quickAPI::checkRendering());
-		break;
-	case CoreCommandType::SaveSource:
-		result.setInfo(TRANS("Save Playing Source"), TRANS("Save a playing source to disk."), TRANS("File"), 0);
-		result.setActive(!quickAPI::checkRendering());
 		break;
 	case CoreCommandType::Render:
 		result.setInfo(TRANS("Render"), TRANS("Render the tracks in current project to audio files on disk."), TRANS("File"), 0);
@@ -122,12 +112,6 @@ bool CoreCommandTarget::perform(
 	case CoreCommandType::SaveProject:
 		this->saveProject();
 		return true;
-	case CoreCommandType::LoadSource:
-		this->loadSource();
-		return true;
-	case CoreCommandType::SaveSource:
-		this->saveSource();
-		return true;
 	case CoreCommandType::Render:
 		this->render();
 		return true;
@@ -170,14 +154,6 @@ void CoreCommandTarget::openProject() const {
 
 void CoreCommandTarget::saveProject() const {
 	CoreActions::saveProjectGUI();
-}
-
-void CoreCommandTarget::loadSource() const {
-	CoreActions::loadSourceGUI();
-}
-
-void CoreCommandTarget::saveSource() const {
-	CoreActions::saveSourceGUI();
 }
 
 void CoreCommandTarget::render() const {

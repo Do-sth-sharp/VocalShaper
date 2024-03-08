@@ -16,7 +16,6 @@ public:
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 
-	void setAudioInputFromInstr(int instrIndex, bool link);
 	void setAudioInputFromSend(int trackIndex, bool link);
 	void setAudioOutputToSend(int trackIndex, bool link);
 
@@ -33,11 +32,9 @@ private:
 	juce::Array<MIDILink> midiInputFromSource;
 	juce::Array<AudioLink> audioInputFromDevice;
 	juce::Array<AudioLink> audioInputFromSource;
-	juce::Array<AudioLink> audioInputFromInstr;
 	juce::Array<AudioLink> audioInputFromSend;
 	std::set<int> midiInputSourceTemp;
 	std::set<int> audioInputSourceTemp;
-	std::set<int> audioInputInstrTemp;
 	std::set<int> audioInputSendTemp;
 
 	bool midiOutputToDevice = false;
@@ -49,7 +46,6 @@ private:
 
 	const juce::Array<std::tuple<int, int>> getInputFromDeviceChannelLinks() const;
 	const juce::Array<std::tuple<int, int>> getInputFromSourceChannelLinks(int seqIndex) const;
-	const juce::Array<std::tuple<int, int>> getInputFromInstrChannelLinks(int instrIndex) const;
 	const juce::Array<std::tuple<int, int>> getInputFromSendChannelLinks(int trackIndex) const;
 	const juce::Array<std::tuple<int, int>> getOutputToDeviceChannelLinks() const;
 	const juce::Array<std::tuple<int, int>> getOutputToSendChannelLinks(int trackIndex) const;

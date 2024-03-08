@@ -186,13 +186,6 @@ AUDIOCORE_FUNC(setReturnToStart) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setSourceSynthesizer) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetSourceSynthesizer{
-		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 AUDIOCORE_FUNC(setAudioSaveBitsPerSample) {
 	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveBitsPerSample{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)), (int)luaL_checkinteger(L, 2) });
@@ -227,6 +220,20 @@ AUDIOCORE_FUNC(setAudioSaveQualityOptionIndex) {
 	return CommandFuncResult{ true, "" };
 }
 
+AUDIOCORE_FUNC(setSequencerTrackRecording) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackRecording{
+		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setInstrOffline) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrOffline{
+		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
 void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioType);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioInput);
@@ -252,8 +259,9 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setPlayPosition);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setReturnToStart);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSourceSynthesizer);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveBitsPerSample);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveMetaData);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveQualityOptionIndex);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackRecording);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrOffline);
 }

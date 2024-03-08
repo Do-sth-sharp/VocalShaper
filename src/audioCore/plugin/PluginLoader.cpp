@@ -19,24 +19,7 @@ void PluginLoader::loadPlugin(
 	int bufferSize = mainGraph->getBlockSize();
 
 	/** Create Task */
-	this->loadThread->load(pluginInfo,
-		{ PluginLoadThread::DstPointer::Type::Plugin, ptr, nullptr }, callback, sampleRate, bufferSize);
-}
-
-void PluginLoader::loadPlugin(const juce::PluginDescription& pluginInfo,
-	CloneableSource::SafePointer<> ptr, const Callback& callback) {
-	/** Get Audio Config */
-	auto mainGraph = AudioCore::getInstance()->getGraph();
-	if (!mainGraph) {
-		jassertfalse;
-		return;
-	}
-	double sampleRate = mainGraph->getSampleRate();
-	int bufferSize = mainGraph->getBlockSize();
-
-	/** Create Task */
-	this->loadThread->load(pluginInfo,
-		{ PluginLoadThread::DstPointer::Type::Synth, nullptr, ptr }, callback, sampleRate, bufferSize);
+	this->loadThread->load(pluginInfo, ptr, callback, sampleRate, bufferSize);
 }
 
 bool PluginLoader::isRunning() const {

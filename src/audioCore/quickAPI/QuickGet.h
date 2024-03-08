@@ -20,25 +20,6 @@ namespace quickAPI {
 	bool isPlaying();
 	bool isRecording();
 
-	enum SourceType {
-		UnknownSource, AudioSource, MIDISource
-	};
-	int getSourceNum();
-	int getSourceId(int index);
-	const juce::String getSourceName(int index);
-	SourceType getSourceType(int index);
-	const juce::String getSourceTypeName(int index);
-	const juce::StringArray getAllSourceTypeName();
-	double getSourceLength(int index);
-	int getSourceChannelNum(int index);
-	int getSourceTrackNum(int index);
-	const juce::String getSourceSynthesizerName(int index);
-	int getSourceSynthDstIndex(int index);
-	double getSourceSampleRate(int index);
-	int getSourceEventNum(int index);
-	const juce::StringArray getSourceNames();
-	const juce::StringArray getSourceNamesWithID();
-
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
 
@@ -88,17 +69,9 @@ namespace quickAPI {
 	/** Src Index, Src Channel, Dst Index, Dst Channel */
 	using AudioLink = std::tuple<int, int, int, int>;
 
-	int getInstrNum();
 	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
-	const juce::StringArray getInstrNameList();
 	bool getInstrBypass(int index);
-	bool getInstrMIDIInputFromDevice(int index);
-	const juce::Array<MIDILink> getInstrMIDIInputFromSource(int index);
-	const juce::Array<AudioLink> getInstrAudioOutputToMixer(int index);
-	const juce::AudioChannelSet getInstrChannelSet(int index);
-	int getInstrInputChannelNum(int index);
-	int getInstrOutputChannelNum(int index);
 	EditorPointer getInstrEditor(int index);
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);
@@ -145,7 +118,6 @@ namespace quickAPI {
 	const juce::Array<MIDILink> getMixerTrackMIDIInputFromSource(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromDevice(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromInstr(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioInputFromSend(int index);
 	bool getMixerTrackMIDIOutputToDevice(int index);
 	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index);

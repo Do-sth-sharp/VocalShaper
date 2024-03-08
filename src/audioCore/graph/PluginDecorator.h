@@ -48,6 +48,9 @@ public:
 	void setMIDICCListener(const MIDICCListener& listener);
 	void clearMIDICCListener();
 
+	void doDMDAHandShake();
+	void setDMDAData(const juce::MidiFile* ptrData);
+
 	class SafePointer {
 	private:
 		juce::WeakReference<PluginDecorator> weakRef;

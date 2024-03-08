@@ -3,7 +3,7 @@
 #include <JuceHeader.h>
 
 #include "../misc/Renderer.h"
-#include "../source/AudioIOList.h"
+#include "../misc/SourceIO.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
 #include "../project/ProjectInfoData.h"
@@ -20,7 +20,7 @@
 
 #define ACTION_CHECK_SOURCE_IO_RUNNING(s) \
 	do { \
-		if(AudioIOList::getInstance()->isThreadRunning()) { \
+		if(SourceIO::getInstance()->isThreadRunning()) { \
 			this->error(s); \
 			return false; \
 		} \

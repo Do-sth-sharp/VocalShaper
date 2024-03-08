@@ -112,19 +112,6 @@ AUDIOCORE_FUNC(echoEffectCCParam) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(echoSourceNum) {
-	auto action = std::unique_ptr<ActionBase>(new ActionEchoSourceNum);
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(echoSource) {
-	auto action = std::unique_ptr<ActionBase>(new ActionEchoSource{
-		(int)luaL_checkinteger(L, 1) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoDeviceMIDI);
@@ -142,6 +129,4 @@ void regCommandEcho(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectParamCC);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoInstrCCParam);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoEffectCCParam);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoSourceNum);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, echoSource);
 }

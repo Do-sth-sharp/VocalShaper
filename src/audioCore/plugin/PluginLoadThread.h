@@ -2,7 +2,6 @@
 
 #include <JuceHeader.h>
 #include "../graph/PluginDecorator.h"
-#include "../source/CloneableSource.h"
 
 class PluginLoadThread final : public juce::Thread {
 public:
@@ -10,11 +9,7 @@ public:
 	~PluginLoadThread() override;
 
 	using Callback = std::function<void()>;
-	struct DstPointer {
-		enum class Type { Plugin, Synth } type;
-		PluginDecorator::SafePointer pluginPtr;
-		CloneableSource::SafePointer<> synthPtr;
-	};
+	using DstPointer = PluginDecorator::SafePointer;
 	void load(const juce::PluginDescription& pluginInfo,
 		DstPointer ptr, const Callback& callback, double sampleRate, int blockSize);
 

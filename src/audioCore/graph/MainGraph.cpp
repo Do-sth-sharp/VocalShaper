@@ -5,7 +5,6 @@
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
 #include "../uiCallback/UICallback.h"
-#include "../source/CloneableSourceManager.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include "SourceRecordProcessor.h"
@@ -31,11 +30,11 @@ MainGraph::MainGraph() {
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
 	/** The Source Recorder Node */
-	this->recorder = std::make_unique<SourceRecordProcessor>();
+	this->recorder = std::make_unique<SourceRecordProcessor>(this);
 }
 
 MainGraph::~MainGraph() {
-	/** Nothing To Do */
+	this->clearGraph();
 }
 
 void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
@@ -83,10 +82,6 @@ void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBl
 		position->setSampleRate(sampleRate);
 	}
 
-	/** Source */
-	CloneableSourceManager::getInstance()->prepareToPlay(
-		sampleRate, maximumExpectedSamplesPerBlock);
-
 	/** Renderer */
 	Renderer::getInstance()->updateSampleRateAndBufferSize(
 		sampleRate, maximumExpectedSamplesPerBlock);
@@ -112,12 +107,6 @@ void MainGraph::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 		src->setPlayHead(newPlayHead);
 	}
 
-	/** Instrument */
-	for (auto& i : this->instrumentNodeList) {
-		auto instr = i->getProcessor();
-		instr->setPlayHead(newPlayHead);
-	}
-
 	/** Track */
 	for (auto& i : this->trackNodeList) {
 		auto track = i->getProcessor();
@@ -138,19 +127,8 @@ SourceRecordProcessor* MainGraph::getRecorder() const {
 }
 
 void MainGraph::clearGraph() {
-	if (auto recorder = this->getRecorder()) {
-		recorder->clearGraph();
-	}
-
-	for (auto& i : this->midiI2InstrConnectionList) {
-		this->removeConnection(i);
-	}
-	this->midiI2InstrConnectionList.clear();
-
-	for (auto& i : this->midiSrc2InstrConnectionList) {
-		this->removeConnection(i);
-	}
-	this->midiSrc2InstrConnectionList.clear();
+	/** Lock */
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	for (auto& i : this->midiSrc2TrkConnectionList) {
 		this->removeConnection(i);
@@ -161,11 +139,6 @@ void MainGraph::clearGraph() {
 		this->removeConnection(i);
 	}
 	this->audioSrc2TrkConnectionList.clear();
-
-	for (auto& i : this->audioInstr2TrkConnectionList) {
-		this->removeConnection(i);
-	}
-	this->audioInstr2TrkConnectionList.clear();
 
 	for (auto& i : this->midiI2TrkConnectionList) {
 		this->removeConnection(i);
@@ -196,11 +169,6 @@ void MainGraph::clearGraph() {
 		this->removeNode(i->nodeID);
 	}
 	this->trackNodeList.clear();
-
-	for (auto& i : this->instrumentNodeList) {
-		this->removeNode(i->nodeID);
-	}
-	this->instrumentNodeList.clear();
 
 	for (auto& i : this->audioSourceNodeList) {
 		this->removeNode(i->nodeID);
@@ -234,17 +202,6 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 		}
 	}
 
-	auto& instrs = mes->instrs();
-	for (auto& i : instrs) {
-		this->insertInstrument(-1, utils::getChannelSet(static_cast<utils::TrackType>(i.info().decoratortype())));
-		if (auto instrNode = this->instrumentNodeList.getLast()) {
-			if (auto instr = dynamic_cast<PluginDecorator*>(instrNode->getProcessor())) {
-				MainGraph::setInstrumentBypass(PluginDecorator::SafePointer{ instr }, i.bypassed());
-				if (!instr->parse(&i)) { return false; }
-			}
-		}
-	}
-
 	auto& mixTracks = mes->mixertracks();
 	for (auto& i : mixTracks) {
 		this->insertTrack(-1, utils::getChannelSet(static_cast<utils::TrackType>(i.type())));
@@ -258,16 +215,6 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 
 	auto& connections = mes->connections();
 
-	auto& midiI2Instr = connections.midii2instr();
-	for (auto& i : midiI2Instr) {
-		this->setMIDII2InstrConnection(i.dst());
-	}
-
-	auto& midiSrc2Instr = connections.midisrc2instr();
-	for (auto& i : midiSrc2Instr) {
-		this->setMIDISrc2InstrConnection(i.src(), i.dst());
-	}
-
 	auto& midiSrc2Track = connections.midisrc2track();
 	for (auto& i : midiSrc2Track) {
 		this->setMIDISrc2TrkConnection(i.src(), i.dst());
@@ -276,11 +223,6 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 	auto& audioSrc2Track = connections.audiosrc2track();
 	for (auto& i : audioSrc2Track) {
 		this->setAudioSrc2TrkConnection(i.src(), i.dst(), i.srcchannel(), i.dstchannel());
-	}
-
-	auto& audioInstr2Track = connections.audioinstr2track();
-	for (auto& i : audioInstr2Track) {
-		this->setAudioInstr2TrkConnection(i.src(), i.dst(), i.srcchannel(), i.dstchannel());
 	}
 
 	auto& midiI2Track = connections.midii2track();
@@ -308,10 +250,6 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 		this->setMIDITrk2OConnection(i.src());
 	}
 
-	if (!this->getRecorder()->parse(&(mes->recorder()))) {
-		return false;
-	}
-
 	return true;
 }
 
@@ -328,17 +266,6 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 		}
 	}
 
-	auto instrs = mes->mutable_instrs();
-	for (auto& i : this->instrumentNodeList) {
-		if (auto instr = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
-			auto imes = instr->serialize();
-			if (!dynamic_cast<vsp4::Plugin*>(imes.get())) { return nullptr; }
-			dynamic_cast<vsp4::Plugin*>(imes.get())->set_bypassed(
-				MainGraph::getInstrumentBypass(PluginDecorator::SafePointer{ instr }));
-			instrs->AddAllocated(dynamic_cast<vsp4::Plugin*>(imes.release()));
-		}
-	}
-
 	auto mixTracks = mes->mutable_mixertracks();
 	for (auto& i : this->trackNodeList) {
 		if (auto track = dynamic_cast<Track*>(i->getProcessor())) {
@@ -350,30 +277,6 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 	}
 
 	auto connections = mes->mutable_connections();
-	
-	auto midiI2Instr = connections->mutable_midii2instr();
-	for (auto& i : this->midiI2InstrConnectionList) {
-		auto dstNode = this->getNodeForId(i.destination.nodeID);
-		if (!dstNode) { return nullptr; }
-
-		auto cmes = std::make_unique<vsp4::MIDIInputConnection>();
-		cmes->set_dst(this->findInstr(dynamic_cast<PluginDecorator*>(dstNode->getProcessor())));
-
-		midiI2Instr->AddAllocated(cmes.release());
-	}
-
-	auto midiSrc2Instr = connections->mutable_midisrc2instr();
-	for (auto& i : this->midiSrc2InstrConnectionList) {
-		auto srcNode = this->getNodeForId(i.source.nodeID);
-		auto dstNode = this->getNodeForId(i.destination.nodeID);
-		if (!srcNode || !dstNode) { return nullptr; }
-
-		auto cmes = std::make_unique<vsp4::MIDISendConnection>();
-		cmes->set_src(this->findSource(dynamic_cast<SeqSourceProcessor*>(srcNode->getProcessor())));
-		cmes->set_dst(this->findInstr(dynamic_cast<PluginDecorator*>(dstNode->getProcessor())));
-
-		midiSrc2Instr->AddAllocated(cmes.release());
-	}
 
 	auto midiSrc2Track = connections->mutable_midisrc2track();
 	for (auto& i : this->midiSrc2TrkConnectionList) {
@@ -403,23 +306,6 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 		cmes->set_dstchannel(dstChannel);
 
 		audioSrc2Track->AddAllocated(cmes.release());
-	}
-
-	auto audioInstr2Track = connections->mutable_audioinstr2track();
-	for (auto& i : this->audioInstr2TrkConnectionList) {
-		auto srcNode = this->getNodeForId(i.source.nodeID);
-		auto dstNode = this->getNodeForId(i.destination.nodeID);
-		int srcChannel = i.source.channelIndex;
-		int dstChannel = i.destination.channelIndex;
-		if (!srcNode || !dstNode) { return nullptr; }
-
-		auto cmes = std::make_unique<vsp4::AudioSendConnection>();
-		cmes->set_src(this->findInstr(dynamic_cast<PluginDecorator*>(srcNode->getProcessor())));
-		cmes->set_dst(this->findTrack(dynamic_cast<Track*>(dstNode->getProcessor())));
-		cmes->set_srcchannel(srcChannel);
-		cmes->set_dstchannel(dstChannel);
-
-		audioInstr2Track->AddAllocated(cmes.release());
 	}
 
 	auto midiI2Track = connections->mutable_midii2track();
@@ -490,10 +376,6 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 
 		midiTrack2O->AddAllocated(cmes.release());
 	}
-
-	auto recorder = this->getRecorder()->serialize();
-	if (!dynamic_cast<vsp4::Recorder*>(recorder.get())) { return nullptr; }
-	mes->set_allocated_recorder(dynamic_cast<vsp4::Recorder*>(recorder.release()));
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
@@ -566,7 +448,6 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Process Audio Block */
 	{
-		juce::ScopedReadLock managerLocker(CloneableSourceManager::getInstance()->getLock());
 		this->recorder->processBlock(audio, midi);
 		this->juce::AudioProcessorGraph::processBlock(audio, midi);
 	}
