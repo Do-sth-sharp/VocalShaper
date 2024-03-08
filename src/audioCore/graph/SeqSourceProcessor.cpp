@@ -754,6 +754,7 @@ void SeqSourceProcessor::writeAudioData(juce::AudioBuffer<float>& buffer, int of
 		this->audioData->setSize(this->audioData->getNumChannels(),
 			this->audioData->getNumSamples() + this->recordInitLength * this->audioSampleRate,
 			true, true, true);
+		this->updateAudioResampler();
 	}
 
 	/** Copy Data Resampled */
