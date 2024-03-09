@@ -64,6 +64,7 @@ namespace utils {
 	const juce::URL getWebsitePage();
 
 	const juce::Rectangle<int> getScreenSize(const juce::Component* comp);
+	double getScreenScale(const juce::Component* comp);
 
 	const juce::StringArray parseCommand(const juce::String& command);
 

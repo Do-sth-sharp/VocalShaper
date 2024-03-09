@@ -134,12 +134,15 @@ quickAPI::EditorPointer PluginEditorContent::getEditor() const {
 
 juce::Point<int> PluginEditorContent::getPerferedSize() {
 	auto screenSize = utils::getScreenSize(this);
+	/** Do This To Fix Editor Size On Different Screens, But It Doesn't Work. */
+	//double screenScale = utils::getScreenScale(this);
+	double screenScale = 1.5;
 	int toolBarHeight = screenSize.getHeight() * 0.03;
 	if (this->editor) {
 		/** Have To Do This To Fix Editor Size, I Don't Know What Happend But This Works */
 		auto bounds = this->editor->getBounds();
-		int width = bounds.getWidth() + screenSize.getWidth() * 0.01;
-		int height = bounds.getHeight() + screenSize.getHeight() * 0.05;
+		int width = bounds.getWidth() + screenSize.getWidth() * 0.01 * (1.5 / screenScale);
+		int height = bounds.getHeight() + screenSize.getHeight() * 0.05 * (1.5 / screenScale);
 		return { width, height + toolBarHeight };
 	}
 	return { screenSize.getWidth() / 4, screenSize.getHeight() / 4 };

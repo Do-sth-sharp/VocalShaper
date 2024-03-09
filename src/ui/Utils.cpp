@@ -240,6 +240,17 @@ namespace utils {
 			(int)(width * scaleMN), (int)(height * scaleMN) };
 	}
 
+	double getScreenScale(const juce::Component* comp) {
+		/** Get current screen */
+		if (!comp) { return 1.0; }
+		auto ptrScreen = juce::Desktop::getInstance().getDisplays()
+			.getDisplayForRect(comp->getScreenBounds());
+		if (!ptrScreen) { return 1.0; }
+
+		/** Result */
+		return ptrScreen->scale;
+	}
+
 	const juce::StringArray parseCommand(const juce::String& command) {
 		return juce::StringArray::fromTokens(command, true);
 	}
