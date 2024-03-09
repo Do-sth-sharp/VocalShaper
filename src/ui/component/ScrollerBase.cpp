@@ -90,7 +90,7 @@ void ScrollerBase::update() {
 	this->setPos(this->viewPos);
 }
 
-void ScrollerBase::setPos(int pos) {
+void ScrollerBase::setPos(double pos) {
 	/** Limit Pos */
 	pos = this->limitPos(pos);
 
@@ -104,7 +104,7 @@ void ScrollerBase::setPos(int pos) {
 	this->updatePos(pos, this->itemSize);
 }
 
-void ScrollerBase::setItemSize(int size) {
+void ScrollerBase::setItemSize(double size) {
 	/** Limit Size */
 	size = this->limitItemSize(size);
 
@@ -118,15 +118,15 @@ void ScrollerBase::setItemSize(int size) {
 	this->updatePos(this->viewPos, size);
 }
 
-int ScrollerBase::getViewPos() const {
+double ScrollerBase::getViewPos() const {
 	return this->viewPos;
 }
 
-int ScrollerBase::getViewSize() const {
+double ScrollerBase::getViewSize() const {
 	return this->viewSize;
 }
 
-int ScrollerBase::getItemSize() const {
+double ScrollerBase::getItemSize() const {
 	return this->itemSize;
 }
 
@@ -134,15 +134,15 @@ double ScrollerBase::getItemNum() const {
 	return this->itemNum;
 }
 
-int ScrollerBase::getItemMinSize() const {
+double ScrollerBase::getItemMinSize() const {
 	return this->itemMinSize;
 }
 
-int ScrollerBase::getItemMaxSize() const {
+double ScrollerBase::getItemMaxSize() const {
 	return this->itemMaxSize;
 }
 
-int ScrollerBase::getActualTotalSize() const {
+double ScrollerBase::getActualTotalSize() const {
 	return this->itemSize * this->itemNum;
 }
 
@@ -165,9 +165,9 @@ void ScrollerBase::mouseDrag(const juce::MouseEvent& event) {
 			break;
 		case State::PressedThumb: {
 			auto [startPos, endPos] = this->getThumb();
-			int halfThumbSize = (endPos - startPos) * this->thumbPressedPer;
-			int newThumbStartPos = caredPos - halfThumbSize;
-			int newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
+			double halfThumbSize = (endPos - startPos) * this->thumbPressedPer;
+			double newThumbStartPos = caredPos - halfThumbSize;
+			double newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
 			this->setPos(newPos);
 			break;
 		}
@@ -199,9 +199,9 @@ void ScrollerBase::mouseDown(const juce::MouseEvent& event) {
 			}
 			else {
 				/** Press On Track */
-				int halfThumbSize = (endPos - startPos) / 2;
-				int newThumbStartPos = caredPos - halfThumbSize;
-				int newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
+				double halfThumbSize = (endPos - startPos) / 2;
+				double newThumbStartPos = caredPos - halfThumbSize;
+				double newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
 				this->setPos(newPos);
 				this->recordThumbPress(caredPos);
 			}
@@ -226,9 +226,9 @@ void ScrollerBase::mouseUp(const juce::MouseEvent& event) {
 			break;
 		case State::PressedThumb: {
 			auto [startPos, endPos] = this->getThumb();
-			int halfThumbSize = (endPos - startPos) * this->thumbPressedPer;
-			int newThumbStartPos = caredPos - halfThumbSize;
-			int newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
+			double halfThumbSize = (endPos - startPos) * this->thumbPressedPer;
+			double newThumbStartPos = caredPos - halfThumbSize;
+			double newPos = (newThumbStartPos / (double)this->getTrackLength()) * this->getActualTotalSize();
 			this->setPos(newPos);
 			break;
 		}
@@ -251,7 +251,7 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 		return;
 	}
 
-	int totalSize = this->getActualTotalSize();
+	double totalSize = this->getActualTotalSize();
 	double delta = totalSize * wheel.deltaY
 		* (wheel.isReversed ? 1 : -1) * 0.15;
 
@@ -294,26 +294,26 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 	}
 }
 
-void ScrollerBase::recordThumbPress(int pos) {
+void ScrollerBase::recordThumbPress(double pos) {
 	auto [startPos, endPos] = this->getThumb();
 	this->thumbPressedPer = (pos - startPos) / (double)(endPos - startPos);
 }
 
-void ScrollerBase::setStart(int start) {
+void ScrollerBase::setStart(double start) {
 	/** Get Size */
 	double startPer = start / (double)this->getTrackLength();
 	double endPer = (this->viewPos + this->viewSize) / (double)this->getActualTotalSize();
 	if (startPer < 0.0) { startPer = 0.0; }
 	if (startPer > (endPer - DELTA)) { startPer = endPer - DELTA; }
 	double viewNum = (endPer - startPer) * this->itemNum;
-	int itemSize = this->limitItemSize(this->viewSize / viewNum);
+	double itemSize = this->limitItemSize(this->viewSize / viewNum);
 	
 	/** Set Size */
 	this->itemSize = itemSize;
 
 	/** Get Pos */
-	int endPos = endPer * this->getActualTotalSize();
-	int pos = endPos - this->viewSize;
+	double endPos = endPer * this->getActualTotalSize();
+	double pos = endPos - this->viewSize;
 	if (pos < 0) { pos = 0; }
 
 	/** Set Pos */
@@ -326,20 +326,20 @@ void ScrollerBase::setStart(int start) {
 	this->updatePos(pos, itemSize);
 }
 
-void ScrollerBase::setEnd(int end) {
+void ScrollerBase::setEnd(double end) {
 	/** Get Size */
 	double startPer = this->viewPos / (double)this->getActualTotalSize();
 	double endPer = end / (double)this->getTrackLength();
 	if (endPer > 1.0) { endPer = 1.0; }
 	if (endPer < (startPer + DELTA)) { endPer = startPer + DELTA; }
 	double viewNum = (endPer - startPer) * this->itemNum;
-	int itemSize = this->limitItemSize(this->viewSize / viewNum);
+	double itemSize = this->limitItemSize(this->viewSize / viewNum);
 
 	/** Set Size */
 	this->itemSize = itemSize;
 
 	/** Get Pos */
-	int pos = startPer * this->getActualTotalSize();
+	double pos = startPer * this->getActualTotalSize();
 	if (pos < 0) { pos = 0; }
 
 	/** Set Pos */
@@ -352,20 +352,20 @@ void ScrollerBase::setEnd(int end) {
 	this->updatePos(pos, itemSize);
 }
 
-int ScrollerBase::limitPos(int pos) const {
+double ScrollerBase::limitPos(double pos) const {
 	pos = std::min(pos, this->getActualTotalSize() - this->viewSize);
-	pos = std::max(pos, 0);
+	pos = std::max(pos, 0.0);
 	return pos;
 }
 
-int ScrollerBase::limitItemSize(int size) const {
+double ScrollerBase::limitItemSize(double size) const {
 	size = std::min(size, this->itemMaxSize);
 	size = std::max(size, this->itemMinSize);
 	return size;
 }
 
 double ScrollerBase::limitItemNum(double num) const {
-	return std::max(num, std::ceil(this->viewSize / (double)this->itemMinSize));
+	return std::max(num, this->viewSize / (double)this->itemMinSize);
 }
 
 int ScrollerBase::getJudgeSize() const {
@@ -381,11 +381,11 @@ int ScrollerBase::getCaredPos(const juce::Point<int>& pos) const {
 	return this->vertical ? pos.getY() : pos.getX();
 }
 
-std::tuple<int, int> ScrollerBase::getThumb() const {
-	int actualTotalSize = this->getActualTotalSize();
-	int trackLength = this->vertical ? this->getHeight() : this->getWidth();
-	int startPos = (this->viewPos / (double)actualTotalSize) * trackLength;
-	int endPos = ((this->viewPos + this->viewSize) / (double)actualTotalSize) * trackLength;
+std::tuple<double, double> ScrollerBase::getThumb() const {
+	double actualTotalSize = this->getActualTotalSize();
+	double trackLength = this->vertical ? this->getHeight() : this->getWidth();
+	double startPos = (this->viewPos / (double)actualTotalSize) * trackLength;
+	double endPos = ((this->viewPos + this->viewSize) / (double)actualTotalSize) * trackLength;
 	return { startPos, endPos };
 }
 
@@ -397,15 +397,15 @@ void ScrollerBase::resetState() {
 
 void ScrollerBase::updateState(const juce::Point<int>& pos, bool pressed) {
 	/** Get Size */
-	int position = this->getCaredPos(pos);
+	double position = this->getCaredPos(pos);
 
 	auto [startPos, endPos] = this->getThumb();
 
-	int judgeSize = this->getJudgeSize();
-	int startJudgeS = startPos - judgeSize / 2;
-	int startJudgeE = startPos + std::min(judgeSize / 2, (endPos - startPos) / 2);
-	int endJudgeS = endPos - std::min(judgeSize / 2, (endPos - startPos) / 2);
-	int endJudgeE = endPos + judgeSize / 2;
+	double judgeSize = this->getJudgeSize();
+	double startJudgeS = startPos - judgeSize / 2;
+	double startJudgeE = startPos + std::min(judgeSize / 2, (endPos - startPos) / 2);
+	double endJudgeS = endPos - std::min(judgeSize / 2, (endPos - startPos) / 2);
+	double endJudgeE = endPos + judgeSize / 2;
 
 	/** Change State */
 	if (pressed) {

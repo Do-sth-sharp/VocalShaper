@@ -13,10 +13,10 @@ MixerView::MixerView()
 
 	/** Scroller */
 	this->hScroller = std::make_unique<Scroller>(false,
-		[this] { return this->getViewWidth(); },
+		[this] { return (double)(this->getViewWidth()); },
 		[this] { return (double)(this->getTrackNum()); },
 		[this] { return this->getTrackWidthLimit(); },
-		[this](int pos, int itemSize) { this->updatePos(pos, itemSize); },
+		[this](double pos, double itemSize) { this->updatePos(pos, itemSize); },
 		Scroller::PaintPreviewFunc{},
 		[this](juce::Graphics& g, int itemIndex,
 			int width, int height, bool vertical) {
@@ -194,13 +194,13 @@ int MixerView::getTrackNum() const {
 	return this->trackList.size();
 }
 
-std::tuple<int, int> MixerView::getTrackWidthLimit() const {
+std::tuple<double, double> MixerView::getTrackWidthLimit() const {
 	auto screenSize = utils::getScreenSize(this);
-	return { (int)(screenSize.getWidth() * 0.04),
-		(int)(screenSize.getWidth() * 0.05) };
+	return { screenSize.getWidth() * 0.04,
+		screenSize.getWidth() * 0.05 };
 }
 
-void MixerView::updatePos(int pos, int itemSize) {
+void MixerView::updatePos(double pos, double itemSize) {
 	int height = this->getHeight() - this->hScroller->getHeight();
 	for (int i = 0; i < this->trackList.size(); i++) {
 		juce::Rectangle<int> trackRect(

@@ -17,7 +17,7 @@ Scroller::Scroller(bool vertical,
 		LookAndFeelFactory::getInstance()->forScroller());
 }
 
-int Scroller::createViewSize() {
+double Scroller::createViewSize() {
 	return this->viewSizeCallback();
 }
 
@@ -25,11 +25,11 @@ double Scroller::createItemNum() {
 	return this->itemNumCallback();
 }
 
-std::tuple<int, int> Scroller::createItemSizeLimit() {
+std::tuple<double, double> Scroller::createItemSizeLimit() {
 	return this->itemSizeLimitCallback();
 }
 
-void Scroller::updatePos(int pos, int itemSize) {
+void Scroller::updatePos(double pos, double itemSize) {
 	this->updatePosCallback(pos, itemSize);
 }
 

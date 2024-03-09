@@ -18,15 +18,15 @@ private:
 
 	int getViewWidth() const;
 	double getTimeLength() const;
-	std::tuple<int, int> getTimeWidthLimit() const;
+	std::tuple<double, double> getTimeWidthLimit() const;
 
-	void updateHPos(int pos, int itemSize);
+	void updateHPos(double pos, double itemSize);
 
 	int getViewHeight() const;
 	int getTrackNum() const;
-	std::tuple<int, int> getTrackHeightLimit() const;
+	std::tuple<double, double> getTrackHeightLimit() const;
 
-	void updateVPos(int pos, int itemSize);
+	void updateVPos(double pos, double itemSize);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };

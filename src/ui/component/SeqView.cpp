@@ -10,19 +10,19 @@ SeqView::SeqView()
 
 	/** Scroller */
 	this->hScroller = std::make_unique<Scroller>(false,
-		[this] { return this->getViewWidth(); },
+		[this] { return (double)(this->getViewWidth()); },
 		[this] { return this->getTimeLength(); },
 		[this] { return this->getTimeWidthLimit(); },
-		[this](int pos, int itemSize) { this->updateHPos(pos, itemSize); },
+		[this](double pos, double itemSize) { this->updateHPos(pos, itemSize); },
 		Scroller::PaintPreviewFunc{},
 		Scroller::PaintItemPreviewFunc{});
 	this->addAndMakeVisible(this->hScroller.get());
 
 	this->vScroller = std::make_unique<Scroller>(true,
-		[this] { return this->getViewHeight(); },
-		[this] { return (double)this->getTrackNum(); },
+		[this] { return (double)(this->getViewHeight()); },
+		[this] { return (double)(this->getTrackNum()); },
 		[this] { return this->getTrackHeightLimit(); },
-		[this](int pos, int itemSize) { this->updateVPos(pos, itemSize); },
+		[this](double pos, double itemSize) { this->updateVPos(pos, itemSize); },
 		Scroller::PaintPreviewFunc{},
 		Scroller::PaintItemPreviewFunc{});
 	this->addAndMakeVisible(this->vScroller.get());
@@ -60,12 +60,12 @@ double SeqView::getTimeLength() const {
 	return 0;
 }
 
-std::tuple<int, int> SeqView::getTimeWidthLimit() const {
+std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 	auto screenSize = utils::getScreenSize(this);
-	return { (int)(screenSize.getWidth() * 0.02), (int)(screenSize.getWidth() * 0.2) };
+	return { screenSize.getWidth() * 0.02, screenSize.getWidth() * 0.2 };
 }
 
-void SeqView::updateHPos(int pos, int itemSize) {
+void SeqView::updateHPos(double pos, double itemSize) {
 	/** TODO */
 }
 
@@ -78,11 +78,11 @@ int SeqView::getTrackNum() const {
 	return 0;
 }
 
-std::tuple<int, int> SeqView::getTrackHeightLimit() const {
+std::tuple<double, double> SeqView::getTrackHeightLimit() const {
 	auto screenSize = utils::getScreenSize(this);
-	return { (int)(screenSize.getHeight() * 0.025), (int)(screenSize.getWidth() * 0.4) };
+	return { screenSize.getHeight() * 0.025, screenSize.getWidth() * 0.4 };
 }
 
-void SeqView::updateVPos(int pos, int itemSize) {
+void SeqView::updateVPos(double pos, double itemSize) {
 	/** TODO */
 }

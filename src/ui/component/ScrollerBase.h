@@ -11,17 +11,17 @@ public:
 	void paint(juce::Graphics& g) override;
 
 	void update();
-	void setPos(int pos);
-	void setItemSize(int size);
+	void setPos(double pos);
+	void setItemSize(double size);
 
-	int getViewPos() const;
-	int getViewSize() const;
-	int getItemSize() const;
+	double getViewPos() const;
+	double getViewSize() const;
+	double getItemSize() const;
 	double getItemNum() const;
-	int getItemMinSize() const;
-	int getItemMaxSize() const;
+	double getItemMinSize() const;
+	double getItemMaxSize() const;
 
-	int getActualTotalSize() const;
+	double getActualTotalSize() const;
 
 	void mouseMove(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);
@@ -32,11 +32,11 @@ public:
 		const juce::MouseWheelDetails& wheel);
 
 protected:
-	virtual int createViewSize() = 0;
+	virtual double createViewSize() = 0;
 	virtual double createItemNum() = 0;
-	virtual std::tuple<int, int> createItemSizeLimit() = 0;
+	virtual std::tuple<double, double> createItemSizeLimit() = 0;
 
-	virtual void updatePos(int pos, int itemSize) = 0;
+	virtual void updatePos(double pos, double itemSize) = 0;
 
 	virtual void paintPreview(juce::Graphics& g, bool vertical) {};
 	virtual void paintItemPreview(juce::Graphics& g, int itemIndex,
@@ -45,10 +45,9 @@ protected:
 private:
 	const bool vertical;
 
-	int viewPos = 0, viewSize = 0;
-	int itemSize = 0;
-	double itemNum = 0;
-	int itemMinSize = 0, itemMaxSize = 0;
+	double viewPos = 0, viewSize = 0;
+	double itemSize = 0, itemNum = 0;
+	double itemMinSize = 0, itemMaxSize = 0;
 
 	enum class State {
 		Normal, HoverThumb, HoverStart, HoverEnd,
@@ -57,19 +56,19 @@ private:
 	State state = State::Normal;
 
 	double thumbPressedPer = -1;
-	void recordThumbPress(int pos);
+	void recordThumbPress(double pos);
 
-	void setStart(int start);
-	void setEnd(int end);
+	void setStart(double start);
+	void setEnd(double end);
 
-	int limitPos(int pos) const;
-	int limitItemSize(int size) const;
+	double limitPos(double pos) const;
+	double limitItemSize(double size) const;
 	double limitItemNum(double num) const;
 
 	int getJudgeSize() const;
 	int getTrackLength() const;
 	int getCaredPos(const juce::Point<int>& pos) const;
-	std::tuple<int, int> getThumb() const;
+	std::tuple<double, double> getThumb() const;
 
 	void resetState();
 	void updateState(const juce::Point<int>& pos, bool pressed);

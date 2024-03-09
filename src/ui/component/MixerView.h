@@ -32,9 +32,9 @@ private:
 
 	int getViewWidth() const;
 	int getTrackNum() const;
-	std::tuple<int, int> getTrackWidthLimit() const;
+	std::tuple<double, double> getTrackWidthLimit() const;
 
-	void updatePos(int pos, int itemSize);
+	void updatePos(double pos, double itemSize);
 
 	void paintTrackPreview(juce::Graphics& g, int itemIndex,
 		int width, int height, bool vertical);
