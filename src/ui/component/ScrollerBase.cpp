@@ -130,7 +130,7 @@ int ScrollerBase::getItemSize() const {
 	return this->itemSize;
 }
 
-int ScrollerBase::getItemNum() const {
+double ScrollerBase::getItemNum() const {
 	return this->itemNum;
 }
 
@@ -364,8 +364,8 @@ int ScrollerBase::limitItemSize(int size) const {
 	return size;
 }
 
-int ScrollerBase::limitItemNum(int num) const {
-	return std::max(num, (int)std::ceil(this->viewSize / (double)this->itemMinSize));
+double ScrollerBase::limitItemNum(double num) const {
+	return std::max(num, std::ceil(this->viewSize / (double)this->itemMinSize));
 }
 
 int ScrollerBase::getJudgeSize() const {

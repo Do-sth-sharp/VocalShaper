@@ -17,7 +17,7 @@ public:
 	int getViewPos() const;
 	int getViewSize() const;
 	int getItemSize() const;
-	int getItemNum() const;
+	double getItemNum() const;
 	int getItemMinSize() const;
 	int getItemMaxSize() const;
 
@@ -33,7 +33,7 @@ public:
 
 protected:
 	virtual int createViewSize() = 0;
-	virtual int createItemNum() = 0;
+	virtual double createItemNum() = 0;
 	virtual std::tuple<int, int> createItemSizeLimit() = 0;
 
 	virtual void updatePos(int pos, int itemSize) = 0;
@@ -46,7 +46,8 @@ private:
 	const bool vertical;
 
 	int viewPos = 0, viewSize = 0;
-	int itemSize = 0, itemNum = 0;
+	int itemSize = 0;
+	double itemNum = 0;
 	int itemMinSize = 0, itemMaxSize = 0;
 
 	enum class State {
@@ -63,7 +64,7 @@ private:
 
 	int limitPos(int pos) const;
 	int limitItemSize(int size) const;
-	int limitItemNum(int num) const;
+	double limitItemNum(double num) const;
 
 	int getJudgeSize() const;
 	int getTrackLength() const;

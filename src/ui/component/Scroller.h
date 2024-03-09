@@ -6,7 +6,7 @@
 class Scroller : public ScrollerBase {
 public:
 	using ViewSizeFunc = std::function<int(void)>;
-	using ItemNumFunc = std::function<int(void)>;
+	using ItemNumFunc = std::function<double(void)>;
 	using ItemSizeLimitFunc = std::function<std::tuple<int, int>(void)>;
 	using UpdatePosFunc = std::function<void(int, int)>;
 	using PaintPreviewFunc = std::function<void(juce::Graphics&, bool)>;
@@ -24,7 +24,7 @@ public:
 
 protected:
 	int createViewSize() override;
-	int createItemNum() override;
+	double createItemNum() override;
 	std::tuple<int, int> createItemSizeLimit() override;
 
 	void updatePos(int pos, int itemSize) override;

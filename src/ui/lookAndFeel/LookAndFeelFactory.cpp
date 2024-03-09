@@ -18,6 +18,7 @@
 #include "LevelMeterLookAndFeel.h"
 #include "MuteButtonLookAndFeel.h"
 #include "EffectLookAndFeel.h"
+#include "SeqLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -106,6 +107,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Effect */
 	this->effectLAF = std::make_unique<EffectLookAndFeel>();
+
+	/** Sequencer */
+	this->seqLAF = std::make_unique<SeqLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -183,6 +187,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forMuteButton() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forEffect() const {
 	return this->effectLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forSeq() const {
+	return this->seqLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

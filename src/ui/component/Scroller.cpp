@@ -21,7 +21,7 @@ int Scroller::createViewSize() {
 	return this->viewSizeCallback();
 }
 
-int Scroller::createItemNum() {
+double Scroller::createItemNum() {
 	return this->itemNumCallback();
 }
 

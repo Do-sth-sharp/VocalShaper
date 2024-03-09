@@ -14,7 +14,7 @@ MixerView::MixerView()
 	/** Scroller */
 	this->hScroller = std::make_unique<Scroller>(false,
 		[this] { return this->getViewWidth(); },
-		[this] { return this->getTrackNum(); },
+		[this] { return (double)(this->getTrackNum()); },
 		[this] { return this->getTrackWidthLimit(); },
 		[this](int pos, int itemSize) { this->updatePos(pos, itemSize); },
 		Scroller::PaintPreviewFunc{},
