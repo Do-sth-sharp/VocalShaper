@@ -51,6 +51,42 @@ void SeqView::resized() {
 	this->vScroller->update();
 }
 
+void SeqView::paint(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int scrollerHeight = screenSize.getHeight() * 0.0275;
+	int scrollerWidth = screenSize.getWidth() * 0.015;
+	int rulerHeight = screenSize.getHeight() * 0.025;
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	float lineThickness = screenSize.getHeight() * 0.0025;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour headBackgroundColor = laf.findColour(
+		juce::Label::ColourIds::backgroundWhenEditingColourId);
+	juce::Colour outlineColor = laf.findColour(
+		juce::Label::ColourIds::outlineColourId);
+
+	/** Head Bar */
+	juce::Rectangle<int> headRect(
+		0, 0, headWidth, this->getHeight());
+	g.setColour(headBackgroundColor);
+	g.fillRect(headRect);
+
+	/** Top Head Split */
+	juce::Rectangle<float> headTopLineRect(
+		0, rulerHeight - lineThickness / 2, headWidth, lineThickness);
+	g.setColour(outlineColor);
+	g.fillRect(headTopLineRect);
+
+	/** Bottom Head Split */
+	juce::Rectangle<float> bottomTopLineRect(
+		0, this->getHeight() - scrollerHeight - lineThickness / 2, headWidth, lineThickness);
+	g.setColour(outlineColor);
+	g.fillRect(bottomTopLineRect);
+}
+
 int SeqView::getViewWidth() const {
 	return this->hScroller->getWidth();
 }

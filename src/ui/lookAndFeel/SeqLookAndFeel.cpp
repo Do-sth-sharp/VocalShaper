@@ -9,13 +9,13 @@ SeqLookAndFeel::SeqLookAndFeel()
 
 	/** Track */
 	this->setColour(juce::Label::ColourIds::backgroundColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));/**< Track Background */
+		ColorMap::getInstance()->get("ThemeColorB0"));/**< Track Background */
 	this->setColour(juce::Label::ColourIds::textColourId,
 		ColorMap::getInstance()->get("ThemeColorB10"));/**< Item Name Light */
 	this->setColour(juce::Label::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));/**< Track Outline */
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB2"));
+		ColorMap::getInstance()->get("ThemeColorB2"));/**< Track Head Background */
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB0"));/**< Item Name Dark */
 	this->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
