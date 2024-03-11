@@ -178,6 +178,7 @@ void MainGraph::clearGraph() {
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, -1);
 }
 
 const juce::Array<float> MainGraph::getOutputLevels() const {

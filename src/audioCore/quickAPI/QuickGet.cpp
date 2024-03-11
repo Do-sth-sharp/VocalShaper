@@ -468,6 +468,15 @@ namespace quickAPI {
 		return "";
 	}
 
+	const juce::Colour getSeqTrackColor(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto seqTrack = graph->getSourceProcessor(index)) {
+				return seqTrack->getTrackColor();
+			}
+		}
+		return utils::getDefaultColour();
+	}
+
 	const juce::StringArray getSeqTrackNameList() {
 		int size = getSeqTrackNum();
 		

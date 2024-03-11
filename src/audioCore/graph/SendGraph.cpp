@@ -22,6 +22,7 @@ void MainGraph::setMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, sourceIndex);
 }
 
 void MainGraph::removeMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
@@ -46,6 +47,7 @@ void MainGraph::removeMIDISrc2TrkConnection(int sourceIndex, int trackIndex) {
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, sourceIndex);
 }
 
 void MainGraph::setAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -75,6 +77,7 @@ void MainGraph::setAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int s
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, sourceIndex);
 }
 
 void MainGraph::removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) {
@@ -94,6 +97,7 @@ void MainGraph::removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, in
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, trackIndex);
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, sourceIndex);
 }
 
 bool MainGraph::isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const {

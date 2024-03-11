@@ -1,6 +1,7 @@
 ﻿#include "SeqView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../Utils.h"
+#include "../../audioCore/AC_API.h"
 
 SeqView::SeqView()
 	: FlowComponent(TRANS("Track")) {
@@ -24,7 +25,9 @@ SeqView::SeqView()
 		[this] { return this->getTrackHeightLimit(); },
 		[this](double pos, double itemSize) { this->updateVPos(pos, itemSize); },
 		Scroller::PaintPreviewFunc{},
-		Scroller::PaintItemPreviewFunc{});
+		[this](juce::Graphics& g, int itemIndex,
+			int width, int height, bool vertical) {
+				this->paintTrackPreview(g, itemIndex, width, height, vertical); });
 	this->addAndMakeVisible(this->vScroller.get());
 }
 
@@ -87,6 +90,54 @@ void SeqView::paint(juce::Graphics& g) {
 	g.fillRect(bottomTopLineRect);
 }
 
+void SeqView::update(int index) {
+	/** Create Or Remove Track */
+	int currentSize = this->trackList.size();
+	int newSize = quickAPI::getSeqTrackNum();
+	if (currentSize > newSize) {
+		for (int i = currentSize - 1; i >= newSize; i--) {
+			this->trackList.remove(i, true);
+		}
+	}
+	else {
+		for (int i = currentSize; i < newSize; i++) {
+			auto track = std::make_unique<juce::Component>();
+			this->addAndMakeVisible(track.get());
+			this->trackList.add(std::move(track));
+		}
+	}
+
+	/** Update Tracks */
+	if (index >= 0 && index < this->trackList.size()) {
+		//this->trackList[index]->update(index);
+	}
+	else {
+		for (int i = 0; i < this->trackList.size(); i++) {
+			//this->trackList[i]->update(i);
+		}
+	}
+
+	/** Update Color Temp */
+	if (index >= 0 && index < this->colorTemp.size()) {
+		if (index < newSize) {
+			this->colorTemp.getReference(index) = quickAPI::getSeqTrackColor(index);
+		}
+		if (this->colorTemp.size() > newSize) {
+			this->colorTemp.resize(newSize);
+		}
+	}
+	else {
+		this->colorTemp.clear();
+		for (int i = 0; i < this->trackList.size(); i++) {
+			this->colorTemp.add(quickAPI::getSeqTrackColor(i));
+		}
+	}
+
+	/** Update View Pos */
+	this->vScroller->update();
+	this->hScroller->update();
+}
+
 int SeqView::getViewWidth() const {
 	return this->hScroller->getWidth();
 }
@@ -120,5 +171,10 @@ std::tuple<double, double> SeqView::getTrackHeightLimit() const {
 }
 
 void SeqView::updateVPos(double pos, double itemSize) {
+	/** TODO */
+}
+
+void SeqView::paintTrackPreview(juce::Graphics& g, int itemIndex,
+	int width, int height, bool vertical) {
 	/** TODO */
 }

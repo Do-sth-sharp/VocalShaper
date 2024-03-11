@@ -30,6 +30,9 @@ void MainGraph::insertSource(int index, const juce::AudioChannelSet& type) {
 			auto node = this->audioSourceNodeList[i];
 			dynamic_cast<SeqSourceProcessor*>(node->getProcessor())->updateIndex(i);
 		}
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
 	}
 	else {
 		jassertfalse;
@@ -78,6 +81,9 @@ void MainGraph::removeSource(int index) {
 		auto node = this->audioSourceNodeList[i];
 		dynamic_cast<SeqSourceProcessor*>(node->getProcessor())->updateIndex(i);
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
 }
 
 int MainGraph::getSourceNum() const {
@@ -94,6 +100,9 @@ void MainGraph::setSourceBypass(int index, bool bypass) {
 	if (index < 0 || index >= this->audioSourceNodeList.size()) { return; }
 	if (auto node = this->audioSourceNodeList.getUnchecked(index)) {
 		node->setBypassed(bypass);
+
+		/** Callback */
+		UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
 	}
 }
 

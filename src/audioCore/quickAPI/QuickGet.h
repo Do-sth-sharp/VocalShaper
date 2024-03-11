@@ -101,6 +101,7 @@ namespace quickAPI {
 
 	int getSeqTrackNum();
 	const juce::String getSeqTrackName(int index);
+	const juce::Colour getSeqTrackColor(int index);
 	const juce::StringArray getSeqTrackNameList();
 	const juce::AudioChannelSet getSeqTrackChannelSet(int index);
 	int getSeqTrackInputChannelNum(int index);

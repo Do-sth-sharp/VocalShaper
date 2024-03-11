@@ -54,6 +54,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](int track, int index) {
 			CoreCallbacks::getInstance()->invokeEffectChanged(track, index);
 		});
+	UICallbackAPI<int>::set(UICallbackType::SeqChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeSeqChanged(index);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -106,6 +110,10 @@ void CoreCallbacks::addTrackMuteChanged(const TrackChangedCallback& callback) {
 
 void CoreCallbacks::addEffectChanged(const EffectChangedCallback& callback) {
 	this->effectChanged.add(callback);
+}
+
+void CoreCallbacks::addSeqChanged(const SeqChangedCallback& callback) {
+	this->seqChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -184,6 +192,12 @@ void CoreCallbacks::invokeTrackMuteChanged(int index) const {
 void CoreCallbacks::invokeEffectChanged(int track, int index) const {
 	for (auto& i : this->effectChanged) {
 		i(track, index);
+	}
+}
+
+void CoreCallbacks::invokeSeqChanged(int index) const {
+	for (auto& i : this->seqChanged) {
+		i(index);
 	}
 }
 
