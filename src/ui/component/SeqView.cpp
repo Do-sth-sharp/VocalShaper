@@ -1,5 +1,6 @@
 ﻿#include "SeqView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../misc/CoreCallbacks.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -29,6 +30,15 @@ SeqView::SeqView()
 			int width, int height, bool vertical) {
 				this->paintTrackPreview(g, itemIndex, width, height, vertical); });
 	this->addAndMakeVisible(this->vScroller.get());
+
+	/** Update Callback */
+	CoreCallbacks::getInstance()->addTrackChanged(
+		[comp = SeqView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->update(index);
+			}
+		}
+	);
 }
 
 void SeqView::resized() {
@@ -175,6 +185,21 @@ void SeqView::updateVPos(double pos, double itemSize) {
 }
 
 void SeqView::paintTrackPreview(juce::Graphics& g, int itemIndex,
-	int width, int height, bool vertical) {
-	/** TODO */
+	int width, int height, bool /*vertical*/) {
+	/** Limit Size */
+	if (itemIndex < 0 || itemIndex >= this->colorTemp.size()) { return; }
+
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int paddingWidth = screenSize.getWidth() * 0.0035;
+	int colorWidth = screenSize.getWidth() * 0.0035;
+
+	/** Color */
+	juce::Colour color = this->colorTemp[itemIndex];
+
+	/** Draw Color */
+	juce::Rectangle<int> colorRect(
+		paddingWidth, 0, colorWidth, height);
+	g.setColour(color);
+	g.fillRect(colorRect);
 }
