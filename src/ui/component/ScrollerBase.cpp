@@ -41,7 +41,7 @@ void ScrollerBase::paint(juce::Graphics& g) {
 		this->getWidth(), this->getHeight(), this->vertical);
 
 	/** Paint Item Preview */
-	int itemAreaSize = this->getTrackLength() / this->itemNum;
+	double itemAreaSize = this->getTrackLength() / this->itemNum;
 	for (int i = 0; i < this->itemNum; i++) {
 		/** Get Paint Area */
 		juce::Rectangle<int> itemRect(
@@ -246,21 +246,25 @@ void ScrollerBase::mouseExit(const juce::MouseEvent& /*event*/) {
 
 void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 	const juce::MouseWheelDetails& wheel) {
+	/** Check State */
 	if (this->state == State::PressedThumb
 		|| this->state == State::PressedStart
 		|| this->state == State::PressedEnd) {
 		return;
 	}
 
+	/** Get Wheel Delta */
 	double totalSize = this->getActualTotalSize();
 	double delta = totalSize * wheel.deltaY
 		* (wheel.isReversed ? 1 : -1) * 0.15;
 
+	/** Get Thumb Per */
 	auto [startPos, endPos] = this->getThumb();
 	double startPer = startPos / (double)this->getTrackLength();
 	double endPer = endPos / (double)this->getTrackLength();
 
 	if (event.mods == juce::ModifierKeys::altModifier) {
+		/** Get Scale Center */
 		auto pos = event.getPosition();
 		auto caredPos = this->getCaredPos(pos);
 		double thumbPer = (caredPos - startPos) / (double)(endPos - startPos);
@@ -274,24 +278,30 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 			centerPer = endPer;
 		}
 
+		/** Get New Per */
 		double deltaPer = delta / totalSize;
 		double deltaL = deltaPer * thumbPer;
 		double deltaR = deltaPer - deltaL;
 		double newStartPer = startPer + deltaL;
 		double newEndPer = endPer - deltaR;
+		newEndPer = std::max(newStartPer, newEndPer);
 
+		/** Get Item Size */
 		double itemSize = this->viewSize / ((newEndPer - newStartPer) * this->itemNum);
 		itemSize = this->limitItemSize(itemSize);
 
+		/** Get Start Pos */
 		double newPer = (this->viewSize / itemSize) / this->itemNum;
 		newStartPer = centerPer - newPer * thumbPer;
 
-		this->setItemSize((int)itemSize);
-		this->setPos((int)(newStartPer * totalSize));
+		/** Set Pos */
+		this->setItemSize(itemSize);
+		this->setPos(newStartPer * this->getActualTotalSize());
 	}
 	else {
+		/** Set Pos */
 		double trueStartPos = startPer * totalSize;
-		this->setPos((int)(trueStartPos + delta));
+		this->setPos(trueStartPos + delta);
 	}
 }
 
