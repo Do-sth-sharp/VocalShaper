@@ -152,6 +152,20 @@ void SeqView::paint(juce::Graphics& g) {
 		0, this->getHeight() - scrollerHeight - lineThickness / 2, headWidth, lineThickness);
 	g.setColour(outlineColor);
 	g.fillRect(bottomTopLineRect);
+
+	/** Top Right Corner */
+	juce::Rectangle<float> topRightRect(
+		this->getWidth() - scrollerWidth, 0,
+		scrollerWidth, rulerHeight);
+	g.setColour(headBackgroundColor);
+	g.fillRect(topRightRect);
+
+	/** Bottom Right Corner */
+	juce::Rectangle<float> bottomRightRect(
+		this->getWidth() - scrollerWidth, this->getHeight() - scrollerHeight,
+		scrollerWidth, scrollerHeight);
+	g.setColour(headBackgroundColor);
+	g.fillRect(bottomRightRect);
 }
 
 void SeqView::update(int index) {
