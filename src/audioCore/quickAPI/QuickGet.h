@@ -19,6 +19,7 @@ namespace quickAPI {
 	const juce::Array<float> getAudioOutputLevel();
 	bool isPlaying();
 	bool isRecording();
+	double getTotalLength();
 
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
@@ -99,6 +100,9 @@ namespace quickAPI {
 	const juce::AudioChannelSet getEffectChannelSet(int trackIndex, int index);
 	int getEffectInputChannelNum(int trackIndex, int index);
 
+	/** StartTime, EndTime, Offset */
+	using SeqBlock = std::tuple<double, double, double>;
+
 	int getSeqTrackNum();
 	const juce::String getSeqTrackName(int index);
 	const juce::Colour getSeqTrackColor(int index);
@@ -106,6 +110,7 @@ namespace quickAPI {
 	const juce::AudioChannelSet getSeqTrackChannelSet(int index);
 	int getSeqTrackInputChannelNum(int index);
 	int getSeqTrackOutputChannelNum(int index);
+	const juce::Array<SeqBlock> getSeqBlockList(int index);
 
 	int getMixerTrackNum();
 	const juce::String getMixerTrackName(int index);

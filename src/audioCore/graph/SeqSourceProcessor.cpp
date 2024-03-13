@@ -57,6 +57,7 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 
 void SeqSourceProcessor::updateIndex(int index) {
 	this->index = index;
+	this->srcs.updateIndex(index);
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);

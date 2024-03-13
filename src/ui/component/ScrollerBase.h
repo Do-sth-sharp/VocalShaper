@@ -38,7 +38,8 @@ protected:
 
 	virtual void updatePos(double pos, double itemSize) = 0;
 
-	virtual void paintPreview(juce::Graphics& g, bool vertical) {};
+	virtual void paintPreview(juce::Graphics& g,
+		int width, int height, bool vertical) {};
 	virtual void paintItemPreview(juce::Graphics& g, int itemIndex,
 		int width, int height, bool vertical) {};
 

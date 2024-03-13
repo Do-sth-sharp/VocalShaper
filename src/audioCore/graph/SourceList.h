@@ -6,6 +6,8 @@
 class SourceList final : public Serializable {
 public:
 	SourceList() = default;
+	
+	void updateIndex(int index);
 
 	/**
 	 * StartTime, EndTime, Offset.
@@ -40,6 +42,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
+	int index = -1;
+
 	juce::Array<SeqBlock, juce::CriticalSection> list;
 	mutable int lastIndex = -1;
 

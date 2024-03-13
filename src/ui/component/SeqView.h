@@ -14,6 +14,7 @@ public:
 	void paint(juce::Graphics& g) override;
 
 	void update(int index);
+	void updateBlock(int track, int index);
 
 private:
 	std::unique_ptr<Scroller> hScroller = nullptr;
@@ -22,11 +23,18 @@ private:
 	juce::OwnedArray<juce::Component> trackList;
 	juce::Array<juce::Colour> colorTemp;
 
+	/** Track Index, Start, End */
+	using BlockItem = std::tuple<int, double, double>;
+	juce::Array<BlockItem> blockTemp;
+	double totalLength = 0;
+
 	int getViewWidth() const;
 	double getTimeLength() const;
 	std::tuple<double, double> getTimeWidthLimit() const;
 
 	void updateHPos(double pos, double itemSize);
+	void paintBlockPreview(juce::Graphics& g,
+		int width, int height, bool vertical);
 
 	int getViewHeight() const;
 	int getTrackNum() const;

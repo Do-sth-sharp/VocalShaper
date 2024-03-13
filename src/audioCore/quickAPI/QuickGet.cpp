@@ -64,6 +64,13 @@ namespace quickAPI {
 		return pos->getIsRecording();
 	}
 
+	double getTotalLength() {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTailLengthSeconds();
+		}
+		return 0;
+	}
+
 	const juce::Array<TrackInfo> getMixerTrackInfos() {
 		juce::Array<TrackInfo> result;
 
@@ -513,6 +520,21 @@ namespace quickAPI {
 			}
 		}
 		return 0;
+	}
+
+	const juce::Array<SeqBlock> getSeqBlockList(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				int blockNum = track->getSeqNum();
+
+				juce::Array<SeqBlock> result;
+				for (int i = 0; i < blockNum; i++) {
+					result.add(track->getSeq(i));
+				}
+				return result;
+			}
+		}
+		return {};
 	}
 
 	int getMixerTrackNum() {

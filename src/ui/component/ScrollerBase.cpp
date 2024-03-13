@@ -37,7 +37,8 @@ void ScrollerBase::paint(juce::Graphics& g) {
 	g.fillAll();
 
 	/** Paint Preview */
-	this->paintPreview(g, this->vertical);
+	this->paintPreview(g,
+		this->getWidth(), this->getHeight(), this->vertical);
 
 	/** Paint Item Preview */
 	int itemAreaSize = this->getTrackLength() / this->itemNum;

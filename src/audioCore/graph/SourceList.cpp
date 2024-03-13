@@ -1,7 +1,12 @@
 ﻿#include "SourceList.h"
 #include "../misc/AudioLock.h"
+#include "../uiCallback/UICallback.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
+
+void SourceList::updateIndex(int index) {
+	this->index = index;
+}
 
 std::tuple<int, int> SourceList::match(double startTime, double endTime) const {
 	/** Empty */
@@ -103,6 +108,10 @@ int SourceList::add(const SourceList::SeqBlock& block) {
 	/** Insert Block */
 	this->list.insert(index, block);
 
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::SeqBlockChanged, this->index, index);
+
 	return index;
 }
 
@@ -110,6 +119,10 @@ void SourceList::remove(int index) {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	if (index >= 0 && index < this->list.size()) {
 		this->list.remove(index);
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::SeqBlockChanged, this->index, index);
 	}
 }
 
@@ -117,6 +130,10 @@ void SourceList::clearGraph() {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->list.clear();
 	this->lastIndex = -1;
+
+	/** Callback */
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::SeqBlockChanged, this->index, -1);
 }
 
 bool SourceList::parse(const google::protobuf::Message* data) {

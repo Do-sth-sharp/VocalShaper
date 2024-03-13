@@ -16,7 +16,8 @@ SeqView::SeqView()
 		[this] { return this->getTimeLength(); },
 		[this] { return this->getTimeWidthLimit(); },
 		[this](double pos, double itemSize) { this->updateHPos(pos, itemSize); },
-		Scroller::PaintPreviewFunc{},
+		[this](juce::Graphics& g, int width, int height, bool vertical) {
+				this->paintBlockPreview(g, width, height, vertical); },
 		Scroller::PaintItemPreviewFunc{});
 	this->addAndMakeVisible(this->hScroller.get());
 
@@ -32,10 +33,17 @@ SeqView::SeqView()
 	this->addAndMakeVisible(this->vScroller.get());
 
 	/** Update Callback */
-	CoreCallbacks::getInstance()->addTrackChanged(
+	CoreCallbacks::getInstance()->addSeqChanged(
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->update(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addSeqBlockChanged(
+		[comp = SeqView::SafePointer(this)](int track, int index) {
+			if (comp) {
+				comp->updateBlock(track, index);
 			}
 		}
 	);
@@ -148,22 +156,67 @@ void SeqView::update(int index) {
 	this->hScroller->update();
 }
 
+void SeqView::updateBlock(int track, int index) {
+	/** Clear Temp */
+	this->blockTemp.clear();
+
+	/** Get Blocks */
+	int trackNum = quickAPI::getSeqTrackNum();
+	for (int i = 0; i < trackNum; i++) {
+		auto list = quickAPI::getSeqBlockList(i);
+		for (auto [startTime, endTime, offset] : list) {
+			this->blockTemp.add({ i, startTime, endTime });
+		}
+	}
+
+	/** Update Length */
+	this->totalLength = quickAPI::getTotalLength();
+
+	/** Update View Pos */
+	this->hScroller->update();
+}
+
 int SeqView::getViewWidth() const {
 	return this->hScroller->getWidth();
 }
 
 double SeqView::getTimeLength() const {
-	/** TODO */
-	return 0;
+	return this->totalLength;
 }
 
 std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 	auto screenSize = utils::getScreenSize(this);
-	return { screenSize.getWidth() * 0.02, screenSize.getWidth() * 0.2 };
+	return { screenSize.getWidth() * 0.01, screenSize.getWidth() * 0.1 };
 }
 
 void SeqView::updateHPos(double pos, double itemSize) {
 	/** TODO */
+}
+
+void SeqView::paintBlockPreview(juce::Graphics& g,
+	int width, int height, bool /*vertical*/) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int paddingHeight = screenSize.getHeight() * 0.0035;
+	float trackMaxHeight = screenSize.getHeight() * 0.0035;
+
+	int trackNum = this->trackList.size();
+	float trackHeight = (height - paddingHeight * 2) / (double)(trackNum);
+	trackHeight = std::min(trackHeight, trackMaxHeight);
+
+	for (auto [trackIndex, startPos, endPos] : this->blockTemp) {
+		if (trackIndex < trackNum) {
+			juce::Rectangle<float> blockRect(
+				startPos / this->totalLength * width,
+				paddingHeight + trackIndex * trackHeight,
+				(endPos - startPos) / this->totalLength * width,
+				trackHeight);
+			juce::Colour blockColor = this->colorTemp[trackIndex];
+
+			g.setColour(blockColor);
+			g.fillRect(blockRect);
+		}
+	}
 }
 
 int SeqView::getViewHeight() const {
@@ -171,8 +224,7 @@ int SeqView::getViewHeight() const {
 }
 
 int SeqView::getTrackNum() const {
-	/** TODO */
-	return 0;
+	return this->trackList.size();
 }
 
 std::tuple<double, double> SeqView::getTrackHeightLimit() const {
