@@ -20,7 +20,27 @@ private:
 	std::unique_ptr<Scroller> hScroller = nullptr;
 	std::unique_ptr<Scroller> vScroller = nullptr;
 
-	juce::OwnedArray<juce::Component> trackList;
+	class TrackList : public juce::Component {
+	public:
+		TrackList() = default;
+
+		int size() const;
+		void remove(int index);
+		void add(std::unique_ptr<juce::Component> newComp);
+
+		void update(int index);
+		void updateBlock(int track, int index);
+
+		void updateHPos(double pos, double itemSize);
+		void updateVPos(double pos, double itemSize);
+
+	private:
+		juce::OwnedArray<juce::Component> list;
+
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrackList)
+	};
+
+	std::unique_ptr<TrackList> trackList = nullptr;
 	juce::Array<juce::Colour> colorTemp;
 
 	/** Track Index, Start, End */

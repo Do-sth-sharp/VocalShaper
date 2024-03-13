@@ -4,11 +4,51 @@
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
+int SeqView::TrackList::size() const {
+	return this->list.size();
+}
+
+void SeqView::TrackList::remove(int index) {
+	this->list.remove(index, true);
+}
+
+void SeqView::TrackList::add(
+	std::unique_ptr<juce::Component> newComp) {
+	this->addAndMakeVisible(newComp.get());
+	this->list.add(std::move(newComp));
+}
+
+void SeqView::TrackList::update(int index) {
+	/** TODO */
+	//this->list[index]->update(index);
+}
+
+void SeqView::TrackList::updateBlock(int track, int index) {
+	/** TODO */
+}
+
+void SeqView::TrackList::updateHPos(double pos, double itemSize) {
+	/** TODO */
+}
+
+void SeqView::TrackList::updateVPos(double pos, double itemSize) {
+	for (int i = 0; i < this->list.size(); i++) {
+		juce::Rectangle<int> trackRect(
+			0, i * itemSize - pos,
+			this->getWidth(), itemSize);
+		this->list[i]->setBounds(trackRect);
+	}
+}
+
 SeqView::SeqView()
 	: FlowComponent(TRANS("Track")) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeq());
+
+	/** Track List */
+	this->trackList = std::make_unique<TrackList>();
+	this->addAndMakeVisible(this->trackList.get());
 
 	/** Scroller */
 	this->hScroller = std::make_unique<Scroller>(false,
@@ -67,6 +107,12 @@ void SeqView::resized() {
 		scrollerWidth, this->getHeight() - rulerHeight - scrollerHeight);
 	this->vScroller->setBounds(vScrollerRect);
 
+	/** Track List */
+	juce::Rectangle<int> listRect(
+		0, vScrollerRect.getY(),
+		hScrollerRect.getWidth(), vScrollerRect.getHeight());
+	this->trackList->setBounds(listRect);
+
 	/** Update View Pos */
 	this->hScroller->update();
 	this->vScroller->update();
@@ -110,28 +156,27 @@ void SeqView::paint(juce::Graphics& g) {
 
 void SeqView::update(int index) {
 	/** Create Or Remove Track */
-	int currentSize = this->trackList.size();
+	int currentSize = this->trackList->size();
 	int newSize = quickAPI::getSeqTrackNum();
 	if (currentSize > newSize) {
 		for (int i = currentSize - 1; i >= newSize; i--) {
-			this->trackList.remove(i, true);
+			this->trackList->remove(i);
 		}
 	}
 	else {
 		for (int i = currentSize; i < newSize; i++) {
 			auto track = std::make_unique<juce::Component>();
-			this->addAndMakeVisible(track.get());
-			this->trackList.add(std::move(track));
+			this->trackList->add(std::move(track));
 		}
 	}
 
 	/** Update Tracks */
-	if (index >= 0 && index < this->trackList.size()) {
-		//this->trackList[index]->update(index);
+	if (index >= 0 && index < this->trackList->size()) {
+		this->trackList->update(index);
 	}
 	else {
-		for (int i = 0; i < this->trackList.size(); i++) {
-			//this->trackList[i]->update(i);
+		for (int i = 0; i < this->trackList->size(); i++) {
+			this->trackList->update(i);
 		}
 	}
 
@@ -146,7 +191,7 @@ void SeqView::update(int index) {
 	}
 	else {
 		this->colorTemp.clear();
-		for (int i = 0; i < this->trackList.size(); i++) {
+		for (int i = 0; i < this->trackList->size(); i++) {
 			this->colorTemp.add(quickAPI::getSeqTrackColor(i));
 		}
 	}
@@ -157,6 +202,9 @@ void SeqView::update(int index) {
 }
 
 void SeqView::updateBlock(int track, int index) {
+	/** Update Tracks */
+	this->trackList->updateBlock(track, index);
+
 	/** Clear Temp */
 	this->blockTemp.clear();
 
@@ -190,7 +238,7 @@ std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 }
 
 void SeqView::updateHPos(double pos, double itemSize) {
-	/** TODO */
+	this->trackList->updateHPos(pos, itemSize);
 }
 
 void SeqView::paintBlockPreview(juce::Graphics& g,
@@ -200,7 +248,7 @@ void SeqView::paintBlockPreview(juce::Graphics& g,
 	int paddingHeight = screenSize.getHeight() * 0.0035;
 	float trackMaxHeight = screenSize.getHeight() * 0.0035;
 
-	int trackNum = this->trackList.size();
+	int trackNum = this->trackList->size();
 	float trackHeight = (height - paddingHeight * 2) / (double)(trackNum);
 	trackHeight = std::min(trackHeight, trackMaxHeight);
 
@@ -224,7 +272,7 @@ int SeqView::getViewHeight() const {
 }
 
 int SeqView::getTrackNum() const {
-	return this->trackList.size();
+	return this->trackList->size();
 }
 
 std::tuple<double, double> SeqView::getTrackHeightLimit() const {
@@ -233,7 +281,7 @@ std::tuple<double, double> SeqView::getTrackHeightLimit() const {
 }
 
 void SeqView::updateVPos(double pos, double itemSize) {
-	/** TODO */
+	this->trackList->updateVPos(pos, itemSize);
 }
 
 void SeqView::paintTrackPreview(juce::Graphics& g, int itemIndex,
