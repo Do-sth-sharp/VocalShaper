@@ -72,6 +72,10 @@ SeqView::SeqView()
 				this->paintTrackPreview(g, itemIndex, width, height, vertical); });
 	this->addAndMakeVisible(this->vScroller.get());
 
+	/** Time Ruler */
+	this->ruler = std::make_unique<SeqTimeRuler>();
+	this->addAndMakeVisible(this->ruler.get());
+
 	/** Update Callback */
 	CoreCallbacks::getInstance()->addSeqChanged(
 		[comp = SeqView::SafePointer(this)](int index) {
@@ -106,6 +110,12 @@ void SeqView::resized() {
 		this->getWidth() - scrollerWidth, rulerHeight,
 		scrollerWidth, this->getHeight() - rulerHeight - scrollerHeight);
 	this->vScroller->setBounds(vScrollerRect);
+
+	/** Time Ruler */
+	juce::Rectangle<int> rulerRect(
+		headWidth, 0,
+		hScrollerRect.getWidth(), rulerHeight);
+	this->ruler->setBounds(rulerRect);
 
 	/** Track List */
 	juce::Rectangle<int> listRect(
@@ -252,6 +262,7 @@ std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 }
 
 void SeqView::updateHPos(double pos, double itemSize) {
+	this->ruler->updateHPos(pos, itemSize);
 	this->trackList->updateHPos(pos, itemSize);
 }
 

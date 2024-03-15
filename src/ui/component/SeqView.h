@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include <FlowUI.h>
 #include "Scroller.h"
+#include "SeqTimeRuler.h"
 
 class SeqView final
 	: public flowUI::FlowComponent,
@@ -39,6 +40,8 @@ private:
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrackList)
 	};
+
+	std::unique_ptr<SeqTimeRuler> ruler = nullptr;
 
 	std::unique_ptr<TrackList> trackList = nullptr;
 	juce::Array<juce::Colour> colorTemp;
