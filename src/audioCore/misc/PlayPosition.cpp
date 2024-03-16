@@ -145,6 +145,11 @@ juce::MidiMessageSequence& MovablePlayHead::getTempoSequence() {
 	return this->tempos;
 }
 
+void MovablePlayHead::updateTempoTemp() {
+	juce::ScopedWriteLock locker(audioLock::getPositionLock());
+	this->tempoTemp.update(this->tempos);
+}
+
 double MovablePlayHead::getSampleRate() const {
 	return this->sampleRate;
 }

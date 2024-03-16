@@ -99,6 +99,7 @@ void SourceIO::run() {
 						juce::ScopedWriteLock locker(audioLock::getPositionLock());
 						auto& tempoSeq = PlayPosition::getInstance()->getTempoSequence();
 						tempoSeq.addSequence(tempo, 0);
+						PlayPosition::getInstance()->updateTempoTemp();
 					}
 
 					/** Set Data */

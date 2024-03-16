@@ -312,6 +312,7 @@ bool AudioCore::parse(const google::protobuf::Message* data) {
 			if (tempoFile.getNumTracks() > 0) {
 				tempos = *(tempoFile.getTrack(0));
 			}
+			PlayPosition::getInstance()->updateTempoTemp();
 		}
 	}
 

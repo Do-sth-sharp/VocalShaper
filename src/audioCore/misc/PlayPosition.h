@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "TempoTemp.h"
 
 class MovablePlayHead : public juce::AudioPlayHead {
 public:
@@ -32,6 +33,7 @@ public:
 	std::tuple<int, double> toBar(double timeSecond, short timeFormat) const;
 
 	juce::MidiMessageSequence& getTempoSequence();
+	void updateTempoTemp();
 	double getSampleRate() const;
 
 	void setOverflow();
@@ -40,6 +42,7 @@ public:
 protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
 	juce::MidiMessageSequence tempos;
+	TempoTemp tempoTemp;
 	std::atomic_short timeFormat = 480;
 	std::atomic<double> sampleRate = 48000;
 	std::atomic_bool overflowFlag = false;
