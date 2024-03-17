@@ -334,9 +334,9 @@ namespace utils {
 					tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
 				}
 
-				if (m.isTimeSignatureMetaEvent()) {
+				if (m2.isTimeSignatureMetaEvent()) {
 					int numerator = 4, denominator = 4;
-					m.getTimeSignatureInfo(numerator, denominator);
+					m2.getTimeSignatureInfo(numerator, denominator);
 
 					/** Check Delay Valid */
 					double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
