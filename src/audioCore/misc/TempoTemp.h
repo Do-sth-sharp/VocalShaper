@@ -7,22 +7,20 @@ public:
 	TempoTemp() = default;
 
 	void update(juce::MidiMessageSequence& tempoMessages);
+	int selectBySec(double time) const;
 
 private:
-	/** xInQuarter, xInBar, beat, base */
-	using BeatTempItem = std::tuple<double, double, int, int>;
-	/** xs, xe, ts, te, T */
+	/** timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar */
 	using TempoTempItem = std::tuple<double, double, double, double, double>;
 
-	juce::Array<BeatTempItem> beatTemp;
-	juce::Array<TempoTempItem> tempoTemp;
-	int lastBeatIndex = -1, lastTempoIndex = -1;
+	juce::Array<TempoTempItem> temp;
+	mutable int lastIndex = -1;
 
-	void updateTempo(juce::MidiMessageSequence& tempoMessages);
-	void updateBeat(juce::MidiMessageSequence& beatMessages);
-
-	static double tFuncBeat(double x, double xs, double T, double ts);
-	static double xFuncBeat(double t, double ts, double T, double xs);
+	enum class CompareResult {
+		EQ, GTR, LSS
+	};
+	template<typename Func, typename T>
+	int search(int low, int high, T value, Func func) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TempoTemp)
 };
