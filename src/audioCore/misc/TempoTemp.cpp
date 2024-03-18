@@ -1,7 +1,11 @@
 ﻿#include "TempoTemp.h"
 
+TempoTemp::TempoTemp() {
+	this->update(juce::MidiMessageSequence{});
+}
+
 void TempoTemp::update(
-	juce::MidiMessageSequence& tempoMessages) {
+	const juce::MidiMessageSequence& tempoMessages) {
 	/** Clear Temp */
 	this->temp.clear();
 	this->lastIndex = -1;
@@ -149,7 +153,7 @@ void TempoTemp::update(
 }
 
 int TempoTemp::selectBySec(double time) const {
-	{
+	if (this->lastIndex >= 0 && this->lastIndex < this->temp.size()) {
 		/** Get Temp */
 		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex);
 
@@ -168,7 +172,7 @@ int TempoTemp::selectBySec(double time) const {
 	}
 	
 	/** Get Next Temp */
-	if (this->lastIndex < this->temp.size() - 1) {
+	if (this->lastIndex >= -1 && this->lastIndex < this->temp.size() - 1) {
 		/** Get Next */
 		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex + 1);
 		
@@ -201,6 +205,196 @@ int TempoTemp::selectBySec(double time) const {
 
 	/** Binary Search */
 	return this->lastIndex = this->search(0, this->temp.size() - 1, time, cFunc);
+}
+
+int TempoTemp::selectByTick(double timeTick, short timeFormat) const {
+	/** Ticks Per Sec */
+	if (timeFormat < 0) {
+		double timeSec = timeTick / (-(timeFormat >> 8) * (timeFormat & 0xff));
+		return this->selectBySec(timeSec);
+	}
+
+	/** Ticks Per Quarter */
+	double timeQuarter = timeTick / timeFormat;
+	return this->selectByQuarter(timeQuarter);
+}
+
+int TempoTemp::selectByQuarter(double timeQuarter) const {
+	if (this->lastIndex >= 0 && this->lastIndex < this->temp.size()) {
+		/** Get Temp */
+		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex);
+
+		/** Hit Temp */
+		if (this->lastIndex == this->temp.size() - 1) {
+			if (timeQuarter >= timeInQuarter) {
+				return this->lastIndex;
+			}
+		}
+		else {
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 1);
+			if ((timeQuarter >= timeInQuarter) && (timeQuarter < timeInQuarterNext)) {
+				return this->lastIndex;
+			}
+		}
+	}
+
+	/** Get Next Temp */
+	if (this->lastIndex >= -1 && this->lastIndex < this->temp.size() - 1) {
+		/** Get Next */
+		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex + 1);
+
+		/** Check Hit */
+		if (this->lastIndex < this->temp.size() - 2) {
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 2);
+			if ((timeQuarter >= timeInQuarter) && (timeQuarter < timeInQuarterNext)) {
+				return ++(this->lastIndex);
+			}
+		}
+		else {
+			if (timeQuarter >= timeInQuarter) {
+				return ++(this->lastIndex);
+			}
+		}
+	}
+
+	/** Compare Function */
+	auto cFunc = [](double x, const TempoTempItem& curr, const TempoTempItem& next)->CompareResult {
+		if (x >= std::get<1>(curr) && x < std::get<1>(next)) {
+			return CompareResult::EQ;
+		}
+		else if (x >= std::get<1>(next)) {
+			return CompareResult::GTR;
+		}
+		else {
+			return CompareResult::LSS;
+		}
+		};
+
+	/** Binary Search */
+	return this->lastIndex = this->search(0, this->temp.size() - 1, timeQuarter, cFunc);
+}
+
+int TempoTemp::selectByBar(double timeBar) const {
+	if (this->lastIndex >= 0 && this->lastIndex < this->temp.size()) {
+		/** Get Temp */
+		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex);
+
+		/** Hit Temp */
+		if (this->lastIndex == this->temp.size() - 1) {
+			if (timeBar >= timeInBar) {
+				return this->lastIndex;
+			}
+		}
+		else {
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 1);
+			if ((timeBar >= timeInBar) && (timeBar < timeInBarNext)) {
+				return this->lastIndex;
+			}
+		}
+	}
+
+	/** Get Next Temp */
+	if (this->lastIndex >= -1 && this->lastIndex < this->temp.size() - 1) {
+		/** Get Next */
+		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex + 1);
+
+		/** Check Hit */
+		if (this->lastIndex < this->temp.size() - 2) {
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 2);
+			if ((timeBar >= timeInBar) && (timeBar < timeInBarNext)) {
+				return ++(this->lastIndex);
+			}
+		}
+		else {
+			if (timeBar >= timeInBar) {
+				return ++(this->lastIndex);
+			}
+		}
+	}
+
+	/** Compare Function */
+	auto cFunc = [](double x, const TempoTempItem& curr, const TempoTempItem& next)->CompareResult {
+		if (x >= std::get<2>(curr) && x < std::get<2>(next)) {
+			return CompareResult::EQ;
+		}
+		else if (x >= std::get<1>(next)) {
+			return CompareResult::GTR;
+		}
+		else {
+			return CompareResult::LSS;
+		}
+		};
+
+	/** Binary Search */
+	return this->lastIndex = this->search(0, this->temp.size() - 1, timeBar, cFunc);
+}
+
+double TempoTemp::secToQuarter(double timeSec, int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	return timeInQuarter + (timeSec - timeInSec) / secPerQuarter;
+}
+
+double TempoTemp::quarterToSec(double timeQuarter, int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	return timeInSec + (timeQuarter - timeInQuarter) * secPerQuarter;
+}
+
+double TempoTemp::secToTick(double timeSec, int tempIndex, short timeFormat) const {
+	/** Ticks Per Sec */
+	if (timeFormat < 0) {
+		return timeSec * (-(timeFormat >> 8) * (timeFormat & 0xff));
+	}
+
+	/** Ticks Per Quarter */
+	double timeQuarter = this->secToQuarter(timeSec, tempIndex);
+	return timeQuarter * timeFormat;
+}
+
+double TempoTemp::tickToSec(double timeTick, int tempIndex, short timeFormat) const {
+	/** Ticks Per Sec */
+	if (timeFormat < 0) {
+		return timeTick / (-(timeFormat >> 8) * (timeFormat & 0xff));
+	}
+
+	/** Ticks Per Quarter */
+	double timeQuarter = timeTick / timeFormat;
+	return this->quarterToSec(timeQuarter, tempIndex);
+}
+
+double TempoTemp::quarterToBar(double timeQuarter, int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	return timeInBar + (timeQuarter - timeInQuarter) / quarterPerBar;
+}
+
+double TempoTemp::barToQuarter(double timeBar, int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	return timeInQuarter + (timeBar - timeInBar) * quarterPerBar;
+}
+
+double TempoTemp::secToBar(double timeSec, int tempIndex) const {
+	double timeQuarter = this->secToQuarter(timeSec, tempIndex);
+	return this->quarterToBar(timeQuarter, tempIndex);
+}
+
+double TempoTemp::barToSec(double timeBar, int tempIndex) const {
+	double timeQuarter = this->barToQuarter(timeBar, tempIndex);
+	return this->quarterToSec(timeQuarter, tempIndex);
+}
+
+double TempoTemp::getSecPerQuarter(int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	return secPerQuarter;
+}
+
+double TempoTemp::getQuarterPerBar(int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	return quarterPerBar;
 }
 
 template<typename Func, typename T>

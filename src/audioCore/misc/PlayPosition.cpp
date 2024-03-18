@@ -3,7 +3,6 @@
 #include <chrono>
 #include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
-#include "../Utils.h"
 
 juce::Optional<juce::AudioPlayHead::PositionInfo> MovablePlayHead::getPosition() const {
 	/** Get System Clock Nanoseconds */
@@ -75,8 +74,8 @@ void MovablePlayHead::setLoopPointsInSeconds(const std::tuple<double, double>& p
 	juce::ScopedWriteLock locker(audioLock::getPositionLock());
 
 	auto [start, end] = points;
-	start = this->toTick(start) / this->timeFormat;
-	end = this->toTick(end) / this->timeFormat;
+	start = this->toQuarter(start);
+	end = this->toQuarter(end);
 
 	this->position.setLoopPoints(
 		juce::AudioPlayHead::LoopPoints{ start, end });
@@ -97,7 +96,7 @@ void MovablePlayHead::setPositionInSeconds(double time) {
 
 void MovablePlayHead::setPositionInQuarter(double time) {
 	juce::ScopedWriteLock locker(audioLock::getPositionLock());
-	this->setPositionInSeconds(this->toSecond(time * this->timeFormat));
+	this->setPositionInSeconds(this->toSecondQ(time));
 }
 
 void MovablePlayHead::setPositionInSamples(int64_t sampleNum) {
@@ -123,22 +122,47 @@ double MovablePlayHead::toTick(double timeSecond) const {
 	return this->toTick(timeSecond, this->timeFormat);
 }
 
-std::tuple<int, double> MovablePlayHead::toBar(double timeSecond) const {
-	return this->toBar(timeSecond, this->timeFormat);
-}
-
 double MovablePlayHead::toSecond(double timeTick, short timeFormat) const {
-	return utils::convertTicksToSecondsWithObjectiveTempoTime(
-		timeTick, this->tempos, this->timeFormat);
+	int tempIndex = this->tempoTemp.selectByTick(timeTick, timeFormat);
+	return this->tempoTemp.tickToSec(timeTick, tempIndex, timeFormat);
 }
 
 double MovablePlayHead::toTick(double timeSecond, short timeFormat) const {
-	return utils::convertSecondsToTicks(
-		timeSecond, this->tempos, timeFormat);
+	int tempIndex = this->tempoTemp.selectBySec(timeSecond);
+	return this->tempoTemp.secToTick(timeSecond, tempIndex, timeFormat);
 }
 
-std::tuple<int, double> MovablePlayHead::toBar(double timeSecond, short /*timeFormat*/) const {
-	return utils::getBarBySecond(timeSecond, this->tempos);
+double MovablePlayHead::toQuarter(double timeSecond) const {
+	int tempIndex = this->tempoTemp.selectBySec(timeSecond);
+	return this->tempoTemp.secToQuarter(timeSecond, tempIndex);
+}
+
+double MovablePlayHead::toSecondQ(double timeQuarter) const {
+	int tempIndex = this->tempoTemp.selectByQuarter(timeQuarter);
+	return this->tempoTemp.quarterToSec(timeQuarter, tempIndex);
+}
+
+std::tuple<int, double> MovablePlayHead::toBar(double timeSecond) const {
+	int tempIndex = this->tempoTemp.selectBySec(timeSecond);
+	double timeQuarter = this->tempoTemp.secToQuarter(timeSecond, tempIndex);
+	double timeBar = this->tempoTemp.quarterToBar(timeQuarter, tempIndex);
+	double quarterPerBar = this->tempoTemp.getQuarterPerBar(tempIndex);
+
+	int barCount = std::floor(timeBar);
+	double quarterInBar = (timeBar - barCount) * quarterPerBar;
+
+	return { barCount, timeQuarter - quarterInBar };
+}
+
+std::tuple<int, double> MovablePlayHead::toBarQ(double timeQuarter) const {
+	int tempIndex = this->tempoTemp.selectByQuarter(timeQuarter);
+	double timeBar = this->tempoTemp.quarterToBar(timeQuarter, tempIndex);
+	double quarterPerBar = this->tempoTemp.getQuarterPerBar(tempIndex);
+
+	int barCount = std::floor(timeBar);
+	double quarterInBar = (timeBar - barCount) * quarterPerBar;
+
+	return { barCount, timeQuarter - quarterInBar };
 }
 
 juce::MidiMessageSequence& MovablePlayHead::getTempoSequence() {
@@ -165,22 +189,24 @@ bool MovablePlayHead::checkOverflow() const {
 void MovablePlayHead::updatePositionByTimeInSecond() {
 	double time = this->position.getTimeInSeconds().orFallback(0);
 	this->position.setTimeInSamples((int64_t)std::floor(time * this->sampleRate));
-	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
+	double timeQuarter = this->toQuarter(time);
+	this->position.setPpqPosition(timeQuarter);
 
-	auto barInfo = this->toBar(time);
-	this->position.setBarCount(std::get<0>(barInfo));
-	this->position.setPpqPositionOfLastBarStart(std::get<1>(barInfo));
+	auto [barCount, barPpq] = this->toBarQ(timeQuarter);
+	this->position.setBarCount(barCount);
+	this->position.setPpqPositionOfLastBarStart(barPpq);
 }
 
 void MovablePlayHead::updatePositionByTimeInSample() {
 	uint64_t sample = this->position.getTimeInSamples().orFallback(0);
 	double time = sample / this->sampleRate;
 	this->position.setTimeInSeconds(time);
-	this->position.setPpqPosition(this->toTick(time) / this->timeFormat);
+	double timeQuarter = this->toQuarter(time);
+	this->position.setPpqPosition(timeQuarter);
 
-	auto barInfo = this->toBar(time);
-	this->position.setBarCount(std::get<0>(barInfo));
-	this->position.setPpqPositionOfLastBarStart(std::get<1>(barInfo));
+	auto [barCount, barPpq] = this->toBarQ(timeQuarter);
+	this->position.setBarCount(barCount);
+	this->position.setPpqPositionOfLastBarStart(barPpq);
 }
 
 PlayPosition* PlayPosition::getInstance() {

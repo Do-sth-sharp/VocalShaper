@@ -4,10 +4,25 @@
 
 class TempoTemp final {
 public:
-	TempoTemp() = default;
+	TempoTemp();
 
-	void update(juce::MidiMessageSequence& tempoMessages);
+	void update(const juce::MidiMessageSequence& tempoMessages);
 	int selectBySec(double time) const;
+	int selectByTick(double timeTick, short timeFormat) const;
+	int selectByQuarter(double timeQuarter) const;
+	int selectByBar(double timeBar) const;
+
+	double secToQuarter(double timeSec, int tempIndex) const;
+	double quarterToSec(double timeQuarter, int tempIndex) const;
+	double secToTick(double timeSec, int tempIndex, short timeFormat) const;
+	double tickToSec(double timeTick, int tempIndex, short timeFormat) const;
+	double quarterToBar(double timeQuarter, int tempIndex) const;
+	double barToQuarter(double timeBar, int tempIndex) const;
+	double secToBar(double timeSec, int tempIndex) const;
+	double barToSec(double timeBar, int tempIndex) const;
+
+	double getSecPerQuarter(int tempIndex) const;
+	double getQuarterPerBar(int tempIndex) const;
 
 private:
 	/** timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar */

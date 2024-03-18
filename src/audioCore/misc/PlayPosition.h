@@ -27,10 +27,14 @@ public:
 
 	double toSecond(double timeTick) const;
 	double toTick(double timeSecond) const;
-	std::tuple<int, double> toBar(double timeSecond) const;
 	double toSecond(double timeTick, short timeFormat) const;
 	double toTick(double timeSecond, short timeFormat) const;
-	std::tuple<int, double> toBar(double timeSecond, short timeFormat) const;
+	double toQuarter(double timeSecond) const;
+	double toSecondQ(double timeQuarter) const;
+	/** BarCount, BarStartQuarter */
+	std::tuple<int, double> toBar(double timeSecond) const;
+	/** BarCount, BarStartQuarter */
+	std::tuple<int, double> toBarQ(double timeQuarter) const;
 
 	juce::MidiMessageSequence& getTempoSequence();
 	void updateTempoTemp();
