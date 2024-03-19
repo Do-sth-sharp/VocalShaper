@@ -23,6 +23,7 @@ void TempoTemp::update(
 
 	/** State Temp */
 	double secsPerQuarter = 0.5, quarterPerBar = 4.0;
+	int numeratorLastValid = 4, denominatorLastValid = 4;
 
 	/** State Wait For Valid Temp */
 	double tempValidSec = 0;
@@ -30,9 +31,13 @@ void TempoTemp::update(
 	double tempValidBar = 0;
 	double secPerQuarterWaitForValid = 0.5;
 	double quarterPerBarWaitForValid = 4.0;
+	int numeratorForValid = 4;
+	int denominatorForValid = 4;
 
 	/** Add First Event */
-	this->temp.add({ tempValidSec, tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
+	this->temp.add({ tempValidSec, tempValidQuarter, tempValidBar,
+		secPerQuarterWaitForValid, quarterPerBarWaitForValid,
+		numeratorForValid, denominatorForValid });
 
 	/** Build Temporary */
 	int numEvents = tempoMessages.getNumEvents();
@@ -43,17 +48,23 @@ void TempoTemp::update(
 		/** Temp Valid */
 		if (correctedQuarter + (eventTime - lastTime) / secsPerQuarter > tempValidQuarter) {
 			if (std::get<0>(this->temp.getLast()) < tempValidQuarter) {
-				this->temp.add({ tempValidSec, tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
+				this->temp.add({ tempValidSec, tempValidQuarter, tempValidBar,
+					secPerQuarterWaitForValid, quarterPerBarWaitForValid,
+					numeratorForValid, denominatorForValid });
 			}
 			else {
 				this->temp.getReference(this->temp.size() - 1)
-					= std::make_tuple(tempValidSec, tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid);
+					= std::make_tuple(tempValidSec, tempValidQuarter, tempValidBar,
+						secPerQuarterWaitForValid, quarterPerBarWaitForValid,
+						numeratorForValid, denominatorForValid);
 			}
 
 			lastValidQuarter = tempValidQuarter;
 			lastValidBar = tempValidBar;
 			secsPerQuarter = secPerQuarterWaitForValid;
 			quarterPerBar = quarterPerBarWaitForValid;
+			numeratorLastValid = numeratorForValid;
+			denominatorLastValid = denominatorForValid;
 		}
 
 		/** Get Time */
@@ -88,6 +99,8 @@ void TempoTemp::update(
 			}
 
 			/** Set Wait For Valid Temp */
+			numeratorForValid = numerator;
+			denominatorForValid = denominator;
 			quarterPerBarWaitForValid = numerator * (4.0 / denominator);
 			tempValidBar = lastValidBar + barDistance;
 			tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
@@ -126,6 +139,8 @@ void TempoTemp::update(
 				}
 
 				/** Set Wait For Valid Temp */
+				numeratorForValid = numerator;
+				denominatorForValid = denominator;
 				quarterPerBarWaitForValid = numerator * (4.0 / denominator);
 				tempValidBar = lastValidBar + barDistance;
 				tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
@@ -138,24 +153,31 @@ void TempoTemp::update(
 	/** Temp Valid */
 	if (correctedQuarter + (eventTime - lastTime) / secsPerQuarter > tempValidQuarter) {
 		if (std::get<0>(this->temp.getLast()) < tempValidQuarter) {
-			this->temp.add({ tempValidSec, tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
+			this->temp.add({ tempValidSec, tempValidQuarter, tempValidBar,
+				secPerQuarterWaitForValid, quarterPerBarWaitForValid,
+				numeratorForValid, denominatorForValid });
 		}
 		else {
 			this->temp.getReference(this->temp.size() - 1)
-				= std::make_tuple(tempValidSec, tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid);
+				= std::make_tuple(tempValidSec, tempValidQuarter, tempValidBar,
+					secPerQuarterWaitForValid, quarterPerBarWaitForValid,
+					numeratorForValid, denominatorForValid);
 		}
 
 		lastValidQuarter = tempValidQuarter;
 		lastValidBar = tempValidBar;
 		secsPerQuarter = secPerQuarterWaitForValid;
 		quarterPerBar = quarterPerBarWaitForValid;
+		numeratorLastValid = numeratorForValid;
+		denominatorLastValid = denominatorForValid;
 	}
 }
 
 int TempoTemp::selectBySec(double time) const {
 	if (this->lastIndex >= 0 && this->lastIndex < this->temp.size()) {
 		/** Get Temp */
-		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex);
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->lastIndex);
 
 		/** Hit Temp */
 		if (this->lastIndex == this->temp.size() - 1) {
@@ -164,7 +186,8 @@ int TempoTemp::selectBySec(double time) const {
 			}
 		}
 		else {
-			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 1);
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext,
+				secPerQuarterNext, quarterPerBarNext, numeratorNext, denominatorNext] = this->temp.getReference(this->lastIndex + 1);
 			if ((time >= timeInSec) && (time < timeInSecNext)) {
 				return this->lastIndex;
 			}
@@ -174,11 +197,13 @@ int TempoTemp::selectBySec(double time) const {
 	/** Get Next Temp */
 	if (this->lastIndex >= -1 && this->lastIndex < this->temp.size() - 1) {
 		/** Get Next */
-		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex + 1);
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->lastIndex + 1);
 		
 		/** Check Hit */
 		if (this->lastIndex < this->temp.size() - 2) {
-			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 2);
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext,
+				secPerQuarterNext, quarterPerBarNext, numeratorNext, denominatorNext] = this->temp.getReference(this->lastIndex + 2);
 			if ((time >= timeInSec) && (time < timeInSecNext)) {
 				return ++(this->lastIndex);
 			}
@@ -222,7 +247,8 @@ int TempoTemp::selectByTick(double timeTick, short timeFormat) const {
 int TempoTemp::selectByQuarter(double timeQuarter) const {
 	if (this->lastIndex >= 0 && this->lastIndex < this->temp.size()) {
 		/** Get Temp */
-		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex);
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->lastIndex);
 
 		/** Hit Temp */
 		if (this->lastIndex == this->temp.size() - 1) {
@@ -231,7 +257,8 @@ int TempoTemp::selectByQuarter(double timeQuarter) const {
 			}
 		}
 		else {
-			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 1);
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext,
+				secPerQuarterNext, quarterPerBarNext, numeratorNext, denominatorNext] = this->temp.getReference(this->lastIndex + 1);
 			if ((timeQuarter >= timeInQuarter) && (timeQuarter < timeInQuarterNext)) {
 				return this->lastIndex;
 			}
@@ -241,11 +268,13 @@ int TempoTemp::selectByQuarter(double timeQuarter) const {
 	/** Get Next Temp */
 	if (this->lastIndex >= -1 && this->lastIndex < this->temp.size() - 1) {
 		/** Get Next */
-		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex + 1);
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->lastIndex + 1);
 
 		/** Check Hit */
 		if (this->lastIndex < this->temp.size() - 2) {
-			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 2);
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext,
+				secPerQuarterNext, quarterPerBarNext, numeratorNext, denominatorNext] = this->temp.getReference(this->lastIndex + 2);
 			if ((timeQuarter >= timeInQuarter) && (timeQuarter < timeInQuarterNext)) {
 				return ++(this->lastIndex);
 			}
@@ -277,7 +306,8 @@ int TempoTemp::selectByQuarter(double timeQuarter) const {
 int TempoTemp::selectByBar(double timeBar) const {
 	if (this->lastIndex >= 0 && this->lastIndex < this->temp.size()) {
 		/** Get Temp */
-		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex);
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->lastIndex);
 
 		/** Hit Temp */
 		if (this->lastIndex == this->temp.size() - 1) {
@@ -286,7 +316,8 @@ int TempoTemp::selectByBar(double timeBar) const {
 			}
 		}
 		else {
-			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 1);
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext,
+				secPerQuarterNext, quarterPerBarNext, numeratorNext, denominatorNext] = this->temp.getReference(this->lastIndex + 1);
 			if ((timeBar >= timeInBar) && (timeBar < timeInBarNext)) {
 				return this->lastIndex;
 			}
@@ -296,11 +327,13 @@ int TempoTemp::selectByBar(double timeBar) const {
 	/** Get Next Temp */
 	if (this->lastIndex >= -1 && this->lastIndex < this->temp.size() - 1) {
 		/** Get Next */
-		auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(this->lastIndex + 1);
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->lastIndex + 1);
 
 		/** Check Hit */
 		if (this->lastIndex < this->temp.size() - 2) {
-			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext, secPerQuarterNext, quarterPerBarNext] = this->temp.getReference(this->lastIndex + 2);
+			auto& [timeInSecNext, timeInQuarterNext, timeInBarNext,
+				secPerQuarterNext, quarterPerBarNext, numeratorNext, denominatorNext] = this->temp.getReference(this->lastIndex + 2);
 			if ((timeBar >= timeInBar) && (timeBar < timeInBarNext)) {
 				return ++(this->lastIndex);
 			}
@@ -331,13 +364,15 @@ int TempoTemp::selectByBar(double timeBar) const {
 
 double TempoTemp::secToQuarter(double timeSec, int tempIndex) const {
 	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
-	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
 	return timeInQuarter + (timeSec - timeInSec) / secPerQuarter;
 }
 
 double TempoTemp::quarterToSec(double timeQuarter, int tempIndex) const {
 	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
-	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
 	return timeInSec + (timeQuarter - timeInQuarter) * secPerQuarter;
 }
 
@@ -365,13 +400,15 @@ double TempoTemp::tickToSec(double timeTick, int tempIndex, short timeFormat) co
 
 double TempoTemp::quarterToBar(double timeQuarter, int tempIndex) const {
 	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
-	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
 	return timeInBar + (timeQuarter - timeInQuarter) / quarterPerBar;
 }
 
 double TempoTemp::barToQuarter(double timeBar, int tempIndex) const {
 	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
-	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
 	return timeInQuarter + (timeBar - timeInBar) * quarterPerBar;
 }
 
@@ -386,15 +423,24 @@ double TempoTemp::barToSec(double timeBar, int tempIndex) const {
 }
 
 double TempoTemp::getSecPerQuarter(int tempIndex) const {
-	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
-	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0.5; }
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
 	return secPerQuarter;
 }
 
 double TempoTemp::getQuarterPerBar(int tempIndex) const {
-	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 0; }
-	const auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar] = this->temp.getReference(tempIndex);
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return 4.0; }
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
 	return quarterPerBar;
+}
+
+std::tuple<int, int> TempoTemp::getTimeSignature(int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return { 4, 4 }; }
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
+	return { numerator, denominator };
 }
 
 template<typename Func, typename T>

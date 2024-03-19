@@ -23,10 +23,12 @@ public:
 
 	double getSecPerQuarter(int tempIndex) const;
 	double getQuarterPerBar(int tempIndex) const;
+	/** numerator, denominator */
+	std::tuple<int, int> getTimeSignature(int tempIndex) const;
 
 private:
-	/** timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar */
-	using TempoTempItem = std::tuple<double, double, double, double, double>;
+	/** timeInSec, timeInQuarter, timeInBar, secPerQuarter, quarterPerBar, numerator, denominator */
+	using TempoTempItem = std::tuple<double, double, double, double, double, int, int>;
 
 	juce::Array<TempoTempItem> temp;
 	mutable int lastIndex = -1;
