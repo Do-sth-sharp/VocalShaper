@@ -28,6 +28,7 @@ public:
 	juce::LookAndFeel_V4* forMuteButton() const;
 	juce::LookAndFeel_V4* forEffect() const;
 	juce::LookAndFeel_V4* forSeq() const;
+	juce::LookAndFeel_V4* forTimeRuler() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -50,6 +51,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> muteButtonLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> effectLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> seqLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> timeRulerLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

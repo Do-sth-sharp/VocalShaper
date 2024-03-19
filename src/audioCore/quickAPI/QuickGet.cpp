@@ -71,6 +71,14 @@ namespace quickAPI {
 		return 0;
 	}
 
+	int getTempoTempIndexBySec(double timeSec) {
+		return PlayPosition::getInstance()->getTempoTempIndexBySec(timeSec);
+	}
+
+	const TempoData getTempoData(int tempIndex) {
+		return PlayPosition::getInstance()->getTempoTempData(tempIndex);
+	}
+
 	const juce::Array<TrackInfo> getMixerTrackInfos() {
 		juce::Array<TrackInfo> result;
 

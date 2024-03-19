@@ -38,6 +38,9 @@ public:
 
 	juce::MidiMessageSequence& getTempoSequence();
 	void updateTempoTemp();
+	int getTempoTempIndexBySec(double timeSec) const;
+	using TempoDataMini = TempoTemp::TempoDataMini;
+	const TempoDataMini getTempoTempData(int tempIndex) const;
 	double getSampleRate() const;
 
 	void setOverflow();

@@ -174,6 +174,14 @@ void MovablePlayHead::updateTempoTemp() {
 	this->tempoTemp.update(this->tempos);
 }
 
+int MovablePlayHead::getTempoTempIndexBySec(double timeSec) const {
+	return this->tempoTemp.selectBySec(timeSec);
+}
+
+const MovablePlayHead::TempoDataMini MovablePlayHead::getTempoTempData(int tempIndex) const {
+	return this->tempoTemp.getTempoDataMini(tempIndex);
+}
+
 double MovablePlayHead::getSampleRate() const {
 	return this->sampleRate;
 }

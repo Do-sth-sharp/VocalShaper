@@ -443,6 +443,13 @@ std::tuple<int, int> TempoTemp::getTimeSignature(int tempIndex) const {
 	return { numerator, denominator };
 }
 
+TempoTemp::TempoDataMini TempoTemp::getTempoDataMini(int tempIndex) const {
+	if (tempIndex < 0 || tempIndex >= this->temp.size()) { return { 0, 0.5, 4, 4 }; }
+	const auto& [timeInSec, timeInQuarter, timeInBar,
+		secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(tempIndex);
+	return { timeInSec, secPerQuarter, numerator, denominator };
+}
+
 template<typename Func, typename T>
 int TempoTemp::search(int low, int high, T value, Func func) const {
 	int mid = low + (high - low) / 2;

@@ -19,6 +19,7 @@
 #include "MuteButtonLookAndFeel.h"
 #include "EffectLookAndFeel.h"
 #include "SeqLookAndFeel.h"
+#include "TimeRulerLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -110,6 +111,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Sequencer */
 	this->seqLAF = std::make_unique<SeqLookAndFeel>();
+
+	/** Time Ruler */
+	this->timeRulerLAF = std::make_unique<TimeRulerLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -191,6 +195,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forEffect() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forSeq() const {
 	return this->seqLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forTimeRuler() const {
+	return this->timeRulerLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {
