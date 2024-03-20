@@ -26,8 +26,8 @@ public:
 	/** numerator, denominator */
 	std::tuple<int, int> getTimeSignature(int tempIndex) const;
 
-	/**timeInSec, secPerQuarter, numerator, denominator */
-	using TempoDataMini = std::tuple<double, double, int, int>;
+	/**timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator */
+	using TempoDataMini = std::tuple<double, double, double, double, int, int>;
 	TempoDataMini getTempoDataMini(int tempIndex) const;
 
 private:

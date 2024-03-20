@@ -50,14 +50,15 @@ const juce::Array<SeqTimeRuler::LineItem> SeqTimeRuler::createRulerLine(
 	double pos, double itemSize) const {
 	/** Get View Area */
 	auto [secStart, secEnd] = this->getViewArea(pos, itemSize);
+	double width = this->getWidth();
 
 	/** Get Each Line */
-	const juce::Array<LineItem> result;
+	juce::Array<LineItem> result;
 
 	double currentTime = secStart;
 	int currentTempIndex = -1;
 	
-	double tempTime = 0;
+	double tempTimeSec = 0, tempTimeQuarter = 0, tempTimeBar = 0;
 	double tempSecPerQuarter = 0.5;
 	int tempNumerator = 4, tempDenominator = 4;
 
@@ -65,15 +66,36 @@ const juce::Array<SeqTimeRuler::LineItem> SeqTimeRuler::createRulerLine(
 		/** Get Current Tempo */
 		int tempIndex = quickAPI::getTempoTempIndexBySec(currentTime);
 		if (tempIndex != currentTempIndex) {
-			std::tie(tempTime, tempSecPerQuarter, tempNumerator, tempDenominator)
+			std::tie(tempTimeSec, tempTimeQuarter, tempTimeBar,
+				tempSecPerQuarter, tempNumerator, tempDenominator)
 				= quickAPI::getTempoData(tempIndex);
 			currentTempIndex = tempIndex;
 		}
 
-		/** TODO Get Next Line */
+		/** Get Current Bar */
+		double secSinceTemp = currentTime - tempTimeSec;
+		double quarterSinceTemp = secSinceTemp / tempSecPerQuarter;
+		double quarterPerBar = ((4.0 / tempDenominator) * tempNumerator);
+		double barSinceTemp = quarterSinceTemp / quarterPerBar;
+		double currentTimeBar = tempTimeBar + barSinceTemp;
 
-		/** TODO Increase Time */
-		currentTime += 0;
+		double currentBar = std::floor(currentTimeBar);
+		double currentBarTimeQuarterSinceTemp = (currentBar - tempTimeBar) * quarterPerBar;
+		double currentBarTimeSec = tempTimeSec + currentBarTimeQuarterSinceTemp * tempSecPerQuarter;
+		if (juce::approximatelyEqual(currentBarTimeSec, currentTime)) {
+			currentBarTimeSec = currentTime;
+		}
+
+		/** Lines */
+		double secPerLine = tempSecPerQuarter * (4.0 / tempDenominator);
+		for (int i = 0; i < tempNumerator; i++) {
+			double lineTime = currentBarTimeSec + i * secPerLine;
+			double pos = (lineTime - secStart) / (secEnd - secStart) * width;
+			result.add({ pos, i == 0 });
+		}
+
+		/** Increase Time */
+		currentTime += (secPerLine * tempNumerator);
 	}
 
 	/** Result */

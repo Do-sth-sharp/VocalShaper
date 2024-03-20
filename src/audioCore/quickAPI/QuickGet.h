@@ -21,8 +21,8 @@ namespace quickAPI {
 	bool isRecording();
 	double getTotalLength();
 	int getTempoTempIndexBySec(double timeSec);
-	/**timeInSec, secPerQuarter, numerator, denominator */
-	using TempoData = std::tuple<double, double, int, int>;
+	/**timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator */
+	using TempoData = std::tuple<double, double, double, double, int, int>;
 	const TempoData getTempoData(int tempIndex);
 
 	using TrackInfo = std::tuple<juce::String, juce::String>;
