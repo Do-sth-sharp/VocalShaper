@@ -13,7 +13,7 @@ TimeRulerLookAndFeel::TimeRulerLookAndFeel()
 	this->setColour(juce::Label::ColourIds::textColourId,
 		ColorMap::getInstance()->get("ThemeColorB9"));/**< Num */
 	this->setColour(juce::Label::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB9"));/**< Line */
+		ColorMap::getInstance()->get("ThemeColorB7"));/**< Line */
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,

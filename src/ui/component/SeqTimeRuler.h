@@ -8,14 +8,20 @@ public:
 
 	void updateHPos(double pos, double itemSize);
 
+	void resized() override;
 	void paint(juce::Graphics& g) override;
 
-	/** Place, IsBar */
-	using LineItem = std::tuple<double, bool>;
+	/** Place, IsBar, barId */
+	using LineItem = std::tuple<double, bool, int>;
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
 private:
-	const juce::Array<LineItem> createRulerLine(double pos, double itemSize) const;
+	double pos = 0, itemSize = 0;
+	juce::Array<LineItem> lineTemp;
+	double minInterval = 0;
+
+	/** Line List, Min Interval */
+	const std::tuple<juce::Array<LineItem>, double> createRulerLine(double pos, double itemSize) const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTimeRuler)
 };
