@@ -255,8 +255,8 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 
 	/** Get Wheel Delta */
 	double totalSize = this->getActualTotalSize();
-	double delta = totalSize * wheel.deltaY
-		* (wheel.isReversed ? 1 : -1) * 0.15;
+	double delta = (1.0 + ((this->itemSize - this->itemMinSize) / (this->itemMaxSize - this->itemMinSize)))
+		* wheel.deltaY * (wheel.isReversed ? 1 : -1) * 100.0;
 
 	/** Get Thumb Per */
 	auto [startPos, endPos] = this->getThumb();

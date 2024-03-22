@@ -258,7 +258,7 @@ double SeqView::getTimeLength() const {
 
 std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 	auto screenSize = utils::getScreenSize(this);
-	return { screenSize.getWidth() * 0.01, screenSize.getWidth() * 0.1 };
+	return { screenSize.getWidth() * 0.01, screenSize.getWidth() * 0.5 };
 }
 
 void SeqView::updateHPos(double pos, double itemSize) {
