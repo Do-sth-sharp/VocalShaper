@@ -21,9 +21,6 @@ void SeqTimeRuler::updateHPos(double pos, double itemSize) {
 	/** Update Line Temp */
 	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
 	this->updateRulerTemp();
-
-	/** Repaint */
-	this->repaint();
 }
 
 void SeqTimeRuler::updateRulerTemp() {
@@ -101,6 +98,14 @@ void SeqTimeRuler::updateRulerTemp() {
 	}
 }
 
+void SeqTimeRuler::updateLevelMeter() {
+	/** Get Play Position */
+	this->playPosSec = quickAPI::getTimeInSecond();
+
+	/** Repaint */
+	this->repaint();
+}
+
 void SeqTimeRuler::resized() {
 	/** Update Line Temp */
 	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
@@ -115,9 +120,28 @@ void SeqTimeRuler::resized() {
 }
 
 void SeqTimeRuler::paint(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float cursorThickness = screenSize.getWidth() * 0.00075;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour cursorColor = laf.findColour(
+		juce::Label::ColourIds::textWhenEditingColourId);
+
 	/** Ruler */
 	if (!this->rulerTemp) { return; }
 	g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
+
+	/** Cursor */
+	auto [secStart, secEnd] = this->getViewArea(this->pos, this->itemSize);
+	float cursorPosX = ((this->playPosSec - secStart) / (secEnd - secStart)) * this->getWidth();
+	juce::Rectangle<float> cursorRect(
+		cursorPosX - cursorThickness / 2, 0,
+		cursorThickness, this->getHeight());
+
+	g.setColour(cursorColor);
+	g.fillRect(cursorRect);
 }
 
 std::tuple<double, double> SeqTimeRuler::getViewArea(
