@@ -7,6 +7,10 @@ SeqTimeRuler::SeqTimeRuler() {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forTimeRuler());
+
+	/** Init Temp */
+	this->rulerTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, 1, 1, false);
 }
 
 void SeqTimeRuler::updateHPos(double pos, double itemSize) {
@@ -16,17 +20,16 @@ void SeqTimeRuler::updateHPos(double pos, double itemSize) {
 
 	/** Update Line Temp */
 	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
+	this->updateRulerTemp();
 
 	/** Repaint */
 	this->repaint();
 }
 
-void SeqTimeRuler::resized() {
-	/** Update Line Temp */
-	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
-}
+void SeqTimeRuler::updateRulerTemp() {
+	/** Temp Size */
+	juce::Graphics g(*(this->rulerTemp.get()));
 
-void SeqTimeRuler::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 
@@ -89,13 +92,32 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 				xPos + numPaddingWidth,
 				this->getHeight() - numPaddingHeight - numFontHeight,
 				numAreaWidth, numFontHeight);
-			
+
 			g.setColour(numColor);
 			g.setFont(numFont);
 			g.drawFittedText(juce::String{ barId }, numRect.toNearestInt(),
 				juce::Justification::centredLeft, 1, 0.5f);
 		}
 	}
+}
+
+void SeqTimeRuler::resized() {
+	/** Update Line Temp */
+	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
+	
+	/** Update Ruler Temp */
+	int width = this->getWidth(), height = this->getHeight();
+	width = std::max(width, 1);
+	height = std::max(height, 1);
+	this->rulerTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, width, height, false);
+	this->updateRulerTemp();
+}
+
+void SeqTimeRuler::paint(juce::Graphics& g) {
+	/** Ruler */
+	if (!this->rulerTemp) { return; }
+	g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
 }
 
 std::tuple<double, double> SeqTimeRuler::getViewArea(
