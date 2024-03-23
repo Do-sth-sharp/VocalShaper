@@ -143,6 +143,11 @@ void AudioCore::record(bool start) {
 }
 
 void AudioCore::setPositon(double pos) {
+	/** Limit Pos */
+	pos = std::max(0.0, pos);
+	pos = std::min(this->mainAudioGraph->getTailLengthSeconds(), pos);
+
+	/** Set Time */
 	this->playStartTime = pos;
 	this->mainAudioGraph->closeAllNote();
 	PlayPosition::getInstance()->setPositionInSeconds(pos);

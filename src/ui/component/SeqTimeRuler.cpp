@@ -3,7 +3,10 @@
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
-SeqTimeRuler::SeqTimeRuler() {
+SeqTimeRuler::SeqTimeRuler(
+	const ScrollFunc& scrollFunc,
+	const ScaleFunc& scaleFunc)
+	: scrollFunc(scrollFunc), scaleFunc(scaleFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forTimeRuler());
@@ -13,10 +16,16 @@ SeqTimeRuler::SeqTimeRuler() {
 		juce::Image::ARGB, 1, 1, false);
 }
 
+void SeqTimeRuler::updateBlock(int /*track*/, int /*index*/) {
+	/** Get Total Length */
+	this->totalLengthSec = quickAPI::getTotalLength();
+}
+
 void SeqTimeRuler::updateHPos(double pos, double itemSize) {
 	/** Set Pos */
 	this->pos = pos;
 	this->itemSize = itemSize;
+	std::tie(this->secStart, this->secEnd) = this->getViewArea(pos, itemSize);
 
 	/** Update Line Temp */
 	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
@@ -108,8 +117,9 @@ void SeqTimeRuler::updateLevelMeter() {
 
 void SeqTimeRuler::resized() {
 	/** Update Line Temp */
+	std::tie(this->secStart, this->secEnd) = this->getViewArea(this->pos, this->itemSize);
 	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
-	
+
 	/** Update Ruler Temp */
 	int width = this->getWidth(), height = this->getHeight();
 	width = std::max(width, 1);
@@ -134,14 +144,57 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 	g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
 
 	/** Cursor */
-	auto [secStart, secEnd] = this->getViewArea(this->pos, this->itemSize);
-	float cursorPosX = ((this->playPosSec - secStart) / (secEnd - secStart)) * this->getWidth();
+	float cursorPosX = ((this->playPosSec - this->secStart) / (this->secEnd - this->secStart)) * this->getWidth();
 	juce::Rectangle<float> cursorRect(
 		cursorPosX - cursorThickness / 2, 0,
 		cursorThickness, this->getHeight());
 
 	g.setColour(cursorColor);
 	g.fillRect(cursorRect);
+}
+
+void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
+	/** Play Position Changed */
+	if (event.mods.isLeftButtonDown()) {
+		double per = event.position.getX() / (double)this->getWidth();
+		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+
+		quickAPI::setPlayPosition(timeSec);
+	}
+}
+
+void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
+	/** Auto Scroll */
+	float xPos = event.position.getX();
+	double delta = 0;
+	if (xPos > this->getWidth()) {
+		delta = xPos - this->getWidth();
+	}
+	else if (xPos < 0) {
+		delta = xPos;
+	}
+	
+	if (delta != 0) {
+		this->scrollFunc(delta / 4);
+	}
+
+	/** Play Position Changed */
+	if (event.mods.isLeftButtonDown()) {
+		double per = xPos / (double)this->getWidth();
+		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+
+		quickAPI::setPlayPosition(timeSec);
+	}
+}
+
+void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
+	/** Play Position Changed */
+	/*if (event.mods.isLeftButtonDown()) {
+		double per = event.position.getX() / (double)this->getWidth();
+		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+
+		quickAPI::setPlayPosition(timeSec);
+	}*/
 }
 
 std::tuple<double, double> SeqTimeRuler::getViewArea(

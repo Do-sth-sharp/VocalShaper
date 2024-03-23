@@ -23,6 +23,9 @@ public:
 
 	double getActualTotalSize() const;
 
+	void scroll(double delta);
+	void scale(double centerPer, double thumbPer, double delta);
+
 	void mouseMove(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);
 	void mouseDown(const juce::MouseEvent& event);

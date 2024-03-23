@@ -73,7 +73,19 @@ SeqView::SeqView()
 	this->addAndMakeVisible(this->vScroller.get());
 
 	/** Time Ruler */
-	this->ruler = std::make_unique<SeqTimeRuler>();
+	this->ruler = std::make_unique<SeqTimeRuler>(
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double delta) {
+			if (comp) {
+				comp->scroll(delta);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double centerPer, double thumbPer, double delta) {
+			if (comp) {
+				comp->scale(centerPer, thumbPer, delta);
+			}
+		});
 	this->addAndMakeVisible(this->ruler.get());
 
 	/** Update Callback */
@@ -226,6 +238,9 @@ void SeqView::update(int index) {
 }
 
 void SeqView::updateBlock(int track, int index) {
+	/** Update Time Ruler */
+	this->ruler->updateBlock(track, index);
+
 	/** Update Tracks */
 	this->trackList->updateBlock(track, index);
 

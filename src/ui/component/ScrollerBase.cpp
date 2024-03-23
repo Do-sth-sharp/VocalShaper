@@ -151,6 +151,50 @@ void ScrollerBase::mouseMove(const juce::MouseEvent& event) {
 	this->updateState(event.getPosition(), false);
 }
 
+void ScrollerBase::scroll(double delta) {
+	/** Get Total Size */
+	double totalSize = this->getActualTotalSize();
+
+	/** Get Start Pos */
+	auto [startPos, endPos] = this->getThumb();
+	double startPer = startPos / (double)this->getTrackLength();
+	double endPer = endPos / (double)this->getTrackLength();
+
+	/** Set Pos */
+	double trueStartPos = startPer * totalSize;
+	this->setPos(trueStartPos + delta);
+}
+
+void ScrollerBase::scale(double centerPer, double thumbPer, double delta) {
+	/** Get Total Size */
+	double totalSize = this->getActualTotalSize();
+	
+	/** Get Start Pos */
+	auto [startPos, endPos] = this->getThumb();
+	double startPer = startPos / (double)this->getTrackLength();
+	double endPer = endPos / (double)this->getTrackLength();
+	
+	/** Get New Per */
+	double deltaPer = delta / totalSize;
+	double deltaL = deltaPer * thumbPer;
+	double deltaR = deltaPer - deltaL;
+	double newStartPer = startPer + deltaL;
+	double newEndPer = endPer - deltaR;
+	newEndPer = std::max(newStartPer, newEndPer);
+
+	/** Get Item Size */
+	double itemSize = this->viewSize / ((newEndPer - newStartPer) * this->itemNum);
+	itemSize = this->limitItemSize(itemSize);
+
+	/** Get Start Pos */
+	double newPer = (this->viewSize / itemSize) / this->itemNum;
+	newStartPer = centerPer - newPer * thumbPer;
+
+	/** Set Pos */
+	this->setItemSize(itemSize);
+	this->setPos(newStartPer * this->getActualTotalSize());
+}
+
 void ScrollerBase::mouseDrag(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		auto pos = event.getPosition();
@@ -254,16 +298,15 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 	}
 
 	/** Get Wheel Delta */
-	double totalSize = this->getActualTotalSize();
 	double delta = (1.0 + ((this->itemSize - this->itemMinSize) / (this->itemMaxSize - this->itemMinSize)))
 		* wheel.deltaY * (wheel.isReversed ? 1 : -1) * 100.0;
 
-	/** Get Thumb Per */
-	auto [startPos, endPos] = this->getThumb();
-	double startPer = startPos / (double)this->getTrackLength();
-	double endPer = endPos / (double)this->getTrackLength();
-
 	if (event.mods == juce::ModifierKeys::altModifier) {
+		/** Get Thumb Per */
+		auto [startPos, endPos] = this->getThumb();
+		double startPer = startPos / (double)this->getTrackLength();
+		double endPer = endPos / (double)this->getTrackLength();
+
 		/** Get Scale Center */
 		auto pos = event.getPosition();
 		auto caredPos = this->getCaredPos(pos);
@@ -278,30 +321,12 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 			centerPer = endPer;
 		}
 
-		/** Get New Per */
-		double deltaPer = delta / totalSize;
-		double deltaL = deltaPer * thumbPer;
-		double deltaR = deltaPer - deltaL;
-		double newStartPer = startPer + deltaL;
-		double newEndPer = endPer - deltaR;
-		newEndPer = std::max(newStartPer, newEndPer);
-
-		/** Get Item Size */
-		double itemSize = this->viewSize / ((newEndPer - newStartPer) * this->itemNum);
-		itemSize = this->limitItemSize(itemSize);
-
-		/** Get Start Pos */
-		double newPer = (this->viewSize / itemSize) / this->itemNum;
-		newStartPer = centerPer - newPer * thumbPer;
-
-		/** Set Pos */
-		this->setItemSize(itemSize);
-		this->setPos(newStartPer * this->getActualTotalSize());
+		/** Scale */
+		this->scale(centerPer, thumbPer, delta);
 	}
 	else {
 		/** Set Pos */
-		double trueStartPos = startPer * totalSize;
-		this->setPos(trueStartPos + delta);
+		this->scroll(delta);
 	}
 }
 

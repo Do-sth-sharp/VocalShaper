@@ -102,4 +102,8 @@ namespace quickAPI {
 	void clearEffectMIDICCListener(PluginHolder pointer) {
 		clearPluginMIDICCListener(pointer);
 	}
+
+	void setPlayPosition(double timeSec) {
+		AudioCore::getInstance()->setPositon(timeSec);
+	}
 }
