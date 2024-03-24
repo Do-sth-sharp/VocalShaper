@@ -31,4 +31,5 @@ namespace quickAPI {
 	void clearEffectMIDICCListener(PluginHolder pointer);
 
 	void setPlayPosition(double timeSec);
+	void setPlayLoop(double startSec, double endSec);
 }

@@ -39,6 +39,7 @@ public:
 	void rewind();
 	void record(bool start);
 	void setPositon(double pos);
+	void setLoop(double startSec, double endSec);
 	void setReturnToPlayStartPosition(bool returnToStart);
 	bool getReturnToPlayStartPosition() const;
 	juce::Optional<juce::AudioPlayHead::PositionInfo> getPosition() const;

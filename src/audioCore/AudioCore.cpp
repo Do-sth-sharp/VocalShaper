@@ -153,6 +153,34 @@ void AudioCore::setPositon(double pos) {
 	PlayPosition::getInstance()->setPositionInSeconds(pos);
 }
 
+void AudioCore::setLoop(double startSec, double endSec) {
+	/** Limit Time */
+	double totalTime = this->mainAudioGraph->getTailLengthSeconds();
+	if (startSec < 0) {
+		startSec = 0;
+	}
+	if (endSec < 0) {
+		endSec = 0;
+	}
+	if (startSec > totalTime) {
+		startSec = totalTime;
+	}
+	if (endSec > totalTime) {
+		endSec = totalTime;
+	}
+
+	/** Valid */
+	if (endSec > startSec) {
+		PlayPosition::getInstance()->setLoopPointsInSeconds({ startSec, endSec });
+		PlayPosition::getInstance()->setLooping(true);
+	}
+	/** Invalid */
+	else {
+		PlayPosition::getInstance()->setLooping(false);
+		PlayPosition::getInstance()->setLoopPointsInSeconds({ 0, 0 });
+	}
+}
+
 void AudioCore::setReturnToPlayStartPosition(bool returnToStart) {
 	this->returnToStart = returnToStart;
 }

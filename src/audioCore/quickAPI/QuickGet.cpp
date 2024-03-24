@@ -47,6 +47,14 @@ namespace quickAPI {
 		return pos->getTimeInSeconds().orFallback(0);
 	}
 
+	std::tuple<double, double> getLoopTimeSec() {
+		if (!PlayPosition::getInstance()->getLooping()) {
+			return { 0, 0 };
+		}
+
+		return PlayPosition::getInstance()->getLoopingTimeSec();
+	}
+
 	const juce::Array<float> getAudioOutputLevel() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getOutputLevels();

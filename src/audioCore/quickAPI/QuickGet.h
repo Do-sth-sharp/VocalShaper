@@ -16,6 +16,7 @@ namespace quickAPI {
 
 	std::tuple<int64_t, double> getTimeInBeat();
 	double getTimeInSecond();
+	std::tuple<double, double> getLoopTimeSec();
 	const juce::Array<float> getAudioOutputLevel();
 	bool isPlaying();
 	bool isRecording();
@@ -24,7 +25,6 @@ namespace quickAPI {
 	/**timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator */
 	using TempoData = std::tuple<double, double, double, double, int, int>;
 	const TempoData getTempoData(int tempIndex);
-
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
 

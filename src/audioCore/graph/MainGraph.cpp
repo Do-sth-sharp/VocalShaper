@@ -387,7 +387,7 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 	juce::ScopedTryReadLock audioLocker(audioLock::getAudioLock());
 	juce::ScopedTryWriteLock sourceLocker(audioLock::getAudioLock());
 	juce::ScopedTryReadLock pluginLocker(audioLock::getPluginLock());
-	juce::ScopedTryReadLock positionLocker(audioLock::getPositionLock());
+	juce::ScopedTryWriteLock positionLocker(audioLock::getPositionLock());
 	juce::ScopedTryReadLock mackieLocker(audioLock::getMackieLock());
 	if (!(audioLocker.isLocked() && pluginLocker.isLocked() 
 		&& sourceLocker.isLocked()  && positionLocker.isLocked() && mackieLocker.isLocked())) {
@@ -479,9 +479,26 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 
 	/** Add Position */
 	if (auto position = dynamic_cast<PlayPosition*>(this->getPlayHead())) {
+		/** Current Time */
 		int currentPos = position->getPosition()->getTimeInSamples().orFallback(0);
-		if (INT_MAX - audio.getNumSamples() > currentPos) {
-			position->next(audio.getNumSamples());
+		int clipSize = audio.getNumSamples();
+
+		/** Check Loop */
+		if (position->getLooping()) {
+			auto [loopStart, loopEnd] = position->getLoopingTimeSec();
+			double sampleRate = position->getSampleRate();
+
+			/** Overflow */
+			int next = currentPos + clipSize;
+			if (next < (loopStart * sampleRate) || next > (loopEnd * sampleRate)) {
+				position->setPositionInSamples(loopStart* sampleRate);
+				return;
+			}
+		}
+		
+		/** Next Clip */
+		if (INT_MAX - clipSize > currentPos) {
+			position->next(clipSize);
 		}
 		else {
 			/** Time Overflow */

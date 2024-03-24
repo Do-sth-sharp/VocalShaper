@@ -106,4 +106,8 @@ namespace quickAPI {
 	void setPlayPosition(double timeSec) {
 		AudioCore::getInstance()->setPositon(timeSec);
 	}
+
+	void setPlayLoop(double startSec, double endSec) {
+		AudioCore::getInstance()->setLoop(startSec, endSec);
+	}
 }

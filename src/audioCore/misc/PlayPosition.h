@@ -39,10 +39,12 @@ public:
 	juce::MidiMessageSequence& getTempoSequence();
 	void updateTempoTemp();
 	int getTempoTempIndexBySec(double timeSec) const;
+	int getTempoTempIndexByQuarter(double timeQuarter) const;
 	using TempoDataMini = TempoTemp::TempoDataMini;
 	const TempoDataMini getTempoTempData(int tempIndex) const;
+	bool getLooping() const;
+	std::tuple<double, double> getLoopingTimeSec() const;
 	double getSampleRate() const;
-
 	void setOverflow();
 	bool checkOverflow() const;
 

@@ -178,8 +178,31 @@ int MovablePlayHead::getTempoTempIndexBySec(double timeSec) const {
 	return this->tempoTemp.selectBySec(timeSec);
 }
 
+int MovablePlayHead::getTempoTempIndexByQuarter(double timeQuarter) const {
+	return this->tempoTemp.selectByQuarter(timeQuarter);
+}
+
 const MovablePlayHead::TempoDataMini MovablePlayHead::getTempoTempData(int tempIndex) const {
 	return this->tempoTemp.getTempoDataMini(tempIndex);
+}
+
+bool MovablePlayHead::getLooping() const {
+	return this->position.getIsLooping();
+}
+
+std::tuple<double, double> MovablePlayHead::getLoopingTimeSec() const {
+	auto loopTime = this->position.getLoopPoints().orFallback(
+		juce::AudioPlayHead::LoopPoints{ 0.0, 0.0 });
+	int startTempIndex = this->getTempoTempIndexByQuarter(loopTime.ppqStart);
+	int endTempIndex = this->getTempoTempIndexByQuarter(loopTime.ppqEnd);
+	if (startTempIndex < 0 || endTempIndex < 0) { return{ 0, 0 }; }
+
+	auto startTempData = this->getTempoTempData(startTempIndex);
+	auto endTempData = this->getTempoTempData(endTempIndex);
+
+	double startSec = std::get<0>(startTempData) + (loopTime.ppqStart - std::get<1>(startTempData)) * std::get<3>(startTempData);
+	double endSec = std::get<0>(endTempData) + (loopTime.ppqEnd - std::get<1>(endTempData)) * std::get<3>(endTempData);
+	return { startSec, endSec };
 }
 
 double MovablePlayHead::getSampleRate() const {
