@@ -73,18 +73,12 @@ void MovablePlayHead::setLooping(bool looping) {
 void MovablePlayHead::setLoopPointsInSeconds(const std::tuple<double, double>& points) {
 	juce::ScopedWriteLock locker(audioLock::getPositionLock());
 
-	auto [start, end] = points;
-	start = this->toQuarter(start);
-	end = this->toQuarter(end);
+	std::tie(this->loopStartSec, this->loopEndSec) = points;
+	double startQuarter = this->toQuarter(this->loopStartSec);
+	double endQuarter = this->toQuarter(this->loopEndSec);
 
 	this->position.setLoopPoints(
-		juce::AudioPlayHead::LoopPoints{ start, end });
-}
-
-void MovablePlayHead::setLoopPointsInQuarter(const std::tuple<double, double>& points) {
-	juce::ScopedWriteLock locker(audioLock::getPositionLock());
-	this->position.setLoopPoints(
-		juce::AudioPlayHead::LoopPoints{ std::get<0>(points), std::get<1>(points) });
+		juce::AudioPlayHead::LoopPoints{ startQuarter, endQuarter });
 }
 
 void MovablePlayHead::setPositionInSeconds(double time) {
@@ -191,18 +185,7 @@ bool MovablePlayHead::getLooping() const {
 }
 
 std::tuple<double, double> MovablePlayHead::getLoopingTimeSec() const {
-	auto loopTime = this->position.getLoopPoints().orFallback(
-		juce::AudioPlayHead::LoopPoints{ 0.0, 0.0 });
-	int startTempIndex = this->getTempoTempIndexByQuarter(loopTime.ppqStart);
-	int endTempIndex = this->getTempoTempIndexByQuarter(loopTime.ppqEnd);
-	if (startTempIndex < 0 || endTempIndex < 0) { return{ 0, 0 }; }
-
-	auto startTempData = this->getTempoTempData(startTempIndex);
-	auto endTempData = this->getTempoTempData(endTempIndex);
-
-	double startSec = std::get<0>(startTempData) + (loopTime.ppqStart - std::get<1>(startTempData)) * std::get<3>(startTempData);
-	double endSec = std::get<0>(endTempData) + (loopTime.ppqEnd - std::get<1>(endTempData)) * std::get<3>(endTempData);
-	return { startSec, endSec };
+	return { this->loopStartSec, this->loopEndSec };
 }
 
 double MovablePlayHead::getSampleRate() const {

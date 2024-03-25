@@ -19,7 +19,6 @@ public:
 	void setSampleRate(double sampleRate);
 	void setLooping(bool looping);
 	void setLoopPointsInSeconds(const std::tuple<double, double>& points);
-	void setLoopPointsInQuarter(const std::tuple<double, double>& points);
 	void setPositionInSeconds(double time);
 	void setPositionInQuarter(double time);
 	void setPositionInSamples(int64_t sampleNum);
@@ -55,6 +54,7 @@ protected:
 	std::atomic_short timeFormat = 480;
 	std::atomic<double> sampleRate = 48000;
 	std::atomic_bool overflowFlag = false;
+	std::atomic<double> loopStartSec = 0, loopEndSec = 0;
 
 	void updatePositionByTimeInSecond();
 	void updatePositionByTimeInSample();
