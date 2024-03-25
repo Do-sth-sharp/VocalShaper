@@ -19,6 +19,9 @@ SeqTimeRuler::SeqTimeRuler(
 void SeqTimeRuler::updateBlock(int /*track*/, int /*index*/) {
 	/** Get Total Length */
 	this->totalLengthSec = quickAPI::getTotalLength();
+
+	/** Get Loop Time */
+	std::tie(this->loopStartSec, this->loopEndSec) = quickAPI::getLoopTimeSec();
 }
 
 void SeqTimeRuler::updateHPos(double pos, double itemSize) {
@@ -138,6 +141,8 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 	auto& laf = this->getLookAndFeel();
 	juce::Colour cursorColor = laf.findColour(
 		juce::Label::ColourIds::textWhenEditingColourId);
+	juce::Colour offColor = laf.findColour(
+		juce::Label::ColourIds::backgroundWhenEditingColourId);
 
 	/** Ruler */
 	if (!this->rulerTemp) { return; }
@@ -151,6 +156,29 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 
 	g.setColour(cursorColor);
 	g.fillRect(cursorRect);
+
+	/** Time Off */
+	if (this->loopEndSec > this->loopStartSec) {
+		/** Left */
+		if (this->loopStartSec > this->secStart) {
+			float xPos = (this->loopStartSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			juce::Rectangle<float> offRect(
+				0, 0, xPos, this->getHeight());
+
+			g.setColour(offColor);
+			g.fillRect(offRect);
+		}
+
+		/** Right */
+		if (this->loopEndSec < this->secEnd) {
+			float xPos = (this->loopEndSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			juce::Rectangle<float> offRect(
+				xPos, 0, this->getWidth() - xPos, this->getHeight());
+
+			g.setColour(offColor);
+			g.fillRect(offRect);
+		}
+	}
 }
 
 void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
