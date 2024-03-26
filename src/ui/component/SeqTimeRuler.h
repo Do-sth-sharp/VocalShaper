@@ -42,6 +42,8 @@ private:
 	double totalLengthSec = 0;
 	double loopStartSec = 0, loopEndSec = 0;
 
+	double mouseDownSecTemp = 0;
+
 	/** Line List, Min Interval */
 	const std::tuple<juce::Array<LineItem>, double> createRulerLine(double pos, double itemSize) const;
 

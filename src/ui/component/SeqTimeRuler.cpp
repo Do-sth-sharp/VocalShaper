@@ -19,9 +19,6 @@ SeqTimeRuler::SeqTimeRuler(
 void SeqTimeRuler::updateBlock(int /*track*/, int /*index*/) {
 	/** Get Total Length */
 	this->totalLengthSec = quickAPI::getTotalLength();
-
-	/** Get Loop Time */
-	std::tie(this->loopStartSec, this->loopEndSec) = quickAPI::getLoopTimeSec();
 }
 
 void SeqTimeRuler::updateHPos(double pos, double itemSize) {
@@ -114,6 +111,9 @@ void SeqTimeRuler::updateLevelMeter() {
 	/** Get Play Position */
 	this->playPosSec = quickAPI::getTimeInSecond();
 
+	/** Get Loop Time */
+	std::tie(this->loopStartSec, this->loopEndSec) = quickAPI::getLoopTimeSec();
+
 	/** Repaint */
 	this->repaint();
 }
@@ -182,12 +182,20 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 }
 
 void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
+	float xPos = event.position.getX();
+
 	/** Play Position Changed */
 	if (event.mods.isLeftButtonDown()) {
-		double per = event.position.getX() / (double)this->getWidth();
+		double per = xPos / (double)this->getWidth();
 		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
 		quickAPI::setPlayPosition(timeSec);
+	}
+
+	/** Play Position Changed */
+	else if (event.mods.isRightButtonDown()) {
+		double per = xPos / (double)this->getWidth();
+		this->mouseDownSecTemp = this->secStart + (this->secEnd - this->secStart) * per;
 	}
 }
 
@@ -213,6 +221,16 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 
 		quickAPI::setPlayPosition(timeSec);
 	}
+
+	/** Loop Changed */
+	else if (event.mods.isRightButtonDown()) {
+		double per = xPos / (double)this->getWidth();
+		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+
+		double loopStart = std::min(this->mouseDownSecTemp, timeSec);
+		double loopEnd = std::max(this->mouseDownSecTemp, timeSec);
+		quickAPI::setPlayLoop(loopStart, loopEnd);
+	}
 }
 
 void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
@@ -223,6 +241,13 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 
 		quickAPI::setPlayPosition(timeSec);
 	}*/
+
+	/** Loop Changed */
+	if (event.mods.isRightButtonDown()) {
+		if (!(event.mouseWasDraggedSinceMouseDown())) {
+			quickAPI::setPlayLoop(0, 0);
+		}
+	}
 }
 
 std::tuple<double, double> SeqTimeRuler::getViewArea(
