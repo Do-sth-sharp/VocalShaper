@@ -87,6 +87,16 @@ namespace quickAPI {
 		return PlayPosition::getInstance()->getTempoTempData(tempIndex);
 	}
 
+	double limitTimeSec(double timeSec, double limitLevel) {
+		if (limitLevel <= 0) {
+			return timeSec;
+		}
+
+		double timeQuarter = PlayPosition::getInstance()->toQuarter(timeSec);
+		double timeQuarterLimited = std::round(timeQuarter / limitLevel) * limitLevel;
+		return PlayPosition::getInstance()->toSecondQ(timeQuarterLimited);
+	}
+
 	const juce::Array<TrackInfo> getMixerTrackInfos() {
 		juce::Array<TrackInfo> result;
 

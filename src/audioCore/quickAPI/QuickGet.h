@@ -25,6 +25,7 @@ namespace quickAPI {
 	/**timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator */
 	using TempoData = std::tuple<double, double, double, double, int, int>;
 	const TempoData getTempoData(int tempIndex);
+	double limitTimeSec(double timeSec, double limitLevel);
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
 
