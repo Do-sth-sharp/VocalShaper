@@ -1,8 +1,10 @@
 ﻿#include "SeqView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreCallbacks.h"
+#include "../misc/Tools.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
+#include <IconManager.h>
 
 int SeqView::TrackList::size() const {
 	return this->list.size();
@@ -46,6 +48,12 @@ SeqView::SeqView()
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeq());
 
+	/** Icons */
+	this->adsorbIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Design", "align-item-left-line").getFullPathName());
+	this->adsorbIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+
 	/** Track List */
 	this->trackList = std::make_unique<TrackList>();
 	this->addAndMakeVisible(this->trackList.get());
@@ -71,6 +79,16 @@ SeqView::SeqView()
 			int width, int height, bool vertical) {
 				this->paintTrackPreview(g, itemIndex, width, height, vertical); });
 	this->addAndMakeVisible(this->vScroller.get());
+
+	/** Button */
+	this->adsorbButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Adsorb"), juce::DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	this->adsorbButton->setImages(this->adsorbIcon.get());
+	this->adsorbButton->setConnectedEdges(juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
+	this->adsorbButton->setWantsKeyboardFocus(false);
+	this->adsorbButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->adsorbButton->onClick = [this] { this->adsorbButtonClicked(); };
+	this->addAndMakeVisible(this->adsorbButton.get());
 
 	/** Time Ruler */
 	this->ruler = std::make_unique<SeqTimeRuler>(
@@ -113,6 +131,9 @@ void SeqView::resized() {
 	int rulerHeight = screenSize.getHeight() * 0.025;
 	int headWidth = screenSize.getWidth() * 0.1;
 
+	int adsorbButtonHeight = rulerHeight * 0.9;
+	int adsorbButtonPaddingWidth = screenSize.getWidth() * 0.005;
+
 	/** Scroller */
 	juce::Rectangle<int> hScrollerRect(
 		headWidth, this->getHeight() - scrollerHeight,
@@ -122,6 +143,13 @@ void SeqView::resized() {
 		this->getWidth() - scrollerWidth, rulerHeight,
 		scrollerWidth, this->getHeight() - rulerHeight - scrollerHeight);
 	this->vScroller->setBounds(vScrollerRect);
+
+	/** Adsorb Button */
+	juce::Rectangle<int> adsorbRect(
+		headWidth - adsorbButtonPaddingWidth - adsorbButtonHeight,
+		rulerHeight / 2 - adsorbButtonHeight / 2,
+		adsorbButtonHeight, adsorbButtonHeight);
+	this->adsorbButton->setBounds(adsorbRect);
 
 	/** Time Ruler */
 	juce::Rectangle<int> rulerRect(
@@ -342,4 +370,31 @@ void SeqView::paintTrackPreview(juce::Graphics& g, int itemIndex,
 		paddingWidth, 0, colorWidth, height);
 	g.setColour(color);
 	g.fillRect(colorRect);
+}
+
+void SeqView::adsorbButtonClicked() {
+	auto menu = this->createAdsorbMenu();
+	int result = menu.showAt(this->adsorbButton.get());
+	if (result == 0) { return; }
+
+	if (result < 0) { Tools::getInstance()->setAdsorb(0); }
+	else { Tools::getInstance()->setAdsorb(1 / (double)result); }
+}
+
+juce::PopupMenu SeqView::createAdsorbMenu() {
+	double currentAdsorb = Tools::getInstance()->getAdsorb();
+
+	juce::PopupMenu menu;
+	menu.addItem(1, "1", true, juce::approximatelyEqual(currentAdsorb, 1.0));
+	menu.addItem(2, "1/2", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)2));
+	menu.addItem(4, "1/4", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)4));
+	menu.addItem(6, "1/6", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)6));
+	menu.addItem(8, "1/8", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)8));
+	menu.addItem(12, "1/12", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)12));
+	menu.addItem(16, "1/16", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)16));
+	menu.addItem(24, "1/24", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)24));
+	menu.addItem(32, "1/32", true, juce::approximatelyEqual(currentAdsorb, 1 / (double)32));
+	menu.addItem(-1, "Off", true, juce::approximatelyEqual(currentAdsorb, 0.0));
+
+	return menu;
 }

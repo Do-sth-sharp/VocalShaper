@@ -42,6 +42,8 @@ private:
 	};
 
 	std::unique_ptr<SeqTimeRuler> ruler = nullptr;
+	std::unique_ptr<juce::DrawableButton> adsorbButton = nullptr;
+	std::unique_ptr<juce::Drawable> adsorbIcon = nullptr;
 
 	std::unique_ptr<TrackList> trackList = nullptr;
 	juce::Array<juce::Colour> colorTemp;
@@ -66,6 +68,9 @@ private:
 	void updateVPos(double pos, double itemSize);
 	void paintTrackPreview(juce::Graphics& g, int itemIndex,
 		int width, int height, bool vertical);
+
+	void adsorbButtonClicked();
+	juce::PopupMenu createAdsorbMenu();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };

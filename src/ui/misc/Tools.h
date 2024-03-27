@@ -12,8 +12,12 @@ public:
 	void setType(Type type);
 	Type getType() const;
 
+	void setAdsorb(double adsorbLevel);
+	double getAdsorb() const;
+
 private:
 	Type type = Type::Arrow;
+	double adsorbLevel = 1;
 
 public:
 	static Tools* getInstance();

@@ -1,5 +1,6 @@
 ﻿#include "SeqTimeRuler.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../misc/Tools.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -189,13 +190,13 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 		double per = xPos / (double)this->getWidth();
 		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
-		quickAPI::setPlayPosition(timeSec);
+		quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
 	}
 
-	/** Play Position Changed */
+	/** Loop Changed */
 	else if (event.mods.isRightButtonDown()) {
 		double per = xPos / (double)this->getWidth();
-		this->mouseDownSecTemp = this->secStart + (this->secEnd - this->secStart) * per;
+		this->mouseDownSecTemp = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
 	}
 }
 
@@ -219,13 +220,13 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 		double per = xPos / (double)this->getWidth();
 		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
-		quickAPI::setPlayPosition(timeSec);
+		quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
 	}
 
 	/** Loop Changed */
 	else if (event.mods.isRightButtonDown()) {
 		double per = xPos / (double)this->getWidth();
-		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+		double timeSec = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
 
 		double loopStart = std::min(this->mouseDownSecTemp, timeSec);
 		double loopEnd = std::max(this->mouseDownSecTemp, timeSec);
@@ -317,4 +318,9 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 
 	/** Result */
 	return { result, minInterval };
+}
+
+double SeqTimeRuler::limitTimeSec(double timeSec) {
+	double level = Tools::getInstance()->getAdsorb();
+	return quickAPI::limitTimeSec(timeSec, level);
 }

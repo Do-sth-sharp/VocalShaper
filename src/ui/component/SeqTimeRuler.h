@@ -47,5 +47,7 @@ private:
 	/** Line List, Min Interval */
 	const std::tuple<juce::Array<LineItem>, double> createRulerLine(double pos, double itemSize) const;
 
+	double limitTimeSec(double timeSec);
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTimeRuler)
 };
