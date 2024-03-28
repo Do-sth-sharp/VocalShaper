@@ -128,11 +128,12 @@ void SeqView::resized() {
 	auto screenSize = utils::getScreenSize(this);
 	int scrollerHeight = screenSize.getHeight() * 0.0275;
 	int scrollerWidth = screenSize.getWidth() * 0.015;
-	int rulerHeight = screenSize.getHeight() * 0.025;
+	int rulerHeight = screenSize.getHeight() * 0.035;
 	int headWidth = screenSize.getWidth() * 0.1;
 
-	int adsorbButtonHeight = rulerHeight * 0.9;
+	int adsorbButtonHeight = screenSize.getHeight() * 0.025;
 	int adsorbButtonPaddingWidth = screenSize.getWidth() * 0.005;
+	int adsorbButtonPaddingHeight = screenSize.getHeight() * 0.005;
 
 	/** Scroller */
 	juce::Rectangle<int> hScrollerRect(
@@ -147,7 +148,7 @@ void SeqView::resized() {
 	/** Adsorb Button */
 	juce::Rectangle<int> adsorbRect(
 		headWidth - adsorbButtonPaddingWidth - adsorbButtonHeight,
-		rulerHeight / 2 - adsorbButtonHeight / 2,
+		rulerHeight - adsorbButtonPaddingHeight - adsorbButtonHeight,
 		adsorbButtonHeight, adsorbButtonHeight);
 	this->adsorbButton->setBounds(adsorbRect);
 
@@ -173,7 +174,7 @@ void SeqView::paint(juce::Graphics& g) {
 	auto screenSize = utils::getScreenSize(this);
 	int scrollerHeight = screenSize.getHeight() * 0.0275;
 	int scrollerWidth = screenSize.getWidth() * 0.015;
-	int rulerHeight = screenSize.getHeight() * 0.025;
+	int rulerHeight = screenSize.getHeight() * 0.035;
 	int headWidth = screenSize.getWidth() * 0.1;
 
 	float lineThickness = screenSize.getHeight() * 0.0025;
