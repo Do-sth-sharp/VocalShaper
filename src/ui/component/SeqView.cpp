@@ -103,6 +103,12 @@ SeqView::SeqView()
 			if (comp) {
 				comp->scale(centerPer, thumbPer, delta);
 			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
 		});
 	this->addAndMakeVisible(this->ruler.get());
 

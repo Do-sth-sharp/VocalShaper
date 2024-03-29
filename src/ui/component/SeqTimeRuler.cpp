@@ -6,8 +6,10 @@
 
 SeqTimeRuler::SeqTimeRuler(
 	const ScrollFunc& scrollFunc,
-	const ScaleFunc& scaleFunc)
-	: scrollFunc(scrollFunc), scaleFunc(scaleFunc) {
+	const ScaleFunc& scaleFunc,
+	const WheelFunc& wheelFunc)
+	: scrollFunc(scrollFunc), scaleFunc(scaleFunc),
+	wheelFunc(wheelFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forTimeRuler());
@@ -249,6 +251,11 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 			quickAPI::setPlayLoop(0, 0);
 		}
 	}
+}
+
+void SeqTimeRuler::mouseWheelMove(const juce::MouseEvent& event,
+	const juce::MouseWheelDetails& wheel) {
+	this->wheelFunc(wheel.deltaY, wheel.isReversed);
 }
 
 std::tuple<double, double> SeqTimeRuler::getViewArea(

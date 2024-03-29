@@ -195,6 +195,15 @@ void ScrollerBase::scale(double centerPer, double thumbPer, double delta) {
 	this->setPos(newStartPer * this->getActualTotalSize());
 }
 
+void ScrollerBase::mouseWheelOutside(float deltaY, bool reversed) {
+	/** Get Wheel Delta */
+	double delta = (1.0 + ((this->itemSize - this->itemMinSize) / (this->itemMaxSize - this->itemMinSize)))
+		* deltaY * (reversed ? 1 : -1) * 100.0;
+	
+	/** Set Pos */
+	this->scroll(delta);
+}
+
 void ScrollerBase::mouseDrag(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		auto pos = event.getPosition();
@@ -325,8 +334,7 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 		this->scale(centerPer, thumbPer, delta);
 	}
 	else {
-		/** Set Pos */
-		this->scroll(delta);
+		this->mouseWheelOutside(wheel.deltaY, wheel.isReversed);
 	}
 }
 

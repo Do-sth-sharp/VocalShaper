@@ -25,6 +25,7 @@ public:
 
 	void scroll(double delta);
 	void scale(double centerPer, double thumbPer, double delta);
+	void mouseWheelOutside(float deltaY, bool reversed);
 
 	void mouseMove(const juce::MouseEvent& event);
 	void mouseDrag(const juce::MouseEvent& event);

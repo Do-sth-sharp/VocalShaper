@@ -9,8 +9,10 @@ class SeqTimeRuler final
 public:
 	using ScrollFunc = std::function<void(double)>;
 	using ScaleFunc = std::function<void(double, double, double)>;
+	using WheelFunc = std::function<void(float, bool)>;
 	SeqTimeRuler(const ScrollFunc& scrollFunc,
-		const ScaleFunc& scaleFunc);
+		const ScaleFunc& scaleFunc,
+		const WheelFunc& wheelFunc);
 
 	void updateBlock(int track, int index);
 	void updateHPos(double pos, double itemSize);
@@ -23,6 +25,8 @@ public:
 	void mouseDown(const juce::MouseEvent& event) override;
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseWheelMove(const juce::MouseEvent& event,
+		const juce::MouseWheelDetails& wheel);
 
 	/** Place, IsBar, barId */
 	using LineItem = std::tuple<double, bool, int>;
@@ -31,6 +35,7 @@ public:
 private:
 	const ScrollFunc scrollFunc;
 	const ScaleFunc scaleFunc;
+	const WheelFunc wheelFunc;
 
 	double pos = 0, itemSize = 0;
 	double secStart = 0, secEnd = 0;
