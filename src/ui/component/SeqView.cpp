@@ -109,6 +109,12 @@ SeqView::SeqView()
 			if (comp) {
 				comp->mouseWheelOutside(deltaY, reversed);
 			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
 		});
 	this->addAndMakeVisible(this->ruler.get());
 

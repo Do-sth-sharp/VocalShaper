@@ -204,6 +204,19 @@ void ScrollerBase::mouseWheelOutside(float deltaY, bool reversed) {
 	this->scroll(delta);
 }
 
+void ScrollerBase::mouseWheelOutsideWithAlt(
+	double centerNum, double thumbPer, float deltaY, bool reversed) {
+	/** Get Wheel Delta */
+	double delta = (1.0 + ((this->itemSize - this->itemMinSize) / (this->itemMaxSize - this->itemMinSize)))
+		* deltaY * (reversed ? 1 : -1) * 100.0;
+	
+	/** Get Scale Center */
+	double centerPer = centerNum / this->itemNum;
+
+	/** Scale */
+	this->scale(centerPer, thumbPer, delta);
+}
+
 void ScrollerBase::mouseDrag(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		auto pos = event.getPosition();
@@ -306,10 +319,6 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 		return;
 	}
 
-	/** Get Wheel Delta */
-	double delta = (1.0 + ((this->itemSize - this->itemMinSize) / (this->itemMaxSize - this->itemMinSize)))
-		* wheel.deltaY * (wheel.isReversed ? 1 : -1) * 100.0;
-
 	if (event.mods == juce::ModifierKeys::altModifier) {
 		/** Get Thumb Per */
 		auto [startPos, endPos] = this->getThumb();
@@ -331,7 +340,8 @@ void ScrollerBase::mouseWheelMove(const juce::MouseEvent& event,
 		}
 
 		/** Scale */
-		this->scale(centerPer, thumbPer, delta);
+		this->mouseWheelOutsideWithAlt(
+			centerPer * this->itemNum, thumbPer, wheel.deltaY, wheel.isReversed);
 	}
 	else {
 		this->mouseWheelOutside(wheel.deltaY, wheel.isReversed);

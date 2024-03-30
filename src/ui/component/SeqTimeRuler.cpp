@@ -7,9 +7,10 @@
 SeqTimeRuler::SeqTimeRuler(
 	const ScrollFunc& scrollFunc,
 	const ScaleFunc& scaleFunc,
-	const WheelFunc& wheelFunc)
+	const WheelFunc& wheelFunc,
+	const WheelAltFunc& wheelAltFunc)
 	: scrollFunc(scrollFunc), scaleFunc(scaleFunc),
-	wheelFunc(wheelFunc) {
+	wheelFunc(wheelFunc), wheelAltFunc(wheelAltFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forTimeRuler());
@@ -255,7 +256,15 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 
 void SeqTimeRuler::mouseWheelMove(const juce::MouseEvent& event,
 	const juce::MouseWheelDetails& wheel) {
-	this->wheelFunc(wheel.deltaY, wheel.isReversed);
+	if (event.mods.isAltDown()) {
+		double thumbPer = event.position.getX() / (double)this->getWidth();
+		double centerNum = this->secStart + (this->secEnd - this->secStart) * thumbPer;
+
+		this->wheelAltFunc(centerNum, thumbPer, wheel.deltaY, wheel.isReversed);
+	}
+	else {
+		this->wheelFunc(wheel.deltaY, wheel.isReversed);
+	}
 }
 
 std::tuple<double, double> SeqTimeRuler::getViewArea(

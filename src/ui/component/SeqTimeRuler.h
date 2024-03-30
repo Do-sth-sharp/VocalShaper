@@ -10,9 +10,11 @@ public:
 	using ScrollFunc = std::function<void(double)>;
 	using ScaleFunc = std::function<void(double, double, double)>;
 	using WheelFunc = std::function<void(float, bool)>;
+	using WheelAltFunc = std::function<void(double, double, float, bool)>;
 	SeqTimeRuler(const ScrollFunc& scrollFunc,
 		const ScaleFunc& scaleFunc,
-		const WheelFunc& wheelFunc);
+		const WheelFunc& wheelFunc,
+		const WheelAltFunc& wheelAltFunc);
 
 	void updateBlock(int track, int index);
 	void updateHPos(double pos, double itemSize);
@@ -36,6 +38,7 @@ private:
 	const ScrollFunc scrollFunc;
 	const ScaleFunc scaleFunc;
 	const WheelFunc wheelFunc;
+	const WheelAltFunc wheelAltFunc;
 
 	double pos = 0, itemSize = 0;
 	double secStart = 0, secEnd = 0;
