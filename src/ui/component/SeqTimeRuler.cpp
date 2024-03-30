@@ -45,8 +45,8 @@ void SeqTimeRuler::updateRulerTemp() {
 
 	float outlineThickness = screenSize.getHeight() * 0.0015;
 	float lineThickness = screenSize.getWidth() * 0.00075;
-	float longLineHeight = screenSize.getHeight() * 0.015;
-	float shortLineHeight = screenSize.getHeight() * 0.0075;
+	float longLineHeight = screenSize.getHeight() * 0.035;
+	float shortLineHeight = screenSize.getHeight() * 0.015;
 
 	float shortLineIntervalMin = screenSize.getWidth() * 0.01;
 
