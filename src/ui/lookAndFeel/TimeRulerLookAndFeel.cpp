@@ -20,4 +20,20 @@ TimeRulerLookAndFeel::TimeRulerLookAndFeel()
 		ColorMap::getInstance()->get("ThemeColorA2"));/**< Cursor */
 	this->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB1"));/**< Outline */
+
+	/** Tempo Label */
+	this->setColour(juce::TextEditor::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));/**< Background */
+	this->setColour(juce::TextEditor::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));/**< Text */
+	this->setColour(juce::TextEditor::ColourIds::highlightColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));
+	this->setColour(juce::TextEditor::ColourIds::highlightedTextColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));
+	this->setColour(juce::TextEditor::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));/**< Outline */
+	this->setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));
+	this->setColour(juce::TextEditor::ColourIds::shadowColourId,
+		ColorMap::getInstance()->get("ThemeColorB4"));
 }

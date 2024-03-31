@@ -140,7 +140,7 @@ void SeqView::resized() {
 	auto screenSize = utils::getScreenSize(this);
 	int scrollerHeight = screenSize.getHeight() * 0.0275;
 	int scrollerWidth = screenSize.getWidth() * 0.015;
-	int rulerHeight = screenSize.getHeight() * 0.035;
+	int rulerHeight = screenSize.getHeight() * 0.05;
 	int headWidth = screenSize.getWidth() * 0.1;
 
 	int adsorbButtonHeight = screenSize.getHeight() * 0.025;
@@ -186,7 +186,7 @@ void SeqView::paint(juce::Graphics& g) {
 	auto screenSize = utils::getScreenSize(this);
 	int scrollerHeight = screenSize.getHeight() * 0.0275;
 	int scrollerWidth = screenSize.getWidth() * 0.015;
-	int rulerHeight = screenSize.getHeight() * 0.035;
+	int rulerHeight = screenSize.getHeight() * 0.05;
 	int headWidth = screenSize.getWidth() * 0.1;
 
 	float lineThickness = screenSize.getHeight() * 0.0025;

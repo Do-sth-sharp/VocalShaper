@@ -20,6 +20,14 @@ SeqTimeRuler::SeqTimeRuler(
 		juce::Image::ARGB, 1, 1, false);
 }
 
+void SeqTimeRuler::updateTempoLabel() {
+	/** Update Tempo Temp */
+	this->tempoTemp = quickAPI::getTempoDataList();
+
+	/** Update Ruler Temp */
+	this->updateRulerTemp();
+}
+
 void SeqTimeRuler::updateBlock(int /*track*/, int /*index*/) {
 	/** Get Total Length */
 	this->totalLengthSec = quickAPI::getTotalLength();
@@ -45,7 +53,7 @@ void SeqTimeRuler::updateRulerTemp() {
 
 	float outlineThickness = screenSize.getHeight() * 0.0015;
 	float lineThickness = screenSize.getWidth() * 0.00075;
-	float longLineHeight = screenSize.getHeight() * 0.035;
+	float longLineHeight = screenSize.getHeight() * 0.05;
 	float shortLineHeight = screenSize.getHeight() * 0.015;
 
 	float shortLineIntervalMin = screenSize.getWidth() * 0.01;
@@ -54,6 +62,11 @@ void SeqTimeRuler::updateRulerTemp() {
 	float numAreaWidth = screenSize.getWidth() * 0.05;
 	float numPaddingWidth = screenSize.getWidth() * 0.0015;
 	float numPaddingHeight = screenSize.getHeight() * 0.001;
+
+	float labelFontHeight = screenSize.getHeight() * 0.015;
+	float labelHeight = screenSize.getHeight() * 0.0175;
+	float labelWidth = screenSize.getWidth() * 0.02;
+	float labelOutlineThickness = screenSize.getHeight() * 0.001;
 
 	/** Colors */
 	auto& laf = this->getLookAndFeel();
@@ -65,9 +78,16 @@ void SeqTimeRuler::updateRulerTemp() {
 		juce::Label::ColourIds::outlineColourId);
 	juce::Colour numColor = laf.findColour(
 		juce::Label::ColourIds::textColourId);
+	juce::Colour labelBackgroundColor = laf.findColour(
+		juce::TextEditor::ColourIds::backgroundColourId);
+	juce::Colour labelTextColor = laf.findColour(
+		juce::TextEditor::ColourIds::textColourId);
+	juce::Colour labelOutlineColor = laf.findColour(
+		juce::TextEditor::ColourIds::outlineColourId);
 
 	/** Font */
 	juce::Font numFont(numFontHeight);
+	juce::Font labelFont(labelFontHeight);
 
 	/** Background */
 	g.setColour(backgroundColor);
@@ -107,6 +127,35 @@ void SeqTimeRuler::updateRulerTemp() {
 			g.setFont(numFont);
 			g.drawFittedText(juce::String{ barId }, numRect.toNearestInt(),
 				juce::Justification::centredLeft, 1, 0.5f);
+		}
+	}
+
+	/** Labels */
+	for (auto& [time, tempo, numerator, denominator, isTempo] : this->tempoTemp) {
+		float labelXPos = (time - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		float labelRPos = labelXPos + labelWidth;
+
+		if (labelXPos < this->getWidth() && labelRPos > 0) {
+			/** Label Rect */
+			juce::Rectangle<float> labelRect(
+				labelXPos, isTempo ? 0.f : labelHeight,
+				labelWidth, labelHeight);
+
+			/** Background */
+			g.setColour(labelBackgroundColor);
+			g.fillRect(labelRect);
+
+			/** Outline */
+			g.setColour(labelOutlineColor);
+			g.drawRect(labelRect, labelOutlineThickness);
+
+			/** Text */
+			juce::String text = isTempo ? juce::String{ tempo, 2 } 
+			: (juce::String{ numerator } + "/" + juce::String{ denominator });
+			g.setColour(labelTextColor);
+			g.setFont(labelFont);
+			g.drawFittedText(text, labelRect.toNearestInt(),
+				juce::Justification::centred, 1, 0.5f);
 		}
 	}
 }
@@ -188,18 +237,27 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 	float xPos = event.position.getX();
 
-	/** Play Position Changed */
-	if (event.mods.isLeftButtonDown()) {
-		double per = xPos / (double)this->getWidth();
-		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-		quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
+	if (event.position.getY() < labelAreaHeight) {
+		/** TODO */
 	}
+	else {
+		/** Play Position Changed */
+		if (event.mods.isLeftButtonDown()) {
+			double per = xPos / (double)this->getWidth();
+			double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
-	/** Loop Changed */
-	else if (event.mods.isRightButtonDown()) {
-		double per = xPos / (double)this->getWidth();
-		this->mouseDownSecTemp = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
+			quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
+		}
+
+		/** Loop Changed */
+		else if (event.mods.isRightButtonDown()) {
+			double per = xPos / (double)this->getWidth();
+			this->mouseDownSecTemp = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
+		}
 	}
 }
 
@@ -218,22 +276,31 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 		this->scrollFunc(delta / 4);
 	}
 
-	/** Play Position Changed */
-	if (event.mods.isLeftButtonDown()) {
-		double per = xPos / (double)this->getWidth();
-		double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-		quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
+	if (event.mouseDownPosition.getY() < labelAreaHeight) {
+		/** TODO */
 	}
+	else {
+		/** Play Position Changed */
+		if (event.mods.isLeftButtonDown()) {
+			double per = xPos / (double)this->getWidth();
+			double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
-	/** Loop Changed */
-	else if (event.mods.isRightButtonDown()) {
-		double per = xPos / (double)this->getWidth();
-		double timeSec = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
+			quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
+		}
 
-		double loopStart = std::min(this->mouseDownSecTemp, timeSec);
-		double loopEnd = std::max(this->mouseDownSecTemp, timeSec);
-		quickAPI::setPlayLoop(loopStart, loopEnd);
+		/** Loop Changed */
+		else if (event.mods.isRightButtonDown()) {
+			double per = xPos / (double)this->getWidth();
+			double timeSec = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
+
+			double loopStart = std::min(this->mouseDownSecTemp, timeSec);
+			double loopEnd = std::max(this->mouseDownSecTemp, timeSec);
+			quickAPI::setPlayLoop(loopStart, loopEnd);
+		}
 	}
 }
 
@@ -246,11 +313,58 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 		quickAPI::setPlayPosition(timeSec);
 	}*/
 
-	/** Loop Changed */
-	if (event.mods.isRightButtonDown()) {
-		if (!(event.mouseWasDraggedSinceMouseDown())) {
-			quickAPI::setPlayLoop(0, 0);
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float labelAreaHeight = screenSize.getHeight() * 0.035;
+
+	if (event.position.getY() < labelAreaHeight) {
+		/** TODO */
+	}
+	else {
+		/** Loop Changed */
+		if (event.mods.isRightButtonDown()) {
+			if (!(event.mouseWasDraggedSinceMouseDown())) {
+				quickAPI::setPlayLoop(0, 0);
+			}
 		}
+	}
+}
+
+void SeqTimeRuler::mouseMove(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float labelAreaHeight = screenSize.getHeight() * 0.035;
+
+	float labelHeight = screenSize.getHeight() * 0.0175;
+	float labelWidth = screenSize.getWidth() * 0.02;
+
+	/** Cursor */
+	if (event.position.getY() < labelAreaHeight) {
+		auto cursor = juce::MouseCursor::NormalCursor;
+
+		/** Labels */
+		for (auto& [time, tempo, numerator, denominator, isTempo] : this->tempoTemp) {
+			float labelXPos = (time - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			float labelRPos = labelXPos + labelWidth;
+
+			if (labelXPos < this->getWidth() && labelRPos > 0) {
+				/** Label Rect */
+				juce::Rectangle<float> labelRect(
+					labelXPos, isTempo ? 0.f : labelHeight,
+					labelWidth, labelHeight);
+
+				/** Cursor In Label */
+				if (labelRect.contains(event.position)) {
+					cursor = juce::MouseCursor::PointingHandCursor;
+					break;
+				}
+			}
+		}
+
+		this->setMouseCursor(cursor);
+	}
+	else {
+		this->setMouseCursor(juce::MouseCursor::IBeamCursor);
 	}
 }
 

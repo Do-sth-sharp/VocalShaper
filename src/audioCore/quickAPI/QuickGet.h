@@ -22,12 +22,15 @@ namespace quickAPI {
 	bool isRecording();
 	double getTotalLength();
 	int getTempoTempIndexBySec(double timeSec);
-	/**timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator */
+	/** timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator */
 	using TempoData = std::tuple<double, double, double, double, int, int>;
 	const TempoData getTempoData(int tempIndex);
 	double limitTimeSec(double timeSec, double limitLevel);
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
+	/** timeInSec, tempo, numerator, denominator, isTempo */
+	using TempoLabelData = std::tuple<double, double, int, int, bool>;
+	const juce::Array<TempoLabelData> getTempoDataList();
 
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension);
 	const juce::Array<int> getFormatPossibleBitDepthsForExtension(const juce::String& extension);

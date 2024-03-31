@@ -16,6 +16,7 @@ public:
 		const WheelFunc& wheelFunc,
 		const WheelAltFunc& wheelAltFunc);
 
+	void updateTempoLabel();
 	void updateBlock(int track, int index);
 	void updateHPos(double pos, double itemSize);
 	void updateRulerTemp();
@@ -27,6 +28,7 @@ public:
 	void mouseDown(const juce::MouseEvent& event) override;
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseWheelMove(const juce::MouseEvent& event,
 		const juce::MouseWheelDetails& wheel);
 
@@ -45,6 +47,9 @@ private:
 	juce::Array<LineItem> lineTemp;
 	double minInterval = 0;
 	std::unique_ptr<juce::Image> rulerTemp = nullptr;
+	/** timeInSec, tempo, numerator, denominator, isTempo */
+	using TempoLabelData = std::tuple<double, double, int, int, bool>;
+	juce::Array<TempoLabelData> tempoTemp;
 
 	double playPosSec = 0;
 	double totalLengthSec = 0;

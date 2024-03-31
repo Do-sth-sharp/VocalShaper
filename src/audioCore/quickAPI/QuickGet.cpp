@@ -119,6 +119,10 @@ namespace quickAPI {
 		return result;
 	}
 
+	const juce::Array<TempoLabelData> getTempoDataList() {
+		return PlayPosition::getInstance()->getTempoDataList();
+	}
+
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension) {
 		return utils::getQualityOptionsForExtension(extension);
 	}

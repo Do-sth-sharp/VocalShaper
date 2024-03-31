@@ -41,6 +41,9 @@ public:
 	int getTempoTempIndexByQuarter(double timeQuarter) const;
 	using TempoDataMini = TempoTemp::TempoDataMini;
 	const TempoDataMini getTempoTempData(int tempIndex) const;
+	/** timeInSec, tempo, numerator, denominator, isTempo */
+	using TempoLabelData = std::tuple<double, double, int, int, bool>;
+	const juce::Array<TempoLabelData> getTempoDataList() const;
 	bool getLooping() const;
 	std::tuple<double, double> getLoopingTimeSec() const;
 	double getSampleRate() const;

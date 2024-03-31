@@ -180,6 +180,31 @@ const MovablePlayHead::TempoDataMini MovablePlayHead::getTempoTempData(int tempI
 	return this->tempoTemp.getTempoDataMini(tempIndex);
 }
 
+const juce::Array<MovablePlayHead::TempoLabelData> MovablePlayHead::getTempoDataList() const {
+	/** Result */
+	juce::Array<MovablePlayHead::TempoLabelData> result;
+
+	/** Temp */
+	double tempoTemp = 120.0;
+	int numeratorTemp = 4, denominatorTemp = 4;
+
+	/** Get Each Label */
+	for (auto i : this->tempos) {
+		auto& mes = i->message;
+		if (mes.isTempoMetaEvent()) {
+			tempoTemp = 1.0 / mes.getTempoSecondsPerQuarterNote() * 60.0;
+			result.add({ mes.getTimeStamp(), tempoTemp, numeratorTemp, denominatorTemp, true });
+		}
+		else if (mes.isTimeSignatureMetaEvent()) {
+			mes.getTimeSignatureInfo(numeratorTemp, denominatorTemp);
+			result.add({ mes.getTimeStamp(), tempoTemp, numeratorTemp, denominatorTemp, false });
+		}
+	}
+
+	/** Return */
+	return result;
+}
+
 bool MovablePlayHead::getLooping() const {
 	return this->position.getIsLooping();
 }
