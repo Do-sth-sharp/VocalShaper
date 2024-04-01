@@ -133,6 +133,13 @@ SeqView::SeqView()
 			}
 		}
 	);
+	CoreCallbacks::getInstance()->addTempoChanged(
+		[comp = SeqView::SafePointer(this)] {
+			if (comp) {
+				comp->updateTempo();
+			}
+		}
+	);
 }
 
 void SeqView::resized() {
@@ -302,6 +309,11 @@ void SeqView::updateBlock(int track, int index) {
 
 	/** Update View Pos */
 	this->hScroller->update();
+}
+
+void SeqView::updateTempo() {
+	/** Update Time Ruler */
+	this->ruler->updateTempoLabel();
 }
 
 int SeqView::getViewWidth() const {

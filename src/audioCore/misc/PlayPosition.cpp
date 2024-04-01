@@ -166,6 +166,8 @@ juce::MidiMessageSequence& MovablePlayHead::getTempoSequence() {
 void MovablePlayHead::updateTempoTemp() {
 	juce::ScopedWriteLock locker(audioLock::getPositionLock());
 	this->tempoTemp.update(this->tempos);
+
+	UICallbackAPI<void>::invoke(UICallbackType::TempoChanged);
 }
 
 int MovablePlayHead::getTempoTempIndexBySec(double timeSec) const {

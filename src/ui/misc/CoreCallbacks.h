@@ -32,6 +32,8 @@ public:
 	void addSeqChanged(const SeqChangedCallback& callback);
 	using SeqBlockChangedCallback = std::function<void(int, int)>;
 	void addSeqBlockChanged(const SeqBlockChangedCallback& callback);
+	using TempoChangedCallback = std::function<void(void)>;
+	void addTempoChanged(const TempoChangedCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
@@ -48,6 +50,7 @@ public:
 	void invokeEffectChanged(int track, int index) const;
 	void invokeSeqChanged(int index) const;
 	void invokeSeqBlockChanged(int track, int index) const;
+	void invokeTempoChanged() const;
 
 private:
 	juce::Array<ErrorCallback> error;
@@ -65,6 +68,7 @@ private:
 	juce::Array<EffectChangedCallback> effectChanged;
 	juce::Array<SeqChangedCallback> seqChanged;
 	juce::Array<SeqBlockChangedCallback> seqBlockChanged;
+	juce::Array<TempoChangedCallback> tempoChanged;
 
 public:
 	static CoreCallbacks* getInstance();

@@ -62,6 +62,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](int track, int index) {
 			CoreCallbacks::getInstance()->invokeSeqBlockChanged(track, index);
 		});
+	UICallbackAPI<void>::set(UICallbackType::TempoChanged,
+		[] {
+			CoreCallbacks::getInstance()->invokeTempoChanged();
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -120,8 +124,12 @@ void CoreCallbacks::addSeqChanged(const SeqChangedCallback& callback) {
 	this->seqChanged.add(callback);
 }
 
-void  CoreCallbacks::addSeqBlockChanged(const SeqBlockChangedCallback& callback) {
+void CoreCallbacks::addSeqBlockChanged(const SeqBlockChangedCallback& callback) {
 	this->seqBlockChanged.add(callback);
+}
+
+void CoreCallbacks::addTempoChanged(const TempoChangedCallback& callback) {
+	this->tempoChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -212,6 +220,12 @@ void CoreCallbacks::invokeSeqChanged(int index) const {
 void CoreCallbacks::invokeSeqBlockChanged(int track, int index) const {
 	for (auto& i : this->seqBlockChanged) {
 		i(track, index);
+	}
+}
+
+void CoreCallbacks::invokeTempoChanged() const {
+	for (auto& i : this->tempoChanged) {
+		i();
 	}
 }
 

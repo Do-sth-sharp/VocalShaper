@@ -16,6 +16,7 @@ public:
 
 	void update(int index);
 	void updateBlock(int track, int index);
+	void updateTempo();
 
 private:
 	std::unique_ptr<Scroller> hScroller = nullptr;
