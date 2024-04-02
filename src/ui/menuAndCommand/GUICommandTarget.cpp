@@ -435,7 +435,8 @@ void GUICommandTarget::changeOpened(CompManager::CompType type) const {
 }
 
 void GUICommandTarget::follow() const {
-	/** TODO */
+	bool follow = Tools::getInstance()->getFollow();
+	Tools::getInstance()->setFollow(!follow);
 }
 
 void GUICommandTarget::openConfig(int page) const {
@@ -528,8 +529,7 @@ void GUICommandTarget::about() const {
 }
 
 bool GUICommandTarget::checkFollow() const {
-	/** TODO */
-	return false;
+	return Tools::getInstance()->getFollow();
 }
 
 GUICommandTarget* GUICommandTarget::getInstance() {

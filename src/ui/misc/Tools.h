@@ -15,9 +15,13 @@ public:
 	void setAdsorb(double adsorbLevel);
 	double getAdsorb() const;
 
+	void setFollow(bool follow);
+	bool getFollow() const;
+
 private:
 	Type type = Type::Arrow;
 	double adsorbLevel = 1;
+	bool editorFollow = false;
 
 public:
 	static Tools* getInstance();

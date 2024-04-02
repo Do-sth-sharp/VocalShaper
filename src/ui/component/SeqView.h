@@ -4,10 +4,12 @@
 #include <FlowUI.h>
 #include "Scroller.h"
 #include "SeqTimeRuler.h"
+#include "../misc/LevelMeterHub.h"
 
 class SeqView final
 	: public flowUI::FlowComponent,
-	public juce::DragAndDropContainer {
+	public juce::DragAndDropContainer,
+	public LevelMeterHub::Target {
 public:
 	SeqView();
 
@@ -17,6 +19,9 @@ public:
 	void update(int index);
 	void updateBlock(int track, int index);
 	void updateTempo();
+	void updateLevelMeter() override;
+
+	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
 private:
 	std::unique_ptr<Scroller> hScroller = nullptr;
@@ -53,6 +58,10 @@ private:
 	using BlockItem = std::tuple<int, double, double>;
 	juce::Array<BlockItem> blockTemp;
 	double totalLength = 0;
+
+	double pos = 0, itemSize = 0;
+	double secStart = 0, secEnd = 0;
+	double playPosSec = 0;
 
 	int getViewWidth() const;
 	double getTimeLength() const;

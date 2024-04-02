@@ -316,6 +316,28 @@ void SeqView::updateTempo() {
 	this->ruler->updateTempoLabel();
 }
 
+void SeqView::updateLevelMeter() {
+	/** Get Play Position */
+	this->playPosSec = quickAPI::getTimeInSecond();
+
+	/** Get Play State */
+	bool isPlaying = quickAPI::isPlaying();
+
+	/** Follow */
+	if (isPlaying && Tools::getInstance()->getFollow()) {
+		if ((this->playPosSec < this->secStart) || (this->playPosSec > this->secEnd)) {
+			this->hScroller->setPos(this->playPosSec * this->itemSize);
+		}
+	}
+}
+
+std::tuple<double, double> SeqView::getViewArea(
+	double pos, double itemSize) const {
+	double secStart = pos / itemSize;
+	double secLength = this->getViewWidth() / itemSize;
+	return { secStart, secStart + secLength };
+}
+
 int SeqView::getViewWidth() const {
 	return this->hScroller->getWidth();
 }
@@ -330,6 +352,12 @@ std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 }
 
 void SeqView::updateHPos(double pos, double itemSize) {
+	/** Set Pos */
+	this->pos = pos;
+	this->itemSize = itemSize;
+	std::tie(this->secStart, this->secEnd) = this->getViewArea(pos, itemSize);
+
+	/** Update Comp */
 	this->ruler->updateHPos(pos, itemSize);
 	this->trackList->updateHPos(pos, itemSize);
 }

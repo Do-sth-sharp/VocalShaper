@@ -16,6 +16,14 @@ double Tools::getAdsorb() const {
 	return this->adsorbLevel;
 }
 
+void Tools::setFollow(bool follow) {
+	this->editorFollow = follow;
+}
+
+bool Tools::getFollow() const {
+	return this->editorFollow;
+}
+
 Tools* Tools::getInstance() {
 	return Tools::instance ? Tools::instance
 		: (Tools::instance = new Tools{});
