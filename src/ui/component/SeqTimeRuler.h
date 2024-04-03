@@ -57,10 +57,19 @@ private:
 
 	double mouseDownSecTemp = 0;
 
+	int dragLabelIndex = -1;
+	float labelDragOffset = 0;
+	float labelDragPos = 0;
+
 	/** Line List, Min Interval */
 	const std::tuple<juce::Array<LineItem>, double> createRulerLine(double pos, double itemSize) const;
 
 	double limitTimeSec(double timeSec);
+	int selectTempoLabel(const juce::Point<float> pos);
+
+	void removeTempoLabel(int index);
+	void addTempoLabel(double timeSec);
+	void setTempoLabelTime(int index, double timeSec);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTimeRuler)
 };

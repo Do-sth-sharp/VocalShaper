@@ -201,6 +201,8 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 	if (!this->rulerTemp) { return; }
 	g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
 
+	/** TODO Moving Tempo Label */
+
 	/** Cursor */
 	float cursorPosX = ((this->playPosSec - this->secStart) / (this->secEnd - this->secStart)) * this->getWidth();
 	juce::Rectangle<float> cursorRect(
@@ -242,7 +244,54 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
 	if (event.position.getY() < labelAreaHeight) {
-		/** TODO */
+		/** Get Tool Type */
+		auto tool = Tools::getInstance()->getType();
+
+		if (event.mods.isLeftButtonDown()) {
+			/** Check Tool Type */
+			switch (tool) {
+			case Tools::Type::Hand:
+				/** TODO Move View Area */
+				break;
+			case Tools::Type::Pencil:
+			case Tools::Type::Magic:
+				/** Get Label Index */
+				this->dragLabelIndex = this->selectTempoLabel(event.position);
+				if (this->dragLabelIndex > -1) {
+					/** Move Label */
+					double labelTime = std::get<0>(this->tempoTemp.getReference(this->dragLabelIndex));
+					float labelPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+					this->labelDragOffset = event.position.getX() - labelPos;
+					this->labelDragPos = labelPos;
+				}
+				else {
+					/** Add Label */
+					double labelTime = this->secStart + (event.position.getX() / (double)this->getWidth()) * (this->secEnd - this->secStart);
+					labelTime = this->limitTimeSec(labelTime);
+					this->addTempoLabel(labelTime);
+				}
+				break;
+			case Tools::Type::Eraser:
+				/** Remove Label */
+				int labelIndex = this->selectTempoLabel(event.position);
+				if (labelIndex > -1) {
+					this->removeTempoLabel(labelIndex);
+				}
+				break;
+			}
+		}
+		else if (event.mods.isRightButtonDown()) {
+			/** Check Tool Type */
+			switch (tool) {
+			case Tools::Type::Pencil:
+				/** Remove Label */
+				int labelIndex = this->selectTempoLabel(event.position);
+				if (labelIndex > -1) {
+					this->removeTempoLabel(labelIndex);
+				}
+				break;
+			}
+		}
 	}
 	else {
 		/** Play Position Changed */
@@ -281,7 +330,15 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
 	if (event.mouseDownPosition.getY() < labelAreaHeight) {
-		/** TODO */
+		/** Move Label */
+		if (event.mods.isLeftButtonDown()) {
+			if (this->dragLabelIndex > -1) {
+				/** Get Label Time */
+				double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
+				labelTime = this->limitTimeSec(labelTime);
+				this->labelDragPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			}
+		}
 	}
 	else {
 		/** Play Position Changed */
@@ -318,7 +375,24 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
 	if (event.position.getY() < labelAreaHeight) {
-		/** TODO */
+		if (event.mods.isLeftButtonDown()) {
+			/** Move Label */
+			if (this->dragLabelIndex > -1) {
+				if (event.mouseWasDraggedSinceMouseDown()) {
+					/** Get Label Time */
+					double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
+					labelTime = this->limitTimeSec(labelTime);
+
+					/** Move Label */
+					this->setTempoLabelTime(this->dragLabelIndex, labelTime);
+				}
+				
+				/** Reset State */
+				this->dragLabelIndex = -1;
+				this->labelDragOffset = 0;
+				this->labelDragPos = 0;
+			}
+		}
 	}
 	else {
 		/** Loop Changed */
@@ -335,30 +409,13 @@ void SeqTimeRuler::mouseMove(const juce::MouseEvent& event) {
 	auto screenSize = utils::getScreenSize(this);
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-	float labelHeight = screenSize.getHeight() * 0.0175;
-	float labelWidth = screenSize.getWidth() * 0.02;
-
 	/** Cursor */
 	if (event.position.getY() < labelAreaHeight) {
 		auto cursor = juce::MouseCursor::NormalCursor;
 
 		/** Labels */
-		for (auto& [time, tempo, numerator, denominator, isTempo] : this->tempoTemp) {
-			float labelXPos = (time - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-			float labelRPos = labelXPos + labelWidth;
-
-			if (labelXPos < this->getWidth() && labelRPos > 0) {
-				/** Label Rect */
-				juce::Rectangle<float> labelRect(
-					labelXPos, isTempo ? 0.f : labelHeight,
-					labelWidth, labelHeight);
-
-				/** Cursor In Label */
-				if (labelRect.contains(event.position)) {
-					cursor = juce::MouseCursor::PointingHandCursor;
-					break;
-				}
-			}
+		if (this->selectTempoLabel(event.position) > -1) {
+			cursor = juce::MouseCursor::PointingHandCursor;
 		}
 
 		this->setMouseCursor(cursor);
@@ -453,4 +510,46 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 double SeqTimeRuler::limitTimeSec(double timeSec) {
 	double level = Tools::getInstance()->getAdsorb();
 	return quickAPI::limitTimeSec(timeSec, level);
+}
+
+int SeqTimeRuler::selectTempoLabel(const juce::Point<float> pos) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+
+	float labelHeight = screenSize.getHeight() * 0.0175;
+	float labelWidth = screenSize.getWidth() * 0.02;
+
+	for (int i = 0; i < this->tempoTemp.size(); i++) {
+		auto& [time, tempo, numerator, denominator, isTempo] = this->tempoTemp.getReference(i);
+
+		float labelXPos = (time - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		float labelRPos = labelXPos + labelWidth;
+
+		if (labelXPos < this->getWidth() && labelRPos > 0) {
+			/** Label Rect */
+			juce::Rectangle<float> labelRect(
+				labelXPos, isTempo ? 0.f : labelHeight,
+				labelWidth, labelHeight);
+
+			/** Cursor In Label */
+			if (labelRect.contains(pos)) {
+				return i;
+			}
+		}
+	}
+
+	/** No In Label */
+	return -1;
+}
+
+void SeqTimeRuler::removeTempoLabel(int index) {
+	/** TODO */
+}
+
+void SeqTimeRuler::addTempoLabel(double timeSec) {
+	/** TODO */
+}
+
+void SeqTimeRuler::setTempoLabelTime(int index, double timeSec) {
+	/** TODO */
 }
