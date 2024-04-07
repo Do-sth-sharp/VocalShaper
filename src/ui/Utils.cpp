@@ -164,6 +164,8 @@ namespace utils {
 	const juce::URL getHelpPage(const juce::String& version,
 		const juce::String& branch, const juce::String& language) {
 		return juce::URL{ "https://help.daw.org.cn" }
+			.getChildURL("#")
+			.getChildURL(language + "/")
 			.withParameter("version", version)
 			.withParameter("branch", branch)
 			.withParameter("language", language);
