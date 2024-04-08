@@ -16,14 +16,14 @@ SourceIO::~SourceIO() {
 
 void SourceIO::addTask(const Task& task) {
 	juce::GenericScopedLock locker(this->lock);
-	this->list.push(task);
+	this->list.push({ task, PlayPosition::getInstance()->getTempoSequence() });
 	this->startThread();
 }
 
 void SourceIO::run() {
 	while (!this->threadShouldExit()) {
 		/** Get Next Task */
-		Task task;
+		TaskStruct task;
 		{
 			juce::GenericScopedLock locker(this->lock);
 
@@ -38,7 +38,8 @@ void SourceIO::run() {
 		/** Process Task */
 		{
 			/** Check Source Type */
-			auto& [type, ptr, path, getTempo] = task;
+			auto& [taskData, tempo] = task;
+			auto& [type, ptr, path, getTempo] = taskData;
 			if (!ptr) { continue; }
 
 			juce::File file = utils::getProjectDir().getChildFile(path);
@@ -96,10 +97,13 @@ void SourceIO::run() {
 
 					/** Set Tempo */
 					if (getTempo) {
-						juce::ScopedWriteLock locker(audioLock::getPositionLock());
-						auto& tempoSeq = PlayPosition::getInstance()->getTempoSequence();
-						tempoSeq.addSequence(tempo, 0);
-						PlayPosition::getInstance()->updateTempoTemp();
+						juce::MessageManager::callAsync(
+							[tempo] {
+								auto& tempoSeq = PlayPosition::getInstance()->getTempoSequence();
+								tempoSeq.addSequence(tempo, 0);
+								PlayPosition::getInstance()->updateTempoTemp();
+							}
+						);
 					}
 
 					/** Set Data */
@@ -122,13 +126,6 @@ void SourceIO::run() {
 						}
 					}
 					if (buffer.getNumTracks() <= 0) { continue; }
-
-					/** Get Tempo */
-					juce::MidiMessageSequence tempo;
-					{
-						juce::ScopedReadLock locker(audioLock::getPositionLock());
-						tempo = PlayPosition::getInstance()->getTempoSequence();
-					}
 
 					/** Merge Data */
 					auto data = SourceIO::mergeMIDI(buffer, tempo);

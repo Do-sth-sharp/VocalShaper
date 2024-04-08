@@ -3,6 +3,7 @@
 #include "../AudioCore.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
+#include "../misc/PlayPosition.h"
 #include "../Utils.h"
 
 ActionAddPluginBlackList::ActionAddPluginBlackList(const juce::String& plugin)
@@ -619,4 +620,67 @@ bool ActionAddSequencerBlock::undo() {
 	}
 	this->output("Can't undo add sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
 	ACTION_RESULT(false);
+}
+
+ActionAddTempoTempo::ActionAddTempoTempo(
+	double time, double tempo)
+	: ACTION_DB{ time, tempo } {}
+
+bool ActionAddTempoTempo::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionAddTempoTempo);
+	ACTION_WRITE_DB();
+
+	ACTION_DATA(index) = PlayPosition::getInstance()
+		->addTempoLabelTempo(ACTION_DATA(time), ACTION_DATA(tempo));
+	ACTION_RESULT(true);
+}
+
+bool ActionAddTempoTempo::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionAddTempoTempo);
+	ACTION_WRITE_DB();
+
+	PlayPosition::getInstance()->removeTempoLabel(ACTION_DATA(index));
+	ACTION_RESULT(true);
+}
+
+ActionAddTempoBeat::ActionAddTempoBeat(
+	double time, int numerator, int denominator)
+	: ACTION_DB{ time, numerator, denominator } {}
+
+bool ActionAddTempoBeat::ActionAddTempoBeat::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionAddTempoBeat);
+	ACTION_WRITE_DB();
+
+	ACTION_DATA(index) = PlayPosition::getInstance()
+		->addTempoLabelBeat(ACTION_DATA(time),
+			ACTION_DATA(numerator), ACTION_DATA(denominator));
+	ACTION_RESULT(true);
+}
+
+bool ActionAddTempoBeat::ActionAddTempoBeat::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionAddTempoBeat);
+	ACTION_WRITE_DB();
+
+	PlayPosition::getInstance()->removeTempoLabel(ACTION_DATA(index));
+	ACTION_RESULT(true);
 }

@@ -24,7 +24,8 @@ private:
 	const juce::StringArray audioFormatsOut, midiFormatsOut;
 
 	juce::CriticalSection lock;
-	std::queue<Task> list;
+	using TaskStruct = std::tuple<Task, juce::MidiMessageSequence>;
+	std::queue<TaskStruct> list;
 
 	static const juce::StringArray trimFormat(const juce::StringArray& list);
 

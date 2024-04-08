@@ -227,6 +227,110 @@ bool MovablePlayHead::checkOverflow() const {
 	return this->overflowFlag;
 }
 
+int MovablePlayHead::addTempoLabelTempo(double time, double tempo) {
+	/** Get Index */
+	int index = this->getTempoInsertIndex(time);
+
+	/** Insert Label */
+	this->tempos.addEvent(juce::MidiMessage::tempoMetaEvent(
+		1 / (tempo / 60)).withTimeStamp(time));
+	this->updateTempoTemp();
+
+	/** Return Index */
+	return index;
+}
+
+int MovablePlayHead::addTempoLabelBeat(double time, int numerator, int denominator) {
+	/** Get Index */
+	int index = this->getTempoInsertIndex(time);
+
+	/** Insert Label */
+	this->tempos.addEvent(juce::MidiMessage::timeSignatureMetaEvent(
+		numerator, denominator).withTimeStamp(time));
+	this->updateTempoTemp();
+
+	/** Return Index */
+	return index;
+}
+
+void MovablePlayHead::removeTempoLabel(int index) {
+	this->tempos.deleteEvent(index, false);
+}
+
+int MovablePlayHead::getTempoLabelNum() const {
+	return this->tempos.getNumEvents();
+}
+
+bool MovablePlayHead::isTempoLabelTempoEvent(int index) const {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		return ptrEvent->message.isTempoMetaEvent();
+	}
+	return false;
+}
+
+void MovablePlayHead::setTempoLabelTime(int index, double time) {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		/** Set Message Time */
+		ptrEvent->message.setTimeStamp(time);
+		this->tempos.sort();
+
+		/** Update Temp */
+		this->updateTempoTemp();
+	}
+}
+
+void MovablePlayHead::setTempoLabelTempo(int index, double tempo) {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		if (ptrEvent->message.isTempoMetaEvent()) {
+			/** Set Message Tempo */
+			double time = ptrEvent->message.getTimeStamp();
+			ptrEvent->message = juce::MidiMessage::tempoMetaEvent(
+				1 / (tempo / 60)).withTimeStamp(time);
+
+			/** Update Temp */
+			this->updateTempoTemp();
+		}
+	}
+}
+
+void MovablePlayHead::setTempoLabelBeat(
+	int index, int numerator, int denominator) {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		if (ptrEvent->message.isTempoMetaEvent()) {
+			/** Set Message Beat */
+			double time = ptrEvent->message.getTimeStamp();
+			ptrEvent->message = juce::MidiMessage::timeSignatureMetaEvent(
+				numerator, denominator).withTimeStamp(time);
+
+			/** Update Temp */
+			this->updateTempoTemp();
+		}
+	}
+}
+
+double MovablePlayHead::getTempoLabelTime(int index) const {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		return ptrEvent->message.getTimeStamp();
+	}
+	return 0;
+}
+
+double MovablePlayHead::getTempoLabelTempo(int index) const {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		return 1 / ptrEvent->message.getTempoSecondsPerQuarterNote() * 60;
+	}
+	return 120;
+}
+
+std::tuple<int, int> MovablePlayHead::getTempoLabelBeat(int index) const {
+	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
+		int numeratorTemp = 4, denominatorTemp = 4;
+		ptrEvent->message.getTimeSignatureInfo(numeratorTemp, denominatorTemp);
+		return { numeratorTemp, denominatorTemp };
+	}
+	return { 4, 4 };
+}
+
 void MovablePlayHead::updatePositionByTimeInSecond() {
 	double time = this->position.getTimeInSeconds().orFallback(0);
 	this->position.setTimeInSamples((int64_t)std::floor(time * this->sampleRate));
@@ -248,6 +352,16 @@ void MovablePlayHead::updatePositionByTimeInSample() {
 	auto [barCount, barPpq] = this->toBarQ(timeQuarter);
 	this->position.setBarCount(barCount);
 	this->position.setPpqPositionOfLastBarStart(barPpq);
+}
+
+int MovablePlayHead::getTempoInsertIndex(double time) const {
+	for (int i = this->tempos.getNumEvents() - 1; i >= 0; i--) {
+		auto ptrEvent = this->tempos.getEventPointer(i);
+		if (ptrEvent->message.getTimeStamp() >= time) {
+			return i + 1;
+		}
+	}
+	return 0;
 }
 
 PlayPosition* PlayPosition::getInstance() {

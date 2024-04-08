@@ -294,3 +294,46 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerBlock)
 };
+
+class ActionAddTempoTempo final : public ActionUndoableBase {
+public:
+	ActionAddTempoTempo() = delete;
+	ActionAddTempoTempo(
+		double time, double tempo);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Add Tempo Label";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const double time, tempo;
+		int index = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionAddTempoTempo)
+};
+
+class ActionAddTempoBeat final : public ActionUndoableBase {
+public:
+	ActionAddTempoBeat() = delete;
+	ActionAddTempoBeat(
+		double time, int numerator, int denominator);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Add Beat Label";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const double time;
+		const int numerator, denominator;
+		int index = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionAddTempoBeat)
+};

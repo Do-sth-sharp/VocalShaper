@@ -1076,3 +1076,54 @@ bool ActionRemoveSequencerBlock::undo() {
 	this->output("Can't undo remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
 	ACTION_RESULT(false);
 }
+
+ActionRemoveTempo::ActionRemoveTempo(int index)
+	: ACTION_DB{ index } {}
+
+bool ActionRemoveTempo::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionRemoveTempo);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
+		ACTION_DATA(isTempo) = PlayPosition::getInstance()->isTempoLabelTempoEvent(ACTION_DATA(index));
+		ACTION_DATA(time) = PlayPosition::getInstance()->getTempoLabelTime(ACTION_DATA(index));
+
+		if (ACTION_DATA(isTempo)) {
+			ACTION_DATA(tempo) = PlayPosition::getInstance()->getTempoLabelTempo(ACTION_DATA(index));
+		}
+		else {
+			std::tie(ACTION_DATA(numerator), ACTION_DATA(denominator)) =
+				PlayPosition::getInstance()->getTempoLabelBeat(ACTION_DATA(index));
+		}
+
+		PlayPosition::getInstance()->removeTempoLabel(ACTION_DATA(index));
+
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionRemoveTempo::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionRemoveTempo);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(isTempo)) {
+		PlayPosition::getInstance()->addTempoLabelTempo(
+			ACTION_DATA(time), ACTION_DATA(tempo));
+	}
+	else {
+		PlayPosition::getInstance()->addTempoLabelBeat(
+			ACTION_DATA(time), ACTION_DATA(numerator), ACTION_DATA(denominator));
+	}
+	ACTION_RESULT(true);
+}

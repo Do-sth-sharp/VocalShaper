@@ -50,6 +50,18 @@ public:
 	void setOverflow();
 	bool checkOverflow() const;
 
+	int addTempoLabelTempo(double time, double tempo);
+	int addTempoLabelBeat(double time, int numerator, int denominator);
+	void removeTempoLabel(int index);
+	int getTempoLabelNum() const;
+	bool isTempoLabelTempoEvent(int index) const;
+	void setTempoLabelTime(int index, double time);
+	void setTempoLabelTempo(int index, double tempo);
+	void setTempoLabelBeat(int index, int numerator, int denominator);
+	double getTempoLabelTime(int index) const;
+	double getTempoLabelTempo(int index) const;
+	std::tuple<int, int> getTempoLabelBeat(int index) const;
+
 protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
 	juce::MidiMessageSequence tempos;
@@ -61,6 +73,8 @@ protected:
 
 	void updatePositionByTimeInSecond();
 	void updatePositionByTimeInSample();
+
+	int getTempoInsertIndex(double time) const;
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MovablePlayHead)

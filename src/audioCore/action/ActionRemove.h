@@ -348,3 +348,25 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerBlock)
 };
+
+class ActionRemoveTempo final : public ActionUndoableBase {
+public:
+	ActionRemoveTempo() = delete;
+	ActionRemoveTempo(int index);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Tempo";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int index;
+		double time = 0, tempo = 120;
+		int numerator = 4, denominator = 4;
+		bool isTempo = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveTempo)
+};
