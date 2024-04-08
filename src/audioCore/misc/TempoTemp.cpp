@@ -215,6 +215,15 @@ int TempoTemp::selectBySec(double time) const {
 		}
 	}
 
+	/** Check Last */
+	if (this->temp.size() > 0) {
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->temp.size() - 1);
+		if (time >= timeInSec) {
+			return this->lastIndex = (this->temp.size() - 1);
+		}
+	}
+
 	/** Compare Function */
 	auto cFunc = [](double x, const TempoTempItem& curr, const TempoTempItem& next)->CompareResult {
 		if (x >= std::get<0>(curr) && x < std::get<0>(next)) {
@@ -229,7 +238,7 @@ int TempoTemp::selectBySec(double time) const {
 		};
 
 	/** Binary Search */
-	return this->lastIndex = this->search(0, this->temp.size() - 1, time, cFunc);
+	return this->lastIndex = this->search(0, this->temp.size() - 2, time, cFunc);
 }
 
 int TempoTemp::selectByTick(double timeTick, short timeFormat) const {
@@ -286,6 +295,15 @@ int TempoTemp::selectByQuarter(double timeQuarter) const {
 		}
 	}
 
+	/** Check Last */
+	if (this->temp.size() > 0) {
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->temp.size() - 1);
+		if (timeQuarter >= timeInQuarter) {
+			return this->lastIndex = (this->temp.size() - 1);
+		}
+	}
+
 	/** Compare Function */
 	auto cFunc = [](double x, const TempoTempItem& curr, const TempoTempItem& next)->CompareResult {
 		if (x >= std::get<1>(curr) && x < std::get<1>(next)) {
@@ -300,7 +318,7 @@ int TempoTemp::selectByQuarter(double timeQuarter) const {
 		};
 
 	/** Binary Search */
-	return this->lastIndex = this->search(0, this->temp.size() - 1, timeQuarter, cFunc);
+	return this->lastIndex = this->search(0, this->temp.size() - 2, timeQuarter, cFunc);
 }
 
 int TempoTemp::selectByBar(double timeBar) const {
@@ -345,6 +363,15 @@ int TempoTemp::selectByBar(double timeBar) const {
 		}
 	}
 
+	/** Check Last */
+	if (this->temp.size() > 0) {
+		auto& [timeInSec, timeInQuarter, timeInBar,
+			secPerQuarter, quarterPerBar, numerator, denominator] = this->temp.getReference(this->temp.size() - 1);
+		if (timeBar >= timeInBar) {
+			return this->lastIndex = (this->temp.size() - 1);
+		}
+	}
+
 	/** Compare Function */
 	auto cFunc = [](double x, const TempoTempItem& curr, const TempoTempItem& next)->CompareResult {
 		if (x >= std::get<2>(curr) && x < std::get<2>(next)) {
@@ -359,7 +386,7 @@ int TempoTemp::selectByBar(double timeBar) const {
 		};
 
 	/** Binary Search */
-	return this->lastIndex = this->search(0, this->temp.size() - 1, timeBar, cFunc);
+	return this->lastIndex = this->search(0, this->temp.size() - 2, timeBar, cFunc);
 }
 
 double TempoTemp::secToQuarter(double timeSec, int tempIndex) const {
@@ -452,6 +479,8 @@ TempoTemp::TempoDataMini TempoTemp::getTempoDataMini(int tempIndex) const {
 
 template<typename Func, typename T>
 int TempoTemp::search(int low, int high, T value, Func func) const {
+	if (high < low) { return -1; }
+	
 	int mid = low + (high - low) / 2;
 	if (func(value, this->temp.getReference(mid),
 		this->temp.getReference(mid + 1)) == CompareResult::EQ) {

@@ -190,18 +190,62 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 	auto screenSize = utils::getScreenSize(this);
 	float cursorThickness = screenSize.getWidth() * 0.00075;
 
+	float labelFontHeight = screenSize.getHeight() * 0.015;
+	float labelHeight = screenSize.getHeight() * 0.0175;
+	float labelWidth = screenSize.getWidth() * 0.02;
+	float labelOutlineThickness = screenSize.getHeight() * 0.001;
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour cursorColor = laf.findColour(
 		juce::Label::ColourIds::textWhenEditingColourId);
 	juce::Colour offColor = laf.findColour(
 		juce::Label::ColourIds::backgroundWhenEditingColourId);
+	juce::Colour labelBackgroundColor = laf.findColour(
+		juce::TextEditor::ColourIds::backgroundColourId);
+	juce::Colour labelTextColor = laf.findColour(
+		juce::TextEditor::ColourIds::textColourId);
+	juce::Colour labelOutlineColor = laf.findColour(
+		juce::TextEditor::ColourIds::outlineColourId);
+
+	float labelMovingAlpha = 0.7f;
+
+	/** Font */
+	juce::Font labelFont(labelFontHeight);
 
 	/** Ruler */
 	if (!this->rulerTemp) { return; }
 	g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
 
-	/** TODO Moving Tempo Label */
+	/** Moving Tempo Label */
+	if (this->dragLabelIndex > -1) {
+		auto& [time, tempo, numerator, denominator, isTempo] = this->tempoTemp.getReference(this->dragLabelIndex);
+		float labelXPos = this->labelDragPos;
+		float labelRPos = labelXPos + labelWidth;
+
+		if (labelXPos < this->getWidth() && labelRPos > 0) {
+			/** Label Rect */
+			juce::Rectangle<float> labelRect(
+				labelXPos, isTempo ? 0.f : labelHeight,
+				labelWidth, labelHeight);
+
+			/** Background */
+			g.setColour(labelBackgroundColor.withAlpha(labelMovingAlpha));
+			g.fillRect(labelRect);
+
+			/** Outline */
+			g.setColour(labelOutlineColor.withAlpha(labelMovingAlpha));
+			g.drawRect(labelRect, labelOutlineThickness);
+
+			/** Text */
+			juce::String text = isTempo ? juce::String{ tempo, 2 }
+			: (juce::String{ numerator } + "/" + juce::String{ denominator });
+			g.setColour(labelTextColor.withAlpha(labelMovingAlpha));
+			g.setFont(labelFont);
+			g.drawFittedText(text, labelRect.toNearestInt(),
+				juce::Justification::centred, 1, 0.5f);
+		}
+	}
 
 	/** Cursor */
 	float cursorPosX = ((this->playPosSec - this->secStart) / (this->secEnd - this->secStart)) * this->getWidth();
@@ -374,7 +418,7 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 	auto screenSize = utils::getScreenSize(this);
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-	if (event.position.getY() < labelAreaHeight) {
+	if (event.mouseDownPosition.getY() < labelAreaHeight) {
 		if (event.mods.isLeftButtonDown()) {
 			/** Move Label */
 			if (this->dragLabelIndex > -1) {
