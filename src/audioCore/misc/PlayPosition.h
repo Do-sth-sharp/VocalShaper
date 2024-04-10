@@ -62,6 +62,8 @@ public:
 	double getTempoLabelTempo(int index) const;
 	std::tuple<int, int> getTempoLabelBeat(int index) const;
 
+	int getTempoInsertIndex(double time) const;
+
 protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
 	juce::MidiMessageSequence tempos;
@@ -73,8 +75,6 @@ protected:
 
 	void updatePositionByTimeInSecond();
 	void updatePositionByTimeInSample();
-
-	int getTempoInsertIndex(double time) const;
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MovablePlayHead)

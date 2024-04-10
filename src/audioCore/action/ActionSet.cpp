@@ -2,6 +2,7 @@
 
 #include "../AudioCore.h"
 #include "../misc/Device.h"
+#include "../misc/PlayPosition.h"
 
 ActionSetDeviceAudioType::ActionSetDeviceAudioType(const juce::String& type)
 	: type(type) {}
@@ -1706,4 +1707,120 @@ bool ActionSetInstrOffline::undo() {
 		}
 	}
 	ACTION_RESULT(false);
+}
+
+ActionSetTempoTime::ActionSetTempoTime(
+	int index, double time)
+	: ACTION_DB{ index, time } {}
+
+bool ActionSetTempoTime::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetTempoTime);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
+		ACTION_DATA(oldTime) = PlayPosition::getInstance()->getTempoLabelTime(ACTION_DATA(index));
+
+		ACTION_DATA(newIndex) = PlayPosition::getInstance()->getTempoInsertIndex(ACTION_DATA(time));
+		if (ACTION_DATA(newIndex) > ACTION_DATA(index)) {
+			ACTION_DATA(newIndex)--;
+		}
+
+		PlayPosition::getInstance()->setTempoLabelTime(ACTION_DATA(index), ACTION_DATA(time));
+
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetTempoTime::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetTempoTime);
+	ACTION_WRITE_DB();
+
+	PlayPosition::getInstance()->setTempoLabelTime(ACTION_DATA(newIndex), ACTION_DATA(oldTime));
+
+	ACTION_RESULT(true);
+}
+
+ActionSetTempoTempo::ActionSetTempoTempo(
+	int index, double tempo)
+	: ACTION_DB{ index, tempo } {}
+
+bool ActionSetTempoTempo::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetTempoTempo);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
+		ACTION_DATA(oldTempo) = PlayPosition::getInstance()->getTempoLabelTempo(ACTION_DATA(index));
+
+		PlayPosition::getInstance()->setTempoLabelTempo(ACTION_DATA(index), ACTION_DATA(tempo));
+
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetTempoTempo::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetTempoTempo);
+	ACTION_WRITE_DB();
+
+	PlayPosition::getInstance()->setTempoLabelTempo(ACTION_DATA(index), ACTION_DATA(oldTempo));
+
+	ACTION_RESULT(true);
+}
+
+ActionSetTempoBeat::ActionSetTempoBeat(
+	int index, int numerator, int denominator)
+	: ACTION_DB{ index, numerator, denominator } {}
+
+bool ActionSetTempoBeat::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetTempoBeat);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
+		std::tie(ACTION_DATA(oldNumerator), ACTION_DATA(oldDenominator)) = PlayPosition::getInstance()->getTempoLabelBeat(ACTION_DATA(index));
+
+		PlayPosition::getInstance()->setTempoLabelBeat(ACTION_DATA(index), ACTION_DATA(numerator), ACTION_DATA(denominator));
+
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionSetTempoBeat::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetTempoBeat);
+	ACTION_WRITE_DB();
+
+	PlayPosition::getInstance()->setTempoLabelBeat(ACTION_DATA(index), ACTION_DATA(numerator), ACTION_DATA(denominator));
+
+	ACTION_RESULT(true);
 }

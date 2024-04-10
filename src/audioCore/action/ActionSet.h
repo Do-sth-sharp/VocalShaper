@@ -941,3 +941,72 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrOffline)
 };
 
+class ActionSetTempoTime final : public ActionUndoableBase {
+public:
+	ActionSetTempoTime() = delete;
+	ActionSetTempoTime(
+		int index, double time);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Tempo Label Time";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int index;
+		const double time;
+
+		double oldTime = 0;
+		int newIndex = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTempoTime)
+};
+
+class ActionSetTempoTempo final : public ActionUndoableBase {
+public:
+	ActionSetTempoTempo() = delete;
+	ActionSetTempoTempo(
+		int index, double tempo);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Tempo Label Tempo";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int index;
+		const double tempo;
+
+		double oldTempo = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTempoTempo)
+};
+
+class ActionSetTempoBeat final : public ActionUndoableBase {
+public:
+	ActionSetTempoBeat() = delete;
+	ActionSetTempoBeat(
+		int index, int numerator, int denominator);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Tempo Label Beat";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int index;
+		const int numerator, denominator;
+
+		int oldNumerator = 4, oldDenominator = 4;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTempoBeat)
+};
