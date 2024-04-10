@@ -348,6 +348,36 @@ void CoreActions::removeTrack(int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::addTempoLabel(double time, double tempo) {
+	auto action = std::unique_ptr<ActionBase>(new ActionAddTempoTempo{ time, tempo });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::addBeatLabel(double time, int numerator, int denominator) {
+	auto action = std::unique_ptr<ActionBase>(new ActionAddTempoBeat{ time, numerator, denominator });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::removeLabel(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveTempo{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setLabelTime(int index, double time) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetTempoTime{ index, time });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setLabelTempo(int index, double tempo) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetTempoTempo{ index, tempo });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setLabelBeat(int index, int numerator, int denominator) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetTempoBeat{ index, numerator, denominator });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

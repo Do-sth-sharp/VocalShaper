@@ -76,6 +76,13 @@ public:
 	static void setTrackMuteAll(bool mute);
 	static void removeTrack(int index);
 
+	static void addTempoLabel(double time, double tempo);
+	static void addBeatLabel(double time, int numerator, int denominator);
+	static void removeLabel(int index);
+	static void setLabelTime(int index, double time);
+	static void setLabelTempo(int index, double tempo);
+	static void setLabelBeat(int index, int numerator, int denominator);
+
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
 	static void newProjectGUI();
