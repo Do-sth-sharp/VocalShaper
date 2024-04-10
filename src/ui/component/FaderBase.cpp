@@ -42,7 +42,7 @@ void FaderBase::paint(juce::Graphics& g) {
 	int paddingHeight = screenSize.getHeight() * 0.002;
 
 	float lineThickness = screenSize.getHeight() * 0.001;
-	float blockHeight = screenSize.getHeight() * 0.02;
+	float blockHeight = screenSize.getHeight() * 0.03;
 	float blockWidth = screenSize.getWidth() * 0.008;
 
 	int textShownWidth = screenSize.getWidth() * 0.02;

@@ -68,24 +68,24 @@ void MixerTrackComponent::resized() {
 	int colorHeight = screenSize.getHeight() * 0.015;
 
 	int sideChainHeight = screenSize.getHeight() * 0.02;
-	int sideChainHideHeight = screenSize.getHeight() * 0.4;
+	int sideChainHideHeight = screenSize.getHeight() * 0.45;
 	bool sideChainShown = this->getHeight() >= sideChainHideHeight;
 
 	int ioHeight = screenSize.getHeight() * 0.02;
 	int ioWidth = ioHeight;
-	int ioHideHeight = screenSize.getHeight() * 0.35;
+	int ioHideHeight = screenSize.getHeight() * 0.45;
 	bool ioShown = this->getHeight() >= ioHideHeight;
 
 	int knobPaddingWidth = screenSize.getWidth() * 0.0025;
 	int knobHeight = screenSize.getHeight() * 0.075;
 	int knobWidth = (this->getWidth()- knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
-	int knobHideHeight = screenSize.getHeight() * 0.3;
+	int knobHideHeight = screenSize.getHeight() * 0.4;
 	bool knobShown = this->getHeight() >= knobHideHeight;
 
 	int faderPaddingWidth = screenSize.getWidth() * 0.0025;
-	int faderHeight = screenSize.getHeight() * 0.15;
+	int faderHeight = screenSize.getHeight() * 0.25;
 	int faderWidth = (this->getWidth() - faderPaddingWidth * 2) / 2;
-	int faderHideHeight = screenSize.getHeight() * 0.3;
+	int faderHideHeight = screenSize.getHeight() * 0.4;
 	bool faderShown = this->getHeight() >= faderHideHeight;
 
 	int muteHeight = screenSize.getHeight() * 0.035;
