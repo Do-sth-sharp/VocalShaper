@@ -30,7 +30,7 @@ TempoEditorContent::TempoEditorContent(bool defaultIsTempo,
 	this->tempoEditor->setClicksOutsideDismissVirtualKeyboard(true);
 	this->tempoEditor->setPopupMenuEnabled(false);
 	this->tempoEditor->setInputFilter(
-		new utils::TextDoubleFilter{ 30, 300, 2 }, true);
+		new utils::TextDoubleFilter{ 0, 300, 2 }, true);
 	this->tempoEditor->setText(juce::String{ defaultTempo, 2 });
 	this->tempoEditor->setEnabled(defaultIsTempo);
 	this->addAndMakeVisible(this->tempoEditor.get());
@@ -43,7 +43,7 @@ TempoEditorContent::TempoEditorContent(bool defaultIsTempo,
 	this->numeratorEditor->setClicksOutsideDismissVirtualKeyboard(true);
 	this->numeratorEditor->setPopupMenuEnabled(false);
 	this->numeratorEditor->setInputFilter(
-		new utils::TextIntegerFilter{ 1, 30 }, true);
+		new utils::TextIntegerFilter{ 0, 30 }, true);
 	this->numeratorEditor->setText(juce::String{ defaultNumerator });
 	this->numeratorEditor->setEnabled(!defaultIsTempo);
 	this->addAndMakeVisible(this->numeratorEditor.get());
@@ -69,15 +69,15 @@ TempoEditorContent::TempoEditorContent(bool defaultIsTempo,
 void TempoEditorContent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
-	int paddingHeight = screenSize.getHeight() * 0.05;
-	int paddingWidth = screenSize.getWidth() * 0.05;
+	int paddingHeight = screenSize.getHeight() * 0.025;
+	int paddingWidth = screenSize.getWidth() * 0.025;
 
 	int toggleHeight = screenSize.getHeight() * 0.025;
 	int toggleWidth = screenSize.getWidth() * 0.05;
 	int toggleSplitWidth = screenSize.getWidth() * 0.005;
 
 	int lineSplitHeight = screenSize.getHeight() * 0.025;
-	int lineHeight = screenSize.getHeight() * 0.05;
+	int lineHeight = screenSize.getHeight() * 0.035;
 	int lineCompWidth = screenSize.getWidth() * 0.1;
 	int beatSplitWidth = screenSize.getWidth() * 0.025;
 
@@ -119,12 +119,16 @@ void TempoEditorContent::resized() {
 }
 
 const TempoEditorContent::TempoResult TempoEditorContent::getResult() const {
-	return {
-		this->tempoToggle->getToggleState(),
-		this->tempoEditor->getText().getDoubleValue(),
-		this->numeratorEditor->getText().getIntValue(),
-		this->denominatorEditor->getText().getIntValue()
-	};
+	double tempo = this->tempoEditor->getText().getDoubleValue();
+	if (tempo < 30 || tempo > 300) { tempo = 120.0; }
+	int numerator = this->numeratorEditor->getText().getIntValue();
+	if (numerator < 1 || numerator > 30) { numerator = 4; }
+	int denominator = this->denominatorEditor->getText().getIntValue();
+	const juce::Array<int> denominatorList{ 2, 4, 8, 16, 32 };
+	if (denominatorList.indexOf(denominator) < 0) { denominator = 4; }
+
+	return { this->tempoToggle->getToggleState(),
+		tempo, numerator, denominator };
 }
 
 void TempoEditorContent::setIsTempo(bool isTempo) {
@@ -160,8 +164,8 @@ TempoEditor::TempoEditor(bool defaultIsTempo,
 		[comp = juce::Component::SafePointer(this)] {
 			if (comp) {
 				auto screenSize = utils::getScreenSize(comp);
-				comp->centreWithSize(screenSize.getWidth() * 0.35,
-					screenSize.getHeight() * 0.35);
+				comp->centreWithSize(screenSize.getWidth() * 0.21,
+					screenSize.getHeight() * 0.15);
 			}
 		}
 	);

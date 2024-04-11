@@ -28,9 +28,6 @@ namespace quickAPI {
 	double limitTimeSec(double timeSec, double limitLevel);
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getMixerTrackInfos();
-	/** timeInSec, tempo, numerator, denominator, isTempo */
-	using TempoLabelData = std::tuple<double, double, int, int, bool>;
-	const juce::Array<TempoLabelData> getTempoDataList();
 
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension);
 	const juce::Array<int> getFormatPossibleBitDepthsForExtension(const juce::String& extension);
@@ -142,6 +139,15 @@ namespace quickAPI {
 	bool getMixerTrackMute(int index);
 	bool isMixerTrackPanValid(int index);
 	const juce::Array<float> getMixerTrackOutputLevel(int index);
+
+	int getLabelNum();
+	bool isLabelTempo(int index);
+	double getLabelTime(int index);
+	double getLabelTempo(int index);
+	std::tuple<int, int> getLabelBeat(int index);
+	/** timeInSec, tempo, numerator, denominator, isTempo */
+	using TempoLabelData = std::tuple<double, double, int, int, bool>;
+	const juce::Array<TempoLabelData> getLabelDataList();
 
 	const juce::String getAudioDeviceName(bool isInput);
 	int getAudioDeviceChannelNum(bool isInput);

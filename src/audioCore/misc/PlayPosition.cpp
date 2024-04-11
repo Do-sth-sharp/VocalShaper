@@ -233,7 +233,7 @@ int MovablePlayHead::addTempoLabelTempo(double time, double tempo) {
 
 	/** Insert Label */
 	this->tempos.addEvent(juce::MidiMessage::tempoMetaEvent(
-		1 / (tempo / 60)).withTimeStamp(time));
+		1000000.0 / (tempo / 60.0)).withTimeStamp(time));
 	this->updateTempoTemp();
 
 	/** Return Index */
@@ -255,6 +255,9 @@ int MovablePlayHead::addTempoLabelBeat(double time, int numerator, int denominat
 
 void MovablePlayHead::removeTempoLabel(int index) {
 	this->tempos.deleteEvent(index, false);
+
+	/** Update Temp */
+	this->updateTempoTemp();
 }
 
 int MovablePlayHead::getTempoLabelNum() const {
@@ -285,7 +288,7 @@ void MovablePlayHead::setTempoLabelTempo(int index, double tempo) {
 			/** Set Message Tempo */
 			double time = ptrEvent->message.getTimeStamp();
 			ptrEvent->message = juce::MidiMessage::tempoMetaEvent(
-				1 / (tempo / 60)).withTimeStamp(time);
+				1000000.0 / (tempo / 60.0)).withTimeStamp(time);
 
 			/** Update Temp */
 			this->updateTempoTemp();

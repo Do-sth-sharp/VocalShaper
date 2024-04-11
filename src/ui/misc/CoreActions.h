@@ -123,6 +123,11 @@ public:
 		const juce::Array<std::tuple<int, int>>& links);
 	static void removeTrackGUI(int index);
 
+	static void addLabelGUI(double time);
+	static void setLabelTimeGUI(int index, double time);
+	static void editLabelGUI(int index);
+	static void removeLabelGUI(int index);
+
 	static bool askForSaveGUI();
 	static void askForAudioPropGUIAsync(
 		const std::function<void(double, int, double)>& callback);
@@ -153,4 +158,9 @@ public:
 	static void askForColorGUIAsync(
 		const std::function<void(const juce::Colour&)>& callback,
 		const juce::Colour& defaultColor);
+	static void askForTempoGUIAsync(
+		const std::function<void(bool, double, int, int)>& callback,
+		bool defaultIsTempo = true,
+		double defaultTempo = 120.0, int defaultNumerator = 4, int defaultDenominator = 4,
+		bool switchable = true);
 };

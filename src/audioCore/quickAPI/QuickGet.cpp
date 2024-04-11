@@ -119,10 +119,6 @@ namespace quickAPI {
 		return result;
 	}
 
-	const juce::Array<TempoLabelData> getTempoDataList() {
-		return PlayPosition::getInstance()->getTempoDataList();
-	}
-
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension) {
 		return utils::getQualityOptionsForExtension(extension);
 	}
@@ -737,6 +733,30 @@ namespace quickAPI {
 			}
 		}
 		return {};
+	}
+
+	int getLabelNum() {
+		return PlayPosition::getInstance()->getTempoLabelNum();
+	}
+
+	bool isLabelTempo(int index) {
+		return PlayPosition::getInstance()->isTempoLabelTempoEvent(index);
+	}
+
+	double getLabelTime(int index) {
+		return PlayPosition::getInstance()->getTempoLabelTime(index);
+	}
+
+	double getLabelTempo(int index) {
+		return PlayPosition::getInstance()->getTempoLabelTempo(index);
+	}
+
+	std::tuple<int, int> getLabelBeat(int index) {
+		return PlayPosition::getInstance()->getTempoLabelBeat(index);
+	}
+
+	const juce::Array<TempoLabelData> getLabelDataList() {
+		return PlayPosition::getInstance()->getTempoDataList();
 	}
 
 	const juce::String getAudioDeviceName(bool isInput) {

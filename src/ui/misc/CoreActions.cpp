@@ -1,6 +1,7 @@
 ﻿#include "CoreActions.h"
 #include "../component/ChannelLinkView.h"
 #include "../component/ColorEditor.h"
+#include "../component/TempoEditor.h"
 #include "../dataModel/TrackListBoxModel.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
@@ -773,6 +774,62 @@ void CoreActions::removeTrackGUI(int index) {
 	CoreActions::removeTrack(index);
 }
 
+void CoreActions::addLabelGUI(double time) {
+	/** Callback */
+	auto callback = [time](bool isTempo, double tempo, int numerator, int denominator) {
+		if (isTempo) {
+			CoreActions::addTempoLabel(time, tempo);
+		}
+		else {
+			CoreActions::addBeatLabel(time, numerator, denominator);
+		}
+		};
+
+	/** Ask For Label Data */
+	CoreActions::askForTempoGUIAsync(callback);
+}
+
+void CoreActions::setLabelTimeGUI(int index, double time) {
+	CoreActions::setLabelTime(index, time);
+}
+
+void CoreActions::editLabelGUI(int index) {
+	/** Callback */
+	auto callback = [index](bool isTempo, double tempo, int numerator, int denominator) {
+		if (isTempo) {
+			CoreActions::setLabelTempo(index, tempo);
+		}
+		else {
+			CoreActions::setLabelBeat(index, numerator, denominator);
+		}
+		};
+
+	/** Get Current Value */
+	bool isTempo = quickAPI::isLabelTempo(index);
+	double tempo = 120.0;
+	int numerator = 4, denominator = 4;
+	if (isTempo) {
+		tempo = quickAPI::getLabelTempo(index);
+	}
+	else {
+		std::tie(numerator, denominator) = quickAPI::getLabelBeat(index);
+	}
+
+	/** Ask For Label Data */
+	CoreActions::askForTempoGUIAsync(callback, isTempo,
+		tempo, numerator, denominator, false);
+}
+
+void CoreActions::removeLabelGUI(int index) {
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Label"),
+		TRANS("Remove the label from time line. Continue?"))) {
+		return;
+	}
+
+	CoreActions::removeLabel(index);
+}
+
 bool CoreActions::askForSaveGUI() {
 	if (quickAPI::checkProjectSaved() && quickAPI::checkSourcesSaved()) {
 		return true;
@@ -1194,4 +1251,21 @@ void CoreActions::askForColorGUIAsync(
 	/** Show Selector Async */
 	editor->enterModalState(true, juce::ModalCallbackFunction::create(
 		[](int /*result*/) {}), true);
+}
+
+void CoreActions::askForTempoGUIAsync(
+	const std::function<void(bool, double, int, int)>& callback,
+	bool defaultIsTempo,
+	double defaultTempo, int defaultNumerator, int defaultDenominator,
+	bool switchable) {
+	/** Create Editor */
+	auto editor = new TempoEditor{ defaultIsTempo,
+		defaultTempo, defaultNumerator, defaultDenominator, switchable };
+
+	/** Show Selector Async */
+	editor->enterModalState(true, juce::ModalCallbackFunction::create(
+		[editor, callback](int /*result*/) {
+			auto [isTempo, tempo, numerator, denominator] = editor->getResult();
+			callback(isTempo, tempo, numerator, denominator);
+		}), true);
 }

@@ -70,6 +70,7 @@ private:
 	void removeTempoLabel(int index);
 	void addTempoLabel(double timeSec);
 	void setTempoLabelTime(int index, double timeSec);
+	void editTempoLabel(int index);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTimeRuler)
 };

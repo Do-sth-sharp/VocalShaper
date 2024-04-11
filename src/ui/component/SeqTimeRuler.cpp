@@ -1,6 +1,7 @@
 ﻿#include "SeqTimeRuler.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/Tools.h"
+#include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
@@ -22,9 +23,10 @@ SeqTimeRuler::SeqTimeRuler(
 
 void SeqTimeRuler::updateTempoLabel() {
 	/** Update Tempo Temp */
-	this->tempoTemp = quickAPI::getTempoDataList();
+	this->tempoTemp = quickAPI::getLabelDataList();
 
 	/** Update Ruler Temp */
+	std::tie(this->lineTemp, this->minInterval) = this->createRulerLine(pos, itemSize);
 	this->updateRulerTemp();
 }
 
@@ -294,11 +296,29 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 		if (event.mods.isLeftButtonDown()) {
 			/** Check Tool Type */
 			switch (tool) {
+			case Tools::Type::Arrow: {
+				/** Get Label Index */
+				this->dragLabelIndex = this->selectTempoLabel(event.position);
+				if (this->dragLabelIndex > -1) {
+					/** Move Label */
+					double labelTime = std::get<0>(this->tempoTemp.getReference(this->dragLabelIndex));
+					float labelPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+					this->labelDragOffset = event.position.getX() - labelPos;
+					this->labelDragPos = labelPos;
+				}
+				break;
+			}
 			case Tools::Type::Hand:
 				/** TODO Move View Area */
 				break;
-			case Tools::Type::Pencil:
-			case Tools::Type::Magic:
+			case Tools::Type::Pencil: {
+				/** Add Label */
+				double labelTime = this->secStart + (event.position.getX() / (double)this->getWidth()) * (this->secEnd - this->secStart);
+				labelTime = this->limitTimeSec(labelTime);
+				this->addTempoLabel(labelTime);
+				break;
+			}
+			case Tools::Type::Magic: {
 				/** Get Label Index */
 				this->dragLabelIndex = this->selectTempoLabel(event.position);
 				if (this->dragLabelIndex > -1) {
@@ -315,13 +335,15 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 					this->addTempoLabel(labelTime);
 				}
 				break;
-			case Tools::Type::Eraser:
+			}
+			case Tools::Type::Eraser: {
 				/** Remove Label */
 				int labelIndex = this->selectTempoLabel(event.position);
 				if (labelIndex > -1) {
 					this->removeTempoLabel(labelIndex);
 				}
 				break;
+			}
 			}
 		}
 		else if (event.mods.isRightButtonDown()) {
@@ -430,6 +452,10 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 					/** Move Label */
 					this->setTempoLabelTime(this->dragLabelIndex, labelTime);
 				}
+				else {
+					/** Edit Label */
+					this->editTempoLabel(this->dragLabelIndex);
+				}
 				
 				/** Reset State */
 				this->dragLabelIndex = -1;
@@ -457,9 +483,19 @@ void SeqTimeRuler::mouseMove(const juce::MouseEvent& event) {
 	if (event.position.getY() < labelAreaHeight) {
 		auto cursor = juce::MouseCursor::NormalCursor;
 
-		/** Labels */
-		if (this->selectTempoLabel(event.position) > -1) {
-			cursor = juce::MouseCursor::PointingHandCursor;
+		/** Get Tool Type */
+		auto tool = Tools::getInstance()->getType();
+		switch (tool) {
+		case Tools::Type::Arrow:
+		case Tools::Type::Pencil:
+		case Tools::Type::Magic:
+		case Tools::Type::Eraser: {
+			if (this->selectTempoLabel(event.position) > -1) {
+				/** Labels */
+				cursor = juce::MouseCursor::PointingHandCursor;
+			}
+			break;
+		}
 		}
 
 		this->setMouseCursor(cursor);
@@ -587,13 +623,17 @@ int SeqTimeRuler::selectTempoLabel(const juce::Point<float> pos) {
 }
 
 void SeqTimeRuler::removeTempoLabel(int index) {
-	/** TODO */
+	CoreActions::removeLabelGUI(index);
 }
 
 void SeqTimeRuler::addTempoLabel(double timeSec) {
-	/** TODO */
+	CoreActions::addLabelGUI(timeSec);
 }
 
 void SeqTimeRuler::setTempoLabelTime(int index, double timeSec) {
-	/** TODO */
+	CoreActions::setLabelTimeGUI(index, timeSec);
+}
+
+void SeqTimeRuler::editTempoLabel(int index) {
+	CoreActions::editLabelGUI(index);
 }
