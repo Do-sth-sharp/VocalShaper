@@ -117,3 +117,6 @@ countries: cn
 "Bypass Effect" = "旁路效果器"
 
 "Adsorb" = "吸附"
+"Tempo" = "曲速"
+"Beat" = "节拍"
+"Tempo Editor" = "曲速编辑器"
