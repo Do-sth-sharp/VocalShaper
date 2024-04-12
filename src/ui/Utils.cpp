@@ -419,11 +419,25 @@ namespace utils {
 
 	juce::String TextIntegerFilter::filterNewText(
 		juce::TextEditor& editor, const juce::String& newInput) {
-		if (!newInput.containsOnly("-0123456789")) { return ""; }
+		auto selected = editor.getHighlightedRegion();
 
-		int num = (editor.getText() + newInput).getIntValue();
-		if (num < this->minLimit) { return ""; }
-		if (num > this->maxLimit) { return ""; }
+		if (!newInput.containsOnly("-0123456789")) { 
+			return selected.isEmpty() ? ""
+				: editor.getText().substring(selected.getStart(), selected.getEnd());
+		}
+
+		auto caret = editor.getCaretPosition();
+		int num = selected.isEmpty() 
+			? editor.getText().replaceSection(caret, 0, newInput).getIntValue()
+			: editor.getText().replaceSection(selected.getStart(), selected.getLength(), newInput).getIntValue();
+		if (num < this->minLimit) {
+			return selected.isEmpty() ? ""
+				: editor.getText().substring(selected.getStart(), selected.getEnd());
+		}
+		if (num > this->maxLimit) {
+			return selected.isEmpty() ? ""
+				: editor.getText().substring(selected.getStart(), selected.getEnd());
+		}
 		return newInput;
 	}
 
@@ -434,44 +448,86 @@ namespace utils {
 
 	juce::String TextDoubleFilter::filterNewText(
 		juce::TextEditor& editor, const juce::String& newInput) {
-		if (!newInput.containsOnly("-0123456789.")) { return ""; }
+		auto selected = editor.getHighlightedRegion();
+
+		if (!newInput.containsOnly("-0123456789.")) {
+			return selected.isEmpty() ? ""
+				: editor.getText().substring(selected.getStart(), selected.getEnd());
+		}
 
 		auto currentText = editor.getText();
+		auto caret = editor.getCaretPosition();
 		int dotPlace = currentText.indexOf(0, ".");
-		if ((dotPlace > -1) && newInput.containsChar('.')) { return ""; }
-		if ((dotPlace > -1) && (this->numberOfDecimalPlaces > -1)
-			&& ((currentText.length() - dotPlace - 1 + newInput.length()) >
-			this->numberOfDecimalPlaces)) { return ""; }
+		if ((dotPlace > -1) && newInput.containsChar('.')) {
+			if (!selected.contains(dotPlace)) {
+				return selected.isEmpty() ? ""
+					: editor.getText().substring(selected.getStart(), selected.getEnd());
+			}
+		}
 
-		double num = (currentText + newInput).getDoubleValue();
-		if (num < this->minLimit) { return ""; }
-		if (num > this->maxLimit) { return ""; }
+		currentText = selected.isEmpty()
+			? currentText.replaceSection(caret, 0, newInput)
+			: currentText.replaceSection(selected.getStart(), selected.getLength(), newInput);
+		dotPlace = currentText.indexOf(0, ".");
+		if ((dotPlace > -1) && (this->numberOfDecimalPlaces > -1)) {
+			if ((currentText.length() - dotPlace - 1) > this->numberOfDecimalPlaces) {
+				return selected.isEmpty() ? ""
+					: editor.getText().substring(selected.getStart(), selected.getEnd());
+			}
+		}
+
+		double num = selected.isEmpty()
+			? editor.getText().replaceSection(caret, 0, newInput).getDoubleValue()
+			: editor.getText().replaceSection(selected.getStart(), selected.getLength(), newInput).getDoubleValue();
+		if (num < this->minLimit) {
+			return selected.isEmpty() ? ""
+				: editor.getText().substring(selected.getStart(), selected.getEnd());
+		}
+		if (num > this->maxLimit) {
+			return selected.isEmpty() ? ""
+				: editor.getText().substring(selected.getStart(), selected.getEnd());
+		}
 		return newInput;
 	}
 
 	juce::String TextColorRGBFilter::filterNewText(
 		juce::TextEditor& e, const juce::String& newInput) {
-		juce::String t(newInput);
+		auto selected = e.getHighlightedRegion();
 
-		t = t.retainCharacters("0123456789");
-		t = t.substring(0, 3 - (e.getTotalNumChars() - e.getHighlightedRegion().getLength()));
+		if (!newInput.containsOnly("0123456789")) {
+			return selected.isEmpty() ? ""
+				: e.getText().substring(selected.getStart(), selected.getEnd());
+		}
 
 		auto caret = e.getCaretPosition();
-		auto num = e.getText().replaceSection(caret, 0, newInput).getIntValue();
+		int num = selected.isEmpty()
+			? e.getText().replaceSection(caret, 0, newInput).getIntValue()
+			: e.getText().replaceSection(selected.getStart(), selected.getLength(), newInput).getIntValue();
 		if (num > 255) {
-			return juce::String{};
+			return selected.isEmpty() ? ""
+				: e.getText().substring(selected.getStart(), selected.getEnd());
 		}
-		return t;
+		return newInput;
 	};
 
 	juce::String TextColorHexFilter::filterNewText(
 		juce::TextEditor& e, const juce::String& newInput) {
-		juce::String t(newInput);
+		auto selected = e.getHighlightedRegion();
 
-		t = t.retainCharacters("0123456789abcdefABCDEF");
-		t = t.substring(0, 6 - (e.getTotalNumChars() - e.getHighlightedRegion().getLength()));
+		if (!newInput.containsOnly("0123456789abcdefABCDEF")) {
+			return selected.isEmpty() ? ""
+				: e.getText().substring(selected.getStart(), selected.getEnd());
+		}
 
-		return t;
+		auto caret = e.getCaretPosition();
+		int charNum = selected.isEmpty()
+			? e.getText().replaceSection(caret, 0, newInput).length()
+			: e.getText().replaceSection(selected.getStart(), selected.getLength(), newInput).length();
+		if (charNum > 6) {
+			return selected.isEmpty() ? ""
+				: e.getText().substring(selected.getStart(), selected.getEnd());
+		}
+		return newInput;
 	};
 
 	const juce::Array<PluginGroup> groupPlugin(const juce::Array<juce::PluginDescription>& list,
