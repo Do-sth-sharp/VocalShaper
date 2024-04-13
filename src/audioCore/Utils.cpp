@@ -304,15 +304,16 @@ namespace utils {
 				/** Check Delay Valid */
 				double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
 				double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
-				double barDistance = std::floor(barCountFromLastValid);
-				if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
-					barDistance++;
-				}
+				double barDistance = barCountFromLastValid;
 
 				/** Set Wait For Valid Temp */
 				quarterPerBarWaitForValid = numerator * (4.0 / denominator);
-				tempValidBar = lastValidBar + barDistance;
-				tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+				double barPlace = lastValidBar + barDistance;
+				tempValidBar = std::floor(barPlace);
+				if (!juce::approximatelyEqual(tempValidBar, barPlace)) {
+					tempValidBar++;
+				}
+				tempValidQuarter = lastValidQuarter + (tempValidBar - lastValidBar) * quarterPerBar;
 			}
 
 			while (i + 1 < numEvents) {
@@ -341,15 +342,16 @@ namespace utils {
 					/** Check Delay Valid */
 					double quarterDistanceFromLastValid = correctedQuarter - lastValidQuarter;
 					double barCountFromLastValid = quarterDistanceFromLastValid / quarterPerBar;
-					double barDistance = std::floor(barCountFromLastValid);
-					if (!juce::approximatelyEqual(barDistance, barCountFromLastValid)) {
-						barDistance++;
-					}
+					double barDistance = barCountFromLastValid;
 
 					/** Set Wait For Valid Temp */
 					quarterPerBarWaitForValid = numerator * (4.0 / denominator);
-					tempValidBar = lastValidBar + barDistance;
-					tempValidQuarter = lastValidQuarter + barDistance * quarterPerBar;
+					double barPlace = lastValidBar + barDistance;
+					tempValidBar = std::floor(barPlace);
+					if (!juce::approximatelyEqual(tempValidBar, barPlace)) {
+						tempValidBar++;
+					}
+					tempValidQuarter = lastValidQuarter + (tempValidBar - lastValidBar) * quarterPerBar;
 				}
 
 				++i;
