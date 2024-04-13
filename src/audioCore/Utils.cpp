@@ -359,7 +359,7 @@ namespace utils {
 		}
 
 		/** Temp Valid */
-		if (correctedQuarter + (time - lastTime) / secsPerQuarter > tempValidQuarter) {
+		if (true) {
 			if (std::get<0>(tempList.getLast()) < tempValidQuarter) {
 				tempList.add({ tempValidQuarter, tempValidBar, secPerQuarterWaitForValid, quarterPerBarWaitForValid });
 			}
