@@ -535,56 +535,18 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 	juce::Array<LineItem> result;
 	double minInterval = DBL_MAX;
 
-	double currentTime = secStart;
-	int currentTempIndex = -1;
-	
-	double tempTimeSec = 0, tempTimeQuarter = 0, tempTimeBar = 0;
-	double tempSecPerQuarter = 0.5;
-	int tempNumerator = 4, tempDenominator = 4;
-
-	while (true/*currentTime < secEnd*/) {
-		/** Get Current Tempo */
-		int tempIndex = quickAPI::getTempoTempIndexBySec(currentTime);
-		if (tempIndex != currentTempIndex) {
-			std::tie(tempTimeSec, tempTimeQuarter, tempTimeBar,
-				tempSecPerQuarter, tempNumerator, tempDenominator)
-				= quickAPI::getTempoData(tempIndex);
-			currentTempIndex = tempIndex;
-		}
-
-		/** Get Current Bar */
-		double secSinceTemp = currentTime - tempTimeSec;
-		double quarterSinceTemp = secSinceTemp / tempSecPerQuarter;
-		double quarterPerBar = ((4.0 / tempDenominator) * tempNumerator);
-		double barSinceTemp = quarterSinceTemp / quarterPerBar;
-		double currentTimeBar = tempTimeBar + barSinceTemp;
-
-		double currentBar = std::floor(currentTimeBar);
-		double currentBarTimeQuarterSinceTemp = (currentBar - tempTimeBar) * quarterPerBar;
-		double currentBarTimeSec = tempTimeSec + currentBarTimeQuarterSinceTemp * tempSecPerQuarter;
-		if (juce::approximatelyEqual(currentBarTimeSec, currentTime)) {
-			currentBarTimeSec = currentTime;
-		}
-
-		/** Check End */
-		if (currentBarTimeSec >= secEnd) { break; }
-
-		/** Lines */
-		double secPerLine = tempSecPerQuarter * (4.0 / tempDenominator);
-		double lineInterval = secPerLine / (secEnd - secStart) * width;
-		minInterval = std::min(minInterval, lineInterval);
-		for (int i = 0; i < tempNumerator; i++) {
-			double lineTime = currentBarTimeSec + i * secPerLine;
-			double pos = (lineTime - secStart) / (secEnd - secStart) * width;
-			result.add({ pos, i == 0, (int)currentBar });
-		}
-
-		/** Increase Time */
-		currentTime += (secPerLine * tempNumerator);
+	/** Get Temp */
+	int tempStartIndex = quickAPI::getTempoTempIndexBySec(secStart);
+	int tempEndIndex = quickAPI::getTempoTempIndexBySec(secEnd);
+	juce::Array<quickAPI::TempoData> tempoTempList;
+	for (int i = tempStartIndex; i <= tempEndIndex; i++) {
+		tempoTempList.add(quickAPI::getTempoData(i));
 	}
 
+	/** TODO Build Line Temp */
+
 	/** Result */
-	return { result, minInterval };
+	return { result, 0 };
 }
 
 double SeqTimeRuler::limitTimeSec(double timeSec) {
