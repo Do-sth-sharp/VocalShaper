@@ -542,11 +542,70 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 	for (int i = tempStartIndex; i <= tempEndIndex; i++) {
 		tempoTempList.add(quickAPI::getTempoData(i));
 	}
+	if (tempoTempList.size() <= 0) { return { result, minInterval }; }
 
-	/** TODO Build Line Temp */
+	/** Line Start */
+	double realSecStart = secStart;
+	int tempIndex = 0;
+	auto& [timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator] = tempoTempList.getReference(tempIndex);
+	{
+		/** Get Real Quarter */
+		double quarterStart = timeInQuarter + (secStart - timeInSec) / secPerQuarter;
+		double realQuarterStart = std::floor(quarterStart * (denominator / 4.0)) / (denominator / 4.0);
+		if (!juce::approximatelyEqual(quarterStart, realQuarterStart)) {
+			realQuarterStart += (4.0 / denominator);
+		}
+
+		/** Next Temp */
+		if (tempoTempList.size() > (tempIndex + 1)) {
+			if (realQuarterStart > std::get<1>(tempoTempList.getReference(tempIndex + 1))) {
+				realQuarterStart -= (4.0 / denominator);
+				std::tie(timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator) = tempoTempList.getReference(++tempIndex);
+				realQuarterStart += (4.0 / denominator);
+			}
+		}
+
+		/** Get Real Sec */
+		realSecStart = timeInSec + (realQuarterStart - timeInQuarter) * secPerQuarter;
+	}
+
+	/** Build Line Temp */
+	for (double currentSec = realSecStart; currentSec < secEnd;) {
+		/** Check Current Is Bar */
+		double currentQuarter = timeInQuarter + (currentSec - timeInSec) / secPerQuarter;
+		double currentBar = timeInBar + (currentQuarter - timeInQuarter) * (denominator / 4.0) / numerator;
+		//bool isBar = juce::approximatelyEqual(currentBar, std::round(currentBar));
+		bool isBar = std::abs(std::round(currentBar) - currentBar) < (1.0 / 480.0);
+
+		/** Get Current X Pos */
+		double XPos = (currentSec - secStart) / (secEnd - secStart) * width;
+
+		/** Add Into Result */
+		result.add({ XPos, isBar, (int)std::round(currentBar) });
+
+		/** Next Line */
+		double nextQuarter = currentQuarter + (4.0 / denominator);
+		if (tempoTempList.size() > (tempIndex + 1)) {
+			if (nextQuarter > std::get<1>(tempoTempList.getReference(tempIndex + 1))) {
+				nextQuarter -= (4.0 / denominator);
+				std::tie(timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator) = tempoTempList.getReference(++tempIndex);
+				nextQuarter += (4.0 / denominator);
+			}
+		}
+
+		/** Update Current Sec */
+		currentSec = timeInSec + (nextQuarter - timeInQuarter) * secPerQuarter;
+	}
+
+	/** Get Min Interval */
+	for (auto& item : tempoTempList) {
+		double lineDeltaSec = (4.0 / std::get<5>(item)) * std::get<3>(item);
+		double interval = lineDeltaSec / (secEnd - secStart) * width;
+		minInterval = std::min(minInterval, interval);
+	}
 
 	/** Result */
-	return { result, 0 };
+	return { result, minInterval };
 }
 
 double SeqTimeRuler::limitTimeSec(double timeSec) {

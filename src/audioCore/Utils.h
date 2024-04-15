@@ -23,9 +23,6 @@ namespace utils {
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);
 
-	std::tuple<int, double> getBarBySecond(double time,
-		const juce::MidiMessageSequence& tempoEvents);
-
 	const juce::StringArray getAudioFormatsSupported(bool isWrite);
 	const juce::StringArray getMidiFormatsSupported(bool isWrite);
 	juce::AudioFormat* findAudioFormatForExtension(const juce::String& extension, bool isWrite);
