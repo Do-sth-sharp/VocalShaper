@@ -557,12 +557,11 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 		}
 
 		/** Next Temp */
-		if (tempoTempList.size() > (tempIndex + 1)) {
-			if (realQuarterStart > std::get<1>(tempoTempList.getReference(tempIndex + 1))) {
-				realQuarterStart -= (4.0 / denominator);
-				std::tie(timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator) = tempoTempList.getReference(++tempIndex);
-				realQuarterStart += (4.0 / denominator);
-			}
+		while ((tempoTempList.size() > (tempIndex + 1)) &&
+			(realQuarterStart > std::get<1>(tempoTempList.getReference(tempIndex + 1)))) {
+			realQuarterStart -= (4.0 / denominator);
+			std::tie(timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator) = tempoTempList.getReference(++tempIndex);
+			realQuarterStart += (4.0 / denominator);
 		}
 
 		/** Get Real Sec */
@@ -585,12 +584,11 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 
 		/** Next Line */
 		double nextQuarter = currentQuarter + (4.0 / denominator);
-		if (tempoTempList.size() > (tempIndex + 1)) {
-			if (nextQuarter > std::get<1>(tempoTempList.getReference(tempIndex + 1))) {
-				nextQuarter -= (4.0 / denominator);
-				std::tie(timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator) = tempoTempList.getReference(++tempIndex);
-				nextQuarter += (4.0 / denominator);
-			}
+		while ((tempoTempList.size() > (tempIndex + 1)) &&
+			(nextQuarter > std::get<1>(tempoTempList.getReference(tempIndex + 1)))) {
+			nextQuarter -= (4.0 / denominator);
+			std::tie(timeInSec, timeInQuarter, timeInBar, secPerQuarter, numerator, denominator) = tempoTempList.getReference(++tempIndex);
+			nextQuarter += (4.0 / denominator);
 		}
 
 		/** Update Current Sec */
@@ -609,6 +607,8 @@ SeqTimeRuler::createRulerLine(double pos, double itemSize) const {
 }
 
 double SeqTimeRuler::limitTimeSec(double timeSec) {
+	timeSec = std::max(timeSec, 0.0);
+
 	double level = Tools::getInstance()->getAdsorb();
 	return quickAPI::limitTimeSec(timeSec, level);
 }

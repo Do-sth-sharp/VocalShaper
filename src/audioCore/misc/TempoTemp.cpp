@@ -10,171 +10,274 @@ void TempoTemp::update(
 	this->temp.clear();
 	this->lastIndex = -1;
 
-	/** Corrected Time */
-	double correctedQuarter = 0;
+	/** Create Tempo Temp */
+	/** timeInSec, timeInQuarter, secsPerQuarter */
+	juce::Array<std::tuple<double, double, double>> tempoTemp;
+	{
+		/** Init Temp */
+		double lastSec = 0, lastQuarter = 0, lastSPQ = 0.5;
+		double thisSec = 0, thisQuarter = 0, thisSPQ = 0.5;
 
-	/** Last Valid Event Time */
-	double lastValidEventSec = 0;
-	double lastValidEventQuarter = 0;
-	double lastValidEventBar = 0;
-	double lastValidSecsPerQuarter = 0.5, lastValidQuarterPerBar = 4.0;
-	int lastValidNumerator = 4, lastValidDenominator = 4;
+		/** Default Tempo */
+		tempoTemp.add({ thisSec, thisQuarter, thisSPQ });
 
-	/** State Wait For Valid Temp */
-	double eventForValidSec = 0;
-	double eventForValidQuarter = 0;
-	double eventForValidBar = 0;
-	double eventForValidSecPerQuarter = 0.5;
-	double eventForValidQuarterPerBar = 4.0;
-	int eventForValidNumerator = 4;
-	int eventForValidDenominator = 4;
+		/** Get Each Tempo Meta */
+		int numEvents = tempoMessages.getNumEvents();
+		for (int i = 0; i < numEvents; i++) {
+			/** Get Event */
+			auto& m = tempoMessages.getEventPointer(i)->message;
+			double eventTime = m.getTimeStamp();
 
-	/** Event Time In Seconds */
-	double eventTime = 0;
-	double lastTime = 0;
+			/** Store Event */
+			if (eventTime > thisSec) {
+				if (std::get<0>(tempoTemp.getLast()) < thisSec) {
+					tempoTemp.add({ thisSec, thisQuarter, thisSPQ });
+				}
+				else {
+					tempoTemp.getReference(tempoTemp.size() - 1)
+						= std::make_tuple(thisSec, thisQuarter, thisSPQ);
+				}
 
-	/** Add First Event */
-	this->temp.add({ eventForValidSec, eventForValidQuarter, eventForValidBar,
-		eventForValidSecPerQuarter, eventForValidQuarterPerBar,
-		eventForValidNumerator, eventForValidDenominator });
+				lastSec = thisSec;
+				lastQuarter = thisQuarter;
+				lastSPQ = thisSPQ;
+			}
 
-	/** Build Temporary */
-	int numEvents = tempoMessages.getNumEvents();
-	for (int i = 0; i < numEvents; i++) {
-		auto& m = tempoMessages.getEventPointer(i)->message;
-		eventTime = m.getTimeStamp();
+			/** Current Is Tempo Meta */
+			if (m.isTempoMetaEvent()) {
+				thisSPQ = m.getTempoSecondsPerQuarterNote();
+				thisSec = eventTime;
+				thisQuarter = lastQuarter + (thisSec - lastSec) / lastSPQ;
+			}
 
-		/** Temp Valid */
-		if (eventTime > eventForValidSec) {
-			if (std::get<0>(this->temp.getLast()) < eventForValidSec) {
-				this->temp.add({ eventForValidSec, eventForValidQuarter, eventForValidBar,
-					eventForValidSecPerQuarter, eventForValidQuarterPerBar,
-					eventForValidNumerator, eventForValidDenominator });
+			/** Skip Same Time Forward */
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoMessages.getEventPointer(i + 1)->message;
+
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
+
+				/** Next Is Tempo Meta */
+				if (m2.isTempoMetaEvent()) {
+					thisSPQ = m2.getTempoSecondsPerQuarterNote();
+					thisSec = eventTime;
+					thisQuarter = lastQuarter + (thisSec - lastSec) / lastSPQ;
+				}
+
+				i++;
+			}
+		}
+
+		/** Write The Last Tempo */
+		if (std::get<0>(tempoTemp.getLast()) < thisSec) {
+			tempoTemp.add({ thisSec, thisQuarter, thisSPQ });
+		}
+		else {
+			tempoTemp.getReference(tempoTemp.size() - 1)
+				= std::make_tuple(thisSec, thisQuarter, thisSPQ);
+		}
+	}
+	
+	/** Tempo Temp Index */
+	int tempoTempIndex = 0;
+
+	/** Create Beat Temp */
+	{
+		/** Init Temp */
+		double lastQuarter = 0, lastBar = 0;
+		int lastNumerator = 4, lastDenominator = 4;
+		double thisQuarter = 0, thisBar = 0;
+		int thisNumerator = 4, thisDenominator = 4;
+
+		/** Init Tempo Temp Data */
+		double tempoSec = 0, tempoQuarter = 0, tempoSPQ = 0.5;
+		std::tie(tempoSec, tempoQuarter, tempoSPQ) = tempoTemp.getReference(tempoTempIndex);
+
+		/** Default Data */
+		this->temp.add({ tempoSec + (thisQuarter - tempoQuarter) * tempoSPQ,
+			thisQuarter, thisBar, tempoSPQ,
+			thisNumerator * (4.0 / thisDenominator),
+			thisNumerator, thisDenominator });
+
+		/** Get Each Beat Meta */
+		int numEvents = tempoMessages.getNumEvents();
+		for (int i = 0; i < numEvents; i++) {
+			/** Get Event */
+			auto& m = tempoMessages.getEventPointer(i)->message;
+			double eventTime = m.getTimeStamp();
+
+			/** Store Event */
+			{
+				double thisSec = tempoSec + (thisQuarter - tempoQuarter) * tempoSPQ;
+				if (eventTime > thisSec) {
+					if (std::get<0>(this->temp.getLast()) < thisSec) {
+						this->temp.add({ thisSec, thisQuarter, thisBar, tempoSPQ,
+							thisNumerator * (4.0 / thisDenominator),
+							thisNumerator, thisDenominator });
+					}
+					else {
+						this->temp.getReference(this->temp.size() - 1)
+							= std::make_tuple(thisSec, thisQuarter, thisBar, tempoSPQ,
+								thisNumerator * (4.0 / thisDenominator),
+								thisNumerator, thisDenominator);
+					}
+
+					lastQuarter = thisQuarter;
+					lastBar = thisBar;
+					lastNumerator = thisNumerator;
+					lastDenominator = thisDenominator;
+				}
+			}
+
+			/** Current Is Beat Meta */
+			if (m.isTimeSignatureMetaEvent()) {
+				m.getTimeSignatureInfo(thisNumerator, thisDenominator);
+
+				/** Next Tempo Temp */
+				while ((tempoTemp.size() > (tempoTempIndex + 1)) &&
+					(eventTime > std::get<0>(tempoTemp.getReference(tempoTempIndex + 1)))) {
+					std::tie(tempoSec, tempoQuarter, tempoSPQ) = tempoTemp.getReference(++tempoTempIndex);
+
+					/** Add Tempo Temp */
+					double tempoBar = lastBar + (tempoQuarter - lastQuarter) * (lastDenominator / 4.0) / lastNumerator;
+					if (std::get<1>(this->temp.getLast()) < tempoQuarter) {
+						this->temp.add({ tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+							lastNumerator * (4.0 / lastDenominator),
+							lastNumerator, lastDenominator });
+					}
+					else {
+						this->temp.getReference(this->temp.size() - 1)
+							= std::make_tuple(tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+								lastNumerator * (4.0 / lastDenominator),
+								lastNumerator, lastDenominator);
+					}
+				}
+
+				/** Get Event Valid Quarter */
+				double quarter = tempoQuarter + (eventTime - tempoSec) / tempoSPQ;
+				double bar = lastBar + (quarter - lastQuarter) * (lastDenominator / 4.0) / lastNumerator;
+				thisBar = std::floor(bar);
+				if (!juce::approximatelyEqual(thisBar, bar)) {
+					thisBar++;
+				}
+				thisQuarter = lastQuarter + (thisBar - lastBar) / (lastDenominator / 4.0) * lastNumerator;
+
+				/** Next Tempo Temp */
+				while ((tempoTemp.size() > (tempoTempIndex + 1)) &&
+					(thisQuarter > std::get<1>(tempoTemp.getReference(tempoTempIndex + 1)))) {
+					std::tie(tempoSec, tempoQuarter, tempoSPQ) = tempoTemp.getReference(++tempoTempIndex);
+
+					/** Add Tempo Temp */
+					double tempoBar = lastBar + (tempoQuarter - lastQuarter) * (lastDenominator / 4.0) / lastNumerator;
+					if (std::get<1>(this->temp.getLast()) < tempoQuarter) {
+						this->temp.add({ tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+							lastNumerator * (4.0 / lastDenominator),
+							lastNumerator, lastDenominator });
+					}
+					else {
+						this->temp.getReference(this->temp.size() - 1)
+							= std::make_tuple(tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+								lastNumerator * (4.0 / lastDenominator),
+								lastNumerator, lastDenominator);
+					}
+				}
+			}
+
+			/** Skip Same Time Forward */
+			while (i + 1 < numEvents) {
+				auto& m2 = tempoMessages.getEventPointer(i + 1)->message;
+
+				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
+					break;
+
+				/** Next Is Beat Meta */
+				if (m2.isTimeSignatureMetaEvent()) {
+					m2.getTimeSignatureInfo(thisNumerator, thisDenominator);
+
+					/** Next Tempo Temp */
+					while ((tempoTemp.size() > (tempoTempIndex + 1)) &&
+						(eventTime > std::get<0>(tempoTemp.getReference(tempoTempIndex + 1)))) {
+						std::tie(tempoSec, tempoQuarter, tempoSPQ) = tempoTemp.getReference(++tempoTempIndex);
+
+						/** Add Tempo Temp */
+						double tempoBar = lastBar + (tempoQuarter - lastQuarter) * (lastDenominator / 4.0) / lastNumerator;
+						if (std::get<1>(this->temp.getLast()) < tempoQuarter) {
+							this->temp.add({ tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+								lastNumerator * (4.0 / lastDenominator),
+								lastNumerator, lastDenominator });
+						}
+						else {
+							this->temp.getReference(this->temp.size() - 1)
+								= std::make_tuple(tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+									lastNumerator * (4.0 / lastDenominator),
+									lastNumerator, lastDenominator);
+						}
+					}
+
+					/** Get Event Valid Quarter */
+					double quarter = tempoQuarter + (eventTime - tempoSec) / tempoSPQ;
+					double bar = lastBar + (quarter - lastQuarter) * (lastDenominator / 4.0) / lastNumerator;
+					thisBar = std::floor(bar);
+					if (!juce::approximatelyEqual(thisBar, bar)) {
+						thisBar++;
+					}
+					thisQuarter = lastQuarter + (thisBar - lastBar) / (lastDenominator / 4.0) * lastNumerator;
+
+					/** Next Tempo Temp */
+					while ((tempoTemp.size() > (tempoTempIndex + 1)) &&
+						(thisQuarter > std::get<1>(tempoTemp.getReference(tempoTempIndex + 1)))) {
+						std::tie(tempoSec, tempoQuarter, tempoSPQ) = tempoTemp.getReference(++tempoTempIndex);
+
+						/** Add Tempo Temp */
+						double tempoBar = lastBar + (tempoQuarter - lastQuarter) * (lastDenominator / 4.0) / lastNumerator;
+						if (std::get<1>(this->temp.getLast()) < tempoQuarter) {
+							this->temp.add({ tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+								lastNumerator * (4.0 / lastDenominator),
+								lastNumerator, lastDenominator });
+						}
+						else {
+							this->temp.getReference(this->temp.size() - 1)
+								= std::make_tuple(tempoSec, tempoQuarter, tempoBar, tempoSPQ,
+									lastNumerator * (4.0 / lastDenominator),
+									lastNumerator, lastDenominator);
+						}
+					}
+				}
+
+				i++;
+			}
+		}
+
+		/** Write The Last Beat */
+		{
+			double thisSec = tempoSec + (thisQuarter - tempoQuarter) * tempoSPQ;
+			if (std::get<0>(this->temp.getLast()) < thisSec) {
+				this->temp.add({ thisSec, thisQuarter, thisBar, tempoSPQ,
+					thisNumerator * (4.0 / thisDenominator),
+					thisNumerator, thisDenominator });
 			}
 			else {
 				this->temp.getReference(this->temp.size() - 1)
-					= std::make_tuple(eventForValidSec, eventForValidQuarter, eventForValidBar,
-						eventForValidSecPerQuarter, eventForValidQuarterPerBar,
-						eventForValidNumerator, eventForValidDenominator);
+					= std::make_tuple(thisSec, thisQuarter, thisBar, tempoSPQ,
+						thisNumerator * (4.0 / thisDenominator),
+						thisNumerator, thisDenominator);
 			}
-
-			lastValidEventSec = eventForValidSec;
-			lastValidEventQuarter = eventForValidQuarter;
-			lastValidEventBar = eventForValidBar;
-			lastValidSecsPerQuarter = eventForValidSecPerQuarter;
-			lastValidQuarterPerBar = eventForValidQuarterPerBar;
-			lastValidNumerator = eventForValidNumerator;
-			lastValidDenominator = eventForValidDenominator;
-		}
-
-		/** Get Time */
-		correctedQuarter += (eventTime - lastTime) / lastValidSecsPerQuarter;
-		lastTime = eventTime;
-
-		/** Tempo Changed */
-		if (m.isTempoMetaEvent()) {
-			eventForValidSecPerQuarter = m.getTempoSecondsPerQuarterNote();
-
-			/** Check Delay Valid */
-			double quarterDistanceFromLastValid = correctedQuarter - lastValidEventQuarter;
-			double barCountFromLastValid = quarterDistanceFromLastValid / lastValidQuarterPerBar;
-
-			/** Set Wait For Valid Temp */
-			eventForValidBar = lastValidEventBar + barCountFromLastValid;
-			eventForValidQuarter = lastValidEventQuarter + (eventForValidBar - lastValidEventBar) * lastValidQuarterPerBar;
-			eventForValidSec = lastValidEventSec + (eventForValidQuarter - lastValidEventQuarter) * lastValidSecsPerQuarter;
-		}
-
-		/** Time Signature Changed */
-		if (m.isTimeSignatureMetaEvent()) {
-			int numerator = 4, denominator = 4;
-			m.getTimeSignatureInfo(numerator, denominator);
-
-			/** Check Delay Valid */
-			double quarterDistanceFromLastValid = correctedQuarter - lastValidEventQuarter;
-			double barCountFromLastValid = quarterDistanceFromLastValid / lastValidQuarterPerBar;
-
-			/** Set Wait For Valid Temp */
-			eventForValidNumerator = numerator;
-			eventForValidDenominator = denominator;
-			eventForValidQuarterPerBar = numerator * (4.0 / denominator);
-
-			double barPlace = lastValidEventBar + barCountFromLastValid;
-			eventForValidBar = std::floor(barPlace);
-			if (!juce::approximatelyEqual(eventForValidBar, barPlace)) {
-				eventForValidBar++;
-			}
-			eventForValidQuarter = lastValidEventQuarter + (eventForValidBar - lastValidEventBar) * lastValidQuarterPerBar;
-			eventForValidSec = lastValidEventSec + (eventForValidQuarter - lastValidEventQuarter) * lastValidSecsPerQuarter;
-		}
-
-		/** Skip Events With Same Time */
-		while (i + 1 < numEvents) {
-			auto& m2 = tempoMessages.getEventPointer(i + 1)->message;
-
-			if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
-				break;
-
-			if (m2.isTempoMetaEvent()) {
-				eventForValidSecPerQuarter = m2.getTempoSecondsPerQuarterNote();
-
-				/** Check Delay Valid */
-				double quarterDistanceFromLastValid = correctedQuarter - lastValidEventQuarter;
-				double barCountFromLastValid = quarterDistanceFromLastValid / lastValidQuarterPerBar;
-
-				/** Set Wait For Valid Temp */
-				eventForValidBar = lastValidEventBar + barCountFromLastValid;
-				eventForValidQuarter = lastValidEventQuarter + (eventForValidBar - lastValidEventBar) * lastValidQuarterPerBar;
-				eventForValidSec = lastValidEventSec + (eventForValidQuarter - lastValidEventQuarter) * lastValidSecsPerQuarter;
-			}
-
-			if (m2.isTimeSignatureMetaEvent()) {
-				int numerator = 4, denominator = 4;
-				m2.getTimeSignatureInfo(numerator, denominator);
-
-				/** Check Delay Valid */
-				double quarterDistanceFromLastValid = correctedQuarter - lastValidEventQuarter;
-				double barCountFromLastValid = quarterDistanceFromLastValid / lastValidQuarterPerBar;
-
-				/** Set Wait For Valid Temp */
-				eventForValidNumerator = numerator;
-				eventForValidDenominator = denominator;
-				eventForValidQuarterPerBar = numerator * (4.0 / denominator);
-
-				double barPlace = lastValidEventBar + barCountFromLastValid;
-				eventForValidBar = std::floor(barPlace);
-				if (!juce::approximatelyEqual(eventForValidBar, barPlace)) {
-					eventForValidBar++;
-				}
-				eventForValidQuarter = lastValidEventQuarter + (eventForValidBar - lastValidEventBar) * lastValidQuarterPerBar;
-				eventForValidSec = lastValidEventSec + (eventForValidQuarter - lastValidEventQuarter) * lastValidSecsPerQuarter;
-			}
-
-			i++;
 		}
 	}
 
-	/** Temp Valid */
-	if (true) {
-		if (std::get<0>(this->temp.getLast()) < eventForValidSec) {
-			this->temp.add({ eventForValidSec, eventForValidQuarter, eventForValidBar,
-				eventForValidSecPerQuarter, eventForValidQuarterPerBar,
-				eventForValidNumerator, eventForValidDenominator });
-		}
-		else {
-			this->temp.getReference(this->temp.size() - 1)
-				= std::make_tuple(eventForValidSec, eventForValidQuarter, eventForValidBar,
-					eventForValidSecPerQuarter, eventForValidQuarterPerBar,
-					eventForValidNumerator, eventForValidDenominator);
-		}
+	/** Add Remained Tempos */
+	{
+		int lastNumerator = 4, lastDenominator = 4;
+		double lastQPB = 0.5;
+		double lastQuarter = 0, lastBar = 0;
+		std::tie(std::ignore, lastQuarter, lastBar, std::ignore, lastQPB, lastNumerator, lastDenominator) = this->temp.getReference(this->temp.size() - 1);
 
-		lastValidEventSec = eventForValidSec;
-		lastValidEventQuarter = eventForValidQuarter;
-		lastValidEventBar = eventForValidBar;
-		lastValidSecsPerQuarter = eventForValidSecPerQuarter;
-		lastValidQuarterPerBar = eventForValidQuarterPerBar;
-		lastValidNumerator = eventForValidNumerator;
-		lastValidDenominator = eventForValidDenominator;
+		for (int i = tempoTempIndex + 1; i < tempoTemp.size(); i++) {
+			auto& [tempoSec, tempoQuarter, tempoSPQ] = tempoTemp.getReference(i);
+			double tempoBar = lastBar + (tempoQuarter - lastQuarter) / lastQPB;
+
+			this->temp.add({ tempoSec, tempoQuarter, tempoBar, tempoSPQ, lastQPB, lastNumerator, lastDenominator });
+		}
 	}
 }
 

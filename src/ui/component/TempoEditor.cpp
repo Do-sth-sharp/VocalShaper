@@ -11,7 +11,7 @@ TempoEditorContent::TempoEditorContent(bool defaultIsTempo,
 	this->tempoToggle->onClick = [this] { this->setIsTempo(true); };
 	this->tempoToggle->setToggleState(defaultIsTempo,
 		juce::NotificationType::dontSendNotification);
-	this->tempoToggle->setToggleable(switchable);
+	this->tempoToggle->setEnabled(switchable);
 	this->addAndMakeVisible(this->tempoToggle.get());
 
 	this->beatToggle = std::make_unique<juce::ToggleButton>(TRANS("Beat"));
@@ -19,7 +19,7 @@ TempoEditorContent::TempoEditorContent(bool defaultIsTempo,
 	this->beatToggle->onClick = [this] { this->setIsTempo(false); };
 	this->beatToggle->setToggleState(!defaultIsTempo,
 		juce::NotificationType::dontSendNotification);
-	this->beatToggle->setToggleable(switchable);
+	this->beatToggle->setEnabled(switchable);
 	this->addAndMakeVisible(this->beatToggle.get());
 
 	/** Tempo Editor */

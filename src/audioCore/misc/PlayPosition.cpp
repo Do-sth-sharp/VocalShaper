@@ -229,6 +229,7 @@ bool MovablePlayHead::checkOverflow() const {
 
 int MovablePlayHead::addTempoLabelTempo(double time, double tempo) {
 	/** Get Index */
+	time = std::max(time, 0.0);
 	int index = this->getTempoInsertIndex(time);
 
 	/** Insert Label */
@@ -242,6 +243,7 @@ int MovablePlayHead::addTempoLabelTempo(double time, double tempo) {
 
 int MovablePlayHead::addTempoLabelBeat(double time, int numerator, int denominator) {
 	/** Get Index */
+	time = std::max(time, 0.0);
 	int index = this->getTempoInsertIndex(time);
 
 	/** Insert Label */
@@ -274,6 +276,7 @@ bool MovablePlayHead::isTempoLabelTempoEvent(int index) const {
 void MovablePlayHead::setTempoLabelTime(int index, double time) {
 	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
 		/** Set Message Time */
+		time = std::max(time, 0.0);
 		ptrEvent->message.setTimeStamp(time);
 		this->tempos.sort();
 
@@ -299,7 +302,7 @@ void MovablePlayHead::setTempoLabelTempo(int index, double tempo) {
 void MovablePlayHead::setTempoLabelBeat(
 	int index, int numerator, int denominator) {
 	if (auto ptrEvent = this->tempos.getEventPointer(index)) {
-		if (ptrEvent->message.isTempoMetaEvent()) {
+		if (ptrEvent->message.isTimeSignatureMetaEvent()) {
 			/** Set Message Beat */
 			double time = ptrEvent->message.getTimeStamp();
 			ptrEvent->message = juce::MidiMessage::timeSignatureMetaEvent(
