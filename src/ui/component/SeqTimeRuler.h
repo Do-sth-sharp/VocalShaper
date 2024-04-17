@@ -11,10 +11,12 @@ public:
 	using ScaleFunc = std::function<void(double, double, double)>;
 	using WheelFunc = std::function<void(float, bool)>;
 	using WheelAltFunc = std::function<void(double, double, float, bool)>;
+	using SetPosFunc = std::function<void(double)>;
 	SeqTimeRuler(const ScrollFunc& scrollFunc,
 		const ScaleFunc& scaleFunc,
 		const WheelFunc& wheelFunc,
-		const WheelAltFunc& wheelAltFunc);
+		const WheelAltFunc& wheelAltFunc,
+		const SetPosFunc& setPosFunc);
 
 	void updateTempoLabel();
 	void updateBlock(int track, int index);
@@ -41,6 +43,7 @@ private:
 	const ScaleFunc scaleFunc;
 	const WheelFunc wheelFunc;
 	const WheelAltFunc wheelAltFunc;
+	const SetPosFunc setPosFunc;
 
 	double pos = 0, itemSize = 0;
 	double secStart = 0, secEnd = 0;
@@ -60,6 +63,9 @@ private:
 	int dragLabelIndex = -1;
 	float labelDragOffset = 0;
 	float labelDragPos = 0;
+
+	bool viewMoving = false;
+	double moveStartPos = 0;
 
 	/** Line List, Min Interval */
 	const std::tuple<juce::Array<LineItem>, double> createRulerLine(double pos, double itemSize) const;

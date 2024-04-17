@@ -9,9 +9,11 @@ SeqTimeRuler::SeqTimeRuler(
 	const ScrollFunc& scrollFunc,
 	const ScaleFunc& scaleFunc,
 	const WheelFunc& wheelFunc,
-	const WheelAltFunc& wheelAltFunc)
+	const WheelAltFunc& wheelAltFunc,
+	const SetPosFunc& setPosFunc)
 	: scrollFunc(scrollFunc), scaleFunc(scaleFunc),
-	wheelFunc(wheelFunc), wheelAltFunc(wheelAltFunc) {
+	wheelFunc(wheelFunc), wheelAltFunc(wheelAltFunc),
+	setPosFunc(setPosFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forTimeRuler());
@@ -309,7 +311,9 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 				break;
 			}
 			case Tools::Type::Hand:
-				/** TODO Move View Area */
+				/** Move View Area */
+				this->viewMoving = true;
+				this->moveStartPos = this->pos;
 				break;
 			case Tools::Type::Pencil: {
 				/** Add Label */
@@ -396,13 +400,19 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
 	if (event.mouseDownPosition.getY() < labelAreaHeight) {
-		/** Move Label */
 		if (event.mods.isLeftButtonDown()) {
+			/** Move Label */
 			if (this->dragLabelIndex > -1) {
 				/** Get Label Time */
 				double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
 				labelTime = this->limitTimeSec(labelTime);
 				this->labelDragPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			}
+
+			/** Move View */
+			else if (this->viewMoving) {
+				int distance = event.getDistanceFromDragStartX();
+				this->setPosFunc(this->moveStartPos - distance);
 			}
 		}
 	}
@@ -462,6 +472,12 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 				this->labelDragOffset = 0;
 				this->labelDragPos = 0;
 			}
+
+			/** Move View */
+			else if (this->viewMoving) {
+				this->viewMoving = false;
+				this->moveStartPos = 0;
+			}
 		}
 	}
 	else {
@@ -494,6 +510,10 @@ void SeqTimeRuler::mouseMove(const juce::MouseEvent& event) {
 				/** Labels */
 				cursor = juce::MouseCursor::PointingHandCursor;
 			}
+			break;
+		}
+		case Tools::Type::Hand: {
+			cursor = juce::MouseCursor::DraggingHandCursor;
 			break;
 		}
 		}
@@ -639,7 +659,7 @@ int SeqTimeRuler::selectTempoLabel(const juce::Point<float> pos) {
 		}
 	}
 
-	/** No In Label */
+	/** Not In Label */
 	return -1;
 }
 
