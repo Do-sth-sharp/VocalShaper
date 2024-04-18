@@ -15,6 +15,7 @@ public:
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
+	void paintOverChildren(juce::Graphics& g) override;
 
 	void update(int index);
 	void updateBlock(int track, int index);
@@ -62,6 +63,12 @@ private:
 	double pos = 0, itemSize = 0;
 	double secStart = 0, secEnd = 0;
 	double playPosSec = 0;
+	double loopStartSec = 0, loopEndSec = 0;
+
+	using LineItem = SeqTimeRuler::LineItem;
+	juce::Array<LineItem> lineTemp;
+	double minInterval = 0;
+	std::unique_ptr<juce::Image> gridTemp = nullptr;
 
 	int getViewWidth() const;
 	double getTimeLength() const;
@@ -81,6 +88,8 @@ private:
 
 	void adsorbButtonClicked();
 	juce::PopupMenu createAdsorbMenu();
+
+	void updateGridTemp();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };

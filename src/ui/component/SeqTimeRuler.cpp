@@ -218,8 +218,9 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 	juce::Font labelFont(labelFontHeight);
 
 	/** Ruler */
-	if (!this->rulerTemp) { return; }
-	g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
+	if (this->rulerTemp) {
+		g.drawImageAt(*(this->rulerTemp.get()), 0, 0);
+	}
 
 	/** Moving Tempo Label */
 	if (this->dragLabelIndex > -1) {
@@ -543,6 +544,10 @@ std::tuple<double, double> SeqTimeRuler::getViewArea(
 	double secStart = pos / itemSize;
 	double secLength = this->getWidth() / itemSize;
 	return { secStart, secStart + secLength };
+}
+
+const std::tuple<juce::Array<SeqTimeRuler::LineItem>, double> SeqTimeRuler::getLineTemp() const {
+	return { this->lineTemp, this->minInterval };
 }
 
 const std::tuple<juce::Array<SeqTimeRuler::LineItem>, double>

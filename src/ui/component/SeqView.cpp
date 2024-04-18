@@ -146,6 +146,10 @@ SeqView::SeqView()
 			}
 		}
 	);
+
+	/** Init Temp */
+	this->gridTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, 1, 1, true);
 }
 
 void SeqView::resized() {
@@ -192,6 +196,19 @@ void SeqView::resized() {
 	/** Update View Pos */
 	this->hScroller->update();
 	this->vScroller->update();
+
+	/** Update Line Temp */
+	std::tie(this->lineTemp, this->minInterval) = this->ruler->getLineTemp();
+
+	/** Update Grid Temp */
+	{
+		int width = hScrollerRect.getWidth(), height = vScrollerRect.getHeight();
+		width = std::max(width, 1);
+		height = std::max(height, 1);
+		this->gridTemp = std::make_unique<juce::Image>(
+			juce::Image::ARGB, width, height, true);
+		this->updateGridTemp();
+	}
 }
 
 void SeqView::paint(juce::Graphics& g) {
@@ -242,6 +259,65 @@ void SeqView::paint(juce::Graphics& g) {
 		scrollerWidth, scrollerHeight);
 	g.setColour(headBackgroundColor);
 	g.fillRect(bottomRightRect);
+
+	/** Grid */
+	if (this->gridTemp) {
+		g.drawImageAt(*(this->gridTemp.get()), headWidth, rulerHeight);
+	}
+}
+
+void SeqView::paintOverChildren(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int scrollerHeight = screenSize.getHeight() * 0.0275;
+	int scrollerWidth = screenSize.getWidth() * 0.015;
+	int rulerHeight = screenSize.getHeight() * 0.05;
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	float cursorThickness = screenSize.getWidth() * 0.00075;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour cursorColor = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+	juce::Colour offColor = laf.findColour(
+		juce::Label::ColourIds::textWhenEditingColourId);
+
+	/** Cursor */
+	int width = this->getWidth() - headWidth - scrollerWidth;
+	int height = this->getHeight() - rulerHeight - scrollerHeight;
+	float cursorPosX = ((this->playPosSec - this->secStart) / (this->secEnd - this->secStart)) * width;
+	juce::Rectangle<float> cursorRect(
+		headWidth + cursorPosX - cursorThickness / 2, rulerHeight,
+		cursorThickness, height);
+
+	if (cursorPosX >= 0 && cursorPosX <= width) {
+		g.setColour(cursorColor);
+		g.fillRect(cursorRect);
+	}
+
+	/** Time Off */
+	if (this->loopEndSec > this->loopStartSec) {
+		/** Left */
+		if (this->loopStartSec > this->secStart) {
+			float xPos = (this->loopStartSec - this->secStart) / (this->secEnd - this->secStart) * width;
+			juce::Rectangle<float> offRect(
+				headWidth, rulerHeight, xPos, height);
+
+			g.setColour(offColor);
+			g.fillRect(offRect);
+		}
+
+		/** Right */
+		if (this->loopEndSec < this->secEnd) {
+			float xPos = (this->loopEndSec - this->secStart) / (this->secEnd - this->secStart) * width;
+			juce::Rectangle<float> offRect(
+				headWidth + xPos, rulerHeight, width - xPos, height);
+
+			g.setColour(offColor);
+			g.fillRect(offRect);
+		}
+	}
 }
 
 void SeqView::update(int index) {
@@ -320,11 +396,18 @@ void SeqView::updateBlock(int track, int index) {
 void SeqView::updateTempo() {
 	/** Update Time Ruler */
 	this->ruler->updateTempoLabel();
+
+	/** Update Line Temp */
+	std::tie(this->lineTemp, this->minInterval) = this->ruler->getLineTemp();
+	this->updateGridTemp();
 }
 
 void SeqView::updateLevelMeter() {
 	/** Get Play Position */
 	this->playPosSec = quickAPI::getTimeInSecond();
+
+	/** Get Loop Time */
+	std::tie(this->loopStartSec, this->loopEndSec) = quickAPI::getLoopTimeSec();
 
 	/** Get Play State */
 	bool isPlaying = quickAPI::isPlaying();
@@ -335,6 +418,9 @@ void SeqView::updateLevelMeter() {
 			this->hScroller->setPos(this->playPosSec * this->itemSize);
 		}
 	}
+
+	/** Repaint */
+	this->repaint();
 }
 
 std::tuple<double, double> SeqView::getViewArea(
@@ -366,6 +452,10 @@ void SeqView::updateHPos(double pos, double itemSize) {
 	/** Update Comp */
 	this->ruler->updateHPos(pos, itemSize);
 	this->trackList->updateHPos(pos, itemSize);
+
+	/** Update Line Temp */
+	std::tie(this->lineTemp, this->minInterval) = this->ruler->getLineTemp();
+	this->updateGridTemp();
 }
 
 void SeqView::paintBlockPreview(juce::Graphics& g,
@@ -456,4 +546,47 @@ juce::PopupMenu SeqView::createAdsorbMenu() {
 	menu.addItem(-1, "Off", true, juce::approximatelyEqual(currentAdsorb, 0.0));
 
 	return menu;
+}
+
+void SeqView::updateGridTemp() {
+	/** Temp Size */
+	juce::Graphics g(*(this->gridTemp.get()));
+
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+
+	float longLineThickness = screenSize.getWidth() * 0.00075;
+	float shortLineThickness = screenSize.getWidth() * 0.0005;
+
+	float shortLineIntervalMin = screenSize.getWidth() * 0.01;
+
+	/** Colors */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour lineColor = laf.findColour(
+		juce::TableListBox::ColourIds::outlineColourId);
+	juce::Colour backgroundColor = laf.findColour(
+		juce::TableListBox::ColourIds::backgroundColourId);
+
+	/** Background */
+	g.setColour(backgroundColor);
+	g.fillAll();
+
+	/** Lines */
+	for (auto& [xPos, isLong, barId] : this->lineTemp) {
+		/** Check Interval */
+		if (!isLong) {
+			if (this->minInterval < shortLineIntervalMin) {
+				continue;
+			}
+		}
+
+		/** Line */
+		float lineThickness = isLong ? longLineThickness : shortLineThickness;
+		juce::Rectangle<float> lineRect(
+			xPos - lineThickness / 2, 0,
+			lineThickness, this->gridTemp->getHeight());
+
+		g.setColour(lineColor);
+		g.fillRect(lineRect);
+	}
 }

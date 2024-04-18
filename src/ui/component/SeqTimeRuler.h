@@ -38,6 +38,8 @@ public:
 	using LineItem = std::tuple<double, bool, int>;
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
+	const std::tuple<juce::Array<LineItem>, double> getLineTemp() const;
+
 private:
 	const ScrollFunc scrollFunc;
 	const ScaleFunc scaleFunc;
