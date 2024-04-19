@@ -15,7 +15,7 @@ void SeqView::TrackList::remove(int index) {
 }
 
 void SeqView::TrackList::add(
-	std::unique_ptr<juce::Component> newComp) {
+	std::unique_ptr<SeqTrackComponent> newComp) {
 	this->addAndMakeVisible(newComp.get());
 	this->list.add(std::move(newComp));
 }
@@ -331,7 +331,7 @@ void SeqView::update(int index) {
 	}
 	else {
 		for (int i = currentSize; i < newSize; i++) {
-			auto track = std::make_unique<juce::Component>();
+			auto track = std::make_unique<SeqTrackComponent>();
 			this->trackList->add(std::move(track));
 		}
 	}

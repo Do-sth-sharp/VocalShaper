@@ -4,6 +4,7 @@
 #include <FlowUI.h>
 #include "Scroller.h"
 #include "SeqTimeRuler.h"
+#include "SeqTrackComponent.h"
 #include "../misc/LevelMeterHub.h"
 
 class SeqView final
@@ -34,7 +35,7 @@ private:
 
 		int size() const;
 		void remove(int index);
-		void add(std::unique_ptr<juce::Component> newComp);
+		void add(std::unique_ptr<SeqTrackComponent> newComp);
 
 		void update(int index);
 		void updateBlock(int track, int index);
@@ -43,7 +44,7 @@ private:
 		void updateVPos(double pos, double itemSize);
 
 	private:
-		juce::OwnedArray<juce::Component> list;
+		juce::OwnedArray<SeqTrackComponent> list;
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrackList)
 	};
