@@ -21,8 +21,7 @@ void SeqView::TrackList::add(
 }
 
 void SeqView::TrackList::update(int index) {
-	/** TODO */
-	//this->list[index]->update(index);
+	this->list[index]->update(index);
 }
 
 void SeqView::TrackList::updateBlock(int track, int index) {
