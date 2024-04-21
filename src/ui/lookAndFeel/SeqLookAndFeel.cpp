@@ -25,7 +25,7 @@ SeqLookAndFeel::SeqLookAndFeel()
 	this->setColour(juce::Label::ColourIds::textColourId,
 		ColorMap::getInstance()->get("ThemeColorA2"));/**< Cursor */
 	this->setColour(juce::Label::ColourIds::outlineColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));/**< Track Outline */
+		ColorMap::getInstance()->get("ThemeColorB3"));/**< Track Outline */
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));/**< Track Head Background */
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,

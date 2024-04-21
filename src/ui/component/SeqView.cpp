@@ -25,11 +25,15 @@ void SeqView::TrackList::update(int index) {
 }
 
 void SeqView::TrackList::updateBlock(int track, int index) {
-	/** TODO */
+	if (track >= 0 && track < this->list.size()) {
+		this->list[track]->updateBlock(index);
+	}
 }
 
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
-	/** TODO */
+	for (auto i : this->list) {
+		i->updateHPos(pos, itemSize);
+	}
 }
 
 void SeqView::TrackList::updateVPos(double pos, double itemSize) {
@@ -189,7 +193,7 @@ void SeqView::resized() {
 	/** Track List */
 	juce::Rectangle<int> listRect(
 		0, vScrollerRect.getY(),
-		hScrollerRect.getWidth(), vScrollerRect.getHeight());
+		vScrollerRect.getX(), vScrollerRect.getHeight());
 	this->trackList->setBounds(listRect);
 
 	/** Update View Pos */

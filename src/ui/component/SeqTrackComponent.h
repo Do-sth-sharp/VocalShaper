@@ -7,6 +7,10 @@ public:
 	SeqTrackComponent();
 
 	void update(int index);
+	void updateBlock(int blockIndex);
+	void updateHPos(double pos, double itemSize);
+
+	void paint(juce::Graphics& g) override;
 
 private:
 	int index = -1;
