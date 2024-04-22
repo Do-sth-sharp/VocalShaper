@@ -107,7 +107,7 @@ countries: cn
 "Remove Side Chain Bus" = "移除侧链总线"
 "Audio Input" = "音频输入"
 "Audio Output" = "音频输出"
-"Gain" = "激励"
+"Gain" = "增益"
 "Pan" = "声像"
 "Mute" = "静音"
 "Solo" = "独奏"
