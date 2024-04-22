@@ -346,6 +346,76 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectBypassByPtr)
 };
 
+class ActionSetSequencerTrackMute final : public ActionUndoableBase {
+public:
+	ActionSetSequencerTrackMute() = delete;
+	ActionSetSequencerTrackMute(
+		int track, bool mute);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Track Mute";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const bool mute;
+
+		bool oldMute = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackMute)
+};
+
+class ActionSetSequencerTrackName final : public ActionUndoableBase {
+public:
+	ActionSetSequencerTrackName() = delete;
+	ActionSetSequencerTrackName(
+		int track, const juce::String& name);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Track Name";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const juce::String name;
+
+		juce::String oldName;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackName)
+};
+
+class ActionSetSequencerTrackColor final : public ActionUndoableBase {
+public:
+	ActionSetSequencerTrackColor() = delete;
+	ActionSetSequencerTrackColor(
+		int track, const juce::Colour& color);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Track Color";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const juce::Colour color;
+
+		juce::Colour oldColor;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackColor)
+};
+
+
 class ActionSetInstrBypass final : public ActionUndoableBase {
 public:
 	ActionSetInstrBypass() = delete;

@@ -1502,6 +1502,133 @@ bool ActionSetMixerTrackColor::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetSequencerTrackMute::ActionSetSequencerTrackMute(
+	int track, bool mute)
+	: ACTION_DB{ track, mute } {}
+
+bool ActionSetSequencerTrackMute::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerTrackMute);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldMute) = track->getMute();
+			track->setMute(ACTION_DATA(mute));
+
+			this->output("Set seq mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");;
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set seq mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerTrackMute::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerTrackMute);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->setMute(ACTION_DATA(oldMute));
+
+			this->output("Undo set seq mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");;
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set seq mute: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");
+	ACTION_RESULT(false);
+}
+
+ActionSetSequencerTrackName::ActionSetSequencerTrackName(
+	int track, const juce::String& name)
+	: ACTION_DB{ track, name } {}
+
+bool ActionSetSequencerTrackName::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerTrackName);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+	ACTION_WRITE_STRING(oldName);
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldName) = track->getTrackName();
+			track->setTrackName(ACTION_DATA(name));
+
+			this->output("Set seq name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set seq name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerTrackName::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerTrackName);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(name);
+	ACTION_WRITE_STRING(oldName);
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->setTrackName(ACTION_DATA(oldName));
+
+			this->output("Undo set seq name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set seq name: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(name) + "\n");
+	ACTION_RESULT(false);
+}
+
+ActionSetSequencerTrackColor::ActionSetSequencerTrackColor(
+	int track, const juce::Colour& color)
+	: ACTION_DB{ track, color } {}
+
+bool ActionSetSequencerTrackColor::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerTrackColor);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldColor) = track->getTrackColor();
+			track->setTrackColor(ACTION_DATA(color));
+
+			this->output("Set seq color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set seq color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerTrackColor::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerTrackColor);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->setTrackColor(ACTION_DATA(oldColor));
+
+			this->output("Undo set seq color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set seq color: [" + juce::String(ACTION_DATA(track)) + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+	ACTION_RESULT(false);
+}
+
 ActionSetEffectWindow::ActionSetEffectWindow(
 	int track, int effect, bool visible)
 	: track(track), effect(effect), visible(visible) {}

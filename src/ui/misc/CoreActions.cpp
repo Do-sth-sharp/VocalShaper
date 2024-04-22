@@ -349,6 +349,12 @@ void CoreActions::removeTrack(int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setSeqColor(int index, const juce::Colour& color) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetSequencerTrackColor{ index, color });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::addTempoLabel(double time, double tempo) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddTempoTempo{ time, tempo });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -772,6 +778,19 @@ void CoreActions::removeTrackGUI(int index) {
 	}
 
 	CoreActions::removeTrack(index);
+}
+
+void CoreActions::setSeqColorGUI(int index) {
+	/** Callback */
+	auto callback = [index](const juce::Colour& color) {
+		CoreActions::setSeqColor(index, color);
+		};
+
+	/** Get Default Color */
+	juce::Colour defaultColor = quickAPI::getSeqTrackColor(index);
+
+	/** Ask For Color */
+	CoreActions::askForColorGUIAsync(callback, defaultColor);
 }
 
 void CoreActions::addLabelGUI(double time) {

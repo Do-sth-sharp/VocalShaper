@@ -76,6 +76,8 @@ public:
 	static void setTrackMuteAll(bool mute);
 	static void removeTrack(int index);
 
+	static void setSeqColor(int index, const juce::Colour& color);
+
 	static void addTempoLabel(double time, double tempo);
 	static void addBeatLabel(double time, int numerator, int denominator);
 	static void removeLabel(int index);
@@ -122,6 +124,8 @@ public:
 	static void setTrackAudioOutputToSendGUI(int index, int trackIndex, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
 	static void removeTrackGUI(int index);
+
+	static void setSeqColorGUI(int index);
 
 	static void addLabelGUI(double time);
 	static void setLabelTimeGUI(int index, double time);

@@ -81,6 +81,9 @@ const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
 
 void SeqSourceProcessor::setTrackName(const juce::String& name) {
 	this->trackName = name;
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, this->index);
 }
 
 const juce::String SeqSourceProcessor::getTrackName() const {
@@ -89,6 +92,9 @@ const juce::String SeqSourceProcessor::getTrackName() const {
 
 void SeqSourceProcessor::setTrackColor(const juce::Colour& color) {
 	this->trackColor = color;
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, this->index);
 }
 
 const juce::Colour SeqSourceProcessor::getTrackColor() const {
@@ -465,6 +471,14 @@ bool SeqSourceProcessor::getRecording() const {
 	return this->recordingFlag;
 }
 
+void SeqSourceProcessor::setMute(bool mute) {
+	this->isMute = mute;
+}
+
+bool SeqSourceProcessor::getMute() const {
+	return this->isMute;
+}
+
 void SeqSourceProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->juce::AudioProcessorGraph::prepareToPlay(
@@ -502,7 +516,7 @@ void SeqSourceProcessor::processBlock(
 		midiMessages.clear();
 	}
 
-	if (isPlaying) {
+	if (isPlaying && !(this->isMute)) {
 		/** Get Time */
 		double startTime = position->getTimeInSeconds().orFallback(-1);
 		double sampleRate = this->getSampleRate();

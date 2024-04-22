@@ -69,6 +69,9 @@ public:
 	void setRecording(bool recording);
 	bool getRecording() const;
 
+	void setMute(bool mute);
+	bool getMute() const;
+
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void releaseResources() override {};
@@ -132,6 +135,8 @@ private:
 	std::atomic_bool recordingFlag = false;
 	const double recordInitLength = 30;
 	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
+
+	std::atomic_bool isMute = false;
 
 	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
 	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
