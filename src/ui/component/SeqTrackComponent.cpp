@@ -1,10 +1,20 @@
 ﻿#include "SeqTrackComponent.h"
+#include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
 SeqTrackComponent::SeqTrackComponent() {
-	/** TODO */
+	/** Track Name Buton */
+	this->trackName = std::make_unique<juce::TextButton>("0 - " + TRANS("Untitled"));
+	this->trackName->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forSeqTrackName());
+	this->trackName->setWantsKeyboardFocus(false);
+	this->trackName->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->trackName->onClick = [this] {
+		this->editTrackName();
+		};
+	this->addAndMakeVisible(this->trackName.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -22,6 +32,12 @@ void SeqTrackComponent::update(int index) {
 				juce::Label::ColourIds::textColourId);
 		}
 
+		auto name = quickAPI::getSeqTrackName(index);
+		if (name.isEmpty()) {
+			name = TRANS("Untitled");
+		}
+		this->trackName->setButtonText(juce::String{ index } + " - " + name);
+
 		this->repaint();
 	}
 }
@@ -32,6 +48,27 @@ void SeqTrackComponent::updateBlock(int blockIndex) {
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
 	/** TODO */
+}
+
+void SeqTrackComponent::resized() {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int compressModeHeight = screenSize.getHeight() * 0.055;
+
+	int paddingHeight = screenSize.getHeight() * 0.015;
+	int paddingWidth = screenSize.getWidth() * 0.01;
+	float lineThickness = screenSize.getHeight() * 0.0025;
+
+	int nameWidth = screenSize.getWidth() * 0.065;
+	int nameHeight = screenSize.getHeight() * 0.025;
+
+	bool isCompressMode = this->getHeight() <= compressModeHeight;
+
+	/** Track Name */
+	juce::Rectangle<int> nameRect(
+		paddingWidth, isCompressMode ? lineThickness : paddingHeight,
+		nameWidth, isCompressMode ? (this->getHeight() - lineThickness * 2) : nameHeight);
+	this->trackName->setBounds(nameRect);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {
@@ -82,4 +119,8 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 			CoreActions::setSeqColorGUI(this->index);
 		}
 	}
+}
+
+void SeqTrackComponent::editTrackName() {
+	/** TODO */
 }

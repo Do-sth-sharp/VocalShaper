@@ -497,7 +497,7 @@ int SeqView::getTrackNum() const {
 
 std::tuple<double, double> SeqView::getTrackHeightLimit() const {
 	auto screenSize = utils::getScreenSize(this);
-	return { screenSize.getHeight() * 0.025, screenSize.getWidth() * 0.4 };
+	return { screenSize.getHeight() * 0.0275, screenSize.getHeight() * 0.2 };
 }
 
 void SeqView::updateVPos(double pos, double itemSize) {
