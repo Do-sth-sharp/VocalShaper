@@ -77,6 +77,7 @@ public:
 	static void removeTrack(int index);
 
 	static void setSeqColor(int index, const juce::Colour& color);
+	static void setSeqName(int index, const juce::String& name);
 
 	static void addTempoLabel(double time, double tempo);
 	static void addBeatLabel(double time, int numerator, int denominator);
@@ -126,6 +127,7 @@ public:
 	static void removeTrackGUI(int index);
 
 	static void setSeqColorGUI(int index);
+	static void setSeqNameGUI(int index);
 
 	static void addLabelGUI(double time);
 	static void setLabelTimeGUI(int index, double time);

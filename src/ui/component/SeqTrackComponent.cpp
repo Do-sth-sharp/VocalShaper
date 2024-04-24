@@ -11,6 +11,8 @@ SeqTrackComponent::SeqTrackComponent() {
 		LookAndFeelFactory::getInstance()->forSeqTrackName());
 	this->trackName->setWantsKeyboardFocus(false);
 	this->trackName->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->trackName->setConnectedEdges(
+		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
 	this->trackName->onClick = [this] {
 		this->editTrackName();
 		};
@@ -122,5 +124,5 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 }
 
 void SeqTrackComponent::editTrackName() {
-	/** TODO */
+	CoreActions::setSeqNameGUI(this->index);
 }
