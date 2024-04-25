@@ -17,6 +17,16 @@ SeqTrackComponent::SeqTrackComponent() {
 		this->editTrackName();
 		};
 	this->addAndMakeVisible(this->trackName.get());
+
+	/** Mute Button */
+	this->muteButton = std::make_unique<juce::TextButton>("M");
+	this->muteButton->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forMuteButton());
+	this->muteButton->setConnectedEdges(juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
+	this->muteButton->setWantsKeyboardFocus(false);
+	this->muteButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->muteButton->onClick = [this] { this->changeMute(); };
+	this->addAndMakeVisible(this->muteButton.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -57,6 +67,8 @@ void SeqTrackComponent::resized() {
 	auto screenSize = utils::getScreenSize(this);
 	int compressModeHeight = screenSize.getHeight() * 0.055;
 
+	int headWidth = screenSize.getWidth() * 0.1;
+
 	int paddingHeight = screenSize.getHeight() * 0.015;
 	int paddingWidth = screenSize.getWidth() * 0.01;
 	float lineThickness = screenSize.getHeight() * 0.0025;
@@ -64,13 +76,23 @@ void SeqTrackComponent::resized() {
 	int nameWidth = screenSize.getWidth() * 0.065;
 	int nameHeight = screenSize.getHeight() * 0.025;
 
+	int muteButtonHeight = screenSize.getHeight() * 0.0225;
+	int buttonSplitWidth = screenSize.getWidth() * 0.0025;
+
 	bool isCompressMode = this->getHeight() <= compressModeHeight;
 
 	/** Track Name */
 	juce::Rectangle<int> nameRect(
 		paddingWidth, isCompressMode ? lineThickness : paddingHeight,
-		nameWidth, isCompressMode ? (this->getHeight() - lineThickness * 2) : nameHeight);
+		headWidth - paddingWidth * 2 - muteButtonHeight * 2 - buttonSplitWidth * 2,
+		isCompressMode ? (this->getHeight() - lineThickness * 2) : nameHeight);
 	this->trackName->setBounds(nameRect);
+
+	/** Mute Button */
+	juce::Rectangle<int> muteRect(
+		nameRect.getRight() + buttonSplitWidth, nameRect.getCentreY() - muteButtonHeight / 2,
+		muteButtonHeight, muteButtonHeight);
+	this->muteButton->setBounds(muteRect);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {
@@ -125,4 +147,8 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 
 void SeqTrackComponent::editTrackName() {
 	CoreActions::setSeqNameGUI(this->index);
+}
+
+void SeqTrackComponent::changeMute() {
+	/** TODO */
 }
