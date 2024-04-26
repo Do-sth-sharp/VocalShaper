@@ -78,6 +78,9 @@ public:
 
 	static void setSeqColor(int index, const juce::Colour& color);
 	static void setSeqName(int index, const juce::String& name);
+	static void setSeqMute(int index, bool mute);
+	static void setSeqSolo(int index);
+	static void setSeqMuteAll(bool mute);
 
 	static void addTempoLabel(double time, double tempo);
 	static void addBeatLabel(double time, int numerator, int denominator);

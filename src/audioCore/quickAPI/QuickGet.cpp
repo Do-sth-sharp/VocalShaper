@@ -548,6 +548,15 @@ namespace quickAPI {
 		return 0;
 	}
 
+	bool getSeqTrackMute(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getMute();
+			}
+		}
+		return false;
+	}
+
 	const juce::Array<SeqBlock> getSeqBlockList(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {

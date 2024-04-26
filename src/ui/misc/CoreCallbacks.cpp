@@ -66,6 +66,10 @@ CoreCallbacks::CoreCallbacks() {
 		[] {
 			CoreCallbacks::getInstance()->invokeTempoChanged();
 		});
+	UICallbackAPI<int>::set(UICallbackType::SeqMuteChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeSeqMuteChanged(index);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -130,6 +134,10 @@ void CoreCallbacks::addSeqBlockChanged(const SeqBlockChangedCallback& callback) 
 
 void CoreCallbacks::addTempoChanged(const TempoChangedCallback& callback) {
 	this->tempoChanged.add(callback);
+}
+
+void CoreCallbacks::addSeqMuteChanged(const SeqMuteChangedCallback& callback) {
+	this->seqMuteChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -226,6 +234,12 @@ void CoreCallbacks::invokeSeqBlockChanged(int track, int index) const {
 void CoreCallbacks::invokeTempoChanged() const {
 	for (auto& i : this->tempoChanged) {
 		i();
+	}
+}
+
+void CoreCallbacks::invokeSeqMuteChanged(int index) const {
+	for (auto& i : this->seqMuteChanged) {
+		i(index);
 	}
 }
 

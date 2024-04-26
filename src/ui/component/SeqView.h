@@ -21,6 +21,7 @@ public:
 	void update(int index);
 	void updateBlock(int track, int index);
 	void updateTempo();
+	void updateMute(int index);
 	void updateLevelMeter() override;
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
@@ -39,6 +40,7 @@ private:
 
 		void update(int index);
 		void updateBlock(int track, int index);
+		void updateMute(int index);
 
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);

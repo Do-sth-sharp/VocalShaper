@@ -50,12 +50,20 @@ void SeqTrackComponent::update(int index) {
 		}
 		this->trackName->setButtonText(juce::String{ index } + " - " + name);
 
+		this->muteButton->setToggleState(quickAPI::getSeqTrackMute(index),
+			juce::NotificationType::dontSendNotification);
+
 		this->repaint();
 	}
 }
 
 void SeqTrackComponent::updateBlock(int blockIndex) {
 	/** TODO */
+}
+
+void SeqTrackComponent::updateMute() {
+	this->muteButton->setToggleState(quickAPI::getSeqTrackMute(index),
+		juce::NotificationType::dontSendNotification);
 }
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
@@ -150,5 +158,6 @@ void SeqTrackComponent::editTrackName() {
 }
 
 void SeqTrackComponent::changeMute() {
-	/** TODO */
+	CoreActions::setSeqMute(this->index,
+		!this->muteButton->getToggleState());
 }

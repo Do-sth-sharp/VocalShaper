@@ -30,6 +30,12 @@ void SeqView::TrackList::updateBlock(int track, int index) {
 	}
 }
 
+void SeqView::TrackList::updateMute(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateMute();
+	}
+}
+
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 	for (auto i : this->list) {
 		i->updateHPos(pos, itemSize);
@@ -146,6 +152,13 @@ SeqView::SeqView()
 		[comp = SeqView::SafePointer(this)] {
 			if (comp) {
 				comp->updateTempo();
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addSeqMuteChanged(
+		[comp = SeqView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateMute(index);
 			}
 		}
 	);
@@ -403,6 +416,10 @@ void SeqView::updateTempo() {
 	/** Update Line Temp */
 	std::tie(this->lineTemp, this->minInterval) = this->ruler->getLineTemp();
 	this->updateGridTemp();
+}
+
+void SeqView::updateMute(int index) {
+	this->trackList->updateMute(index);
 }
 
 void SeqView::updateLevelMeter() {

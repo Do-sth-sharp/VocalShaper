@@ -473,6 +473,14 @@ bool SeqSourceProcessor::getRecording() const {
 
 void SeqSourceProcessor::setMute(bool mute) {
 	this->isMute = mute;
+
+	/** Close All Note */
+	if (mute) {
+		this->closeAllNote();
+	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteChanged, this->index);
 }
 
 bool SeqSourceProcessor::getMute() const {
@@ -638,6 +646,7 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 	}
 
 	this->setRecording(mes->recording());
+	this->setMute(mes->muted());
 
 	return true;
 }
@@ -689,6 +698,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	}
 
 	mes->set_recording(this->getRecording());
+	mes->set_muted(this->getMute());
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }

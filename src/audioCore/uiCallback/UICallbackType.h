@@ -16,6 +16,7 @@ enum class UICallbackType : int {
 	EffectChanged,
 	SeqChanged,
 	SeqBlockChanged,
+	SeqMuteChanged,
 	TempoChanged,
 
 	TypeMaxNum

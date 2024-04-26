@@ -8,6 +8,7 @@ public:
 
 	void update(int index);
 	void updateBlock(int blockIndex);
+	void updateMute();
 	void updateHPos(double pos, double itemSize);
 
 	void resized() override;

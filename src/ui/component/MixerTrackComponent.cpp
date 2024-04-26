@@ -301,6 +301,8 @@ void MixerTrackComponent::update(int index) {
 		this->panKnob->setValue(quickAPI::getMixerTrackPan(index));
 		this->panValid = quickAPI::isMixerTrackPanValid(index);
 
+		this->muteButton->update(index);
+
 		this->levelMeter->update(index);
 
 		this->effectListModel->update(index);

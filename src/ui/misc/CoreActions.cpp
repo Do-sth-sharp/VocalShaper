@@ -331,16 +331,14 @@ void CoreActions::setTrackMute(int index, bool mute) {
 void CoreActions::setTrackSolo(int index) {
 	int trackNum = quickAPI::getMixerTrackNum();
 	for (int i = 0; i < trackNum; i++) {
-		auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackMute{ i, i != index });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
+		CoreActions::setTrackMute(i, i != index);
 	}
 }
 
 void CoreActions::setTrackMuteAll(bool mute) {
 	int trackNum = quickAPI::getMixerTrackNum();
 	for (int i = 0; i < trackNum; i++) {
-		auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackMute{ i, mute });
-		ActionDispatcher::getInstance()->dispatch(std::move(action));
+		CoreActions::setTrackMute(i, mute);
 	}
 }
 
@@ -359,6 +357,25 @@ void CoreActions::setSeqName(int index, const juce::String& name) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetSequencerTrackName{ index, name });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setSeqMute(int index, bool mute) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackMute{ index, mute });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setSeqSolo(int index) {
+	int trackNum = quickAPI::getSeqTrackNum();
+	for (int i = 0; i < trackNum; i++) {
+		CoreActions::setSeqMute(i, i != index);
+	}
+}
+
+void CoreActions::setSeqMuteAll(bool mute) {
+	int trackNum = quickAPI::getSeqTrackNum();
+	for (int i = 0; i < trackNum; i++) {
+		CoreActions::setSeqMute(i, mute);
+	}
 }
 
 void CoreActions::addTempoLabel(double time, double tempo) {
