@@ -17,6 +17,7 @@
 #include "SideChainLookAndFeel.h"
 #include "LevelMeterLookAndFeel.h"
 #include "MuteButtonLookAndFeel.h"
+#include "RecButtonLookAndFeel.h"
 #include "EffectLookAndFeel.h"
 #include "SeqLookAndFeel.h"
 #include "TimeRulerLookAndFeel.h"
@@ -107,6 +108,9 @@ void LookAndFeelFactory::initialise() {
 	/** Mute Button */
 	this->muteButtonLAF = std::make_unique<MuteButtonLookAndFeel>();
 
+	/** Record Button */
+	this->recButtonLAF = std::make_unique<RecButtonLookAndFeel>();
+
 	/** Effect */
 	this->effectLAF = std::make_unique<EffectLookAndFeel>();
 
@@ -191,6 +195,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forLevelMeter() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forMuteButton() const {
 	return this->muteButtonLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forRecButton() const {
+	return this->recButtonLAF.get();
 }
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forEffect() const {

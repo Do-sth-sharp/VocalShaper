@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "SeqTrackMuteComponent.h"
+#include "SeqTrackRecComponent.h"
 
 class SeqTrackComponent final : public juce::Component {
 public:
@@ -10,6 +11,7 @@ public:
 	void update(int index);
 	void updateBlock(int blockIndex);
 	void updateMute();
+	void updateRec();
 	void updateHPos(double pos, double itemSize);
 
 	void resized() override;
@@ -23,8 +25,7 @@ private:
 
 	std::unique_ptr<juce::TextButton> trackName = nullptr;
 	std::unique_ptr<SeqTrackMuteComponent> muteButton = nullptr;
-	std::unique_ptr<juce::DrawableButton> recButton = nullptr;
-	std::unique_ptr<juce::Drawable> recordIcon = nullptr, recordIconOn = nullptr;
+	std::unique_ptr<SeqTrackRecComponent> recButton = nullptr;
 
 	void editTrackName();
 

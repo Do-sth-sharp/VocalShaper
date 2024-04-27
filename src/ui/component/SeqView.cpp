@@ -36,6 +36,12 @@ void SeqView::TrackList::updateMute(int index) {
 	}
 }
 
+void SeqView::TrackList::updateRec(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateRec();
+	}
+}
+
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 	for (auto i : this->list) {
 		i->updateHPos(pos, itemSize);
@@ -159,6 +165,13 @@ SeqView::SeqView()
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateMute(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addSeqRecChanged(
+		[comp = SeqView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateRec(index);
 			}
 		}
 	);
@@ -420,6 +433,10 @@ void SeqView::updateTempo() {
 
 void SeqView::updateMute(int index) {
 	this->trackList->updateMute(index);
+}
+
+void SeqView::updateRec(int index) {
+	this->trackList->updateRec(index);
 }
 
 void SeqView::updateLevelMeter() {

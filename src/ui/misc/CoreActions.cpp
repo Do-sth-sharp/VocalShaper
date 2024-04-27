@@ -378,6 +378,11 @@ void CoreActions::setSeqMuteAll(bool mute) {
 	}
 }
 
+void CoreActions::setSeqRec(int index, bool rec) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackRecording{ index, rec });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::addTempoLabel(double time, double tempo) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddTempoTempo{ time, tempo });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));

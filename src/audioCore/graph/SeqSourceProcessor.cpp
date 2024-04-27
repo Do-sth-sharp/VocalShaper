@@ -465,6 +465,9 @@ void SeqSourceProcessor::setRecording(bool recording) {
 		this->prepareRecord();
 	}
 	this->recordingFlag = recording;
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqRecChanged, this->index);
 }
 
 bool SeqSourceProcessor::getRecording() const {

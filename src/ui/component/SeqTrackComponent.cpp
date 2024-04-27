@@ -21,6 +21,10 @@ SeqTrackComponent::SeqTrackComponent() {
 	/** Mute Button */
 	this->muteButton = std::make_unique<SeqTrackMuteComponent>();
 	this->addAndMakeVisible(this->muteButton.get());
+
+	/** Record Button */
+	this->recButton = std::make_unique<SeqTrackRecComponent>();
+	this->addAndMakeVisible(this->recButton.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -45,6 +49,7 @@ void SeqTrackComponent::update(int index) {
 		this->trackName->setButtonText(juce::String{ index } + " - " + name);
 
 		this->muteButton->update(index);
+		this->recButton->update(index);
 
 		this->repaint();
 	}
@@ -56,6 +61,10 @@ void SeqTrackComponent::updateBlock(int blockIndex) {
 
 void SeqTrackComponent::updateMute() {
 	this->muteButton->update(this->index);
+}
+
+void SeqTrackComponent::updateRec() {
+	this->recButton->update(this->index);
 }
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
@@ -70,14 +79,14 @@ void SeqTrackComponent::resized() {
 	int headWidth = screenSize.getWidth() * 0.1;
 
 	int paddingHeight = screenSize.getHeight() * 0.015;
-	int paddingWidth = screenSize.getWidth() * 0.01;
+	int paddingWidth = screenSize.getWidth() * 0.0075;
 	float lineThickness = screenSize.getHeight() * 0.0025;
 
 	int nameWidth = screenSize.getWidth() * 0.065;
 	int nameHeight = screenSize.getHeight() * 0.025;
 
 	int muteButtonHeight = screenSize.getHeight() * 0.0225;
-	int buttonSplitWidth = screenSize.getWidth() * 0.0025;
+	int buttonSplitWidth = screenSize.getWidth() * 0.0035;
 
 	bool isCompressMode = this->getHeight() <= compressModeHeight;
 
@@ -93,6 +102,12 @@ void SeqTrackComponent::resized() {
 		nameRect.getRight() + buttonSplitWidth, nameRect.getCentreY() - muteButtonHeight / 2,
 		muteButtonHeight, muteButtonHeight);
 	this->muteButton->setBounds(muteRect);
+
+	/** Record Button */
+	juce::Rectangle<int> recRect(
+		muteRect.getRight() + buttonSplitWidth, nameRect.getCentreY() - muteButtonHeight / 2,
+		muteButtonHeight, muteButtonHeight);
+	this->recButton->setBounds(recRect);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {

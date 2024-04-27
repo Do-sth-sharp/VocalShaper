@@ -81,6 +81,7 @@ public:
 	static void setSeqMute(int index, bool mute);
 	static void setSeqSolo(int index);
 	static void setSeqMuteAll(bool mute);
+	static void setSeqRec(int index, bool rec);
 
 	static void addTempoLabel(double time, double tempo);
 	static void addBeatLabel(double time, int numerator, int denominator);

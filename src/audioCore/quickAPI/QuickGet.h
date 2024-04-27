@@ -116,6 +116,7 @@ namespace quickAPI {
 	int getSeqTrackInputChannelNum(int index);
 	int getSeqTrackOutputChannelNum(int index);
 	bool getSeqTrackMute(int index);
+	bool getSeqTrackRecording(int index);
 	const juce::Array<SeqBlock> getSeqBlockList(int index);
 
 	int getMixerTrackNum();

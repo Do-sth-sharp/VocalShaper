@@ -1,15 +1,15 @@
-﻿#include "SeqTrackMuteComponent.h"
+﻿#include "SeqTrackRecComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 
-SeqTrackMuteComponent::SeqTrackMuteComponent() {
+SeqTrackRecComponent::SeqTrackRecComponent() {
 	this->setLookAndFeel(
-		LookAndFeelFactory::getInstance()->forMuteButton());
+		LookAndFeelFactory::getInstance()->forRecButton());
 }
 
-void SeqTrackMuteComponent::paint(juce::Graphics& g) {
+void SeqTrackRecComponent::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float lineThickness = screenSize.getHeight() * 0.001;
@@ -17,19 +17,16 @@ void SeqTrackMuteComponent::paint(juce::Graphics& g) {
 	int buttonWidth = std::min(this->getWidth(), this->getHeight()) - lineThickness;
 	int buttonHeight = buttonWidth;
 
-	float textFontHeight = buttonWidth * 0.7;
+	float iconHeight = buttonWidth * 0.4;
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(this->mute
+	juce::Colour backgroundColor = laf.findColour(this->rec
 		? juce::TextButton::ColourIds::buttonOnColourId
 		: juce::TextButton::ColourIds::buttonColourId);
-	juce::Colour textColor = laf.findColour(this->mute
+	juce::Colour iconColor = laf.findColour(this->rec
 		? juce::TextButton::ColourIds::textColourOnId
 		: juce::TextButton::ColourIds::textColourOffId);
-
-	/** Font */
-	juce::Font textFont(textFontHeight);
 
 	/** Button */
 	juce::Rectangle<float> buttonRect(
@@ -39,19 +36,22 @@ void SeqTrackMuteComponent::paint(juce::Graphics& g) {
 	g.setColour(backgroundColor);
 	g.fillRect(buttonRect);
 
-	g.setColour(textColor);
+	g.setColour(iconColor);
 	g.drawRect(buttonRect, lineThickness);
 
-	g.setFont(textFont);
-	g.drawFittedText("M", buttonRect.toNearestInt(),
-		juce::Justification::centred, 1, 0.f);
+	juce::Rectangle<float> iconRect(
+		buttonRect.getWidth() / 2.f - iconHeight / 2.f,
+		buttonRect.getHeight() / 2.f - iconHeight / 2.f,
+		iconHeight, iconHeight);
+	g.setColour(iconColor);
+	g.fillEllipse(iconRect);
 }
 
-void SeqTrackMuteComponent::mouseDrag(const juce::MouseEvent& event) {
+void SeqTrackRecComponent::mouseDrag(const juce::MouseEvent& event) {
 	this->mouseMove(event);
 }
 
-void SeqTrackMuteComponent::mouseMove(const juce::MouseEvent& event) {
+void SeqTrackRecComponent::mouseMove(const juce::MouseEvent& event) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float lineThickness = screenSize.getHeight() * 0.001;
@@ -68,7 +68,7 @@ void SeqTrackMuteComponent::mouseMove(const juce::MouseEvent& event) {
 		: juce::MouseCursor::NormalCursor);
 }
 
-void SeqTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
+void SeqTrackRecComponent::mouseUp(const juce::MouseEvent& event) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float lineThickness = screenSize.getHeight() * 0.001;
@@ -81,60 +81,20 @@ void SeqTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
 
 	if (buttonRect.contains(event.position)) {
 		if (event.mods.isLeftButtonDown()) {
-			this->changeMute();
-		}
-		else if (event.mods.isRightButtonDown()) {
-			this->showMenu();
+			this->changeRec();
 		}
 	}
 }
 
-void SeqTrackMuteComponent::update(int index) {
+void SeqTrackRecComponent::update(int index) {
 	this->index = index;
 	if (index > -1) {
-		this->mute = quickAPI::getSeqTrackMute(index);
+		this->rec = quickAPI::getSeqTrackRecording(index);
 
 		this->repaint();
 	}
 }
 
-void SeqTrackMuteComponent::changeMute() {
-	CoreActions::setSeqMute(this->index, !(this->mute));
+void SeqTrackRecComponent::changeRec() {
+	CoreActions::setSeqRec(this->index, !(this->rec));
 }
-
-enum MixerMuteActionType {
-	Mute = 1, Solo, MuteAll, UnmuteAll
-};
-
-void SeqTrackMuteComponent::showMenu() {
-	auto menu = this->createMenu();
-	int result = menu.show();
-
-	switch (result) {
-	case MixerMuteActionType::Mute:
-		this->changeMute();
-		break;
-	case MixerMuteActionType::Solo:
-		CoreActions::setSeqSolo(this->index);
-		break;
-	case MixerMuteActionType::MuteAll:
-		CoreActions::setSeqMuteAll(true);
-		break;
-	case MixerMuteActionType::UnmuteAll:
-		CoreActions::setSeqMuteAll(false);
-		break;
-	}
-}
-
-juce::PopupMenu SeqTrackMuteComponent::createMenu() const {
-	juce::PopupMenu menu;
-
-	menu.addItem(MixerMuteActionType::Mute, TRANS("Mute"), true, this->mute);
-	menu.addItem(MixerMuteActionType::Solo, TRANS("Solo"));
-	menu.addSeparator();
-	menu.addItem(MixerMuteActionType::MuteAll, TRANS("Mute All"));
-	menu.addItem(MixerMuteActionType::UnmuteAll, TRANS("Unmute All"));
-
-	return menu;
-}
-
