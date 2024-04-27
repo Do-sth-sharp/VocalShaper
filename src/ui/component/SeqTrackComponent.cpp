@@ -19,13 +19,7 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->addAndMakeVisible(this->trackName.get());
 
 	/** Mute Button */
-	this->muteButton = std::make_unique<juce::TextButton>("M");
-	this->muteButton->setLookAndFeel(
-		LookAndFeelFactory::getInstance()->forMuteButton());
-	this->muteButton->setConnectedEdges(juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
-	this->muteButton->setWantsKeyboardFocus(false);
-	this->muteButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-	this->muteButton->onClick = [this] { this->changeMute(); };
+	this->muteButton = std::make_unique<SeqTrackMuteComponent>();
 	this->addAndMakeVisible(this->muteButton.get());
 }
 
@@ -50,8 +44,7 @@ void SeqTrackComponent::update(int index) {
 		}
 		this->trackName->setButtonText(juce::String{ index } + " - " + name);
 
-		this->muteButton->setToggleState(quickAPI::getSeqTrackMute(index),
-			juce::NotificationType::dontSendNotification);
+		this->muteButton->update(index);
 
 		this->repaint();
 	}
@@ -62,8 +55,7 @@ void SeqTrackComponent::updateBlock(int blockIndex) {
 }
 
 void SeqTrackComponent::updateMute() {
-	this->muteButton->setToggleState(quickAPI::getSeqTrackMute(index),
-		juce::NotificationType::dontSendNotification);
+	this->muteButton->update(this->index);
 }
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
@@ -155,9 +147,4 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 
 void SeqTrackComponent::editTrackName() {
 	CoreActions::setSeqNameGUI(this->index);
-}
-
-void SeqTrackComponent::changeMute() {
-	CoreActions::setSeqMute(this->index,
-		!this->muteButton->getToggleState());
 }
