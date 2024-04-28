@@ -328,6 +328,15 @@ namespace quickAPI {
 		return false;
 	}
 
+	bool getInstrOffline(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getInstrOffline();
+			}
+		}
+		return false;
+	}
+
 	EditorPointer getInstrEditor(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {

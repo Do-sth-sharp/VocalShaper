@@ -13,8 +13,8 @@ EffectComponent::EffectComponent() {
 		LookAndFeelFactory::getInstance()->forEffect());
 
 	/** Bypass Icon */
-		this->bypassIcon = flowUI::IconManager::getSVG(
-			utils::getIconFile("Device", "shut-down-line").getFullPathName());
+	this->bypassIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Device", "shut-down-line").getFullPathName());
 	this->bypassIcon->replaceColour(juce::Colours::black,
 		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
 

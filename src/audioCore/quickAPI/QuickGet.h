@@ -78,6 +78,7 @@ namespace quickAPI {
 	PluginHolder getInstrPointer(int index);
 	const juce::String getInstrName(int index);
 	bool getInstrBypass(int index);
+	bool getInstrOffline(int index);
 	EditorPointer getInstrEditor(int index);
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);

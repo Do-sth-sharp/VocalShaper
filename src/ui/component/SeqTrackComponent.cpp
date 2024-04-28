@@ -3,6 +3,7 @@
 #include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
+#include <IconManager.h>
 
 SeqTrackComponent::SeqTrackComponent() {
 	/** Track Name Buton */
@@ -25,6 +26,58 @@ SeqTrackComponent::SeqTrackComponent() {
 	/** Record Button */
 	this->recButton = std::make_unique<SeqTrackRecComponent>();
 	this->addAndMakeVisible(this->recButton.get());
+
+	/** Instr Button */
+	this->instrButton = std::make_unique<juce::TextButton>("-");
+	this->instrButton->setWantsKeyboardFocus(false);
+	this->instrButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->instrButton->setConnectedEdges(juce::Button::ConnectedOnRight);
+	this->addChildComponent(this->instrButton.get());
+
+	/** Instr Bypass Icon */
+	this->instrBypassIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Device", "shut-down-line").getFullPathName());
+	this->instrBypassIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+
+	this->instrBypassIconOn = flowUI::IconManager::getSVG(
+		utils::getIconFile("Device", "shut-down-line").getFullPathName());
+	this->instrBypassIconOn->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+
+	/** Instr Offline Icon */
+	this->instrOfflineIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Editor", "link-unlink").getFullPathName());
+	this->instrOfflineIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+
+	this->instrOfflineIconOn = flowUI::IconManager::getSVG(
+		utils::getIconFile("Editor", "link-unlink").getFullPathName());
+	this->instrOfflineIconOn->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+
+	/** Instr Bypass Button */
+	this->instrBypassButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Bypass Instrument"), juce::DrawableButton::ImageOnButtonBackground);
+	this->instrBypassButton->setImages(
+		this->instrBypassIcon.get(), nullptr, nullptr, nullptr,
+		this->instrBypassIconOn.get(), nullptr, nullptr, nullptr);
+	this->instrBypassButton->setWantsKeyboardFocus(false);
+	this->instrBypassButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->instrBypassButton->setConnectedEdges(juce::Button::ConnectedOnLeft);
+	this->addAndMakeVisible(this->instrBypassButton.get());
+
+	/** Instr Offline Button */
+	this->instrOfflineButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Instrument Offline"), juce::DrawableButton::ImageOnButtonBackground);
+	this->instrOfflineButton->setImages(
+		this->instrOfflineIcon.get(), nullptr, nullptr, nullptr,
+		this->instrOfflineIconOn.get(), nullptr, nullptr, nullptr);
+	this->instrOfflineButton->setWantsKeyboardFocus(false);
+	this->instrOfflineButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->instrOfflineButton->setConnectedEdges(
+		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
+	this->addAndMakeVisible(this->instrOfflineButton.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -51,6 +104,18 @@ void SeqTrackComponent::update(int index) {
 		this->muteButton->update(index);
 		this->recButton->update(index);
 
+		auto instrName = quickAPI::getInstrName(index);
+		this->instrButton->setButtonText(
+			instrName.isNotEmpty() ? instrName : "-");
+		this->instrBypassButton->setToggleState(
+			(!quickAPI::getInstrBypass(index)) && instrName.isNotEmpty(),
+			juce::NotificationType::dontSendNotification);
+		this->instrOfflineButton->setToggleState(
+			(!quickAPI::getInstrOffline(index)) && instrName.isNotEmpty(),
+			juce::NotificationType::dontSendNotification);
+		this->instrBypassButton->setEnabled(instrName.isNotEmpty());
+		this->instrOfflineButton->setEnabled(instrName.isNotEmpty());
+
 		this->repaint();
 	}
 }
@@ -74,7 +139,6 @@ void SeqTrackComponent::updateHPos(double pos, double itemSize) {
 void SeqTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
-	int compressModeHeight = screenSize.getHeight() * 0.055;
 
 	int headWidth = screenSize.getWidth() * 0.1;
 
@@ -88,7 +152,14 @@ void SeqTrackComponent::resized() {
 	int muteButtonHeight = screenSize.getHeight() * 0.0225;
 	int buttonSplitWidth = screenSize.getWidth() * 0.0035;
 
+	int compressModeHeight = paddingHeight * 2 + nameHeight;
 	bool isCompressMode = this->getHeight() <= compressModeHeight;
+
+	int lineSplitHeight = screenSize.getHeight() * 0.01;
+	int instrLineHeight = screenSize.getHeight() * 0.0225;
+
+	int instrLineShownHeight = paddingHeight * 2 + nameHeight + lineSplitHeight + instrLineHeight;
+	bool isInstrLineShown = this->getHeight() >= instrLineShownHeight;
 
 	/** Track Name */
 	juce::Rectangle<int> nameRect(
@@ -108,6 +179,28 @@ void SeqTrackComponent::resized() {
 		muteRect.getRight() + buttonSplitWidth, nameRect.getCentreY() - muteButtonHeight / 2,
 		muteButtonHeight, muteButtonHeight);
 	this->recButton->setBounds(recRect);
+
+	/** Instr Button */
+	juce::Rectangle<int> instrLineRect(
+		paddingWidth, nameRect.getBottom() + lineSplitHeight,
+		headWidth - paddingWidth * 2, instrLineHeight);
+	auto instrRect = instrLineRect.withTrimmedRight(instrLineHeight * 2);
+	this->instrButton->setBounds(instrRect);
+	this->instrButton->setVisible(isInstrLineShown);
+
+	/** Instr Offline Button */
+	juce::Rectangle<int> instrOfflineRect(
+		instrRect.getRight(), instrRect.getY(),
+		instrLineHeight, instrLineHeight);
+	this->instrOfflineButton->setBounds(instrOfflineRect);
+	this->instrOfflineButton->setVisible(isInstrLineShown);
+
+	/** Instr Bypass Button */
+	juce::Rectangle<int> instrBypassRect(
+		instrOfflineRect.getRight(), instrRect.getY(),
+		instrLineHeight, instrLineHeight);
+	this->instrBypassButton->setBounds(instrBypassRect);
+	this->instrBypassButton->setVisible(isInstrLineShown);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {

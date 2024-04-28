@@ -27,6 +27,12 @@ private:
 	std::unique_ptr<SeqTrackMuteComponent> muteButton = nullptr;
 	std::unique_ptr<SeqTrackRecComponent> recButton = nullptr;
 
+	std::unique_ptr<juce::TextButton> instrButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> instrBypassButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> instrOfflineButton = nullptr;
+	std::unique_ptr<juce::Drawable> instrBypassIcon = nullptr, instrBypassIconOn = nullptr;
+	std::unique_ptr<juce::Drawable> instrOfflineIcon = nullptr, instrOfflineIconOn = nullptr;
+
 	void editTrackName();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)

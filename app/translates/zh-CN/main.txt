@@ -120,4 +120,7 @@ countries: cn
 "Tempo" = "曲速"
 "Beat" = "节拍"
 "Tempo Editor" = "曲速编辑器"
+
 "Untitled" = "未命名"
+"Bypass Instrument" = "旁路乐器"
+"Instrument Offline" = "乐器离线"

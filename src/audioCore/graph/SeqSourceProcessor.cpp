@@ -185,19 +185,27 @@ void SeqSourceProcessor::removeInstr() {
 }
 
 PluginDecorator* SeqSourceProcessor::getInstrProcessor() const {
-	return dynamic_cast<PluginDecorator*>(this->instr->getProcessor());
+	if (this->instr) {
+		return dynamic_cast<PluginDecorator*>(this->instr->getProcessor());
+	}
+	return nullptr;
 }
 
 void SeqSourceProcessor::setInstrumentBypass(bool bypass) {
 	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
 
-	SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{
+	if (this->instr) {
+		SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{
 			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) }, bypass);
+	}
 }
 
 bool SeqSourceProcessor::getInstrumentBypass() const {
-	return SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer{
+	if (this->instr) {
+		return SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer{
 			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) });
+	}
+	return false;
 }
 
 void SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass) {
