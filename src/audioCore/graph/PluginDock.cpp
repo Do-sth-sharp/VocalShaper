@@ -385,7 +385,7 @@ juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index)
 		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptrNode->nodeID, this->midiChannelIndex} });
 
 	/** Remove Additional Connection */
-	for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
+	for (int i = this->audioChannels.size(); i < this->getTotalNumInputChannels(); i++) {
 		juce::AudioProcessorGraph::Connection connection =
 		{ {this->audioInputNode->nodeID, i}, {ptrNode->nodeID, i} };
 		this->removeConnection(connection);
@@ -477,7 +477,7 @@ void PluginDock::insertPluginInternal(
 	}
 
 	/** Connect Additional Bus */
-	for (int i = this->audioChannels.size(); i < this->getNumInputChannels(); i++) {
+	for (int i = this->audioChannels.size(); i < this->getTotalNumInputChannels(); i++) {
 		juce::AudioProcessorGraph::Connection connection =
 		{ {this->audioInputNode->nodeID, i}, {ptr->nodeID, i} };
 		this->addConnection(connection);
