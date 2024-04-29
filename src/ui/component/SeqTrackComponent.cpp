@@ -1,6 +1,7 @@
 ﻿#include "SeqTrackComponent.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
+#include "../misc/PluginEditorHub.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -32,6 +33,7 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->instrButton->setWantsKeyboardFocus(false);
 	this->instrButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->instrButton->setConnectedEdges(juce::Button::ConnectedOnRight);
+	this->instrButton->onClick = [this] { this->instrEditorShow(); };
 	this->addChildComponent(this->instrButton.get());
 
 	/** Instr Bypass Icon */
@@ -101,20 +103,10 @@ void SeqTrackComponent::update(int index) {
 		}
 		this->trackName->setButtonText(juce::String{ index } + " - " + name);
 
-		this->muteButton->update(index);
-		this->recButton->update(index);
+		this->updateMute();
+		this->updateRec();
 
-		auto instrName = quickAPI::getInstrName(index);
-		this->instrButton->setButtonText(
-			instrName.isNotEmpty() ? instrName : "-");
-		this->instrBypassButton->setToggleState(
-			(!quickAPI::getInstrBypass(index)) && instrName.isNotEmpty(),
-			juce::NotificationType::dontSendNotification);
-		this->instrOfflineButton->setToggleState(
-			(!quickAPI::getInstrOffline(index)) && instrName.isNotEmpty(),
-			juce::NotificationType::dontSendNotification);
-		this->instrBypassButton->setEnabled(instrName.isNotEmpty());
-		this->instrOfflineButton->setEnabled(instrName.isNotEmpty());
+		this->updateInstr();
 
 		this->repaint();
 	}
@@ -130,6 +122,23 @@ void SeqTrackComponent::updateMute() {
 
 void SeqTrackComponent::updateRec() {
 	this->recButton->update(this->index);
+}
+
+void SeqTrackComponent::updateInstr() {
+	bool instrValid = quickAPI::isInstrValid(this->index);
+	this->instrButton->setButtonText(
+		instrValid ? quickAPI::getInstrName(this->index) : "-");
+	this->instrButton->setToggleState(
+		PluginEditorHub::getInstance()->checkInstr(this->index),
+		juce::NotificationType::dontSendNotification);
+	this->instrBypassButton->setToggleState(
+		(!quickAPI::getInstrBypass(this->index)) && instrValid,
+		juce::NotificationType::dontSendNotification);
+	this->instrOfflineButton->setToggleState(
+		(!quickAPI::getInstrOffline(this->index)) && instrValid,
+		juce::NotificationType::dontSendNotification);
+	this->instrBypassButton->setEnabled(instrValid);
+	this->instrOfflineButton->setEnabled(instrValid);
 }
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
@@ -255,4 +264,16 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 
 void SeqTrackComponent::editTrackName() {
 	CoreActions::setSeqNameGUI(this->index);
+}
+
+void SeqTrackComponent::instrEditorShow() {
+	bool instrValid = quickAPI::isInstrValid(this->index);
+	if (!instrValid) { return; }
+	
+	if (this->instrButton->getToggleState()) {
+		PluginEditorHub::getInstance()->closeInstr(this->index);
+	}
+	else {
+		PluginEditorHub::getInstance()->openInstr(this->index);
+	}
 }

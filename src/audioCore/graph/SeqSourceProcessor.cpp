@@ -247,6 +247,9 @@ void SeqSourceProcessor::setInstrOffline(bool offline) {
 		/** Link Channels */
 		this->linkInstr();
 	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
 }
 
 bool SeqSourceProcessor::getInstrOffline() const {

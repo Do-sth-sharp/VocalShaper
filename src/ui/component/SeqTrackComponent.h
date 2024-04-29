@@ -12,6 +12,7 @@ public:
 	void updateBlock(int blockIndex);
 	void updateMute();
 	void updateRec();
+	void updateInstr();
 	void updateHPos(double pos, double itemSize);
 
 	void resized() override;
@@ -34,6 +35,7 @@ private:
 	std::unique_ptr<juce::Drawable> instrOfflineIcon = nullptr, instrOfflineIconOn = nullptr;
 
 	void editTrackName();
+	void instrEditorShow();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)
 };

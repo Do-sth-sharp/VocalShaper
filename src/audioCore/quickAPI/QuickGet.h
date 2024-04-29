@@ -76,6 +76,7 @@ namespace quickAPI {
 	using AudioLink = std::tuple<int, int, int, int>;
 
 	PluginHolder getInstrPointer(int index);
+	bool isInstrValid(int index);
 	const juce::String getInstrName(int index);
 	bool getInstrBypass(int index);
 	bool getInstrOffline(int index);
