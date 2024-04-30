@@ -118,6 +118,12 @@ void CoreActions::bypassInstr(int index, bool bypass) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::offlineInstr(int index, bool offline) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetInstrOffline{ index, offline });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::bypassInstr(quickAPI::PluginHolder instr, bool bypass) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetInstrBypassByPtr{ instr, bypass });

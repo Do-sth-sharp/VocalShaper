@@ -7,6 +7,10 @@
 #include <IconManager.h>
 
 SeqTrackComponent::SeqTrackComponent() {
+	/** Look And Feel */
+	this->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forSeqTrack());
+
 	/** Track Name Buton */
 	this->trackName = std::make_unique<juce::TextButton>("0 - " + TRANS("Untitled"));
 	this->trackName->setLookAndFeel(
@@ -67,6 +71,7 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->instrBypassButton->setWantsKeyboardFocus(false);
 	this->instrBypassButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->instrBypassButton->setConnectedEdges(juce::Button::ConnectedOnLeft);
+	this->instrBypassButton->onClick = [this] { this->instrBypass(); };
 	this->addAndMakeVisible(this->instrBypassButton.get());
 
 	/** Instr Offline Button */
@@ -79,6 +84,7 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->instrOfflineButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->instrOfflineButton->setConnectedEdges(
 		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
+	this->instrOfflineButton->onClick = [this] { this->instrOffline(); };
 	this->addAndMakeVisible(this->instrOfflineButton.get());
 }
 
@@ -131,6 +137,7 @@ void SeqTrackComponent::updateInstr() {
 	this->instrButton->setToggleState(
 		PluginEditorHub::getInstance()->checkInstr(this->index),
 		juce::NotificationType::dontSendNotification);
+
 	this->instrBypassButton->setToggleState(
 		(!quickAPI::getInstrBypass(this->index)) && instrValid,
 		juce::NotificationType::dontSendNotification);
@@ -276,4 +283,14 @@ void SeqTrackComponent::instrEditorShow() {
 	else {
 		PluginEditorHub::getInstance()->openInstr(this->index);
 	}
+}
+
+void SeqTrackComponent::instrBypass() {
+	CoreActions::bypassInstr(this->index,
+		this->instrBypassButton->getToggleState());
+}
+
+void SeqTrackComponent::instrOffline() {
+	CoreActions::offlineInstr(this->index,
+		this->instrOfflineButton->getToggleState());
 }

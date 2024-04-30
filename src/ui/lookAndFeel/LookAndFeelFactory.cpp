@@ -21,6 +21,7 @@
 #include "EffectLookAndFeel.h"
 #include "SeqLookAndFeel.h"
 #include "TimeRulerLookAndFeel.h"
+#include "SeqTrackLookAndFeel.h"
 #include "SeqTrackNameLookAndFeel.h" 
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
@@ -120,6 +121,9 @@ void LookAndFeelFactory::initialise() {
 	/** Time Ruler */
 	this->timeRulerLAF = std::make_unique<TimeRulerLookAndFeel>();
 
+	/** Seq Track */
+	this->seqTrackLAF = std::make_unique<SeqTrackLookAndFeel>();
+
 	/** Seq Track Name */
 	this->seqTrackNameLAF = std::make_unique<SeqTrackNameLookAndFeel>();
 }
@@ -211,6 +215,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forSeq() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forTimeRuler() const {
 	return this->timeRulerLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forSeqTrack() const {
+	return this->seqTrackLAF.get();
 }
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forSeqTrackName() const {

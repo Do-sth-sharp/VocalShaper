@@ -36,6 +36,8 @@ private:
 
 	void editTrackName();
 	void instrEditorShow();
+	void instrBypass();
+	void instrOffline();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)
 };

@@ -36,6 +36,7 @@ public:
 
 	static void insertInstr(int index, const juce::String& pid);
 	static void bypassInstr(int index, bool bypass);
+	static void offlineInstr(int index, bool offline);
 	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
 	static void setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel);
 	static void setInstrMIDICCIntercept(quickAPI::PluginHolder instr, bool intercept);
