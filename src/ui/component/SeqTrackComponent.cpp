@@ -170,7 +170,7 @@ void SeqTrackComponent::resized() {
 	int nameWidth = screenSize.getWidth() * 0.065;
 	int nameHeight = screenSize.getHeight() * 0.025;
 
-	int muteButtonHeight = screenSize.getHeight() * 0.0225;
+	int muteButtonHeight = screenSize.getHeight() * 0.02;
 	int buttonSplitWidth = screenSize.getWidth() * 0.0035;
 
 	int compressModeHeight = paddingHeight * 2 + nameHeight;
