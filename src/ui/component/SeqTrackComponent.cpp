@@ -34,6 +34,8 @@ SeqTrackComponent::SeqTrackComponent() {
 
 	/** Instr Button */
 	this->instrButton = std::make_unique<juce::TextButton>("-");
+	this->instrButton->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forInstrName());
 	this->instrButton->setWantsKeyboardFocus(false);
 	this->instrButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->instrButton->setConnectedEdges(juce::Button::ConnectedOnRight);

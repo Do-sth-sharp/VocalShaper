@@ -32,6 +32,7 @@ public:
 	juce::LookAndFeel_V4* forTimeRuler() const;
 	juce::LookAndFeel_V4* forSeqTrack() const;
 	juce::LookAndFeel_V4* forSeqTrackName() const;
+	juce::LookAndFeel_V4* forInstrName() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -58,6 +59,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> timeRulerLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> seqTrackLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> seqTrackNameLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> instrNameLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();
