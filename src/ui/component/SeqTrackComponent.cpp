@@ -134,8 +134,11 @@ void SeqTrackComponent::updateRec() {
 
 void SeqTrackComponent::updateInstr() {
 	bool instrValid = quickAPI::isInstrValid(this->index);
+	auto instrName = quickAPI::getInstrName(this->index);
 	this->instrButton->setButtonText(
-		instrValid ? quickAPI::getInstrName(this->index) : "-");
+		instrValid ? instrName : "-");
+	this->instrButton->setTooltip(
+		instrValid ? instrName : "");
 	this->instrButton->setToggleState(
 		PluginEditorHub::getInstance()->checkInstr(this->index),
 		juce::NotificationType::dontSendNotification);
