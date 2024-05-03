@@ -79,6 +79,8 @@ public:
 
 	static void setSeqColor(int index, const juce::Colour& color);
 	static void setSeqName(int index, const juce::String& name);
+	static void setSeqMIDIOutputToMixer(int index, int mixerIndex, bool output);
+	static void setSeqAudioOutputToMixer(int index, int channel, int mixerIndex, int dstChannel, bool output);
 	static void setSeqMute(int index, bool mute);
 	static void setSeqSolo(int index);
 	static void setSeqMuteAll(bool mute);
@@ -133,6 +135,8 @@ public:
 
 	static void setSeqColorGUI(int index);
 	static void setSeqNameGUI(int index);
+	static void setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,
+		const juce::Array<std::tuple<int, int>>& links);
 
 	static void addLabelGUI(double time);
 	static void setLabelTimeGUI(int index, double time);

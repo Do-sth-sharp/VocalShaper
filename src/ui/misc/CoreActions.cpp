@@ -365,6 +365,22 @@ void CoreActions::setSeqName(int index, const juce::String& name) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setSeqMIDIOutputToMixer(
+	int index, int mixerIndex, bool output) {
+	auto action = output
+		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackMidiOutputToMixer{ index, mixerIndex })
+		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackMidiOutputToMixer{ index, mixerIndex });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setSeqAudioOutputToMixer(
+	int index, int channel, int mixerIndex, int dstChannel, bool output) {
+	auto action = output
+		? std::unique_ptr<ActionBase>(new ActionAddSequencerTrackOutput{ index, channel, mixerIndex, dstChannel })
+		: std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrackOutput{ index, channel, mixerIndex, dstChannel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::setSeqMute(int index, bool mute) {
 	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackMute{ index, mute });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -838,6 +854,37 @@ void CoreActions::setSeqNameGUI(int index) {
 
 	/** Ask For Name */
 	CoreActions::askForNameGUIAsync(callback, defaultName);
+}
+
+void CoreActions::setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,
+	const juce::Array<std::tuple<int, int>>& links) {
+	/** Callback */
+	auto callback = [index, mixerIndex](int srcc, int dstc, bool output) {
+		CoreActions::setSeqAudioOutputToMixer(index, srcc, mixerIndex, dstc, output);
+		};
+
+	/** Remove */
+	if (!output) {
+		for (auto& [srcc, dstc] : links) {
+			callback(srcc, dstc, false);
+		}
+		return;
+	}
+
+	/** Name */
+	juce::String trackName = TRANS("Sequencer Track") + " #" + juce::String{ index } + " " + quickAPI::getSeqTrackName(index);
+	juce::String mixerName = TRANS("Mixer Track") + " #" + juce::String{ mixerIndex } + " " + quickAPI::getMixerTrackName(mixerIndex);
+
+	/** Channels */
+	auto trackChannelSet = quickAPI::getSeqTrackChannelSet(index);
+	auto mixerChannelSet = quickAPI::getMixerTrackChannelSet(mixerIndex);
+	int trackTotalChannels = quickAPI::getSeqTrackOutputChannelNum(index);
+	int mixerTotalChannels = quickAPI::getMixerTrackInputChannelNum(mixerIndex);
+
+	/** Ask For Channels */
+	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
+		trackChannelSet, mixerChannelSet, trackTotalChannels, mixerTotalChannels,
+		trackName, mixerName, true);
 }
 
 void CoreActions::addLabelGUI(double time) {
