@@ -74,7 +74,7 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->instrBypassButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->instrBypassButton->setConnectedEdges(juce::Button::ConnectedOnLeft);
 	this->instrBypassButton->onClick = [this] { this->instrBypass(); };
-	this->addAndMakeVisible(this->instrBypassButton.get());
+	this->addChildComponent(this->instrBypassButton.get());
 
 	/** Instr Offline Button */
 	this->instrOfflineButton = std::make_unique<juce::DrawableButton>(
@@ -87,7 +87,14 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->instrOfflineButton->setConnectedEdges(
 		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
 	this->instrOfflineButton->onClick = [this] { this->instrOffline(); };
-	this->addAndMakeVisible(this->instrOfflineButton.get());
+	this->addChildComponent(this->instrOfflineButton.get());
+
+	/** IO */
+	this->midiOutput = std::make_unique<SeqTrackIOComponent>(true);
+	this->addChildComponent(this->midiOutput.get());
+
+	this->audioOutput = std::make_unique<SeqTrackIOComponent>(false);
+	this->addChildComponent(this->audioOutput.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -115,6 +122,9 @@ void SeqTrackComponent::update(int index) {
 		this->updateRec();
 
 		this->updateInstr();
+
+		this->midiOutput->update(index);
+		this->audioOutput->update(index);
 
 		this->repaint();
 	}
@@ -179,8 +189,16 @@ void SeqTrackComponent::resized() {
 	int lineSplitHeight = screenSize.getHeight() * 0.01;
 	int instrLineHeight = screenSize.getHeight() * 0.0225;
 
-	int instrLineShownHeight = paddingHeight * 2 + nameHeight + lineSplitHeight + instrLineHeight;
+	int instrLineShownHeight = compressModeHeight + lineSplitHeight + instrLineHeight;
 	bool isInstrLineShown = this->getHeight() >= instrLineShownHeight;
+
+	int contentLineSplitHeight = screenSize.getHeight() * 0.0075;
+
+	int ioLineHeight = screenSize.getHeight() * 0.02;
+	int ioLineSplitWidth = screenSize.getWidth() * 0.002;
+
+	int ioLineShownHeight = instrLineShownHeight + contentLineSplitHeight + ioLineHeight;
+	bool isIOLineShown = this->getHeight() >= ioLineShownHeight;
 
 	/** Track Name */
 	juce::Rectangle<int> nameRect(
@@ -222,6 +240,19 @@ void SeqTrackComponent::resized() {
 		instrLineHeight, instrLineHeight);
 	this->instrBypassButton->setBounds(instrBypassRect);
 	this->instrBypassButton->setVisible(isInstrLineShown);
+
+	/** IO */
+	juce::Rectangle<int> midiOutputRect(
+		paddingWidth, instrRect.getBottom() + contentLineSplitHeight,
+		ioLineHeight, ioLineHeight);
+	this->midiOutput->setBounds(midiOutputRect);
+	this->midiOutput->setVisible(isIOLineShown);
+
+	juce::Rectangle<int> audioOutputRect(
+		midiOutputRect.getRight() + ioLineSplitWidth, midiOutputRect.getY(),
+		ioLineHeight, ioLineHeight);
+	this->audioOutput->setBounds(audioOutputRect);
+	this->audioOutput->setVisible(isIOLineShown);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {

@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "SeqTrackMuteComponent.h"
 #include "SeqTrackRecComponent.h"
+#include "SeqTrackIOComponent.h"
 
 class SeqTrackComponent final : public juce::Component {
 public:
@@ -33,6 +34,9 @@ private:
 	std::unique_ptr<juce::DrawableButton> instrOfflineButton = nullptr;
 	std::unique_ptr<juce::Drawable> instrBypassIcon = nullptr, instrBypassIconOn = nullptr;
 	std::unique_ptr<juce::Drawable> instrOfflineIcon = nullptr, instrOfflineIconOn = nullptr;
+
+	std::unique_ptr<SeqTrackIOComponent> midiOutput = nullptr;
+	std::unique_ptr<SeqTrackIOComponent> audioOutput = nullptr;
 
 	void editTrackName();
 	void instrEditorShow();
