@@ -115,17 +115,10 @@ void SeqTrackIOComponent::showLinkMenu(bool link) {
 		CoreActions::setSeqMIDIOutputToMixer(this->index, dst, link);
 	}
 	else {
-
-		/*if (result == MixerTrackIOAction::Device) {
-			auto links = this->getOutputToDeviceChannelLinks();
-			CoreActions::setTrackAudioOutputToDeviceGUI(
-				this->index, link, links);
-		}
-		else if (result >= MixerTrackIOAction::NumBase0
-			&& result < MixerTrackIOAction::NumBase1) {
-			int dst = result - MixerTrackIOAction::NumBase0;
-			this->setAudioOutputToSend(dst, link);
-		}*/
+		int dst = result - 1;
+		auto links = this->getOutputToMixerChannelLinks(dst);
+		CoreActions::setSeqAudioOutputToMixerGUI(
+			this->index, dst, link, links);
 	}
 }
 
