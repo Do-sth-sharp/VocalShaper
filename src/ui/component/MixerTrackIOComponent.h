@@ -18,6 +18,8 @@ public:
 
 	void setAudioInputFromSend(int trackIndex, bool link);
 	void setAudioOutputToSend(int trackIndex, bool link);
+	void setMidiInputFromSeq(int seqIndex, bool link);
+	void setAudioInputFromSeq(int seqIndex, bool link);
 
 private:
 	const bool isInput, isMidi;

@@ -396,6 +396,18 @@ bool MixerTrackComponent::isInterestedInDragSource(
 		return true;
 	}
 
+	/** From Seq Midi Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::SourceMidiOutput)) {
+		int seqIndex = des["track"];
+		return seqIndex >= 0;
+	}
+
+	/** From Seq Audio Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::SourceAudioOutput)) {
+		int seqIndex = des["track"];
+		return seqIndex >= 0;
+	}
+
 	return false;
 }
 
@@ -500,6 +512,22 @@ void MixerTrackComponent::itemDropped(
 			CoreActions::setEffectIndex(trackIndex, oldIndex, newIndex);
 		}
 
+		return;
+	}
+
+	/** From Seq Midi Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::SourceMidiOutput)) {
+		int seqIndex = des["track"];
+
+		this->midiInput->setMidiInputFromSeq(seqIndex, true);
+		return;
+	}
+
+	/** From Seq Audio Output */
+	if ((int)(des["type"]) == (int)(DragSourceType::SourceAudioOutput)) {
+		int seqIndex = des["track"];
+
+		this->audioInput->setAudioInputFromSeq(seqIndex, true);
 		return;
 	}
 }

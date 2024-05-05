@@ -160,6 +160,21 @@ void MixerTrackIOComponent::setAudioOutputToSend(
 	}
 }
 
+void MixerTrackIOComponent::setMidiInputFromSeq(int seqIndex, bool link) {
+	if (this->isMidi && this->isInput) {
+		CoreActions::setTrackMIDIInputFromSeqTrack(this->index, seqIndex, link);
+	}
+	
+}
+
+void MixerTrackIOComponent::setAudioInputFromSeq(int seqIndex, bool link) {
+	if ((!(this->isMidi)) && this->isInput) {
+		auto links = this->getInputFromSourceChannelLinks(seqIndex);
+		CoreActions::setTrackAudioInputFromSourceGUI(
+			this->index, seqIndex, link, links);
+	}
+}
+
 enum MixerTrackIOAction {
 	Device = 1,
 	NumBase0 = 2,
@@ -177,7 +192,7 @@ void MixerTrackIOComponent::showLinkMenu(bool link) {
 			}
 			else if (result >= MixerTrackIOAction::NumBase0) {
 				int src = result - MixerTrackIOAction::NumBase0;
-				CoreActions::setTrackMIDIInputFromSeqTrack(this->index, src, link);
+				this->setMidiInputFromSeq(src, link);
 			}
 		}
 		else {
@@ -189,10 +204,7 @@ void MixerTrackIOComponent::showLinkMenu(bool link) {
 			else if (result >= MixerTrackIOAction::NumBase0
 				&& result < MixerTrackIOAction::NumBase1) {
 				int src = result - MixerTrackIOAction::NumBase0;
-
-				auto links = this->getInputFromSourceChannelLinks(src);
-				CoreActions::setTrackAudioInputFromSourceGUI(
-					this->index, src, link, links);
+				this->setAudioInputFromSeq(src, link);
 			}
 			else if (result >= MixerTrackIOAction::NumBase1) {
 				int src = result - MixerTrackIOAction::NumBase1;
