@@ -72,6 +72,8 @@ public:
 	void setMute(bool mute);
 	bool getMute() const;
 
+	const juce::Array<float> getOutputLevels() const;
+
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void releaseResources() override {};
@@ -137,6 +139,8 @@ private:
 	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
 
 	std::atomic_bool isMute = false;
+
+	juce::Array<float> outputLevels;
 
 	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
 	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);

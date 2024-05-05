@@ -4,6 +4,7 @@
 #include "SeqTrackMuteComponent.h"
 #include "SeqTrackRecComponent.h"
 #include "SeqTrackIOComponent.h"
+#include "SeqTrackLevelMeter.h"
 
 class SeqTrackComponent final : public juce::Component {
 public:
@@ -37,6 +38,7 @@ private:
 
 	std::unique_ptr<SeqTrackIOComponent> midiOutput = nullptr;
 	std::unique_ptr<SeqTrackIOComponent> audioOutput = nullptr;
+	std::unique_ptr<SeqTrackLevelMeter> levelMeter = nullptr;
 
 	void editTrackName();
 	void instrEditorShow();

@@ -95,6 +95,10 @@ SeqTrackComponent::SeqTrackComponent() {
 
 	this->audioOutput = std::make_unique<SeqTrackIOComponent>(false);
 	this->addChildComponent(this->audioOutput.get());
+
+	/** Level Meter */
+	this->levelMeter = std::make_unique<SeqTrackLevelMeter>();
+	this->addChildComponent(this->levelMeter.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -125,6 +129,8 @@ void SeqTrackComponent::update(int index) {
 
 		this->midiOutput->update(index);
 		this->audioOutput->update(index);
+
+		this->levelMeter->update(index);
 
 		this->repaint();
 	}
@@ -194,8 +200,8 @@ void SeqTrackComponent::resized() {
 
 	int contentLineSplitHeight = screenSize.getHeight() * 0.0075;
 
-	int ioLineHeight = screenSize.getHeight() * 0.02;
-	int ioLineSplitWidth = screenSize.getWidth() * 0.002;
+	int ioLineHeight = screenSize.getHeight() * 0.015;
+	int ioLineSplitWidth = screenSize.getWidth() * 0.0025;
 
 	int ioLineShownHeight = instrLineShownHeight + contentLineSplitHeight + ioLineHeight;
 	bool isIOLineShown = this->getHeight() >= ioLineShownHeight;
@@ -253,6 +259,13 @@ void SeqTrackComponent::resized() {
 		ioLineHeight, ioLineHeight);
 	this->audioOutput->setBounds(audioOutputRect);
 	this->audioOutput->setVisible(isIOLineShown);
+
+	/** Level Meter */
+	juce::Rectangle<int> levelRect(
+		audioOutputRect.getRight() + ioLineSplitWidth, midiOutputRect.getY(),
+		headWidth - paddingWidth - audioOutputRect.getRight() - ioLineSplitWidth, ioLineHeight);
+	this->levelMeter->setBounds(levelRect);
+	this->levelMeter->setVisible(isIOLineShown);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {

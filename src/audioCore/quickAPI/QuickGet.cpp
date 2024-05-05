@@ -613,6 +613,15 @@ namespace quickAPI {
 		return {};
 	}
 
+	const juce::Array<float> getSeqTrackOutputLevel(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getOutputLevels();
+			}
+		}
+		return {};
+	}
+
 	int getMixerTrackNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getTrackNum();

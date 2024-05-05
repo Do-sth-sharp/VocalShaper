@@ -51,6 +51,9 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	/** Synth Thread */
 	this->synthThread = std::make_unique<SynthThread>(this);
 
+	/** Set Level Size */
+	this->outputLevels.resize(type.size());
+
 	/** Default Color */
 	this->trackColor = utils::getDefaultColour();
 }
@@ -501,6 +504,11 @@ bool SeqSourceProcessor::getMute() const {
 	return this->isMute;
 }
 
+const juce::Array<float> SeqSourceProcessor::getOutputLevels() const {
+	juce::ScopedReadLock locker(audioLock::getLevelMeterLock());
+	return this->outputLevels;
+}
+
 void SeqSourceProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->juce::AudioProcessorGraph::prepareToPlay(
@@ -612,6 +620,12 @@ void SeqSourceProcessor::processBlock(
 	/** Process Graph */
 	if (!(this->instrOffline)) {
 		this->juce::AudioProcessorGraph::processBlock(buffer, midiMessages);
+	}
+
+	/** Update Level Meter */
+	for (int i = 0; i < buffer.getNumChannels() && i < this->outputLevels.size(); i++) {
+		this->outputLevels.getReference(i) =
+			buffer.getRMSLevel(i, 0, buffer.getNumSamples());
 	}
 }
 
