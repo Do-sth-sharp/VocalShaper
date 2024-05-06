@@ -6,7 +6,9 @@
 #include "SeqTrackIOComponent.h"
 #include "SeqTrackLevelMeter.h"
 
-class SeqTrackComponent final : public juce::Component {
+class SeqTrackComponent final
+	: public juce::Component,
+	public juce::DragAndDropTarget {
 public:
 	SeqTrackComponent();
 
@@ -19,12 +21,20 @@ public:
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
+	void paintOverChildren(juce::Graphics& g) override;
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+
+	bool isInterestedInDragSource(
+		const SourceDetails& dragSourceDetails) override;
+	void itemDragEnter(const SourceDetails& dragSourceDetails) override;
+	void itemDragExit(const SourceDetails& dragSourceDetails) override;
+	void itemDropped(const SourceDetails& dragSourceDetails) override;
 
 private:
 	int index = -1;
 	juce::Colour trackColor, idColor;
+	bool dragHovered = false;
 
 	std::unique_ptr<juce::TextButton> trackName = nullptr;
 	std::unique_ptr<SeqTrackMuteComponent> muteButton = nullptr;
@@ -44,6 +54,11 @@ private:
 	void instrEditorShow();
 	void instrBypass();
 	void instrOffline();
+
+	void setInstr(const juce::String& pid);
+
+	void preDrop();
+	void endDrop();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)
 };

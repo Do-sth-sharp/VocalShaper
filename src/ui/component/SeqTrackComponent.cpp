@@ -2,6 +2,7 @@
 #include "../lookAndFeel/LookAndFeelFactory.h"
 #include "../misc/CoreActions.h"
 #include "../misc/PluginEditorHub.h"
+#include "../misc/DragSourceType.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -271,7 +272,6 @@ void SeqTrackComponent::resized() {
 void SeqTrackComponent::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
-	float lineThickness = screenSize.getHeight() * 0.0025;
 	float trackColorWidth = screenSize.getWidth() * 0.005;
 
 	/** Colors */
@@ -284,13 +284,24 @@ void SeqTrackComponent::paint(juce::Graphics& g) {
 		0, 0, trackColorWidth, this->getHeight());
 	g.setColour(this->trackColor);
 	g.fillRect(trackColorRect);
+}
+
+void SeqTrackComponent::paintOverChildren(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float outlineThickness = screenSize.getHeight() * 0.00125;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour outlineColor = laf.findColour(this->dragHovered
+		? juce::Label::ColourIds::outlineWhenEditingColourId
+		: juce::Label::ColourIds::outlineColourId);
 
 	/** Outline */
 	juce::Rectangle<float> outlineRect(
-		0, this->getHeight() - lineThickness,
-		this->getWidth(), lineThickness);
+		0, 0, this->getWidth(), this->getHeight());
 	g.setColour(outlineColor);
-	g.fillRect(outlineRect);
+	g.drawRect(outlineRect, outlineThickness);
 }
 
 void SeqTrackComponent::mouseMove(const juce::MouseEvent& event) {
@@ -318,6 +329,71 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
+bool SeqTrackComponent::isInterestedInDragSource(
+	const SourceDetails& dragSourceDetails) {
+	auto& des = dragSourceDetails.description;
+
+	/** From Mixer Track Midi Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackMidiInput)) {
+		int trackIndex = des["track"];
+		return trackIndex >= 0;
+	}
+
+	/** From Mixer Track Audio Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+		int trackIndex = des["track"];
+		return trackIndex >= 0;
+	}
+
+	/** From Plugins */
+	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		return des["instrument"];
+	}
+
+	return false;
+}
+
+void SeqTrackComponent::itemDragEnter(const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+	this->preDrop();
+}
+
+void SeqTrackComponent::itemDragExit(const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+	this->endDrop();
+}
+
+void SeqTrackComponent::itemDropped(const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	auto& des = dragSourceDetails.description;
+	this->endDrop();
+
+	/** From Mixer Track Midi Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackMidiInput)) {
+		int trackIndex = des["track"];
+
+		this->midiOutput->setMidiOutputToMixer(trackIndex, true);
+		return;
+	}
+
+	/** From Mixer Track Audio Input */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+		int trackIndex = des["track"];
+
+		this->audioOutput->setAudioOutputToMixer(trackIndex, true);
+		return;
+	}
+
+	/** From Plugins */
+	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		juce::String pid = des["id"].toString();
+
+		this->setInstr(pid);
+		return;
+	}
+}
+
 void SeqTrackComponent::editTrackName() {
 	CoreActions::setSeqNameGUI(this->index);
 }
@@ -342,4 +418,18 @@ void SeqTrackComponent::instrBypass() {
 void SeqTrackComponent::instrOffline() {
 	CoreActions::offlineInstr(this->index,
 		this->instrOfflineButton->getToggleState());
+}
+
+void SeqTrackComponent::setInstr(const juce::String& pid) {
+	CoreActions::insertInstr(this->index, pid);
+}
+
+void SeqTrackComponent::preDrop() {
+	this->dragHovered = true;
+	this->repaint();
+}
+
+void SeqTrackComponent::endDrop() {
+	this->dragHovered = false;
+	this->repaint();
 }

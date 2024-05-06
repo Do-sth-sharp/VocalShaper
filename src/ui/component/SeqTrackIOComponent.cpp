@@ -105,6 +105,20 @@ void SeqTrackIOComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
+void SeqTrackIOComponent::setMidiOutputToMixer(int trackIndex, bool link) {
+	if (this->isMidi) {
+		CoreActions::setSeqMIDIOutputToMixer(this->index, trackIndex, link);
+	}
+}
+
+void SeqTrackIOComponent::setAudioOutputToMixer(int trackIndex, bool link) {
+	if (!this->isMidi) {
+		auto links = this->getOutputToMixerChannelLinks(trackIndex);
+		CoreActions::setSeqAudioOutputToMixerGUI(
+			this->index, trackIndex, link, links);
+	}
+}
+
 void SeqTrackIOComponent::showLinkMenu(bool link) {
 	auto menu = link ? this->createLinkMenu() : this->createUnlinkMenu();
 	int result = menu.showAt(this);
@@ -112,13 +126,11 @@ void SeqTrackIOComponent::showLinkMenu(bool link) {
 
 	if (this->isMidi) {
 		int dst = result - 1;
-		CoreActions::setSeqMIDIOutputToMixer(this->index, dst, link);
+		this->setMidiOutputToMixer(dst, link);
 	}
 	else {
 		int dst = result - 1;
-		auto links = this->getOutputToMixerChannelLinks(dst);
-		CoreActions::setSeqAudioOutputToMixerGUI(
-			this->index, dst, link, links);
+		this->setAudioOutputToMixer(dst, link);
 	}
 }
 

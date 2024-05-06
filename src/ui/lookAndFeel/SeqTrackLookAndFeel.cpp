@@ -2,7 +2,7 @@
 #include "../misc/ColorMap.h"
 
 SeqTrackLookAndFeel::SeqTrackLookAndFeel()
-	: MainLookAndFeel() {
+	: SeqLookAndFeel() {
 	/** Buttons */
 	this->setColour(juce::TextButton::ColourIds::buttonColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));

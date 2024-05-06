@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "MainLookAndFeel.h"
+#include "SeqLookAndFeel.h"
 
-class SeqTrackLookAndFeel : public MainLookAndFeel {
+class SeqTrackLookAndFeel : public SeqLookAndFeel {
 public:
 	SeqTrackLookAndFeel();
 
