@@ -360,6 +360,12 @@ void CoreActions::removeTrack(int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::insertSeq(int index, int type) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionAddSequencerTrack{ index, type });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::setSeqColor(int index, const juce::Colour& color) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionSetSequencerTrackColor{ index, color });
@@ -835,6 +841,17 @@ void CoreActions::removeTrackGUI(int index) {
 	}
 
 	CoreActions::removeTrack(index);
+}
+
+void CoreActions::insertSeqGUI(int index) {
+	auto callback = [index](int type) {
+		CoreActions::insertSeq(index, type); };
+	CoreActions::askForBusTypeGUIAsync(callback);
+}
+
+void CoreActions::insertSeqGUI() {
+	int num = quickAPI::getSeqTrackNum();
+	CoreActions::insertSeqGUI(num);
 }
 
 void CoreActions::setSeqColorGUI(int index) {

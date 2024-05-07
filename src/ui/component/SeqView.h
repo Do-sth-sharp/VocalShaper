@@ -49,8 +49,12 @@ private:
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);
 
+		void mouseUp(const juce::MouseEvent& event) override;
+
 	private:
 		juce::OwnedArray<SeqTrackComponent> list;
+
+		void add();
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrackList)
 	};

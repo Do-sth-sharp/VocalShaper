@@ -78,6 +78,7 @@ public:
 	static void setTrackMuteAll(bool mute);
 	static void removeTrack(int index);
 
+	static void insertSeq(int index, int type);
 	static void setSeqColor(int index, const juce::Colour& color);
 	static void setSeqName(int index, const juce::String& name);
 	static void setSeqMIDIOutputToMixer(int index, int mixerIndex, bool output);
@@ -134,6 +135,8 @@ public:
 		const juce::Array<std::tuple<int, int>>& links);
 	static void removeTrackGUI(int index);
 
+	static void insertSeqGUI(int index);
+	static void insertSeqGUI();
 	static void setSeqColorGUI(int index);
 	static void setSeqNameGUI(int index);
 	static void setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,

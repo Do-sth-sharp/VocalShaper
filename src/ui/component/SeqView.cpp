@@ -1,5 +1,6 @@
 ﻿#include "SeqView.h"
 #include "../lookAndFeel/LookAndFeelFactory.h"
+#include "../misc/CoreActions.h"
 #include "../misc/CoreCallbacks.h"
 #include "../misc/Tools.h"
 #include "../Utils.h"
@@ -66,6 +67,16 @@ void SeqView::TrackList::updateVPos(double pos, double itemSize) {
 			this->getWidth(), itemSize);
 		this->list[i]->setBounds(trackRect);
 	}
+}
+
+void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isRightButtonDown()) {
+		this->add();
+	}
+}
+
+void SeqView::TrackList::add() {
+	CoreActions::insertSeqGUI();
 }
 
 SeqView::SeqView()
