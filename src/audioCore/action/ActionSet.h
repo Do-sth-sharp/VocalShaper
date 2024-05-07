@@ -1080,3 +1080,26 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetTempoBeat)
 };
+
+class ActionSetEffect final : public ActionUndoableBase {
+public:
+	ActionSetEffect() = delete;
+	ActionSetEffect(
+		int track, int effect, const juce::String& pid);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track, effect;
+		const juce::String pid;
+
+		juce::MemoryBlock data;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffect)
+};

@@ -3,6 +3,8 @@
 #include "../AudioCore.h"
 #include "../misc/Device.h"
 #include "../misc/PlayPosition.h"
+#include <VSP4.h>
+using namespace org::vocalsharp::vocalshaper;
 
 ActionSetDeviceAudioType::ActionSetDeviceAudioType(const juce::String& type)
 	: type(type) {}
@@ -1950,4 +1952,107 @@ bool ActionSetTempoBeat::undo() {
 	PlayPosition::getInstance()->setTempoLabelBeat(ACTION_DATA(index), ACTION_DATA(numerator), ACTION_DATA(denominator));
 
 	ACTION_RESULT(true);
+}
+
+ActionSetEffect::ActionSetEffect(
+	int track, int effect, const juce::String& pid)
+	: ACTION_DB{ track, effect, pid } {}
+
+bool ActionSetEffect::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change effect while searching plugin.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetEffect);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(pid);
+
+	writeRecoverySizeValue(ACTION_DATA(data).getSize());
+	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
+
+	if (auto des = Plugin::getInstance()->findPlugin(ACTION_DATA(pid), false)) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+				if (auto pluginDock = track->getPluginDock()) {
+					/** Check Effect */
+					if (ACTION_DATA(effect) < 0 || ACTION_DATA(effect) >= pluginDock->getPluginNum()) { ACTION_RESULT(false); }
+
+					/** Save Effect State */
+					auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect));
+					if (!effect) { ACTION_RESULT(false); }
+					auto state = effect->serialize();
+
+					auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
+					if (!statePtr) { ACTION_RESULT(false); }
+					statePtr->set_bypassed(pluginDock->getPluginBypass(ACTION_DATA(effect)));
+
+					ACTION_DATA(data).setSize(state->ByteSizeLong());
+					state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
+
+					/** Remove Effect */
+					pluginDock->removePlugin(ACTION_DATA(effect));
+
+					/** Add */
+					if (auto ptr = pluginDock->insertPlugin(ACTION_DATA(effect))) {
+						PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+
+						this->output("Set Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
+						ACTION_RESULT(true);
+					}
+				}
+			}
+		}
+	}
+
+	this->error("Can't Set Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetEffect::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+	ACTION_CHECK_PLUGIN_SEARCHING(
+		"Don't change effect while searching plugin.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetEffect);
+	ACTION_WRITE_DB();
+	ACTION_WRITE_STRING(pid);
+
+	writeRecoverySizeValue(ACTION_DATA(data).getSize());
+	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
+			if (auto pluginDock = track->getPluginDock()) {
+				/** Check Effect */
+				if (ACTION_DATA(effect) < 0 || ACTION_DATA(effect) >= pluginDock->getPluginNum()) { ACTION_RESULT(false); }
+
+				/** Remove Effect */
+				pluginDock->removePlugin(ACTION_DATA(effect));
+
+				/** Prepare Effect State */
+				auto state = std::make_unique<vsp4::Plugin>();
+				if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
+					ACTION_RESULT(false);
+				}
+
+				/** Add Effect */
+				pluginDock->insertPlugin(ACTION_DATA(effect));
+
+				/** Recover Effect State */
+				auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect));
+				pluginDock->setPluginBypass(ACTION_DATA(effect), state->bypassed());
+				effect->parse(state.get());
+
+				this->output("Undo Set Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "]" + "\n");
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	ACTION_RESULT(false);
 }

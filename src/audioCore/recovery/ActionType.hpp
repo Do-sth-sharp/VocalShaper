@@ -74,5 +74,6 @@ enum class ActionType : unsigned int {
 	ActionSetTempoBeat,
 	ActionSetSequencerTrackName,
 	ActionSetSequencerTrackColor,
-	ActionSetSequencerTrackMute
+	ActionSetSequencerTrackMute,
+	ActionSetEffect
 };

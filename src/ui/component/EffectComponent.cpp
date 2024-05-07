@@ -150,9 +150,14 @@ void EffectComponent::showMenu() {
 			comp->addEffect(pluginDes);
 		}
 		};
+	auto editCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
+		if (comp) {
+			comp->replaceEffect(pluginDes);
+		}
+		};
 
 	/** Create Menu */
-	auto menu = this->createMenu(addCallback);
+	auto menu = this->createMenu(addCallback, editCallback);
 	int result = menu.show();
 
 	switch (result) {
@@ -180,6 +185,12 @@ void EffectComponent::addEffect(
 		pluginDes.createIdentifierString());
 }
 
+void EffectComponent::replaceEffect(
+	const juce::PluginDescription& pluginDes) {
+	CoreActions::replaceEffect(this->track, this->index,
+		pluginDes.createIdentifierString());
+}
+
 juce::var EffectComponent::getDragSourceDescription() const {
 	auto object = std::make_unique<juce::DynamicObject>();
 
@@ -201,10 +212,12 @@ juce::String EffectComponent::createToolTip() const {
 }
 
 juce::PopupMenu EffectComponent::createMenu(
-	const std::function<void(const juce::PluginDescription&)>& addCallback) const {
+	const std::function<void(const juce::PluginDescription&)>& addCallback,
+	const std::function<void(const juce::PluginDescription&)>& editCallback) const {
 	juce::PopupMenu menu;
 
 	menu.addSubMenu(TRANS("Add"), this->createAddMenu(addCallback));
+	menu.addSubMenu(TRANS("Replace"), this->createAddMenu(editCallback));
 	menu.addItem(EffectMenuActionType::Bypass, TRANS("Bypass"), true, !(this->bypassButton->getToggleState()));
 	menu.addItem(EffectMenuActionType::Remove, TRANS("Remove"));
 

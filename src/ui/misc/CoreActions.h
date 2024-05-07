@@ -55,6 +55,7 @@ public:
 	static void removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel);
 	static void removeEffect(int track, int index);
 	static void setEffectIndex(int track, int oldIndex, int newIndex);
+	static void replaceEffect(int track, int index, const juce::String& pid);
 
 	static void insertTrack(int index, int type);
 	static void setTrackColor(int index, const juce::Colour& color);

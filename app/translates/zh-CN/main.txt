@@ -115,6 +115,7 @@ countries: cn
 "Unmute All" = "全部取消静音"
 "Fx List" = "效果器列表"
 "Bypass Effect" = "旁路效果器"
+"Replace" = "替换"
 
 "Adsorb" = "吸附"
 "Tempo" = "曲速"

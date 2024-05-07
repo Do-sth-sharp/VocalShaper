@@ -222,6 +222,13 @@ void CoreActions::setEffectIndex(int track, int oldIndex, int newIndex) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::replaceEffect(
+	int track, int index, const juce::String& pid) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSetEffect{ track, index, pid });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::insertTrack(int index, int type) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionAddMixerTrack{ index, type });

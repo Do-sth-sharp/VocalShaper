@@ -31,11 +31,13 @@ private:
 	void startDrag();
 
 	void addEffect(const juce::PluginDescription& plugin);
+	void replaceEffect(const juce::PluginDescription& plugin);
 
 	juce::var getDragSourceDescription() const;
 	juce::String createToolTip() const;
 	juce::PopupMenu createMenu(
-		const std::function<void(const juce::PluginDescription&)>& addCallback) const;
+		const std::function<void(const juce::PluginDescription&)>& addCallback,
+		const std::function<void(const juce::PluginDescription&)>& editCallback) const;
 	juce::PopupMenu createAddMenu(
 		const std::function<void(const juce::PluginDescription&)>& callback) const;
 
