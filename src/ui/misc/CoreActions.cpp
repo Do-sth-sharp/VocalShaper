@@ -586,7 +586,7 @@ void CoreActions::removeInstrGUI(int index) {
 
 	if (!juce::AlertWindow::showOkCancelBox(
 		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Instrument"),
-		TRANS("Remove the instrument from instrument list. Continue?"))) {
+		TRANS("Remove the instrument from sequencer track. Continue?"))) {
 		return;
 	}
 

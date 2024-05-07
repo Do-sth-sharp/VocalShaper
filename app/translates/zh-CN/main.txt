@@ -124,3 +124,4 @@ countries: cn
 "Untitled" = "未命名"
 "Bypass Instrument" = "旁路乐器"
 "Instrument Offline" = "乐器离线"
+"Offline" = "离线"

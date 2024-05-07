@@ -62,5 +62,10 @@ private:
 	void preDrop();
 	void endDrop();
 
+	juce::PopupMenu createInstrMenu(
+		const std::function<void(const juce::PluginDescription&)>& addCallback) const;
+	juce::PopupMenu createInstrAddMenu(
+		const std::function<void(const juce::PluginDescription&)>& callback) const;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)
 };

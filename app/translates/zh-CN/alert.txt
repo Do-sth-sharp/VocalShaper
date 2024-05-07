@@ -19,6 +19,7 @@ countries: cn
 "Remove Effect" = "移除效果器"
 "Remove Track" = "移除轨道"
 "Remove Label" = "移除标签"
+"Remove Instrument" = "移除乐器"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
@@ -50,3 +51,4 @@ countries: cn
 "Remove the effect from effect list. Continue?" = "从效果器列表中移除效果器。继续？"
 "Remove the track from mixer. Continue?" = "从混音器中移除轨道。继续？"
 "Remove the label from time line. Continue?" = "从时间线中移除标签。继续？"
+"Remove the instrument from sequencer track. Continue?" = "从音序器轨道移除乐器。继续？"

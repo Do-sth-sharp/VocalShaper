@@ -421,8 +421,36 @@ void SeqTrackComponent::instrOffline() {
 		this->instrOfflineButton->getToggleState());
 }
 
+enum InstrMenuActionType {
+	Bypass = 1, Offline, Remove
+};
+
 void SeqTrackComponent::instrMenuShow() {
-	/** TODO */
+	/** Callback */
+	auto addCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
+		if (comp) {
+			comp->setInstr(pluginDes.createIdentifierString());
+		}
+		};
+
+	/** Create Menu */
+	auto menu = this->createInstrMenu(addCallback);
+	int result = menu.show();
+
+	switch (result) {
+	case InstrMenuActionType::Bypass: {
+		this->instrBypass();
+		break;
+	}
+	case InstrMenuActionType::Offline: {
+		this->instrOffline();
+		break;
+	}
+	case InstrMenuActionType::Remove: {
+		CoreActions::removeInstrGUI(this->index);
+		break;
+	}
+	}
 }
 
 void SeqTrackComponent::setInstr(const juce::String& pid) {
@@ -437,4 +465,32 @@ void SeqTrackComponent::preDrop() {
 void SeqTrackComponent::endDrop() {
 	this->dragHovered = false;
 	this->repaint();
+}
+
+juce::PopupMenu SeqTrackComponent::createInstrMenu(
+	const std::function<void(const juce::PluginDescription&)>& addCallback) const {
+	juce::PopupMenu menu;
+
+	menu.addSubMenu(TRANS("Edit"), this->createInstrAddMenu(addCallback));
+	menu.addItem(InstrMenuActionType::Bypass, TRANS("Bypass"), 
+		this->instrBypassButton->isEnabled(),
+		this->instrBypassButton->isEnabled() &&
+		!(this->instrBypassButton->getToggleState()));
+	menu.addItem(InstrMenuActionType::Offline, TRANS("Offline"),
+		this->instrOfflineButton->isEnabled(),
+		this->instrOfflineButton->isEnabled() && 
+		!(this->instrOfflineButton->getToggleState()));
+	menu.addItem(InstrMenuActionType::Remove, TRANS("Remove"),
+		this->instrBypassButton->isEnabled());
+
+	return menu;
+}
+
+juce::PopupMenu SeqTrackComponent::createInstrAddMenu(
+	const std::function<void(const juce::PluginDescription&)>& callback) const {
+	/** Create Menu */
+	auto [valid, list] = quickAPI::getPluginList(true, true);
+	if (!valid) { return juce::PopupMenu{}; }
+	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
+	return utils::createPluginMenu(groups, callback);
 }
