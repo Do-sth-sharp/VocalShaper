@@ -34,13 +34,14 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->addAndMakeVisible(this->recButton.get());
 
 	/** Instr Button */
-	this->instrButton = std::make_unique<juce::TextButton>("-");
+	this->instrButton = std::make_unique<RightClickableTextButton>("-",
+		[this] { this->instrEditorShow(); },
+		[this] { this->instrMenuShow(); });
 	this->instrButton->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forInstrName());
 	this->instrButton->setWantsKeyboardFocus(false);
 	this->instrButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->instrButton->setConnectedEdges(juce::Button::ConnectedOnRight);
-	this->instrButton->onClick = [this] { this->instrEditorShow(); };
 	this->addChildComponent(this->instrButton.get());
 
 	/** Instr Bypass Icon */
@@ -418,6 +419,10 @@ void SeqTrackComponent::instrBypass() {
 void SeqTrackComponent::instrOffline() {
 	CoreActions::offlineInstr(this->index,
 		this->instrOfflineButton->getToggleState());
+}
+
+void SeqTrackComponent::instrMenuShow() {
+	/** TODO */
 }
 
 void SeqTrackComponent::setInstr(const juce::String& pid) {

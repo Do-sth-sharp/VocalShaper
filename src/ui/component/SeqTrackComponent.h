@@ -5,6 +5,7 @@
 #include "SeqTrackRecComponent.h"
 #include "SeqTrackIOComponent.h"
 #include "SeqTrackLevelMeter.h"
+#include "RightClickableTextButton.h"
 
 class SeqTrackComponent final
 	: public juce::Component,
@@ -40,7 +41,7 @@ private:
 	std::unique_ptr<SeqTrackMuteComponent> muteButton = nullptr;
 	std::unique_ptr<SeqTrackRecComponent> recButton = nullptr;
 
-	std::unique_ptr<juce::TextButton> instrButton = nullptr;
+	std::unique_ptr<RightClickableTextButton> instrButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> instrBypassButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> instrOfflineButton = nullptr;
 	std::unique_ptr<juce::Drawable> instrBypassIcon = nullptr, instrBypassIconOn = nullptr;
@@ -54,6 +55,7 @@ private:
 	void instrEditorShow();
 	void instrBypass();
 	void instrOffline();
+	void instrMenuShow();
 
 	void setInstr(const juce::String& pid);
 
