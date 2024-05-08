@@ -123,6 +123,7 @@ namespace quickAPI {
 	bool getSeqTrackRecording(int index);
 	const juce::Array<SeqBlock> getSeqBlockList(int index);
 	const juce::Array<float> getSeqTrackOutputLevel(int index);
+	const juce::String getSeqTrackType(int index);
 
 	int getMixerTrackNum();
 	const juce::String getMixerTrackName(int index);
@@ -146,6 +147,7 @@ namespace quickAPI {
 	bool getMixerTrackMute(int index);
 	bool isMixerTrackPanValid(int index);
 	const juce::Array<float> getMixerTrackOutputLevel(int index);
+	const juce::String getMixerTrackType(int index);
 
 	int getLabelNum();
 	bool isLabelTempo(int index);

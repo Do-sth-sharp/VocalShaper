@@ -134,6 +134,8 @@ void SeqTrackComponent::update(int index) {
 
 		this->levelMeter->update(index);
 
+		this->setTooltip(this->createToolTipString());
+
 		this->repaint();
 	}
 }
@@ -169,6 +171,8 @@ void SeqTrackComponent::updateInstr() {
 		juce::NotificationType::dontSendNotification);
 	this->instrBypassButton->setEnabled(instrValid);
 	this->instrOfflineButton->setEnabled(instrValid);
+
+	this->setTooltip(this->createToolTipString());
 }
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
@@ -507,4 +511,19 @@ juce::PopupMenu SeqTrackComponent::createInstrAddMenu(
 	if (!valid) { return juce::PopupMenu{}; }
 	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
 	return utils::createPluginMenu(groups, callback);
+}
+
+juce::String SeqTrackComponent::createToolTipString() const {
+	juce::String result;
+
+	result += "#" + juce::String{ this->index } + " " + quickAPI::getSeqTrackName(this->index) + "\n";
+	result += TRANS("Type:") + " " + quickAPI::getSeqTrackType(this->index) + "\n";
+
+	if (quickAPI::isInstrValid(this->index)) {
+		result += TRANS("Instrument:") + " " + quickAPI::getInstrName(this->index) + "\n";
+		result += TRANS("Instrument Offline:") + " " + juce::String{ quickAPI::getInstrOffline(this->index) ? "ON" : "OFF" } + "\n";
+		result += TRANS("Instrument Bypass:") + " " + juce::String{ quickAPI::getInstrBypass(this->index) ? "ON" : "OFF" } + "\n";
+	}
+
+	return result;
 }

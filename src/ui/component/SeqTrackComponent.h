@@ -9,7 +9,8 @@
 
 class SeqTrackComponent final
 	: public juce::Component,
-	public juce::DragAndDropTarget {
+	public juce::DragAndDropTarget,
+	public juce::SettableTooltipClient {
 public:
 	SeqTrackComponent();
 
@@ -66,6 +67,7 @@ private:
 		const std::function<void(const juce::PluginDescription&)>& addCallback) const;
 	juce::PopupMenu createInstrAddMenu(
 		const std::function<void(const juce::PluginDescription&)>& callback) const;
+	juce::String createToolTipString() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)
 };

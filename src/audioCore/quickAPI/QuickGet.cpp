@@ -622,6 +622,15 @@ namespace quickAPI {
 		return {};
 	}
 
+	const juce::String getSeqTrackType(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getAudioChannelSet().getDescription();
+			}
+		}
+		return "";
+	}
+
 	int getMixerTrackNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getTrackNum();
@@ -792,6 +801,15 @@ namespace quickAPI {
 			}
 		}
 		return {};
+	}
+
+	const juce::String getMixerTrackType(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(index)) {
+				return track->getAudioChannelSet().getDescription();
+			}
+		}
+		return "";
 	}
 
 	int getLabelNum() {
