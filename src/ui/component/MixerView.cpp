@@ -66,6 +66,13 @@ MixerView::MixerView()
 			}
 		}
 	);
+	CoreCallbacks::getInstance()->addSeqChanged(
+		[comp = MixerView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateSeqTrack(index);
+			}
+		}
+	);
 }
 
 void MixerView::resized() {
@@ -173,6 +180,12 @@ void MixerView::updateEffect(int track, int index) {
 		for (auto i : this->trackList) {
 			i->updateEffect(index);
 		}
+	}
+}
+
+void MixerView::updateSeqTrack(int /*index*/) {
+	for (auto i : this->trackList) {
+		i->updateSeqTrack();
 	}
 }
 

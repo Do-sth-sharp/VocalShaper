@@ -20,6 +20,7 @@ public:
 	void updateFader(int index);
 	void updateMute(int index);
 	void updateEffect(int track, int index);
+	void updateSeqTrack(int index);
 
 	void mouseUp(const juce::MouseEvent& event) override;
 

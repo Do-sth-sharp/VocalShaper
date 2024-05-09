@@ -179,6 +179,11 @@ void SeqTrackComponent::updateHPos(double pos, double itemSize) {
 	/** TODO */
 }
 
+void SeqTrackComponent::updateMixerTrack() {
+	this->midiOutput->update(this->index);
+	this->audioOutput->update(this->index);
+}
+
 void SeqTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);

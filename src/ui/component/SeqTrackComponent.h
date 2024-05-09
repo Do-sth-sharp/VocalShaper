@@ -20,6 +20,7 @@ public:
 	void updateRec();
 	void updateInstr();
 	void updateHPos(double pos, double itemSize);
+	void updateMixerTrack();
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;

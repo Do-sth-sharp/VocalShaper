@@ -54,6 +54,12 @@ void SeqView::TrackList::updateInstr(int index) {
 	}
 }
 
+void SeqView::TrackList::updateMixerTrack() {
+	for (auto i : this->list) {
+		i->updateMixerTrack();
+	}
+}
+
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 	for (auto i : this->list) {
 		i->updateHPos(pos, itemSize);
@@ -201,6 +207,13 @@ SeqView::SeqView()
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateInstr(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addTrackChanged(
+		[comp = SeqView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateMixerTrack(index);
 			}
 		}
 	);
@@ -491,6 +504,10 @@ void SeqView::updateLevelMeter() {
 
 	/** Repaint */
 	this->repaint();
+}
+
+void SeqView::updateMixerTrack(int /*index*/) {
+	this->trackList->updateMixerTrack();
 }
 
 std::tuple<double, double> SeqView::getViewArea(
