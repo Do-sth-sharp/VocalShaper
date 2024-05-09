@@ -52,3 +52,4 @@ countries: cn
 "Remove the track from mixer. Continue?" = "从混音器中移除轨道。继续？"
 "Remove the label from time line. Continue?" = "从时间线中移除标签。继续？"
 "Remove the instrument from sequencer track. Continue?" = "从音序器轨道移除乐器。继续？"
+"Remove the track from sequencer. Continue?" = "从音序器移除轨道。继续？"

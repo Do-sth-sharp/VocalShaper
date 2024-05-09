@@ -341,10 +341,13 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 	float trackColorWidth = screenSize.getWidth() * 0.005;
 	float x = event.position.getX();
 
-	if (event.mods.isLeftButtonDown() || event.mods.isRightButtonDown()) {
+	if (event.mods.isLeftButtonDown()) {
 		if (x >= 0 && x < trackColorWidth) {
 			CoreActions::setSeqColorGUI(this->index);
 		}
+	}
+	else if (event.mods.isRightButtonDown()) {
+		this->menuShow();
 	}
 }
 
@@ -471,8 +474,36 @@ void SeqTrackComponent::instrMenuShow() {
 	}
 }
 
+enum SeqMenuActionType {
+	Add = 1, Remove1
+};
+
+void SeqTrackComponent::menuShow() {
+	auto menu = this->createMenu();
+	int result = menu.show();
+
+	switch (result) {
+	case SeqMenuActionType::Add: {
+		this->add();
+		break;
+	}
+	case SeqMenuActionType::Remove1: {
+		this->remove();
+		break;
+	}
+	}
+}
+
 void SeqTrackComponent::setInstr(const juce::String& pid) {
 	CoreActions::insertInstr(this->index, pid);
+}
+
+void SeqTrackComponent::add() {
+	CoreActions::insertSeqGUI(this->index + 1);
+}
+
+void SeqTrackComponent::remove() {
+	CoreActions::removeSeqGUI(this->index);
 }
 
 void SeqTrackComponent::preDrop() {
@@ -511,6 +542,15 @@ juce::PopupMenu SeqTrackComponent::createInstrAddMenu(
 	if (!valid) { return juce::PopupMenu{}; }
 	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
 	return utils::createPluginMenu(groups, callback);
+}
+
+juce::PopupMenu SeqTrackComponent::createMenu() const {
+	juce::PopupMenu menu;
+
+	menu.addItem(SeqMenuActionType::Add, TRANS("Add"));
+	menu.addItem(SeqMenuActionType::Remove1, TRANS("Remove"));
+
+	return menu;
 }
 
 juce::String SeqTrackComponent::createToolTipString() const {

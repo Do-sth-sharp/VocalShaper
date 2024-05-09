@@ -87,6 +87,7 @@ public:
 	static void setSeqSolo(int index);
 	static void setSeqMuteAll(bool mute);
 	static void setSeqRec(int index, bool rec);
+	static void removeSeq(int index);
 
 	static void addTempoLabel(double time, double tempo);
 	static void addBeatLabel(double time, int numerator, int denominator);
@@ -141,6 +142,7 @@ public:
 	static void setSeqNameGUI(int index);
 	static void setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
+	static void removeSeqGUI(int index);
 
 	static void addLabelGUI(double time);
 	static void setLabelTimeGUI(int index, double time);

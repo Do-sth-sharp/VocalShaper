@@ -418,6 +418,11 @@ void CoreActions::setSeqRec(int index, bool rec) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::removeSeq(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::addTempoLabel(double time, double tempo) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddTempoTempo{ time, tempo });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -909,6 +914,18 @@ void CoreActions::setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool ou
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		trackChannelSet, mixerChannelSet, trackTotalChannels, mixerTotalChannels,
 		trackName, mixerName, true);
+}
+
+void CoreActions::removeSeqGUI(int index) {
+	if (index <= -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Remove Track"),
+		TRANS("Remove the track from sequencer. Continue?"))) {
+		return;
+	}
+
+	CoreActions::removeSeq(index);
 }
 
 void CoreActions::addLabelGUI(double time) {

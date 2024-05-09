@@ -57,8 +57,11 @@ private:
 	void instrBypass();
 	void instrOffline();
 	void instrMenuShow();
+	void menuShow();
 
 	void setInstr(const juce::String& pid);
+	void add();
+	void remove();
 
 	void preDrop();
 	void endDrop();
@@ -67,6 +70,7 @@ private:
 		const std::function<void(const juce::PluginDescription&)>& addCallback) const;
 	juce::PopupMenu createInstrAddMenu(
 		const std::function<void(const juce::PluginDescription&)>& callback) const;
+	juce::PopupMenu createMenu() const;
 	juce::String createToolTipString() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackComponent)
