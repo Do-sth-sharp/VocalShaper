@@ -451,7 +451,7 @@ void SeqView::updateBlock(int track, int index) {
 	/** Get Blocks */
 	int trackNum = quickAPI::getSeqTrackNum();
 	for (int i = 0; i < trackNum; i++) {
-		auto list = quickAPI::getSeqBlockList(i);
+		auto list = quickAPI::getBlockList(i);
 		for (auto [startTime, endTime, offset] : list) {
 			this->blockTemp.add({ i, startTime, endTime });
 		}

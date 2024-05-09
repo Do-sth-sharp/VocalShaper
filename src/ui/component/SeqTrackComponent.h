@@ -6,6 +6,7 @@
 #include "SeqTrackIOComponent.h"
 #include "SeqTrackLevelMeter.h"
 #include "RightClickableTextButton.h"
+#include "SeqTrackContentViewer.h"
 
 class SeqTrackComponent final
 	: public juce::Component,
@@ -52,6 +53,8 @@ private:
 	std::unique_ptr<SeqTrackIOComponent> midiOutput = nullptr;
 	std::unique_ptr<SeqTrackIOComponent> audioOutput = nullptr;
 	std::unique_ptr<SeqTrackLevelMeter> levelMeter = nullptr;
+
+	std::unique_ptr<SeqTrackContentViewer> content = nullptr;
 
 	void editTrackName();
 	void instrEditorShow();

@@ -101,6 +101,10 @@ SeqTrackComponent::SeqTrackComponent() {
 	/** Level Meter */
 	this->levelMeter = std::make_unique<SeqTrackLevelMeter>();
 	this->addChildComponent(this->levelMeter.get());
+
+	/** Content */
+	this->content = std::make_unique<SeqTrackContentViewer>();
+	this->addAndMakeVisible(this->content.get());
 }
 
 void SeqTrackComponent::update(int index) {
@@ -134,6 +138,8 @@ void SeqTrackComponent::update(int index) {
 
 		this->levelMeter->update(index);
 
+		this->content->update(index);
+
 		this->setTooltip(this->createToolTipString());
 
 		this->repaint();
@@ -141,7 +147,7 @@ void SeqTrackComponent::update(int index) {
 }
 
 void SeqTrackComponent::updateBlock(int blockIndex) {
-	/** TODO */
+	this->content->updateBlock(blockIndex);
 }
 
 void SeqTrackComponent::updateMute() {
@@ -176,7 +182,7 @@ void SeqTrackComponent::updateInstr() {
 }
 
 void SeqTrackComponent::updateHPos(double pos, double itemSize) {
-	/** TODO */
+	this->content->updateHPos(pos, itemSize);
 }
 
 void SeqTrackComponent::updateMixerTrack() {
@@ -291,6 +297,12 @@ void SeqTrackComponent::resized() {
 	if (isIOLineShown) {
 		topY = midiOutputRect.getBottom();
 	}
+
+	/** Content */
+	juce::Rectangle<int> contentRect(
+		headWidth, 0, this->getWidth() - headWidth, this->getHeight());
+	this->content->setBounds(contentRect);
+	this->content->setCompressed(isCompressMode);
 }
 
 void SeqTrackComponent::paint(juce::Graphics& g) {

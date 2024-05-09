@@ -107,9 +107,6 @@ namespace quickAPI {
 	const juce::AudioChannelSet getEffectChannelSet(int trackIndex, int index);
 	int getEffectInputChannelNum(int trackIndex, int index);
 
-	/** StartTime, EndTime, Offset */
-	using SeqBlock = std::tuple<double, double, double>;
-
 	int getSeqTrackNum();
 	const juce::String getSeqTrackName(int index);
 	const juce::Colour getSeqTrackColor(int index);
@@ -121,7 +118,6 @@ namespace quickAPI {
 	const juce::Array<AudioLink> getSeqTrackAudioOutputToMixer(int index);
 	bool getSeqTrackMute(int index);
 	bool getSeqTrackRecording(int index);
-	const juce::Array<SeqBlock> getSeqBlockList(int index);
 	const juce::Array<float> getSeqTrackOutputLevel(int index);
 	const juce::String getSeqTrackType(int index);
 
@@ -157,6 +153,12 @@ namespace quickAPI {
 	/** timeInSec, tempo, numerator, denominator, isTempo */
 	using TempoLabelData = std::tuple<double, double, int, int, bool>;
 	const juce::Array<TempoLabelData> getLabelDataList();
+
+	/** StartTime, EndTime, Offset */
+	using SeqBlock = std::tuple<double, double, double>;
+	int getBlockNum(int trackIndex);
+	const juce::Array<SeqBlock> getBlockList(int trackIndex);
+	const SeqBlock getBlock(int trackIndex, int index);
 
 	const juce::String getAudioDeviceName(bool isInput);
 	int getAudioDeviceChannelNum(bool isInput);

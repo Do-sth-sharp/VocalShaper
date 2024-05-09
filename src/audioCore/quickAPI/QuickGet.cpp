@@ -598,21 +598,6 @@ namespace quickAPI {
 		return false;
 	}
 
-	const juce::Array<SeqBlock> getSeqBlockList(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				int blockNum = track->getSeqNum();
-
-				juce::Array<SeqBlock> result;
-				for (int i = 0; i < blockNum; i++) {
-					result.add(track->getSeq(i));
-				}
-				return result;
-			}
-		}
-		return {};
-	}
-
 	const juce::Array<float> getSeqTrackOutputLevel(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
@@ -834,6 +819,42 @@ namespace quickAPI {
 
 	const juce::Array<TempoLabelData> getLabelDataList() {
 		return PlayPosition::getInstance()->getTempoDataList();
+	}
+
+	int getBlockNum(int trackIndex) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(trackIndex)) {
+				return track->getSeqNum();
+			}
+		}
+		return 0;
+	}
+
+	const juce::Array<SeqBlock> getBlockList(int trackIndex) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(trackIndex)) {
+				int blockNum = track->getSeqNum();
+
+				juce::Array<SeqBlock> result;
+				for (int i = 0; i < blockNum; i++) {
+					result.add(track->getSeq(i));
+				}
+				return result;
+			}
+		}
+		return {};
+	}
+
+	const SeqBlock getBlock(int trackIndex, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(trackIndex)) {
+				int blockNum = track->getSeqNum();
+				if (index >= 0 && index < blockNum) {
+					return track->getSeq(index);
+				}
+			}
+		}
+		return {};
 	}
 
 	const juce::String getAudioDeviceName(bool isInput) {
