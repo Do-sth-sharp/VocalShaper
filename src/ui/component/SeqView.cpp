@@ -7,6 +7,8 @@
 #include "../../audioCore/AC_API.h"
 #include <IconManager.h>
 
+#define SEQ_TAIL_SEC 10;
+
 int SeqView::TrackList::size() const {
 	return this->list.size();
 }
@@ -458,7 +460,7 @@ void SeqView::updateBlock(int track, int index) {
 	}
 
 	/** Update Length */
-	this->totalLength = quickAPI::getTotalLength();
+	this->totalLength = quickAPI::getTotalLength() + SEQ_TAIL_SEC;
 
 	/** Update View Pos */
 	this->hScroller->update();

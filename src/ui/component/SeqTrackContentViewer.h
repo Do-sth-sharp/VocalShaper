@@ -12,10 +12,14 @@ public:
 	void updateBlock(int blockIndex);
 	void updateHPos(double pos, double itemSize);
 
+	void paint(juce::Graphics& g) override;
+
 private:
 	bool compressed = false;
 	int index = -1;
 	double pos = 0, itemSize = 0;
+	double secStart = 0, secEnd = 0;
+	juce::Colour trackColor;
 
 	struct BlockItem final {
 		double startTime = 0, endTime = 0, offset = 0;
