@@ -661,6 +661,7 @@ namespace utils {
 	}
 
 	bool isLightColor(const juce::Colour& color) {
-		return color.getLightness() > 0.65f;
+		float brightness = color.getRed() * 0.299 + color.getGreen() * 0.587 + color.getBlue() * 0.114;
+		return brightness > 140;
 	}
 }
