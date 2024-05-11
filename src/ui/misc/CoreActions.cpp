@@ -1,8 +1,8 @@
 ﻿#include "CoreActions.h"
-#include "../component/ChannelLinkView.h"
-#include "../component/ColorEditor.h"
-#include "../component/TempoEditor.h"
-#include "../dataModel/TrackListBoxModel.h"
+#include "../component/askfor/ChannelLinkView.h"
+#include "../component/askfor/ColorEditor.h"
+#include "../component/askfor/TempoEditor.h"
+#include "../dataModel/askfor/TrackListBoxModel.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"
 

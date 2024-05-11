@@ -1,7 +1,6 @@
 ﻿#include "CoreCommandTarget.h"
 #include "GUICommandTarget.h"
 #include "CommandTypes.h"
-#include "../dataModel/TrackListBoxModel.h"
 #include "../misc/CoreActions.h"
 #include "../Utils.h"
 #include "../../audioCore/AC_API.h"

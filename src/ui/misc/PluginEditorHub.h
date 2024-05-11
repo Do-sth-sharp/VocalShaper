@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "../component/PluginEditor.h"
+#include "../component/plugin/PluginEditor.h"
 
 class PluginEditorHub final : private juce::DeletedAtShutdown {
 public:
