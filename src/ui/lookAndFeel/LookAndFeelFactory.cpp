@@ -24,6 +24,7 @@
 #include "SeqTrackLookAndFeel.h"
 #include "SeqTrackNameLookAndFeel.h" 
 #include "InstrNameLookAndFeel.h"
+#include "SeqBlockLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
 
@@ -130,6 +131,9 @@ void LookAndFeelFactory::initialise() {
 
 	/** Instr Name */
 	this->instrNameLAF = std::make_unique<InstrNameLookAndFeel>();
+
+	/** Seq Block */
+	this->seqBlockLAF = std::make_unique<SeqBlockLookAndFeel>();
 }
 
 void LookAndFeelFactory::setDefaultSansSerifTypeface(juce::Typeface::Ptr typeface) {
@@ -231,6 +235,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forSeqTrackName() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forInstrName() const {
 	return this->instrNameLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forSeqBlock() const {
+	return this->seqBlockLAF.get();
 }
 
 LookAndFeelFactory* LookAndFeelFactory::getInstance() {

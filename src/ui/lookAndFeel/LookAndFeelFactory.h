@@ -33,6 +33,7 @@ public:
 	juce::LookAndFeel_V4* forSeqTrack() const;
 	juce::LookAndFeel_V4* forSeqTrackName() const;
 	juce::LookAndFeel_V4* forInstrName() const;
+	juce::LookAndFeel_V4* forSeqBlock() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -60,6 +61,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> seqTrackLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> seqTrackNameLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> instrNameLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> seqBlockLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();

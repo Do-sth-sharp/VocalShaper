@@ -74,6 +74,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](int index) {
 			CoreCallbacks::getInstance()->invokeSeqRecChanged(index);
 		});
+	UICallbackAPI<int>::set(UICallbackType::SeqDataRefChanged,
+		[](int index) {
+			CoreCallbacks::getInstance()->invokeSeqDataRefChanged(index);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -146,6 +150,10 @@ void CoreCallbacks::addSeqMuteChanged(const SeqMuteChangedCallback& callback) {
 
 void CoreCallbacks::addSeqRecChanged(const SeqRecChangedCallback& callback) {
 	this->seqRecChanged.add(callback);
+}
+
+void CoreCallbacks::addSeqDataRefChanged(const SeqDataRefChangedCallback& callback) {
+	this->seqDataRefChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -253,6 +261,12 @@ void CoreCallbacks::invokeSeqMuteChanged(int index) const {
 
 void CoreCallbacks::invokeSeqRecChanged(int index) const {
 	for (auto& i : this->seqRecChanged) {
+		i(index);
+	}
+}
+
+void CoreCallbacks::invokeSeqDataRefChanged(int index) const {
+	for (auto& i : this->seqDataRefChanged) {
 		i(index);
 	}
 }

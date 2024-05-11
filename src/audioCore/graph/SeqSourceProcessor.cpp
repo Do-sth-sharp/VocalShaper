@@ -301,8 +301,14 @@ void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 	/** Update Resample Source */
 	this->updateAudioResampler();
 
+	/** Update Name */
+	this->audioName = juce::String{};
+
 	/** Set Flag */
 	this->audioChanged();
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
 }
 
 void SeqSourceProcessor::initMIDI() {
@@ -313,8 +319,14 @@ void SeqSourceProcessor::initMIDI() {
 	this->midiData = std::make_unique<juce::MidiFile>();
 	this->midiData->addTrack(juce::MidiMessageSequence{});
 
+	/** Update Name */
+	this->midiName = juce::String{};
+
 	/** Set Flag */
 	this->midiChanged();
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
 }
 
 void SeqSourceProcessor::setAudio(double sampleRate,
@@ -337,6 +349,9 @@ void SeqSourceProcessor::setAudio(double sampleRate,
 
 	/** Set Flag */
 	this->audioChanged();
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
 }
 
 void SeqSourceProcessor::setMIDI(
@@ -350,6 +365,9 @@ void SeqSourceProcessor::setMIDI(
 
 	/** Set Flag */
 	this->midiChanged();
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
 }
 
 const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio() const {
@@ -448,6 +466,14 @@ const juce::String SeqSourceProcessor::getMIDIFileName() const {
 	juce::String extension = utils::getMidiFormatsSupported(true)[0]
 		.trimCharactersAtStart("*");
 	return utils::getLegalFileName(name) + extension;
+}
+
+const juce::String SeqSourceProcessor::getAudioName() const {
+	return this->audioName;
+}
+
+const juce::String SeqSourceProcessor::getMIDIName() const {
+	return this->midiName;
 }
 
 void SeqSourceProcessor::audioChanged() {

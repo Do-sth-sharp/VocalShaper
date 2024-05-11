@@ -616,6 +616,24 @@ namespace quickAPI {
 		return "";
 	}
 
+	const juce::String getSeqTrackDataRefAudio(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getAudioName();
+			}
+		}
+		return "";
+	}
+
+	const juce::String getSeqTrackDataRefMIDI(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getMIDIName();
+			}
+		}
+		return "";
+	}
+
 	int getMixerTrackNum() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			return graph->getTrackNum();

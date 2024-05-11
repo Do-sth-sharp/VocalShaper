@@ -11,6 +11,7 @@ public:
 	void update(int index);
 	void updateBlock(int blockIndex);
 	void updateHPos(double pos, double itemSize);
+	void updateDataRef();
 
 	void paint(juce::Graphics& g) override;
 
@@ -19,7 +20,9 @@ private:
 	int index = -1;
 	double pos = 0, itemSize = 0;
 	double secStart = 0, secEnd = 0;
-	juce::Colour trackColor;
+	juce::Colour trackColor, nameColor;
+	juce::String audioName, midiName;
+	juce::String blockNameCombined;
 
 	struct BlockItem final {
 		double startTime = 0, endTime = 0, offset = 0;

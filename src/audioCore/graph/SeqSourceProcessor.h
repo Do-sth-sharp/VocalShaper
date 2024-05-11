@@ -59,6 +59,8 @@ public:
 	void loadMIDI(const juce::String& path, bool getTempo = false);
 	const juce::String getAudioFileName() const;
 	const juce::String getMIDIFileName() const;
+	const juce::String getAudioName() const;
+	const juce::String getMIDIName() const;
 	void audioChanged();
 	void midiChanged();
 	void audioSaved();
@@ -109,7 +111,7 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
-	int index = -1;
+	std::atomic_int index = -1;
 
 	const juce::AudioChannelSet audioChannels;
 

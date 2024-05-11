@@ -190,6 +190,10 @@ void SeqTrackComponent::updateMixerTrack() {
 	this->audioOutput->update(this->index);
 }
 
+void SeqTrackComponent::updateDataRef() {
+	this->content->updateDataRef();
+}
+
 void SeqTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
