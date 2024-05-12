@@ -120,8 +120,12 @@ namespace quickAPI {
 	bool getSeqTrackRecording(int index);
 	const juce::Array<float> getSeqTrackOutputLevel(int index);
 	const juce::String getSeqTrackType(int index);
+	bool isSeqTrackHasAudioData(int index);
+	bool isSeqTrackHasMIDIData(int index);
 	const juce::String getSeqTrackDataRefAudio(int index);
 	const juce::String getSeqTrackDataRefMIDI(int index);
+	const std::tuple<double, juce::AudioSampleBuffer> getSeqTrackAudioData(int index);
+	const juce::MidiFile getSeqTrackMIDIData(int index);
 
 	int getMixerTrackNum();
 	const juce::String getMixerTrackName(int index);

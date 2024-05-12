@@ -616,6 +616,24 @@ namespace quickAPI {
 		return "";
 	}
 
+	bool isSeqTrackHasAudioData(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->isAudioValid();
+			}
+		}
+		return false;
+	}
+
+	bool isSeqTrackHasMIDIData(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->isMIDIValid();
+			}
+		}
+		return false;
+	}
+
 	const juce::String getSeqTrackDataRefAudio(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
@@ -632,6 +650,24 @@ namespace quickAPI {
 			}
 		}
 		return "";
+	}
+
+	const std::tuple<double, juce::AudioSampleBuffer> getSeqTrackAudioData(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getAudio();
+			}
+		}
+		return {};
+	}
+
+	const juce::MidiFile getSeqTrackMIDIData(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getMIDI();
+			}
+		} 
+		return {};
 	}
 
 	int getMixerTrackNum() {

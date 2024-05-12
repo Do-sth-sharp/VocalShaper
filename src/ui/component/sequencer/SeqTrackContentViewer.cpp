@@ -78,11 +78,14 @@ void SeqTrackContentViewer::updateHPos(double pos, double itemSize) {
 }
 
 void SeqTrackContentViewer::updateDataRef() {
-	this->audioName = quickAPI::getSeqTrackDataRefAudio(this->index);
-	this->midiName = quickAPI::getSeqTrackDataRefMIDI(this->index);
+	this->audioValid = quickAPI::isSeqTrackHasAudioData(this->index);
+	this->midiValid = quickAPI::isSeqTrackHasMIDIData(this->index);
+
+	this->audioName = this->audioValid ? quickAPI::getSeqTrackDataRefAudio(this->index) : juce::String{};
+	this->midiName = this->midiValid ? quickAPI::getSeqTrackDataRefMIDI(this->index) : juce::String{};
 
 	this->blockNameCombined = this->audioName
-		+ ((this->audioName.isNotEmpty() && this->midiName.isNotEmpty()) ? " + " : "")
+		+ ((this->audioValid&& this->midiValid) ? " + " : "")
 		+ this->midiName;
 
 	this->repaint();

@@ -500,6 +500,14 @@ bool SeqSourceProcessor::isMIDISaved() const {
 	return this->midiSavedFlag;
 }
 
+bool SeqSourceProcessor::isAudioValid() const {
+	return (bool)this->audioData;
+}
+
+bool SeqSourceProcessor::isMIDIValid() const {
+	return (bool)this->midiData;
+}
+
 void SeqSourceProcessor::setRecording(bool recording) {
 	if (recording) {
 		this->prepareRecord();

@@ -67,6 +67,8 @@ public:
 	void midiSaved();
 	bool isAudioSaved() const;
 	bool isMIDISaved() const;
+	bool isAudioValid() const;
+	bool isMIDIValid() const;
 
 	void setRecording(bool recording);
 	bool getRecording() const;

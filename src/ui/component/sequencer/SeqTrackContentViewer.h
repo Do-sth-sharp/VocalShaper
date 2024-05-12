@@ -21,6 +21,7 @@ private:
 	double pos = 0, itemSize = 0;
 	double secStart = 0, secEnd = 0;
 	juce::Colour trackColor, nameColor;
+	bool audioValid = false, midiValid = false;
 	juce::String audioName, midiName;
 	juce::String blockNameCombined;
 
