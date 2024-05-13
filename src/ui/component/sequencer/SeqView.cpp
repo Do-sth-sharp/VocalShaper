@@ -141,6 +141,9 @@ SeqView::SeqView()
 	this->adsorbButton->onClick = [this] { this->adsorbButtonClicked(); };
 	this->addAndMakeVisible(this->adsorbButton.get());
 
+	/** Notice */
+	this->emptyNoticeStr = TRANS("Right click on the blank space to create a new track.");
+
 	/** Time Ruler */
 	this->ruler = std::make_unique<SeqTimeRuler>(
 		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
@@ -307,12 +310,21 @@ void SeqView::paint(juce::Graphics& g) {
 
 	float lineThickness = screenSize.getHeight() * 0.0025;
 
+	int emptyTextPaddingWidth = screenSize.getWidth() * 0.015;
+	int emptyTextPaddingHeight = screenSize.getHeight() * 0.015;
+	float emptyTextFontHeight = screenSize.getHeight() * 0.02;
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour headBackgroundColor = laf.findColour(
 		juce::Label::ColourIds::backgroundWhenEditingColourId);
 	juce::Colour outlineColor = laf.findColour(
 		juce::Label::ColourIds::outlineColourId);
+	juce::Colour emptyTextColor = laf.findColour(
+		juce::TableListBox::ColourIds::textColourId);
+
+	/** Font */
+	juce::Font emptyTextFont(emptyTextFontHeight);
 
 	/** Head Bar */
 	juce::Rectangle<int> headRect(
@@ -349,6 +361,20 @@ void SeqView::paint(juce::Graphics& g) {
 	/** Grid */
 	if (this->gridTemp) {
 		g.drawImageAt(*(this->gridTemp.get()), headWidth, rulerHeight);
+	}
+
+	/** Empty Text */
+	if (this->trackList->size() <= 0) {
+		juce::Rectangle<int> emptyTextRect(
+			headWidth + emptyTextPaddingWidth,
+			rulerHeight + emptyTextPaddingHeight,
+			this->getWidth() - headWidth - scrollerWidth - emptyTextPaddingWidth * 2,
+			this->getHeight() - rulerHeight - scrollerHeight - emptyTextPaddingHeight * 2);
+		
+		g.setColour(emptyTextColor);
+		g.setFont(emptyTextFont);
+		g.drawFittedText(this->emptyNoticeStr, emptyTextRect,
+			juce::Justification::centredTop, 1, 1.f);
 	}
 }
 

@@ -39,5 +39,5 @@ SeqLookAndFeel::SeqLookAndFeel()
 	this->setColour(juce::TableListBox::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB5"));/** Line */
 	this->setColour(juce::TableListBox::ColourIds::textColourId,
-		ColorMap::getInstance()->get("ThemeColorB5"));
+		ColorMap::getInstance()->get("ThemeColorB10"));/** Empty Notice Text */
 }

@@ -85,6 +85,8 @@ private:
 	double minInterval = 0;
 	std::unique_ptr<juce::Image> gridTemp = nullptr;
 
+	juce::String emptyNoticeStr;
+
 	int getViewWidth() const;
 	double getTimeLength() const;
 	std::tuple<double, double> getTimeWidthLimit() const;
