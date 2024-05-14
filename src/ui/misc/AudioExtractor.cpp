@@ -28,12 +28,28 @@ void AudioExtractor::extractInternal(
 
 		/** Get Clip Data */
 		for (int j = 0; j < pointNum; j++) {
+			float minV = 1.f, maxV = -1.f;
+
 			if (clipSize >= 1) {
-				/** TODO Extract */
+				/** Extract */
+				for (int k = j * clipSize; k < std::ceil((j + 1) * clipSize); k++) {
+					minV = std::min(minV, dataPtr[k]);
+					maxV = std::max(maxV, dataPtr[k]);
+				}
 			}
 			else {
-				/** TODO Interpolation */
+				/** Interpolation */
+				double dataIndex = j * clipSize;
+				int dataIndexFloor = std::floor(dataIndex);
+				int dataIndexCeil = std::ceil(dataIndex);
+				double dataPer = dataIndex - dataIndexFloor;
+
+				minV = maxV = dataPtr[dataIndexFloor] * (1.0 - dataPer)
+					+ dataPtr[dataIndexCeil] * dataPer;
 			}
+
+			channelResult.copyFrom(&minV, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
+			channelResult.copyFrom(&maxV, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
 		}
 
 		result.add(std::move(channelResult));
