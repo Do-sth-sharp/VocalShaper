@@ -1,5 +1,6 @@
 ﻿#include "SeqTrackContentViewer.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
+#include "../../misc/AudioExtractor.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
@@ -68,11 +69,17 @@ void SeqTrackContentViewer::updateBlock(int blockIndex) {
 }
 
 void SeqTrackContentViewer::updateHPos(double pos, double itemSize) {
+	bool shouldRepaintDataImage = !juce::approximatelyEqual(this->itemSize, itemSize);
+
 	this->pos = pos;
 	this->itemSize = itemSize;
 
 	this->secStart = pos / itemSize;
 	this->secEnd = this->secStart + (this->getWidth() / itemSize);
+
+	if (shouldRepaintDataImage) {
+		this->updateDataImage();
+	}
 
 	this->repaint();
 }
@@ -88,7 +95,76 @@ void SeqTrackContentViewer::updateDataRef() {
 		+ ((this->audioValid&& this->midiValid) ? " + " : "")
 		+ this->midiName;
 
+	this->updateData();
+
 	this->repaint();
+}
+
+void SeqTrackContentViewer::updateData() {
+	/** Clear Temp */
+	this->audioDataTemp = {};
+	this->midiDataTemp = juce::MidiFile{};
+
+	/** Get Audio Data */
+	if (this->audioValid) {
+		this->audioDataTemp = quickAPI::getSeqTrackAudioData(this->index);
+	}
+
+	/** Get MIDI Data */
+	if (this->midiValid) {
+		this->midiDataTemp = quickAPI::getSeqTrackMIDIData(this->index);
+	}
+
+	/** Update Image Temp */
+	this->updateDataImage();
+}
+
+void SeqTrackContentViewer::updateDataImage() {
+	/** Clear Temp */
+	this->audioImageTemp = nullptr;
+	this->midiImageTemp = nullptr;
+	this->audioPointTemp.clear();
+
+	/** Audio Data */
+	if (this->audioValid) {
+		/** Get Data */
+		auto& [sampleRate, data] = this->audioDataTemp;
+
+		/** Prepare Callback */
+		auto callback = [comp = SafePointer{ this }](const AudioExtractor::Result& result) {
+			if (comp) {
+				/** Set Temp */
+				comp->setAudioPointTempInternal(result);
+
+				/** Update Image */
+				comp->updateAudioImage();
+			}
+			};
+
+		/** Get Point Num */
+		double lengthSec = data.getNumSamples() / sampleRate;
+		int pointNum = std::floor(lengthSec * this->itemSize);
+
+		/** Extract */
+		AudioExtractor::extractAsync({ sampleRate, data }, pointNum, callback);
+	}
+	
+	/** MIDI Data */
+	if (this->midiValid) {
+		/** Update Image */
+		this->updateMIDIImage();
+	}
+
+	/** Repaint */
+	this->repaint();
+}
+
+void SeqTrackContentViewer::updateAudioImage() {
+	/** TODO */
+}
+
+void SeqTrackContentViewer::updateMIDIImage() {
+	/** TODO */
 }
 
 void SeqTrackContentViewer::paint(juce::Graphics& g) {
@@ -146,4 +222,9 @@ void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {
 		std::tie(temp->startTime, temp->endTime, temp->offset)
 			= quickAPI::getBlock(this->index, blockIndex);
 	}
+}
+
+void SeqTrackContentViewer::setAudioPointTempInternal(
+	const juce::Array<juce::MemoryBlock>& temp) {
+	this->audioPointTemp = temp;
 }

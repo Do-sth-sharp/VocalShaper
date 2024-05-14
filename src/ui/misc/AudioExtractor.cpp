@@ -4,6 +4,7 @@
 void AudioExtractor::extractAsync(
 	const AudioData& data, uint64_t pointNum,
 	const Callback& callback) {
+	/** TODO Performance Optimization */
 	auto job = [data, pointNum, callback] {
 		AudioExtractor::extractInternal(
 			std::get<1>(data), pointNum, callback);

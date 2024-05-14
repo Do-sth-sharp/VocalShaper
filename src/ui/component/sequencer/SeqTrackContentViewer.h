@@ -12,6 +12,11 @@ public:
 	void updateBlock(int blockIndex);
 	void updateHPos(double pos, double itemSize);
 	void updateDataRef();
+	void updateData();
+	void updateDataImage();
+	
+	void updateAudioImage();
+	void updateMIDIImage();
 
 	void paint(juce::Graphics& g) override;
 
@@ -30,7 +35,16 @@ private:
 	};
 	juce::OwnedArray<BlockItem> blockTemp;
 
+	std::tuple<double, juce::AudioSampleBuffer> audioDataTemp;
+	juce::MidiFile midiDataTemp;
+
+	juce::Array<juce::MemoryBlock> audioPointTemp;
+
+	std::unique_ptr<juce::Image> audioImageTemp = nullptr;
+	std::unique_ptr<juce::Image> midiImageTemp = nullptr;
+
 	void updateBlockInternal(int blockIndex);
+	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };
