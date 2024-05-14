@@ -29,6 +29,8 @@ private:
 	juce::OwnedArray<MixerTrackComponent> trackList;
 	juce::Array<juce::Colour> colorTemp;
 
+	juce::String emptyNoticeStr;
+
 	void add();
 
 	int getViewWidth() const;

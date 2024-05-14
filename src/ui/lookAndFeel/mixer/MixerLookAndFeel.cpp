@@ -32,4 +32,12 @@ MixerLookAndFeel::MixerLookAndFeel()
 		ColorMap::getInstance()->get("ThemeColorB9"));
 	this->setColour(juce::ListBox::ColourIds::textColourId + 1,
 		ColorMap::getInstance()->get("ThemeColorB10"));/**< Text On */
+
+	/** Grid */
+	this->setColour(juce::TableListBox::ColourIds::backgroundColourId,
+		ColorMap::getInstance()->get("ThemeColorB1"));
+	this->setColour(juce::TableListBox::ColourIds::outlineColourId,
+		ColorMap::getInstance()->get("ThemeColorB5"));
+	this->setColour(juce::TableListBox::ColourIds::textColourId,
+		ColorMap::getInstance()->get("ThemeColorB10"));/** Empty Notice Text */
 }

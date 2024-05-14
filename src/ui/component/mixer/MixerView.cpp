@@ -23,6 +23,9 @@ MixerView::MixerView()
 				this->paintTrackPreview(g, itemIndex, width, height, vertical); });
 	this->addAndMakeVisible(this->hScroller.get());
 
+	/** Notice */
+	this->emptyNoticeStr = TRANS("Right click on the blank space to create a new track.");
+
 	/** Update Callback */
 	CoreCallbacks::getInstance()->addTrackChanged(
 		[comp = MixerView::SafePointer(this)](int index) {
@@ -91,14 +94,41 @@ void MixerView::resized() {
 }
 
 void MixerView::paint(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int scrollerHeight = screenSize.getHeight() * 0.025;
+
+	int emptyTextPaddingWidth = screenSize.getWidth() * 0.015;
+	int emptyTextPaddingHeight = screenSize.getHeight() * 0.015;
+	float emptyTextFontHeight = screenSize.getHeight() * 0.02;
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId);
+	juce::Colour emptyTextColor = laf.findColour(
+		juce::TableListBox::ColourIds::textColourId);
+
+	/** Font */
+	juce::Font emptyTextFont(emptyTextFontHeight);
 
 	/** Background */
 	g.setColour(backgroundColor);
 	g.fillAll();
+
+	/** Empty Text */
+	if (this->trackList.size() <= 0) {
+		juce::Rectangle<int> emptyTextRect(
+			emptyTextPaddingWidth,
+			emptyTextPaddingHeight,
+			this->getWidth() - emptyTextPaddingWidth * 2,
+			this->getHeight() - scrollerHeight - emptyTextPaddingHeight * 2);
+
+		g.setColour(emptyTextColor);
+		g.setFont(emptyTextFont);
+		g.drawFittedText(this->emptyNoticeStr, emptyTextRect,
+			juce::Justification::centredTop, 1, 1.f);
+	}
 }
 
 void MixerView::update(int index) {
@@ -146,6 +176,9 @@ void MixerView::update(int index) {
 
 	/** Update View Pos */
 	this->hScroller->update();
+
+	/** Repaint */
+	this->repaint();
 }
 
 void MixerView::updateGain(int index) {
