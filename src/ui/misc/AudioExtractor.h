@@ -2,20 +2,30 @@
 
 #include <JuceHeader.h>
 
-class AudioExtractor final {
-	AudioExtractor() = delete;
+class AudioExtractorJob;
 
+class AudioExtractor final : private juce::DeletedAtShutdown {
 public:
+	AudioExtractor() = default;
+
 	using AudioData = std::tuple<double, juce::AudioSampleBuffer>;
 	using Result = juce::Array<juce::MemoryBlock>;
 	using Callback = std::function<void(const Result&)>;
 
-	static void extractAsync(
+	void extractAsync(
 		const AudioData& data, uint64_t pointNum,
 		const Callback& callback);
 
 private:
-	static void extractInternal(
-		const juce::AudioSampleBuffer& data, uint64_t pointNum,
-		const Callback& callback);
+	friend class AudioExtractorJob;
+	void destoryTicket(const void* ticket);
+
+public:
+	static AudioExtractor* getInstance();
+	static void releaseInstance();
+
+private:
+	static AudioExtractor* instance;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioExtractor)
 };

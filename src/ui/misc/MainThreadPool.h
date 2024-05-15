@@ -10,6 +10,7 @@ public:
 	void stopAll();
 	using Job = std::function<void(void)>;
 	void runJob(const Job& job);
+	void runJob(juce::ThreadPoolJob* job, bool deleteJobWhenFinished);
 
 private:
 	std::unique_ptr<juce::ThreadPool> pool = nullptr;

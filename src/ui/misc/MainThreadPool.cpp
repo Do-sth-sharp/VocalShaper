@@ -16,6 +16,11 @@ void MainThreadPool::runJob(const Job& job) {
 	this->pool->addJob(job);
 }
 
+void MainThreadPool::runJob(
+	juce::ThreadPoolJob* job, bool deleteJobWhenFinished) {
+	this->pool->addJob(job, deleteJobWhenFinished);
+}
+
 MainThreadPool* MainThreadPool::getInstance() {
 	return MainThreadPool::instance ? MainThreadPool::instance
 		: (MainThreadPool::instance = new MainThreadPool{});

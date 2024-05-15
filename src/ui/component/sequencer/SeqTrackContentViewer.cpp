@@ -146,7 +146,8 @@ void SeqTrackContentViewer::updateDataImage() {
 		int pointNum = std::floor(lengthSec * this->itemSize);
 
 		/** Extract */
-		AudioExtractor::extractAsync({ sampleRate, data }, pointNum, callback);
+		AudioExtractor::getInstance() ->extractAsync(
+			{ sampleRate, data }, pointNum, callback);
 	}
 	
 	/** MIDI Data */

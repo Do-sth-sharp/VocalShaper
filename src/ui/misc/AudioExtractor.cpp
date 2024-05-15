@@ -1,34 +1,76 @@
 ﻿#include "AudioExtractor.h"
 #include "MainThreadPool.h"
 
-void AudioExtractor::extractAsync(
-	const AudioData& data, uint64_t pointNum,
-	const Callback& callback) {
-	/** TODO Performance Optimization */
-	auto job = [data, pointNum, callback] {
-		AudioExtractor::extractInternal(
-			std::get<1>(data), pointNum, callback);
-		};
-	MainThreadPool::getInstance()->runJob(job);
+class AudioExtractorJob final : public juce::ThreadPoolJob {
+public:
+	AudioExtractorJob() = delete;
+	AudioExtractorJob(const juce::AudioSampleBuffer* data,
+		uint64_t pointNum, const AudioExtractor::Callback& callback);
+
+	void updateSizeUnsafe(const juce::AudioSampleBuffer* data,
+		uint64_t pointNum);
+
+private:
+	JobStatus runJob() override;
+
+	bool doExtract();
+	void sendResult();
+
+private:
+	const juce::AudioSampleBuffer* data;
+	uint64_t pointNum;
+	const AudioExtractor::Callback callback;
+
+	std::unique_ptr<AudioExtractor::Result> result = nullptr;
+	void reallocResultUnsafe();
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioExtractorJob)
+};
+
+AudioExtractorJob::AudioExtractorJob(const juce::AudioSampleBuffer* data,
+	uint64_t pointNum, const AudioExtractor::Callback& callback)
+	: ThreadPoolJob("Audio Extractor Job"),
+	data(data), pointNum(pointNum), callback(callback) {
+	/** Prepare Result */
+	this->reallocResultUnsafe();
 }
 
-void AudioExtractor::extractInternal(
-	const juce::AudioSampleBuffer& data, uint64_t pointNum,
-	const Callback& callback) {
-	/** Prepare Data */
-	int sampleNum = data.getNumSamples();
-	double clipSize = sampleNum / (double)pointNum;
+void AudioExtractorJob::updateSizeUnsafe(const juce::AudioSampleBuffer* data,
+	uint64_t pointNum) {
+	/** Change Result Memory */
+	this->data = data;
+	if (pointNum != this->pointNum) {
+		this->pointNum = pointNum;
+		this->reallocResultUnsafe();
+	}
+}
 
-	/** Result */
-	Result result;
+AudioExtractorJob::JobStatus AudioExtractorJob::runJob() {
+	/** Do Extract */
+	bool success = this->doExtract();
+	if (success) {
+		/** Send Result */
+		this->sendResult();
+	}
+
+	return JobStatus::jobHasFinished;
+}
+
+bool AudioExtractorJob::doExtract() {
+	if (!this->data) { return false; }
+	if (!this->result) { return false; }
+
+	/** Prepare Data */
+	int sampleNum = this->data->getNumSamples();
+	double clipSize = sampleNum / (double)this->pointNum;
 
 	/** Get Each Track */
-	for (int i = 0; i < data.getNumChannels(); i++) {
-		auto dataPtr = data.getReadPointer(i);
-		juce::MemoryBlock channelResult(pointNum * sizeof(float) * 2);
+	for (int i = 0; i < this->data->getNumChannels(); i++) {
+		auto dataPtr = this->data->getReadPointer(i);
+		auto& channelResult = this->result->getReference(i);
 
 		/** Get Clip Data */
-		for (int j = 0; j < pointNum; j++) {
+		for (int j = 0; j < this->pointNum; j++) {
 			float minV = 1.f, maxV = -1.f;
 
 			if (clipSize >= 1) {
@@ -51,11 +93,59 @@ void AudioExtractor::extractInternal(
 
 			channelResult.copyFrom(&minV, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
 			channelResult.copyFrom(&maxV, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
+
+			/** Check Exit */
+			if (this->shouldExit()) {
+				return false;
+			}
 		}
 
-		result.add(std::move(channelResult));
+		/** Check Exit */
+		if (this->shouldExit()) {
+			return false;
+		}
 	}
 
-	/** Callback */
-	juce::MessageManager::callAsync(std::bind(callback, result));
+	return true;
 }
+
+void AudioExtractorJob::sendResult() {
+	if (!this->result) { return; }
+
+	auto cbFunc = [res = *(this->result), cb = this->callback] {
+		cb(res);
+		};
+	juce::MessageManager::callAsync(cbFunc);
+}
+
+void AudioExtractorJob::reallocResultUnsafe() {
+	this->result = std::make_unique<AudioExtractor::Result>();
+	for (int i = 0; i < this->data->getNumChannels(); i++) {
+		this->result->add(
+			juce::MemoryBlock{ this->pointNum * sizeof(float) * 2 });
+	}
+}
+
+void AudioExtractor::extractAsync(
+	const AudioData& data, uint64_t pointNum,
+	const Callback& callback) {
+	/** TODO */
+}
+
+void AudioExtractor::destoryTicket(const void* ticket) {
+	/** TODO */
+}
+
+AudioExtractor* AudioExtractor::getInstance() {
+	return AudioExtractor::instance ? AudioExtractor::instance
+		: (AudioExtractor::instance = new AudioExtractor{});
+}
+
+void AudioExtractor::releaseInstance() {
+	if (AudioExtractor::instance) {
+		delete AudioExtractor::instance;
+		AudioExtractor::instance = nullptr;
+	}
+}
+
+AudioExtractor* AudioExtractor::instance = nullptr;
