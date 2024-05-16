@@ -143,6 +143,14 @@ void AudioExtractorJob::reallocResultUnsafe() {
 void AudioExtractor::extractAsync(const void* ticket,
 	const juce::AudioSampleBuffer& data, uint64_t pointNum,
 	const Callback& callback) {
+	/**
+	 * This may cause a bug when call this while AudioExtractorJob::runJob() is running between
+	 * AudioExtractorJob::doExtract() and AudioExtractorJob::sendResult().
+	 * The result of current async extract will be dropped.
+	 * To fix this, I add a Timer in SeqTrackContentViewer to extract again every period of time.
+	 * I currently do not have a better solution.
+	 */
+
 	/** Find */
 	auto it = this->templist.find(ticket);
 

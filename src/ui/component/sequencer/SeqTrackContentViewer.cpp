@@ -35,6 +35,11 @@ SeqTrackContentViewer::SeqTrackContentViewer() {
 
 	/** Data Update Timer */
 	this->blockImageUpdateTimer = std::make_unique<DataImageUpdateTimer>(this);
+	/**
+	 * To fix the bug in AudioExtractor.
+	 * This will invoke AudioExtractor::extractAsync(...) every period of time.
+	 * I currently do not have a better solution.
+	 */
 	this->blockImageUpdateTimer->startTimer(5000);
 }
 
