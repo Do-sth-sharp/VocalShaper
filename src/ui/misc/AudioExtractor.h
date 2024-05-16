@@ -8,15 +8,20 @@ class AudioExtractor final : private juce::DeletedAtShutdown {
 public:
 	AudioExtractor() = default;
 
-	using AudioData = std::tuple<double, juce::AudioSampleBuffer>;
 	using Result = juce::Array<juce::MemoryBlock>;
 	using Callback = std::function<void(const Result&)>;
 
-	void extractAsync(
-		const AudioData& data, uint64_t pointNum,
+	void extractAsync(const void* ticket,
+		const juce::AudioSampleBuffer& data, uint64_t pointNum,
 		const Callback& callback);
 
 private:
+	struct DataTemp {
+		juce::AudioSampleBuffer data;
+		std::shared_ptr<juce::ThreadPoolJob> job;
+	};
+	std::map<const void*, DataTemp> templist;
+
 	friend class AudioExtractorJob;
 	void destoryTicket(const void* ticket);
 

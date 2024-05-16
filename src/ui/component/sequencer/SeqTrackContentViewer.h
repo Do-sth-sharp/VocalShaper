@@ -43,6 +43,8 @@ private:
 	std::unique_ptr<juce::Image> audioImageTemp = nullptr;
 	std::unique_ptr<juce::Image> midiImageTemp = nullptr;
 
+	std::unique_ptr<juce::Timer> blockImageUpdateTimer = nullptr;
+
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
 

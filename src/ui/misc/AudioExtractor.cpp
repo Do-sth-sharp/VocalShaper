@@ -6,9 +6,11 @@ public:
 	AudioExtractorJob() = delete;
 	AudioExtractorJob(const juce::AudioSampleBuffer* data,
 		uint64_t pointNum, const AudioExtractor::Callback& callback);
+	~AudioExtractorJob();
 
 	void updateSizeUnsafe(const juce::AudioSampleBuffer* data,
 		uint64_t pointNum);
+	void stopNow();
 
 private:
 	JobStatus runJob() override;
@@ -35,13 +37,25 @@ AudioExtractorJob::AudioExtractorJob(const juce::AudioSampleBuffer* data,
 	this->reallocResultUnsafe();
 }
 
+AudioExtractorJob::~AudioExtractorJob() {
+	this->stopNow();
+}
+
 void AudioExtractorJob::updateSizeUnsafe(const juce::AudioSampleBuffer* data,
 	uint64_t pointNum) {
 	/** Change Result Memory */
+	bool channelsChanged = this->data->getNumChannels() != data->getNumChannels();
 	this->data = data;
-	if (pointNum != this->pointNum) {
+	if (pointNum != this->pointNum || channelsChanged) {
 		this->pointNum = pointNum;
 		this->reallocResultUnsafe();
+	}
+}
+
+void AudioExtractorJob::stopNow() {
+	if (this->isRunning()) {
+		this->signalJobShouldExit();
+		while (this->isRunning());
 	}
 }
 
@@ -126,14 +140,50 @@ void AudioExtractorJob::reallocResultUnsafe() {
 	}
 }
 
-void AudioExtractor::extractAsync(
-	const AudioData& data, uint64_t pointNum,
+void AudioExtractor::extractAsync(const void* ticket,
+	const juce::AudioSampleBuffer& data, uint64_t pointNum,
 	const Callback& callback) {
-	/** TODO */
+	/** Find */
+	auto it = this->templist.find(ticket);
+
+	/** Exists */
+	if (it != this->templist.end()) {
+		if (auto ptrJob = dynamic_cast<AudioExtractorJob*>(it->second.job.get())) {
+			ptrJob->stopNow();
+			it->second.data = data;
+		}
+	}
+	/** Add New */
+	else {
+		/** Create Temp */
+		auto res = this->templist.insert(
+			std::make_pair(ticket, DataTemp{ data, nullptr }));
+		if (!res.second) { return; }
+		it = res.first;
+
+		/** Callback */
+		auto cb = [this, callback, ticket](const Result& result) {
+			/** Destory Ticket */
+			this->destoryTicket(ticket);
+
+			/** Callback */
+			callback(result);
+			};
+
+		/** Set Job */
+		it->second.job = std::make_shared<AudioExtractorJob>(
+			&(it->second.data), pointNum, cb);
+	}
+
+	/** Run Job */
+	MainThreadPool::getInstance()->runJob(it->second.job.get(), false);
 }
 
 void AudioExtractor::destoryTicket(const void* ticket) {
-	/** TODO */
+	auto it = this->templist.find(ticket);
+	if (it != this->templist.end()) {
+		this->templist.erase(it);
+	}
 }
 
 AudioExtractor* AudioExtractor::getInstance() {

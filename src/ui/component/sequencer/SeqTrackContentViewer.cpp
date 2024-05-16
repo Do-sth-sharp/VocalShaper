@@ -4,10 +4,38 @@
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
+class DataImageUpdateTimer final : public juce::Timer {
+public:
+	DataImageUpdateTimer() = delete;
+	DataImageUpdateTimer(
+		juce::Component::SafePointer<SeqTrackContentViewer> parent);
+
+	void timerCallback() override;
+
+private:
+	const juce::Component::SafePointer<SeqTrackContentViewer> parent;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DataImageUpdateTimer)
+};
+
+DataImageUpdateTimer::DataImageUpdateTimer(
+	juce::Component::SafePointer<SeqTrackContentViewer> parent)
+	: parent(parent) {}
+
+void DataImageUpdateTimer::timerCallback() {
+	if (this->parent) {
+		this->parent->updateDataImage();
+	}
+}
+
 SeqTrackContentViewer::SeqTrackContentViewer() {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeqBlock());
+
+	/** Data Update Timer */
+	this->blockImageUpdateTimer = std::make_unique<DataImageUpdateTimer>(this);
+	this->blockImageUpdateTimer->startTimer(5000);
 }
 
 void SeqTrackContentViewer::setCompressed(bool isCompressed) {
@@ -16,6 +44,8 @@ void SeqTrackContentViewer::setCompressed(bool isCompressed) {
 }
 
 void SeqTrackContentViewer::update(int index) {
+	bool changeData = true;//this->index != index;
+
 	this->index = index;
 	if (index > -1) {
 		this->updateBlock(-1);
@@ -32,7 +62,10 @@ void SeqTrackContentViewer::update(int index) {
 				juce::Label::ColourIds::textColourId);
 		}
 
-		this->updateDataRef();
+		if (changeData) {
+			this->updateDataRef();
+			this->updateData();
+		}
 
 		this->repaint();
 	}
@@ -147,7 +180,7 @@ void SeqTrackContentViewer::updateDataImage() {
 
 		/** Extract */
 		AudioExtractor::getInstance() ->extractAsync(
-			{ sampleRate, data }, pointNum, callback);
+			this, data, pointNum, callback);
 	}
 	
 	/** MIDI Data */
