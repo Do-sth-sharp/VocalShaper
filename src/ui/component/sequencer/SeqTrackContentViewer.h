@@ -48,5 +48,8 @@ private:
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
 
+	void setAudioImageTemp(const juce::Image& image);
+	void setMIDIImageTemp(const juce::Image& image);
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };

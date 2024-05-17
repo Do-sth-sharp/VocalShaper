@@ -1,6 +1,7 @@
 ﻿#include "SeqTrackContentViewer.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/AudioExtractor.h"
+#include "../../misc/MainThreadPool.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
@@ -199,7 +200,87 @@ void SeqTrackContentViewer::updateDataImage() {
 }
 
 void SeqTrackContentViewer::updateAudioImage() {
-	/** TODO */
+	/** Compressed */
+	if (this->compressed) {
+		return;
+	}
+
+	/** Get Size */
+	auto screenSize = utils::getScreenSize(this);
+	float blockPaddingHeight = screenSize.getHeight() * 0.01;
+	float blockNameFontHeight = screenSize.getHeight() * 0.015;
+
+	int height = this->getHeight();
+
+	/** Get Color */
+	juce::Colour waveColor = this->nameColor;
+
+	/** Width */
+	int width = 0;
+	if (this->audioPointTemp.size() > 0) {
+		width = this->audioPointTemp.getReference(0).getSize() / 2 / sizeof(float);
+	}
+
+	/** Content Rect */
+	int posY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+	juce::Rectangle<int> contentRect(
+		0, posY, width, height - blockPaddingHeight - posY);
+
+	/** Clear Current Image */
+	this->audioImageTemp = nullptr;
+
+	/** Callback */
+	auto callback = [comp = SafePointer{ this }](const juce::Image& image) {
+		if (comp) {
+			comp->setAudioImageTemp(image);
+		}
+		};
+
+	/** Paint Job */
+	auto paintJob = [temp = this->audioPointTemp, contentRect, waveColor, callback] {
+		/** Create Image With Graph */
+		juce::Image image(
+			juce::Image::PixelFormat::ARGB,
+			std::max(contentRect.getWidth(), 1),
+			std::max(contentRect.getHeight(), 1), true);
+		juce::Graphics g(image);
+		g.setColour(waveColor);
+
+		/** Paint Each Channel */
+		float channelHeight = contentRect.getHeight() / temp.size();
+		for (int i = 0; i < temp.size(); i++) {
+			auto& data = temp.getReference(i);
+			juce::Rectangle<float> channelRect(
+				0, channelHeight * i, contentRect.getWidth(), channelHeight);
+
+			/** Paint Each Point */
+			int pointNum = data.getSize() / 2 / sizeof(float);
+			for (int j = 0; j < pointNum; j++) {
+				/** Get Value */
+				float minVal = 0, maxVal = 0;
+				data.copyTo(&minVal, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
+				data.copyTo(&maxVal, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
+
+				/** Paint */
+				juce::Rectangle<float> lineRect(
+					j, channelRect.getCentreY() - (maxVal / 1.f) * channelRect.getHeight() / 2.f,
+					1, channelRect.getHeight() * ((maxVal - minVal) / 2.f));
+				g.fillRect(lineRect);
+			}
+		}
+
+		/** Invoke Callback */
+		auto cb = [callback, image] {
+			callback(image);
+			};
+		juce::MessageManager::callAsync(cb);
+		};
+
+	/** Run Job */
+	MainThreadPool::getInstance()->runJob(paintJob);
+
+	/** Repaint */
+	this->repaint();
 }
 
 void SeqTrackContentViewer::updateMIDIImage() {
@@ -252,6 +333,13 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			g.setFont(blockNameFont);
 			g.drawFittedText(this->blockNameCombined, nameRect.toNearestInt(),
 				juce::Justification::centredLeft, 1, 1.f);
+
+			/** Wave */
+			if (!this->compressed) {
+				if (this->audioImageTemp) {
+					/** TODO Paint Wave */
+				}
+			}
 		}
 	}
 }
@@ -266,4 +354,14 @@ void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {
 void SeqTrackContentViewer::setAudioPointTempInternal(
 	const juce::Array<juce::MemoryBlock>& temp) {
 	this->audioPointTemp = temp;
+}
+
+void SeqTrackContentViewer::setAudioImageTemp(const juce::Image& image) {
+	this->audioImageTemp = std::make_unique<juce::Image>(image);
+	this->repaint();
+}
+
+void SeqTrackContentViewer::setMIDIImageTemp(const juce::Image& image) {
+	this->midiImageTemp = std::make_unique<juce::Image>(image);
+	this->repaint();
 }
