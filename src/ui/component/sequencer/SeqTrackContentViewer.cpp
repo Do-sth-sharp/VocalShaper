@@ -350,14 +350,24 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 
 					int startPixel = startSec * dstPointPerSec / imgScaleRatio;
 					int endPixel = endSec * dstPointPerSec / imgScaleRatio;
+					int realStartPixel = std::min(startPixel, this->audioImageTemp->getWidth());
+					int realEndPixel = std::min(endPixel, this->audioImageTemp->getWidth());
+					realStartPixel = std::max(0, realStartPixel);
+					realEndPixel = std::max(0, realEndPixel);
+
+					double startLimitPercent = (realStartPixel - startPixel) / (double)(endPixel - startPixel);
+					double endLimitPercent = (realEndPixel - startPixel) / (double)(endPixel - startPixel);
+					float blockStartPosX = blockRect.getX() + blockRect.getWidth() * startLimitPercent;
+					float blockEndPosX = blockRect.getX() + blockRect.getWidth() * endLimitPercent;
 
 					/** Draw Content */
 					float nameAreaHeight = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
-					juce::Rectangle<float> contentRect =
-						blockRect.withTrimmedTop(nameAreaHeight - paddingHeight)
-						.withTrimmedBottom(blockPaddingHeight);
+					juce::Rectangle<float> contentRect(
+						blockStartPosX, nameAreaHeight,
+						blockEndPosX - blockStartPosX,
+						this->getHeight() - blockPaddingHeight - nameAreaHeight);
 					juce::Rectangle<int> imageRect(
-						startPixel, 0, endPixel - startPixel, this->audioImageTemp->getHeight());
+						realStartPixel, 0, realEndPixel - realStartPixel, this->audioImageTemp->getHeight());
 					g.drawImage(this->audioImageTemp->getClippedImage(imageRect), contentRect,
 						juce::RectanglePlacement::stretchToFit, false);
 				}
