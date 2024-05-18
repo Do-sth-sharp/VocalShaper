@@ -143,6 +143,9 @@ void SeqTrackContentViewer::updateData() {
 	/** Clear Temp */
 	this->audioDataTemp = {};
 	this->midiDataTemp = juce::MidiFile{};
+	this->audioImageTemp = nullptr;
+	this->midiImageTemp = nullptr;
+	this->audioPointTemp.clear();
 
 	/** Get Audio Data */
 	if (this->audioValid) {
@@ -159,11 +162,6 @@ void SeqTrackContentViewer::updateData() {
 }
 
 void SeqTrackContentViewer::updateDataImage() {
-	/** Clear Temp */
-	this->audioImageTemp = nullptr;
-	this->midiImageTemp = nullptr;
-	this->audioPointTemp.clear();
-
 	/** Audio Data */
 	if (this->audioValid) {
 		/** Get Data */
@@ -225,9 +223,6 @@ void SeqTrackContentViewer::updateAudioImage() {
 	int posY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
 	juce::Rectangle<int> contentRect(
 		0, posY, width, height - blockPaddingHeight - posY);
-
-	/** Clear Current Image */
-	this->audioImageTemp = nullptr;
 
 	/** Callback */
 	auto callback = [comp = SafePointer{ this }](const juce::Image& image) {
@@ -307,6 +302,18 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 	/** Font */
 	juce::Font blockNameFont(blockNameFontHeight);
 
+	/** Data Scale Ratio */
+	auto& [sampleRate, data] = this->audioDataTemp;
+	double dstLengthSec = data.getNumSamples() / sampleRate;
+	int dstPointNum = std::floor(dstLengthSec * this->itemSize);
+	double dstPointPerSec = this->itemSize;
+
+	double imgScaleRatio = 1;
+	if (this->audioPointTemp.size() > 0) {
+		auto& data = this->audioPointTemp.getReference(0);
+		imgScaleRatio = dstPointNum / (double)(data.getSize() / 2 / sizeof(float));
+	}
+
 	/** Blocks */
 	for (auto block : this->blockTemp) {
 		if ((block->startTime <= this->secEnd)
@@ -337,7 +344,22 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			/** Wave */
 			if (!this->compressed) {
 				if (this->audioImageTemp) {
-					/** TODO Paint Wave */
+					/** Select Time */
+					double startSec = block->startTime + block->offset;
+					double endSec = block->endTime + block->offset;
+
+					int startPixel = startSec * dstPointPerSec / imgScaleRatio;
+					int endPixel = endSec * dstPointPerSec / imgScaleRatio;
+
+					/** Draw Content */
+					float nameAreaHeight = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+					juce::Rectangle<float> contentRect =
+						blockRect.withTrimmedTop(nameAreaHeight - paddingHeight)
+						.withTrimmedBottom(blockPaddingHeight);
+					juce::Rectangle<int> imageRect(
+						startPixel, 0, endPixel - startPixel, this->audioImageTemp->getHeight());
+					g.drawImage(this->audioImageTemp->getClippedImage(imageRect), contentRect,
+						juce::RectanglePlacement::stretchToFit, false);
 				}
 			}
 		}
