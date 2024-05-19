@@ -109,6 +109,7 @@ void SeqTrackContentViewer::updateBlock(int blockIndex) {
 
 void SeqTrackContentViewer::updateHPos(double pos, double itemSize) {
 	bool shouldRepaintDataImage = !juce::approximatelyEqual(this->itemSize, itemSize);
+	bool shouldRepaintAudioImageTemp = !juce::approximatelyEqual(this->pos, pos);
 
 	this->pos = pos;
 	this->itemSize = itemSize;
@@ -118,6 +119,9 @@ void SeqTrackContentViewer::updateHPos(double pos, double itemSize) {
 
 	if (shouldRepaintDataImage) {
 		this->updateDataImage();
+	}
+	else if (shouldRepaintAudioImageTemp) {
+		this->updateAudioImage();
 	}
 
 	this->repaint();
@@ -202,6 +206,26 @@ void SeqTrackContentViewer::updateAudioImage() {
 	if (this->compressed) {
 		return;
 	}
+
+	/** Get Clips */
+	double hotSecStart = this->secStart - (this->secEnd - this->secStart);
+	double hotSecEnd = this->secEnd + (this->secEnd - this->secStart);
+	juce::Array<std::pair<int, int>> clips;
+	for (auto block : this->blockTemp) {
+		if ((block->startTime <= hotSecEnd)
+			&& (block->endTime >= hotSecStart)) {
+			double hotBlockSecStart = block->startTime - (block->endTime - block->startTime);
+			double hotBlockSecEnd = block->endTime + (block->endTime - block->startTime);
+
+			double hotClipSecStart = std::max(hotSecStart, hotBlockSecStart);
+			double hotClipSecEnd = std::min(hotSecEnd, hotBlockSecEnd);
+
+			clips.add({ (int)std::floor(hotClipSecStart * this->itemSize),
+				(int)std::floor(hotClipSecEnd * this->itemSize) });
+		}
+	}
+
+	/** TODO Join Into Union */
 
 	/** Get Size */
 	auto screenSize = utils::getScreenSize(this);
