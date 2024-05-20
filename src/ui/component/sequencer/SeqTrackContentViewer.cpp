@@ -148,6 +148,7 @@ void SeqTrackContentViewer::updateData() {
 	this->audioDataTemp = {};
 	this->midiDataTemp = juce::MidiFile{};
 	this->audioImageTemp = nullptr;
+	this->audioImageIndex.clear();
 	this->midiImageTemp = nullptr;
 	this->audioPointTemp.clear();
 
@@ -163,6 +164,9 @@ void SeqTrackContentViewer::updateData() {
 
 	/** Update Image Temp */
 	this->updateDataImage();
+
+	/** Repaint */
+	this->repaint();
 }
 
 void SeqTrackContentViewer::updateDataImage() {
@@ -196,9 +200,6 @@ void SeqTrackContentViewer::updateDataImage() {
 		/** Update Image */
 		this->updateMIDIImage();
 	}
-
-	/** Repaint */
-	this->repaint();
 }
 
 void SeqTrackContentViewer::updateAudioImage() {
@@ -225,7 +226,12 @@ void SeqTrackContentViewer::updateAudioImage() {
 		}
 	}
 
-	/** TODO Join Into Union */
+	/** Join Into Union */
+	auto clipUnion = utils::getUnionSections(clips);
+	int totalPoints = 0;
+	for (auto& i : clipUnion) {
+		totalPoints += (i.second - i.first + 1);
+	}
 
 	/** Get Size */
 	auto screenSize = utils::getScreenSize(this);
@@ -237,26 +243,22 @@ void SeqTrackContentViewer::updateAudioImage() {
 	/** Get Color */
 	juce::Colour waveColor = this->nameColor;
 
-	/** Width */
-	int width = 0;
-	if (this->audioPointTemp.size() > 0) {
-		width = this->audioPointTemp.getReference(0).getSize() / 2 / sizeof(float);
-	}
-
 	/** Content Rect */
 	int posY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
 	juce::Rectangle<int> contentRect(
-		0, posY, width, height - blockPaddingHeight - posY);
+		0, posY, totalPoints, height - blockPaddingHeight - posY);
 
 	/** Callback */
-	auto callback = [comp = SafePointer{ this }](const juce::Image& image) {
+	auto callback = [comp = SafePointer{ this }](
+		const juce::Image& image, const ImageIndexList& index) {
 		if (comp) {
-			comp->setAudioImageTemp(image);
+			comp->setAudioImageTemp(image, index);
 		}
 		};
 
 	/** Paint Job */
-	auto paintJob = [temp = this->audioPointTemp, contentRect, waveColor, callback] {
+	auto paintJob = [temp = this->audioPointTemp,
+		clipUnion, contentRect, waveColor, callback] {
 		/** Create Image With Graph */
 		juce::Image image(
 			juce::Image::PixelFormat::ARGB,
@@ -265,41 +267,50 @@ void SeqTrackContentViewer::updateAudioImage() {
 		juce::Graphics g(image);
 		g.setColour(waveColor);
 
-		/** Paint Each Channel */
-		float channelHeight = contentRect.getHeight() / temp.size();
-		for (int i = 0; i < temp.size(); i++) {
-			auto& data = temp.getReference(i);
-			juce::Rectangle<float> channelRect(
-				0, channelHeight * i, contentRect.getWidth(), channelHeight);
+		/** Paint Each Clip */
+		ImageIndexList imageIndex;
+		int imageIndexTemp = 0;
 
-			/** Paint Each Point */
-			int pointNum = data.getSize() / 2 / sizeof(float);
-			for (int j = 0; j < pointNum; j++) {
-				/** Get Value */
-				float minVal = 0, maxVal = 0;
-				data.copyTo(&minVal, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
-				data.copyTo(&maxVal, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
+		float channelHeight = contentRect.getHeight() / (float)temp.size();
+		for (auto& i : clipUnion) {
+			int clipSize = i.second - i.first + 1;
+			imageIndex.add({ i, imageIndexTemp });
 
-				/** Paint */
-				juce::Rectangle<float> lineRect(
-					j, channelRect.getCentreY() - (maxVal / 1.f) * channelRect.getHeight() / 2.f,
-					1, channelRect.getHeight() * ((maxVal - minVal) / 2.f));
-				g.fillRect(lineRect);
+			/** Paint Each Channel */
+			for (int j = 0; j < temp.size(); j++) {
+				auto& data = temp.getReference(j);
+				juce::Rectangle<float> channelRect(
+					imageIndexTemp, channelHeight * j, clipSize, channelHeight);
+				int pointNum = data.getSize() / 2 / sizeof(float);
+
+				/** Paint Each Point */
+				for (int k = std::max(i.first, 0); k <= i.second && k < pointNum; k++) {
+					/** Get Value */
+					float minVal = 0, maxVal = 0;
+					data.copyTo(&minVal, (k * 2 + 0) * (int)sizeof(float), sizeof(float));
+					data.copyTo(&maxVal, (k * 2 + 1) * (int)sizeof(float), sizeof(float));
+
+					/** Paint */
+					juce::Rectangle<float> lineRect(
+						imageIndexTemp + (k - i.first),
+						channelRect.getCentreY() - (maxVal / 1.f) * channelRect.getHeight() / 2.f,
+						1, channelRect.getHeight() * ((maxVal - minVal) / 2.f));
+					g.fillRect(lineRect);
+				}
 			}
+
+			imageIndexTemp += clipSize;
 		}
 
 		/** Invoke Callback */
-		auto cb = [callback, image] {
-			callback(image);
+		auto cb = [callback, image, imageIndex] {
+			callback(image, imageIndex);
 			};
 		juce::MessageManager::callAsync(cb);
 		};
 
 	/** Run Job */
 	MainThreadPool::getInstance()->runJob(paintJob);
-
-	/** Repaint */
-	this->repaint();
 }
 
 void SeqTrackContentViewer::updateMIDIImage() {
@@ -369,31 +380,36 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			if (!this->compressed) {
 				if (this->audioImageTemp) {
 					/** Select Time */
-					double startSec = block->startTime + block->offset;
-					double endSec = block->endTime + block->offset;
-
+					double startSec = std::max(block->startTime + block->offset, this->secStart);
+					double endSec = std::min(block->endTime + block->offset, this->secEnd);
 					int startPixel = startSec * dstPointPerSec / imgScaleRatio;
 					int endPixel = endSec * dstPointPerSec / imgScaleRatio;
-					int realStartPixel = std::min(startPixel, this->audioImageTemp->getWidth());
-					int realEndPixel = std::min(endPixel, this->audioImageTemp->getWidth());
-					realStartPixel = std::max(0, realStartPixel);
-					realEndPixel = std::max(0, realEndPixel);
 
-					double startLimitPercent = (realStartPixel - startPixel) / (double)(endPixel - startPixel);
-					double endLimitPercent = (realEndPixel - startPixel) / (double)(endPixel - startPixel);
-					float blockStartPosX = blockRect.getX() + blockRect.getWidth() * startLimitPercent;
-					float blockEndPosX = blockRect.getX() + blockRect.getWidth() * endLimitPercent;
+					/** Find Index Temp */
+					for (auto& i : this->audioImageIndex) {
+						if (startPixel <= i.first.second &&
+							endPixel >= i.first.first) {
+							int realStartPixel = std::max(startPixel, i.first.first);
+							int realEndPixel = std::min(endPixel, i.first.second);
 
-					/** Draw Content */
-					float nameAreaHeight = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
-					juce::Rectangle<float> contentRect(
-						blockStartPosX, nameAreaHeight,
-						blockEndPosX - blockStartPosX,
-						this->getHeight() - blockPaddingHeight - nameAreaHeight);
-					juce::Rectangle<int> imageRect(
-						realStartPixel, 0, realEndPixel - realStartPixel, this->audioImageTemp->getHeight());
-					g.drawImage(this->audioImageTemp->getClippedImage(imageRect), contentRect,
-						juce::RectanglePlacement::stretchToFit, false);
+							double startLimitPercent = (realStartPixel - startPixel) / (double)(endPixel - startPixel);
+							double endLimitPercent = (realEndPixel - startPixel) / (double)(endPixel - startPixel);
+							float blockStartPosX = blockRect.getX() + blockRect.getWidth() * startLimitPercent;
+							float blockEndPosX = blockRect.getX() + blockRect.getWidth() * endLimitPercent;
+
+							/** Draw Content */
+							float nameAreaHeight = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+							juce::Rectangle<float> contentRect(
+								blockStartPosX, nameAreaHeight,
+								blockEndPosX - blockStartPosX,
+								this->getHeight() - blockPaddingHeight - nameAreaHeight);
+							juce::Rectangle<int> imageRect(
+								i.second + (realStartPixel - i.first.first), 0,
+								realEndPixel - realStartPixel, this->audioImageTemp->getHeight());
+							g.drawImage(this->audioImageTemp->getClippedImage(imageRect), contentRect,
+								juce::RectanglePlacement::stretchToFit, false);
+						}
+					}
 				}
 			}
 		}
@@ -412,8 +428,10 @@ void SeqTrackContentViewer::setAudioPointTempInternal(
 	this->audioPointTemp = temp;
 }
 
-void SeqTrackContentViewer::setAudioImageTemp(const juce::Image& image) {
+void SeqTrackContentViewer::setAudioImageTemp(
+	const juce::Image& image, const ImageIndexList& index) {
 	this->audioImageTemp = std::make_unique<juce::Image>(image);
+	this->audioImageIndex = index;
 	this->repaint();
 }
 

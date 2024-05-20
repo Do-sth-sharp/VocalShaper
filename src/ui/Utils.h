@@ -151,4 +151,7 @@ namespace utils {
 	const juce::String createBeatString(const TimeInBeats& time);
 
 	bool isLightColor(const juce::Colour& color);
+	using IntSection = std::pair<int, int>;
+	using IntSectionList = juce::Array<IntSection>;
+	const IntSectionList getUnionSections(const IntSectionList& source);
 }

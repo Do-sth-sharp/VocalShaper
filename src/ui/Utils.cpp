@@ -2,6 +2,8 @@
 
 #if JUCE_WINDOWS
 #include <Windows.h>
+#undef max
+#undef min
 #endif //JUCE_WINDOWS
 
 namespace utils {
@@ -663,5 +665,30 @@ namespace utils {
 	bool isLightColor(const juce::Colour& color) {
 		float brightness = color.getRed() * 0.299 + color.getGreen() * 0.587 + color.getBlue() * 0.114;
 		return brightness > 140;
+	}
+
+	const IntSectionList getUnionSections(const IntSectionList& source) {
+		if (source.size() <= 0) return {};
+
+		auto compareFunc = [](const IntSection& a, const IntSection& b) {
+			return a.first < b.first;
+			};
+		IntSectionList sortedSource = source;
+		std::sort(sortedSource.begin(), sortedSource.end(), compareFunc);
+
+		IntSectionList merged;
+		merged.add(sortedSource[0]);
+
+		for (int i = 1; i < sortedSource.size(); i++) {
+			auto& last = merged.getReference(merged.size() - 1);
+			if (sortedSource[i].first <= last.second) {
+				last.second = std::max(last.second, sortedSource[i].second);
+			}
+			else {
+				merged.add(sortedSource[i]);
+			}
+		}
+
+		return merged;
 	}
 }
