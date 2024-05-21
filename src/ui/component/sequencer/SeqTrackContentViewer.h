@@ -14,9 +14,6 @@ public:
 	void updateDataRef();
 	void updateData();
 	void updateDataImage();
-	
-	void updateAudioImage();
-	void updateMIDIImage();
 
 	void paint(juce::Graphics& g) override;
 
@@ -40,20 +37,10 @@ private:
 
 	juce::Array<juce::MemoryBlock> audioPointTemp;
 
-	using IntSection = std::pair<int, int>;
-	using ImageIndex = std::pair<IntSection, int>;
-	using ImageIndexList = juce::Array<ImageIndex>;
-	std::unique_ptr<juce::Image> audioImageTemp = nullptr;
-	ImageIndexList audioImageIndex;
-	std::unique_ptr<juce::Image> midiImageTemp = nullptr;
-
 	std::unique_ptr<juce::Timer> blockImageUpdateTimer = nullptr;
 
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
-
-	void setAudioImageTemp(const juce::Image& image, const ImageIndexList& index);
-	void setMIDIImageTemp(const juce::Image& image);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };
