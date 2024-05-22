@@ -144,6 +144,7 @@ void SeqTrackContentViewer::updateData() {
 	this->audioDataTemp = {};
 	this->midiDataTemp = juce::MidiFile{};
 	this->audioPointTemp.clear();
+	this->midiMinNote = this->midiMaxNote = 0;
 
 	/** Get Audio Data */
 	if (this->audioValid) {
@@ -190,7 +191,11 @@ void SeqTrackContentViewer::updateDataImage() {
 	
 	/** MIDI Data */
 	if (this->midiValid) {
-		/** TODO Update MIDI */
+		/** Update MIDI */
+		this->updateMIDINoteTempInternal();
+
+		/** Repaint */
+		this->repaint();
 	}
 }
 
@@ -303,4 +308,22 @@ void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {
 void SeqTrackContentViewer::setAudioPointTempInternal(
 	const juce::Array<juce::MemoryBlock>& temp) {
 	this->audioPointTemp = temp;
+}
+
+void SeqTrackContentViewer::updateMIDINoteTempInternal() {
+	/** Get Note Zone */
+	int minNote = 127, maxNote = 0;
+	int midiTracks = this->midiDataTemp.getNumTracks();
+	for (int i = 0; i < midiTracks; i++) {
+		auto track = this->midiDataTemp.getTrack(i);
+		for (auto e : (*track)) {
+			if (e->message.isNoteOn(true)) {
+				minNote = std::min(minNote, e->message.getNoteNumber());
+				maxNote = std::max(maxNote, e->message.getNoteNumber());
+			}
+		}
+	}
+	if (maxNote < minNote) { maxNote = minNote = 0; }
+	this->midiMinNote = minNote;
+	this->midiMaxNote = maxNote;
 }

@@ -36,11 +36,13 @@ private:
 	juce::MidiFile midiDataTemp;
 
 	juce::Array<juce::MemoryBlock> audioPointTemp;
+	int midiMinNote = 0, midiMaxNote = 0;
 
 	std::unique_ptr<juce::Timer> blockImageUpdateTimer = nullptr;
 
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
+	void updateMIDINoteTempInternal();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };
