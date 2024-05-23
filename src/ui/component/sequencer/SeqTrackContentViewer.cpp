@@ -211,6 +211,8 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 
 	float blockNameFontHeight = screenSize.getHeight() * 0.015;
 
+	float noteMaxHeight = screenSize.getHeight() * 0.015;
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour outlineColor = laf.findColour(
@@ -291,6 +293,69 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 							imgScaleRatio,
 							channelHeight * ((maxVal - minVal) / 2.f));
 						g.fillRect(pointRect);
+					}
+				}
+			}
+
+			/** Note */
+			if (!this->compressed) {
+				/** Select Time */
+				double startSec = std::max(block->startTime + block->offset, this->secStart);
+				double endSec = std::min(block->endTime + block->offset, this->secEnd);
+
+				/** Content Area */
+				float notePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+				float noteAreaHeight = this->getHeight() - blockPaddingHeight - notePosY;
+				juce::Rectangle<float> noteContentRect(0, notePosY, this->getWidth(), noteAreaHeight);
+
+				/** Limit Note Height */
+				double minNoteID = this->midiMinNote, maxNoteID = this->midiMaxNote;
+				float noteHeight = noteAreaHeight / (maxNoteID - minNoteID + 1);
+				if (noteHeight > noteMaxHeight) {
+					noteHeight = noteMaxHeight;
+
+					double centerNoteID = minNoteID + (maxNoteID - minNoteID) / 2;
+					minNoteID = centerNoteID - ((noteAreaHeight / noteHeight + 1) / 2 - 1);
+					maxNoteID = centerNoteID + ((noteAreaHeight / noteHeight + 1) / 2 - 1);
+				}
+
+				/** Paint Each MIDI Track */
+				g.setColour(this->nameColor);
+				int trackNum = this->midiDataTemp.getNumTracks();
+				for (int i = 0; i < trackNum; i++) {
+					auto track = this->midiDataTemp.getTrack(i);
+
+					/** Paint Each Note */
+					std::array<double, 128> noteStartTime{};
+					for (int i = 0; i < 128; i++) {
+						noteStartTime[i] = -1;
+					}
+
+					for (auto event : *track) {
+						if (event->message.isNoteOn(true)) {
+							int noteNumber = event->message.getNoteNumber();
+							if (noteNumber >= 0 && noteNumber < 128) {
+								noteStartTime[noteNumber] = event->message.getTimeStamp();
+							}
+						}
+						else if (event->message.isNoteOff(false)) {
+							int noteNumber = event->message.getNoteNumber();
+							if (noteNumber >= 0 && noteNumber < 128) {
+								double noteStart = noteStartTime[noteNumber];
+								noteStartTime[noteNumber] = -1;
+								if (noteStart >= 0) {
+									double noteEnd = event->message.getTimeStamp();
+									if (noteStart <= endSec && noteEnd >= startSec) {
+										juce::Rectangle<float> noteRect(
+											(noteStart - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
+											notePosY + (maxNoteID - event->message.getNoteNumber()) * noteHeight,
+											(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
+											noteHeight);
+										g.fillRect(noteRect);
+									}
+								}
+							}
+						}
 					}
 				}
 			}
