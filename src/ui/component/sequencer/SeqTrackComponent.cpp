@@ -194,6 +194,10 @@ void SeqTrackComponent::updateDataRef() {
 	this->content->updateDataRef();
 }
 
+void SeqTrackComponent::updateData() {
+	this->content->updateData();
+}
+
 void SeqTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);

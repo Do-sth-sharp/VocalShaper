@@ -309,6 +309,7 @@ void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
 
 void SeqSourceProcessor::initMIDI() {
@@ -327,6 +328,7 @@ void SeqSourceProcessor::initMIDI() {
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
 
 void SeqSourceProcessor::setAudio(double sampleRate,
@@ -352,6 +354,7 @@ void SeqSourceProcessor::setAudio(double sampleRate,
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
 
 void SeqSourceProcessor::setMIDI(
@@ -368,6 +371,7 @@ void SeqSourceProcessor::setMIDI(
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
 
 const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio() const {

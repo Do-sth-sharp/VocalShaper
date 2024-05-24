@@ -27,6 +27,7 @@ public:
 	void updateLevelMeter() override;
 	void updateMixerTrack(int index);
 	void updateDataRef(int index);
+	void updateData(int index);
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
@@ -49,6 +50,7 @@ private:
 		void updateInstr(int index);
 		void updateMixerTrack();
 		void updateDataRef(int index);
+		void updateData(int index);
 
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);

@@ -143,8 +143,8 @@ void SeqTrackContentViewer::updateData() {
 	/** Clear Temp */
 	this->audioDataTemp = {};
 	this->midiDataTemp = juce::MidiFile{};
-	this->audioPointTemp.clear();
-	this->midiMinNote = this->midiMaxNote = 0;
+	//this->audioPointTemp.clear();
+	//this->midiMinNote = this->midiMaxNote = 0;
 
 	/** Get Audio Data */
 	if (this->audioValid) {

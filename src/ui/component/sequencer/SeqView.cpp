@@ -68,6 +68,17 @@ void SeqView::TrackList::updateDataRef(int index) {
 	}
 }
 
+void SeqView::TrackList::updateData(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateData();
+	}
+	else {
+		for (auto i : this->list) {
+			i->updateData();
+		}
+	}
+}
+
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 	for (auto i : this->list) {
 		i->updateHPos(pos, itemSize);
@@ -232,6 +243,13 @@ SeqView::SeqView()
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateDataRef(index);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addSourceChanged(
+		[comp = SeqView::SafePointer(this)](int index) {
+			if (comp) {
+				comp->updateData(index);
 			}
 		}
 	);
@@ -553,6 +571,10 @@ void SeqView::updateMixerTrack(int /*index*/) {
 
 void SeqView::updateDataRef(int index) {
 	this->trackList->updateDataRef(index);
+}
+
+void SeqView::updateData(int index) {
+	this->trackList->updateData(index);
 }
 
 std::tuple<double, double> SeqView::getViewArea(
