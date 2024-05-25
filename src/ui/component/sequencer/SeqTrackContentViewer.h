@@ -17,6 +17,8 @@ public:
 
 	void paint(juce::Graphics& g) override;
 
+	void mouseMove(const juce::MouseEvent& event) override;
+
 private:
 	bool compressed = false;
 	int index = -1;

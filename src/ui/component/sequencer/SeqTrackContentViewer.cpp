@@ -2,6 +2,7 @@
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/AudioExtractor.h"
 #include "../../misc/MainThreadPool.h"
+#include "../../misc/Tools.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
@@ -361,6 +362,40 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			}
 		}
 	}
+}
+
+void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int blockJudgeWidth = screenSize.getWidth() * 0.005;
+
+	/** Move */
+	if (Tools::getInstance()->getType() == Tools::Type::Hand) {
+		this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+		return;
+	}
+
+	/** Block */
+	float posX = event.position.getX();
+	for (auto block : this->blockTemp) {
+		float startX = (block->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		float endX = (block->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+
+		if (std::abs(posX - startX) < blockJudgeWidth) {
+			this->setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
+			return;
+		}
+		else if (std::abs(posX - endX) < blockJudgeWidth) {
+			this->setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
+			return;
+		}
+		else if (posX > startX && posX < endX) {
+			this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+			return;
+		}
+	}
+
+	this->setMouseCursor(juce::MouseCursor::NormalCursor);
 }
 
 void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {
