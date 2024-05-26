@@ -377,19 +377,44 @@ void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
 
 	/** Block */
 	float posX = event.position.getX();
-	for (auto block : this->blockTemp) {
+	for (int i = 0; i < this->blockTemp.size(); i++) {
+		/** Get Block Time */
+		auto block = this->blockTemp.getUnchecked(i);
 		float startX = (block->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 		float endX = (block->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 
-		if (std::abs(posX - startX) < blockJudgeWidth) {
+		/** Judge Area */
+		float judgeSSX = startX - blockJudgeWidth, judgeSEX = startX + blockJudgeWidth;
+		float judgeESX = endX - blockJudgeWidth, judgeEEX = endX + blockJudgeWidth;
+		if (endX - startX < blockJudgeWidth * 2) {
+			judgeSEX = startX + (endX - startX) / 2;
+			judgeESX = endX - (endX - startX) / 2;
+		}
+		if (i > 0) {
+			auto lastBlock = this->blockTemp.getUnchecked(i - 1);
+			float lastEndX = (lastBlock->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			if (startX - lastEndX < blockJudgeWidth * 2) {
+				judgeSSX = startX - (startX - lastEndX) / 2;
+			}
+		}
+		if (i < this->blockTemp.size() - 1) {
+			auto nextBlock = this->blockTemp.getUnchecked(i + 1);
+			float nextStartX = (nextBlock->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			if (nextStartX - endX < blockJudgeWidth * 2) {
+				judgeEEX = endX + (nextStartX - endX) / 2;
+			}
+		}
+
+		/** Set Cursor */
+		if (posX >= judgeSSX && posX < judgeSEX) {
 			this->setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
 			return;
 		}
-		else if (std::abs(posX - endX) < blockJudgeWidth) {
+		else if (posX >= judgeESX && posX < judgeEEX) {
 			this->setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
 			return;
 		}
-		else if (posX > startX && posX < endX) {
+		else if (posX >= judgeSEX && posX < judgeESX) {
 			this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 			return;
 		}
