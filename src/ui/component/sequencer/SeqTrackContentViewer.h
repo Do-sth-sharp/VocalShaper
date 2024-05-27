@@ -46,5 +46,11 @@ private:
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
 	void updateMIDINoteTempInternal();
 
+	enum class BlockControllerType {
+		None, Left, Right, Inside
+	};
+	std::tuple<BlockControllerType, int> getBlockController(float posX) const;
+	std::tuple<BlockControllerType, int> getBlockControllerWithoutEdge(float posX) const;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };

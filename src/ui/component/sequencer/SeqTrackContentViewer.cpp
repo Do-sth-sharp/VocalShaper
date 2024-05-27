@@ -365,10 +365,6 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 }
 
 void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
-	/** Size */
-	auto screenSize = utils::getScreenSize(this);
-	int blockJudgeWidth = screenSize.getWidth() * 0.005;
-
 	/** Move */
 	if (Tools::getInstance()->getType() == Tools::Type::Hand) {
 		this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
@@ -377,47 +373,30 @@ void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
 
 	/** Block */
 	float posX = event.position.getX();
-	for (int i = 0; i < this->blockTemp.size(); i++) {
-		/** Get Block Time */
-		auto block = this->blockTemp.getUnchecked(i);
-		float startX = (block->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-		float endX = (block->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+	std::tuple<SeqTrackContentViewer::BlockControllerType, int> blockController;
+	switch (Tools::getInstance()->getType()) {
+	case Tools::Type::Arrow:
+	case Tools::Type::Eraser:
+	case Tools::Type::Scissors:
+		blockController = this->getBlockControllerWithoutEdge(posX);
+		break;
+	case Tools::Type::Magic:
+	case Tools::Type::Pencil:
+		blockController = this->getBlockController(posX);
+		break;
+	}
 
-		/** Judge Area */
-		float judgeSSX = startX - blockJudgeWidth, judgeSEX = startX + blockJudgeWidth;
-		float judgeESX = endX - blockJudgeWidth, judgeEEX = endX + blockJudgeWidth;
-		if (endX - startX < blockJudgeWidth * 2) {
-			judgeSEX = startX + (endX - startX) / 2;
-			judgeESX = endX - (endX - startX) / 2;
-		}
-		if (i > 0) {
-			auto lastBlock = this->blockTemp.getUnchecked(i - 1);
-			float lastEndX = (lastBlock->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-			if (startX - lastEndX < blockJudgeWidth * 2) {
-				judgeSSX = startX - (startX - lastEndX) / 2;
-			}
-		}
-		if (i < this->blockTemp.size() - 1) {
-			auto nextBlock = this->blockTemp.getUnchecked(i + 1);
-			float nextStartX = (nextBlock->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-			if (nextStartX - endX < blockJudgeWidth * 2) {
-				judgeEEX = endX + (nextStartX - endX) / 2;
-			}
-		}
-
-		/** Set Cursor */
-		if (posX >= judgeSSX && posX < judgeSEX) {
-			this->setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
-			return;
-		}
-		else if (posX >= judgeESX && posX < judgeEEX) {
-			this->setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
-			return;
-		}
-		else if (posX >= judgeSEX && posX < judgeESX) {
-			this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-			return;
-		}
+	if (std::get<0>(blockController) == BlockControllerType::Left) {
+		this->setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
+		return;
+	}
+	else if (std::get<0>(blockController) == BlockControllerType::Right) {
+		this->setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
+		return;
+	}
+	else if (std::get<0>(blockController) == BlockControllerType::Inside) {
+		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		return;
 	}
 
 	this->setMouseCursor(juce::MouseCursor::NormalCursor);
@@ -451,4 +430,74 @@ void SeqTrackContentViewer::updateMIDINoteTempInternal() {
 	if (maxNote < minNote) { maxNote = minNote = 0; }
 	this->midiMinNote = minNote;
 	this->midiMaxNote = maxNote;
+}
+
+std::tuple<SeqTrackContentViewer::BlockControllerType, int> 
+SeqTrackContentViewer::getBlockController(float posX) const {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int blockJudgeWidth = screenSize.getWidth() * 0.005;
+
+	/** Get Each Block */
+	for (int i = 0; i < this->blockTemp.size(); i++) {
+		/** Get Block Time */
+		auto block = this->blockTemp.getUnchecked(i);
+		float startX = (block->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		float endX = (block->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+
+		/** Judge Area */
+		float judgeSSX = startX - blockJudgeWidth, judgeSEX = startX + blockJudgeWidth;
+		float judgeESX = endX - blockJudgeWidth, judgeEEX = endX + blockJudgeWidth;
+		if (endX - startX < blockJudgeWidth * 2) {
+			judgeSEX = startX + (endX - startX) / 2;
+			judgeESX = endX - (endX - startX) / 2;
+		}
+		if (i > 0) {
+			auto lastBlock = this->blockTemp.getUnchecked(i - 1);
+			float lastEndX = (lastBlock->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			if (startX - lastEndX < blockJudgeWidth * 2) {
+				judgeSSX = startX - (startX - lastEndX) / 2;
+			}
+		}
+		if (i < this->blockTemp.size() - 1) {
+			auto nextBlock = this->blockTemp.getUnchecked(i + 1);
+			float nextStartX = (nextBlock->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+			if (nextStartX - endX < blockJudgeWidth * 2) {
+				judgeEEX = endX + (nextStartX - endX) / 2;
+			}
+		}
+
+		/** Get Controller */
+		if (posX >= judgeSSX && posX < judgeSEX) {
+			return { BlockControllerType::Left, i };
+		}
+		else if (posX >= judgeESX && posX < judgeEEX) {
+			return { BlockControllerType::Right, i };
+		}
+		else if (posX >= judgeSEX && posX < judgeESX) {
+			return { BlockControllerType::Inside, i };
+		}
+	}
+
+	/** None */
+	return { BlockControllerType::None, -1 };
+}
+
+std::tuple<SeqTrackContentViewer::BlockControllerType, int>
+SeqTrackContentViewer::getBlockControllerWithoutEdge(float posX) const {
+	/** Get Each Block */
+	for (int i = 0; i < this->blockTemp.size(); i++) {
+		/** Get Block Time */
+		auto block = this->blockTemp.getUnchecked(i);
+		float startX = (block->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		float endX = (block->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+
+		/** Set Cursor */
+		if (posX >= startX && posX < endX) {
+			return { BlockControllerType::Inside, i };
+		}
+	}
+
+	/** None */
+	return { BlockControllerType::None, -1 };
 }
