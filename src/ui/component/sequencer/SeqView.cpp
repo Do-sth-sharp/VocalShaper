@@ -181,10 +181,21 @@ SeqView::SeqView()
 				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
 			}
 		},
-		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-		(double pos) {
+		[comp = ScrollerBase::SafePointer(this)] {
 			if (comp) {
-				comp->setPos(pos);
+				comp->processAreaDragStart();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int distanceX, int distanceY, bool moveX, bool moveY) {
+			if (comp) {
+				comp->processAreaDragTo(
+					distanceX, distanceY, moveX, moveY);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragEnd();
 			}
 		});
 	this->addAndMakeVisible(this->ruler.get());
@@ -461,7 +472,24 @@ void SeqView::update(int index) {
 	}
 	else {
 		for (int i = currentSize; i < newSize; i++) {
-			auto track = std::make_unique<SeqTrackComponent>();
+			auto track = std::make_unique<SeqTrackComponent>(
+				[comp = ScrollerBase::SafePointer(this)] {
+					if (comp) {
+						comp->processAreaDragStart();
+					}
+				},
+				[comp = ScrollerBase::SafePointer(this)]
+				(int distanceX, int distanceY, bool moveX, bool moveY) {
+					if (comp) {
+						comp->processAreaDragTo(
+							distanceX, distanceY, moveX, moveY);
+					}
+				},
+				[comp = ScrollerBase::SafePointer(this)] {
+					if (comp) {
+						comp->processAreaDragEnd();
+					}
+				});
 			this->trackList->add(std::move(track));
 		}
 	}
@@ -743,4 +771,27 @@ void SeqView::updateGridTemp() {
 		g.setColour(lineColor);
 		g.fillRect(lineRect);
 	}
+}
+
+void SeqView::processAreaDragStart() {
+	this->viewMoving = true;
+	this->moveStartPosX = this->hScroller->getViewPos();
+	this->moveStartPosY = this->vScroller->getViewPos();
+}
+
+void SeqView::processAreaDragTo(
+	int distanceX, int distanceY, bool moveX, bool moveY) {
+	if (this->viewMoving) {
+		if (moveX) {
+			this->hScroller->setPos(this->moveStartPosX - distanceX);
+		}
+		if (moveY) {
+			this->vScroller->setPos(this->moveStartPosY - distanceY);
+		}
+	}
+}
+
+void SeqView::processAreaDragEnd() {
+	this->viewMoving = false;
+	this->moveStartPosX = this->moveStartPosY = 0;
 }

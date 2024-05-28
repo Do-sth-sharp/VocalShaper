@@ -4,7 +4,13 @@
 
 class SeqTrackContentViewer final : public juce::Component {
 public:
-	SeqTrackContentViewer();
+	using DragStartFunc = std::function<void(void)>;
+	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
+	using DragEndFunc = std::function<void(void)>;
+	SeqTrackContentViewer(
+		const DragStartFunc& dragStartFunc,
+		const DragProcessFunc& dragProcessFunc,
+		const DragEndFunc& dragEndFunc);
 
 	void setCompressed(bool isCompressed);
 
@@ -18,8 +24,15 @@ public:
 	void paint(juce::Graphics& g) override;
 
 	void mouseMove(const juce::MouseEvent& event) override;
+	void mouseDrag(const juce::MouseEvent& event) override;
+	void mouseDown(const juce::MouseEvent& event) override;
+	void mouseUp(const juce::MouseEvent& event) override;
 
 private:
+	const DragStartFunc dragStartFunc;
+	const DragProcessFunc dragProcessFunc;
+	const DragEndFunc dragEndFunc;
+
 	bool compressed = false;
 	int index = -1;
 	double pos = 0, itemSize = 0;
@@ -41,6 +54,8 @@ private:
 	int midiMinNote = 0, midiMaxNote = 0;
 
 	std::unique_ptr<juce::Timer> blockImageUpdateTimer = nullptr;
+
+	bool viewMoving = false;
 
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);

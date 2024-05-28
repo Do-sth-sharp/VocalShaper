@@ -10,10 +10,12 @@ SeqTimeRuler::SeqTimeRuler(
 	const ScaleFunc& scaleFunc,
 	const WheelFunc& wheelFunc,
 	const WheelAltFunc& wheelAltFunc,
-	const SetPosFunc& setPosFunc)
+	const DragStartFunc& dragStartFunc,
+	const DragProcessFunc& dragProcessFunc,
+	const DragEndFunc& dragEndFunc)
 	: scrollFunc(scrollFunc), scaleFunc(scaleFunc),
 	wheelFunc(wheelFunc), wheelAltFunc(wheelAltFunc),
-	setPosFunc(setPosFunc) {
+	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forTimeRuler());
@@ -314,7 +316,7 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 			case Tools::Type::Hand:
 				/** Move View Area */
 				this->viewMoving = true;
-				this->moveStartPos = this->pos;
+				this->dragStartFunc();
 				break;
 			case Tools::Type::Pencil: {
 				/** Add Label */
@@ -384,16 +386,18 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 	/** Auto Scroll */
 	float xPos = event.position.getX();
-	double delta = 0;
-	if (xPos > this->getWidth()) {
-		delta = xPos - this->getWidth();
-	}
-	else if (xPos < 0) {
-		delta = xPos;
-	}
-	
-	if (delta != 0) {
-		this->scrollFunc(delta / 4);
+	if (!this->viewMoving) {
+		double delta = 0;
+		if (xPos > this->getWidth()) {
+			delta = xPos - this->getWidth();
+		}
+		else if (xPos < 0) {
+			delta = xPos;
+		}
+
+		if (delta != 0) {
+			this->scrollFunc(delta / 4);
+		}
 	}
 
 	/** Size */
@@ -413,7 +417,7 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 			/** Move View */
 			else if (this->viewMoving) {
 				int distance = event.getDistanceFromDragStartX();
-				this->setPosFunc(this->moveStartPos - distance);
+				this->dragProcessFunc(distance, 0, true, false);
 			}
 		}
 	}
@@ -476,8 +480,7 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 
 			/** Move View */
 			else if (this->viewMoving) {
-				this->viewMoving = false;
-				this->moveStartPos = 0;
+				this->dragEndFunc();
 			}
 		}
 	}

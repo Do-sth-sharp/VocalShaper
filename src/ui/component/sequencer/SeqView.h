@@ -89,6 +89,9 @@ private:
 
 	juce::String emptyNoticeStr;
 
+	bool viewMoving = false;
+	double moveStartPosX = 0, moveStartPosY = 0;
+
 	int getViewWidth() const;
 	double getTimeLength() const;
 	std::tuple<double, double> getTimeWidthLimit() const;
@@ -109,6 +112,10 @@ private:
 	juce::PopupMenu createAdsorbMenu();
 
 	void updateGridTemp();
+
+	void processAreaDragStart();
+	void processAreaDragTo(int distanceX, int distanceY, bool moveX = true, bool moveY = true);
+	void processAreaDragEnd();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };

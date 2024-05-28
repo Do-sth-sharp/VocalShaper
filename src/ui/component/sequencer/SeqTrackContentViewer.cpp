@@ -30,7 +30,12 @@ void DataImageUpdateTimer::timerCallback() {
 	}
 }
 
-SeqTrackContentViewer::SeqTrackContentViewer() {
+SeqTrackContentViewer::SeqTrackContentViewer(
+	const DragStartFunc& dragStartFunc,
+	const DragProcessFunc& dragProcessFunc,
+	const DragEndFunc& dragEndFunc)
+	: dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc),
+	dragEndFunc(dragEndFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeqBlock());
@@ -400,6 +405,45 @@ void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
 	}
 
 	this->setMouseCursor(juce::MouseCursor::NormalCursor);
+}
+
+void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		/** Move View */
+		if (this->viewMoving) {
+			int distanceX = event.getDistanceFromDragStartX();
+			int distanceY = event.getDistanceFromDragStartY();
+			this->dragProcessFunc(distanceX, distanceY, true, true);
+		}
+	}
+}
+
+void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
+	/** Get Tool Type */
+	auto tool = Tools::getInstance()->getType();
+
+	if (event.mods.isLeftButtonDown()) {
+		/** Check Tool Type */
+		switch (tool) {
+		case Tools::Type::Hand:
+			/** Move View Area */
+			this->viewMoving = true;
+			this->dragStartFunc();
+			break;
+		}
+	}
+	else if (event.mods.isRightButtonDown()) {
+		/** TODO */
+	}
+}
+
+void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		/** Move View */
+		if (this->viewMoving) {
+			this->dragEndFunc();
+		}
+	}
 }
 
 void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {

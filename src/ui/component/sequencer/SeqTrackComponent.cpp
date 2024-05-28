@@ -7,7 +7,10 @@
 #include "../../../audioCore/AC_API.h"
 #include <IconManager.h>
 
-SeqTrackComponent::SeqTrackComponent() {
+SeqTrackComponent::SeqTrackComponent(
+	const DragStartFunc& dragStartFunc,
+	const DragProcessFunc& dragProcessFunc,
+	const DragEndFunc& dragEndFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeqTrack());
@@ -103,7 +106,8 @@ SeqTrackComponent::SeqTrackComponent() {
 	this->addChildComponent(this->levelMeter.get());
 
 	/** Content */
-	this->content = std::make_unique<SeqTrackContentViewer>();
+	this->content = std::make_unique<SeqTrackContentViewer>(
+		dragStartFunc, dragProcessFunc, dragEndFunc);
 	this->addAndMakeVisible(this->content.get());
 }
 
