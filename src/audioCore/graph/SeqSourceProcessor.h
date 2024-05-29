@@ -50,9 +50,10 @@ public:
 	void initAudio(double sampleRate, double length);
 	void initMIDI();
 	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
-	void setMIDI(const juce::MidiFile& data, const juce::String& name);
+	void setMIDI(const juce::MidiFile& data, const juce::String& name, int midiTrack = 0);
 	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
-	const juce::MidiFile getMIDI() const;
+	const juce::MidiMessageSequence getMIDI() const;
+	const juce::MidiFile getMIDIFile() const;
 	void saveAudio(const juce::String& path = "") const;
 	void saveMIDI(const juce::String& path = "") const;
 	void loadAudio(const juce::String& path);
@@ -69,6 +70,8 @@ public:
 	bool isMIDISaved() const;
 	bool isAudioValid() const;
 	bool isMIDIValid() const;
+	void setCurrentMIDITrack(int trackIndex);
+	int getCurrentMIDITrack() const;
 
 	void setRecording(bool recording);
 	bool getRecording() const;
@@ -137,6 +140,7 @@ private:
 	double audioSampleRate = 0;
 	juce::String audioName, midiName;
 	std::atomic_bool audioSavedFlag = true, midiSavedFlag = true;
+	std::atomic_int currentMIDITrack = 0;
 
 	std::atomic_bool recordingFlag = false;
 	const double recordInitLength = 30;

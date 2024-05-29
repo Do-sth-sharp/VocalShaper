@@ -48,7 +48,7 @@ private:
 	juce::OwnedArray<BlockItem> blockTemp;
 
 	std::tuple<double, juce::AudioSampleBuffer> audioDataTemp;
-	juce::MidiFile midiDataTemp;
+	juce::MidiMessageSequence midiDataTemp;
 
 	juce::Array<juce::MemoryBlock> audioPointTemp;
 	int midiMinNote = 0, midiMaxNote = 0;

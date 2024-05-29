@@ -322,6 +322,7 @@ void SeqSourceProcessor::initMIDI() {
 
 	/** Update Name */
 	this->midiName = juce::String{};
+	this->currentMIDITrack = 0;
 
 	/** Set Flag */
 	this->midiChanged();
@@ -358,13 +359,15 @@ void SeqSourceProcessor::setAudio(double sampleRate,
 }
 
 void SeqSourceProcessor::setMIDI(
-	const juce::MidiFile& data, const juce::String& name) {
+	const juce::MidiFile& data, const juce::String& name,
+	int midiTrack) {
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Create MIDI Data */
 	this->midiData = std::make_unique<juce::MidiFile>(data);
 	this->midiName = name;
+	this->currentMIDITrack = midiTrack;
 
 	/** Set Flag */
 	this->midiChanged();
@@ -387,7 +390,22 @@ const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio()
 	return { this->audioSampleRate, *(this->audioData.get()) };
 }
 
-const juce::MidiFile SeqSourceProcessor::getMIDI() const {
+const juce::MidiMessageSequence SeqSourceProcessor::getMIDI() const {
+	/** Lock */
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	/** Check Data */
+	if (this->midiData) {
+		if (auto track = this->midiData->getTrack(this->currentMIDITrack)) {
+			return juce::MidiMessageSequence{ *track };
+		}
+	}
+
+	/** Default Result */
+	return juce::MidiMessageSequence{};
+}
+
+const juce::MidiFile SeqSourceProcessor::getMIDIFile() const {
 	/** Lock */
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 
@@ -510,6 +528,17 @@ bool SeqSourceProcessor::isAudioValid() const {
 
 bool SeqSourceProcessor::isMIDIValid() const {
 	return (bool)this->midiData;
+}
+
+void SeqSourceProcessor::setCurrentMIDITrack(int trackIndex) {
+	this->currentMIDITrack = trackIndex;
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+}
+
+int SeqSourceProcessor::getCurrentMIDITrack() const {
+	return this->currentMIDITrack;
 }
 
 void SeqSourceProcessor::setRecording(bool recording) {
@@ -710,6 +739,7 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 			.getChildFile(mes->midisrc()).getFullPathName();
 		this->loadMIDI(path, false);
 	}
+	this->setCurrentMIDITrack(mes->miditrack());
 
 	this->setRecording(mes->recording());
 	this->setMute(mes->muted());
@@ -762,6 +792,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 		mes->set_midisrc(name.toStdString());
 		this->saveMIDI(path);
 	}
+	mes->set_miditrack(this->getCurrentMIDITrack());
 
 	mes->set_recording(this->getRecording());
 	mes->set_muted(this->getMute());
@@ -812,11 +843,9 @@ void SeqSourceProcessor::readMIDIData(
 
 	/** Get MIDI Data */
 	juce::MidiMessageSequence total;
-	for (int i = 0; i < this->midiData->getNumTracks(); i++) {
-		if (auto track = this->midiData->getTrack(i)) {
-			total.addSequence(*track, 0,
-				startTime / this->getSampleRate(), endTime / this->getSampleRate());
-		}
+	if (auto track = this->midiData->getTrack(this->currentMIDITrack)) {
+		total.addSequence(*track, 0,
+			startTime / this->getSampleRate(), endTime / this->getSampleRate());
 	}
 
 	/** Copy Data */
@@ -870,7 +899,7 @@ void SeqSourceProcessor::writeMIDIData(const juce::MidiBuffer& buffer, int offse
 
 	/** Write To The Last Track */
 	if (auto track = const_cast<juce::MidiMessageSequence*>(
-		this->midiData->getTrack(this->midiData->getNumTracks() - 1))) {
+		this->midiData->getTrack(this->currentMIDITrack))) {
 		for (const auto& m : buffer) {
 			double timeStamp = (m.samplePosition + offset) / this->getSampleRate();
 			if (timeStamp >= 0) {

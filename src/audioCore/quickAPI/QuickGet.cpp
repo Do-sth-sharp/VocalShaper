@@ -661,7 +661,7 @@ namespace quickAPI {
 		return {};
 	}
 
-	const juce::MidiFile getSeqTrackMIDIData(int index) {
+	const juce::MidiMessageSequence getSeqTrackMIDIData(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
 				return track->getMIDI();

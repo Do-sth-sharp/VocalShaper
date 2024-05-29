@@ -148,7 +148,7 @@ void SeqTrackContentViewer::updateDataRef() {
 void SeqTrackContentViewer::updateData() {
 	/** Clear Temp */
 	this->audioDataTemp = {};
-	this->midiDataTemp = juce::MidiFile{};
+	this->midiDataTemp = juce::MidiMessageSequence{};
 	//this->audioPointTemp.clear();
 	//this->midiMinNote = this->midiMaxNote = 0;
 
@@ -325,40 +325,35 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 					maxNoteID = centerNoteID + ((noteAreaHeight / noteHeight + 1) / 2 - 1);
 				}
 
-				/** Paint Each MIDI Track */
+				/** Paint Each Note */
 				g.setColour(this->nameColor);
-				int trackNum = this->midiDataTemp.getNumTracks();
-				for (int i = 0; i < trackNum; i++) {
-					auto track = this->midiDataTemp.getTrack(i);
+				
+				std::array<double, 128> noteStartTime{};
+				for (int i = 0; i < 128; i++) {
+					noteStartTime[i] = -1;
+				}
 
-					/** Paint Each Note */
-					std::array<double, 128> noteStartTime{};
-					for (int i = 0; i < 128; i++) {
-						noteStartTime[i] = -1;
-					}
-
-					for (auto event : *track) {
-						if (event->message.isNoteOn(true)) {
-							int noteNumber = event->message.getNoteNumber();
-							if (noteNumber >= 0 && noteNumber < 128) {
-								noteStartTime[noteNumber] = event->message.getTimeStamp();
-							}
+				for (auto event : this->midiDataTemp) {
+					if (event->message.isNoteOn(true)) {
+						int noteNumber = event->message.getNoteNumber();
+						if (noteNumber >= 0 && noteNumber < 128) {
+							noteStartTime[noteNumber] = event->message.getTimeStamp();
 						}
-						else if (event->message.isNoteOff(false)) {
-							int noteNumber = event->message.getNoteNumber();
-							if (noteNumber >= 0 && noteNumber < 128) {
-								double noteStart = noteStartTime[noteNumber];
-								noteStartTime[noteNumber] = -1;
-								if (noteStart >= 0) {
-									double noteEnd = event->message.getTimeStamp();
-									if (noteStart <= endSec && noteEnd >= startSec) {
-										juce::Rectangle<float> noteRect(
-											(noteStart - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
-											notePosY + (maxNoteID - event->message.getNoteNumber()) * noteHeight,
-											(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
-											noteHeight);
-										g.fillRect(noteRect);
-									}
+					}
+					else if (event->message.isNoteOff(false)) {
+						int noteNumber = event->message.getNoteNumber();
+						if (noteNumber >= 0 && noteNumber < 128) {
+							double noteStart = noteStartTime[noteNumber];
+							noteStartTime[noteNumber] = -1;
+							if (noteStart >= 0) {
+								double noteEnd = event->message.getTimeStamp();
+								if (noteStart <= endSec && noteEnd >= startSec) {
+									juce::Rectangle<float> noteRect(
+										(noteStart - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
+										notePosY + (maxNoteID - event->message.getNoteNumber()) * noteHeight,
+										(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
+										noteHeight);
+									g.fillRect(noteRect);
 								}
 							}
 						}
@@ -461,14 +456,10 @@ void SeqTrackContentViewer::setAudioPointTempInternal(
 void SeqTrackContentViewer::updateMIDINoteTempInternal() {
 	/** Get Note Zone */
 	int minNote = 127, maxNote = 0;
-	int midiTracks = this->midiDataTemp.getNumTracks();
-	for (int i = 0; i < midiTracks; i++) {
-		auto track = this->midiDataTemp.getTrack(i);
-		for (auto e : (*track)) {
-			if (e->message.isNoteOn(true)) {
-				minNote = std::min(minNote, e->message.getNoteNumber());
-				maxNote = std::max(maxNote, e->message.getNoteNumber());
-			}
+	for (auto e : this->midiDataTemp) {
+		if (e->message.isNoteOn(true)) {
+			minNote = std::min(minNote, e->message.getNoteNumber());
+			maxNote = std::max(maxNote, e->message.getNoteNumber());
 		}
 	}
 	if (maxNote < minNote) { maxNote = minNote = 0; }

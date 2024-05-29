@@ -3,6 +3,8 @@
 #include "AudioLock.h"
 #include "../Utils.h"
 
+#define TIME_TRACK_NAME "##VS_TIME"
+
 SourceIO::SourceIO()
 	: Thread("Source IO"),
 	audioFormatsIn(SourceIO::trimFormat(utils::getAudioFormatsSupported(false))),
@@ -122,7 +124,7 @@ void SourceIO::run() {
 					{
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
 						if (ptr) {
-							buffer = ptr->getMIDI();
+							buffer = ptr->getMIDIFile();
 						}
 					}
 					if (buffer.getNumTracks() <= 0) { continue; }
@@ -234,6 +236,16 @@ SourceIO::splitMIDI(const juce::MidiFile& data) {
 		}
 
 		if (seqTemp.getNumEvents() > 0) {
+			/** Exclude Time Track */
+			if (auto firstEvent = seqTemp.getEventPointer(0)) {
+				if (firstEvent->message.isTrackNameEvent()) {
+					if (firstEvent->message.getTextFromTextMetaEvent() == TIME_TRACK_NAME) {
+						continue;
+					}
+				}
+			}
+
+			/** Copy Track */
 			result.addTrack(seqTemp);
 		}
 	}
@@ -246,11 +258,17 @@ const juce::MidiFile SourceIO::mergeMIDI(const juce::MidiFile& data,
 	juce::MidiFile result;
 	SourceIO::copyMIDITimeFormat(result, data);
 
-	result.addTrack(timeSeq);
+	/** MIDI Track */
 	for (int i = 0; i < data.getNumTracks(); i++) {
 		auto seq = data.getTrack(i);
 		result.addTrack(*seq);
 	}
+
+	/** Time Track */
+	juce::MidiMessageSequence timeSeqTemp;
+	timeSeqTemp.addEvent(juce::MidiMessage::textMetaEvent(3, TIME_TRACK_NAME));
+	timeSeqTemp.addSequence(timeSeq, 0);
+	result.addTrack(timeSeqTemp);
 
 	return result;
 }
