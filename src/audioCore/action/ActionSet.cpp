@@ -2056,3 +2056,44 @@ bool ActionSetEffect::undo() {
 	}
 	ACTION_RESULT(false);
 }
+
+ActionSetSequencerMIDITrack::ActionSetSequencerMIDITrack(
+	int track, int midiTrack)
+	: ACTION_DB{ track, midiTrack } {}
+
+bool ActionSetSequencerMIDITrack::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerMIDITrack);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldMIDITrack) = track->getCurrentMIDITrack();
+			track->setCurrentMIDITrack(ACTION_DATA(midiTrack));
+
+			this->output("Set seq MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set seq MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerMIDITrack::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerMIDITrack);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->setCurrentMIDITrack(ACTION_DATA(oldMIDITrack));
+
+			this->output("Undo set seq MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set seq MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+	ACTION_RESULT(false);
+}

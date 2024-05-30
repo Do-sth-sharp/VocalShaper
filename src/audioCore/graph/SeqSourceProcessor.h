@@ -72,6 +72,7 @@ public:
 	bool isMIDIValid() const;
 	void setCurrentMIDITrack(int trackIndex);
 	int getCurrentMIDITrack() const;
+	int getTotalMIDITrackNum() const;
 
 	void setRecording(bool recording);
 	bool getRecording() const;

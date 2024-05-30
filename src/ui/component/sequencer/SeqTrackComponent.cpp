@@ -504,7 +504,7 @@ void SeqTrackComponent::instrMenuShow() {
 }
 
 enum SeqMenuActionType {
-	Add = 1, Remove1
+	Add = 1, Remove1, MIDITrack
 };
 
 void SeqTrackComponent::menuShow() {
@@ -518,6 +518,10 @@ void SeqTrackComponent::menuShow() {
 	}
 	case SeqMenuActionType::Remove1: {
 		this->remove();
+		break;
+	}
+	case SeqMenuActionType::MIDITrack: {
+		CoreActions::setSeqMIDITrackGUI(this->index);
 		break;
 	}
 	}
@@ -578,6 +582,7 @@ juce::PopupMenu SeqTrackComponent::createMenu() const {
 
 	menu.addItem(SeqMenuActionType::Add, TRANS("Add"));
 	menu.addItem(SeqMenuActionType::Remove1, TRANS("Remove"));
+	menu.addItem(SeqMenuActionType::MIDITrack, TRANS("Select MIDI Track"));
 
 	return menu;
 }

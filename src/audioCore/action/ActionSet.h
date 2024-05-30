@@ -1103,3 +1103,26 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetEffect)
 };
+
+class ActionSetSequencerMIDITrack final : public ActionUndoableBase {
+public:
+	ActionSetSequencerMIDITrack() = delete;
+	ActionSetSequencerMIDITrack(
+		int track, int midiTrack);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer MIDI Track";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const int midiTrack;
+
+		int oldMIDITrack = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerMIDITrack)
+};

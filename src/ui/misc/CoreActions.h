@@ -87,6 +87,7 @@ public:
 	static void setSeqSolo(int index);
 	static void setSeqMuteAll(bool mute);
 	static void setSeqRec(int index, bool rec);
+	static void setSeqMIDITrack(int index, int midiTrack);
 	static void removeSeq(int index);
 
 	static void addTempoLabel(double time, double tempo);
@@ -142,6 +143,7 @@ public:
 	static void setSeqNameGUI(int index);
 	static void setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
+	static void setSeqMIDITrackGUI(int index);
 	static void removeSeqGUI(int index);
 
 	static void addLabelGUI(double time);
@@ -184,4 +186,7 @@ public:
 		bool defaultIsTempo = true,
 		double defaultTempo = 120.0, int defaultNumerator = 4, int defaultDenominator = 4,
 		bool switchable = true);
+	static void askForMIDITrackAsync(
+		const std::function<void(int)>& callback,
+		int totalNum, int defaltTrack = 0);
 };

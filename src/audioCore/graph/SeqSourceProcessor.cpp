@@ -541,6 +541,13 @@ int SeqSourceProcessor::getCurrentMIDITrack() const {
 	return this->currentMIDITrack;
 }
 
+int SeqSourceProcessor::getTotalMIDITrackNum() const {
+	if (this->midiData) {
+		return this->midiData->getNumTracks();
+	}
+	return 0;
+}
+
 void SeqSourceProcessor::setRecording(bool recording) {
 	if (recording) {
 		this->prepareRecord();

@@ -128,6 +128,7 @@ countries: cn
 "Bypass Instrument" = "旁路乐器"
 "Instrument Offline" = "乐器离线"
 "Offline" = "离线"
+"Select MIDI Track" = "选择 MIDI 轨道"
 
 "Type:" = "类型："
 "Instrument:" = "乐器："

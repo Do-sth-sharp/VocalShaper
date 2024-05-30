@@ -418,6 +418,11 @@ void CoreActions::setSeqRec(int index, bool rec) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setSeqMIDITrack(int index, int midiTrack) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerMIDITrack{ index, midiTrack });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::removeSeq(int index) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{ index });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -914,6 +919,20 @@ void CoreActions::setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool ou
 	CoreActions::askForAudioChannelLinkGUIAsync(callback, links,
 		trackChannelSet, mixerChannelSet, trackTotalChannels, mixerTotalChannels,
 		trackName, mixerName, true);
+}
+
+void CoreActions::setSeqMIDITrackGUI(int index) {
+	/** Callback */
+	auto callback = [index](int midiTrack) {
+		CoreActions::setSeqMIDITrack(index, midiTrack);
+		};
+
+	/** Get Total Track */
+	int totalMIDITrack = quickAPI::getSeqTrackMIDITrackNum(index);
+	int currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(index);
+
+	/** Ask For MIDI Track */
+	CoreActions::askForMIDITrackAsync(callback, totalMIDITrack, currentMIDITrack);
 }
 
 void CoreActions::removeSeqGUI(int index) {
@@ -1422,4 +1441,36 @@ void CoreActions::askForTempoGUIAsync(
 			auto [isTempo, tempo, numerator, denominator] = editor->getResult();
 			callback(isTempo, tempo, numerator, denominator);
 		}), true);
+}
+
+void CoreActions::askForMIDITrackAsync(
+	const std::function<void(int)>& callback,
+	int totalNum, int defaltTrack) {
+	/** Get Index List */
+	juce::StringArray indexItemList;
+	for (int i = 0; i < totalNum; i++) {
+		indexItemList.add(juce::String{ i });
+	}
+
+	/** Create Selector */
+	auto selectorWindow = new juce::AlertWindow{
+		TRANS("MIDI Track Selector"), TRANS("Select a MIDI track in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	selectorWindow->addButton(TRANS("OK"), 1);
+	selectorWindow->addButton(TRANS("Cancel"), 0);
+	selectorWindow->addComboBox(TRANS("Track"), indexItemList);
+
+	/** Show Selector Async */
+	auto combo = selectorWindow->getComboBoxComponent(TRANS("Track"));
+	combo->setSelectedItemIndex(defaltTrack);
+	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo, callback, totalNum](int result) {
+			if (result != 1) { return; }
+
+			int index = combo->getSelectedItemIndex();
+			if (index < 0 || index >= totalNum) { return; }
+
+			callback(index);
+		}
+	), true);
 }
