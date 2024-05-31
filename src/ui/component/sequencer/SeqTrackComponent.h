@@ -13,10 +13,11 @@ class SeqTrackComponent final
 	public juce::DragAndDropTarget,
 	public juce::SettableTooltipClient {
 public:
+	using ScrollFunc = std::function<void(double)>;
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
-	SeqTrackComponent(
+	SeqTrackComponent(const ScrollFunc& scrollFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
 		const DragEndFunc& dragEndFunc);

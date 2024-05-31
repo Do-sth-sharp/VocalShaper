@@ -473,6 +473,12 @@ void SeqView::update(int index) {
 	else {
 		for (int i = currentSize; i < newSize; i++) {
 			auto track = std::make_unique<SeqTrackComponent>(
+				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+				(double delta) {
+					if (comp) {
+						comp->scroll(delta);
+					}
+				},
 				[comp = ScrollerBase::SafePointer(this)] {
 					if (comp) {
 						comp->processAreaDragStart();

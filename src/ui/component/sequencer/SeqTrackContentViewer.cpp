@@ -31,10 +31,12 @@ void DataImageUpdateTimer::timerCallback() {
 }
 
 SeqTrackContentViewer::SeqTrackContentViewer(
+	const ScrollFunc& scrollFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
 	const DragEndFunc& dragEndFunc)
-	: dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc),
+	: scrollFunc(scrollFunc),
+	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc),
 	dragEndFunc(dragEndFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
@@ -403,12 +405,34 @@ void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
 }
 
 void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
+	/** Auto Scroll */
+	float xPos = event.position.getX();
+	if (!this->viewMoving) {
+		double delta = 0;
+		if (xPos > this->getWidth()) {
+			delta = xPos - this->getWidth();
+		}
+		else if (xPos < 0) {
+			delta = xPos;
+		}
+
+		if (delta != 0) {
+			this->scrollFunc(delta / 4);
+		}
+	}
+
 	if (event.mods.isLeftButtonDown()) {
 		/** Move View */
 		if (this->viewMoving) {
 			int distanceX = event.getDistanceFromDragStartX();
 			int distanceY = event.getDistanceFromDragStartY();
 			this->dragProcessFunc(distanceX, distanceY, true, true);
+		}
+
+		/** Edit Block */
+		else if (this->dragType != DragType::None) {
+			this->mouseCurrentSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			this->repaint();
 		}
 	}
 }
@@ -425,6 +449,39 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			this->viewMoving = true;
 			this->dragStartFunc();
 			break;
+		case Tools::Type::Magic:
+		case Tools::Type::Arrow: {
+			/** Edit */
+			auto [controller, index] = this->getBlockController(event.position.x);
+
+			if (index > -1) {
+				this->pressedBlockIndex = index;
+				if (controller == BlockControllerType::Inside) {
+					this->dragType = DragType::Move;
+				}
+				else if (controller == BlockControllerType::Left) {
+					this->dragType = DragType::Left;
+				}
+				else if (controller == BlockControllerType::Right) {
+					this->dragType = DragType::Right;
+				}
+				this->mousePressedSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			}
+			break;
+		}
+		case Tools::Type::Pencil: {
+			this->mousePressedSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			this->dragType = DragType::Add;
+			break;
+		}
+		case Tools::Type::Eraser: {
+			/** TODO */
+			break;
+		}
+		case Tools::Type::Scissors: {
+			/** TODO */
+			break;
+		}
 		}
 	}
 	else if (event.mods.isRightButtonDown()) {
@@ -433,12 +490,16 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 }
 
 void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
-	if (event.mods.isLeftButtonDown()) {
-		/** Move View */
-		if (this->viewMoving) {
-			this->dragEndFunc();
-		}
+	/** Move View */
+	if (this->viewMoving) {
+		this->dragEndFunc();
 	}
+
+	/** Other */
+	this->dragType = DragType::None;
+	this->pressedBlockIndex = -1;
+	this->mousePressedSecond = 0;
+	this->mouseCurrentSecond = 0;
 }
 
 void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {

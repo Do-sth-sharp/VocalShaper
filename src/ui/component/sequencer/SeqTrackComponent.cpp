@@ -8,6 +8,7 @@
 #include <IconManager.h>
 
 SeqTrackComponent::SeqTrackComponent(
+	const ScrollFunc& scrollFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
 	const DragEndFunc& dragEndFunc) {
@@ -107,7 +108,7 @@ SeqTrackComponent::SeqTrackComponent(
 
 	/** Content */
 	this->content = std::make_unique<SeqTrackContentViewer>(
-		dragStartFunc, dragProcessFunc, dragEndFunc);
+		scrollFunc, dragStartFunc, dragProcessFunc, dragEndFunc);
 	this->addAndMakeVisible(this->content.get());
 }
 

@@ -4,10 +4,11 @@
 
 class SeqTrackContentViewer final : public juce::Component {
 public:
+	using ScrollFunc = std::function<void(double)>;
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
-	SeqTrackContentViewer(
+	SeqTrackContentViewer(const ScrollFunc& scrollFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
 		const DragEndFunc& dragEndFunc);
@@ -29,6 +30,7 @@ public:
 	void mouseUp(const juce::MouseEvent& event) override;
 
 private:
+	const ScrollFunc scrollFunc;
 	const DragStartFunc dragStartFunc;
 	const DragProcessFunc dragProcessFunc;
 	const DragEndFunc dragEndFunc;
@@ -55,7 +57,14 @@ private:
 
 	std::unique_ptr<juce::Timer> blockImageUpdateTimer = nullptr;
 
+	enum class DragType {
+		None, Add, Move, Left, Right
+	};
 	bool viewMoving = false;
+	DragType dragType = DragType::None;
+	int pressedBlockIndex = -1;
+	double mousePressedSecond = 0;
+	double mouseCurrentSecond = 0;
 
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
