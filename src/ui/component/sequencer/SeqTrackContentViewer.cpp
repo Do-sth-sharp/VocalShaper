@@ -221,6 +221,11 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 
 	float noteMaxHeight = screenSize.getHeight() * 0.015;
 
+	float scissorsLineThickness = screenSize.getWidth() * 0.001;
+	float scissorsLineDashLength = screenSize.getHeight() * 0.005;
+	float scissorsLineSkipLength = scissorsLineDashLength;
+	float scissorsLineArray[2] = { scissorsLineDashLength, scissorsLineSkipLength };
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour outlineColor = laf.findColour(
@@ -364,6 +369,17 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			}
 		}
 	}
+
+	/** Scissors Line */
+	if (this->scissorsPosX > 0) {
+		juce::Line<float> sciLine(
+			this->scissorsPosX, paddingHeight,
+			this->scissorsPosX, this->getHeight() - paddingHeight);
+		g.setColour(this->nameColor);
+		g.drawDashedLine(sciLine, scissorsLineArray,
+			sizeof(scissorsLineArray) / sizeof(float),
+			scissorsLineThickness, 0);
+	}
 }
 
 void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
@@ -386,6 +402,32 @@ void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
 	case Tools::Type::Pencil:
 		blockController = this->getBlockController(posX);
 		break;
+	}
+
+	/** Scissors Line */
+	{
+		bool scissorsFlag = false;
+		if (Tools::getInstance()->getType() == Tools::Type::Scissors &&
+			std::get<0>(blockController) == BlockControllerType::Inside) {
+			double currentSec = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			currentSec = this->limitTimeSec(currentSec);
+
+			if (auto block = this->blockTemp[std::get<1>(blockController)]) {
+				if (block->startTime < currentSec && block->endTime > currentSec) {
+					this->scissorsPosX = (currentSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+
+					scissorsFlag = true;
+					this->repaint();
+				}
+			}
+		}
+
+		if (!scissorsFlag) {
+			if (this->scissorsPosX > 0) {
+				this->scissorsPosX = -1;
+				this->repaint();
+			}
+		}
 	}
 
 	if (std::get<0>(blockController) == BlockControllerType::Left) {
@@ -438,6 +480,8 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
+	float posX = event.position.x;
+
 	/** Get Tool Type */
 	auto tool = Tools::getInstance()->getType();
 
@@ -452,7 +496,7 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 		case Tools::Type::Magic:
 		case Tools::Type::Arrow: {
 			/** Edit */
-			auto [controller, index] = this->getBlockController(event.position.x);
+			auto [controller, index] = this->getBlockController(posX);
 
 			if (index > -1) {
 				this->pressedBlockIndex = index;
@@ -465,12 +509,12 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 				else if (controller == BlockControllerType::Right) {
 					this->dragType = DragType::Right;
 				}
-				this->mousePressedSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+				this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
 			}
 			break;
 		}
 		case Tools::Type::Pencil: {
-			this->mousePressedSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
 			this->dragType = DragType::Add;
 			break;
 		}
@@ -479,7 +523,21 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			break;
 		}
 		case Tools::Type::Scissors: {
-			/** TODO */
+			auto blockController = this->getBlockControllerWithoutEdge(posX);
+			if (Tools::getInstance()->getType() == Tools::Type::Scissors &&
+				std::get<0>(blockController) == BlockControllerType::Inside) {
+				double currentSec = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+				currentSec = this->limitTimeSec(currentSec);
+
+				if (auto block = this->blockTemp[std::get<1>(blockController)]) {
+					if (block->startTime < currentSec && block->endTime > currentSec) {
+						this->scissorsPosX = (currentSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+						this->repaint();
+
+						this->splitBlock(std::get<1>(blockController), currentSec);
+					}
+				}
+			}
 			break;
 		}
 		}
@@ -500,6 +558,11 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 	this->pressedBlockIndex = -1;
 	this->mousePressedSecond = 0;
 	this->mouseCurrentSecond = 0;
+}
+
+void SeqTrackContentViewer::mouseExit(const juce::MouseEvent& event) {
+	this->scissorsPosX = -1;
+	this->repaint();
 }
 
 void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {
@@ -596,4 +659,15 @@ SeqTrackContentViewer::getBlockControllerWithoutEdge(float posX) const {
 
 	/** None */
 	return { BlockControllerType::None, -1 };
+}
+
+double SeqTrackContentViewer::limitTimeSec(double timeSec) {
+	timeSec = std::max(timeSec, 0.0);
+
+	double level = Tools::getInstance()->getAdsorb();
+	return quickAPI::limitTimeSec(timeSec, level);
+}
+
+void SeqTrackContentViewer::splitBlock(int blockIndex, double timeSec) {
+	/** TODO */
 }

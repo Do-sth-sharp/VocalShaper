@@ -28,6 +28,7 @@ public:
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseDown(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseExit(const juce::MouseEvent& event) override;
 
 private:
 	const ScrollFunc scrollFunc;
@@ -65,6 +66,7 @@ private:
 	int pressedBlockIndex = -1;
 	double mousePressedSecond = 0;
 	double mouseCurrentSecond = 0;
+	float scissorsPosX = -1;
 
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
@@ -75,6 +77,10 @@ private:
 	};
 	std::tuple<BlockControllerType, int> getBlockController(float posX) const;
 	std::tuple<BlockControllerType, int> getBlockControllerWithoutEdge(float posX) const;
+
+	double limitTimeSec(double timeSec);
+
+	void splitBlock(int blockIndex, double timeSec);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };
