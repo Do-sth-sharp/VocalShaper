@@ -299,3 +299,24 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSynth)
 };
+
+class ActionSplitSequencerBlock final : public ActionUndoableBase {
+public:
+	ActionSplitSequencerBlock() = delete;
+	ActionSplitSequencerBlock(
+		int track, int block, double time);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Split Sequencer Track Block";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track, block;
+		const double time;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSplitSequencerBlock)
+};

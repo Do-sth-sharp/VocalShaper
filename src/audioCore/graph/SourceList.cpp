@@ -126,6 +126,56 @@ void SourceList::remove(int index) {
 	}
 }
 
+bool SourceList::split(int index, double time) {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+
+	if (index >= 0 && index < this->list.size()) {
+		auto [startTime, endTime, offset] = this->list.getUnchecked(index);
+		if (startTime < time && time < endTime) {
+			this->list.remove(index);
+
+			this->list.insert(index, { startTime, time, offset });
+			this->list.insert(index + 1, { time, endTime, offset });
+
+			/** Callback */
+			UICallbackAPI<int, int>::invoke(
+				UICallbackType::SeqBlockChanged, this->index, index);
+			UICallbackAPI<int, int>::invoke(
+				UICallbackType::SeqBlockChanged, this->index, index + 1);
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool SourceList::stickWithNext(int index) {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+
+	if (index >= 0 && index < this->list.size() - 1) {
+		auto [startTimeFirst, endTimeFirst, offsetFirst] = this->list.getUnchecked(index);
+		auto [startTimeSecond, endTimeSecond, offsetSecond] = this->list.getUnchecked(index + 1);
+		if (juce::approximatelyEqual(offsetFirst, offsetSecond) &&
+			juce::approximatelyEqual(endTimeFirst, startTimeSecond)) {
+			this->list.remove(index + 1);
+			this->list.remove(index);
+
+			this->list.insert(index, { startTimeFirst, endTimeSecond, offsetFirst });
+
+			/** Callback */
+			UICallbackAPI<int, int>::invoke(
+				UICallbackType::SeqBlockChanged, this->index, index);
+			UICallbackAPI<int, int>::invoke(
+				UICallbackType::SeqBlockChanged, this->index, index + 1);
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void SourceList::clearGraph() {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->list.clear();

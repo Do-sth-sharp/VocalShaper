@@ -355,3 +355,43 @@ bool ActionSynth::doAction() {
 	this->error("Can't synth: [" + juce::String{ this->index } + "]\n");
 	return false;
 }
+
+ActionSplitSequencerBlock::ActionSplitSequencerBlock(
+	int track, int block, double time)
+	: ACTION_DB{ track, block, time } {}
+
+bool ActionSplitSequencerBlock::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSplitSequencerBlock);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			if (track->splitSeq(ACTION_DATA(block), ACTION_DATA(time))) {
+				this->output("Split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	this->output("Can't split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSplitSequencerBlock::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSplitSequencerBlock);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			if (track->stickSeqWithNext(ACTION_DATA(block))) {
+				this->output("Undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	this->output("Can't undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+	ACTION_RESULT(false);
+}

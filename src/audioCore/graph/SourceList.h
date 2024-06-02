@@ -35,6 +35,9 @@ public:
 	int add(const SeqBlock& block);
 	void remove(int index);
 
+	bool split(int index, double time);
+	bool stickWithNext(int index);
+
 	void clearGraph();
 
 public:

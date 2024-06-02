@@ -18,6 +18,7 @@ enum class ActionType : unsigned int {
 	ActionAddTempoBeat,
 
 	ActionSave = 0x0101,
+	ActionSplitSequencerBlock,
 
 	ActionRemoveMixerTrack = 0x0201,
 	ActionRemoveMixerTrackSend,

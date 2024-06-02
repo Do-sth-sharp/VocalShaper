@@ -18,6 +18,8 @@ public:
 	void removeSeq(int index);
 	int getSeqNum() const;
 	const SourceList::SeqBlock getSeq(int index) const;
+	bool splitSeq(int index, double time);
+	bool stickSeqWithNext(int index);
 
 	void setTrackName(const juce::String& name);
 	const juce::String getTrackName() const;

@@ -82,6 +82,14 @@ const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
 	return this->srcs.get(index);
 }
 
+bool SeqSourceProcessor::splitSeq(int index, double time) {
+	return this->srcs.split(index, time);
+}
+
+bool SeqSourceProcessor::stickSeqWithNext(int index) {
+	return this->srcs.stickWithNext(index);
+}
+
 void SeqSourceProcessor::setTrackName(const juce::String& name) {
 	this->trackName = name;
 
