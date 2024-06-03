@@ -170,7 +170,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: '"${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.exe","${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.dll","${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.vst3"'
+        subject-path: '"${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.exe","${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.dll","${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/synth-engines/*.vst3"'
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
