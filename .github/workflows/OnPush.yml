@@ -169,7 +169,7 @@ jobs:
     - name: Generate Artifact Attestation
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: ${{github.workspace}}\out\build\${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}\bin\*
+        subject-path: ${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
