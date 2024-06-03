@@ -458,6 +458,24 @@ void CoreActions::setLabelBeat(int index, int numerator, int denominator) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::insertSeqBlock(
+	int track, double startTime, double endTime, double offset) {
+	auto action = std::unique_ptr<ActionBase>(new ActionAddSequencerBlock{
+		track, startTime, endTime, offset });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::splitSeqBlock(int track, int index, double time) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSplitSequencerBlock{
+		track, index, time });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::removeSeqBlock(int track, int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerBlock{ track, index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

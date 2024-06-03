@@ -3,6 +3,7 @@
 #include "../../misc/AudioExtractor.h"
 #include "../../misc/MainThreadPool.h"
 #include "../../misc/Tools.h"
+#include "../../misc/CoreActions.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
@@ -85,7 +86,7 @@ void SeqTrackContentViewer::update(int index) {
 	}
 }
 
-void SeqTrackContentViewer::updateBlock(int blockIndex) {
+void SeqTrackContentViewer::updateBlock(int /*blockIndex*/) {
 	/** Create Or Remove Block */
 	int currentSize = this->blockTemp.size();
 	int newSize = quickAPI::getBlockNum(this->index);
@@ -102,13 +103,8 @@ void SeqTrackContentViewer::updateBlock(int blockIndex) {
 	}
 
 	/** Update Blocks */
-	if (blockIndex >= 0 && blockIndex < this->blockTemp.size()) {
-		this->updateBlockInternal(blockIndex);
-	}
-	else {
-		for (int i = 0; i < this->blockTemp.size(); i++) {
-			this->updateBlockInternal(i);
-		}
+	for (int i = 0; i < this->blockTemp.size(); i++) {
+		this->updateBlockInternal(i);
 	}
 
 	/** Repaint */
@@ -669,5 +665,5 @@ double SeqTrackContentViewer::limitTimeSec(double timeSec) {
 }
 
 void SeqTrackContentViewer::splitBlock(int blockIndex, double timeSec) {
-	/** TODO */
+	CoreActions::splitSeqBlock(this->index, blockIndex, timeSec);
 }

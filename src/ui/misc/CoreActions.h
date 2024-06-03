@@ -97,6 +97,10 @@ public:
 	static void setLabelTempo(int index, double tempo);
 	static void setLabelBeat(int index, int numerator, int denominator);
 
+	static void insertSeqBlock(int track, double startTime, double endTime, double offset);
+	static void splitSeqBlock(int track, int index, double time);
+	static void removeSeqBlock(int track, int index);
+
 	static void loadProjectGUI(const juce::String& filePath);
 	static void loadProjectGUI();
 	static void newProjectGUI();
