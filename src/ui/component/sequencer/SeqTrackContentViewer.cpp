@@ -242,129 +242,136 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 		imgScaleRatio = dstPointNum / (double)(data.getSize() / 2 / sizeof(float));
 	}
 
-	/** Blocks */
-	for (auto block : this->blockTemp) {
-		if ((block->startTime <= this->secEnd)
-			&& (block->endTime >= this->secStart)) {
-			float startPos = (block->startTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-			float endPos = (block->endTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+	/** Block Paint Func */
+	auto paintBlockFunc = [this, &g, &blockNameFont, paddingHeight, blockRadius, outlineColor, outlineThickness,
+		blockPaddingWidth, blockPaddingHeight, blockNameFontHeight, dstPointPerSec, imgScaleRatio, noteMaxHeight]
+	(double blockStartSec, double blockEndSec, double blockOffset, float blockAlpha = 1.f) {
+		float startPos = (blockStartSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		float endPos = (blockEndSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 
-			/** Rect */
-			juce::Rectangle<float> blockRect(
-				startPos, paddingHeight,
-				endPos - startPos, this->getHeight() - paddingHeight * 2);
-			g.setColour(this->trackColor.withAlpha(0.5f));
-			g.fillRoundedRectangle(blockRect, blockRadius);
-			g.setColour(outlineColor);
-			g.drawRoundedRectangle(blockRect, blockRadius, outlineThickness);
+		/** Rect */
+		juce::Rectangle<float> blockRect(
+			startPos, paddingHeight,
+			endPos - startPos, this->getHeight() - paddingHeight * 2);
+		g.setColour(this->trackColor.withAlpha(0.5f).withMultipliedAlpha(blockAlpha));
+		g.fillRoundedRectangle(blockRect, blockRadius);
+		g.setColour(outlineColor.withMultipliedAlpha(blockAlpha));
+		g.drawRoundedRectangle(blockRect, blockRadius, outlineThickness);
 
-			/** Name */
-			float nameStartPos = std::max(startPos, 0.f) + blockPaddingWidth;
-			float nameEndPos = std::min(endPos, (float)this->getWidth()) - blockPaddingWidth;
-			juce::Rectangle<float> nameRect(
-				nameStartPos, this->compressed ? 0 : blockPaddingHeight,
-				nameEndPos - nameStartPos, this->compressed ? this->getHeight() : blockNameFontHeight);
-			g.setColour(this->nameColor);
-			g.setFont(blockNameFont);
-			g.drawFittedText(this->blockNameCombined, nameRect.toNearestInt(),
-				juce::Justification::centredLeft, 1, 1.f);
+		/** Name */
+		float nameStartPos = std::max(startPos, 0.f) + blockPaddingWidth;
+		float nameEndPos = std::min(endPos, (float)this->getWidth()) - blockPaddingWidth;
+		juce::Rectangle<float> nameRect(
+			nameStartPos, this->compressed ? 0 : blockPaddingHeight,
+			nameEndPos - nameStartPos, this->compressed ? this->getHeight() : blockNameFontHeight);
+		g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
+		g.setFont(blockNameFont);
+		g.drawFittedText(this->blockNameCombined, nameRect.toNearestInt(),
+			juce::Justification::centredLeft, 1, 1.f);
 
-			/** Wave */
-			if (!this->compressed) {
-				/** Select Time */
-				double startSec = std::max(block->startTime, this->secStart) + block->offset;
-				double endSec = std::min(block->endTime, this->secEnd) + block->offset;
-				int startPixel = startSec * dstPointPerSec / imgScaleRatio;
-				int endPixel = endSec * dstPointPerSec / imgScaleRatio;
+		/** Wave */
+		if (!this->compressed) {
+			/** Select Time */
+			double startSec = std::max(blockStartSec, this->secStart) + blockOffset;
+			double endSec = std::min(blockEndSec, this->secEnd) + blockOffset;
+			int startPixel = startSec * dstPointPerSec / imgScaleRatio;
+			int endPixel = endSec * dstPointPerSec / imgScaleRatio;
 
-				/** Paint Each Channel */
-				g.setColour(this->nameColor);
-				float wavePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
-				float channelHeight = (this->getHeight() - blockPaddingHeight - wavePosY) / (float)this->audioPointTemp.size();
-				for (int i = 0; i < this->audioPointTemp.size(); i++) {
-					float channelPosY = wavePosY + channelHeight * i;
-					auto& data = this->audioPointTemp.getReference(i);
-					int dataSize = data.getSize() / 2 / sizeof(float);
+			/** Paint Each Channel */
+			g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
+			float wavePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+			float channelHeight = (this->getHeight() - blockPaddingHeight - wavePosY) / (float)this->audioPointTemp.size();
+			for (int i = 0; i < this->audioPointTemp.size(); i++) {
+				float channelPosY = wavePosY + channelHeight * i;
+				auto& data = this->audioPointTemp.getReference(i);
+				int dataSize = data.getSize() / 2 / sizeof(float);
 
-					/** Paint Each Point */
-					for (int j = std::max(startPixel, 0); j <= endPixel && j < dataSize; j++) {
-						/** Get Value */
-						float minVal = 0, maxVal = 0;
-						data.copyTo(&minVal, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
-						data.copyTo(&maxVal, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
+				/** Paint Each Point */
+				for (int j = std::max(startPixel, 0); j <= endPixel && j < dataSize; j++) {
+					/** Get Value */
+					float minVal = 0, maxVal = 0;
+					data.copyTo(&minVal, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
+					data.copyTo(&maxVal, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
 
-						/** Paint Point */
-						double pixelSec = j * imgScaleRatio / dstPointPerSec;
-						float pixelPosX = (pixelSec - block->offset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-						juce::Rectangle<float> pointRect(
-							pixelPosX,
-							channelPosY + channelHeight / 2.f - (maxVal / 1.f) * channelHeight / 2.f,
-							imgScaleRatio,
-							channelHeight * ((maxVal - minVal) / 2.f));
-						g.fillRect(pointRect);
-					}
+					/** Paint Point */
+					double pixelSec = j * imgScaleRatio / dstPointPerSec;
+					float pixelPosX = (pixelSec - blockOffset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+					juce::Rectangle<float> pointRect(
+						pixelPosX,
+						channelPosY + channelHeight / 2.f - (maxVal / 1.f) * channelHeight / 2.f,
+						imgScaleRatio,
+						channelHeight * ((maxVal - minVal) / 2.f));
+					g.fillRect(pointRect);
 				}
 			}
+		}
 
-			/** Note */
-			if (!this->compressed) {
-				/** Select Time */
-				double startSec = std::max(block->startTime, this->secStart) + block->offset;
-				double endSec = std::min(block->endTime, this->secEnd) + block->offset;
+		/** Note */
+		if (!this->compressed) {
+			/** Select Time */
+			double startSec = std::max(blockStartSec, this->secStart) + blockOffset;
+			double endSec = std::min(blockEndSec, this->secEnd) + blockOffset;
 
-				/** Content Area */
-				float notePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
-				float noteAreaHeight = this->getHeight() - blockPaddingHeight - notePosY;
-				juce::Rectangle<float> noteContentRect(0, notePosY, this->getWidth(), noteAreaHeight);
+			/** Content Area */
+			float notePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+			float noteAreaHeight = this->getHeight() - blockPaddingHeight - notePosY;
+			juce::Rectangle<float> noteContentRect(0, notePosY, this->getWidth(), noteAreaHeight);
 
-				/** Limit Note Height */
-				double minNoteID = this->midiMinNote, maxNoteID = this->midiMaxNote;
-				float noteHeight = noteAreaHeight / (maxNoteID - minNoteID + 1);
-				if (noteHeight > noteMaxHeight) {
-					noteHeight = noteMaxHeight;
+			/** Limit Note Height */
+			double minNoteID = this->midiMinNote, maxNoteID = this->midiMaxNote;
+			float noteHeight = noteAreaHeight / (maxNoteID - minNoteID + 1);
+			if (noteHeight > noteMaxHeight) {
+				noteHeight = noteMaxHeight;
 
-					double centerNoteID = minNoteID + (maxNoteID - minNoteID) / 2;
-					minNoteID = centerNoteID - ((noteAreaHeight / noteHeight + 1) / 2 - 1);
-					maxNoteID = centerNoteID + ((noteAreaHeight / noteHeight + 1) / 2 - 1);
-				}
+				double centerNoteID = minNoteID + (maxNoteID - minNoteID) / 2;
+				minNoteID = centerNoteID - ((noteAreaHeight / noteHeight + 1) / 2 - 1);
+				maxNoteID = centerNoteID + ((noteAreaHeight / noteHeight + 1) / 2 - 1);
+			}
 
-				/** Paint Each Note */
-				g.setColour(this->nameColor);
-				
-				std::array<double, 128> noteStartTime{};
-				for (int i = 0; i < 128; i++) {
-					noteStartTime[i] = -1;
-				}
+			/** Paint Each Note */
+			g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
 
-				for (auto event : this->midiDataTemp) {
-					if (event->message.isNoteOn(true)) {
-						int noteNumber = event->message.getNoteNumber();
-						if (noteNumber >= 0 && noteNumber < 128) {
-							noteStartTime[noteNumber] = event->message.getTimeStamp();
-						}
+			std::array<double, 128> noteStartTime{};
+			for (int i = 0; i < 128; i++) {
+				noteStartTime[i] = -1;
+			}
+
+			for (auto event : this->midiDataTemp) {
+				if (event->message.isNoteOn(true)) {
+					int noteNumber = event->message.getNoteNumber();
+					if (noteNumber >= 0 && noteNumber < 128) {
+						noteStartTime[noteNumber] = event->message.getTimeStamp();
 					}
-					else if (event->message.isNoteOff(false)) {
-						int noteNumber = event->message.getNoteNumber();
-						if (noteNumber >= 0 && noteNumber < 128) {
-							double noteStart = noteStartTime[noteNumber];
-							noteStartTime[noteNumber] = -1;
-							if (noteStart >= 0) {
-								double noteEnd = event->message.getTimeStamp();
-								if (noteStart <= endSec && noteEnd >= startSec) {
-									noteStart = std::max(noteStart, startSec);
-									noteEnd = std::min(noteEnd, endSec);
-									juce::Rectangle<float> noteRect(
-										(noteStart - block->offset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
-										notePosY + (maxNoteID - event->message.getNoteNumber()) * noteHeight,
-										(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
-										noteHeight);
-									g.fillRect(noteRect);
-								}
+				}
+				else if (event->message.isNoteOff(false)) {
+					int noteNumber = event->message.getNoteNumber();
+					if (noteNumber >= 0 && noteNumber < 128) {
+						double noteStart = noteStartTime[noteNumber];
+						noteStartTime[noteNumber] = -1;
+						if (noteStart >= 0) {
+							double noteEnd = event->message.getTimeStamp();
+							if (noteStart <= endSec && noteEnd >= startSec) {
+								noteStart = std::max(noteStart, startSec);
+								noteEnd = std::min(noteEnd, endSec);
+								juce::Rectangle<float> noteRect(
+									(noteStart - blockOffset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
+									notePosY + (maxNoteID - event->message.getNoteNumber()) * noteHeight,
+									(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
+									noteHeight);
+								g.fillRect(noteRect);
 							}
 						}
 					}
 				}
 			}
+		}
+		};
+
+	/** Blocks */
+	for (auto block : this->blockTemp) {
+		if ((block->startTime <= this->secEnd)
+			&& (block->endTime >= this->secStart)) {
+			paintBlockFunc(block->startTime, block->endTime, block->offset);
 		}
 	}
 
@@ -472,6 +479,14 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 		/** Edit Block */
 		else if (this->dragType != DragType::None) {
 			this->mouseCurrentSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			this->mouseCurrentSecond = this->limitTimeSec(this->mouseCurrentSecond);
+
+			/** Check Block Valid */
+			this->blockValid = this->checkBlockValid(
+				std::min(this->mousePressedSecond, this->mouseCurrentSecond),
+				std::max(this->mousePressedSecond, this->mouseCurrentSecond),
+				(this->dragType == DragType::Add) ? -1 : this->pressedBlockIndex);
+
 			this->repaint();
 		}
 	}
@@ -492,28 +507,30 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			this->dragStartFunc();
 			break;
 		case Tools::Type::Magic:
-		case Tools::Type::Arrow: {
+		case Tools::Type::Pencil: {
 			/** Edit */
 			auto [controller, index] = this->getBlockController(posX);
 
-			if (index > -1) {
-				this->pressedBlockIndex = index;
-				if (controller == BlockControllerType::Inside) {
-					this->dragType = DragType::Move;
-				}
-				else if (controller == BlockControllerType::Left) {
-					this->dragType = DragType::Left;
-				}
-				else if (controller == BlockControllerType::Right) {
-					this->dragType = DragType::Right;
-				}
-				this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			this->pressedBlockIndex = index;
+			if (controller == BlockControllerType::Inside) {
+				this->dragType = DragType::Move;
 			}
+			else if (controller == BlockControllerType::Left) {
+				this->dragType = DragType::Left;
+			}
+			else if (controller == BlockControllerType::Right) {
+				this->dragType = DragType::Right;
+			}
+			else {
+				this->dragType = DragType::Add;
+			}
+			this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			this->mousePressedSecond = this->limitTimeSec(this->mousePressedSecond);
+
 			break;
 		}
-		case Tools::Type::Pencil: {
-			this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
-			this->dragType = DragType::Add;
+		case Tools::Type::Arrow: {
+			/** TODO */
 			break;
 		}
 		case Tools::Type::Eraser: {
@@ -543,21 +560,54 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 		}
 	}
 	else if (event.mods.isRightButtonDown()) {
-		/** TODO */
+		/** Check Tool Type */
+		switch (tool) {
+		case Tools::Type::Pencil: {
+			auto blockController = this->getBlockControllerWithoutEdge(posX);
+			if (std::get<0>(blockController) == BlockControllerType::Inside) {
+				this->removeBlock(std::get<1>(blockController));
+			}
+			break;
+		}
+		}
 	}
 }
 
 void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
-	/** Move View */
-	if (this->viewMoving) {
-		this->dragEndFunc();
-	}
+	float posX = event.position.x;
 
-	/** Other */
-	this->dragType = DragType::None;
-	this->pressedBlockIndex = -1;
-	this->mousePressedSecond = 0;
-	this->mouseCurrentSecond = 0;
+	if (event.mods.isLeftButtonDown()) {
+		/** Move View */
+		if (this->viewMoving) {
+			this->dragEndFunc();
+		}
+
+		/** Check Drag Type */
+		switch (this->dragType) {
+		case DragType::Add: {
+			double currentSec = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			currentSec = this->limitTimeSec(currentSec);
+
+			double blockStartSec = std::min(this->mousePressedSecond, currentSec);
+			double blockEndSec = std::max(this->mousePressedSecond, currentSec);
+
+			if (this->checkBlockValid(blockStartSec, blockEndSec, -1)) {
+				this->addBlock(blockStartSec, blockEndSec);
+			}
+			break;
+		}
+		}
+
+		/** Other */
+		this->dragType = DragType::None;
+		this->pressedBlockIndex = -1;
+		this->mousePressedSecond = 0;
+		this->mouseCurrentSecond = 0;
+		this->blockValid = true;
+
+		/** Repaint */
+		this->repaint();
+	}
 }
 
 void SeqTrackContentViewer::mouseExit(const juce::MouseEvent& event) {
@@ -661,11 +711,29 @@ SeqTrackContentViewer::getBlockControllerWithoutEdge(float posX) const {
 	return { BlockControllerType::None, -1 };
 }
 
-double SeqTrackContentViewer::limitTimeSec(double timeSec) {
+double SeqTrackContentViewer::limitTimeSec(double timeSec) const {
 	timeSec = std::max(timeSec, 0.0);
 
 	double level = Tools::getInstance()->getAdsorb();
 	return quickAPI::limitTimeSec(timeSec, level);
+}
+
+bool SeqTrackContentViewer::checkBlockValid(
+	double startSec, double endSec, int excludeIndex) const {
+	for (int i = 0; i < this->blockTemp.size(); i++) {
+		if (i != excludeIndex) {
+			auto block = this->blockTemp.getUnchecked(i);
+			if (block->endTime > startSec &&
+				block->startTime < endSec) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void SeqTrackContentViewer::addBlock(double startSec, double endSec) {
+	CoreActions::insertSeqBlock(this->index, startSec, endSec, 0);
 }
 
 void SeqTrackContentViewer::splitBlock(int blockIndex, double timeSec) {

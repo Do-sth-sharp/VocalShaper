@@ -67,6 +67,7 @@ private:
 	double mousePressedSecond = 0;
 	double mouseCurrentSecond = 0;
 	float scissorsPosX = -1;
+	bool blockValid = true;
 
 	void updateBlockInternal(int blockIndex);
 	void setAudioPointTempInternal(const juce::Array<juce::MemoryBlock>& temp);
@@ -78,8 +79,10 @@ private:
 	std::tuple<BlockControllerType, int> getBlockController(float posX) const;
 	std::tuple<BlockControllerType, int> getBlockControllerWithoutEdge(float posX) const;
 
-	double limitTimeSec(double timeSec);
+	double limitTimeSec(double timeSec) const;
+	bool checkBlockValid(double startSec, double endSec, int excludeIndex = -1) const;
 
+	void addBlock(double startSec, double endSec);
 	void splitBlock(int blockIndex, double timeSec);
 	void removeBlock(int blockIndex);
 
