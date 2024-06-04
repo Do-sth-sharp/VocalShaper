@@ -272,8 +272,8 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			/** Wave */
 			if (!this->compressed) {
 				/** Select Time */
-				double startSec = std::max(block->startTime + block->offset, this->secStart);
-				double endSec = std::min(block->endTime + block->offset, this->secEnd);
+				double startSec = std::max(block->startTime, this->secStart) + block->offset;
+				double endSec = std::min(block->endTime, this->secEnd) + block->offset;
 				int startPixel = startSec * dstPointPerSec / imgScaleRatio;
 				int endPixel = endSec * dstPointPerSec / imgScaleRatio;
 
@@ -295,7 +295,7 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 
 						/** Paint Point */
 						double pixelSec = j * imgScaleRatio / dstPointPerSec;
-						float pixelPosX = (pixelSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+						float pixelPosX = (pixelSec - block->offset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 						juce::Rectangle<float> pointRect(
 							pixelPosX,
 							channelPosY + channelHeight / 2.f - (maxVal / 1.f) * channelHeight / 2.f,
@@ -309,8 +309,8 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			/** Note */
 			if (!this->compressed) {
 				/** Select Time */
-				double startSec = std::max(block->startTime + block->offset, this->secStart);
-				double endSec = std::min(block->endTime + block->offset, this->secEnd);
+				double startSec = std::max(block->startTime, this->secStart) + block->offset;
+				double endSec = std::min(block->endTime, this->secEnd) + block->offset;
 
 				/** Content Area */
 				float notePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
@@ -351,8 +351,10 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 							if (noteStart >= 0) {
 								double noteEnd = event->message.getTimeStamp();
 								if (noteStart <= endSec && noteEnd >= startSec) {
+									noteStart = std::max(noteStart, startSec);
+									noteEnd = std::min(noteEnd, endSec);
 									juce::Rectangle<float> noteRect(
-										(noteStart - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
+										(noteStart - block->offset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
 										notePosY + (maxNoteID - event->message.getNoteNumber()) * noteHeight,
 										(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
 										noteHeight);
@@ -515,13 +517,15 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			break;
 		}
 		case Tools::Type::Eraser: {
-			/** TODO */
+			auto blockController = this->getBlockControllerWithoutEdge(posX);
+			if (std::get<0>(blockController) == BlockControllerType::Inside) {
+				this->removeBlock(std::get<1>(blockController));
+			}
 			break;
 		}
 		case Tools::Type::Scissors: {
 			auto blockController = this->getBlockControllerWithoutEdge(posX);
-			if (Tools::getInstance()->getType() == Tools::Type::Scissors &&
-				std::get<0>(blockController) == BlockControllerType::Inside) {
+			if (std::get<0>(blockController) == BlockControllerType::Inside) {
 				double currentSec = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
 				currentSec = this->limitTimeSec(currentSec);
 
@@ -666,4 +670,8 @@ double SeqTrackContentViewer::limitTimeSec(double timeSec) {
 
 void SeqTrackContentViewer::splitBlock(int blockIndex, double timeSec) {
 	CoreActions::splitSeqBlock(this->index, blockIndex, timeSec);
+}
+
+void SeqTrackContentViewer::removeBlock(int blockIndex) {
+	CoreActions::removeSeqBlock(this->index, blockIndex);
 }

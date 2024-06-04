@@ -81,6 +81,7 @@ private:
 	double limitTimeSec(double timeSec);
 
 	void splitBlock(int blockIndex, double timeSec);
+	void removeBlock(int blockIndex);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };
