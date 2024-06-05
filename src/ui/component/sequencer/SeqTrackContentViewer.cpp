@@ -368,11 +368,68 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 		};
 
 	/** Blocks */
-	for (auto block : this->blockTemp) {
+	for (int i = 0; i < this->blockTemp.size(); i++) {
+		auto block = this->blockTemp.getUnchecked(i);
 		if ((block->startTime <= this->secEnd)
 			&& (block->endTime >= this->secStart)) {
-			paintBlockFunc(block->startTime, block->endTime, block->offset);
+			/** Get Block Time */
+			double blockStartTime = block->startTime;
+			double blockEndTime = block->endTime;
+			double blockOffset = block->offset;
+			if (i == this->pressedBlockIndex) {
+				switch (this->dragType) {
+				case DragType::Move: {
+					double delta = this->mouseCurrentSecond - this->mousePressedSecond;
+					blockStartTime += delta;
+					blockEndTime += delta;
+					blockOffset -= delta;
+					break;
+				}
+				case DragType::Left: {
+					blockStartTime = this->mouseCurrentSecond;
+					blockStartTime = std::min(blockStartTime, blockEndTime);
+					break;
+				}
+				case DragType::Right: {
+					blockEndTime = this->mouseCurrentSecond;
+					blockEndTime = std::max(blockEndTime, blockStartTime);
+					break;
+				}
+				}
+			}
+
+			/** Get Alpha */
+			float alpha = 1.f;
+			if (this->dragType != DragType::None && i == this->pressedBlockIndex) {
+				alpha = 0.75f;
+
+				/** Valid */
+				if (!this->blockValid) {
+					alpha = 0.5f;
+				}
+			}
+
+			/** Paint Block */
+			paintBlockFunc(blockStartTime, blockEndTime, blockOffset, alpha);
 		}
+	}
+
+	/** Add Block */
+	if (this->dragType == DragType::Add) {
+		/** Get Block Time */
+		double blockStartSec = std::min(this->mousePressedSecond, this->mouseCurrentSecond);
+		double blockEndSec = std::max(this->mousePressedSecond, this->mouseCurrentSecond);
+
+		/** Get Alpha */
+		float alpha = 0.75f;
+
+		/** Valid */
+		if (!this->blockValid) {
+			alpha = 0.5f;
+		}
+
+		/** Paint Block */
+		paintBlockFunc(blockStartSec, blockEndSec, 0, alpha);
 	}
 
 	/** Scissors Line */
@@ -526,6 +583,7 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			}
 			this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
 			this->mousePressedSecond = this->limitTimeSec(this->mousePressedSecond);
+			this->mouseCurrentSecond = this->mousePressedSecond;
 
 			break;
 		}
@@ -733,7 +791,9 @@ bool SeqTrackContentViewer::checkBlockValid(
 }
 
 void SeqTrackContentViewer::addBlock(double startSec, double endSec) {
-	CoreActions::insertSeqBlock(this->index, startSec, endSec, 0);
+	if (endSec > startSec) {
+		CoreActions::insertSeqBlock(this->index, startSec, endSec, 0);
+	}
 }
 
 void SeqTrackContentViewer::splitBlock(int blockIndex, double timeSec) {
