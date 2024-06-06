@@ -176,6 +176,14 @@ bool SourceList::stickWithNext(int index) {
 	return false;
 }
 
+int SourceList::resetTime(int index, const SeqBlock& block) {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+
+	if (index < 0 || index >= this->list.size()) { return -1; }
+	this->remove(index);
+	return this->add(block);
+}
+
 void SourceList::clearGraph() {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->list.clear();

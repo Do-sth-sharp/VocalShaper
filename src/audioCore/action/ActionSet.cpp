@@ -2097,3 +2097,45 @@ bool ActionSetSequencerMIDITrack::undo() {
 	this->output("Can't undo set seq MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
 	ACTION_RESULT(false);
 }
+
+ActionSetSequencerBlockTime::ActionSetSequencerBlockTime(
+	int track, int index, const BlockTime& time)
+	: ACTION_DB{ track, index, time } {}
+
+bool ActionSetSequencerBlockTime::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerBlockTime);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldTime) = track->getSeq(ACTION_DATA(index));
+			ACTION_DATA(newIndex) = track->resetSeqTime(ACTION_DATA(index), ACTION_DATA(time));
+			if (ACTION_DATA(newIndex) >= 0) {
+				this->output("Set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+				ACTION_RESULT(true);
+			}
+		}
+	}
+	this->output("Can't set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerBlockTime::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerBlockTime);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->resetSeqTime(ACTION_DATA(newIndex), ACTION_DATA(oldTime));
+
+			this->output("Undo set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+	ACTION_RESULT(false);
+}

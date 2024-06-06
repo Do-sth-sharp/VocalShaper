@@ -38,6 +38,8 @@ public:
 	bool split(int index, double time);
 	bool stickWithNext(int index);
 
+	int resetTime(int index, const SeqBlock& block);
+
 	void clearGraph();
 
 public:

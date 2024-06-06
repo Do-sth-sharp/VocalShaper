@@ -1126,3 +1126,28 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetSequencerMIDITrack)
 };
+
+class ActionSetSequencerBlockTime final : public ActionUndoableBase {
+public:
+	using BlockTime = std::tuple<double, double, double>;
+	ActionSetSequencerBlockTime() = delete;
+	ActionSetSequencerBlockTime(
+		int track, int index, const BlockTime& time);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Block Time";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track, index;
+		const BlockTime time;
+
+		int newIndex = -1;
+		BlockTime oldTime{};
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerBlockTime)
+};

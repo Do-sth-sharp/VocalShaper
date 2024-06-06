@@ -20,6 +20,7 @@ public:
 	const SourceList::SeqBlock getSeq(int index) const;
 	bool splitSeq(int index, double time);
 	bool stickSeqWithNext(int index);
+	int resetSeqTime(int index, const SourceList::SeqBlock& block);
 
 	void setTrackName(const juce::String& name);
 	const juce::String getTrackName() const;

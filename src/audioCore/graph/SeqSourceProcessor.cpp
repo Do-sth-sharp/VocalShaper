@@ -90,6 +90,11 @@ bool SeqSourceProcessor::stickSeqWithNext(int index) {
 	return this->srcs.stickWithNext(index);
 }
 
+int SeqSourceProcessor::resetSeqTime(
+	int index, const SourceList::SeqBlock& block) {
+	return this->srcs.resetTime(index, block);
+}
+
 void SeqSourceProcessor::setTrackName(const juce::String& name) {
 	this->trackName = name;
 
