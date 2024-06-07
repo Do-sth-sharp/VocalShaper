@@ -471,6 +471,13 @@ void CoreActions::splitSeqBlock(int track, int index, double time) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setSeqBlock(int track, int index,
+	double startTime, double endTime, double offset) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerBlockTime{
+		track, index, { startTime, endTime, offset } });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::removeSeqBlock(int track, int index) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerBlock{ track, index });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));

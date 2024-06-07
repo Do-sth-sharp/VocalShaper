@@ -99,6 +99,7 @@ public:
 
 	static void insertSeqBlock(int track, double startTime, double endTime, double offset);
 	static void splitSeqBlock(int track, int index, double time);
+	static void setSeqBlock(int track, int index, double startTime, double endTime, double offset);
 	static void removeSeqBlock(int track, int index);
 
 	static void loadProjectGUI(const juce::String& filePath);

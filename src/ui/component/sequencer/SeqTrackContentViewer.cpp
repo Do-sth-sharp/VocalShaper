@@ -585,6 +585,8 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			this->mousePressedSecond = this->limitTimeSec(this->mousePressedSecond);
 			this->mouseCurrentSecond = this->mousePressedSecond;
 
+			this->repaint();
+
 			break;
 		}
 		case Tools::Type::Arrow: {
@@ -652,6 +654,47 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 			if (this->checkBlockValid(blockStartSec, blockEndSec, -1)) {
 				this->addBlock(blockStartSec, blockEndSec);
 			}
+			break;
+		}
+		case DragType::Left:
+		case DragType::Right: 
+		case DragType::Move: {
+			double currentSec = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			currentSec = this->limitTimeSec(currentSec);
+
+			if (this->pressedBlockIndex >= 0 && this->pressedBlockIndex < this->blockTemp.size()) {
+				auto block = this->blockTemp.getUnchecked(this->pressedBlockIndex);
+
+				double blockStartTime = block->startTime;
+				double blockEndTime = block->endTime;
+				double blockOffset = block->offset;
+
+				switch (this->dragType) {
+				case DragType::Move: {
+					double delta = currentSec - this->mousePressedSecond;
+					blockStartTime += delta;
+					blockEndTime += delta;
+					blockOffset -= delta;
+					break;
+				}
+				case DragType::Left: {
+					blockStartTime = currentSec;
+					blockStartTime = std::min(blockStartTime, blockEndTime);
+					break;
+				}
+				case DragType::Right: {
+					blockEndTime = currentSec;
+					blockEndTime = std::max(blockEndTime, blockStartTime);
+					break;
+				}
+				}
+
+				if (this->checkBlockValid(blockStartTime, blockEndTime, this->pressedBlockIndex)) {
+					this->setBlock(this->pressedBlockIndex,
+						blockStartTime, blockEndTime, blockOffset);
+				}
+			}
+
 			break;
 		}
 		}
@@ -778,6 +821,8 @@ double SeqTrackContentViewer::limitTimeSec(double timeSec) const {
 
 bool SeqTrackContentViewer::checkBlockValid(
 	double startSec, double endSec, int excludeIndex) const {
+	if (endSec <= startSec) { return false; }
+
 	for (int i = 0; i < this->blockTemp.size(); i++) {
 		if (i != excludeIndex) {
 			auto block = this->blockTemp.getUnchecked(i);
@@ -793,6 +838,14 @@ bool SeqTrackContentViewer::checkBlockValid(
 void SeqTrackContentViewer::addBlock(double startSec, double endSec) {
 	if (endSec > startSec) {
 		CoreActions::insertSeqBlock(this->index, startSec, endSec, 0);
+	}
+}
+
+void SeqTrackContentViewer::setBlock(int blockIndex,
+	double startSec, double endSec, double offset) {
+	if (endSec > startSec) {
+		CoreActions::setSeqBlock(this->index, blockIndex,
+			startSec, endSec, offset);
 	}
 }
 

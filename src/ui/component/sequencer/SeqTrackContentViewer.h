@@ -83,6 +83,7 @@ private:
 	bool checkBlockValid(double startSec, double endSec, int excludeIndex = -1) const;
 
 	void addBlock(double startSec, double endSec);
+	void setBlock(int blockIndex, double startSec, double endSec, double offset);
 	void splitBlock(int blockIndex, double timeSec);
 	void removeBlock(int blockIndex);
 
