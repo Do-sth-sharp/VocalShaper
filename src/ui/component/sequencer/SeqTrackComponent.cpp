@@ -446,6 +446,60 @@ void SeqTrackComponent::itemDropped(const SourceDetails& dragSourceDetails) {
 	}
 }
 
+bool SeqTrackComponent::isInterestedInFileDrag(const juce::StringArray& files) {
+	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
+	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
+
+	int audioCount = 0, midiCount = 0;
+
+	for (auto& filePath : files) {
+		juce::File file(filePath);
+		juce::String fileType = "*" + file.getFileExtension();
+
+		if (audioFormats.contains(fileType)) {
+			audioCount++;
+		}
+		else if (midiFormats.contains(fileType)) {
+			midiCount++;
+		}
+
+		if (audioCount > 1 || midiCount > 1) { return false; }
+	}
+
+	if (audioCount + midiCount <= 0) { return false; }
+	return audioCount <= 1 && midiCount <= 1;
+}
+
+void SeqTrackComponent::fileDragEnter(const juce::StringArray& files, int /*x*/, int /*y*/) {
+	if (!this->isInterestedInFileDrag(files)) { return; }
+	this->preDrop();
+}
+
+void SeqTrackComponent::fileDragExit(const juce::StringArray& files) {
+	if (!this->isInterestedInFileDrag(files)) { return; }
+	this->endDrop();
+}
+
+void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, int /*y*/) {
+	if (!this->isInterestedInFileDrag(files)) { return; }
+	this->endDrop();
+
+	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(false);
+	juce::StringArray midiFormats = quickAPI::getMidiFormatsSupported(false);
+
+	for (auto& filePath : files) {
+		juce::File file(filePath);
+		juce::String fileType = "*" + file.getFileExtension();
+
+		if (audioFormats.contains(fileType)) {
+			/** TODO Load Audio */
+		}
+		else if (midiFormats.contains(fileType)) {
+			/** TODO Load MIDI */
+		}
+	}
+}
+
 void SeqTrackComponent::editTrackName() {
 	CoreActions::setSeqNameGUI(this->index);
 }

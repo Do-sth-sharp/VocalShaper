@@ -292,7 +292,7 @@ namespace utils {
 	}
 
 	const juce::StringArray getMidiFormatsSupported(bool /*isWrite*/) {
-		return juce::StringArray{ "*.mid" };
+		return juce::StringArray{ "*.mid", "*.midi", "*.smf" };
 	}
 
 	juce::AudioFormat* findAudioFormatForExtension(const juce::String& extension, bool isWrite) {
