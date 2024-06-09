@@ -71,6 +71,16 @@ jobs:
         retention-days: 7
         compression-level: 9
 
+    - name: Archive vcpkg Packages
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: vcpkgpkgs-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{github.sha}}
+        path: |
+          vcpkg/packages/**
+        retention-days: 7
+        compression-level: 9
+
   build:
     needs: [build-package]
     runs-on: ${{matrix.os}}
@@ -178,5 +188,4 @@ jobs:
         name: VocalShaper-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
         path: |
           out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/**
-        retention-days: 7
         compression-level: 9
