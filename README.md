@@ -79,14 +79,14 @@ cd ..
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-windows -B out/build/x64-Debug-MSVC .
-ninja -C out/build/x64-Debug -j 8 VocalShaper
+ninja -C out/build/x64-Debug-MSVC -j 8 VocalShaper
 ```
 
 ### Windows Release (MSVC)
 ```
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-windows -B out/build/x64-Release-MSVC .
-ninja -C out/build/x64-Release -j 8 VocalShaper
+ninja -C out/build/x64-Release-MSVC -j 8 VocalShaper
 ```
 
 ### Windows Debug (MinGW)
@@ -94,7 +94,7 @@ ninja -C out/build/x64-Release -j 8 VocalShaper
 set CC=gcc
 set CXX=c++
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-mingw-dynamic -B out/build/x64-Debug-MinGW .
-ninja -C out/build/x64-Debug -j 8 VocalShaper
+ninja -C out/build/x64-Debug-MinGW -j 8 VocalShaper
 ```
 
 ### Windows Release (MinGW)
@@ -102,4 +102,4 @@ ninja -C out/build/x64-Debug -j 8 VocalShaper
 set CC=gcc
 set CXX=c++
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-mingw-dynamic -B out/build/x64-Release-MinGW .
-ninja -C out/build/x64-Release -j 8 VocalShaper
+ninja -C out/build/x64-Release-MinGW -j 8 VocalShaper
