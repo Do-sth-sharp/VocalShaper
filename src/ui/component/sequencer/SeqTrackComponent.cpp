@@ -492,10 +492,12 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 		juce::String fileType = "*" + file.getFileExtension();
 
 		if (audioFormats.contains(fileType)) {
-			/** TODO Load Audio */
+			/** Load Audio */
+			this->setContentAudioRef(filePath);
 		}
 		else if (midiFormats.contains(fileType)) {
-			/** TODO Load MIDI */
+			/** Load MIDI */
+			this->setContentMIDIRef(filePath);
 		}
 	}
 }
@@ -592,6 +594,14 @@ void SeqTrackComponent::add() {
 
 void SeqTrackComponent::remove() {
 	CoreActions::removeSeqGUI(this->index);
+}
+
+void SeqTrackComponent::setContentAudioRef(const juce::String& path) {
+	CoreActions::setSeqAudioRefGUI(this->index, path);
+}
+
+void SeqTrackComponent::setContentMIDIRef(const juce::String& path) {
+	CoreActions::setSeqMIDIRefGUI(this->index, path);
 }
 
 void SeqTrackComponent::preDrop() {

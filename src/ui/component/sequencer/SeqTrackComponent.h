@@ -82,6 +82,9 @@ private:
 	void add();
 	void remove();
 
+	void setContentAudioRef(const juce::String& path);
+	void setContentMIDIRef(const juce::String& path);
+
 	void preDrop();
 	void endDrop();
 

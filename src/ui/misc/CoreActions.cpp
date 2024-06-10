@@ -423,6 +423,16 @@ void CoreActions::setSeqMIDITrack(int index, int midiTrack) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::setSeqAudioRef(int index, const juce::String& path) {
+	auto action = std::unique_ptr<ActionBase>(new ActionLoadAudioSource{ index, path });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setSeqMIDIRef(int index, const juce::String& path, bool getTempo) {
+	auto action = std::unique_ptr<ActionBase>(new ActionLoadMidiSource{ index, path, getTempo });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::removeSeq(int index) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{ index });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -958,6 +968,39 @@ void CoreActions::setSeqMIDITrackGUI(int index) {
 
 	/** Ask For MIDI Track */
 	CoreActions::askForMIDITrackAsync(callback, totalMIDITrack, currentMIDITrack);
+}
+
+void CoreActions::setSeqAudioRefGUI(int index, const juce::String& path) {
+	if (index <= -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Load Audio"),
+		TRANS("Load {FILENAME} onto the sequencer track {TRACKINDEX}. Continue?")
+		.replace("{TRACKINDEX}", "#" + juce::String{ index })
+		.replace("{FILENAME}", path))) {
+		return;
+	}
+
+	CoreActions::setSeqAudioRef(index, path);
+}
+
+void CoreActions::setSeqMIDIRefGUI(int index, const juce::String& path) {
+	if (index <= -1) { return; }
+
+	if (!juce::AlertWindow::showOkCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Load MIDI"),
+		TRANS("Load {FILENAME} onto the sequencer track {TRACKINDEX}. Continue?")
+		.replace("{TRACKINDEX}", "#" + juce::String{ index })
+		.replace("{FILENAME}", path))) {
+		return;
+	}
+
+	int getTempo = juce::AlertWindow::showYesNoCancelBox(
+		juce::MessageBoxIconType::QuestionIcon, TRANS("Load MIDI"),
+		TRANS("Get tempo and time meta events from the MIDI file?"));
+	if (getTempo == 0) { return; }
+
+	CoreActions::setSeqMIDIRef(index, path, getTempo == 1);
 }
 
 void CoreActions::removeSeqGUI(int index) {

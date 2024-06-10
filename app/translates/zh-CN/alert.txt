@@ -21,6 +21,8 @@ countries: cn
 "Remove Label" = "移除标签"
 "Remove Instrument" = "移除乐器"
 "MIDI Track Selector" = "MIDI 轨道选择器"
+"Load Audio" = "加载音频"
+"Load MIDI" = "加载 MIDI"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
@@ -55,3 +57,5 @@ countries: cn
 "Remove the instrument from sequencer track. Continue?" = "从音序器轨道移除乐器。继续？"
 "Remove the track from sequencer. Continue?" = "从音序器移除轨道。继续？"
 "Select a MIDI track in the list:" = "从列表中选择一个 MIDI 轨道："
+"Load {FILENAME} onto the sequencer track {TRACKINDEX}. Continue?" = "将 {FILENAME} 加载到音序器轨道{TRACKINDEX}。继续？"
+"Get tempo and time meta events from the MIDI file?" = "从 MIDI 文件中获取曲速与时间元事件？"
