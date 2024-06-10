@@ -51,21 +51,15 @@ jobs:
       working-directory: ${{github.workspace}}/vcpkg
       run: .\bootstrap-vcpkg.bat
 
-    - name: Initialize MSVC Environment Windows
-      if: runner.os == 'Windows'
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: ${{runner.arch}}
-
     - name: Install Packages MSVC
       if: runner.os == 'Windows' && matrix.compiler == 'MSVC'
       working-directory: ${{github.workspace}}/vcpkg
-      run: $env:PATH+=";$env:LIB"; vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-windows
+      run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-windows
 
     - name: Install Packages MinGW
       if: runner.os == 'Windows' && matrix.compiler == 'MinGW'
       working-directory: ${{github.workspace}}/vcpkg
-      run: $env:PATH+=";$env:LIB"; vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
+      run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
 
     - name: Archive vcpkg Logs
       if: ${{ !cancelled() }}
