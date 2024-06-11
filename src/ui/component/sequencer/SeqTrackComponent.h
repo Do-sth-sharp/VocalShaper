@@ -15,10 +15,14 @@ class SeqTrackComponent final
 	public juce::SettableTooltipClient {
 public:
 	using ScrollFunc = std::function<void(double)>;
+	using WheelFunc = std::function<void(float, bool)>;
+	using WheelAltFunc = std::function<void(double, double, float, bool)>;
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
 	SeqTrackComponent(const ScrollFunc& scrollFunc,
+		const WheelFunc& wheelHFunc,
+		const WheelAltFunc& wheelAltHFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
 		const DragEndFunc& dragEndFunc);

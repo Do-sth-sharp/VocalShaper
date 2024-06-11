@@ -37,7 +37,18 @@ private:
 
 	class TrackList : public juce::Component {
 	public:
-		TrackList() = default;
+		using ScrollFunc = std::function<void(double)>;
+		using WheelFunc = std::function<void(float, bool)>;
+		using WheelAltFunc = std::function<void(double, double, float, bool)>;
+		using DragStartFunc = std::function<void(void)>;
+		using DragProcessFunc = std::function<void(int, int, bool, bool)>;
+		using DragEndFunc = std::function<void(void)>;
+		TrackList(const ScrollFunc& scrollFunc,
+			const WheelFunc& wheelHFunc,
+			const WheelAltFunc& wheelAltHFunc,
+			const DragStartFunc& dragStartFunc,
+			const DragProcessFunc& dragProcessFunc,
+			const DragEndFunc& dragEndFunc);
 
 		int size() const;
 		void remove(int index);
@@ -55,10 +66,27 @@ private:
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);
 
+		void mouseDown(const juce::MouseEvent& event) override;
 		void mouseUp(const juce::MouseEvent& event) override;
+		void mouseMove(const juce::MouseEvent& event) override;
+		void mouseDrag(const juce::MouseEvent& event) override;
+		void mouseWheelMove(const juce::MouseEvent& event,
+			const juce::MouseWheelDetails& wheel) override;
 
 	private:
 		juce::OwnedArray<SeqTrackComponent> list;
+
+		const ScrollFunc scrollFunc;
+		const WheelFunc wheelHFunc;
+		const WheelAltFunc wheelAltHFunc;
+		const DragStartFunc dragStartFunc;
+		const DragProcessFunc dragProcessFunc;
+		const DragEndFunc dragEndFunc;
+
+		double pos = 0, itemSize = 0;
+		double secStart = 0, secEnd = 0;
+
+		bool viewMoving = false;
 
 		void add();
 

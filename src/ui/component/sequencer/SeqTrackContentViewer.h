@@ -5,10 +5,14 @@
 class SeqTrackContentViewer final : public juce::Component {
 public:
 	using ScrollFunc = std::function<void(double)>;
+	using WheelFunc = std::function<void(float, bool)>;
+	using WheelAltFunc = std::function<void(double, double, float, bool)>;
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
 	SeqTrackContentViewer(const ScrollFunc& scrollFunc,
+		const WheelFunc& wheelFunc,
+		const WheelAltFunc& wheelAltFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
 		const DragEndFunc& dragEndFunc);
@@ -29,9 +33,13 @@ public:
 	void mouseDown(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 	void mouseExit(const juce::MouseEvent& event) override;
+	void mouseWheelMove(const juce::MouseEvent& event,
+		const juce::MouseWheelDetails& wheel) override;
 
 private:
 	const ScrollFunc scrollFunc;
+	const WheelFunc wheelFunc;
+	const WheelAltFunc wheelAltFunc;
 	const DragStartFunc dragStartFunc;
 	const DragProcessFunc dragProcessFunc;
 	const DragEndFunc dragEndFunc;

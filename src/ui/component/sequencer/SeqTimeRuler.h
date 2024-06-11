@@ -36,7 +36,7 @@ public:
 	void mouseUp(const juce::MouseEvent& event) override;
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseWheelMove(const juce::MouseEvent& event,
-		const juce::MouseWheelDetails& wheel);
+		const juce::MouseWheelDetails& wheel) override;
 
 	/** Place, IsBar, barId */
 	using LineItem = std::tuple<double, bool, int>;

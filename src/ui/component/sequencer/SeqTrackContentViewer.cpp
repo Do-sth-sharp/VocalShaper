@@ -33,10 +33,12 @@ void DataImageUpdateTimer::timerCallback() {
 
 SeqTrackContentViewer::SeqTrackContentViewer(
 	const ScrollFunc& scrollFunc,
+	const WheelFunc& wheelFunc,
+	const WheelAltFunc& wheelAltFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
 	const DragEndFunc& dragEndFunc)
-	: scrollFunc(scrollFunc),
+	: scrollFunc(scrollFunc), wheelFunc(wheelFunc), wheelAltFunc(wheelAltFunc),
 	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc),
 	dragEndFunc(dragEndFunc) {
 	/** Look And Feel */
@@ -639,6 +641,7 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
 		/** Move View */
 		if (this->viewMoving) {
+			this->viewMoving = false;
 			this->dragEndFunc();
 		}
 
@@ -714,6 +717,19 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 void SeqTrackContentViewer::mouseExit(const juce::MouseEvent& event) {
 	this->scissorsPosX = -1;
 	this->repaint();
+}
+
+void SeqTrackContentViewer::mouseWheelMove(const juce::MouseEvent& event,
+	const juce::MouseWheelDetails& wheel) {
+	if (event.mods.isAltDown()) {
+		double thumbPer = event.position.getX() / (double)this->getWidth();
+		double centerNum = this->secStart + (this->secEnd - this->secStart) * thumbPer;
+
+		this->wheelAltFunc(centerNum, thumbPer, wheel.deltaY, wheel.isReversed);
+	}
+	else {
+		this->wheelFunc(wheel.deltaY, wheel.isReversed);
+	}
 }
 
 void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {

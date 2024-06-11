@@ -9,6 +9,16 @@
 
 #define SEQ_TAIL_SEC 10;
 
+SeqView::TrackList::TrackList(
+	const ScrollFunc& scrollFunc,
+	const WheelFunc& wheelHFunc,
+	const WheelAltFunc& wheelAltHFunc,
+	const DragStartFunc& dragStartFunc,
+	const DragProcessFunc& dragProcessFunc,
+	const DragEndFunc& dragEndFunc)
+	: scrollFunc(scrollFunc), wheelHFunc(wheelHFunc), wheelAltHFunc(wheelAltHFunc),
+	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc) {}
+
 int SeqView::TrackList::size() const {
 	return this->list.size();
 }
@@ -80,6 +90,18 @@ void SeqView::TrackList::updateData(int index) {
 }
 
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	/** Temp */
+	this->pos = pos;
+	this->itemSize = itemSize;
+
+	this->secStart = pos / itemSize;
+	this->secEnd = this->secStart + ((this->getWidth() - headWidth) / itemSize);
+
+	/** Tracks */
 	for (auto i : this->list) {
 		i->updateHPos(pos, itemSize);
 	}
@@ -94,10 +116,115 @@ void SeqView::TrackList::updateVPos(double pos, double itemSize) {
 	}
 }
 
-void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
-	if (event.mods.isRightButtonDown()) {
-		this->add();
+void SeqView::TrackList::mouseDown(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	/** Get Tool Type */
+	auto tool = Tools::getInstance()->getType();
+
+	/** Not Head */
+	if (event.position.x > headWidth) {
+		if (event.mods.isLeftButtonDown()) {
+			/** Check Tool Type */
+			switch (tool) {
+			case Tools::Type::Hand:
+				/** Move View Area */
+				this->viewMoving = true;
+				this->dragStartFunc();
+				break;
+			}
+		}
 	}
+}
+
+void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		/** Move View */
+		if (this->viewMoving) {
+			this->viewMoving = false;
+			this->dragEndFunc();
+		}
+	}
+	else if (event.mods.isRightButtonDown()) {
+		if (!event.mouseWasDraggedSinceMouseDown()) {
+			this->add();
+		}
+	}
+}
+
+void SeqView::TrackList::mouseMove(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	float posX = event.position.getX();
+
+	/** Not Head */
+	if (posX > headWidth) {
+		/** Move */
+		if (Tools::getInstance()->getType() == Tools::Type::Hand) {
+			this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+			return;
+		}
+	}
+
+	this->setMouseCursor(juce::MouseCursor::NormalCursor);
+}
+
+void SeqView::TrackList::mouseDrag(const juce::MouseEvent& event) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	/** Not Head */
+	if (event.mouseDownPosition.getX() > headWidth) {
+		/** Auto Scroll */
+		float xPos = event.position.getX();
+		if (!this->viewMoving) {
+			double delta = 0;
+			if (xPos > this->getWidth()) {
+				delta = xPos - this->getWidth();
+			}
+			else if (xPos < headWidth) {
+				delta = xPos - headWidth;
+			}
+
+			if (delta != 0) {
+				this->scrollFunc(delta / 4);
+			}
+		}
+
+		if (event.mods.isLeftButtonDown()) {
+			/** Move View */
+			if (this->viewMoving) {
+				int distanceX = event.getDistanceFromDragStartX();
+				int distanceY = event.getDistanceFromDragStartY();
+				this->dragProcessFunc(distanceX, distanceY, true, true);
+			}
+		}
+	}
+}
+
+void SeqView::TrackList::mouseWheelMove(const juce::MouseEvent& event,
+	const juce::MouseWheelDetails& wheel) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	if (event.position.getX() > headWidth) {
+		if (event.mods.isAltDown()) {
+			double thumbPer = (event.position.getX() - headWidth) / (double)(this->getWidth() - headWidth);
+			double centerNum = this->secStart + (this->secEnd - this->secStart) * thumbPer;
+
+			this->wheelAltHFunc(centerNum, thumbPer, wheel.deltaY, wheel.isReversed);
+		}
+		else {
+			this->wheelHFunc(wheel.deltaY, wheel.isReversed);
+		}
+	}
+	
 }
 
 void SeqView::TrackList::add() {
@@ -115,10 +242,6 @@ SeqView::SeqView()
 		utils::getIconFile("Design", "align-item-left-line").getFullPathName());
 	this->adsorbIcon->replaceColour(juce::Colours::black,
 		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
-
-	/** Track List */
-	this->trackList = std::make_unique<TrackList>();
-	this->addAndMakeVisible(this->trackList.get());
 
 	/** Scroller */
 	this->hScroller = std::make_unique<Scroller>(false,
@@ -141,6 +264,45 @@ SeqView::SeqView()
 			int width, int height, bool vertical) {
 				this->paintTrackPreview(g, itemIndex, width, height, vertical); });
 	this->addAndMakeVisible(this->vScroller.get());
+
+	/** Track List */
+	this->trackList = std::make_unique<TrackList>(
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double delta) {
+			if (comp) {
+				comp->scroll(delta);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragStart();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int distanceX, int distanceY, bool moveX, bool moveY) {
+			if (comp) {
+				comp->processAreaDragTo(
+					distanceX, distanceY, moveX, moveY);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragEnd();
+			}
+		});
+	this->addAndMakeVisible(this->trackList.get());
 
 	/** Button */
 	this->adsorbButton = std::make_unique<juce::DrawableButton>(
@@ -477,6 +639,18 @@ void SeqView::update(int index) {
 				(double delta) {
 					if (comp) {
 						comp->scroll(delta);
+					}
+				},
+				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+				(float deltaY, bool reversed) {
+					if (comp) {
+						comp->mouseWheelOutside(deltaY, reversed);
+					}
+				},
+				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+				(double centerNum, double thumbPer, float deltaY, bool reversed) {
+					if (comp) {
+						comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
 					}
 				},
 				[comp = ScrollerBase::SafePointer(this)] {

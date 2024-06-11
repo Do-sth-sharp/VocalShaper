@@ -9,6 +9,8 @@
 
 SeqTrackComponent::SeqTrackComponent(
 	const ScrollFunc& scrollFunc,
+	const WheelFunc& wheelHFunc,
+	const WheelAltFunc& wheelAltHFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
 	const DragEndFunc& dragEndFunc) {
@@ -108,7 +110,8 @@ SeqTrackComponent::SeqTrackComponent(
 
 	/** Content */
 	this->content = std::make_unique<SeqTrackContentViewer>(
-		scrollFunc, dragStartFunc, dragProcessFunc, dragEndFunc);
+		scrollFunc, wheelHFunc, wheelAltHFunc,
+		dragStartFunc, dragProcessFunc, dragEndFunc);
 	this->addAndMakeVisible(this->content.get());
 }
 
