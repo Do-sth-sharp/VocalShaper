@@ -13,10 +13,13 @@ SeqView::TrackList::TrackList(
 	const ScrollFunc& scrollFunc,
 	const WheelFunc& wheelHFunc,
 	const WheelAltFunc& wheelAltHFunc,
+	const WheelFunc& wheelVFunc,
+	const WheelAltFunc& wheelAltVFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
 	const DragEndFunc& dragEndFunc)
 	: scrollFunc(scrollFunc), wheelHFunc(wheelHFunc), wheelAltHFunc(wheelAltHFunc),
+	wheelVFunc(wheelVFunc), wheelAltVFunc(wheelAltVFunc),
 	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc) {}
 
 int SeqView::TrackList::size() const {
@@ -108,6 +111,9 @@ void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 }
 
 void SeqView::TrackList::updateVPos(double pos, double itemSize) {
+	this->indexStart = pos / itemSize;
+	this->indexEnd = this->indexStart + (this->getHeight() / itemSize);
+
 	for (int i = 0; i < this->list.size(); i++) {
 		juce::Rectangle<int> trackRect(
 			0, i * itemSize - pos,
@@ -224,6 +230,17 @@ void SeqView::TrackList::mouseWheelMove(const juce::MouseEvent& event,
 			this->wheelHFunc(wheel.deltaY, wheel.isReversed);
 		}
 	}
+	else{
+		if (event.mods.isAltDown()) {
+			double thumbPer = event.position.getY() / (double)this->getHeight();
+			double centerNum = this->indexStart + (this->indexEnd - this->indexStart) * thumbPer;
+
+			this->wheelAltVFunc(centerNum, thumbPer, wheel.deltaY, wheel.isReversed);
+		}
+		else {
+			this->wheelVFunc(wheel.deltaY, wheel.isReversed);
+		}
+	}
 	
 }
 
@@ -280,6 +297,18 @@ SeqView::SeqView()
 			}
 		},
 		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
 		(double centerNum, double thumbPer, float deltaY, bool reversed) {
 			if (comp) {
 				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
@@ -648,6 +677,18 @@ void SeqView::update(int index) {
 					}
 				},
 				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+				(double centerNum, double thumbPer, float deltaY, bool reversed) {
+					if (comp) {
+						comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+					}
+				},
+				[comp = ScrollerBase::SafePointer(this->vScroller.get())]
+				(float deltaY, bool reversed) {
+					if (comp) {
+						comp->mouseWheelOutside(deltaY, reversed);
+					}
+				},
+				[comp = ScrollerBase::SafePointer(this->vScroller.get())]
 				(double centerNum, double thumbPer, float deltaY, bool reversed) {
 					if (comp) {
 						comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);

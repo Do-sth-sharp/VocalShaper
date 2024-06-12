@@ -23,6 +23,8 @@ public:
 	SeqTrackComponent(const ScrollFunc& scrollFunc,
 		const WheelFunc& wheelHFunc,
 		const WheelAltFunc& wheelAltHFunc,
+		const WheelFunc& wheelVFunc,
+		const WheelAltFunc& wheelAltVFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
 		const DragEndFunc& dragEndFunc);
@@ -42,6 +44,8 @@ public:
 	void paintOverChildren(juce::Graphics& g) override;
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseWheelMove(const juce::MouseEvent& event,
+		const juce::MouseWheelDetails& wheel) override;
 
 	bool isInterestedInDragSource(
 		const SourceDetails& dragSourceDetails) override;
@@ -55,6 +59,9 @@ public:
 	void filesDropped(const juce::StringArray& files, int x, int y) override;
 
 private:
+	const WheelFunc wheelVFunc;
+	const WheelAltFunc wheelAltVFunc;
+
 	int index = -1;
 	juce::Colour trackColor, idColor;
 	bool dragHovered = false;

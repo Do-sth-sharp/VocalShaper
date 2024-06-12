@@ -11,9 +11,12 @@ SeqTrackComponent::SeqTrackComponent(
 	const ScrollFunc& scrollFunc,
 	const WheelFunc& wheelHFunc,
 	const WheelAltFunc& wheelAltHFunc,
+	const WheelFunc& wheelVFunc,
+	const WheelAltFunc& wheelAltVFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
-	const DragEndFunc& dragEndFunc) {
+	const DragEndFunc& dragEndFunc)
+	: wheelVFunc(wheelVFunc), wheelAltVFunc(wheelAltVFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeqTrack());
@@ -381,6 +384,24 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 	else if (event.mods.isRightButtonDown()) {
 		this->menuShow();
+	}
+}
+
+void SeqTrackComponent::mouseWheelMove(const juce::MouseEvent& event,
+	const juce::MouseWheelDetails& wheel) {
+	if (event.mods.isAltDown()) {
+		if (auto parent = this->getParentComponent()) {
+			float posYInList = event.getEventRelativeTo(parent).position.getY();
+			int listHeight = parent->getHeight();
+
+			double thumbPer = posYInList / (double)listHeight;
+			double centerNum = this->index + (event.position.getY() / (double)this->getHeight());
+
+			this->wheelAltVFunc(centerNum, thumbPer, wheel.deltaY, wheel.isReversed);
+		}
+	}
+	else {
+		this->wheelVFunc(wheel.deltaY, wheel.isReversed);
 	}
 }
 

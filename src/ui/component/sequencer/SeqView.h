@@ -46,6 +46,8 @@ private:
 		TrackList(const ScrollFunc& scrollFunc,
 			const WheelFunc& wheelHFunc,
 			const WheelAltFunc& wheelAltHFunc,
+			const WheelFunc& wheelVFunc,
+			const WheelAltFunc& wheelAltVFunc,
 			const DragStartFunc& dragStartFunc,
 			const DragProcessFunc& dragProcessFunc,
 			const DragEndFunc& dragEndFunc);
@@ -79,12 +81,15 @@ private:
 		const ScrollFunc scrollFunc;
 		const WheelFunc wheelHFunc;
 		const WheelAltFunc wheelAltHFunc;
+		const WheelFunc wheelVFunc;
+		const WheelAltFunc wheelAltVFunc;
 		const DragStartFunc dragStartFunc;
 		const DragProcessFunc dragProcessFunc;
 		const DragEndFunc dragEndFunc;
 
 		double pos = 0, itemSize = 0;
 		double secStart = 0, secEnd = 0;
+		double indexStart = 0, indexEnd = 0;
 
 		bool viewMoving = false;
 
