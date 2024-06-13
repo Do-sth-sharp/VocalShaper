@@ -180,9 +180,10 @@ void AudioPluginSearchThread::run() {
 			= searcherPath + " " + arg0 + " " + arg1 + " " + arg2 + " " + arg3;
 
 		/** Start Process */
-		process.start(processCommand, 0);
+		process.start(processCommand);
 
 		/** Wait For Process Finished */
+		char outTemp[1000] = { 0 };
 		while (process.isRunning()) {
 			/** Check If Thread Terminate */
 			if (this->threadShouldExit()) {
@@ -192,6 +193,19 @@ void AudioPluginSearchThread::run() {
 				juce::MessageManager::callAsync(
 					[] { UICallbackAPI<bool>::invoke(UICallbackType::PluginSearchStateChanged, false); });
 				return;
+			}
+
+			/** Get Output */
+			int outputSize = process.readProcessOutput(outTemp, 1000);
+			while (outputSize > 0) {
+				juce::String mesTemp = juce::String::createStringFromData(outTemp, outputSize);
+
+				/** Send */
+				juce::MessageManager::callAsync(
+					[mesTemp] { UICallbackAPI<const juce::String&>::invoke(
+						UICallbackType::PluginSearchMessage, mesTemp); });
+
+				outputSize = process.readProcessOutput(outTemp, 1000);
 			}
 
 			/** Thread Sleep */

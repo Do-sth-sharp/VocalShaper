@@ -78,6 +78,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](int index) {
 			CoreCallbacks::getInstance()->invokeSeqDataRefChanged(index);
 		});
+	UICallbackAPI<const juce::String&>::set(UICallbackType::PluginSearchMessage,
+		[](const juce::String& mes) {
+			CoreCallbacks::getInstance()->invokePluginSearchMes(mes);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -154,6 +158,10 @@ void CoreCallbacks::addSeqRecChanged(const SeqRecChangedCallback& callback) {
 
 void CoreCallbacks::addSeqDataRefChanged(const SeqDataRefChangedCallback& callback) {
 	this->seqDataRefChanged.add(callback);
+}
+
+void CoreCallbacks::addPluginSearchMes(const PluginSearchMesCallback& callback) {
+	this->pluginSearchMesChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -268,6 +276,12 @@ void CoreCallbacks::invokeSeqRecChanged(int index) const {
 void CoreCallbacks::invokeSeqDataRefChanged(int index) const {
 	for (auto& i : this->seqDataRefChanged) {
 		i(index);
+	}
+}
+
+void CoreCallbacks::invokePluginSearchMes(const juce::String& mes) const {
+	for (auto& i : this->pluginSearchMesChanged) {
+		i(mes);
 	}
 }
 

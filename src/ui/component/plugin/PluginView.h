@@ -30,12 +30,16 @@ private:
 	std::unique_ptr<juce::TreeView> pluginTree = nullptr;
 	std::unique_ptr<PluginTreeModel> pluginModel = nullptr;
 
-	juce::String searchingMes;
+	juce::String searchingMes, searchingOutput;
+	juce::String searchTextTemp;
 
 	utils::PluginGroupType groupType = utils::PluginGroupType::Manufacturer;
 
 	void searchStart();
 	void searchEnd();
+	void searchMessage(const juce::String& mes);
+
+	void updateSearchTextTemp();
 
 	juce::PopupMenu createGroupMenu() const;
 	juce::PopupMenu createPluginMenu() const;

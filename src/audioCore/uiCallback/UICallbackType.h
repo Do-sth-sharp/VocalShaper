@@ -20,6 +20,7 @@ enum class UICallbackType : int {
 	SeqRecChanged,
 	TempoChanged,
 	SeqDataRefChanged,
+	PluginSearchMessage,
 
 	TypeMaxNum
 };

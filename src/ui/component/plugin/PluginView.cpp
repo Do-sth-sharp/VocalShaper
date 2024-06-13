@@ -41,6 +41,7 @@ PluginView::PluginView()
 
 	/** Searching Message */
 	this->searchingMes = TRANS("Plugin search in progress, please wait...");
+	this->updateSearchTextTemp();
 
 	/** Add Callback */
 	CoreCallbacks::getInstance()->addSearchPlugin(
@@ -48,6 +49,13 @@ PluginView::PluginView()
 			if (comp) {
 				if (status) { comp->searchStart(); }
 				else { comp->searchEnd(); }
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addPluginSearchMes(
+		[comp = PluginView::SafePointer(this)](const juce::String& mes) {
+			if (comp) {
+				comp->searchMessage(mes);
 			}
 		}
 	);
@@ -118,11 +126,12 @@ void PluginView::paint(juce::Graphics& g) {
 	if (!this->pluginTree->isVisible()) {
 		juce::Rectangle<int> textRect(
 			paddingWidth, searchRect.getBottom() + paddingHeight,
-			this->getWidth() - paddingWidth * 2, textHeight);
+			this->getWidth() - paddingWidth * 2,
+			this->getHeight() - searchRect.getBottom() - paddingHeight * 2);
 		g.setFont(textFont);
 		g.setColour(textColor);
-		g.drawFittedText(this->searchingMes, textRect,
-			juce::Justification::centred, 1, 1.f);
+		g.drawFittedText(this->searchTextTemp, textRect,
+			juce::Justification::centredBottom, 3, 1.f);
 	}
 }
 
@@ -240,6 +249,21 @@ void PluginView::searchEnd() {
 
 	/** Show Plugin Tree */
 	this->pluginTree->setVisible(true);
+
+	/** Clear Output */
+	this->searchingOutput.clear();
+	this->updateSearchTextTemp();
+	this->repaint();
+}
+
+void PluginView::searchMessage(const juce::String& mes) {
+	this->searchingOutput.append(mes, mes.length());
+	this->updateSearchTextTemp();
+	this->repaint();
+}
+
+void PluginView::updateSearchTextTemp() {
+	this->searchTextTemp = this->searchingMes + "\n" + this->searchingOutput;
 }
 
 juce::PopupMenu PluginView::createGroupMenu() const {

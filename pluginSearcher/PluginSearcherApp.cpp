@@ -17,7 +17,7 @@ public:
 	bool moreThanOneInstanceAllowed() override { return false; };
 
     void initialise(const juce::String& commandLine) override {
-        OUT("VocalShaper Plugin Searcher v" + this->getApplicationVersion());
+        OUT("VocalShaper Plugin Searcher v" + this->getApplicationVersion().toStdString());
         OUT("Copyright 2023-2024 VocalSharp Org. All rights reserved.");
         OUT("");
 
