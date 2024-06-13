@@ -208,7 +208,7 @@ void ScrollerBase::mouseWheelOutsideWithAlt(
 	double centerNum, double thumbPer, float deltaY, bool reversed) {
 	/** Get Wheel Delta */
 	double delta = (1.0 + ((this->itemSize - this->itemMinSize) / (this->itemMaxSize - this->itemMinSize)))
-		* deltaY * (reversed ? 1 : -1) * 100.0;
+		* deltaY * (reversed ? -1 : 1) * 100.0;
 	
 	/** Get Scale Center */
 	double centerPer = centerNum / this->itemNum;
