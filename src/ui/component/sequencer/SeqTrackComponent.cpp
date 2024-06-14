@@ -209,6 +209,10 @@ void SeqTrackComponent::updateData() {
 	this->content->updateData();
 }
 
+void SeqTrackComponent::updateSynthState(bool state) {
+	this->updateDataRef();
+}
+
 void SeqTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
@@ -585,7 +589,7 @@ void SeqTrackComponent::instrMenuShow() {
 }
 
 enum SeqMenuActionType {
-	Add = 1, Remove1, MIDITrack
+	Add = 1, Remove1, MIDITrack, Synth
 };
 
 void SeqTrackComponent::menuShow() {
@@ -603,6 +607,10 @@ void SeqTrackComponent::menuShow() {
 	}
 	case SeqMenuActionType::MIDITrack: {
 		CoreActions::setSeqMIDITrackGUI(this->index);
+		break;
+	}
+	case SeqMenuActionType::Synth: {
+		CoreActions::synthSeq(this->index);
 		break;
 	}
 	}
@@ -672,6 +680,7 @@ juce::PopupMenu SeqTrackComponent::createMenu() const {
 	menu.addItem(SeqMenuActionType::Add, TRANS("Add"));
 	menu.addItem(SeqMenuActionType::Remove1, TRANS("Remove"));
 	menu.addItem(SeqMenuActionType::MIDITrack, TRANS("Select MIDI Track"));
+	menu.addItem(SeqMenuActionType::Synth, TRANS("Synth"));
 
 	return menu;
 }

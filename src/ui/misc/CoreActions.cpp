@@ -433,6 +433,11 @@ void CoreActions::setSeqMIDIRef(int index, const juce::String& path, bool getTem
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::synthSeq(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSynth{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::removeSeq(int index) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{ index });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));

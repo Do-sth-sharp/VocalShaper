@@ -21,6 +21,7 @@ enum class UICallbackType : int {
 	TempoChanged,
 	SeqDataRefChanged,
 	PluginSearchMessage,
+	SynthStateChanged,
 
 	TypeMaxNum
 };

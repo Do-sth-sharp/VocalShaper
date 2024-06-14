@@ -62,6 +62,10 @@ void SeqSourceProcessor::updateIndex(int index) {
 	this->index = index;
 	this->srcs.updateIndex(index);
 
+	if (auto synthThread = dynamic_cast<SynthThread*>(this->synthThread.get())) {
+		synthThread->setIndex(index);
+	}
+
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
 }

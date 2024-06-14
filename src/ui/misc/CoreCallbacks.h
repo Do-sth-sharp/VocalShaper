@@ -42,6 +42,8 @@ public:
 	void addSeqDataRefChanged(const SeqDataRefChangedCallback& callback);
 	using PluginSearchMesCallback = std::function<void(const juce::String&)>;
 	void addPluginSearchMes(const PluginSearchMesCallback& callback);
+	using SynthStatusCallback = std::function<void(int, bool)>;
+	void addSynthStatus(const SynthStatusCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
@@ -63,6 +65,7 @@ public:
 	void invokeSeqRecChanged(int index) const;
 	void invokeSeqDataRefChanged(int index) const;
 	void invokePluginSearchMes(const juce::String& mes) const;
+	void invokeSynthStatus(int index, bool status) const;
 
 private:
 	juce::Array<ErrorCallback> error;
@@ -85,6 +88,7 @@ private:
 	juce::Array<SeqRecChangedCallback> seqRecChanged;
 	juce::Array<SeqDataRefChangedCallback> seqDataRefChanged;
 	juce::Array<PluginSearchMesCallback> pluginSearchMesChanged;
+	juce::Array<SynthStatusCallback> synthStatus;
 
 public:
 	static CoreCallbacks* getInstance();

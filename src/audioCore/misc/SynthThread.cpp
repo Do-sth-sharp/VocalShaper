@@ -1,5 +1,6 @@
 ﻿#include "SynthThread.h"
 #include "../graph/SeqSourceProcessor.h"
+#include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
 #include "../misc/PlayPosition.h"
 #include "../Utils.h"
@@ -9,6 +10,10 @@ SynthThread::SynthThread(SeqSourceProcessor* parent)
 
 SynthThread::~SynthThread() {
 	this->stopThread(5000);
+}
+
+void SynthThread::setIndex(int index) {
+	this->index = index;
 }
 
 void SynthThread::synthNow() {
@@ -32,6 +37,10 @@ void SynthThread::synthNow() {
 	if (!midiMode) {
 		this->parent->prepareAudioData(length);
 	}
+
+	/** State Changed */
+	UICallbackAPI<int, bool>::invoke(
+		UICallbackType::SynthStateChanged, this->index, true);
 
 	/** Start Thread */
 	this->startThread();
@@ -186,4 +195,13 @@ void SynthThread::run() {
 
 	/** Reset Play Head */
 	plugin->setPlayHead(oldPlayHead);
+
+	/** State Changed */
+	int index = this->index;
+	juce::MessageManager::callAsync(
+		[index] {
+			UICallbackAPI<int, bool>::invoke(
+				UICallbackType::SynthStateChanged, index, false);
+		}
+	);
 }

@@ -90,6 +90,7 @@ public:
 	static void setSeqMIDITrack(int index, int midiTrack);
 	static void setSeqAudioRef(int index, const juce::String& path);
 	static void setSeqMIDIRef(int index, const juce::String& path, bool getTempo);
+	static void synthSeq(int index);
 	static void removeSeq(int index);
 
 	static void addTempoLabel(double time, double tempo);

@@ -82,6 +82,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](const juce::String& mes) {
 			CoreCallbacks::getInstance()->invokePluginSearchMes(mes);
 		});
+	UICallbackAPI<int, bool>::set(UICallbackType::SynthStateChanged,
+		[](int index, bool status) {
+			CoreCallbacks::getInstance()->invokeSynthStatus(index, status);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -162,6 +166,10 @@ void CoreCallbacks::addSeqDataRefChanged(const SeqDataRefChangedCallback& callba
 
 void CoreCallbacks::addPluginSearchMes(const PluginSearchMesCallback& callback) {
 	this->pluginSearchMesChanged.add(callback);
+}
+
+void CoreCallbacks::addSynthStatus(const SynthStatusCallback& callback) {
+	this->synthStatus.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -282,6 +290,12 @@ void CoreCallbacks::invokeSeqDataRefChanged(int index) const {
 void CoreCallbacks::invokePluginSearchMes(const juce::String& mes) const {
 	for (auto& i : this->pluginSearchMesChanged) {
 		i(mes);
+	}
+}
+
+void CoreCallbacks::invokeSynthStatus(int index, bool status) const {
+	for (auto& i : this->synthStatus) {
+		i(index, status);
 	}
 }
 

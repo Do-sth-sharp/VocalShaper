@@ -38,6 +38,7 @@ public:
 	void updateMixerTrack();
 	void updateDataRef();
 	void updateData();
+	void updateSynthState(bool state);
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;

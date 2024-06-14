@@ -28,6 +28,7 @@ public:
 	void updateMixerTrack(int index);
 	void updateDataRef(int index);
 	void updateData(int index);
+	void updateSynthState(int index, bool state);
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
@@ -64,6 +65,7 @@ private:
 		void updateMixerTrack();
 		void updateDataRef(int index);
 		void updateData(int index);
+		void updateSynthState(int index, bool state);
 
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);
