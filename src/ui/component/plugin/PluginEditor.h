@@ -30,7 +30,6 @@ private:
 	const quickAPI::EditorPointer editor;
 	const PluginType type;
 
-	std::unique_ptr<juce::Viewport> editorViewport = nullptr;
 	std::unique_ptr<juce::Viewport> configViewport = nullptr;
 	std::unique_ptr<juce::Drawable> bypassIcon = nullptr;
 	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;

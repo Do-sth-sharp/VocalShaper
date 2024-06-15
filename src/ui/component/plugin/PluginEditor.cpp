@@ -14,18 +14,13 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forPluginEditor());
 
-	/** Add Listener To Comp */
 	if (editor) {
+		/** Add Listener To Comp */
 		editor->addComponentListener(this);
-	}
 
-	/** Editor Viewport */
-	this->editorViewport = std::make_unique<juce::Viewport>(TRANS("Plugin Editor"));
-	this->editorViewport->setViewedComponent(editor, false);
-	this->editorViewport->setScrollBarPosition(false, false);
-	this->editorViewport->setScrollOnDragMode(
-		juce::Viewport::ScrollOnDragMode::nonHover);
-	this->addAndMakeVisible(this->editorViewport.get());
+		/** Add As Child */
+		this->addAndMakeVisible(editor);
+	}
 
 	/** Config Viewport */
 	this->pluginProp = std::make_unique<PluginPropComponent>(type, plugin);
@@ -134,16 +129,10 @@ quickAPI::EditorPointer PluginEditorContent::getEditor() const {
 
 juce::Point<int> PluginEditorContent::getPerferedSize() {
 	auto screenSize = utils::getScreenSize(this);
-	/** Do This To Fix Editor Size On Different Screens, But It Doesn't Work. */
-	//double screenScale = utils::getScreenScale(this);
-	double screenScale = 1.5;
 	int toolBarHeight = screenSize.getHeight() * 0.03;
 	if (this->editor) {
-		/** Have To Do This To Fix Editor Size, I Don't Know What Happend But This Works */
 		auto bounds = this->editor->getBounds();
-		int width = bounds.getWidth() + screenSize.getWidth() * 0.01 * (1.5 / screenScale);
-		int height = bounds.getHeight() + screenSize.getHeight() * 0.05 * (1.5 / screenScale);
-		return { width, height + toolBarHeight };
+		return { bounds.getWidth(), bounds.getHeight() + toolBarHeight };
 	}
 	return { screenSize.getWidth() / 4, screenSize.getHeight() / 4 };
 }
@@ -175,12 +164,8 @@ void PluginEditorContent::resized() {
 		buttonHeight, buttonHeight);
 	this->pinButton->setBounds(pinRect);
 
-	int right = this->getWidth();
-	if (this->editor) {
-		right = std::min(right, this->editor->getWidth());
-	}/**< Have To Do This To Fix Width, I Don't Know What Happend But This Works */
 	juce::Rectangle<int> scaleRect(
-		right - toolPaddingWidth - scaleButtonWidth,
+		this->getWidth() - toolPaddingWidth - scaleButtonWidth,
 		toolPaddingHeight, scaleButtonWidth, buttonHeight);
 	this->scaleButton->setBounds(scaleRect);
 
@@ -190,8 +175,10 @@ void PluginEditorContent::resized() {
 	/** Content */
 	juce::Rectangle<int> contentRect =
 		this->getLocalBounds().withTrimmedTop(toolBarHeight);
-	this->editorViewport->setBounds(contentRect);
 	this->configViewport->setBounds(contentRect);
+	if (this->editor) {
+		this->editor->setTopLeftPosition(contentRect.getTopLeft());
+	}
 
 	/** Config View Port */
 	{
@@ -240,8 +227,7 @@ void PluginEditorContent::update() {
 }
 
 void PluginEditorContent::componentBeingDeleted(juce::Component&) {
-	/** Remove Editor */
-	this->editorViewport->setViewedComponent(nullptr, false);
+	/** Update Plugin */
 	this->update();
 
 	/** Delete From Hub */
@@ -284,7 +270,9 @@ void PluginEditorContent::bypass() {
 
 void PluginEditorContent::config() {
 	bool newState = !(this->configButton->getToggleState());
-	this->editorViewport->setVisible(!newState);
+	if (this->editor) {
+		this->editor->setVisible(!newState);
+	}
 	this->configViewport->setVisible(newState);
 	this->configButton->setToggleState(newState,
 		juce::NotificationType::dontSendNotification);
@@ -411,11 +399,22 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 		juce::ResizableWindow::ColourIds::backgroundColourId), 
 		juce::DocumentWindow::allButtons, true) {
 	this->setUsingNativeTitleBar(true);
-	this->setResizable(true, false);
+	this->setResizable(false, false);
 
 	this->setContentOwned(
 		new PluginEditorContent{
 			this, name, type, plugin, editor }, false);
+
+	if (auto content = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
+		auto size = content->getPerferedSize();
+		juce::MessageManager::callAsync(
+			[size, comp = juce::Component::SafePointer(this)] {
+				if (comp) {
+					comp->centreWithSize(size.getX(), size.getY());
+				}
+			}
+		);
+	}
 }
 
 PluginEditor::~PluginEditor() {
@@ -437,12 +436,10 @@ void PluginEditor::update() {
 
 void PluginEditor::sizeChanged(const juce::Point<int>& size) {
 	int width = size.getX(), height = size.getY();
-	this->setResizeLimits(width / 2, height / 2, width, height);
 	juce::MessageManager::callAsync(
 		[width, height, comp = juce::Component::SafePointer(this)] {
 			if (comp) {
-				comp->centreWithSize(width, height);
-
+				comp->setSize(width, height);
 			}
 		}
 	);
