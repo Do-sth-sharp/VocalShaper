@@ -191,7 +191,7 @@ juce::PopupMenu SeqTrackIOComponent::createLinkMenu() const {
 	auto mixerTracks = quickAPI::getMixerTrackNameList();
 	for (int i = 0; i < mixerTracks.size(); i++) {
 		juce::String name = TRANS("Mixer Track") + " #" + juce::String{ i } + " " + mixerTracks[i];
-		menu.addItem(i + 1, name, i != this->index,
+		menu.addItem(i + 1, name, true,
 			this->isMidi ? this->midiOutputMixerTemp.contains(i)
 			: this->audioOutputMixerTemp.contains(i));
 	}
