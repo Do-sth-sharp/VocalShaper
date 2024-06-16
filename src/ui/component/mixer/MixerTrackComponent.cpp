@@ -60,6 +60,10 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->effectList = std::make_unique<juce::ListBox>(
 		TRANS("Fx List"), this->effectListModel.get());
 	this->addAndMakeVisible(this->effectList.get());
+
+	/** Focus */
+	this->setWantsKeyboardFocus(true);
+	this->setMouseClickGrabsKeyboardFocus(true);
 }
 
 void MixerTrackComponent::resized() {
@@ -244,21 +248,21 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
-	juce::Colour outlineColor = laf.findColour(this->dragHovered
+	juce::Colour outlineColor = laf.findColour(this->dragHovered || this->hasKeyboardFocus(true)
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
 	juce::Colour dropLineColor = laf.findColour(
 		juce::Label::ColourIds::outlineWhenEditingColourId);
 
-	/** Outline */
-	auto totalRect = this->getLocalBounds();
-	g.setColour(outlineColor);
-	g.drawRect(totalRect, outlineThickness);
-
 	/** Effect Rect */
 	auto effectRect = this->effectList->getBounds();
 	g.setColour(backgroundColor);
 	g.drawRect(effectRect, outlineThickness);
+
+	/** Outline */
+	auto totalRect = this->getLocalBounds();
+	g.setColour(outlineColor);
+	g.drawRect(totalRect, outlineThickness);
 
 	/** Drop Line */
 	auto& [dropIndex, dropYPos] = this->dropItemState;
@@ -537,6 +541,14 @@ void MixerTrackComponent::itemDropped(
 		this->audioInput->setAudioInputFromSeq(seqIndex, true);
 		return;
 	}
+}
+
+void MixerTrackComponent::focusGained(FocusChangeType cause) {
+	this->repaint();
+}
+
+void MixerTrackComponent::focusLost(FocusChangeType cause) {
+	this->repaint();
 }
 
 void MixerTrackComponent::preDrop() {

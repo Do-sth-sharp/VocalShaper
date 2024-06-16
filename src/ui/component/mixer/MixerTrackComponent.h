@@ -37,6 +37,9 @@ public:
 	void itemDragExit(const SourceDetails& dragSourceDetails) override;
 	void itemDropped(const SourceDetails& dragSourceDetails) override;
 
+	void focusGained(FocusChangeType cause) override;
+	void focusLost(FocusChangeType cause) override;
+
 private:
 	int index = -1;
 	juce::Colour trackColor, nameColor;
