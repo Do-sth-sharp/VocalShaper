@@ -248,7 +248,8 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
-	juce::Colour outlineColor = laf.findColour(this->dragHovered || this->hasKeyboardFocus(true)
+	juce::Colour outlineColor = laf.findColour(
+		this->dragHovered || this->hasKeyboardFocus(true)
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
 	juce::Colour dropLineColor = laf.findColour(

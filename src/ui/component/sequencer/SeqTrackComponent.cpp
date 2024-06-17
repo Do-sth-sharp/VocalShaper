@@ -116,6 +116,10 @@ SeqTrackComponent::SeqTrackComponent(
 		scrollFunc, wheelHFunc, wheelAltHFunc,
 		dragStartFunc, dragProcessFunc, dragEndFunc);
 	this->addAndMakeVisible(this->content.get());
+
+	/** Focus */
+	this->setWantsKeyboardFocus(true);
+	this->setMouseClickGrabsKeyboardFocus(true);
 }
 
 void SeqTrackComponent::update(int index) {
@@ -352,7 +356,8 @@ void SeqTrackComponent::paintOverChildren(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour outlineColor = laf.findColour(this->dragHovered
+	juce::Colour outlineColor = laf.findColour(
+		this->dragHovered || this->hasKeyboardFocus(true)
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
 
@@ -528,6 +533,14 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 			this->setContentMIDIRef(filePath);
 		}
 	}
+}
+
+void SeqTrackComponent::focusGained(FocusChangeType cause) {
+	this->repaint();
+}
+
+void SeqTrackComponent::focusLost(FocusChangeType cause) {
+	this->repaint();
 }
 
 void SeqTrackComponent::editTrackName() {

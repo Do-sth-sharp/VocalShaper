@@ -59,6 +59,9 @@ public:
 	void fileDragExit(const juce::StringArray& files) override;
 	void filesDropped(const juce::StringArray& files, int x, int y) override;
 
+	void focusGained(FocusChangeType cause) override;
+	void focusLost(FocusChangeType cause) override;
+
 private:
 	const WheelFunc wheelVFunc;
 	const WheelAltFunc wheelAltVFunc;

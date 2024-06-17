@@ -20,7 +20,9 @@ SeqView::TrackList::TrackList(
 	const DragEndFunc& dragEndFunc)
 	: scrollFunc(scrollFunc), wheelHFunc(wheelHFunc), wheelAltHFunc(wheelAltHFunc),
 	wheelVFunc(wheelVFunc), wheelAltVFunc(wheelAltVFunc),
-	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc) {}
+	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc) {
+	this->setWantsKeyboardFocus(true);
+}
 
 int SeqView::TrackList::size() const {
 	return this->list.size();
