@@ -152,5 +152,7 @@ private:
 	void processAreaDragTo(int distanceX, int distanceY, bool moveX = true, bool moveY = true);
 	void processAreaDragEnd();
 
+	void seqTrackSelected(int index, bool selected);
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };

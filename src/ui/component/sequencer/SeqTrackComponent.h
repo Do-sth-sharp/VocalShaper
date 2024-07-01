@@ -20,6 +20,7 @@ public:
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
+	using SeqTrackSelectFunc = std::function<void(int, bool)>;
 	SeqTrackComponent(const ScrollFunc& scrollFunc,
 		const WheelFunc& wheelHFunc,
 		const WheelAltFunc& wheelAltHFunc,
@@ -27,7 +28,8 @@ public:
 		const WheelAltFunc& wheelAltVFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
-		const DragEndFunc& dragEndFunc);
+		const DragEndFunc& dragEndFunc,
+		const SeqTrackSelectFunc& trackSelectFunc);
 
 	void update(int index);
 	void updateBlock(int blockIndex);
@@ -65,6 +67,7 @@ public:
 private:
 	const WheelFunc wheelVFunc;
 	const WheelAltFunc wheelAltVFunc;
+	const SeqTrackSelectFunc trackSelectFunc;
 
 	int index = -1;
 	juce::Colour trackColor, idColor;

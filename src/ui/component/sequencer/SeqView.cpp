@@ -725,6 +725,12 @@ void SeqView::update(int index) {
 					if (comp) {
 						comp->processAreaDragEnd();
 					}
+				},
+				[comp = ScrollerBase::SafePointer(this)]
+				(int index, bool selected) {
+					if (comp) {
+						comp->seqTrackSelected(index, selected);
+					}
 				});
 			this->trackList->add(std::move(track));
 		}
@@ -1034,4 +1040,8 @@ void SeqView::processAreaDragTo(
 void SeqView::processAreaDragEnd() {
 	this->viewMoving = false;
 	this->moveStartPosX = this->moveStartPosY = 0;
+}
+
+void SeqView::seqTrackSelected(int index, bool selected) {
+	/** TODO */
 }

@@ -15,8 +15,10 @@ SeqTrackComponent::SeqTrackComponent(
 	const WheelAltFunc& wheelAltVFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
-	const DragEndFunc& dragEndFunc)
-	: wheelVFunc(wheelVFunc), wheelAltVFunc(wheelAltVFunc) {
+	const DragEndFunc& dragEndFunc,
+	const SeqTrackSelectFunc& trackSelectFunc)
+	: wheelVFunc(wheelVFunc), wheelAltVFunc(wheelAltVFunc),
+	trackSelectFunc(trackSelectFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeqTrack());
@@ -536,10 +538,12 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 }
 
 void SeqTrackComponent::focusGained(FocusChangeType cause) {
+	this->trackSelectFunc(this->index, true);
 	this->repaint();
 }
 
 void SeqTrackComponent::focusLost(FocusChangeType cause) {
+	this->trackSelectFunc(this->index, false);
 	this->repaint();
 }
 
