@@ -1,6 +1,6 @@
 ﻿#include "SourceIO.h"
-#include "PlayPosition.h"
-#include "AudioLock.h"
+#include "../misc/PlayPosition.h"
+#include "../misc/AudioLock.h"
 #include "../Utils.h"
 
 #define TIME_TRACK_NAME "##VS_TIME"

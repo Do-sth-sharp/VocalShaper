@@ -3,7 +3,7 @@
 #include <JuceHeader.h>
 
 #include "../misc/Renderer.h"
-#include "../misc/SourceIO.h"
+#include "../source/SourceIO.h"
 #include "../plugin/Plugin.h"
 #include "../plugin/PluginLoader.h"
 #include "../project/ProjectInfoData.h"
