@@ -9,6 +9,7 @@
 #include "misc/Renderer.h"
 #include "misc/Device.h"
 #include "misc/AudioLock.h"
+#include "source/SourceManager.h"
 #include "project/ProjectInfoData.h"
 #include "action/ActionDispatcher.h"
 #include "uiCallback/UICallback.h"
@@ -91,6 +92,7 @@ AudioCore::~AudioCore() {
 	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
 	Plugin::releaseInstance();
+	SourceManager::releaseInstance();
 	UICallback::releaseInstance();
 }
 
