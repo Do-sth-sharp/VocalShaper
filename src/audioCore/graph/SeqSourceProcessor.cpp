@@ -2,8 +2,8 @@
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
-#include "../misc/SynthThread.h"
 #include "../source/SourceIO.h"
+#include "../source/SourceManager.h"
 #include "../AudioConfig.h"
 #include "../uiCallback/UICallback.h"
 #include "../Utils.h"
@@ -48,8 +48,7 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 			{ this->audioOutputNode->nodeID, i } });
 	}
 
-	/** Synth Thread */
-	this->synthThread = std::make_unique<SynthThread>(this);
+	/** TODO Synth Thread */
 
 	/** Set Level Size */
 	this->outputLevels.resize(type.size());
@@ -58,13 +57,16 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 	this->trackColor = utils::getDefaultColour();
 }
 
+SeqSourceProcessor::~SeqSourceProcessor() {
+	this->releaseAudio();
+	this->releaseMIDI();
+}
+
 void SeqSourceProcessor::updateIndex(int index) {
 	this->index = index;
 	this->srcs.updateIndex(index);
 
-	if (auto synthThread = dynamic_cast<SynthThread*>(this->synthThread.get())) {
-		synthThread->setIndex(index);
-	}
+	/** TODO Synth Index */
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
@@ -277,13 +279,12 @@ bool SeqSourceProcessor::getInstrOffline() const {
 }
 
 bool SeqSourceProcessor::isSynthRunning() const {
-	return this->synthThread->isThreadRunning();
+	/** TODO */
+	return false;
 }
 
 void SeqSourceProcessor::startSynth() {
-	if (auto thread = dynamic_cast<SynthThread*>(this->synthThread.get())) {
-		thread->synthNow();
-	}
+	/** TODO */
 }
 
 double SeqSourceProcessor::getSourceLength() const {
@@ -291,38 +292,20 @@ double SeqSourceProcessor::getSourceLength() const {
 }
 
 double SeqSourceProcessor::getMIDILength() const {
-	if (!this->midiData) { return 0; }
-	return this->midiData->getLastTimestamp() + AudioConfig::getMidiTail();
+	return SourceManager::getInstance()->getLength(
+		this->midiSourceRef, SourceManager::SourceType::MIDI);
 }
 
 double SeqSourceProcessor::getAudioLength() const {
-	if (!this->audioData) { return 0; }
-	return this->audioData->getNumSamples() / this->audioSampleRate;
+	return SourceManager::getInstance()->getLength(
+		this->audioSourceRef, SourceManager::SourceType::Audio);
 }
 
 void SeqSourceProcessor::initAudio(double sampleRate, double length) {
-	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getSourceLock());
-
-	/** Clear Audio Source */
-	this->resampleSource = nullptr;
-	this->memSource = nullptr;
-	this->audioData = nullptr;
-
-	/** Create Buffer */
-	this->audioData = std::make_unique<juce::AudioSampleBuffer>(
-		this->audioChannels.size(), (int)std::ceil(length * sampleRate));
-	vMath::zeroAllAudioData(*(this->audioData.get()));
-	this->audioSampleRate = sampleRate;
-
-	/** Update Resample Source */
-	this->updateAudioResampler();
-
-	/** Update Name */
-	this->audioName = juce::String{};
-
-	/** Set Flag */
-	this->audioChanged();
+	this->applyAudio();
+	SourceManager::getInstance()->initAudio(this->audioSourceRef,
+		this->audioChannels.size(), sampleRate, length,
+		this->getBlockSize(), this->getSampleRate());
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
@@ -330,19 +313,8 @@ void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 }
 
 void SeqSourceProcessor::initMIDI() {
-	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getSourceLock());
-
-	/** Create MIDI Data */
-	this->midiData = std::make_unique<juce::MidiFile>();
-	this->midiData->addTrack(juce::MidiMessageSequence{});
-
-	/** Update Name */
-	this->midiName = juce::String{};
-	this->currentMIDITrack = 0;
-
-	/** Set Flag */
-	this->midiChanged();
+	this->applyMIDI();
+	SourceManager::getInstance()->initMIDI(this->midiSourceRef);
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
@@ -351,25 +323,11 @@ void SeqSourceProcessor::initMIDI() {
 
 void SeqSourceProcessor::setAudio(double sampleRate,
 	const juce::AudioSampleBuffer& data, const juce::String& name) {
-	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getSourceLock());
-
-	/** Clear Audio Source */
-	this->resampleSource = nullptr;
-	this->memSource = nullptr;
-	this->audioData = nullptr;
-
-	/** Create Buffer */
-	this->audioData = std::make_unique<juce::AudioSampleBuffer>(data);
-	this->audioSampleRate = sampleRate;
-	this->audioName = name;
-
-	/** Update Resample Source */
-	this->updateAudioResampler();
-
-	/** Set Flag */
-	this->audioChanged();
-
+	this->applyAudio();
+	SourceManager::getInstance()->setAudio(this->audioSourceRef,
+		sampleRate, data, name,
+		this->getBlockSize(), this->getSampleRate());
+	
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
 	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
@@ -378,16 +336,10 @@ void SeqSourceProcessor::setAudio(double sampleRate,
 void SeqSourceProcessor::setMIDI(
 	const juce::MidiFile& data, const juce::String& name,
 	int midiTrack) {
-	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getSourceLock());
-
-	/** Create MIDI Data */
-	this->midiData = std::make_unique<juce::MidiFile>(data);
-	this->midiName = name;
+	this->applyMIDI();
+	SourceManager::getInstance()->setMIDI(this->midiSourceRef,
+		data, name);
 	this->currentMIDITrack = midiTrack;
-
-	/** Set Flag */
-	this->midiChanged();
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
@@ -395,44 +347,15 @@ void SeqSourceProcessor::setMIDI(
 }
 
 const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio() const {
-	/** Lock */
-	juce::ScopedReadLock locker(audioLock::getSourceLock());
-
-	/** Check Data */
-	if (!this->audioData) {
-		return { 0, juce::AudioSampleBuffer{} };
-	}
-
-	/** Copy Data */
-	return { this->audioSampleRate, *(this->audioData.get()) };
+	return SourceManager::getInstance()->getAudio(this->audioSourceRef);
 }
 
 const juce::MidiMessageSequence SeqSourceProcessor::getMIDI() const {
-	/** Lock */
-	juce::ScopedReadLock locker(audioLock::getSourceLock());
-
-	/** Check Data */
-	if (this->midiData) {
-		if (auto track = this->midiData->getTrack(this->currentMIDITrack)) {
-			return juce::MidiMessageSequence{ *track };
-		}
-	}
-
-	/** Default Result */
-	return juce::MidiMessageSequence{};
+	return SourceManager::getInstance()->getMIDI(this->midiSourceRef, this->currentMIDITrack);
 }
 
 const juce::MidiFile SeqSourceProcessor::getMIDIFile() const {
-	/** Lock */
-	juce::ScopedReadLock locker(audioLock::getSourceLock());
-
-	/** Check Data */
-	if (!this->midiData) {
-		return juce::MidiFile{};
-	}
-
-	/** Copy Data */
-	return *(this->midiData.get());
+	return SourceManager::getInstance()->getMIDIFile(this->midiSourceRef);
 }
 
 void SeqSourceProcessor::saveAudio(const juce::String& path) const {
@@ -488,7 +411,7 @@ void SeqSourceProcessor::loadMIDI(const juce::String& path, bool getTempo) {
 }
 
 const juce::String SeqSourceProcessor::getAudioFileName() const {
-	juce::String name = this->audioName;
+	juce::String name = this->getAudioName();
 	if (name.isEmpty()) { name = this->trackName; }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 	
@@ -498,7 +421,7 @@ const juce::String SeqSourceProcessor::getAudioFileName() const {
 }
 
 const juce::String SeqSourceProcessor::getMIDIFileName() const {
-	juce::String name = this->midiName;
+	juce::String name = this->getMIDIName();
 	if (name.isEmpty()) { name = this->trackName; }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 
@@ -508,43 +431,53 @@ const juce::String SeqSourceProcessor::getMIDIFileName() const {
 }
 
 const juce::String SeqSourceProcessor::getAudioName() const {
-	return this->audioName;
+	return SourceManager::getInstance()->getFileName(
+		this->audioSourceRef, SourceManager::SourceType::Audio);
 }
 
 const juce::String SeqSourceProcessor::getMIDIName() const {
-	return this->midiName;
+	return SourceManager::getInstance()->getFileName(
+		this->midiSourceRef, SourceManager::SourceType::MIDI);
 }
 
 void SeqSourceProcessor::audioChanged() {
-	this->audioSavedFlag = false;
+	SourceManager::getInstance()->changed(
+		this->audioSourceRef, SourceManager::SourceType::Audio);
 }
 
 void SeqSourceProcessor::midiChanged() {
-	this->midiSavedFlag = false;
+	SourceManager::getInstance()->changed(
+		this->midiSourceRef, SourceManager::SourceType::MIDI);
 }
 
 void SeqSourceProcessor::audioSaved() {
-	this->audioSavedFlag = true;
+	SourceManager::getInstance()->saved(
+		this->audioSourceRef, SourceManager::SourceType::Audio);
 }
 
 void SeqSourceProcessor::midiSaved() {
-	this->midiSavedFlag = true;
+	SourceManager::getInstance()->saved(
+		this->midiSourceRef, SourceManager::SourceType::MIDI);
 }
 
 bool SeqSourceProcessor::isAudioSaved() const {
-	return this->audioSavedFlag;
+	return SourceManager::getInstance()->isSaved(
+		this->audioSourceRef, SourceManager::SourceType::Audio);
 }
 
 bool SeqSourceProcessor::isMIDISaved() const {
-	return this->midiSavedFlag;
+	return SourceManager::getInstance()->isSaved(
+		this->midiSourceRef, SourceManager::SourceType::MIDI);
 }
 
 bool SeqSourceProcessor::isAudioValid() const {
-	return (bool)this->audioData;
+	return SourceManager::getInstance()->isValid(
+		this->audioSourceRef, SourceManager::SourceType::Audio);
 }
 
 bool SeqSourceProcessor::isMIDIValid() const {
-	return (bool)this->midiData;
+	return SourceManager::getInstance()->isValid(
+		this->midiSourceRef, SourceManager::SourceType::MIDI);
 }
 
 void SeqSourceProcessor::setCurrentMIDITrack(int trackIndex) {
@@ -559,15 +492,16 @@ int SeqSourceProcessor::getCurrentMIDITrack() const {
 }
 
 int SeqSourceProcessor::getTotalMIDITrackNum() const {
-	if (this->midiData) {
-		return this->midiData->getNumTracks();
-	}
-	return 0;
+	return SourceManager::getInstance()->getMIDITrackNum(this->midiSourceRef);
 }
 
 void SeqSourceProcessor::setRecording(bool recording) {
 	if (recording) {
-		this->prepareRecord();
+		this->applyAudioIfNeed();
+		this->applyMIDIIfNeed();
+		SourceManager::getInstance()->prepareAudioRecord(this->audioSourceRef,
+			this->audioChannels.size(), this->getBlockSize(), this->getSampleRate());
+		SourceManager::getInstance()->prepareMIDIRecord(this->midiSourceRef);
 	}
 	this->recordingFlag = recording;
 
@@ -604,8 +538,9 @@ void SeqSourceProcessor::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->juce::AudioProcessorGraph::prepareToPlay(
 		sampleRate, maximumExpectedSamplesPerBlock);
-	this->prepareMIDIPlay(sampleRate, maximumExpectedSamplesPerBlock);
-	this->prepareAudioPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	SourceManager::getInstance()->prepareMIDIPlay(this->midiSourceRef);
+	SourceManager::getInstance()->prepareAudioPlay(this->audioSourceRef, 
+		sampleRate, maximumExpectedSamplesPerBlock);
 }
 
 void SeqSourceProcessor::processBlock(
@@ -800,7 +735,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	}
 	mes->set_offline(this->getInstrOffline());
 
-	if (this->audioData) {
+	if (this->isAudioValid()) {
 		juce::String name = this->getAudioFileName();
 		juce::String path = utils::getProjectDir()
 			.getChildFile(name).getFullPathName();
@@ -808,7 +743,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 		mes->set_audiosrc(name.toStdString());
 		this->saveAudio(path);
 	}
-	if (this->midiData) {
+	if (this->isMIDIValid()) {
 		juce::String name = this->getMIDIFileName();
 		juce::String path = utils::getProjectDir()
 			.getChildFile(name).getFullPathName();
@@ -824,178 +759,75 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
-void SeqSourceProcessor::prepareAudioPlay(
-	double sampleRate, int maximumExpectedSamplesPerBlock) {
-	/** Lock */
-	juce::ScopedWriteLock sourceLock(audioLock::getSourceLock());
-
-	/** Update Audio Sample Rate */
-	if (this->resampleSource) {
-		this->resampleSource->setResamplingRatio(this->audioSampleRate / sampleRate);
-		this->resampleSource->prepareToPlay(maximumExpectedSamplesPerBlock, sampleRate);
-	}
-}
-
-void SeqSourceProcessor::prepareMIDIPlay(
-	double /*sampleRate*/, int /*maximumExpectedSamplesPerBlock*/) {
-	/** Nothing To Do */
-}
-
 void SeqSourceProcessor::readAudioData(
 	juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {
-	/** Check Source */
-	if (!this->resampleSource) { return; }
-	if (buffer.getNumSamples() <= 0 || length <= 0) { return; }
-
-	/** Get Data */
-	if (this->resampleSource && this->memSource) {
-		this->memSource->setNextReadPosition(
-			(int64_t)(dataOffset * this->resampleSource->getResamplingRatio()));
-		int startSample = bufferOffset;
-		this->resampleSource->getNextAudioBlock(juce::AudioSourceChannelInfo{
-			&buffer, startSample,
-				std::min(buffer.getNumSamples() - startSample, length) });
-	}
+	SourceManager::getInstance()->readAudioData(this->audioSourceRef,
+		buffer, bufferOffset, dataOffset, length);
 }
 
 void SeqSourceProcessor::readMIDIData(
 	juce::MidiBuffer& buffer, int baseTime,
 	int startTime, int endTime) const {
-	/** Check Source */
-	if (!this->midiData) { return; }
-
-	/** Get MIDI Data */
-	juce::MidiMessageSequence total;
-	if (auto track = this->midiData->getTrack(this->currentMIDITrack)) {
-		total.addSequence(*track, 0,
-			startTime / this->getSampleRate(), endTime / this->getSampleRate());
-	}
-
-	/** Copy Data */
-	for (auto i : total) {
-		auto& message = i->message;
-		double time = message.getTimeStamp();
-		buffer.addEvent(message,
-			std::floor((time - baseTime / this->getSampleRate()) * this->getSampleRate()));
-	}
+	double sampleRate = this->getSampleRate();
+	SourceManager::getInstance()->readMIDIData(this->midiSourceRef,
+		buffer, baseTime / sampleRate, startTime / sampleRate, endTime / sampleRate,
+		this->currentMIDITrack, sampleRate);
 }
 
 void SeqSourceProcessor::writeAudioData(juce::AudioBuffer<float>& buffer, int offset) {
-	/** Get Time */
-	int srcLength = buffer.getNumSamples();
-	int srcStartSample = offset;
-	//int bufferStartSample = 0;
-	/*if (srcStartSample < 0) {
-		bufferStartSample -= srcStartSample;
-		srcLength -= bufferStartSample;
-		srcStartSample = 0;
-	}*/
-
-	/** Prepare Resampling */
-	this->prepareAudioRecord();
-	double resampleRatio = this->getSampleRate() / this->audioSampleRate;
-	int channelNum = std::min(buffer.getNumChannels(), this->audioData->getNumChannels());
-
-	/** Increase Source Length */
-	int endLength = offset + buffer.getNumSamples();
-	int trueEndLength = std::ceil(endLength / resampleRatio);
-	if (trueEndLength > this->audioData->getNumSamples()) {
-		this->audioData->setSize(this->audioData->getNumChannels(),
-			this->audioData->getNumSamples() + this->recordInitLength * this->audioSampleRate,
-			true, true, true);
-		this->updateAudioResampler();
-	}
-
-	/** Copy Data Resampled */
-	utils::bufferOutputResampledFixed(*(this->audioData.get()), buffer,
-		this->recordBuffer, this->recordBufferTemp,
-		resampleRatio, channelNum, this->audioSampleRate,
-		0, srcStartSample, srcLength);
-
-	/** Set Flag */
-	this->audioChanged();
+	SourceManager::getInstance()->writeAudioData(this->audioSourceRef,
+		buffer, offset,
+		this->audioChannels.size(), this->getBlockSize(), this->getSampleRate());
 }
 
 void SeqSourceProcessor::writeMIDIData(const juce::MidiBuffer& buffer, int offset) {
-	/** Prepare Write */
-	this->prepareMIDIRecord();
+	SourceManager::getInstance()->writeMIDIData(this->midiSourceRef,
+		buffer, offset, this->currentMIDITrack, this->getSampleRate());
+}
 
-	/** Write To The Last Track */
-	if (auto track = const_cast<juce::MidiMessageSequence*>(
-		this->midiData->getTrack(this->currentMIDITrack))) {
-		for (const auto& m : buffer) {
-			double timeStamp = (m.samplePosition + offset) / this->getSampleRate();
-			if (timeStamp >= 0) {
-				auto mes = m.getMessage();
-				mes.setTimeStamp(timeStamp);
-				track->addEvent(mes);
-			}
-		}
+void SeqSourceProcessor::applyAudio() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	this->releaseAudio();
+	this->audioSourceRef = SourceManager::getInstance()->applySource(
+		SourceManager::SourceType::Audio);
+}
 
-		/** Set Flag */
-		this->midiChanged();
+void SeqSourceProcessor::applyMIDI() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	this->releaseMIDI();
+	this->midiSourceRef = SourceManager::getInstance()->applySource(
+		SourceManager::SourceType::MIDI);
+}
+
+void SeqSourceProcessor::releaseAudio() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	if (this->audioSourceRef > 0) {
+		SourceManager::getInstance()->releaseSource(this->audioSourceRef);
+		this->audioSourceRef = 0;
 	}
 }
 
-void SeqSourceProcessor::updateAudioResampler() {
-	/** Lock */
-	juce::ScopedWriteLock locker(audioLock::getSourceLock());
-
-	/** Check Audio Data */
-	if (!this->audioData) { return; }
-
-	/** Remove Resample Source */
-	this->resampleSource = nullptr;
-
-	/** Create Audio Source */
-	this->memSource = std::make_unique<juce::MemoryAudioSource>(
-		*(this->audioData.get()), false, false);
-	auto resSource = std::make_unique<juce::ResamplingAudioSource>(
-		this->memSource.get(), false, this->audioData->getNumChannels());
-
-	/** Set Sample Rate */
-	resSource->setResamplingRatio(this->audioSampleRate / this->getSampleRate());
-	resSource->prepareToPlay(this->getBlockSize(), this->getSampleRate());
-
-	/** Set Resample Source */
-	this->resampleSource = std::move(resSource);
-}
-
-void SeqSourceProcessor::prepareRecord() {
-	juce::ScopedReadLock locker(audioLock::getSourceLock());
-	this->prepareAudioRecord();
-	this->prepareMIDIRecord();
-}
-
-void SeqSourceProcessor::prepareAudioRecord() {
-	if (!this->audioData) {
-		this->prepareAudioData(this->recordInitLength);
+void SeqSourceProcessor::releaseMIDI() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	if (this->midiSourceRef > 0) {
+		SourceManager::getInstance()->releaseSource(this->midiSourceRef);
+		this->midiSourceRef = 0;
 	}
 }
 
-void SeqSourceProcessor::prepareMIDIRecord() {
-	if ((!this->midiData) || (this->midiData->getNumTracks() <= 0)) {
-		this->prepareMIDIData();
+void SeqSourceProcessor::applyAudioIfNeed() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	if (this->audioSourceRef == 0) {
+		this->applyAudio();
 	}
 }
 
-void SeqSourceProcessor::prepareAudioData(double length) {
-	double sampleRate = 0;
-
-	{
-		juce::ScopedReadLock locker(audioLock::getSourceLock());
-		sampleRate = this->audioSampleRate;
-		if (sampleRate <= 0) {
-			sampleRate = this->getSampleRate();
-		}
+void SeqSourceProcessor::applyMIDIIfNeed() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	if (this->midiSourceRef == 0) {
+		this->applyMIDI();
 	}
-
-	this->initAudio(sampleRate, length);
-}
-
-void SeqSourceProcessor::prepareMIDIData() {
-	this->initMIDI();
 }
 
 void SeqSourceProcessor::linkInstr() {

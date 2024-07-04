@@ -11,6 +11,7 @@ class SeqSourceProcessor final : public juce::AudioProcessorGraph,
 public:
 	SeqSourceProcessor() = delete;
 	SeqSourceProcessor(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	~SeqSourceProcessor();
 
 	void updateIndex(int index);
 
@@ -61,6 +62,7 @@ public:
 	void saveMIDI(const juce::String& path = "") const;
 	void loadAudio(const juce::String& path);
 	void loadMIDI(const juce::String& path, bool getTempo = false);
+	
 	const juce::String getAudioFileName() const;
 	const juce::String getMIDIFileName() const;
 	const juce::String getAudioName() const;
@@ -73,6 +75,7 @@ public:
 	bool isMIDISaved() const;
 	bool isAudioValid() const;
 	bool isMIDIValid() const;
+
 	void setCurrentMIDITrack(int trackIndex);
 	int getCurrentMIDITrack() const;
 	int getTotalMIDITrackNum() const;
@@ -132,30 +135,18 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr instr = nullptr;
 	std::atomic_bool instrOffline = false;
-	std::unique_ptr<juce::Thread> synthThread = nullptr;
 
 	juce::String trackName;
 	juce::Colour trackColor;
 
-	std::unique_ptr<juce::MidiFile> midiData = nullptr;
-	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
-	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
-	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
-	double audioSampleRate = 0;
-	juce::String audioName, midiName;
-	std::atomic_bool audioSavedFlag = true, midiSavedFlag = true;
+	uint64_t audioSourceRef = 0, midiSourceRef = 0;
 	std::atomic_int currentMIDITrack = 0;
 
 	std::atomic_bool recordingFlag = false;
-	const double recordInitLength = 30;
-	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
 
 	std::atomic_bool isMute = false;
 
 	juce::Array<float> outputLevels;
-
-	void prepareAudioPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
-	void prepareMIDIPlay(double sampleRate, int maximumExpectedSamplesPerBlock);
 
 	friend class SourceRecordProcessor;
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
@@ -165,14 +156,14 @@ private:
 	void writeAudioData(juce::AudioBuffer<float>& buffer, int offset);
 	void writeMIDIData(const juce::MidiBuffer& buffer, int offset);
 
-	void updateAudioResampler();
-	void prepareRecord();
-	void prepareAudioRecord();
-	void prepareMIDIRecord();
-
 	friend class SynthThread;
-	void prepareAudioData(double length);
-	void prepareMIDIData();
+
+	void applyAudio();
+	void applyMIDI();
+	void releaseAudio();
+	void releaseMIDI();
+	void applyAudioIfNeed();
+	void applyMIDIIfNeed();
 
 	void linkInstr();
 	void unlinkInstr();
