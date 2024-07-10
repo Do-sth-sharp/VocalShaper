@@ -409,6 +409,14 @@ void AudioCore::initAudioDevice() {
 }
 
 void AudioCore::updateAudioBuses() {
+	/** Lock Audio */
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+
+	/** Change Source Sample Rate */
+	SourceManager::getInstance()->sampleRateChanged(
+		Device::getInstance()->getAudioSampleRate(),
+		Device::getInstance()->getAudioBufferSize());
+
 	/** Link Audio Bus To Sequencer And Mixer */
 	if (auto mainGraph = this->mainAudioGraph.get()) {
 		/** Get Input Channel Num */

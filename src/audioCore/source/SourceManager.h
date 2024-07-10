@@ -46,6 +46,9 @@ public:
 		int trackChannelNum, int blockSize, double sampleRate);
 	void writeMIDIData(uint64_t ref, const juce::MidiBuffer& buffer, int offset, int trackIndex, double sampleRate);
 
+public:
+	void sampleRateChanged(double sampleRate, int blockSize);
+
 private:
 	class SourceItem final {
 	public:
@@ -98,6 +101,9 @@ private:
 		void prepareMIDIData();
 	};
 	std::map<uint64_t, std::shared_ptr<SourceItem>> sources;
+
+	double sampleRate = 0;
+	int blockSize = 0;
 
 	SourceItem* getSource(uint64_t ref, SourceType type) const;
 	SourceItem* getSourceFast(uint64_t ref, SourceType type) const;

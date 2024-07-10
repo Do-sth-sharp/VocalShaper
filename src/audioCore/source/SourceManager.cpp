@@ -224,6 +224,18 @@ void SourceManager::writeMIDIData(uint64_t ref, const juce::MidiBuffer& buffer, 
 	}
 }
 
+void SourceManager::sampleRateChanged(double sampleRate, int blockSize) {
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+	
+	this->sampleRate = sampleRate;
+	this->blockSize = blockSize;
+	
+	for (auto it = this->sources.begin(); it != this->sources.end(); it++) {
+		auto srcPtr = it->second.get();
+		/** TODO Change Sample Rate */
+	}
+}
+
 void SourceManager::SourceItem::initAudio(
 	int channelNum, double sampleRate, double length,
 	int blockSize, double playSampleRate) {
