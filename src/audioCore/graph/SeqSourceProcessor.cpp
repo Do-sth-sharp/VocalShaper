@@ -304,8 +304,7 @@ double SeqSourceProcessor::getAudioLength() const {
 void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 	this->applyAudio();
 	SourceManager::getInstance()->initAudio(this->audioSourceRef,
-		this->audioChannels.size(), sampleRate, length,
-		this->getBlockSize(), this->getSampleRate());
+		this->audioChannels.size(), sampleRate, length);
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
@@ -325,8 +324,7 @@ void SeqSourceProcessor::setAudio(double sampleRate,
 	const juce::AudioSampleBuffer& data, const juce::String& name) {
 	this->applyAudio();
 	SourceManager::getInstance()->setAudio(this->audioSourceRef,
-		sampleRate, data, name,
-		this->getBlockSize(), this->getSampleRate());
+		sampleRate, data, name);
 	
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
@@ -500,7 +498,7 @@ void SeqSourceProcessor::setRecording(bool recording) {
 		this->applyAudioIfNeed();
 		this->applyMIDIIfNeed();
 		SourceManager::getInstance()->prepareAudioRecord(this->audioSourceRef,
-			this->audioChannels.size(), this->getBlockSize(), this->getSampleRate());
+			this->audioChannels.size());
 		SourceManager::getInstance()->prepareMIDIRecord(this->midiSourceRef);
 	}
 	this->recordingFlag = recording;
@@ -539,8 +537,7 @@ void SeqSourceProcessor::prepareToPlay(
 	this->juce::AudioProcessorGraph::prepareToPlay(
 		sampleRate, maximumExpectedSamplesPerBlock);
 	SourceManager::getInstance()->prepareMIDIPlay(this->midiSourceRef);
-	SourceManager::getInstance()->prepareAudioPlay(this->audioSourceRef, 
-		sampleRate, maximumExpectedSamplesPerBlock);
+	SourceManager::getInstance()->prepareAudioPlay(this->audioSourceRef);
 }
 
 void SeqSourceProcessor::processBlock(
@@ -772,18 +769,17 @@ void SeqSourceProcessor::readMIDIData(
 	double sampleRate = this->getSampleRate();
 	SourceManager::getInstance()->readMIDIData(this->midiSourceRef,
 		buffer, baseTime / sampleRate, startTime / sampleRate, endTime / sampleRate,
-		this->currentMIDITrack, sampleRate);
+		this->currentMIDITrack);
 }
 
 void SeqSourceProcessor::writeAudioData(juce::AudioBuffer<float>& buffer, int offset) {
 	SourceManager::getInstance()->writeAudioData(this->audioSourceRef,
-		buffer, offset,
-		this->audioChannels.size(), this->getBlockSize(), this->getSampleRate());
+		buffer, offset, this->audioChannels.size());
 }
 
 void SeqSourceProcessor::writeMIDIData(const juce::MidiBuffer& buffer, int offset) {
 	SourceManager::getInstance()->writeMIDIData(this->midiSourceRef,
-		buffer, offset, this->currentMIDITrack, this->getSampleRate());
+		buffer, offset, this->currentMIDITrack);
 }
 
 void SeqSourceProcessor::applyAudio() {
