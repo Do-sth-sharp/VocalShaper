@@ -5,6 +5,7 @@
 #include "../misc/Device.h"
 #include "../misc/PlayPosition.h"
 #include "../misc/VMath.h"
+#include "../source/SourceManager.h"
 
 namespace quickAPI {
 	juce::Component* getAudioDebugger() {
@@ -619,7 +620,9 @@ namespace quickAPI {
 	bool isSeqTrackHasAudioData(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
-				return track->isAudioValid();
+				auto ref = track->getAudioRef();
+				return SourceManager::getInstance()->isValid(
+					ref, SourceManager::SourceType::Audio);
 			}
 		}
 		return false;
@@ -628,7 +631,9 @@ namespace quickAPI {
 	bool isSeqTrackHasMIDIData(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
-				return track->isMIDIValid();
+				auto ref = track->getMIDIRef();
+				return SourceManager::getInstance()->isValid(
+					ref, SourceManager::SourceType::MIDI);
 			}
 		}
 		return false;
@@ -637,7 +642,9 @@ namespace quickAPI {
 	const juce::String getSeqTrackDataRefAudio(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getAudioName();
+				auto ref = track->getAudioRef();
+				return SourceManager::getInstance()->getFileName(
+					ref, SourceManager::SourceType::Audio);
 			}
 		}
 		return "";
@@ -646,7 +653,9 @@ namespace quickAPI {
 	const juce::String getSeqTrackDataRefMIDI(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getMIDIName();
+				auto ref = track->getMIDIRef();
+				return SourceManager::getInstance()->getFileName(
+					ref, SourceManager::SourceType::MIDI);
 			}
 		}
 		return "";
@@ -655,7 +664,8 @@ namespace quickAPI {
 	const std::tuple<double, juce::AudioSampleBuffer> getSeqTrackAudioData(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getAudio();
+				auto ref = track->getAudioRef();
+				return SourceManager::getInstance()->getAudio(ref);
 			}
 		}
 		return {};
@@ -664,7 +674,9 @@ namespace quickAPI {
 	const juce::MidiMessageSequence getSeqTrackMIDIData(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getMIDI();
+				auto ref = track->getMIDIRef();
+				int midiTrack = track->getCurrentMIDITrack();
+				return SourceManager::getInstance()->getMIDI(ref, midiTrack);
 			}
 		} 
 		return {};

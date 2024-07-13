@@ -4,6 +4,7 @@
 #include "../AudioCore.h"
 #include "../misc/PlayPosition.h"
 #include "../plugin/Plugin.h"
+#include "../source/SourceManager.h"
 #include "../recovery/DataControl.hpp"
 #include "../Utils.h"
 
@@ -222,7 +223,11 @@ bool ActionInitAudioSource::doAction() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->initAudio(this->sampleRate, this->length);
+			track->applyAudio();
+			auto ref = track->getAudioRef();
+			int channels = track->getAudioChannelSet().size();
+			SourceManager::getInstance()->initAudio(ref,
+				channels, this->sampleRate, this->length);
 
 			this->output("Init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->length } + "s\n");
 			return true;
@@ -243,7 +248,9 @@ bool ActionInitMidiSource::doAction() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->initMIDI();
+			track->applyMIDI();
+			auto ref = track->getMIDIRef();
+			SourceManager::getInstance()->initMIDI(ref);
 
 			this->output("Init midi source: [" + juce::String{ this->index } + "]\n");
 			return true;
@@ -265,7 +272,10 @@ bool ActionLoadAudioSource::doAction() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->loadAudio(this->path);
+			track->applyAudio();
+			auto ref = track->getAudioRef();
+			SourceIO::getInstance()->addTask(
+				{ SourceIO::TaskType::Read, ref, this->path, false });
 
 			this->output("Load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;
@@ -287,7 +297,10 @@ bool ActionLoadMidiSource::doAction() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->loadMIDI(this->path, this->getTempo);
+			track->applyMIDI();
+			auto ref = track->getMIDIRef();
+			SourceIO::getInstance()->addTask(
+				{ SourceIO::TaskType::Read, ref, this->path, this->getTempo });
 
 			this->output("Load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;
@@ -307,7 +320,9 @@ bool ActionSaveAudioSource::doAction() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->saveAudio(this->path);
+			auto ref = track->getAudioRef();
+			SourceIO::getInstance()->addTask(
+				{ SourceIO::TaskType::Write, ref, this->path, false });
 
 			this->output("Save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;
@@ -327,7 +342,9 @@ bool ActionSaveMidiSource::doAction() {
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->saveMIDI(this->path);
+			auto ref = track->getMIDIRef();
+			SourceIO::getInstance()->addTask(
+				{ SourceIO::TaskType::Write, ref, this->path, false });
 
 			this->output("Save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;

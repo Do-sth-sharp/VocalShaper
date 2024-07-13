@@ -47,32 +47,15 @@ public:
 	bool isSynthRunning() const;
 	void startSynth();
 
-	double getSourceLength() const;
-	double getMIDILength() const;
-	double getAudioLength() const;
+	uint64_t getAudioRef() const;
+	uint64_t getMIDIRef() const;
 
-	void initAudio(double sampleRate, double length);
-	void initMIDI();
-	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
-	const juce::MidiMessageSequence getMIDI() const;
-	const juce::MidiFile getMIDIFile() const;
-	void saveAudio(const juce::String& path = "") const;
-	void saveMIDI(const juce::String& path = "") const;
-	void loadAudio(const juce::String& path);
-	void loadMIDI(const juce::String& path, bool getTempo = false);
-	
-	const juce::String getAudioFileName() const;
-	const juce::String getMIDIFileName() const;
-	const juce::String getAudioName() const;
-	const juce::String getMIDIName() const;
-	void audioChanged();
-	void midiChanged();
-	void audioSaved();
-	void midiSaved();
-	bool isAudioSaved() const;
-	bool isMIDISaved() const;
-	bool isAudioValid() const;
-	bool isMIDIValid() const;
+	void applyAudio();
+	void applyMIDI();
+	void releaseAudio();
+	void releaseMIDI();
+	void applyAudioIfNeed();
+	void applyMIDIIfNeed();
 
 	void setCurrentMIDITrack(int trackIndex);
 	int getCurrentMIDITrack() const;
@@ -156,12 +139,25 @@ private:
 
 	friend class SynthThread;
 
-	void applyAudio();
-	void applyMIDI();
-	void releaseAudio();
-	void releaseMIDI();
-	void applyAudioIfNeed();
-	void applyMIDIIfNeed();
+	void initAudio(double sampleRate, double length);
+	void initMIDI();
+	void saveAudio(const juce::String& path = "") const;
+	void saveMIDI(const juce::String& path = "") const;
+	void loadAudio(const juce::String& path);
+	void loadMIDI(const juce::String& path, bool getTempo = false);
+
+	const juce::String getAudioFileName() const;
+	const juce::String getMIDIFileName() const;
+	const juce::String getAudioName() const;
+	const juce::String getMIDIName() const;
+	bool isAudioSaved() const;
+	bool isMIDISaved() const;
+	bool isAudioValid() const;
+	bool isMIDIValid() const;
+
+	double getSourceLength() const;
+	double getMIDILength() const;
+	double getAudioLength() const;
 
 	void linkInstr();
 	void unlinkInstr();
