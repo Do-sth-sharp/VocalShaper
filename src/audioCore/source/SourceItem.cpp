@@ -1,6 +1,10 @@
 ﻿#include "SourceItem.h"
 #include "../misc/VMath.h"
+#include "../AudioConfig.h"
 #include "../Utils.h"
+
+SourceItem::SourceItem(SourceType type)
+	: type(type) {}
 
 void SourceItem::initAudio(
 	int channelNum, double sampleRate, double length) {
@@ -138,6 +142,46 @@ void SourceItem::setSampleRate(int blockSize, double sampleRate) {
 	this->blockSize = blockSize;
 
 	this->updateAudioResampler();
+}
+
+SourceItem::SourceType SourceItem::getType() const {
+	return this->type;
+}
+
+const juce::String SourceItem::getFileName() const {
+	return this->fileName;
+}
+
+bool SourceItem::midiValid() const {
+	return this->midiData != nullptr;
+}
+
+bool SourceItem::audioValid() const {
+	return this->audioData != nullptr;
+}
+
+int SourceItem::getMIDITrackNum() const {
+	if (auto data = this->midiData.get()) {
+		return data->getNumTracks();
+	}
+
+	return 0;
+}
+
+double SourceItem::getMIDILength() const {
+	if (auto data = this->midiData.get()) {
+		return data->getLastTimestamp() + AudioConfig::getMidiTail();
+	}
+
+	return 0;
+}
+
+double SourceItem::getAudioLength() const {
+	if (auto data = this->audioData.get()) {
+		return data->getNumSamples() / this->audioSampleRate;
+	}
+
+	return 0;
 }
 
 void SourceItem::readAudioData(

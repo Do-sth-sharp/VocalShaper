@@ -8,14 +8,8 @@ public:
 		Undefined, MIDI, Audio
 	};
 
-	SourceType type = SourceType::Undefined;
-	std::unique_ptr<juce::MidiFile> midiData = nullptr;
-	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
-	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
-	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
-	double audioSampleRate = 0;
-	juce::String fileName;
-	std::atomic_bool savedFlag = true;
+	SourceItem() = delete;
+	SourceItem(SourceType type);
 
 	void initAudio(int channelNum, double sampleRate, double length);
 	void initMIDI();
@@ -36,6 +30,14 @@ public:
 
 	void setSampleRate(int blockSize, double sampleRate);
 
+	SourceType getType() const;
+	const juce::String getFileName() const;
+	bool midiValid() const;
+	bool audioValid() const;
+	int getMIDITrackNum() const;
+	double getMIDILength() const;
+	double getAudioLength() const;
+
 public:
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
@@ -47,6 +49,15 @@ public:
 		int offset, int trackIndex);
 
 private:
+	const SourceType type;
+	std::unique_ptr<juce::MidiFile> midiData = nullptr;
+	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
+	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
+	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
+	double audioSampleRate = 0;
+	juce::String fileName;
+	std::atomic_bool savedFlag = true;
+
 	const double recordInitLength = 30;
 	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
 

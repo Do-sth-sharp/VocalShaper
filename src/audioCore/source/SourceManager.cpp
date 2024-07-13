@@ -1,13 +1,11 @@
 ﻿#include "SourceManager.h"
-#include "../AudioConfig.h"
 #include "../misc/AudioLock.h"
 
 uint64_t SourceManager::applySource(SourceType type) {
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
 	/** Create Item */
-	auto ptr = std::make_shared<SourceItem>();
-	ptr->type = type;
+	auto ptr = std::make_shared<SourceItem>(type);
 	ptr->setSampleRate(this->blockSize, this->sampleRate);
 	
 	/** Get Reference */
@@ -29,7 +27,7 @@ const juce::String SourceManager::getFileName(uint64_t ref, SourceType type) con
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 
 	if (auto ptr = this->getSource(ref, type)) {
-		return ptr->fileName;
+		return ptr->getFileName();
 	}
 	return "";
 }
@@ -65,9 +63,9 @@ bool SourceManager::isValid(uint64_t ref, SourceType type) const {
 	if (auto ptr = this->getSource(ref, type)) {
 		switch (type) {
 		case SourceManager::SourceType::MIDI:
-			return ptr->midiData != nullptr;
+			return ptr->midiValid();
 		case SourceManager::SourceType::Audio:
-			return ptr->audioData != nullptr;
+			return ptr->audioValid();
 		}
 	}
 	return false;
@@ -77,9 +75,7 @@ int SourceManager::getMIDITrackNum(uint64_t ref) const {
 	juce::ScopedReadLock locker(audioLock::getSourceLock()); 
 	
 	if (auto ptr = this->getSource(ref, SourceType::MIDI)) {
-		if (auto data = ptr->midiData.get()) {
-			return data->getNumTracks();
-		}
+		return ptr->getMIDITrackNum();
 	}
 	return 0;
 }
@@ -90,15 +86,9 @@ double SourceManager::getLength(uint64_t ref, SourceType type) const {
 	if (auto ptr = this->getSource(ref, type)) {
 		switch (type) {
 		case SourceManager::SourceType::MIDI:
-			if (auto data = ptr->midiData.get()) {
-				return ptr->midiData->getLastTimestamp() + AudioConfig::getMidiTail();
-			}
-			break;
+			return ptr->getMIDILength();
 		case SourceManager::SourceType::Audio:
-			if (auto data = ptr->audioData.get()) {
-				return ptr->audioData->getNumSamples() / ptr->audioSampleRate;
-			}
-			break;
+			return ptr->getAudioLength();
 		}
 	}
 	return 0;
@@ -240,7 +230,7 @@ SourceItem* SourceManager::getSource(uint64_t ref, SourceType type) const {
 
 	auto it = this->sources.find(ref);
 	if (it != this->sources.end()) {
-		if (it->second->type == type) {
+		if (it->second->getType() == type) {
 			return it->second.get();
 		}
 	}
@@ -252,7 +242,7 @@ SourceItem* SourceManager::getSourceFast(uint64_t ref, SourceType type) const {
 	if (ref == 0) { return nullptr; }
 
 	if (auto ptr = reinterpret_cast<SourceItem*>(ref)) {
-		if (ptr->type == type) {
+		if (ptr->getType() == type) {
 			return ptr;
 		}
 	}
