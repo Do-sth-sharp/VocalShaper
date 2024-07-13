@@ -119,33 +119,50 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 	g.setColour(lineColor);
 	g.drawRect(tableRect, lineThickness);
 
+	/** Table Content Line */
+	juce::Rectangle<float> tableContentHLineRect(
+		paddingWidth + titleWidth + 2 * cellWidth - lineThickness / 2,
+		paddingHeight + titleHeight,
+		lineThickness, tableHeight);
+	juce::Rectangle<float> tableContentVLineRect(
+		paddingWidth + titleWidth,
+		paddingHeight + titleHeight + 2 * cellHeight - lineThickness / 2,
+		tableWidth, lineThickness);
+	g.setColour(lineColor);
+	g.fillRect(tableContentHLineRect);
+	g.fillRect(tableContentVLineRect);
+
 	/** H Line */
 	g.setColour(lineColor);
 	int dstChannelPerBus = this->dstChannels.size();
-	for (int i = 0; i <= this->dstChannelNum + 2; i++) {
-		if (i >= 2) {
-			bool longLine = ((i - 2) % dstChannelPerBus) == 0;
-			juce::Rectangle<float> lineRect(
-				paddingWidth + titleWidth + i * cellWidth - lineThickness / 2,
-				paddingHeight + titleHeight + (longLine ? 0 : cellHeight),
-				lineThickness,
-				(this->srcChannelNum + 2) * cellHeight - (longLine ? 0 : cellHeight));
-			g.fillRect(lineRect);
+	if (dstChannelPerBus > 0) {
+		for (int i = 0; i <= this->dstChannelNum + 2; i++) {
+			if (i >= 2) {
+				bool longLine = ((i - 2) % dstChannelPerBus) == 0;
+				juce::Rectangle<float> lineRect(
+					paddingWidth + titleWidth + i * cellWidth - lineThickness / 2,
+					paddingHeight + titleHeight + (longLine ? 0 : cellHeight),
+					lineThickness,
+					(this->srcChannelNum + 2) * cellHeight - (longLine ? 0 : cellHeight));
+				g.fillRect(lineRect);
+			}
 		}
 	}
 
 	/** V Line */
 	g.setColour(lineColor);
 	int srcChannelPerBus = this->srcChannels.size();
-	for (int i = 0; i <= this->srcChannelNum + 2; i++) {
-		if (i >= 2) {
-			bool longLine = ((i - 2) % srcChannelPerBus) == 0;
-			juce::Rectangle<float> lineRect(
-				paddingWidth + titleWidth + (longLine ? 0 : cellWidth),
-				paddingHeight + titleHeight + i * cellHeight - lineThickness / 2,
-				(this->dstChannelNum + 2) * cellWidth - (longLine ? 0 : cellWidth),
-				lineThickness);
-			g.fillRect(lineRect);
+	if (srcChannelPerBus > 0) {
+		for (int i = 0; i <= this->srcChannelNum + 2; i++) {
+			if (i >= 2) {
+				bool longLine = ((i - 2) % srcChannelPerBus) == 0;
+				juce::Rectangle<float> lineRect(
+					paddingWidth + titleWidth + (longLine ? 0 : cellWidth),
+					paddingHeight + titleHeight + i * cellHeight - lineThickness / 2,
+					(this->dstChannelNum + 2) * cellWidth - (longLine ? 0 : cellWidth),
+					lineThickness);
+				g.fillRect(lineRect);
+			}
 		}
 	}
 
@@ -160,25 +177,29 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 	/** H Bus ID */
 	g.setColour(textColor);
 	g.setFont(textFont);
-	int dstBusNum = this->dstChannelNum / dstChannelPerBus;
-	for (int i = 0; i < dstBusNum; i++) {
-		juce::Rectangle<int> textRect(
-			paddingWidth + titleWidth + cellWidth * 2 + i * cellWidth * dstChannelPerBus,
-			paddingHeight + titleHeight, cellWidth * dstChannelPerBus, cellHeight);
-		g.drawFittedText(juce::String{ i }, textRect,
-			juce::Justification::centred, 1, 0.f);
+	if (dstChannelPerBus > 0) {
+		int dstBusNum = this->dstChannelNum / dstChannelPerBus;
+		for (int i = 0; i < dstBusNum; i++) {
+			juce::Rectangle<int> textRect(
+				paddingWidth + titleWidth + cellWidth * 2 + i * cellWidth * dstChannelPerBus,
+				paddingHeight + titleHeight, cellWidth * dstChannelPerBus, cellHeight);
+			g.drawFittedText(juce::String{ i }, textRect,
+				juce::Justification::centred, 1, 0.f);
+		}
 	}
 
 	/** V Bus ID */
 	g.setColour(textColor);
 	g.setFont(textFont);
-	int srcBusNum = this->srcChannelNum / srcChannelPerBus;
-	for (int i = 0; i < srcBusNum; i++) {
-		juce::Rectangle<int> textRect(paddingWidth + titleWidth,
-			paddingHeight + titleHeight + cellHeight * 2 + i * cellHeight * srcChannelPerBus,
-			cellWidth, cellHeight * srcChannelPerBus);
-		g.drawFittedText(juce::String{ i }, textRect,
-			juce::Justification::centred, 1, 0.f);
+	if (srcChannelPerBus > 0) {
+		int srcBusNum = this->srcChannelNum / srcChannelPerBus;
+		for (int i = 0; i < srcBusNum; i++) {
+			juce::Rectangle<int> textRect(paddingWidth + titleWidth,
+				paddingHeight + titleHeight + cellHeight * 2 + i * cellHeight * srcChannelPerBus,
+				cellWidth, cellHeight * srcChannelPerBus);
+			g.drawFittedText(juce::String{ i }, textRect,
+				juce::Justification::centred, 1, 0.f);
+		}
 	}
 
 	/** H Channel Name */

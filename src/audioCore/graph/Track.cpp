@@ -166,6 +166,7 @@ bool Track::removeAdditionalAudioBus() {
 }
 
 int Track::getAdditionalAudioBusNum() const {
+	if (this->audioChannels.size() <= 0) { return 0; }
 	return this->getTotalNumInputChannels() / this->audioChannels.size() - 1;
 }
 
@@ -256,17 +257,19 @@ void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 		return;
 	}
 
-	/** Prepare Gain And Panner */
-	this->gainAndPanner.prepare(juce::dsp::ProcessSpec(
-		sampleRate, maximumExpectedSamplesPerBlock,
-		this->audioChannels.size()
-	));
+	if (this->audioChannels.size() > 0) {
+		/** Prepare Gain And Panner */
+		this->gainAndPanner.prepare(juce::dsp::ProcessSpec(
+			sampleRate, maximumExpectedSamplesPerBlock,
+			this->audioChannels.size()
+		));
 
-	/** Prepare Slider */
-	this->slider.prepare(juce::dsp::ProcessSpec(
-		sampleRate, maximumExpectedSamplesPerBlock,
-		this->audioChannels.size()
-	));
+		/** Prepare Slider */
+		this->slider.prepare(juce::dsp::ProcessSpec(
+			sampleRate, maximumExpectedSamplesPerBlock,
+			this->audioChannels.size()
+		));
+	}
 
 	/** Prepare Current Graph */
 	this->AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
@@ -363,6 +366,10 @@ bool Track::canRemoveBus(bool isInput) const {
 }
 
 void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+	/** Check Buffer Is Empty */
+	if (buffer.getNumChannels() <= 0) { return; }
+	if (buffer.getNumSamples() <= 0) { return; }
+	
 	/** Process Gain And Panner */
 	int mainChannels = this->audioChannels.size();
 	auto block = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(

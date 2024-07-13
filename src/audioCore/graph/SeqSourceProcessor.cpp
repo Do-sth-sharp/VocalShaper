@@ -503,6 +503,7 @@ void SeqSourceProcessor::prepareToPlay(
 void SeqSourceProcessor::processBlock(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Check Buffer Is Empty */
+	if (buffer.getNumChannels() <= 0) { return; }
 	if (buffer.getNumSamples() <= 0) { return; }
 
 	/** Clear Audio Channel */
