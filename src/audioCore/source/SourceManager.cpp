@@ -184,6 +184,15 @@ void SourceManager::prepareMIDIRecord(uint64_t ref) {
 	}
 }
 
+void SourceManager::setCallback(
+	uint64_t ref, SourceType type,
+	const ChangedCallback& callback) {
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSource(ref, type)) {
+		ptr->setCallback(callback);
+	}
+}
+
 void SourceManager::readAudioData(uint64_t ref, juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {
 	if (auto ptr = this->getSourceFast(ref, SourceType::Audio)) {

@@ -1,4 +1,5 @@
 ﻿#include "SourceIO.h"
+#include "SourceManager.h"
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../Utils.h"
@@ -41,8 +42,8 @@ void SourceIO::run() {
 		{
 			/** Check Source Type */
 			auto& [taskData, tempo] = task;
-			auto& [type, ptr, path, getTempo] = taskData;
-			if (!ptr) { continue; }
+			auto& [type, ref, path, getTempo] = taskData;
+			if (!ref) { continue; }
 
 			juce::File file = utils::getProjectDir().getChildFile(path);
 			juce::String extension = file.getFileExtension();
@@ -59,11 +60,11 @@ void SourceIO::run() {
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[sampleRate, buffer, name, ptr] {
-							if (ptr) {
-								ptr->setAudio(sampleRate, buffer, name);
-								ptr->audioSaved();
-							}
+						[sampleRate, buffer, name, ref] {
+							SourceManager::getInstance()->setAudio(
+								ref, sampleRate, buffer, name);
+							SourceManager::getInstance()->saved(
+								ref, SourceManager::SourceType::Audio);
 						}
 					);
 				}
@@ -73,18 +74,15 @@ void SourceIO::run() {
 					juce::AudioSampleBuffer buffer;
 					{
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
-						if (ptr) {
-							std::tie(sampleRate, buffer) = ptr->getAudio();
-						}
+						std::tie(sampleRate, buffer) = SourceManager::getInstance()->getAudio(ref);
 					}
 					if (sampleRate <= 0) { continue; }
 
 					/** Save Audio Data */
 					if (SourceIO::saveAudio(file, sampleRate, buffer)) {
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
-						if (ptr) {
-							ptr->audioSaved();
-						}
+						SourceManager::getInstance()->saved(
+							ref, SourceManager::SourceType::Audio);
 					}
 				}
 			}
@@ -110,11 +108,11 @@ void SourceIO::run() {
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[buffer, name, ptr] {
-							if (ptr) {
-								ptr->setMIDI(buffer, name);
-								ptr->midiSaved();
-							}
+						[buffer, name, ref] {
+							SourceManager::getInstance()->setMIDI(
+								ref, buffer, name);
+							SourceManager::getInstance()->saved(
+								ref, SourceManager::SourceType::MIDI);
 						}
 					);
 				}
@@ -123,9 +121,7 @@ void SourceIO::run() {
 					juce::MidiFile buffer;
 					{
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
-						if (ptr) {
-							buffer = ptr->getMIDIFile();
-						}
+						buffer = SourceManager::getInstance()->getMIDIFile(ref);
 					}
 					if (buffer.getNumTracks() <= 0) { continue; }
 
@@ -135,9 +131,8 @@ void SourceIO::run() {
 					/** Save MIDI Data */
 					if (SourceIO::saveMIDI(file, data)) {
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
-						if (ptr) {
-							ptr->midiSaved();
-						}
+						SourceManager::getInstance()->saved(
+							ref, SourceManager::SourceType::MIDI);
 					}
 				}
 			}

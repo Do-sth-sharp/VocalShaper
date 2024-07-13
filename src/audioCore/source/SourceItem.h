@@ -38,6 +38,10 @@ public:
 	double getMIDILength() const;
 	double getAudioLength() const;
 
+	using ChangedCallback = std::function<void(void)>;
+	void setCallback(const ChangedCallback& callback);
+	void invokeCallback() const;
+
 public:
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
@@ -63,6 +67,8 @@ private:
 
 	double playSampleRate = 0;
 	int blockSize = 0;
+
+	ChangedCallback callback;
 
 	void updateAudioResampler();
 

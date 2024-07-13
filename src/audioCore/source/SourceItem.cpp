@@ -27,6 +27,9 @@ void SourceItem::initAudio(
 
 	/** Set Flag */
 	this->changed();
+
+	/** Callback */
+	this->invokeCallback();
 }
 
 void SourceItem::initMIDI() {
@@ -39,6 +42,9 @@ void SourceItem::initMIDI() {
 
 	/** Set Flag */
 	this->changed();
+
+	/** Callback */
+	this->invokeCallback();
 }
 
 void SourceItem::setAudio(
@@ -58,6 +64,9 @@ void SourceItem::setAudio(
 
 	/** Set Flag */
 	this->changed();
+
+	/** Callback */
+	this->invokeCallback();
 }
 
 void SourceItem::setMIDI(
@@ -68,6 +77,9 @@ void SourceItem::setMIDI(
 
 	/** Set Flag */
 	this->changed();
+
+	/** Callback */
+	this->invokeCallback();
 }
 
 const std::tuple<double, juce::AudioSampleBuffer> SourceItem::getAudio() const {
@@ -182,6 +194,16 @@ double SourceItem::getAudioLength() const {
 	}
 
 	return 0;
+}
+
+void SourceItem::setCallback(const ChangedCallback& callback) {
+	this->callback = callback;
+}
+
+void SourceItem::invokeCallback() const {
+	if (this->callback) {
+		this->callback();
+	}
 }
 
 void SourceItem::readAudioData(

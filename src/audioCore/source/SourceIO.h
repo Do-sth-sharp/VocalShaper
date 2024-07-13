@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "../graph/SeqSourceProcessor.h"
 
 class SourceIO final : public juce::Thread,
 	private juce::DeletedAtShutdown {
@@ -13,7 +12,7 @@ public:
 		Read, Write
 	};
 	/** Type, SeqPtr, Path, GetTempo */
-	using Task = std::tuple<TaskType, SeqSourceProcessor::SafePointer, juce::String, bool>;
+	using Task = std::tuple<TaskType, uint64_t, juce::String, bool>;
 	void addTask(const Task& task);
 
 protected:

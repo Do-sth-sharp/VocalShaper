@@ -33,6 +33,10 @@ public:
 	void prepareAudioRecord(uint64_t ref, int channelNum);
 	void prepareMIDIRecord(uint64_t ref);
 
+	using ChangedCallback = SourceItem::ChangedCallback;
+	void setCallback(uint64_t ref, SourceType type,
+		const ChangedCallback& callback);
+
 public:
 	void readAudioData(uint64_t ref, juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;

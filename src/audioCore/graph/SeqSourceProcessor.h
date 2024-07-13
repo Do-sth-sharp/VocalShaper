@@ -53,8 +53,6 @@ public:
 
 	void initAudio(double sampleRate, double length);
 	void initMIDI();
-	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
-	void setMIDI(const juce::MidiFile& data, const juce::String& name, int midiTrack = 0);
 	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
 	const juce::MidiMessageSequence getMIDI() const;
 	const juce::MidiFile getMIDIFile() const;
@@ -167,6 +165,8 @@ private:
 
 	void linkInstr();
 	void unlinkInstr();
+
+	void invokeDataCallbacks() const;
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(SeqSourceProcessor)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqSourceProcessor)

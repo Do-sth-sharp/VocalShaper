@@ -305,43 +305,11 @@ void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 	this->applyAudio();
 	SourceManager::getInstance()->initAudio(this->audioSourceRef,
 		this->audioChannels.size(), sampleRate, length);
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
-	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
 
 void SeqSourceProcessor::initMIDI() {
 	this->applyMIDI();
 	SourceManager::getInstance()->initMIDI(this->midiSourceRef);
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
-	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
-}
-
-void SeqSourceProcessor::setAudio(double sampleRate,
-	const juce::AudioSampleBuffer& data, const juce::String& name) {
-	this->applyAudio();
-	SourceManager::getInstance()->setAudio(this->audioSourceRef,
-		sampleRate, data, name);
-	
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
-	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
-}
-
-void SeqSourceProcessor::setMIDI(
-	const juce::MidiFile& data, const juce::String& name,
-	int midiTrack) {
-	this->applyMIDI();
-	SourceManager::getInstance()->setMIDI(this->midiSourceRef,
-		data, name);
-	this->currentMIDITrack = midiTrack;
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
-	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
 
 const std::tuple<double, juce::AudioSampleBuffer> SeqSourceProcessor::getAudio() const {
@@ -364,13 +332,9 @@ void SeqSourceProcessor::saveAudio(const juce::String& path) const {
 			this->getAudioFileName()).getFullPathName();
 	}
 
-	/** Get Pointer */
-	auto ptr = SeqSourceProcessor::SafePointer{
-		const_cast<SeqSourceProcessor*>(this) };
-
 	/** Save */
 	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Write, ptr, savePath, false });
+		{ SourceIO::TaskType::Write, this->audioSourceRef, savePath, false });
 }
 
 void SeqSourceProcessor::saveMIDI(const juce::String& path) const {
@@ -381,13 +345,9 @@ void SeqSourceProcessor::saveMIDI(const juce::String& path) const {
 			this->getMIDIFileName()).getFullPathName();
 	}
 
-	/** Get Pointer */
-	auto ptr = SeqSourceProcessor::SafePointer{
-		const_cast<SeqSourceProcessor*>(this) };
-
 	/** Save */
 	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Write, ptr, savePath, false });
+		{ SourceIO::TaskType::Write, this->midiSourceRef, savePath, false });
 }
 
 void SeqSourceProcessor::loadAudio(const juce::String& path) {
@@ -395,8 +355,9 @@ void SeqSourceProcessor::loadAudio(const juce::String& path) {
 	auto ptr = SeqSourceProcessor::SafePointer{ this };
 
 	/** Load */
+	this->applyAudio();
 	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Read, ptr, path, false });
+		{ SourceIO::TaskType::Read, this->audioSourceRef, path, false });
 }
 
 void SeqSourceProcessor::loadMIDI(const juce::String& path, bool getTempo) {
@@ -404,8 +365,9 @@ void SeqSourceProcessor::loadMIDI(const juce::String& path, bool getTempo) {
 	auto ptr = SeqSourceProcessor::SafePointer{ this };
 
 	/** Load */
+	this->applyMIDI();
 	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Read, ptr, path, getTempo });
+		{ SourceIO::TaskType::Read, this->midiSourceRef, path, getTempo });
 }
 
 const juce::String SeqSourceProcessor::getAudioFileName() const {
@@ -787,6 +749,15 @@ void SeqSourceProcessor::applyAudio() {
 	this->releaseAudio();
 	this->audioSourceRef = SourceManager::getInstance()->applySource(
 		SourceManager::SourceType::Audio);
+
+	/** Callback */
+	auto callback = [ptr = SafePointer{ this }] {
+		if (ptr) {
+			ptr->invokeDataCallbacks();
+		}
+		};
+	SourceManager::getInstance()->setCallback(this->audioSourceRef,
+		SourceManager::SourceType::Audio, callback);
 }
 
 void SeqSourceProcessor::applyMIDI() {
@@ -794,6 +765,16 @@ void SeqSourceProcessor::applyMIDI() {
 	this->releaseMIDI();
 	this->midiSourceRef = SourceManager::getInstance()->applySource(
 		SourceManager::SourceType::MIDI);
+	this->currentMIDITrack = 0;
+
+	/** Callback */
+	auto callback = [ptr = SafePointer{ this }] {
+		if (ptr) {
+			ptr->invokeDataCallbacks();
+		}
+		};
+	SourceManager::getInstance()->setCallback(this->midiSourceRef,
+		SourceManager::SourceType::MIDI, callback);
 }
 
 void SeqSourceProcessor::releaseAudio() {
@@ -810,6 +791,7 @@ void SeqSourceProcessor::releaseMIDI() {
 		SourceManager::getInstance()->releaseSource(this->midiSourceRef);
 		this->midiSourceRef = 0;
 	}
+	this->currentMIDITrack = 0;
 }
 
 void SeqSourceProcessor::applyAudioIfNeed() {
@@ -854,4 +836,9 @@ void SeqSourceProcessor::unlinkInstr() {
 				{ this->audioOutputNode->nodeID, i } });
 		}
 	}
+}
+
+void SeqSourceProcessor::invokeDataCallbacks() const {
+	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
 }
