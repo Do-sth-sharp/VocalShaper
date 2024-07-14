@@ -141,10 +141,6 @@ private:
 
 	void initAudio(double sampleRate, double length);
 	void initMIDI();
-	void saveAudio(const juce::String& path = "") const;
-	void saveMIDI(const juce::String& path = "") const;
-	void loadAudio(const juce::String& path);
-	void loadMIDI(const juce::String& path, bool getTempo = false);
 
 	const juce::String getAudioFileName() const;
 	const juce::String getMIDIFileName() const;

@@ -10,6 +10,7 @@
 #include "misc/Device.h"
 #include "misc/AudioLock.h"
 #include "source/SourceManager.h"
+#include "source/SourceIO.h"
 #include "project/ProjectInfoData.h"
 #include "action/ActionDispatcher.h"
 #include "uiCallback/UICallback.h"
@@ -239,6 +240,9 @@ bool AudioCore::save(const juce::String& name) {
 	projData.setSize(proj->ByteSizeLong());
 	if (!proj->SerializeToArray(projData.getData(), projData.getSize())) { ProjectInfoData::getInstance()->pop(); return false; }
 	
+	/** Save Source File */
+	this->saveSource(proj.get());
+
 	/** Write Project File */
 	juce::FileOutputStream projStream(projFile);
 	if (!projStream.openedOk()) { ProjectInfoData::getInstance()->pop(); return false; }
@@ -290,6 +294,9 @@ bool AudioCore::load(const juce::String& path) {
 
 	/** Change Graph */
 	if (this->parse(proj.get())) {
+		/** Load Source File */
+		this->loadSource(proj.get());
+
 		return true;
 	}
 
@@ -444,6 +451,68 @@ void AudioCore::updateAudioBuses() {
 
 	/** Update Mackie Control Devices */
 	this->mackieHub->removeUnavailableDevices();
+}
+
+void AudioCore::saveSource(const google::protobuf::Message* data) const {
+	auto ptrProj = dynamic_cast<const vsp4::Project*>(data);
+	if (!ptrProj) { return; }
+
+	auto& graph = ptrProj->graph();
+	auto mainGraph = this->mainAudioGraph.get();
+	for (int i = 0; i < graph.seqtracks_size(); i++) {
+		if (auto track = mainGraph->getSourceProcessor(i)) {
+			auto& seqData = graph.seqtracks(i);
+
+			if (!seqData.midisrc().empty()) {
+				if (auto ref = track->getMIDIRef()) {
+					juce::String path = utils::getProjectDir()
+						.getChildFile(seqData.midisrc()).getFullPathName();
+					SourceIO::getInstance()->addTask(
+						{ SourceIO::TaskType::Write, ref, path, false });
+				}
+			}
+
+			if (!seqData.audiosrc().empty()) {
+				if (auto ref = track->getAudioRef()) {
+					juce::String path = utils::getProjectDir()
+						.getChildFile(seqData.audiosrc()).getFullPathName();
+					SourceIO::getInstance()->addTask(
+						{ SourceIO::TaskType::Write, ref, path, false });
+				}
+			}
+		}
+	}
+}
+
+void AudioCore::loadSource(const google::protobuf::Message* data) const {
+	auto ptrProj = dynamic_cast<const vsp4::Project*>(data);
+	if (!ptrProj) { return; }
+
+	auto& graph = ptrProj->graph();
+	auto mainGraph = this->mainAudioGraph.get();
+	for (int i = 0; i < graph.seqtracks_size(); i++) {
+		if (auto track = mainGraph->getSourceProcessor(i)) {
+			auto& seqData = graph.seqtracks(i);
+
+			if (!seqData.midisrc().empty()) {
+				if (auto ref = track->getMIDIRef()) {
+					juce::String path = utils::getProjectDir()
+						.getChildFile(seqData.midisrc()).getFullPathName();
+					SourceIO::getInstance()->addTask(
+						{ SourceIO::TaskType::Read, ref, path, false });
+				}
+			}
+
+			if (!seqData.audiosrc().empty()) {
+				if (auto ref = track->getAudioRef()) {
+					juce::String path = utils::getProjectDir()
+						.getChildFile(seqData.audiosrc()).getFullPathName();
+					SourceIO::getInstance()->addTask(
+						{ SourceIO::TaskType::Read, ref, path, false });
+				}
+			}
+		}
+	}
 }
 
 AudioCore* AudioCore::getInstance() {

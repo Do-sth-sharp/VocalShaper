@@ -2,7 +2,6 @@
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
-#include "../source/SourceIO.h"
 #include "../source/SourceManager.h"
 #include "../AudioConfig.h"
 #include "../uiCallback/UICallback.h"
@@ -370,44 +369,6 @@ void SeqSourceProcessor::initMIDI() {
 	SourceManager::getInstance()->initMIDI(this->midiSourceRef);
 }
 
-void SeqSourceProcessor::saveAudio(const juce::String& path) const {
-	/** Get Path */
-	juce::String savePath = path;
-	if (savePath.isEmpty()) {
-		savePath = utils::getProjectDir().getChildFile(
-			this->getAudioFileName()).getFullPathName();
-	}
-
-	/** Save */
-	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Write, this->audioSourceRef, savePath, false });
-}
-
-void SeqSourceProcessor::saveMIDI(const juce::String& path) const {
-	/** Get Path */
-	juce::String savePath = path;
-	if (savePath.isEmpty()) {
-		savePath = utils::getProjectDir().getChildFile(
-			this->getMIDIFileName()).getFullPathName();
-	}
-
-	/** Save */
-	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Write, this->midiSourceRef, savePath, false });
-}
-
-void SeqSourceProcessor::loadAudio(const juce::String& path) {
-	this->applyAudio();
-	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Read, this->audioSourceRef, path, false });
-}
-
-void SeqSourceProcessor::loadMIDI(const juce::String& path, bool getTempo) {
-	this->applyMIDI();
-	SourceIO::getInstance()->addTask(
-		{ SourceIO::TaskType::Read, this->midiSourceRef, path, getTempo });
-}
-
 const juce::String SeqSourceProcessor::getAudioFileName() const {
 	juce::String name = this->getAudioName();
 	if (name.isEmpty()) { name = this->trackName; }
@@ -647,14 +608,10 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 	this->setInstrOffline(mes->offline());
 
 	if (!mes->audiosrc().empty()) {
-		juce::String path = utils::getProjectDir()
-			.getChildFile(mes->audiosrc()).getFullPathName();
-		this->loadAudio(path);
+		this->applyAudio();
 	}
 	if (!mes->midisrc().empty()) {
-		juce::String path = utils::getProjectDir()
-			.getChildFile(mes->midisrc()).getFullPathName();
-		this->loadMIDI(path, false);
+		this->applyMIDI();
 	}
 	this->setCurrentMIDITrack(mes->miditrack());
 
@@ -695,19 +652,11 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 
 	if (this->isAudioValid()) {
 		juce::String name = this->getAudioFileName();
-		juce::String path = utils::getProjectDir()
-			.getChildFile(name).getFullPathName();
-
 		mes->set_audiosrc(name.toStdString());
-		this->saveAudio(path);
 	}
 	if (this->isMIDIValid()) {
 		juce::String name = this->getMIDIFileName();
-		juce::String path = utils::getProjectDir()
-			.getChildFile(name).getFullPathName();
-
 		mes->set_midisrc(name.toStdString());
-		this->saveMIDI(path);
 	}
 	mes->set_miditrack(this->getCurrentMIDITrack());
 

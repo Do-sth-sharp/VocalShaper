@@ -85,6 +85,9 @@ private:
 	void initAudioDevice();
 	void updateAudioBuses();
 
+	void saveSource(const google::protobuf::Message* data) const;
+	void loadSource(const google::protobuf::Message* data) const;
+
 public:
 	static AudioCore* getInstance();
 	static AudioCore* getInstanceWithoutCreate();
