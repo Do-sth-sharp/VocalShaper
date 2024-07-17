@@ -349,12 +349,9 @@ bool AudioCore::parse(const google::protobuf::Message* data) {
 
 		{
 			juce::ScopedTryWriteLock locker(audioLock::getPositionLock());
-			auto& tempos = PlayPosition::getInstance()->getTempoSequence();
-			tempos.clear();
 			if (tempoFile.getNumTracks() > 0) {
-				tempos = *(tempoFile.getTrack(0));
+				PlayPosition::getInstance()->setTempoSequence(*(tempoFile.getTrack(0)));
 			}
-			PlayPosition::getInstance()->updateTempoTemp();
 		}
 	}
 
@@ -381,7 +378,7 @@ std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {
 
 	/** Get Tempo */
 	{
-		auto& tempos = PlayPosition::getInstance()->getTempoSequence();
+		auto tempos = PlayPosition::getInstance()->getTempoSequence();
 		juce::MidiFile tempoFile;
 		tempoFile.addTrack(tempos);
 

@@ -35,7 +35,9 @@ public:
 	/** BarCount, BarStartQuarter */
 	std::tuple<int, double> toBarQ(double timeQuarter) const;
 
-	juce::MidiMessageSequence& getTempoSequence();
+	void setTempoSequence(const juce::MidiMessageSequence& seq);
+	void insertTempoSequence(const juce::MidiMessageSequence& seq);
+	const juce::MidiMessageSequence getTempoSequence() const;
 	void updateTempoTemp();
 	int getTempoTempIndexBySec(double timeSec) const;
 	int getTempoTempIndexByQuarter(double timeQuarter) const;
@@ -55,7 +57,7 @@ public:
 	void removeTempoLabel(int index);
 	int getTempoLabelNum() const;
 	bool isTempoLabelTempoEvent(int index) const;
-	void setTempoLabelTime(int index, double time);
+	int setTempoLabelTime(int index, double time);
 	void setTempoLabelTempo(int index, double tempo);
 	void setTempoLabelBeat(int index, int numerator, int denominator);
 	double getTempoLabelTime(int index) const;
@@ -66,12 +68,15 @@ public:
 
 protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
-	juce::MidiMessageSequence tempos;
+	juce::Array<juce::MidiMessage> tempos;
 	TempoTemp tempoTemp;
 	std::atomic_short timeFormat = 480;
 	std::atomic<double> sampleRate = 48000;
 	std::atomic_bool overflowFlag = false;
 	std::atomic<double> loopStartSec = 0, loopEndSec = 0;
+
+	int insert(const juce::MidiMessage& mes);
+	const juce::MidiMessage remove(int index);
 
 	void updatePositionByTimeInSecond();
 	void updatePositionByTimeInSample();

@@ -6,7 +6,7 @@ class TempoTemp final {
 public:
 	TempoTemp();
 
-	void update(const juce::MidiMessageSequence& tempoMessages);
+	void update(const juce::Array<juce::MidiMessage>& tempoMessages);
 	int selectBySec(double time) const;
 	int selectByTick(double timeTick, short timeFormat) const;
 	int selectByQuarter(double timeQuarter) const;

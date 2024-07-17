@@ -99,9 +99,7 @@ void SourceIO::run() {
 					if (getTempo) {
 						juce::MessageManager::callAsync(
 							[tempo] {
-								auto& tempoSeq = PlayPosition::getInstance()->getTempoSequence();
-								tempoSeq.addSequence(tempo, 0);
-								PlayPosition::getInstance()->updateTempoTemp();
+								PlayPosition::getInstance()->insertTempoSequence(tempo);
 							}
 						);
 					}

@@ -1,11 +1,11 @@
 ﻿#include "TempoTemp.h"
 
 TempoTemp::TempoTemp() {
-	this->update(juce::MidiMessageSequence{});
+	this->update(juce::Array<juce::MidiMessage>{});
 }
 
 void TempoTemp::update(
-	const juce::MidiMessageSequence& tempoMessages) {
+	const juce::Array<juce::MidiMessage>& tempoMessages) {
 	/** Clear Temp */
 	this->temp.clear();
 	this->lastIndex = -1;
@@ -22,10 +22,10 @@ void TempoTemp::update(
 		tempoTemp.add({ thisSec, thisQuarter, thisSPQ });
 
 		/** Get Each Tempo Meta */
-		int numEvents = tempoMessages.getNumEvents();
+		int numEvents = tempoMessages.size();
 		for (int i = 0; i < numEvents; i++) {
 			/** Get Event */
-			auto& m = tempoMessages.getEventPointer(i)->message;
+			auto& m = tempoMessages.getReference(i);
 			double eventTime = m.getTimeStamp();
 
 			/** Store Event */
@@ -52,7 +52,7 @@ void TempoTemp::update(
 
 			/** Skip Same Time Forward */
 			while (i + 1 < numEvents) {
-				auto& m2 = tempoMessages.getEventPointer(i + 1)->message;
+				auto& m2 = tempoMessages.getReference(i + 1);
 
 				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
 					break;
@@ -100,10 +100,10 @@ void TempoTemp::update(
 			thisNumerator, thisDenominator });
 
 		/** Get Each Beat Meta */
-		int numEvents = tempoMessages.getNumEvents();
+		int numEvents = tempoMessages.size();
 		for (int i = 0; i < numEvents; i++) {
 			/** Get Event */
-			auto& m = tempoMessages.getEventPointer(i)->message;
+			auto& m = tempoMessages.getReference(i);
 			double eventTime = m.getTimeStamp();
 
 			/** Store Event */
@@ -185,7 +185,7 @@ void TempoTemp::update(
 
 			/** Skip Same Time Forward */
 			while (i + 1 < numEvents) {
-				auto& m2 = tempoMessages.getEventPointer(i + 1)->message;
+				auto& m2 = tempoMessages.getReference(i + 1);
 
 				if (!juce::approximatelyEqual(m2.getTimeStamp(), eventTime))
 					break;
