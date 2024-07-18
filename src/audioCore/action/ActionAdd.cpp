@@ -636,7 +636,7 @@ bool ActionAddTempoTempo::doAction() {
 	ACTION_WRITE_DB();
 
 	ACTION_DATA(index) = PlayPosition::getInstance()
-		->addTempoLabelTempo(ACTION_DATA(time), ACTION_DATA(tempo));
+		->addTempoLabelTempo(ACTION_DATA(time), ACTION_DATA(tempo), ACTION_DATA(index));
 	ACTION_RESULT(true);
 }
 
@@ -657,7 +657,7 @@ ActionAddTempoBeat::ActionAddTempoBeat(
 	double time, int numerator, int denominator)
 	: ACTION_DB{ time, numerator, denominator } {}
 
-bool ActionAddTempoBeat::ActionAddTempoBeat::doAction() {
+bool ActionAddTempoBeat::doAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -668,11 +668,11 @@ bool ActionAddTempoBeat::ActionAddTempoBeat::doAction() {
 
 	ACTION_DATA(index) = PlayPosition::getInstance()
 		->addTempoLabelBeat(ACTION_DATA(time),
-			ACTION_DATA(numerator), ACTION_DATA(denominator));
+			ACTION_DATA(numerator), ACTION_DATA(denominator), ACTION_DATA(index));
 	ACTION_RESULT(true);
 }
 
-bool ActionAddTempoBeat::ActionAddTempoBeat::undo() {
+bool ActionAddTempoBeat::undo() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 

@@ -242,20 +242,22 @@ bool MovablePlayHead::checkOverflow() const {
 	return this->overflowFlag;
 }
 
-int MovablePlayHead::addTempoLabelTempo(double time, double tempo) {
+int MovablePlayHead::addTempoLabelTempo(
+	double time, double tempo, int newIndex) {
 	/** Insert Label */
 	int index = this->insert(juce::MidiMessage::tempoMetaEvent(
-		1000000.0 / (tempo / 60.0)).withTimeStamp(time));
+		1000000.0 / (tempo / 60.0)).withTimeStamp(time), newIndex);
 	this->updateTempoTemp();
 
 	/** Return Index */
 	return index;
 }
 
-int MovablePlayHead::addTempoLabelBeat(double time, int numerator, int denominator) {
+int MovablePlayHead::addTempoLabelBeat(
+	double time, int numerator, int denominator, int newIndex) {
 	/** Insert Label */
 	int index = this->insert(juce::MidiMessage::timeSignatureMetaEvent(
-		numerator, denominator).withTimeStamp(time));
+		numerator, denominator).withTimeStamp(time), newIndex);
 	this->updateTempoTemp();
 
 	/** Return Index */
@@ -281,7 +283,7 @@ bool MovablePlayHead::isTempoLabelTempoEvent(int index) const {
 	return false;
 }
 
-int MovablePlayHead::setTempoLabelTime(int index, double time) {
+int MovablePlayHead::setTempoLabelTime(int index, double time, int newIndex) {
 	if (index >= 0 && index < this->tempos.size()) {
 		/** Remove */
 		auto event = this->remove(index);
@@ -291,13 +293,13 @@ int MovablePlayHead::setTempoLabelTime(int index, double time) {
 		event.setTimeStamp(time);
 		
 		/** Add */
-		int newIndex = this->insert(event);
+		int indexTemp = this->insert(event, newIndex);
 
 		/** Update Temp */
 		this->updateTempoTemp();
 
 		/** Return */
-		return newIndex;
+		return indexTemp;
 	}
 	return index;
 }
@@ -361,8 +363,32 @@ std::tuple<int, int> MovablePlayHead::getTempoLabelBeat(int index) const {
 	return { 4, 4 };
 }
 
-int MovablePlayHead::insert(const juce::MidiMessage& mes) {
-	int index = this->getTempoInsertIndex(mes.getTimeStamp());
+int MovablePlayHead::insert(const juce::MidiMessage& mes, int newIndex) {
+	int index = newIndex;
+	if (index < 0 || index > this->tempos.size()) {
+		index = this->getTempoInsertIndex(mes.getTimeStamp());
+	}
+	else {
+		do {
+			double time = mes.getTimeStamp();
+			if (index > 0) {
+				auto& last = this->tempos.getReference(index - 1);
+				if (!(last.getTimeStamp() <= time)) {
+					index = this->getTempoInsertIndex(time);
+					break;
+				}
+			}
+			if (index < this->tempos.size() - 1) {
+				auto& next = this->tempos.getReference(index + 1);
+				double time = mes.getTimeStamp();
+				if (!(next.getTimeStamp() >= time)) {
+					index = this->getTempoInsertIndex(time);
+					break;
+				}
+			}
+		} while (false);
+	}
+	
 	this->tempos.insert(index, mes);
 	return index;
 }

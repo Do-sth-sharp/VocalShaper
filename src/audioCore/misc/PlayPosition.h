@@ -52,12 +52,12 @@ public:
 	void setOverflow();
 	bool checkOverflow() const;
 
-	int addTempoLabelTempo(double time, double tempo);
-	int addTempoLabelBeat(double time, int numerator, int denominator);
+	int addTempoLabelTempo(double time, double tempo, int newIndex = -1);
+	int addTempoLabelBeat(double time, int numerator, int denominator, int newIndex = -1);
 	void removeTempoLabel(int index);
 	int getTempoLabelNum() const;
 	bool isTempoLabelTempoEvent(int index) const;
-	int setTempoLabelTime(int index, double time);
+	int setTempoLabelTime(int index, double time, int newIndex = -1);
 	void setTempoLabelTempo(int index, double tempo);
 	void setTempoLabelBeat(int index, int numerator, int denominator);
 	double getTempoLabelTime(int index) const;
@@ -75,7 +75,7 @@ protected:
 	std::atomic_bool overflowFlag = false;
 	std::atomic<double> loopStartSec = 0, loopEndSec = 0;
 
-	int insert(const juce::MidiMessage& mes);
+	int insert(const juce::MidiMessage& mes, int newIndex = -1);
 	const juce::MidiMessage remove(int index);
 
 	void updatePositionByTimeInSecond();

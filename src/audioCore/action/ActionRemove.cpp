@@ -1119,11 +1119,11 @@ bool ActionRemoveTempo::undo() {
 
 	if (ACTION_DATA(isTempo)) {
 		PlayPosition::getInstance()->addTempoLabelTempo(
-			ACTION_DATA(time), ACTION_DATA(tempo));
+			ACTION_DATA(time), ACTION_DATA(tempo), ACTION_DATA(index));
 	}
 	else {
 		PlayPosition::getInstance()->addTempoLabelBeat(
-			ACTION_DATA(time), ACTION_DATA(numerator), ACTION_DATA(denominator));
+			ACTION_DATA(time), ACTION_DATA(numerator), ACTION_DATA(denominator), ACTION_DATA(index));
 	}
 	ACTION_RESULT(true);
 }

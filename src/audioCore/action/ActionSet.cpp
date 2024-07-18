@@ -1854,12 +1854,8 @@ bool ActionSetTempoTime::doAction() {
 	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
 		ACTION_DATA(oldTime) = PlayPosition::getInstance()->getTempoLabelTime(ACTION_DATA(index));
 
-		ACTION_DATA(newIndex) = PlayPosition::getInstance()->getTempoInsertIndex(ACTION_DATA(time));
-		if (ACTION_DATA(newIndex) > ACTION_DATA(index)) {
-			ACTION_DATA(newIndex)--;
-		}
-
-		PlayPosition::getInstance()->setTempoLabelTime(ACTION_DATA(index), ACTION_DATA(time));
+		ACTION_DATA(newIndex) = PlayPosition::getInstance()->setTempoLabelTime(
+			ACTION_DATA(index), ACTION_DATA(time));
 
 		ACTION_RESULT(true);
 	}
@@ -1875,7 +1871,8 @@ bool ActionSetTempoTime::undo() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetTempoTime);
 	ACTION_WRITE_DB();
 
-	PlayPosition::getInstance()->setTempoLabelTime(ACTION_DATA(newIndex), ACTION_DATA(oldTime));
+	PlayPosition::getInstance()->setTempoLabelTime(
+		ACTION_DATA(newIndex), ACTION_DATA(oldTime), ACTION_DATA(index));
 
 	ACTION_RESULT(true);
 }
