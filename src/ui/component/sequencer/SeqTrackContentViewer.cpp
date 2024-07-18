@@ -114,6 +114,8 @@ void SeqTrackContentViewer::updateBlock(int /*blockIndex*/) {
 }
 
 void SeqTrackContentViewer::updateHPos(double pos, double itemSize) {
+	if (this->getWidth() <= 0) { return; }
+	
 	bool shouldRepaintDataImage = !juce::approximatelyEqual(this->itemSize, itemSize);
 
 	this->pos = pos;
@@ -206,6 +208,8 @@ void SeqTrackContentViewer::updateDataImage() {
 }
 
 void SeqTrackContentViewer::paint(juce::Graphics& g) {
+	if (this->getWidth() <= 0 || this->getHeight() <= 0) { return; }
+
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float paddingHeight = screenSize.getHeight() * 0.0025;
@@ -248,6 +252,7 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 	auto paintBlockFunc = [this, &g, &blockNameFont, paddingHeight, blockRadius, outlineColor, outlineThickness,
 		blockPaddingWidth, blockPaddingHeight, blockNameFontHeight, dstPointPerSec, imgScaleRatio, noteMaxHeight]
 	(double blockStartSec, double blockEndSec, double blockOffset, float blockAlpha = 1.f) {
+		if (this->secStart >= this->secEnd) { return; }
 		float startPos = (blockStartSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 		float endPos = (blockEndSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 
