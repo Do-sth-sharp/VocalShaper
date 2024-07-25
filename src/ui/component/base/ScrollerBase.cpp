@@ -5,6 +5,12 @@
 
 ScrollerBase::ScrollerBase(bool vertical)
 	: vertical(vertical) {
+	/** Init Temp */
+	this->backTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, 1, 1, false);
+	this->frontTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, 1, 1, false);
+
 	/** Update Later */
 	juce::MessageManager::callAsync(
 		[comp = juce::Component::SafePointer(this)] {
@@ -16,68 +22,29 @@ ScrollerBase::ScrollerBase(bool vertical)
 };
 
 void ScrollerBase::paint(juce::Graphics& g) {
-	/** Size */
-	auto screenSize = utils::getScreenSize(this);
-	int paddingWidth = screenSize.getWidth() * 0.0015;
-	int paddingHeight = screenSize.getHeight() * 0.0025;
-	float cornerSize = screenSize.getHeight() * 0.005;
-	float outlineThickness = screenSize.getHeight() * 0.001;
-
-	/** Colour */
-	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(
-		juce::ScrollBar::ColourIds::backgroundColourId);
-	juce::Colour thumbColor = laf.findColour(
-		juce::ScrollBar::ColourIds::thumbColourId);
-	juce::Colour outlineColor = laf.findColour(
-		juce::ScrollBar::ColourIds::trackColourId);
-
-	/** Background */
-	g.setColour(backgroundColor);
-	g.fillAll();
-
-	/** Paint Preview */
-	this->paintPreview(g,
-		this->getWidth(), this->getHeight(), this->vertical);
-
-	/** Paint Item Preview */
-	double itemAreaSize = this->getTrackLength() / this->itemNum;
-	for (int i = 0; i < this->itemNum; i++) {
-		/** Get Paint Area */
-		juce::Rectangle<int> itemRect(
-			this->vertical ? 0 : (itemAreaSize * i),
-			this->vertical ? (itemAreaSize * i) : 0,
-			this->vertical ? this->getWidth() : itemAreaSize,
-			this->vertical ? itemAreaSize : this->getHeight());
-
-		/** Add Transform */
-		g.saveState();
-		g.addTransform(juce::AffineTransform{
-			1.f, 0.f, (float)(itemRect.getX()),
-			0.f, 1.f, (float)(itemRect.getY()) });
-
-		/** Paint Item */
-		this->paintItemPreview(g, i,
-			itemRect.getWidth(), itemRect.getHeight(), this->vertical);
-
-		/** Remove Transform */
-		g.restoreState();
+	/** Back Temp */
+	if (this->backTemp) {
+		g.drawImageAt(*(this->backTemp.get()), 0, 0);
 	}
 
-	/** Outline */
-	auto totalRect = this->getLocalBounds();
-	g.setColour(outlineColor);
-	g.drawRect(totalRect.toFloat(), outlineThickness);
+	/** Front Temp */
+	if (this->frontTemp) {
+		g.drawImageAt(*(this->frontTemp.get()), 0, 0);
+	}
+}
 
-	/** Thumb */
-	auto [startPos, endPos] = this->getThumb();
-	juce::Rectangle<float> thumbRect(
-		this->vertical ? paddingWidth : startPos,
-		this->vertical ? startPos : paddingHeight,
-		this->vertical ? (this->getWidth() - paddingWidth * 2) : (endPos - startPos),
-		this->vertical ? (endPos - startPos) : (this->getHeight() - paddingHeight * 2));
-	g.setColour(thumbColor);
-	g.fillRoundedRectangle(thumbRect, cornerSize);
+void ScrollerBase::resized() {
+	/** Update Image Temp */
+	int width = this->getWidth(), height = this->getHeight();
+	width = std::max(width, 1);
+	height = std::max(height, 1);
+	this->backTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, width, height, false);
+	this->frontTemp = std::make_unique<juce::Image>(
+		juce::Image::ARGB, width, height, false);
+	if (this->getWidth() > 0 && this->getHeight() > 0) {
+		this->updateImageTemp();
+	}
 }
 
 void ScrollerBase::update() {
@@ -99,7 +66,7 @@ void ScrollerBase::setPos(double pos) {
 	this->viewPos = pos;
 
 	/** Repaint */
-	this->repaint();
+	this->updateImageTemp();
 
 	/** Update Content */
 	this->updatePos(pos, this->itemSize);
@@ -113,7 +80,7 @@ void ScrollerBase::setItemSize(double size) {
 	this->itemSize = size;
 
 	/** Repaint */
-	this->repaint();
+	this->updateImageTemp();
 
 	/** Update Content */
 	this->updatePos(this->viewPos, size);
@@ -374,7 +341,7 @@ void ScrollerBase::setStart(double start) {
 	this->viewPos = pos;
 
 	/** Repaint */
-	this->repaint();
+	this->updateImageTemp();
 
 	/** Update Content */
 	this->updatePos(pos, itemSize);
@@ -400,7 +367,7 @@ void ScrollerBase::setEnd(double end) {
 	this->viewPos = pos;
 
 	/** Repaint */
-	this->repaint();
+	this->updateImageTemp();
 
 	/** Update Content */
 	this->updatePos(pos, itemSize);
@@ -446,7 +413,7 @@ std::tuple<double, double> ScrollerBase::getThumb() const {
 void ScrollerBase::resetState() {
 	this->state = State::Normal;
 	this->updateCursor();
-	this->repaint();
+	this->updateImageTemp();
 }
 
 void ScrollerBase::updateState(const juce::Point<int>& pos, bool pressed) {
@@ -499,7 +466,7 @@ void ScrollerBase::updateState(const juce::Point<int>& pos, bool pressed) {
 	this->updateCursor();
 
 	/** Repaint */
-	this->repaint();
+	this->updateImageTemp();
 }
 
 void ScrollerBase::updateCursor() {
@@ -521,5 +488,93 @@ void ScrollerBase::updateCursor() {
 			? juce::MouseCursor::UpDownResizeCursor
 			: juce::MouseCursor::LeftRightResizeCursor);
 		break;
+	}
+}
+
+void ScrollerBase::updateImageTemp() {
+	this->updateBackTemp();
+	this->updateFrontTemp();
+	this->repaint();
+}
+
+void ScrollerBase::updateBackTemp() {
+	/** Temp Graphic */
+	juce::Graphics g(*(this->backTemp.get()));
+
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float outlineThickness = screenSize.getHeight() * 0.001;
+
+	/** Colour */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour backgroundColor = laf.findColour(
+		juce::ScrollBar::ColourIds::backgroundColourId);
+	juce::Colour outlineColor = laf.findColour(
+		juce::ScrollBar::ColourIds::trackColourId);
+
+	/** Background */
+	g.setColour(backgroundColor);
+	g.fillAll();
+
+	/** Paint Preview */
+	this->paintPreview(g,
+		this->getWidth(), this->getHeight(), this->vertical);
+
+	/** Paint Item Preview */
+	double itemAreaSize = this->getTrackLength() / this->itemNum;
+	for (int i = 0; i < this->itemNum; i++) {
+		/** Get Paint Area */
+		juce::Rectangle<int> itemRect(
+			this->vertical ? 0 : (itemAreaSize * i),
+			this->vertical ? (itemAreaSize * i) : 0,
+			this->vertical ? this->getWidth() : itemAreaSize,
+			this->vertical ? itemAreaSize : this->getHeight());
+
+		/** Add Transform */
+		g.saveState();
+		g.addTransform(juce::AffineTransform{
+			1.f, 0.f, (float)(itemRect.getX()),
+			0.f, 1.f, (float)(itemRect.getY()) });
+
+		/** Paint Item */
+		this->paintItemPreview(g, i,
+			itemRect.getWidth(), itemRect.getHeight(), this->vertical);
+
+		/** Remove Transform */
+		g.restoreState();
+	}
+
+	/** Outline */
+	auto totalRect = this->getLocalBounds();
+	g.setColour(outlineColor);
+	g.drawRect(totalRect.toFloat(), outlineThickness);
+}
+
+void ScrollerBase::updateFrontTemp() {
+	/** Temp Graphic */
+	this->frontTemp->clear(this->frontTemp->getBounds());
+	juce::Graphics g(*(this->frontTemp.get()));
+
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int paddingWidth = screenSize.getWidth() * 0.0015;
+	int paddingHeight = screenSize.getHeight() * 0.0025;
+	float cornerSize = screenSize.getHeight() * 0.005;
+
+	/** Colour */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour thumbColor = laf.findColour(
+		juce::ScrollBar::ColourIds::thumbColourId);
+
+	/** Thumb */
+	auto [startPos, endPos] = this->getThumb();
+	if (endPos > startPos) {
+		juce::Rectangle<float> thumbRect(
+			this->vertical ? paddingWidth : startPos,
+			this->vertical ? startPos : paddingHeight,
+			this->vertical ? (this->getWidth() - paddingWidth * 2) : (endPos - startPos),
+			this->vertical ? (endPos - startPos) : (this->getHeight() - paddingHeight * 2));
+		g.setColour(thumbColor);
+		g.fillRoundedRectangle(thumbRect, cornerSize);
 	}
 }

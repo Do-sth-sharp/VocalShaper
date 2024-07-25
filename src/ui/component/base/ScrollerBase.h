@@ -9,6 +9,7 @@ public:
 	virtual ~ScrollerBase() = default;
 
 	void paint(juce::Graphics& g) override;
+	void resized() override;
 
 	void update();
 	void setPos(double pos);
@@ -55,6 +56,9 @@ private:
 	double itemSize = 0, itemNum = 0;
 	double itemMinSize = 0, itemMaxSize = 0;
 
+	std::unique_ptr<juce::Image> backTemp = nullptr;
+	std::unique_ptr<juce::Image> frontTemp = nullptr;
+
 	enum class State {
 		Normal, HoverThumb, HoverStart, HoverEnd,
 		PressedThumb, PressedStart, PressedEnd
@@ -79,6 +83,10 @@ private:
 	void resetState();
 	void updateState(const juce::Point<int>& pos, bool pressed);
 	void updateCursor();
+
+	void updateImageTemp();
+	void updateBackTemp();
+	void updateFrontTemp();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScrollerBase)
 };
