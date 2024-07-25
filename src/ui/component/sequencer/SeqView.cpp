@@ -276,7 +276,9 @@ SeqView::SeqView()
 		[this](double pos, double itemSize) { this->updateHPos(pos, itemSize); },
 		[this](juce::Graphics& g, int width, int height, bool vertical) {
 				this->paintBlockPreview(g, width, height, vertical); },
-		Scroller::PaintItemPreviewFunc{});
+		Scroller::PaintItemPreviewFunc{},
+		[this] { return this->getPlayPos(); });
+	this->hScroller->setShouldShowPlayPos(true);
 	this->addAndMakeVisible(this->hScroller.get());
 
 	this->vScroller = std::make_unique<Scroller>(true,
@@ -869,6 +871,10 @@ double SeqView::getTimeLength() const {
 std::tuple<double, double> SeqView::getTimeWidthLimit() const {
 	auto screenSize = utils::getScreenSize(this);
 	return { screenSize.getWidth() * 0.01, screenSize.getWidth() * 0.5 };
+}
+
+double SeqView::getPlayPos() const {
+	return quickAPI::getTimeInSecond();
 }
 
 void SeqView::updateHPos(double pos, double itemSize) {

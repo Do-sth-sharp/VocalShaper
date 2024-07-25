@@ -130,6 +130,7 @@ private:
 	int getViewWidth() const;
 	double getTimeLength() const;
 	std::tuple<double, double> getTimeWidthLimit() const;
+	double getPlayPos() const;
 
 	void updateHPos(double pos, double itemSize);
 	void paintBlockPreview(juce::Graphics& g,

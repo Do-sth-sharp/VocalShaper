@@ -1,8 +1,10 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../../misc/LevelMeterHub.h"
 
-class ScrollerBase : public juce::Component {
+class ScrollerBase : public juce::Component,
+	public LevelMeterHub::Target {
 public:
 	ScrollerBase() = delete;
 	ScrollerBase(bool vertical);
@@ -14,6 +16,9 @@ public:
 	void update();
 	void setPos(double pos);
 	void setItemSize(double size);
+	void setShouldShowPlayPos(bool showPos);
+
+	void updateLevelMeter() override;
 
 	double getViewPos() const;
 	double getViewSize() const;
@@ -49,12 +54,16 @@ protected:
 	virtual void paintItemPreview(juce::Graphics& g, int itemIndex,
 		int width, int height, bool vertical) {};
 
+	virtual double getPlayPos() { return -1; };
+
 private:
 	const bool vertical;
 
 	double viewPos = 0, viewSize = 0;
 	double itemSize = 0, itemNum = 0;
 	double itemMinSize = 0, itemMaxSize = 0;
+
+	bool showPos = false;
 
 	std::unique_ptr<juce::Image> backTemp = nullptr;
 	std::unique_ptr<juce::Image> frontTemp = nullptr;

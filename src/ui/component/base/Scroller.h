@@ -11,6 +11,7 @@ public:
 	using UpdatePosFunc = std::function<void(double, double)>;
 	using PaintPreviewFunc = std::function<void(juce::Graphics&, int, int, bool)>;
 	using PaintItemPreviewFunc = std::function<void(juce::Graphics&, int, int, int, bool)>;
+	using PlayPosFunc = std::function<double(void)>;
 
 public:
 	Scroller() = delete;
@@ -20,7 +21,8 @@ public:
 		const ItemSizeLimitFunc& itemSizeLimitCallback,
 		const UpdatePosFunc& updatePosCallback,
 		const PaintPreviewFunc& paintPreviewCallback = PaintPreviewFunc{},
-		const PaintItemPreviewFunc& paintItemPreviewCallback = PaintItemPreviewFunc{});
+		const PaintItemPreviewFunc& paintItemPreviewCallback = PaintItemPreviewFunc{},
+		const PlayPosFunc& playPosCallback = PlayPosFunc{});
 
 protected:
 	double createViewSize() override;
@@ -33,6 +35,8 @@ protected:
 	void paintItemPreview(juce::Graphics& g, int itemIndex,
 		int width, int height, bool vertical) override;
 
+	double getPlayPos() override;
+
 private:
 	const ViewSizeFunc viewSizeCallback;
 	const ItemNumFunc itemNumCallback;
@@ -40,6 +44,7 @@ private:
 	const UpdatePosFunc updatePosCallback;
 	const PaintPreviewFunc paintPreviewCallback;
 	const PaintItemPreviewFunc paintItemPreviewCallback;
+	const PlayPosFunc playPosCallback;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Scroller)
 };

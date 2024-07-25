@@ -7,11 +7,13 @@ Scroller::Scroller(bool vertical,
 	const ItemSizeLimitFunc& itemSizeLimitCallback,
 	const UpdatePosFunc& updatePosCallback,
 	const PaintPreviewFunc& paintPreviewCallback,
-	const PaintItemPreviewFunc& paintItemPreviewCallback)
+	const PaintItemPreviewFunc& paintItemPreviewCallback,
+	const PlayPosFunc& playPosCallback)
 	: ScrollerBase(vertical),
 	viewSizeCallback(viewSizeCallback), itemNumCallback(itemNumCallback),
 	itemSizeLimitCallback(itemSizeLimitCallback), updatePosCallback(updatePosCallback),
-	paintPreviewCallback(paintPreviewCallback), paintItemPreviewCallback(paintItemPreviewCallback) {
+	paintPreviewCallback(paintPreviewCallback), paintItemPreviewCallback(paintItemPreviewCallback),
+	playPosCallback(playPosCallback) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forScroller());
@@ -46,4 +48,11 @@ void Scroller::paintItemPreview(juce::Graphics& g, int itemIndex,
 		this->paintItemPreviewCallback(
 			g, itemIndex, width, height, vertical);
 	}
+}
+
+double Scroller::getPlayPos() {
+	if (this->playPosCallback) {
+		return this->playPosCallback();
+	}
+	return -1;
 }

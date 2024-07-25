@@ -27,6 +27,34 @@ void ScrollerBase::paint(juce::Graphics& g) {
 		g.drawImageAt(*(this->backTemp.get()), 0, 0);
 	}
 
+	/** Play Pos */
+	if (this->showPos) {
+		/** Size */
+		auto screenSize = utils::getScreenSize(this);
+		int paddingWidth = screenSize.getWidth() * 0.0015;
+		int paddingHeight = screenSize.getHeight() * 0.0025;
+		float posWidth = screenSize.getWidth() * 0.001;
+		float posHeight = posWidth;
+
+		/** Colour */
+		auto& laf = this->getLookAndFeel();
+		juce::Colour posColor = laf.findColour(
+			juce::Label::ColourIds::outlineColourId);
+
+		/** Pos */
+		double pos = this->getPlayPos();
+		float posPer = pos / this->itemNum;
+		double trackLength = this->vertical ? this->getHeight() : this->getWidth();
+
+		juce::Rectangle<float> posLineRect(
+			this->vertical ? paddingWidth : posPer * trackLength - posWidth / 2,
+			this->vertical ? posPer * trackLength - posHeight / 2 : paddingHeight,
+			this->vertical ? this->getWidth() - paddingWidth * 2 : posWidth,
+			this->vertical ? posHeight : this->getHeight() - paddingHeight * 2);
+		g.setColour(posColor);
+		g.fillRect(posLineRect);
+	}
+
 	/** Front Temp */
 	if (this->frontTemp) {
 		g.drawImageAt(*(this->frontTemp.get()), 0, 0);
@@ -84,6 +112,18 @@ void ScrollerBase::setItemSize(double size) {
 
 	/** Update Content */
 	this->updatePos(this->viewPos, size);
+}
+
+void ScrollerBase::setShouldShowPlayPos(bool showPos) {
+	this->showPos = showPos;
+	this->repaint();
+}
+
+void ScrollerBase::updateLevelMeter() {
+	/** Repaint */
+	if (this->showPos) {
+		this->repaint();
+	}
 }
 
 double ScrollerBase::getViewPos() const {
