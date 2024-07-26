@@ -40,10 +40,10 @@ void SourceRecordProcessor::processBlock(
 	}
 
 	/** Callback */
-	if (count > 0) {
+	if (count > 0 && buffer.getNumSamples() > 0) {
 		this->limitedCall.call([] {
 			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
-			}, 500 / (1000 / (this->getSampleRate() / buffer.getNumChannels())), 500);
+			}, 500 / (1000 / (this->getSampleRate() / buffer.getNumSamples())), 500);
 	}
 }
 
