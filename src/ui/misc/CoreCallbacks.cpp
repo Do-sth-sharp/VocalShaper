@@ -86,6 +86,10 @@ CoreCallbacks::CoreCallbacks() {
 		[](int index, bool status) {
 			CoreCallbacks::getInstance()->invokeSynthStatus(index, status);
 		});
+	UICallbackAPI<const std::set<int>&>::set(UICallbackType::SourceRecord,
+		[](const std::set<int>& trackList) {
+			CoreCallbacks::getInstance()->invokeSourceRecord(trackList);
+		});
 }
 
 void CoreCallbacks::addError(const ErrorCallback& callback) {
@@ -170,6 +174,10 @@ void CoreCallbacks::addPluginSearchMes(const PluginSearchMesCallback& callback) 
 
 void CoreCallbacks::addSynthStatus(const SynthStatusCallback& callback) {
 	this->synthStatus.add(callback);
+}
+
+void CoreCallbacks::addSourceRecord(const SourceRecordCallback& callback) {
+	this->sourceRecord.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -296,6 +304,12 @@ void CoreCallbacks::invokePluginSearchMes(const juce::String& mes) const {
 void CoreCallbacks::invokeSynthStatus(int index, bool status) const {
 	for (auto& i : this->synthStatus) {
 		i(index, status);
+	}
+}
+
+void CoreCallbacks::invokeSourceRecord(const std::set<int>& trackList) const {
+	for (auto& i : this->sourceRecord) {
+		i(trackList);
 	}
 }
 

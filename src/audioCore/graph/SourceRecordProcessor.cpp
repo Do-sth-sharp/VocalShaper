@@ -25,7 +25,7 @@ void SourceRecordProcessor::processBlock(
 	int timeInSamples = playPosition->getTimeInSamples().orFallback(0);
 
 	/** Check Each Task */
-	int count = 0;
+	std::set<int> trackIndexList;
 	int trackNum = this->parent->getSourceNum();
 	for (int i = 0; i < trackNum; i++) {
 		auto track = this->parent->getSourceProcessor(i);
@@ -34,15 +34,16 @@ void SourceRecordProcessor::processBlock(
 			track->writeAudioData(buffer, timeInSamples);
 			track->writeMIDIData(midiMessages, timeInSamples);
 
-			/** Increase Count */
-			count++;
+			/** Add Track Index to List */
+			trackIndexList.insert(i);
 		}
 	}
 
 	/** Callback */
-	if (count > 0 && buffer.getNumSamples() > 0) {
-		this->limitedCall.call([] {
-			UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, -1);
+	if (trackIndexList.size() > 0 && buffer.getNumSamples() > 0) {
+		this->limitedCall.call([trackIndexList] {
+			UICallbackAPI<const std::set<int>&>::invoke(
+				UICallbackType::SourceRecord, trackIndexList);
 			}, 500 / (1000 / (this->getSampleRate() / buffer.getNumSamples())), 500);
 	}
 }

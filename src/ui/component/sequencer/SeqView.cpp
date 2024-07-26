@@ -100,6 +100,15 @@ void SeqView::TrackList::updateSynthState(int index, bool state) {
 	}
 }
 
+void SeqView::TrackList::updateSourceRecord(
+	const std::set<int>& trackList) {
+	for (auto i : trackList) {
+		if (i >= 0 && i < this->list.size()) {
+			this->list[i]->updateData();
+		}
+	}
+}
+
 void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
@@ -469,6 +478,13 @@ SeqView::SeqView()
 		[comp = SeqView::SafePointer(this)](int index, bool state) {
 			if (comp) {
 				comp->updateSynthState(index, state);
+			}
+		}
+	);
+	CoreCallbacks::getInstance()->addSourceRecord(
+		[comp = SeqView::SafePointer(this)](const std::set<int>& trackList) {
+			if (comp) {
+				comp->updateSourceRecord(trackList);
 			}
 		}
 	);
@@ -851,6 +867,10 @@ void SeqView::updateData(int index) {
 
 void SeqView::updateSynthState(int index, bool state) {
 	this->trackList->updateSynthState(index, state);
+}
+
+void SeqView::updateSourceRecord(const std::set<int>& trackList) {
+	this->trackList->updateSourceRecord(trackList);
 }
 
 std::tuple<double, double> SeqView::getViewArea(

@@ -29,6 +29,7 @@ public:
 	void updateDataRef(int index);
 	void updateData(int index);
 	void updateSynthState(int index, bool state);
+	void updateSourceRecord(const std::set<int>& trackList);
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
@@ -66,6 +67,7 @@ private:
 		void updateDataRef(int index);
 		void updateData(int index);
 		void updateSynthState(int index, bool state);
+		void updateSourceRecord(const std::set<int>& trackList);
 
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);
