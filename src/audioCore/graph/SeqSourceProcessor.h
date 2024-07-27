@@ -155,6 +155,9 @@ private:
 	double getMIDILength() const;
 	double getAudioLength() const;
 
+	using AudioFormat = std::tuple<juce::String, int, int>;
+	const AudioFormat getAudioFormat() const;
+
 	void linkInstr();
 	void unlinkInstr();
 

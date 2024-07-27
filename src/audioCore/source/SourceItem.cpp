@@ -206,6 +206,14 @@ void SourceItem::invokeCallback() const {
 	}
 }
 
+void SourceItem::setAudioFormat(const AudioFormat& format) {
+	std::tie(this->format, this->bitsPerSample, this->quality) = format;
+}
+
+const SourceItem::AudioFormat SourceItem::getAudioFormat() const {
+	return { this->format, this->bitsPerSample, this->quality };
+}
+
 void SourceItem::readAudioData(
 	juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {

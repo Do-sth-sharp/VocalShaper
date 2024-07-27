@@ -321,17 +321,14 @@ namespace utils {
 	}
 
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
-		double sampleRateToUse, const juce::AudioChannelSet& channelLayout) {
+		double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
+		int bitDepth, int quality) {
 		auto format = utils::findAudioFormat(file, true);
 		if (!format) { return nullptr; }
 
 		juce::String formatType = file.getFileExtension();
-		auto bitsPerSample =
-			AudioSaveConfig::getInstance()->getBitsPerSample(formatType);
 		auto metadataValues =
 			AudioSaveConfig::getInstance()->getMetaData(formatType);
-		auto qualityOptionIndex =
-			AudioSaveConfig::getInstance()->getQualityOptionIndex(formatType);
 
 		auto outStream = new juce::FileOutputStream(file);
 		if (outStream->openedOk()) {
@@ -340,7 +337,7 @@ namespace utils {
 		}
 
 		auto writer = format->createWriterFor(outStream,
-			sampleRateToUse, channelLayout, bitsPerSample, metadataValues, qualityOptionIndex);
+			sampleRateToUse, channelLayout, bitDepth, metadataValues, quality);
 		if (!writer) {
 			delete outStream;
 			file.deleteFile();

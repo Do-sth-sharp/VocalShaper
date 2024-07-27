@@ -193,6 +193,21 @@ void SourceManager::setCallback(
 	}
 }
 
+void SourceManager::setAudioFormat(uint64_t ref, const AudioFormat& format) {
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSource(ref, SourceType::Audio)) {
+		ptr->setAudioFormat(format);
+	}
+}
+
+const SourceManager::AudioFormat SourceManager::getAudioFormat(uint64_t ref) const {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSource(ref, SourceType::Audio)) {
+		return ptr->getAudioFormat();
+	}
+	return AudioFormat{};
+}
+
 void SourceManager::readAudioData(uint64_t ref, juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {
 	if (auto ptr = this->getSourceFast(ref, SourceType::Audio)) {

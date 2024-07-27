@@ -374,8 +374,12 @@ const juce::String SeqSourceProcessor::getAudioFileName() const {
 	if (name.isEmpty()) { name = this->trackName; }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 	
-	juce::String extension = utils::getAudioFormatsSupported(true)[0]
-		.trimCharactersAtStart("*");
+	auto [extension, bitDepth, quality] = this->getAudioFormat();
+	if (extension.isEmpty()) {
+		extension = utils::getAudioFormatsSupported(true)[0]
+			.trimCharactersAtStart("*");
+	}
+
 	return utils::getLegalFileName(name) + extension;
 }
 
@@ -724,6 +728,10 @@ double SeqSourceProcessor::getMIDILength() const {
 double SeqSourceProcessor::getAudioLength() const {
 	return SourceManager::getInstance()->getLength(
 		this->audioSourceRef, SourceManager::SourceType::Audio);
+}
+
+const SeqSourceProcessor::AudioFormat SeqSourceProcessor::getAudioFormat() const {
+	return SourceManager::getInstance()->getAudioFormat(this->audioSourceRef);
 }
 
 void SeqSourceProcessor::linkInstr() {

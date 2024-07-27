@@ -42,6 +42,10 @@ public:
 	void setCallback(const ChangedCallback& callback);
 	void invokeCallback() const;
 
+	using AudioFormat = std::tuple<juce::String, int, int>;
+	void setAudioFormat(const AudioFormat& format);
+	const AudioFormat getAudioFormat() const;
+
 public:
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
@@ -61,6 +65,10 @@ private:
 	double audioSampleRate = 0;
 	juce::String fileName;
 	std::atomic_bool savedFlag = true;
+
+	juce::String format;
+	int bitsPerSample = 0;
+	int quality = 0;
 
 	const double recordInitLength = 30;
 	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;

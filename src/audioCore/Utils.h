@@ -29,7 +29,7 @@ namespace utils {
 	juce::AudioFormat* findAudioFormat(const juce::File& file, bool isWrite);
 	std::unique_ptr<juce::AudioFormatReader> createAudioReader(const juce::File& file);
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
-		double sampleRateToUse, const juce::AudioChannelSet& channelLayout);
+		double sampleRateToUse, const juce::AudioChannelSet& channelLayout, int bitDepth, int quality);
 	juce::StringArray getQualityOptionsForExtension(const juce::String& extension);
 	juce::Array<int> getPossibleBitDepthsForExtension(const juce::String& extension);
 	juce::Array<int> getPossibleSampleRatesForExtension(const juce::String& extension);
