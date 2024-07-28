@@ -42,7 +42,7 @@ public:
 	void setCallback(const ChangedCallback& callback);
 	void invokeCallback() const;
 
-	using AudioFormat = std::tuple<juce::String, int, int>;
+	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;
 	void setAudioFormat(const AudioFormat& format);
 	const AudioFormat getAudioFormat() const;
 
@@ -67,6 +67,7 @@ private:
 	std::atomic_bool savedFlag = true;
 
 	juce::String format;
+	juce::StringPairArray metaData;
 	int bitsPerSample = 0;
 	int quality = 0;
 

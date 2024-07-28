@@ -207,11 +207,11 @@ void SourceItem::invokeCallback() const {
 }
 
 void SourceItem::setAudioFormat(const AudioFormat& format) {
-	std::tie(this->format, this->bitsPerSample, this->quality) = format;
+	std::tie(this->format, this->metaData, this->bitsPerSample, this->quality) = format;
 }
 
 const SourceItem::AudioFormat SourceItem::getAudioFormat() const {
-	return { this->format, this->bitsPerSample, this->quality };
+	return { this->format, this->metaData, this->bitsPerSample, this->quality };
 }
 
 void SourceItem::readAudioData(

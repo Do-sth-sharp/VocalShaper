@@ -27,13 +27,16 @@ private:
 	std::queue<TaskStruct> list;
 
 	static const juce::StringArray trimFormat(const juce::StringArray& list);
+	static const juce::StringPairArray getMetaDataForFormat(const juce::String& format);
 	static int getQualityForFormat(const juce::String& format);
 	static int getBitDepthForFormat(const juce::String& format);
+	static int getBestQualityForFormat(const juce::String& format);
 
-	static const std::tuple<double, juce::AudioSampleBuffer, int> loadAudio(const juce::File& file);
+	static const std::tuple<double, juce::AudioSampleBuffer, juce::StringPairArray, int> loadAudio(const juce::File& file);
 	static const std::tuple<bool, juce::MidiFile> loadMIDI(const juce::File& file);
 	static bool saveAudio(const juce::File& file,
-		double sampleRate, const juce::AudioSampleBuffer& buffer, int bitDepth, int quality);
+		double sampleRate, const juce::AudioSampleBuffer& buffer,
+		const juce::StringPairArray& metaData, int bitDepth, int quality);
 	static bool saveMIDI(const juce::File& file, const juce::MidiFile& data);
 
 	static const std::tuple<juce::MidiMessageSequence, juce::MidiFile>

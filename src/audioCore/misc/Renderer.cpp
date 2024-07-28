@@ -249,6 +249,7 @@ void Renderer::saveFile(const juce::File& dir,
 	juce::GenericScopedLock locker(this->lock);
 
 	/** Formats */
+	auto metaData = AudioSaveConfig::getInstance()->getMetaData(extension);
 	int bitDepth = AudioSaveConfig::getInstance()->getBitsPerSample(extension);
 	int quality = AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
 
@@ -270,7 +271,7 @@ void Renderer::saveFile(const juce::File& dir,
 
 		/** Create Audio Writer */
 		auto writer = utils::createAudioWriter(
-			file, this->sampleRate, channels, bitDepth, quality);
+			file, this->sampleRate, channels, metaData, bitDepth, quality);
 		if (!writer) { continue; }
 
 		/** Write Data */

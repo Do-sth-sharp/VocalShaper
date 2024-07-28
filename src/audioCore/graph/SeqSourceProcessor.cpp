@@ -374,7 +374,10 @@ const juce::String SeqSourceProcessor::getAudioFileName() const {
 	if (name.isEmpty()) { name = this->trackName; }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 	
-	auto [extension, bitDepth, quality] = this->getAudioFormat();
+	auto [extension, metaData, bitDepth, quality] = this->getAudioFormat();
+	if (!utils::getAudioFormatsSupported(true).contains("*" + extension)) {
+		extension.clear();
+	}
 	if (extension.isEmpty()) {
 		extension = utils::getAudioFormatsSupported(true)[0]
 			.trimCharactersAtStart("*");

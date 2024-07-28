@@ -56,16 +56,17 @@ void SourceIO::run() {
 			if (audioTypes.contains(extension)) {
 				if (type == TaskType::Read) {
 					/** Load Audio Data */
-					auto [sampleRate, buffer, bitDepth] = SourceIO::loadAudio(file);
+					auto [sampleRate, buffer, metaData, bitDepth] = SourceIO::loadAudio(file);
 					if (sampleRate <= 0) { continue; }
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[sampleRate, buffer, name, ref, bitDepth, extension] {
+						[sampleRate, buffer, name, ref, metaData, bitDepth, extension] {
 							SourceManager::getInstance()->setAudio(
 								ref, sampleRate, buffer, name);
 							SourceManager::getInstance()->setAudioFormat(
-								ref, { extension, bitDepth, SourceIO::getQualityForFormat(extension) });
+								ref, { extension, metaData, bitDepth,
+								SourceIO::getBestQualityForFormat(extension) });
 							SourceManager::getInstance()->saved(
 								ref, SourceManager::SourceType::Audio);
 						}
@@ -82,17 +83,18 @@ void SourceIO::run() {
 					if (sampleRate <= 0) { continue; }
 
 					/** Audio Format */
-					auto [format, bitDepth, quality] = SourceManager::getInstance()->getAudioFormat(ref);
+					auto [format, metaData, bitDepth, quality] = SourceManager::getInstance()->getAudioFormat(ref);
 					if (format != extension) {
+						metaData = SourceIO::getMetaDataForFormat(extension);
 						bitDepth = SourceIO::getBitDepthForFormat(extension);
 						quality = SourceIO::getQualityForFormat(extension);
 
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
-						SourceManager::getInstance()->setAudioFormat(ref, { extension, bitDepth, quality });
+						SourceManager::getInstance()->setAudioFormat(ref, { extension, metaData, bitDepth, quality });
 					}
 
 					/** Save Audio Data */
-					if (SourceIO::saveAudio(file, sampleRate, buffer, bitDepth, quality)) {
+					if (SourceIO::saveAudio(file, sampleRate, buffer, metaData, bitDepth, quality)) {
 						juce::ScopedReadLock locker(audioLock::getSourceLock());
 						SourceManager::getInstance()->saved(
 							ref, SourceManager::SourceType::Audio);
@@ -159,6 +161,10 @@ const juce::StringArray SourceIO::trimFormat(const juce::StringArray& list) {
 	return result;
 }
 
+const juce::StringPairArray SourceIO::getMetaDataForFormat(const juce::String& format) {
+	return AudioSaveConfig::getInstance()->getMetaData(format);
+}
+
 int SourceIO::getQualityForFormat(const juce::String& format) {
 	return AudioSaveConfig::getInstance()->getQualityOptionIndex(format);
 }
@@ -167,17 +173,22 @@ int SourceIO::getBitDepthForFormat(const juce::String& format) {
 	return AudioSaveConfig::getInstance()->getBitsPerSample(format);
 }
 
-const std::tuple<double, juce::AudioSampleBuffer, int> SourceIO::loadAudio(const juce::File& file) {
+int SourceIO::getBestQualityForFormat(const juce::String& format) {
+	return utils::getBestQualityOptionIndexForExtension(format);
+}
+
+const std::tuple<double, juce::AudioSampleBuffer, juce::StringPairArray, int> SourceIO::loadAudio(const juce::File& file) {
 	/** Create Audio Reader */
 	auto audioReader = utils::createAudioReader(file);
-	if (!audioReader) { return { 0, juce::AudioSampleBuffer{}, 0 }; }
+	if (!audioReader) { return { 0, juce::AudioSampleBuffer{}, juce::StringPairArray{}, 0 }; }
 
 	/** Read Data */
 	juce::AudioSampleBuffer buffer(
 		(int)audioReader->numChannels, (int)audioReader->lengthInSamples);
 	audioReader->read(&buffer, 0, audioReader->lengthInSamples, 0, true, true);
 
-	return { audioReader->sampleRate, buffer, audioReader->bitsPerSample };
+	return { audioReader->sampleRate, buffer, 
+		audioReader->metadataValues, audioReader->bitsPerSample };
 }
 
 const std::tuple<bool, juce::MidiFile> SourceIO::loadMIDI(const juce::File& file) {
@@ -197,11 +208,11 @@ const std::tuple<bool, juce::MidiFile> SourceIO::loadMIDI(const juce::File& file
 
 bool SourceIO::saveAudio(const juce::File& file,
 	double sampleRate, const juce::AudioSampleBuffer& buffer,
-	int bitDepth, int quality) {
+	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	/** Create Audio Writer */
 	auto audioWriter = utils::createAudioWriter(file, sampleRate,
 		juce::AudioChannelSet::canonicalChannelSet(buffer.getNumChannels()),
-		bitDepth, quality);
+		metaData, bitDepth, quality);
 	if (!audioWriter) { return false; }
 
 	/** Write Data */

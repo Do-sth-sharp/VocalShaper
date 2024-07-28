@@ -322,13 +322,9 @@ namespace utils {
 
 	std::unique_ptr<juce::AudioFormatWriter> createAudioWriter(const juce::File& file,
 		double sampleRateToUse, const juce::AudioChannelSet& channelLayout,
-		int bitDepth, int quality) {
+		const juce::StringPairArray& metaData, int bitDepth, int quality) {
 		auto format = utils::findAudioFormat(file, true);
 		if (!format) { return nullptr; }
-
-		juce::String formatType = file.getFileExtension();
-		auto metadataValues =
-			AudioSaveConfig::getInstance()->getMetaData(formatType);
 
 		auto outStream = new juce::FileOutputStream(file);
 		if (outStream->openedOk()) {
@@ -337,7 +333,7 @@ namespace utils {
 		}
 
 		auto writer = format->createWriterFor(outStream,
-			sampleRateToUse, channelLayout, bitDepth, metadataValues, quality);
+			sampleRateToUse, channelLayout, bitDepth, metaData, quality);
 		if (!writer) {
 			delete outStream;
 			file.deleteFile();
@@ -387,6 +383,30 @@ namespace utils {
 		}
 
 		return {};
+	}
+
+	int getBestQualityOptionIndexForExtension(const juce::String& extension) {
+		auto format = findAudioFormatForExtension(extension, true);
+		if (!format) { return {}; }
+		juce::String formatName = format->getFormatName();
+
+		if (formatName == "WAV file") {
+			return 0;
+		}
+		else if (formatName == "AIFF file") {
+			return 0;
+		}
+		else if (formatName == "FLAC file") {
+			return 8;
+		}
+		else if (formatName == "MP3 file") {
+			return 23;
+		}
+		else if (formatName == "Ogg-Vorbis file") {
+			return 10;
+		}
+
+		return 0;
 	}
 
 	const juce::Array<TrackType> getAllTrackTypes() {
