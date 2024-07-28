@@ -35,7 +35,7 @@ find_package (flowui CONFIG REQUIRED)
 find_package (sigar CONFIG REQUIRED)
 
 set (OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
-set (ENGINES_PATH "${OUTPUT_DIR}/synth-engines")
+set (ENGINES_DIR "${OUTPUT_DIR}/synth-engines")
 
 # App Configs
 file (GLOB_RECURSE APP_CONFIG_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/app/*")
@@ -103,7 +103,7 @@ endif (MSVC)
 set (ENGINE_OUTPUT "")
 foreach (ITEM ${ENGINE_LIST})
 	get_filename_component (ITEM_NAME ${ITEM} NAME)
-	set (ITEM_TARGET "${ENGINES_PATH}/${ITEM_NAME}")
+	set (ITEM_TARGET "${ENGINES_DIR}/${ITEM_NAME}")
 	list (APPEND ENGINE_OUTPUT ${ITEM_TARGET})
 
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
@@ -122,6 +122,49 @@ add_custom_target (engines_copy
 	VERBATIM)
 add_dependencies (engines_copy
 	SynthEngineDemo::SynthEngineDemo
+)
+
+# lame
+function (lame_get_pdb var bin_path)
+	get_filename_component (bin_dir ${bin_path} DIRECTORY)
+	get_filename_component (bin_name ${bin_path} NAME_WE)
+	set (${var} "${bin_dir}/${bin_name}.pdb" PARENT_SCOPE)
+endfunction (lame_get_pdb var bin_path)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	get_target_property (LAME_PATH cmake-lame::lame IMPORTED_LOCATION_DEBUG)
+	lame_get_pdb (LAME_PDB_PATH ${LAME_PATH})
+else (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	get_target_property (LAME_PATH cmake-lame::lame IMPORTED_LOCATION_RELEASE)
+	set (LAME_PDB_PATH "")
+endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+set (LAME_LIST ${LAME_LIST} "${LAME_PATH}")
+if (MSVC)
+	set (LAME_LIST ${LAME_LIST} "${LAME_PDB_PATH}")
+endif (MSVC)
+
+set (LAME_OUTPUT "")
+foreach (ITEM ${LAME_LIST})
+	get_filename_component (ITEM_NAME ${ITEM} NAME)
+	set (ITEM_TARGET "${OUTPUT_DIR}/${ITEM_NAME}")
+	list (APPEND LAME_OUTPUT ${ITEM_TARGET})
+
+	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
+	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
+
+    add_custom_command (
+		OUTPUT ${ITEM_TARGET}
+		COMMAND copy ${ITEM_INPUT} ${ITEM_OUTPUT}
+		DEPENDS ${ITEM}
+		COMMENT "Copying lame executable file: ${ITEM}"
+		VERBATIM)
+endforeach (ITEM ${LAME_LIST})
+add_custom_target (lame_copy
+	DEPENDS ${LAME_OUTPUT}
+	COMMENT "Copy lame executable file"
+	VERBATIM)
+add_dependencies (lame_copy
+	cmake-lame::lame
 )
 
 # Plugin Searcher Target
@@ -210,8 +253,8 @@ if (MSVC)
 endif (MSVC)
 
 add_dependencies (VocalShaper
-	PluginSearcher FileRegistrar cmake-lame::lame
-	app_config_copy remix_icon_copy engines_copy
+	PluginSearcher FileRegistrar
+	app_config_copy remix_icon_copy engines_copy lame_copy
 )
 
 set_target_properties (VocalShaper PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
