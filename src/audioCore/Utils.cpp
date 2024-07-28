@@ -326,6 +326,12 @@ namespace utils {
 		auto format = utils::findAudioFormat(file, true);
 		if (!format) { return nullptr; }
 
+		/** Limit Bit Depth To Solve MP3 Bit Depth Problem */
+		auto bitDepths = format->getPossibleBitDepths();
+		if (!bitDepths.contains(bitDepth)) {
+			bitDepth = bitDepths.getLast();
+		}
+
 		auto outStream = new juce::FileOutputStream(file);
 		if (outStream->openedOk()) {
 			outStream->setPosition(0);
