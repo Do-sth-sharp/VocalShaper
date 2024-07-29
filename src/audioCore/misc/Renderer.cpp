@@ -13,7 +13,8 @@ public:
 	RenderThread(Renderer* renderer);
 
 	void prepare(const juce::File& dir,
-		const juce::String& name, const juce::String& extension);
+		const juce::String& name, const juce::String& extension,
+		const juce::StringPairArray& metaData, int bitDepth, int quality);
 
 public:
 	void run() override;
@@ -23,6 +24,9 @@ private:
 	juce::File dir;
 	juce::String name = "untitled";
 	juce::String extension = ".wav";
+	juce::StringPairArray metaData;
+	int bitDepth = 24;
+	int quality = 0;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RenderThread)
 };
@@ -31,11 +35,15 @@ RenderThread::RenderThread(Renderer* renderer)
 	: Thread("Render Thread"), renderer(renderer) {}
 
 void RenderThread::prepare(const juce::File& dir,
-	const juce::String& name, const juce::String& extension) {
+	const juce::String& name, const juce::String& extension,
+	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	if (this->isThreadRunning()) { return; }
 	this->dir = dir;
 	this->name = name;
 	this->extension = extension;
+	this->metaData = metaData;
+	this->bitDepth = bitDepth;
+	this->quality = quality;
 }
 
 void RenderThread::run() {
@@ -110,7 +118,8 @@ void RenderThread::run() {
 			}});
 	
 	/** Save Audio */
-	this->renderer->saveFile(this->dir, this->name, this->extension);
+	this->renderer->saveFile(this->dir, this->name, this->extension,
+		this->metaData, this->bitDepth, this->quality);
 
 	/** Clear Buffer */
 	this->renderer->releaseBuffer();
@@ -128,7 +137,8 @@ Renderer::~Renderer() {
 }
 
 bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
-	const juce::String& name, const juce::String& extension) {
+	const juce::String& name, const juce::String& extension,
+	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	/** Async Protection */
 	if (PluginLoader::getInstance()->isRunning()) { return false; }
 
@@ -159,7 +169,8 @@ bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 
 	/** Prepare Thread */
 	if (auto thread = dynamic_cast<RenderThread*>(this->renderThread.get())) {
-		thread->prepare(dir, name, extension);
+		thread->prepare(dir, name, extension,
+			metaData, bitDepth, quality);
 	}
 	else {
 		return false;
@@ -244,14 +255,10 @@ void Renderer::prepareToRender(const RenderTaskList& tasks) {
 }
 
 void Renderer::saveFile(const juce::File& dir,
-	const juce::String& name, const juce::String& extension) {
+	const juce::String& name, const juce::String& extension,
+	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	/** Lock */
 	juce::GenericScopedLock locker(this->lock);
-
-	/** Formats */
-	auto metaData = AudioSaveConfig::getInstance()->getMetaData(extension);
-	int bitDepth = AudioSaveConfig::getInstance()->getBitsPerSample(extension);
-	int quality = AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
 
 	/** Save Each Buffer */
 	for (auto& i : this->buffers) {
@@ -271,7 +278,8 @@ void Renderer::saveFile(const juce::File& dir,
 
 		/** Create Audio Writer */
 		auto writer = utils::createAudioWriter(
-			file, this->sampleRate, channels, metaData, bitDepth, quality);
+			file, this->sampleRate, channels,
+			metaData, bitDepth, quality);
 		if (!writer) { continue; }
 
 		/** Write Data */

@@ -19,7 +19,8 @@ public:
 	static bool removePluginSearchPath(const juce::String& path);
 
 	static void render(const juce::String& dirPath, const juce::String& fileName,
-		const juce::String& fileExtension, const juce::Array<int>& tracks);
+		const juce::String& fileExtension, const juce::Array<int>& tracks,
+		const juce::StringPairArray& metaData, int bitDepth, int quality);
 
 	static void undo();
 	static void redo();
@@ -115,7 +116,8 @@ public:
 	static bool addPluginSearchPathGUI(const juce::String& path);
 	static bool removePluginSearchPathGUI(const juce::String& path);
 
-	static void renderGUI(const juce::Array<int>& tracks);
+	static void renderGUI(const juce::String& dirPath, const juce::String& fileName,
+		const juce::String& fileExtension, const juce::StringPairArray& metaData, int bitDepth, int quality);
 	static void renderGUI();
 
 	static void insertInstrGUI(int index);

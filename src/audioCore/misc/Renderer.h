@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <JuceHeader.h>
 
@@ -13,7 +13,8 @@ public:
 	using RenderTaskList = juce::Array<RenderTask>;
 
 	bool start(const juce::Array<int>& tracks, const juce::String& path,
-		const juce::String& name, const juce::String& extension);
+		const juce::String& name, const juce::String& extension,
+		const juce::StringPairArray& metaData, int bitDepth, int quality);
 	/**
 	 * For internal use only.
 	 */
@@ -30,7 +31,8 @@ private:
 
 	void prepareToRender(const RenderTaskList& tasks);
 	void saveFile(const juce::File& dir,
-		const juce::String& name, const juce::String& extension);
+		const juce::String& name, const juce::String& extension,
+		const juce::StringPairArray& metaData, int bitDepth, int quality);
 	void releaseBuffer();
 
 private:

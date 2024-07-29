@@ -115,8 +115,10 @@ bool ActionStopRecord::doAction() {
 
 ActionRenderNow::ActionRenderNow(
 	const juce::String& path, const juce::String& name,
-	const juce::String& extension, const juce::Array<int>& tracks)
-	: path(path), name(name), extension(extension), tracks(tracks) {}
+	const juce::String& extension, const juce::Array<int>& tracks,
+	const juce::StringPairArray& metaData, int bitDepth, int quality)
+	: path(path), name(name), extension(extension), tracks(tracks),
+	metaData(metaData), bitDepth(bitDepth), quality(quality) {}
 
 bool ActionRenderNow::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -125,7 +127,8 @@ bool ActionRenderNow::doAction() {
 		"Don't do this while source IO running.");
 
 	if (AudioCore::getInstance()->renderNow(
-		this->tracks, this->path, this->name, this->extension)) {
+		this->tracks, this->path, this->name, this->extension,
+		this->metaData, this->bitDepth, this->quality)) {
 		juce::String result;
 
 		result += "Start rendering:\n";

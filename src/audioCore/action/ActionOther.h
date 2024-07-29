@@ -112,7 +112,8 @@ public:
 	ActionRenderNow() = delete;
 	ActionRenderNow(
 		const juce::String& path, const juce::String& name,
-		const juce::String& extension, const juce::Array<int>& tracks);
+		const juce::String& extension, const juce::Array<int>& tracks,
+		const juce::StringPairArray& metaData, int bitDepth, int quality);
 
 	bool doAction() override;
 	const juce::String getName() override {
@@ -122,6 +123,9 @@ public:
 private:
 	const juce::String path, name, extension;
 	const juce::Array<int> tracks;
+	const juce::StringPairArray metaData;
+	const int bitDepth;
+	const int quality;
 
 	JUCE_LEAK_DETECTOR(ActionRenderNow)
 };

@@ -202,8 +202,11 @@ void AudioCore::setIsolation(bool isolation) {
 }
 
 bool AudioCore::renderNow(const juce::Array<int>& tracks, const juce::String& path,
-	const juce::String& name, const juce::String& extension) {
-	return Renderer::getInstance()->start(tracks, path, name, extension);
+	const juce::String& name, const juce::String& extension,
+	const juce::StringPairArray& metaData, int bitDepth, int quality) {
+	return Renderer::getInstance()->start(
+		tracks, path, name, extension,
+		metaData, bitDepth, quality);
 }
 
 bool AudioCore::isRendering() const {

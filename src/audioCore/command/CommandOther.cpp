@@ -64,8 +64,20 @@ AUDIOCORE_FUNC(renderNow) {
 	}
 	lua_pop(L, 1);
 
+	juce::StringPairArray metaData;
+	lua_pushvalue(L, 5);
+	lua_pushnil(L);
+	while (lua_next(L, -2)) {
+		metaData.set(luaL_checkstring(L, -2), luaL_checkstring(L, -1));
+		lua_pop(L, 1);
+	}
+	lua_pop(L, 1);
+
+	int bitDepth = luaL_checkinteger(L, 6);
+	int quality = luaL_checkinteger(L, 7);
+
 	auto action = std::unique_ptr<ActionBase>(new ActionRenderNow{
-		path, name, extension, tracks });
+		path, name, extension, tracks, metaData, bitDepth, quality });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }

@@ -45,9 +45,11 @@ bool CoreActions::removePluginSearchPath(const juce::String& path) {
 }
 
 void CoreActions::render(const juce::String& dirPath, const juce::String& fileName,
-	const juce::String& fileExtension, const juce::Array<int>& tracks) {
+	const juce::String& fileExtension, const juce::Array<int>& tracks,
+	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRenderNow{
-				dirPath, fileName, fileExtension, tracks });
+				dirPath, fileName, fileExtension, tracks,
+				metaData, bitDepth, quality });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -594,11 +596,21 @@ bool CoreActions::removePluginSearchPathGUI(const juce::String& path) {
 	return true;
 }
 
-void CoreActions::renderGUI(const juce::Array<int>& tracks) {
-	if (tracks.isEmpty()) { return; }
+void CoreActions::renderGUI(const juce::String& dirPath, const juce::String& fileName,
+	const juce::String& fileExtension, const juce::StringPairArray& metaData, int bitDepth, int quality) {
+	auto callback = [dirPath, fileName, fileExtension, metaData, bitDepth, quality](const juce::Array<int>& tracks) {
+		CoreActions::render(
+			dirPath, fileName, fileExtension, tracks,
+			metaData, bitDepth, quality);
+		};
+	CoreActions::askForMixerTracksListGUIAsync(callback);
+}
 
+void CoreActions::renderGUI() {
+	/** Supported Formats */
 	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
 
+	/** Choose File */
 	juce::File defaultPath = quickAPI::getProjectDir();
 	juce::FileChooser chooser(TRANS("Render"), defaultPath,
 		audioFormats.joinIntoString(","));
@@ -617,14 +629,17 @@ void CoreActions::renderGUI(const juce::Array<int>& tracks) {
 			}
 		}
 
-		CoreActions::render(dir.getFullPathName(),
-			file.getFileNameWithoutExtension(), file.getFileExtension(), tracks);
-	}
-}
+		/** Format */
+		auto extension = file.getFileExtension();
+		auto metaData = quickAPI::getFormatMetaData(extension);
+		int bitDepth = quickAPI::getFormatBitsPerSample(extension);
+		int quality = quickAPI::getFormatQualityOptionIndex(extension);
 
-void CoreActions::renderGUI() {
-	auto callback = [](const juce::Array<int>& tracks) { CoreActions::renderGUI(tracks); };
-	CoreActions::askForMixerTracksListGUIAsync(callback);
+		/** Render */
+		CoreActions::renderGUI(dir.getFullPathName(),
+			file.getFileNameWithoutExtension(), extension,
+			metaData, bitDepth, quality);
+	}
 }
 
 void CoreActions::insertInstrGUI(int index) {

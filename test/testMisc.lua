@@ -1,4 +1,4 @@
--- Plugin
+﻿-- Plugin
 AC.searchPlugin();
 AC.clearPlugin();
 
@@ -12,7 +12,7 @@ AC.startRecord();
 AC.stopRecord();
 
 -- Render
-AC.renderNow("./", "test", ".wav", { 0, 1, 2 });
+AC.renderNow("./", "test", ".wav", { 0, 1, 2 }, {}, 24, 0);
 
 -- Project
 AC.newProject("C:/Music/vsp4/test/");
