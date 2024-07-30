@@ -1597,10 +1597,10 @@ void CoreActions::askForAudioSaveFormatsAsync(
 		juce::MessageBoxIconType::QuestionIcon };
 	configWindow->addButton(TRANS("OK"), 1);
 	configWindow->addButton(TRANS("Cancel"), 0);
-	configWindow->addComboBox(TRANS("bit-depth"), possibleBitDepth);
-	configWindow->addComboBox(TRANS("quality"), qualityList);
+	configWindow->addComboBox(TRANS("bit-depth"), possibleBitDepth, TRANS("bit-depth"));
+	configWindow->addComboBox(TRANS("quality"), qualityList, TRANS("quality"));
 	configWindow->addComboBox(TRANS("Meta Data"),
-		juce::StringArray{ TRANS("Empty"), TRANS("From Output Config") });
+		juce::StringArray{ TRANS("Empty"), TRANS("From Output Config") }, TRANS("Meta Data"));
 
 	/** Default */
 	auto bitDepthCombo = configWindow->getComboBoxComponent(TRANS("bit-depth"));
