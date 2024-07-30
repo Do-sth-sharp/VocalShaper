@@ -118,6 +118,8 @@ public:
 
 	static void renderGUI(const juce::String& dirPath, const juce::String& fileName,
 		const juce::String& fileExtension, const juce::StringPairArray& metaData, int bitDepth, int quality);
+	static void renderGUI(const juce::String& dirPath, const juce::String& fileName,
+		const juce::String& fileExtension);
 	static void renderGUI();
 
 	static void insertInstrGUI(int index);
@@ -201,4 +203,7 @@ public:
 	static void askForMIDITrackAsync(
 		const std::function<void(int)>& callback,
 		int totalNum, int defaltTrack = 0);
+	static void askForAudioSaveFormatsAsync(
+		const std::function<void(bool, int, int)>& callback,
+		const juce::String& format);
 };

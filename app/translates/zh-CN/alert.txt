@@ -23,6 +23,7 @@ countries: cn
 "MIDI Track Selector" = "MIDI 轨道选择器"
 "Load Audio" = "加载音频"
 "Load MIDI" = "加载 MIDI"
+"Audio Saving Config" = "音频保存设置"
 
 "Discard unsaved changes and exit?" = "放弃未保存的更改并退出？"
 "Discard unsaved changes and continue?" = "放弃未保存的更改并继续？"
@@ -59,3 +60,4 @@ countries: cn
 "Select a MIDI track in the list:" = "从列表中选择一个 MIDI 轨道："
 "Load {FILENAME} onto the sequencer track {TRACKINDEX}. Continue?" = "将 {FILENAME} 加载到音序器轨道{TRACKINDEX}。继续？"
 "Get tempo and time meta events from the MIDI file?" = "从 MIDI 文件中获取曲速与时间元事件？"
+"Configure audio saving options:" = "配置音频保存选项："

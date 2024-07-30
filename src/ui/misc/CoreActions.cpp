@@ -606,6 +606,25 @@ void CoreActions::renderGUI(const juce::String& dirPath, const juce::String& fil
 	CoreActions::askForMixerTracksListGUIAsync(callback);
 }
 
+void CoreActions::renderGUI(const juce::String& dirPath, const juce::String& fileName,
+	const juce::String& fileExtension) {
+	/** Callback */
+	auto callback = [dirPath, fileName, fileExtension]
+	(bool addMetaData, int bitDepth, int quality) {
+		juce::StringPairArray metaData;
+		if (addMetaData) {
+			metaData = quickAPI::getFormatMetaData(fileExtension);
+		}
+
+		CoreActions::renderGUI(
+			dirPath, fileName, fileExtension,
+			metaData, bitDepth, quality);
+		};
+
+	/** Ask For Audio Save Format */
+	CoreActions::askForAudioSaveFormatsAsync(callback, fileExtension);
+}
+
 void CoreActions::renderGUI() {
 	/** Supported Formats */
 	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
@@ -629,16 +648,9 @@ void CoreActions::renderGUI() {
 			}
 		}
 
-		/** Format */
-		auto extension = file.getFileExtension();
-		auto metaData = quickAPI::getFormatMetaData(extension);
-		int bitDepth = quickAPI::getFormatBitsPerSample(extension);
-		int quality = quickAPI::getFormatQualityOptionIndex(extension);
-
 		/** Render */
 		CoreActions::renderGUI(dir.getFullPathName(),
-			file.getFileNameWithoutExtension(), extension,
-			metaData, bitDepth, quality);
+			file.getFileNameWithoutExtension(), file.getFileExtension());
 	}
 }
 
@@ -1559,6 +1571,62 @@ void CoreActions::askForMIDITrackAsync(
 			if (index < 0 || index >= totalNum) { return; }
 
 			callback(index);
+		}
+	), true);
+}
+
+void CoreActions::askForAudioSaveFormatsAsync(
+	const std::function<void(bool, int, int)>& callback,
+	const juce::String& format) {
+	/** Supported Formats */
+	auto bitDepthList = quickAPI::getFormatPossibleBitDepthsForExtension(format);
+	auto qualityList = quickAPI::getFormatQualityOptionsForExtension(format);
+
+	juce::StringArray possibleBitDepth;
+	for (auto i : bitDepthList) {
+		possibleBitDepth.add(juce::String{ i });
+	}
+
+	/** Default Formats */
+	int bitDepth = quickAPI::getFormatBitsPerSample(format);
+	int quality = quickAPI::getFormatQualityOptionIndex(format);
+
+	/** Config Window */
+	auto configWindow = new juce::AlertWindow{
+		TRANS("Audio Saving Config"), TRANS("Configure audio saving options:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	configWindow->addButton(TRANS("OK"), 1);
+	configWindow->addButton(TRANS("Cancel"), 0);
+	configWindow->addComboBox(TRANS("bit-depth"), possibleBitDepth);
+	configWindow->addComboBox(TRANS("quality"), qualityList);
+	configWindow->addComboBox(TRANS("Meta Data"),
+		juce::StringArray{ TRANS("Empty"), TRANS("From Output Config") });
+
+	/** Default */
+	auto bitDepthCombo = configWindow->getComboBoxComponent(TRANS("bit-depth"));
+	bitDepthCombo->setSelectedItemIndex(bitDepthList.indexOf(bitDepth));
+
+	auto qualityCombo = configWindow->getComboBoxComponent(TRANS("quality"));
+	qualityCombo->setSelectedItemIndex(quality);
+
+	auto metaDataCombo = configWindow->getComboBoxComponent(TRANS("Meta Data"));
+	metaDataCombo->setSelectedItemIndex(1);
+
+	/** Show Async */
+	configWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[bitDepthCombo, qualityCombo, metaDataCombo, callback, bitDepthList](int result) {
+			if (result != 1) { return; }
+
+			int bitDepthIndex = bitDepthCombo->getSelectedItemIndex();
+			if (bitDepthIndex < 0 || bitDepthIndex >= bitDepthList.size()) { return; }
+			int bitDepth = bitDepthList.getUnchecked(bitDepthIndex);
+
+			int quality = qualityCombo->getSelectedItemIndex();
+			if (quality < 0) { quality = 0; }
+
+			bool addMetaData = metaDataCombo->getSelectedItemIndex() == 1;
+
+			callback(addMetaData, bitDepth, quality);
 		}
 	), true);
 }

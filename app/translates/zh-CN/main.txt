@@ -135,3 +135,6 @@ countries: cn
 "Instrument:" = "乐器："
 "Instrument Offline:" = "乐器离线："
 "Instrument Bypass:" = "乐器旁路："
+
+"Empty" = "空"
+"From Output Config" = "从输出设置"
