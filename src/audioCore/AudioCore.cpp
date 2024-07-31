@@ -260,29 +260,60 @@ bool AudioCore::save(const juce::String& name) {
 
 bool AudioCore::load(const juce::String& path) {
 	/** Check Renderer */
-	if (Renderer::getInstance()->getRendering()) { return false; }
+	if (Renderer::getInstance()->getRendering()) { 
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Can't load project while rendering.");
+		return false; 
+	}
 
 	/** Load Project File */
 	juce::File projFile = utils::getDefaultWorkingDir().getChildFile(path);
-	if (!projFile.existsAsFile()) { return false; }
+	if (!projFile.existsAsFile()) {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Project file isn't exists.");
+		return false;
+	}
 	juce::FileInputStream projStream(projFile);
-	if (!projStream.openedOk()) { return false; }
+	if (!projStream.openedOk()) {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Can't open project file.");
+		return false;
+	}
 	juce::MemoryBlock projData;
 	projData.setSize(projStream.getTotalLength());
-	if (!projStream.read(projData.getData(), projData.getSize())) { return false; }
+	if (!projStream.read(projData.getData(), projData.getSize())) {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Can't read project data.");
+		return false;
+	}
 
 	/** Parse Project */
 	auto proj = std::make_unique<vsp4::Project>();
-	if (!proj->ParseFromArray(projData.getData(), projData.getSize())) { return false; }
+	if (!proj->ParseFromArray(projData.getData(), projData.getSize())) {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Project file format error.");
+		return false;
+	}
 
 	/** Check Project Version */
 	auto& projVer = proj->version();
 	if (!utils::projectVersionHighEnough(
 		{ projVer.major(), projVer.minor(), projVer.patch() })) {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Project version is too low.");
 		return false;
 	}
 	if (!utils::projectVersionLowEnough(
 		{ projVer.major(), projVer.minor(), projVer.patch() })) {
+		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+			UICallbackType::ErrorAlert, "Load Project",
+			"Audio core version is too low.");
 		return false;
 	}
 
@@ -302,6 +333,10 @@ bool AudioCore::load(const juce::String& path) {
 
 		return true;
 	}
+
+	UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+		UICallbackType::ErrorAlert, "Load Project",
+		"Project structure unsupportive.");
 
 	utils::setProjectDir(utils::getDefaultWorkingDir());
 	return false;
