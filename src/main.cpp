@@ -39,7 +39,11 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
+				/** Init Path */
 				::initCrashHandler(utils::getAppRootDir().getFullPathName());
+
+				/** ShutDown FlowUI */
+				::setUICrashCallback([] { flowUI::FlowWindowHub::shutdown(); });
 			}
 		);
 	};

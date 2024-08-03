@@ -10,6 +10,7 @@
 #endif //JUCE_WINDOWS
 
 static std::string hostPath;
+static UICrashCallback uiCrashCallback;
 
 std::string getLocalTime() {
 	time_t nowTime;
@@ -60,6 +61,11 @@ void applicationCrashHandler(void* info) {
 
 	/** =======================Unsafe========================= */
 
+	/** Close UI */
+	if (::uiCrashCallback) {
+		uiCrashCallback();
+	}
+
 	/** Result */
 	std::string message = "A fatal error has occurred in the application and the program will abort.\n"
 		"The error triggered an emergency backup of the project data, and here is the result of that backup:\n"
@@ -77,4 +83,8 @@ const juce::Array<juce::File> getAllDumpFiles() {
 
 void initCrashHandler(const juce::String& path) {
 	::hostPath = path.toStdString();
+}
+
+void setUICrashCallback(const UICrashCallback& callback) {
+	::uiCrashCallback = callback;
 }
