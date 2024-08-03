@@ -10,8 +10,13 @@ SeqTrackLevelMeter::SeqTrackLevelMeter() {
 
 void SeqTrackLevelMeter::updateLevelMeter() {
 	/** Get Value */
-	this->values.clear();
 	auto valuesTemp = quickAPI::getSeqTrackOutputLevel(this->index);
+	if (this->values.size() == valuesTemp.size()) {
+		this->values.clearQuick();
+	}
+	else {
+		this->values.clear();
+	}
 	for (auto i : valuesTemp) {
 		this->values.add(utils::logRMS(i));
 	}

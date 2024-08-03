@@ -19,10 +19,18 @@ void TimeComponent::updateLevelMeter() {
 	/** Get Values From Audio Core */
 	std::tie(this->timeInMeasure, this->timeInBeat) = quickAPI::getTimeInBeat();
 	this->timeInSec = quickAPI::getTimeInSecond();
-	auto levels = quickAPI::getAudioOutputLevel();
-	this->level = {
-		(levels.size() > 0) ? levels[0] : 0.f,
-		(levels.size() > 1) ? levels[1] : 0.f };
+
+	auto levelTemp = quickAPI::getAudioOutputLevel();
+	if (this->level.size() == levelTemp.size()) {
+		this->level.clearQuick();
+	}
+	else {
+		this->level.clear();
+	}
+	for (auto i : levelTemp) {
+		this->level.add(utils::logRMS(i));
+	}
+
 	this->isPlaying = quickAPI::isPlaying();
 	this->isRecording = quickAPI::isRecording();
 
@@ -292,11 +300,14 @@ void TimeComponent::mouseMove(const juce::MouseEvent& event) {
 	}
 	/** Level Meter */
 	else if (event.position.getX() < levelAreaWidth) {
-		auto [left, right] = this->level;
-		left = utils::logRMS(left);
-		right = utils::logRMS(right);
-		juce::String str =
-			juce::String{ left, 2 } + " dB, " + juce::String{ right, 2 } + " dB";
+		juce::String str;
+		for (int i = 0; i < this->level.size(); i++) {
+			float data = utils::logRMS(this->level.getUnchecked(i));
+			str += juce::String{ data, 2 } + " dB";
+			if (i < this->level.size() - 1) {
+				str += ", ";
+			}
+		}
 		this->setTooltip(str);
 	}
 	/** Status */
@@ -549,29 +560,10 @@ void TimeComponent::paintDot(
 
 void TimeComponent::paintLevelMeter(
 	juce::Graphics& g, const juce::Rectangle<int>& area,
-	const LevelValue& value, float splitThickness, bool logMeter) {
-	/** Level Area */
-	float barHeight = area.getHeight() / 2.f - splitThickness / 2;
-	juce::Rectangle<float> leftRect(
-		area.getX(), area.getY(),
-		area.getWidth(), barHeight);
-	juce::Rectangle<float> rightRect(
-		area.getX(), area.getBottom() - barHeight,
-		area.getWidth(), barHeight);
-
+	const juce::Array<float>& values, float splitThickness, bool logMeter) {
 	/** Level Segment */
 	std::array<float, 3> levelSegs{
 		0.66f, 0.86f, 1.f };
-
-	/** Level Value */
-	auto [left, right] = value;
-
-	/** Log Value */
-	if (logMeter) {
-		constexpr float rmsNum = 60.f;
-		left = std::max(utils::getLogLevelPercent(utils::logRMS(left), rmsNum), 0.f);
-		right = std::max(utils::getLogLevelPercent(utils::logRMS(right), rmsNum), 0.f);
-	}
 
 	/** Level Color */
 	std::array<juce::Colour, levelSegs.size()> levelColors{
@@ -579,16 +571,25 @@ void TimeComponent::paintLevelMeter(
 		juce::Colours::yellow,
 		juce::Colours::red };
 
-	/** Paint Lower Level */
-	for (int i = levelSegs.size() - 1; i >= 0; i--) {
-		juce::Rectangle<float> leftArea
-			= leftRect.withWidth(std::fminf(left, levelSegs[i]) * area.getWidth());
-		juce::Rectangle<float> rightArea
-			= rightRect.withWidth(std::fminf(right, levelSegs[i]) * area.getWidth());
+	/** Paint Each Bar */
+	int barNum = values.size();
+	if (barNum > 0) {
+		constexpr float rmsNum = 60.f;
+		float barHeight = (area.getHeight() - (barNum - 1) * splitThickness) / barNum;
+		for (int i = 0; i < barNum; i++) {
+			float value = values.getUnchecked(i);
+			float percent = std::max(utils::getLogLevelPercent(value, rmsNum), 0.f);
 
-		g.setColour(levelColors[i]);
-		g.fillRect(leftArea);
-		g.fillRect(rightArea);
+			for (int j = levelSegs.size() - 1; j >= 0; j--) {
+				float width = std::min(percent, levelSegs[j]) * area.getWidth();
+				juce::Rectangle<float> barRect(
+					0, area.getY() + (barHeight + splitThickness) * i,
+					width, barHeight);
+
+				g.setColour(levelColors[j]);
+				g.fillRect(barRect);
+			}
+		}
 	}
 }
 

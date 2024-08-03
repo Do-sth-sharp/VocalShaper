@@ -25,8 +25,7 @@ private:
 	double timeInBeat = 0;
 	bool showSec = true;
 
-	using LevelValue = std::tuple<float, float>;
-	LevelValue level;
+	juce::Array<float> level;
 
 	bool isPlaying = false;
 	bool isRecording = false;
@@ -43,7 +42,7 @@ private:
 		float lineThickness, float splitThickness);
 	static void paintLevelMeter(
 		juce::Graphics& g, const juce::Rectangle<int>& area,
-		const LevelValue& value, float splitThickness, bool logMeter);
+		const juce::Array<float>& values, float splitThickness, bool logMeter);
 	static void paintRecordStatus(
 		juce::Graphics& g, const juce::Rectangle<int>& area,
 		float lineThickness, bool recording);
