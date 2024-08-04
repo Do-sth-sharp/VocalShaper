@@ -132,6 +132,8 @@ private:
 
 	juce::Array<float> outputLevels;
 
+	mutable double totalLengthTemp = 0;
+
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
 

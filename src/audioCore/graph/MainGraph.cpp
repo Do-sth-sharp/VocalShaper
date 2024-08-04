@@ -119,7 +119,7 @@ double MainGraph::getTailLengthSeconds() const {
 	for (auto& t : this->audioSourceNodeList) {
 		result = std::max(t->getProcessor()->getTailLengthSeconds(), result);
 	}
-	return result;
+	return this->totalLengthTemp = std::max(result, this->totalLengthTemp);
 }
 
 SourceRecordProcessor* MainGraph::getRecorder() const {
@@ -127,6 +127,9 @@ SourceRecordProcessor* MainGraph::getRecorder() const {
 }
 
 void MainGraph::clearGraph() {
+	/** Clear Temp */
+	this->totalLengthTemp = 0;
+
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 
