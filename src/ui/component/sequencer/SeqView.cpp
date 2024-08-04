@@ -765,20 +765,25 @@ void SeqView::update(int index) {
 	}
 
 	/** Update Color Temp */
-	if (index >= 0 && index < this->colorTemp.size()) {
-		if (index < newSize) {
-			this->colorTemp.getReference(index) = quickAPI::getSeqTrackColor(index);
-		}
-		if (this->colorTemp.size() > newSize) {
-			this->colorTemp.resize(newSize);
-		}
+	if (this->colorTemp.size() > newSize) {
+		this->colorTemp.resize(newSize);
 	}
 	else {
-		this->colorTemp.clear();
-		for (int i = 0; i < this->trackList->size(); i++) {
+		for (int i = this->colorTemp.size(); i < newSize; i++) {
 			this->colorTemp.add(quickAPI::getSeqTrackColor(i));
 		}
 	}
+	if (index >= 0 && index < this->colorTemp.size()) {
+		this->colorTemp.getReference(index) = quickAPI::getSeqTrackColor(index);
+	}
+	else {
+		for (int i = 0; i < this->trackList->size(); i++) {
+			this->colorTemp.getReference(i) = quickAPI::getSeqTrackColor(i);
+		}
+	}
+
+	/** Update Block Temp */
+	this->updateBlockTemp();
 
 	/** Update View Pos */
 	this->vScroller->update();
@@ -792,23 +797,8 @@ void SeqView::updateBlock(int track, int index) {
 	/** Update Tracks */
 	this->trackList->updateBlock(track, index);
 
-	/** Clear Temp */
-	this->blockTemp.clear();
-
-	/** Get Blocks */
-	int trackNum = quickAPI::getSeqTrackNum();
-	for (int i = 0; i < trackNum; i++) {
-		auto list = quickAPI::getBlockList(i);
-		for (auto [startTime, endTime, offset] : list) {
-			this->blockTemp.add({ i, startTime, endTime });
-		}
-	}
-
-	/** Update Length */
-	this->totalLength = quickAPI::getTotalLength() + SEQ_TAIL_SEC;
-
-	/** Update View Pos */
-	this->hScroller->update();
+	/** Update Block Temp */
+	this->updateBlockTemp();
 }
 
 void SeqView::updateTempo() {
@@ -1043,6 +1033,26 @@ void SeqView::updateGridTemp() {
 		g.setColour(lineColor);
 		g.fillRect(lineRect);
 	}
+}
+
+void SeqView::updateBlockTemp() {
+	/** Clear Temp */
+	this->blockTemp.clear();
+
+	/** Get Blocks */
+	int trackNum = quickAPI::getSeqTrackNum();
+	for (int i = 0; i < trackNum; i++) {
+		auto list = quickAPI::getBlockList(i);
+		for (auto [startTime, endTime, offset] : list) {
+			this->blockTemp.add({ i, startTime, endTime });
+		}
+	}
+
+	/** Update Length */
+	this->totalLength = quickAPI::getTotalLength() + SEQ_TAIL_SEC;
+
+	/** Update View Pos */
+	this->hScroller->update();
 }
 
 void SeqView::processAreaDragStart() {

@@ -150,6 +150,7 @@ private:
 	juce::PopupMenu createAdsorbMenu();
 
 	void updateGridTemp();
+	void updateBlockTemp();
 
 	void processAreaDragStart();
 	void processAreaDragTo(int distanceX, int distanceY, bool moveX = true, bool moveY = true);
