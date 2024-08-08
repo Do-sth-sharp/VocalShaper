@@ -23,6 +23,15 @@ namespace utils {
 		const juce::MidiMessageSequence& tempoEvents,
 		int timeFormat);
 
+	struct AudioFormatInfo final {
+		double sampleRate = 0;
+		unsigned int bitsPerSample = 0;
+		int64_t lengthInSamples = 0;
+		unsigned int numChannels = 0;
+		bool usesFloatingPointData = false;
+		juce::StringPairArray metadataValues;
+	};
+
 	const juce::StringArray getAudioFormatsSupported(bool isWrite);
 	const juce::StringArray getMidiFormatsSupported(bool isWrite);
 	juce::AudioFormat* findAudioFormatForExtension(const juce::String& extension, bool isWrite);
@@ -36,6 +45,7 @@ namespace utils {
 	juce::Array<int> getPossibleSampleRatesForExtension(const juce::String& extension);
 	juce::StringArray getPossibleMetaKeyForExtension(const juce::String& extension);
 	int getBestQualityOptionIndexForExtension(const juce::String& extension);
+	const AudioFormatInfo getAudioFormatData(const juce::File& file);
 
 	enum class TrackType {
 		DISABLED = 0,

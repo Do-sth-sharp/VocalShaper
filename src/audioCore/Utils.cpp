@@ -415,6 +415,20 @@ namespace utils {
 		return 0;
 	}
 
+	const AudioFormatInfo getAudioFormatData(const juce::File& file) {
+		if (auto reader = createAudioReader(file)) {
+			return AudioFormatInfo{
+				reader->sampleRate,
+				reader->bitsPerSample,
+				reader->lengthInSamples,
+				reader->numChannels,
+				reader->usesFloatingPointData,
+				reader->metadataValues
+			};
+		}
+		return AudioFormatInfo{};
+	}
+
 	const juce::Array<TrackType> getAllTrackTypes() {
 		return {
 			TrackType::DISABLED,
