@@ -529,10 +529,12 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 		if (audioFormats.contains(fileType)) {
 			/** Load Audio */
 			this->setContentAudioRef(filePath);
+			break;
 		}
 		else if (midiFormats.contains(fileType)) {
 			/** Load MIDI */
 			this->setContentMIDIRef(filePath);
+			break;
 		}
 	}
 }
