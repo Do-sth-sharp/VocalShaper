@@ -1,6 +1,5 @@
 ﻿#include "QuickGet.h"
 #include "../AudioCore.h"
-#include "../Utils.h"
 #include "../plugin/Plugin.h"
 #include "../misc/Device.h"
 #include "../misc/PlayPosition.h"
@@ -162,6 +161,11 @@ namespace quickAPI {
 
 	int getFormatQualityOptionIndex(const juce::String& extension) {
 		return AudioSaveConfig::getInstance()->getQualityOptionIndex(extension);
+	}
+
+	const AudioFormatInfo getAudioFormatData(const juce::String& path) {
+		return utils::getAudioFormatData(
+			utils::getProjectDir().getChildFile(path));
 	}
 
 	const juce::Array<double> getSampleRateSupported() {

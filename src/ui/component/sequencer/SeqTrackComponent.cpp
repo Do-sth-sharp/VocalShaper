@@ -528,11 +528,13 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 
 		if (audioFormats.contains(fileType)) {
 			/** Load Audio */
+			this->addBlockForAudioFile(filePath);
 			this->setContentAudioRef(filePath);
 			break;
 		}
 		else if (midiFormats.contains(fileType)) {
 			/** Load MIDI */
+			this->addBlockForMIDIFile(filePath);
 			this->setContentMIDIRef(filePath);
 			break;
 		}
@@ -663,6 +665,28 @@ void SeqTrackComponent::preDrop() {
 void SeqTrackComponent::endDrop() {
 	this->dragHovered = false;
 	this->repaint();
+}
+
+void SeqTrackComponent::addBlockForMIDIFile(const juce::String& path) {
+	/** TODO */
+}
+
+void SeqTrackComponent::addBlockForAudioFile(const juce::String& path) {
+	/** Check Already Has Block */
+	if (quickAPI::getBlockNum(this->index) > 0) { return; }
+
+	/** Get Audio Format */
+	auto audioFormatData = quickAPI::getAudioFormatData(path);
+	
+	/** Check Audio Format */
+	if (audioFormatData.sampleRate == 0 ||
+		audioFormatData.lengthInSamples == 0) { return; }
+
+	/** Get Length */
+	double length = audioFormatData.lengthInSamples / audioFormatData.sampleRate;
+
+	/** Add Block */
+	CoreActions::insertSeqBlock(this->index, 0, length, 0);
 }
 
 juce::PopupMenu SeqTrackComponent::createInstrMenu(

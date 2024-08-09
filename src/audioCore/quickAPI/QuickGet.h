@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "../graph/PluginDecorator.h"
+#include "../Utils.h"
 
 namespace quickAPI {
 	juce::Component* getAudioDebugger();
@@ -42,6 +43,9 @@ namespace quickAPI {
 	int getFormatBitsPerSample(const juce::String& extension);
 	const juce::StringPairArray getFormatMetaData(const juce::String& extension);
 	int getFormatQualityOptionIndex(const juce::String& extension);
+
+	using AudioFormatInfo = utils::AudioFormatInfo;
+	const AudioFormatInfo getAudioFormatData(const juce::String& path);
 
 	const juce::Array<double> getSampleRateSupported();
 	const juce::Array<double> getSourceSampleRateSupported();
