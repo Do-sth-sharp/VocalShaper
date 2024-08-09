@@ -106,9 +106,6 @@ private:
 	void preDrop();
 	void endDrop();
 
-	void addBlockForMIDIFile(const juce::String& path);
-	void addBlockForAudioFile(const juce::String& path);
-
 	juce::PopupMenu createInstrMenu(
 		const std::function<void(const juce::PluginDescription&)>& addCallback) const;
 	juce::PopupMenu createInstrAddMenu(

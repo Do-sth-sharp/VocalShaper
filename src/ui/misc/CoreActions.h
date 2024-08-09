@@ -156,7 +156,9 @@ public:
 	static void setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,
 		const juce::Array<std::tuple<int, int>>& links);
 	static void setSeqMIDITrackGUI(int index);
+	static void setSeqAudioRefGUIThenAddBlock(int index, const juce::String& path);
 	static void setSeqAudioRefGUI(int index, const juce::String& path);
+	static void setSeqMIDIRefGUIThenAddBlock(int index, const juce::String& path, bool getTempo);
 	static void setSeqMIDIRefGUI(int index, const juce::String& path);
 	static void removeSeqGUI(int index);
 

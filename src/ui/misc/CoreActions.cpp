@@ -1002,6 +1002,32 @@ void CoreActions::setSeqMIDITrackGUI(int index) {
 	CoreActions::askForMIDITrackAsync(callback, totalMIDITrack, currentMIDITrack);
 }
 
+void CoreActions::setSeqAudioRefGUIThenAddBlock(int index, const juce::String& path) {
+	/** Add Block When Track Empty */
+	[index, path] {
+		/** Check Already Has Block */
+		if (quickAPI::getBlockNum(index) > 0) { return; }
+
+		/** Get Audio Format */
+		auto audioFormatData = quickAPI::getAudioFormatData(path);
+
+		/** Check Audio Format */
+		if (audioFormatData.sampleRate == 0 ||
+			audioFormatData.lengthInSamples == 0) {
+			return;
+		}
+
+		/** Get Length */
+		double length = audioFormatData.lengthInSamples / audioFormatData.sampleRate;
+
+		/** Add Block */
+		CoreActions::insertSeqBlock(index, 0, length, 0);
+		} ();
+
+	/** Load Audio */
+	CoreActions::setSeqAudioRef(index, path);
+}
+
 void CoreActions::setSeqAudioRefGUI(int index, const juce::String& path) {
 	if (index <= -1) { return; }
 
@@ -1013,7 +1039,17 @@ void CoreActions::setSeqAudioRefGUI(int index, const juce::String& path) {
 		return;
 	}
 
-	CoreActions::setSeqAudioRef(index, path);
+	CoreActions::setSeqAudioRefGUIThenAddBlock(index, path);
+}
+
+void CoreActions::setSeqMIDIRefGUIThenAddBlock(int index, const juce::String& path, bool getTempo) {
+	/** Add Block When Track Empty */
+	[index, path] {
+		/** TODO */
+		} ();
+
+	/** Load MIDI */
+	CoreActions::setSeqMIDIRef(index, path, getTempo);
 }
 
 void CoreActions::setSeqMIDIRefGUI(int index, const juce::String& path) {
@@ -1032,7 +1068,7 @@ void CoreActions::setSeqMIDIRefGUI(int index, const juce::String& path) {
 		TRANS("Get tempo and time meta events from the MIDI file?"));
 	if (getTempo == 0) { return; }
 
-	CoreActions::setSeqMIDIRef(index, path, getTempo == 1);
+	CoreActions::setSeqMIDIRefGUIThenAddBlock(index, path, getTempo == 1);
 }
 
 void CoreActions::removeSeqGUI(int index) {
