@@ -264,8 +264,8 @@ bool ActionInitMidiSource::doAction() {
 }
 
 ActionLoadAudioSource::ActionLoadAudioSource(int index,
-	const juce::String& path)
-	: index(index), path(path) {};
+	const juce::String& path, const SourceCallback& callback)
+	: index(index), path(path), callback(callback) {};
 
 bool ActionLoadAudioSource::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -278,7 +278,8 @@ bool ActionLoadAudioSource::doAction() {
 			track->applyAudio();
 			auto ref = track->getAudioRef();
 			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Read, ref, this->path, false });
+				{ SourceIO::TaskType::Read, ref, this->path,
+				false, this->callback });
 
 			this->output("Load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;
@@ -289,8 +290,9 @@ bool ActionLoadAudioSource::doAction() {
 }
 
 ActionLoadMidiSource::ActionLoadMidiSource(int index,
-	const juce::String& path, bool getTempo)
-	: index(index), path(path), getTempo(getTempo) {}
+	const juce::String& path, bool getTempo,
+	const SourceCallback& callback)
+	: index(index), path(path), getTempo(getTempo), callback(callback) {}
 
 bool ActionLoadMidiSource::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -303,7 +305,8 @@ bool ActionLoadMidiSource::doAction() {
 			track->applyMIDI();
 			auto ref = track->getMIDIRef();
 			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Read, ref, this->path, this->getTempo });
+				{ SourceIO::TaskType::Read, ref, this->path,
+				this->getTempo, this->callback });
 
 			this->output("Load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;
@@ -325,7 +328,7 @@ bool ActionSaveAudioSource::doAction() {
 		if (auto track = graph->getSourceProcessor(this->index)) {
 			auto ref = track->getAudioRef();
 			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Write, ref, this->path, false });
+				{ SourceIO::TaskType::Write, ref, this->path, false, {} });
 
 			this->output("Save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;
@@ -347,7 +350,7 @@ bool ActionSaveMidiSource::doAction() {
 		if (auto track = graph->getSourceProcessor(this->index)) {
 			auto ref = track->getMIDIRef();
 			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Write, ref, this->path, false });
+				{ SourceIO::TaskType::Write, ref, this->path, false, {} });
 
 			this->output("Save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 			return true;

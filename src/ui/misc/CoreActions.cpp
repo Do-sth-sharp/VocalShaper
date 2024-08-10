@@ -425,13 +425,15 @@ void CoreActions::setSeqMIDITrack(int index, int midiTrack) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqAudioRef(int index, const juce::String& path) {
-	auto action = std::unique_ptr<ActionBase>(new ActionLoadAudioSource{ index, path });
+void CoreActions::setSeqAudioRef(int index, const juce::String& path,
+	const std::function<void(uint64_t)>& callback) {
+	auto action = std::unique_ptr<ActionBase>(new ActionLoadAudioSource{ index, path, callback });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqMIDIRef(int index, const juce::String& path, bool getTempo) {
-	auto action = std::unique_ptr<ActionBase>(new ActionLoadMidiSource{ index, path, getTempo });
+void CoreActions::setSeqMIDIRef(int index, const juce::String& path,
+	bool getTempo, const std::function<void(uint64_t)>& callback) {
+	auto action = std::unique_ptr<ActionBase>(new ActionLoadMidiSource{ index, path, getTempo, callback });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -1044,12 +1046,38 @@ void CoreActions::setSeqAudioRefGUI(int index, const juce::String& path) {
 
 void CoreActions::setSeqMIDIRefGUIThenAddBlock(int index, const juce::String& path, bool getTempo) {
 	/** Add Block When Track Empty */
-	[index, path] {
-		/** TODO */
-		} ();
+	auto addBlockFunc = [](int index) {
+		/** Check Already Has Block */
+		if (quickAPI::getBlockNum(index) > 0) { return; }
+
+		/** Get Length */
+		double length = quickAPI::getMIDISourceLength(
+			quickAPI::getSeqTrackMIDIRef(index));
+
+		/** Add Block */
+		CoreActions::insertSeqBlock(index, 0, length, 0);
+		};
+	
+	/** Source Loading Callback */
+	auto callback = [index, addBlockFunc] (uint64_t ref) {
+		/** Check Index Track Ref Firstly */
+		if (quickAPI::isSeqTrackMIDIRef(index, ref)) {
+			addBlockFunc(index);
+			return;
+		}
+
+		/** Check Each Track */
+		int trackNum = quickAPI::getSeqTrackNum();
+		for (int i = 0; i < trackNum; i++) {
+			if (quickAPI::isSeqTrackMIDIRef(i, ref)) {
+				addBlockFunc(i);
+				return;
+			}
+		}
+		};
 
 	/** Load MIDI */
-	CoreActions::setSeqMIDIRef(index, path, getTempo);
+	CoreActions::setSeqMIDIRef(index, path, getTempo, callback);
 }
 
 void CoreActions::setSeqMIDIRefGUI(int index, const juce::String& path) {

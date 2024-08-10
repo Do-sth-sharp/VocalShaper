@@ -132,6 +132,10 @@ namespace quickAPI {
 	const juce::MidiMessageSequence getSeqTrackMIDIData(int index);
 	int getSeqTrackMIDITrackNum(int index);
 	int getSeqTrackCurrentMIDITrack(int index);
+	bool isSeqTrackAudioRef(int index, uint64_t ref);
+	bool isSeqTrackMIDIRef(int index, uint64_t ref);
+	uint64_t getSeqTrackAudioRef(int index);
+	uint64_t getSeqTrackMIDIRef(int index);
 
 	int getMixerTrackNum();
 	const juce::String getMixerTrackName(int index);
@@ -177,4 +181,7 @@ namespace quickAPI {
 
 	const juce::String getMIDICCChannelName(int channel);
 	const juce::StringArray getMIDICCChannelNameList();
+
+	double getAudioSourceLength(uint64_t ref);
+	double getMIDISourceLength(uint64_t ref);
 }

@@ -218,8 +218,9 @@ private:
 class ActionLoadAudioSource final : public ActionBase {
 public:
 	ActionLoadAudioSource() = delete;
+	using SourceCallback = std::function<void(uint64_t)>;
 	ActionLoadAudioSource(int index,
-		const juce::String& path);
+		const juce::String& path, const SourceCallback& callback = {});
 
 	bool doAction() override;
 	const juce::String getName() override {
@@ -229,6 +230,7 @@ public:
 private:
 	const int index;
 	const juce::String path;
+	const SourceCallback callback;
 
 	JUCE_LEAK_DETECTOR(ActionLoadAudioSource)
 };
@@ -236,8 +238,10 @@ private:
 class ActionLoadMidiSource final : public ActionBase {
 public:
 	ActionLoadMidiSource() = delete;
+	using SourceCallback = std::function<void(uint64_t)>;
 	ActionLoadMidiSource(int index,
-		const juce::String& path, bool getTempo = false);
+		const juce::String& path, bool getTempo = false,
+		const SourceCallback& callback = {});
 
 	bool doAction() override;
 	const juce::String getName() override {
@@ -248,6 +252,7 @@ private:
 	const int index;
 	const juce::String path;
 	const bool getTempo;
+	const SourceCallback callback;
 
 	JUCE_LEAK_DETECTOR(ActionLoadMidiSource)
 };

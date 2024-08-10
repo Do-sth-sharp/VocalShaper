@@ -108,7 +108,7 @@ namespace quickAPI {
 					result.add({ "", "" });
 					continue;
 				}
-				
+
 				auto& trackType = track->getAudioChannelSet();
 				auto trackName = track->getTrackName();
 				if (trackName.isEmpty()) { trackName = "untitled"; }
@@ -535,7 +535,7 @@ namespace quickAPI {
 
 	const juce::StringArray getSeqTrackNameList() {
 		int size = getSeqTrackNum();
-		
+
 		juce::StringArray result;
 		for (int i = 0; i < size; i++) {
 			result.add(getSeqTrackName(i));
@@ -682,7 +682,7 @@ namespace quickAPI {
 				int midiTrack = track->getCurrentMIDITrack();
 				return SourceManager::getInstance()->getMIDI(ref, midiTrack);
 			}
-		} 
+		}
 		return {};
 	}
 
@@ -699,6 +699,32 @@ namespace quickAPI {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
 				return track->getCurrentMIDITrack();
+			}
+		}
+		return 0;
+	}
+
+	bool isSeqTrackAudioRef(int index, uint64_t ref) {
+		return getSeqTrackAudioRef(index) == ref;
+	}
+
+	bool isSeqTrackMIDIRef(int index, uint64_t ref) {
+		return getSeqTrackMIDIRef(index) == ref;
+	}
+
+	uint64_t getSeqTrackAudioRef(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getAudioRef();
+			}
+		}
+		return 0;
+	}
+
+	uint64_t getSeqTrackMIDIRef(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getMIDIRef();
 			}
 		}
 		return 0;
@@ -967,5 +993,17 @@ namespace quickAPI {
 			result.add(getMIDICCChannelName(i));
 		}
 		return result;
+	}
+
+	double getAudioSourceLength(uint64_t ref) {
+		if (ref == 0) { return 0; }
+		return SourceManager::getInstance()->getLength(
+			ref, SourceManager::SourceType::Audio);
+	}
+
+	double getMIDISourceLength(uint64_t ref) {
+		if (ref == 0) { return 0; }
+		return SourceManager::getInstance()->getLength(
+			ref, SourceManager::SourceType::MIDI);
 	}
 }

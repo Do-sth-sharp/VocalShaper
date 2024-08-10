@@ -89,8 +89,10 @@ public:
 	static void setSeqMuteAll(bool mute);
 	static void setSeqRec(int index, bool rec);
 	static void setSeqMIDITrack(int index, int midiTrack);
-	static void setSeqAudioRef(int index, const juce::String& path);
-	static void setSeqMIDIRef(int index, const juce::String& path, bool getTempo);
+	static void setSeqAudioRef(int index, const juce::String& path,
+		const std::function<void(uint64_t)>& callback = {});
+	static void setSeqMIDIRef(int index, const juce::String& path,
+		bool getTempo, const std::function<void(uint64_t)>& callback = {});
 	static void synthSeq(int index);
 	static void removeSeq(int index);
 

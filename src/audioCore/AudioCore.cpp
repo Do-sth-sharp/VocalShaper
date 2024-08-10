@@ -503,7 +503,7 @@ void AudioCore::saveSource(const google::protobuf::Message* data) const {
 					juce::String path = utils::getProjectDir()
 						.getChildFile(seqData.midisrc()).getFullPathName();
 					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Write, ref, path, false });
+						{ SourceIO::TaskType::Write, ref, path, false, {} });
 				}
 			}
 
@@ -512,7 +512,7 @@ void AudioCore::saveSource(const google::protobuf::Message* data) const {
 					juce::String path = utils::getProjectDir()
 						.getChildFile(seqData.audiosrc()).getFullPathName();
 					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Write, ref, path, false });
+						{ SourceIO::TaskType::Write, ref, path, false, {} });
 				}
 			}
 		}
@@ -534,7 +534,7 @@ void AudioCore::loadSource(const google::protobuf::Message* data) const {
 					juce::String path = utils::getProjectDir()
 						.getChildFile(seqData.midisrc()).getFullPathName();
 					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Read, ref, path, false });
+						{ SourceIO::TaskType::Read, ref, path, false, {} });
 				}
 			}
 
@@ -543,7 +543,7 @@ void AudioCore::loadSource(const google::protobuf::Message* data) const {
 					juce::String path = utils::getProjectDir()
 						.getChildFile(seqData.audiosrc()).getFullPathName();
 					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Read, ref, path, false });
+						{ SourceIO::TaskType::Read, ref, path, false, {} });
 				}
 			}
 		}

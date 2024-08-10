@@ -43,7 +43,7 @@ void SourceIO::run() {
 		{
 			/** Check Source Type */
 			auto& [taskData, tempo] = task;
-			auto& [type, ref, path, getTempo] = taskData;
+			auto& [type, ref, path, getTempo, callback] = taskData;
 			if (!ref) { continue; }
 
 			juce::File file = utils::getProjectDir().getChildFile(path);
@@ -61,7 +61,7 @@ void SourceIO::run() {
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[sampleRate, buffer, name, ref, metaData, bitDepth, extension] {
+						[sampleRate, buffer, name, ref, metaData, bitDepth, extension, callback] {
 							SourceManager::getInstance()->setAudio(
 								ref, sampleRate, buffer, name);
 							SourceManager::getInstance()->setAudioFormat(
@@ -69,6 +69,8 @@ void SourceIO::run() {
 								SourceIO::getBestQualityForFormat(extension) });
 							SourceManager::getInstance()->saved(
 								ref, SourceManager::SourceType::Audio);
+
+							if (callback) { callback(ref); }
 						}
 					);
 				}
@@ -99,6 +101,13 @@ void SourceIO::run() {
 						SourceManager::getInstance()->saved(
 							ref, SourceManager::SourceType::Audio);
 					}
+
+					/** Callback */
+					juce::MessageManager::callAsync(
+						[callback, ref] {
+							if (callback) { callback(ref); }
+						}
+					);
 				}
 			}
 			else if (midiTypes.contains(extension)) {
@@ -121,11 +130,13 @@ void SourceIO::run() {
 
 					/** Set Data */
 					juce::MessageManager::callAsync(
-						[buffer, name, ref] {
+						[buffer, name, ref, callback] {
 							SourceManager::getInstance()->setMIDI(
 								ref, buffer, name);
 							SourceManager::getInstance()->saved(
 								ref, SourceManager::SourceType::MIDI);
+
+							if (callback) { callback(ref); }
 						}
 					);
 				}
@@ -147,6 +158,13 @@ void SourceIO::run() {
 						SourceManager::getInstance()->saved(
 							ref, SourceManager::SourceType::MIDI);
 					}
+
+					/** Callback */
+					juce::MessageManager::callAsync(
+						[callback, ref] {
+							if (callback) { callback(ref); }
+						}
+					);
 				}
 			}
 		}

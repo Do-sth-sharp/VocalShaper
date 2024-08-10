@@ -12,7 +12,8 @@ public:
 		Read, Write
 	};
 	/** Type, SeqPtr, Path, GetTempo */
-	using Task = std::tuple<TaskType, uint64_t, juce::String, bool>;
+	using SourceIOCallback = std::function<void(uint64_t)>;
+	using Task = std::tuple<TaskType, uint64_t, juce::String, bool, SourceIOCallback>;
 	void addTask(const Task& task);
 
 protected:
