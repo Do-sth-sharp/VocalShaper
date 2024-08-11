@@ -59,7 +59,7 @@ void SeqTimeRuler::updateRulerTemp() {
 
 	float outlineThickness = screenSize.getHeight() * 0.0015;
 	float lineThickness = screenSize.getWidth() * 0.00075;
-	float longLineHeight = screenSize.getHeight() * 0.05;
+	float longLineHeight = screenSize.getHeight() * 0.065;
 	float shortLineHeight = screenSize.getHeight() * 0.015;
 
 	float shortLineIntervalMin = screenSize.getWidth() * 0.01;
@@ -73,6 +73,8 @@ void SeqTimeRuler::updateRulerTemp() {
 	float labelHeight = screenSize.getHeight() * 0.0175;
 	float labelWidth = screenSize.getWidth() * 0.02;
 	float labelOutlineThickness = screenSize.getHeight() * 0.001;
+
+	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
 	/** Colors */
 	auto& laf = this->getLookAndFeel();
@@ -98,6 +100,13 @@ void SeqTimeRuler::updateRulerTemp() {
 	/** Background */
 	g.setColour(backgroundColor);
 	g.fillAll();
+
+	/** H Split */
+	juce::Rectangle<float>  hSplitLineRect(
+		0, labelAreaHeight - lineThickness / 2,
+		this->rulerTemp->getWidth(), lineThickness);
+	g.setColour(outlineColor);
+	g.fillRect(hSplitLineRect);
 
 	/** Outline */
 	auto outlineRect = this->getLocalBounds();
