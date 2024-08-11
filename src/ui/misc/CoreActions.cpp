@@ -1474,37 +1474,32 @@ public:
 		quickAPI::PluginHolder plugin, PluginType type)
 		: ComboBox(name), plugin(plugin), type(type) {
 		/** Add Listener */
-		switch (type) {
+		auto listener = [comp = juce::Component::SafePointer(this)](int index) {
+			if (comp) {
+				comp->setSelectedItemIndex(index);
+			}
+			};
+		quickAPI::setMainMIDICCListener(listener);
+		/*switch (type) {
 		case PluginType::Instr:
-			quickAPI::setInstrMIDICCListener(plugin,
-				[comp = juce::Component::SafePointer(this)](int index) {
-					if (comp) {
-						comp->setSelectedItemIndex(index);
-					}
-				}
-			);
+			quickAPI::setInstrMIDICCListener(plugin, listener);
 			break;
 		case PluginType::Effect:
-			quickAPI::setEffectMIDICCListener(plugin,
-				[comp = juce::Component::SafePointer(this)](int index) {
-					if (comp) {
-						comp->setSelectedItemIndex(index);
-					}
-				}
-			);
+			quickAPI::setEffectMIDICCListener(plugin, listener);
 			break;
-		}
+		}*/
 	};
 	~ListenableMIDICCCombo() {
 		/** Remove Listener */
-		switch (this->type) {
+		quickAPI::clearMainMIDICCListener();
+		/*switch (this->type) {
 		case PluginType::Instr:
 			quickAPI::clearInstrMIDICCListener(this->plugin);
 			break;
 		case PluginType::Effect:
 			quickAPI::clearEffectMIDICCListener(this->plugin);
 			break;
-		}
+		}*/
 	};
 
 private:

@@ -29,6 +29,8 @@ namespace quickAPI {
 	void setEffectMIDICCListener(PluginHolder pointer, const MIDICCListener& listener);
 	void clearInstrMIDICCListener(PluginHolder pointer);
 	void clearEffectMIDICCListener(PluginHolder pointer);
+	void setMainMIDICCListener(const MIDICCListener& listener);
+	void clearMainMIDICCListener();
 
 	void setPlayPosition(double timeSec);
 	void setPlayLoop(double startSec, double endSec);

@@ -75,6 +75,10 @@ public:
 	 */
 	void setMIDIMessageHook(const std::function<void(const juce::MidiMessage&, bool)> hook);
 
+	using MIDICCListener = std::function<void(int)>;
+	void setMIDICCListener(const MIDICCListener& listener);
+	void clearMIDICCListener();
+
 	void closeAllNote();
 
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -129,6 +133,8 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Connection> midiTrk2OConnectionList;
 
 	std::function<void(const juce::MidiMessage&, bool)> midiHook;
+
+	MIDICCListener ccListener;
 
 	juce::Array<float> outputLevels;
 

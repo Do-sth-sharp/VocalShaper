@@ -103,6 +103,18 @@ namespace quickAPI {
 		clearPluginMIDICCListener(pointer);
 	}
 
+	void setMainMIDICCListener(const MIDICCListener& listener) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			graph->setMIDICCListener(listener);
+		}
+	}
+
+	void clearMainMIDICCListener() {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			graph->clearMIDICCListener();
+		}
+	}
+
 	void setPlayPosition(double timeSec) {
 		AudioCore::getInstance()->setPositon(timeSec);
 	}

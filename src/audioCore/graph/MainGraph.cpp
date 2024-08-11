@@ -76,6 +76,16 @@ void MainGraph::setMIDIMessageHook(
 	this->midiHook = hook;
 }
 
+void MainGraph::setMIDICCListener(const MIDICCListener& listener) {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	this->ccListener = listener;
+}
+
+void MainGraph::clearMIDICCListener() {
+	juce::ScopedWriteLock locker(audioLock::getAudioLock());
+	this->ccListener = MIDICCListener{};
+}
+
 void MainGraph::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
 	/** Play Head */
 	if (auto position = dynamic_cast<PlayPosition*>(this->getPlayHead())) {
@@ -411,6 +421,26 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 						hook(mes, true);
 					});
 			}
+		}
+	}
+
+	/** Send MIDI CC */
+	if (!isRendering) {
+		/** Get Last CC Channel */
+		int lastCCChannel = -1;
+		for (auto m : midi) {
+			/** Get Message */
+			auto message = m.getMessage();
+			if (!message.isController()) { continue; }
+
+			/** Auto Link Param */
+			lastCCChannel = message.getControllerNumber();
+		}
+
+		/** Send Auto Connect */
+		if ((lastCCChannel > -1) && this->ccListener) {
+			juce::MessageManager::callAsync(
+				std::bind(this->ccListener, lastCCChannel));
 		}
 	}
 
