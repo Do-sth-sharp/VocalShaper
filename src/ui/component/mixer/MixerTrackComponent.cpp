@@ -59,6 +59,7 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->effectListModel = std::make_unique<EffectListModel>();
 	this->effectList = std::make_unique<juce::ListBox>(
 		TRANS("Fx List"), this->effectListModel.get());
+	this->effectList->setWantsKeyboardFocus(false);
 	this->addAndMakeVisible(this->effectList.get());
 
 	/** Focus */
@@ -97,6 +98,8 @@ void MixerTrackComponent::resized() {
 	bool muteShown = this->getHeight() >= muteHideHeight;
 
 	int listItemHeight = screenSize.getHeight() * 0.02;
+
+	float outlineThickness = screenSize.getHeight() * 0.00125;
 
 	int top = 0, bottom = this->getHeight();
 	top += colorHeight;
@@ -194,7 +197,7 @@ void MixerTrackComponent::resized() {
 
 	/** Effects */
 	juce::Rectangle<int> effectRect(
-		0, top, this->getWidth(), bottom - top);
+		outlineThickness, top, this->getWidth() - outlineThickness * 2, bottom - top);
 	this->effectList->setBounds(effectRect);
 	this->effectList->setRowHeight(listItemHeight);
 }
