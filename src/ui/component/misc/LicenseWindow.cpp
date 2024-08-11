@@ -14,6 +14,7 @@ LicenseWindow::LicenseWindow()
 	this->setContentOwned(new LicenseComponent, false);
 	this->setResizable(true, false);
 	this->centreWithSize(this->getWidth(), this->getHeight());
+	this->setAlwaysOnTop(true);
 
 	/** OpenGL */
 	auto& funcVar = ConfigManager::getInstance()->get("function");
