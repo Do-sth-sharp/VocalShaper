@@ -144,6 +144,11 @@ namespace utils {
 		int srcStart, int dstStart, int length);
 
 	const juce::String getMIDICCChannelName(int channel);
+
+	bool readFileToBlock(const juce::String& path, juce::MemoryBlock& block,
+		const juce::File& base = utils::getProjectDir());
+	bool writeBlockToFile(const juce::String& path, const juce::MemoryBlock& block,
+		const juce::File& base = utils::getProjectDir());
 }
 
 #define UNUSED(var) (void)var

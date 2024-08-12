@@ -247,11 +247,11 @@ bool AudioCore::save(const juce::String& name) {
 	this->saveSource(proj.get());
 
 	/** Write Project File */
-	juce::FileOutputStream projStream(projFile);
-	if (!projStream.openedOk()) { ProjectInfoData::getInstance()->pop(); return false; }
-	projStream.setPosition(0);
-	projStream.truncate();
-	if (!projStream.write(projData.getData(), projData.getSize())) { ProjectInfoData::getInstance()->pop(); return false; }
+	if (!utils::writeBlockToFile(projFile.getFullPathName(), projData,
+		utils::getProjectDir())) {
+		ProjectInfoData::getInstance()->pop();
+		return false;
+	}
 
 	/** Release Project Info Temp */
 	ProjectInfoData::getInstance()->release();
@@ -268,26 +268,12 @@ bool AudioCore::load(const juce::String& path) {
 	}
 
 	/** Load Project File */
+	juce::MemoryBlock projData;
 	juce::File projFile = utils::getDefaultWorkingDir().getChildFile(path);
-	if (!projFile.existsAsFile()) {
-		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
-			UICallbackType::ErrorAlert, "Load Project",
-			"Project file isn't exists.");
-		return false;
-	}
-	juce::FileInputStream projStream(projFile);
-	if (!projStream.openedOk()) {
+	if (!utils::readFileToBlock(projFile.getFullPathName(), projData, utils::getDefaultWorkingDir())) {
 		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
 			UICallbackType::ErrorAlert, "Load Project",
 			"Can't open project file.");
-		return false;
-	}
-	juce::MemoryBlock projData;
-	projData.setSize(projStream.getTotalLength());
-	if (!projStream.read(projData.getData(), projData.getSize())) {
-		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
-			UICallbackType::ErrorAlert, "Load Project",
-			"Can't read project data.");
 		return false;
 	}
 

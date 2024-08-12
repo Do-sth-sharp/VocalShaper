@@ -384,6 +384,9 @@ ActionSplitSequencerBlock::ActionSplitSequencerBlock(
 	: ACTION_DB{ track, block, time } {}
 
 bool ActionSplitSequencerBlock::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE(ActionSplitSequencerBlock);
@@ -402,6 +405,9 @@ bool ActionSplitSequencerBlock::doAction() {
 }
 
 bool ActionSplitSequencerBlock::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSplitSequencerBlock);
@@ -416,5 +422,75 @@ bool ActionSplitSequencerBlock::undo() {
 		}
 	}
 	this->output("Can't undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+	ACTION_RESULT(false);
+}
+
+ActionLoadPluginState::ActionLoadPluginState(
+	quickAPI::PluginHolder plugin, const juce::String& path)
+	: ACTION_DB{ plugin, path } {}
+
+bool ActionLoadPluginState::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionLoadPluginState);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(plugin)) {
+		juce::MemoryBlock state;
+		if (!utils::readFileToBlock(ACTION_DATA(path), state)) {
+			this->output("Can't load plugin state: [" + ACTION_DATA(plugin)->getName() + "] " + ACTION_DATA(path));
+			ACTION_RESULT(false);
+		}
+		ACTION_DATA(plugin)->getStateInformation(ACTION_DATA(oldState));
+
+		ACTION_DATA(plugin)->setStateInformation(
+			state.getData(), state.getSize());
+
+		this->output("Load plugin state: [" + ACTION_DATA(plugin)->getName() + "] " + ACTION_DATA(path));
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+bool ActionLoadPluginState::undo() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionLoadPluginState);
+	ACTION_WRITE_DB();
+
+	if (ACTION_DATA(plugin)) {
+		ACTION_DATA(plugin)->setStateInformation(
+			ACTION_DATA(oldState).getData(), ACTION_DATA(oldState).getSize());
+
+		this->output("Undo load plugin state: [" + ACTION_DATA(plugin)->getName() + "] " + ACTION_DATA(path));
+		ACTION_RESULT(true);
+	}
+	ACTION_RESULT(false);
+}
+
+ActionSavePluginState::ActionSavePluginState(
+	quickAPI::PluginHolder plugin, const juce::String& path)
+	: plugin(plugin), path(path) {}
+
+bool ActionSavePluginState::doAction() {
+	ACTION_CHECK_RENDERING(
+		"Don't do this while rendering.");
+
+	if (this->plugin) {
+		juce::MemoryBlock state;
+		this->plugin->getStateInformation(state);
+
+		if (utils::writeBlockToFile(this->path, state)) {
+			this->output("Save plugin state: [" + this->plugin->getName() + "] " + this->path);
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't save plugin state: [" + this->plugin->getName() + "] " + this->path);
 	ACTION_RESULT(false);
 }

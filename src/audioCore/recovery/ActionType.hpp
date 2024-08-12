@@ -19,6 +19,7 @@ enum class ActionType : unsigned int {
 
 	ActionSave = 0x0101,
 	ActionSplitSequencerBlock,
+	ActionLoadPluginState,
 
 	ActionRemoveMixerTrack = 0x0201,
 	ActionRemoveMixerTrackSend,

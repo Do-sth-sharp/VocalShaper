@@ -1008,4 +1008,38 @@ namespace utils {
 	const juce::String getMIDICCChannelName(int channel) {
 		return juce::MidiMessage::getControllerName(channel);
 	}
+
+	bool readFileToBlock(
+		const juce::String& path, juce::MemoryBlock& block, const juce::File& base) {
+		juce::File file = base.getChildFile(path);
+		if (!file.existsAsFile()) {
+			return false;
+		}
+
+		juce::FileInputStream stream(file);
+		if (!stream.openedOk()) {
+			return false;
+		}
+
+		block.setSize(stream.getTotalLength());
+		if (!stream.read(block.getData(), block.getSize())) {
+			return false;
+		}
+		return true;
+	}
+
+	bool writeBlockToFile(
+		const juce::String& path, const juce::MemoryBlock& block, const juce::File& base) {
+		juce::File file = base.getChildFile(path);
+
+		juce::FileOutputStream stream(file);
+		if (!stream.openedOk()) { return false; }
+		stream.setPosition(0);
+		stream.truncate();
+
+		if (!stream.write(block.getData(), block.getSize())) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -2,6 +2,7 @@
 
 #include "ActionUndoableBase.h"
 #include "ActionUtils.h"
+#include "../quickAPI/QuickGet.h"
 
 class ActionClearPlugin final : public ActionBase {
 public:
@@ -328,4 +329,45 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSplitSequencerBlock)
+};
+
+class ActionLoadPluginState final : public ActionUndoableBase {
+public:
+	ActionLoadPluginState() = delete;
+	ActionLoadPluginState(
+		quickAPI::PluginHolder plugin, const juce::String& path);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Load Plugin State";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder plugin;
+		const juce::String path;
+
+		juce::MemoryBlock oldState;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionLoadPluginState)
+};
+
+class ActionSavePluginState final : public ActionBase {
+public:
+	ActionSavePluginState() = delete;
+	ActionSavePluginState(
+		quickAPI::PluginHolder plugin, const juce::String& path);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Save Plugin State";
+	};
+
+private:
+	const quickAPI::PluginHolder plugin;
+	const juce::String path;
+
+	JUCE_LEAK_DETECTOR(ActionSavePluginState)
 };
