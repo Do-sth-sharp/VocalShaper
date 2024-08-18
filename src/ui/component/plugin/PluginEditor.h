@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include <FlowUI.h>
 #include "PluginPropComponent.h"
+#include "PluginToolBar.h"
 #include "../../misc/PluginType.h"
 #include "../../../audioCore/AC_API.h"
 
@@ -30,36 +31,21 @@ private:
 	const quickAPI::EditorPointer editor;
 	const PluginType type;
 
+	std::unique_ptr<PluginToolBar> toolBar = nullptr;
 	std::unique_ptr<juce::Viewport> configViewport = nullptr;
-	std::unique_ptr<juce::Drawable> bypassIcon = nullptr;
-	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;
-	std::unique_ptr<juce::Drawable> configIcon = nullptr;
-	std::unique_ptr<juce::Drawable> configIconOn = nullptr;
-	std::unique_ptr<juce::Drawable> pinIcon = nullptr;
-	std::unique_ptr<juce::Drawable> pinIconOn = nullptr;
-	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
-	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
-	std::unique_ptr<juce::DrawableButton> pinButton = nullptr;
 	std::unique_ptr<PluginPropComponent> pluginProp = nullptr;
-	std::unique_ptr<juce::TextButton> scaleButton = nullptr;
 
 	void componentBeingDeleted(juce::Component&) override;
 	void componentMovedOrResized(juce::Component&,
 		bool wasMoved, bool wasResized) override;
 
-	void bypass();
-	void config();
-	void pin();
-	void changeScale();
-
-	float scale = 1.0;
+	friend class PluginToolBar;
+	void config(bool showConfig);
+	void pin(bool pinned);
 	void setEditorScale(float scale);
-	float getEditorScale() const;
 
 	friend class PluginEditor;
 	void deleteEditor();
-
-	juce::PopupMenu createScaleMenu();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditorContent)
 };
