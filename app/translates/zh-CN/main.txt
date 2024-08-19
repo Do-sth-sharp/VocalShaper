@@ -94,6 +94,7 @@ countries: cn
 "Channel Link" = "通道连接"
 "Bypass" = "旁路"
 "Unlinked" = "未连接"
+"More Plugin Configs" = "更多插件设置"
 
 "Color Editor" = "颜色编辑器"
 "Common Colors" = "常用颜色"

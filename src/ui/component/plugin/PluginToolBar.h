@@ -26,19 +26,25 @@ private:
 	std::unique_ptr<juce::Drawable> configIconOn = nullptr;
 	std::unique_ptr<juce::Drawable> pinIcon = nullptr;
 	std::unique_ptr<juce::Drawable> pinIconOn = nullptr;
+	std::unique_ptr<juce::Drawable> moreIcon = nullptr;
 	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> pinButton = nullptr;
 	std::unique_ptr<juce::TextButton> scaleButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> moreButton = nullptr;
 
 	void bypass();
 	void config();
 	void pin();
 	void changeScale();
+	void more();
+
+	void judgeScaleResult(int result);
 
 	float scale = 1.0;
 	void setEditorScale(float scale);
 	float getEditorScale() const;
 
-	juce::PopupMenu createScaleMenu();
+	juce::PopupMenu createMoreMenu() const;
+	juce::PopupMenu createScaleMenu() const;
 };

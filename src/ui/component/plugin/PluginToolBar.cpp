@@ -43,6 +43,11 @@ PluginToolBar::PluginToolBar(PluginEditorContent* parent,
 	this->pinIconOn->replaceColour(juce::Colours::black,
 		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
 
+	this->moreIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Arrows", "arrow-down-s-fill").getFullPathName());
+	this->moreIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+
 	/** Buttons */
 	this->bypassButton = std::make_unique<juce::DrawableButton>(
 		TRANS("Bypass Plugin"), juce::DrawableButton::ImageOnButtonBackground);
@@ -82,6 +87,14 @@ PluginToolBar::PluginToolBar(PluginEditorContent* parent,
 	this->scaleButton->onClick = [this] { this->changeScale(); };
 	this->addAndMakeVisible(this->scaleButton.get());
 
+	this->moreButton = std::make_unique<juce::DrawableButton>(
+		TRANS("More Plugin Configs"), juce::DrawableButton::ImageOnButtonBackground);
+	this->moreButton->setImages(this->moreIcon.get());
+	this->moreButton->setWantsKeyboardFocus(false);
+	this->moreButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->moreButton->onClick = [this] { this->more(); };
+	this->addAndMakeVisible(this->moreButton.get());
+
 	/** Update Scale */
 	this->setEditorScale(1.0f);
 }
@@ -97,25 +110,67 @@ void PluginToolBar::resized() {
 	int scaleButtonWidth = screenSize.getWidth() * 0.03;
 
 	/** Buttons */
+	bool showMoreButton = false;
+	int right = toolPaddingWidth;
+	int redLine = this->getWidth() - toolPaddingWidth - buttonHeight - toolSplitWidth;
 	juce::Rectangle<int> bypassRect(
-		toolPaddingWidth, toolPaddingHeight,
+		right, toolPaddingHeight,
 		buttonHeight, buttonHeight);
 	this->bypassButton->setBounds(bypassRect);
+	if (right + buttonHeight <= redLine) {
+		this->bypassButton->setVisible(true);
+		right += (buttonHeight + toolSplitWidth);
+	}
+	else {
+		this->bypassButton->setVisible(false);
+		showMoreButton = true;
+	}
 
 	juce::Rectangle<int> configRect(
-		bypassRect.getRight() + toolSplitWidth, toolPaddingHeight,
+		right, toolPaddingHeight,
 		buttonHeight, buttonHeight);
 	this->configButton->setBounds(configRect);
+	if (right + buttonHeight <= redLine) {
+		this->configButton->setVisible(true);
+		right += (buttonHeight + toolSplitWidth);
+	}
+	else {
+		this->configButton->setVisible(false);
+		showMoreButton = true;
+	}
 
 	juce::Rectangle<int> pinRect(
-		configRect.getRight() + toolSplitWidth, toolPaddingHeight,
+		right, toolPaddingHeight,
 		buttonHeight, buttonHeight);
 	this->pinButton->setBounds(pinRect);
+	if (right + buttonHeight <= redLine) {
+		this->pinButton->setVisible(true);
+		right += (buttonHeight + toolSplitWidth);
+	}
+	else {
+		this->pinButton->setVisible(false);
+		showMoreButton = true;
+	}
 
+	int left = this->getWidth() - toolPaddingWidth;
 	juce::Rectangle<int> scaleRect(
-		this->getWidth() - toolPaddingWidth - scaleButtonWidth,
+		left - scaleButtonWidth,
 		toolPaddingHeight, scaleButtonWidth, buttonHeight);
 	this->scaleButton->setBounds(scaleRect);
+	if (right + scaleButtonWidth + (showMoreButton ? (buttonHeight + toolSplitWidth) : 0) <= left) {
+		this->scaleButton->setVisible(true);
+		left -= (scaleButtonWidth + toolPaddingWidth);
+	}
+	else {
+		this->scaleButton->setVisible(false);
+		showMoreButton = true;
+	}
+
+	juce::Rectangle<int> moreRect(
+		right, toolPaddingHeight,
+		buttonHeight, buttonHeight);
+	this->moreButton->setBounds(moreRect);
+	this->moreButton->setVisible(showMoreButton);
 }
 
 void PluginToolBar::update() {
@@ -173,6 +228,10 @@ void PluginToolBar::pin() {
 		juce::NotificationType::dontSendNotification);
 }
 
+enum PluginEditorMoreType {
+	Bypass = 101, Config, Pin
+};
+
 enum PluginEditorScaleType {
 	Scale_0_25 = 1, Scale_0_5, Scale_0_75, Scale_1_0,
 	Scale_1_25, Scale_1_5, Scale_1_75, Scale_2_0,
@@ -183,6 +242,34 @@ void PluginToolBar::changeScale() {
 	auto menu = this->createScaleMenu();
 	int result = menu.showAt(this->scaleButton.get());
 
+	this->judgeScaleResult(result);
+}
+
+void PluginToolBar::more() {
+	auto menu = this->createMoreMenu();
+	int result = menu.showAt(this->moreButton.get());
+
+	switch (result) {
+	case PluginEditorMoreType::Bypass: {
+		this->bypass();
+		break;
+	}
+	case PluginEditorMoreType::Config: {
+		this->config();
+		break;
+	}
+	case PluginEditorMoreType::Pin: {
+		this->pin();
+		break;
+	}
+	default: {
+		this->judgeScaleResult(result);
+		break;
+	}
+	}
+}
+
+void PluginToolBar::judgeScaleResult(int result) {
 	switch (result) {
 	case PluginEditorScaleType::Scale_0_25: {
 		this->setEditorScale(0.25f);
@@ -237,7 +324,30 @@ float PluginToolBar::getEditorScale() const {
 	return this->scale;
 }
 
-juce::PopupMenu PluginToolBar::createScaleMenu() {
+juce::PopupMenu PluginToolBar::createMoreMenu() const {
+	juce::PopupMenu menu;
+
+	if (!this->bypassButton->isVisible()) {
+		menu.addItem(PluginEditorMoreType::Bypass, TRANS("Bypass Plugin"),
+			true, !this->bypassButton->getToggleState());
+	}
+	if (!this->configButton->isVisible()) {
+		menu.addItem(PluginEditorMoreType::Config, TRANS("Config Plugin"),
+			true, this->configButton->getToggleState());
+	}
+	if (!this->pinButton->isVisible()) {
+		menu.addItem(PluginEditorMoreType::Pin, TRANS("Pin Plugin Window"),
+			true, this->pinButton->getToggleState());
+	}
+
+	if (!this->scaleButton->isVisible()) {
+		menu.addSubMenu(TRANS("Scale Plugin Window"), this->createScaleMenu());
+	}
+
+	return menu;
+}
+
+juce::PopupMenu PluginToolBar::createScaleMenu() const {
 	juce::PopupMenu menu;
 
 	menu.addItem(PluginEditorScaleType::Scale_0_25, "0.25x",
