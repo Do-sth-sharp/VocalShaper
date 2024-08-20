@@ -18,6 +18,7 @@ public:
 		std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier);
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
+	const juce::String getPluginIdentifier() const;
 
 	bool canPluginAddBus(bool isInput) const;
 	bool canPluginRemoveBus(bool isInput) const;

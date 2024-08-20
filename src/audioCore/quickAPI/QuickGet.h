@@ -79,6 +79,8 @@ namespace quickAPI {
 	/** Src Index, Src Channel, Dst Index, Dst Channel */
 	using AudioLink = std::tuple<int, int, int, int>;
 
+	const juce::String getPluginIdentifier(PluginHolder pointer);
+
 	PluginHolder getInstrPointer(int index);
 	bool isInstrValid(int index);
 	const juce::String getInstrName(int index);

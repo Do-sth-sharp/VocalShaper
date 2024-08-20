@@ -26,16 +26,22 @@ private:
 	std::unique_ptr<juce::Drawable> configIconOn = nullptr;
 	std::unique_ptr<juce::Drawable> pinIcon = nullptr;
 	std::unique_ptr<juce::Drawable> pinIconOn = nullptr;
+	std::unique_ptr<juce::Drawable> loadIcon = nullptr;
+	std::unique_ptr<juce::Drawable> saveIcon = nullptr;
 	std::unique_ptr<juce::Drawable> moreIcon = nullptr;
 	std::unique_ptr<juce::DrawableButton> bypassButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> configButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> pinButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> loadButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> saveButton = nullptr;
 	std::unique_ptr<juce::TextButton> scaleButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> moreButton = nullptr;
 
 	void bypass();
 	void config();
 	void pin();
+	void load();
+	void save();
 	void changeScale();
 	void more();
 

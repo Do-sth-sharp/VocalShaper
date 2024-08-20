@@ -43,6 +43,16 @@ PluginToolBar::PluginToolBar(PluginEditorContent* parent,
 	this->pinIconOn->replaceColour(juce::Colours::black,
 		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
 
+	this->loadIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Document", "folder-open-line").getFullPathName());
+	this->loadIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+
+	this->saveIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("Device", "save-2-line").getFullPathName());
+	this->saveIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+
 	this->moreIcon = flowUI::IconManager::getSVG(
 		utils::getIconFile("Arrows", "arrow-down-s-fill").getFullPathName());
 	this->moreIcon->replaceColour(juce::Colours::black,
@@ -78,6 +88,22 @@ PluginToolBar::PluginToolBar(PluginEditorContent* parent,
 	this->pinButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 	this->pinButton->onClick = [this] { this->pin(); };
 	this->addAndMakeVisible(this->pinButton.get());
+
+	this->loadButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Load Plugin Preset"), juce::DrawableButton::ImageOnButtonBackground);
+	this->loadButton->setImages(this->loadIcon.get());
+	this->loadButton->setWantsKeyboardFocus(false);
+	this->loadButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->loadButton->onClick = [this] { this->load(); };
+	this->addAndMakeVisible(this->loadButton.get());
+
+	this->saveButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Save Plugin Preset"), juce::DrawableButton::ImageOnButtonBackground);
+	this->saveButton->setImages(this->saveIcon.get());
+	this->saveButton->setWantsKeyboardFocus(false);
+	this->saveButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->saveButton->onClick = [this] { this->save(); };
+	this->addAndMakeVisible(this->saveButton.get());
 
 	this->scaleButton = std::make_unique<juce::TextButton>(
 		TRANS("Scale Plugin Window"), TRANS("Scale Plugin Window"));
@@ -149,6 +175,32 @@ void PluginToolBar::resized() {
 	}
 	else {
 		this->pinButton->setVisible(false);
+		showMoreButton = true;
+	}
+
+	juce::Rectangle<int> loadRect(
+		right, toolPaddingHeight,
+		buttonHeight, buttonHeight);
+	this->loadButton->setBounds(loadRect);
+	if (right + buttonHeight <= redLine) {
+		this->loadButton->setVisible(true);
+		right += (buttonHeight + toolSplitWidth);
+	}
+	else {
+		this->loadButton->setVisible(false);
+		showMoreButton = true;
+	}
+
+	juce::Rectangle<int> saveRect(
+		right, toolPaddingHeight,
+		buttonHeight, buttonHeight);
+	this->saveButton->setBounds(saveRect);
+	if (right + buttonHeight <= redLine) {
+		this->saveButton->setVisible(true);
+		right += (buttonHeight + toolSplitWidth);
+	}
+	else {
+		this->saveButton->setVisible(false);
 		showMoreButton = true;
 	}
 
@@ -228,8 +280,20 @@ void PluginToolBar::pin() {
 		juce::NotificationType::dontSendNotification);
 }
 
+void PluginToolBar::load() {
+	if (this->plugin) {
+		CoreActions::loadPluginPresetGUI(this->plugin);
+	}
+}
+
+void PluginToolBar::save() {
+	if (this->plugin) {
+		CoreActions::savePluginPresetGUI(this->plugin);
+	}
+}
+
 enum PluginEditorMoreType {
-	Bypass = 101, Config, Pin
+	Bypass = 101, Config, Pin, Load, Save
 };
 
 enum PluginEditorScaleType {
@@ -260,6 +324,14 @@ void PluginToolBar::more() {
 	}
 	case PluginEditorMoreType::Pin: {
 		this->pin();
+		break;
+	}
+	case PluginEditorMoreType::Load: {
+		this->load();
+		break;
+	}
+	case PluginEditorMoreType::Save: {
+		this->save();
 		break;
 	}
 	default: {
@@ -338,6 +410,12 @@ juce::PopupMenu PluginToolBar::createMoreMenu() const {
 	if (!this->pinButton->isVisible()) {
 		menu.addItem(PluginEditorMoreType::Pin, TRANS("Pin Plugin Window"),
 			true, this->pinButton->getToggleState());
+	}
+	if (!this->loadButton->isVisible()) {
+		menu.addItem(PluginEditorMoreType::Load, TRANS("Load Plugin Preset"));
+	}
+	if (!this->saveButton->isVisible()) {
+		menu.addItem(PluginEditorMoreType::Save, TRANS("Save Plugin Preset"));
 	}
 
 	if (!this->scaleButton->isVisible()) {

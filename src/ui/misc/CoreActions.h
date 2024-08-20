@@ -58,6 +58,9 @@ public:
 	static void setEffectIndex(int track, int oldIndex, int newIndex);
 	static void replaceEffect(int track, int index, const juce::String& pid);
 
+	static void loadPluginPreset(quickAPI::PluginHolder plugin, const juce::String& path);
+	static void savePluginPreset(quickAPI::PluginHolder plugin, const juce::String& path);
+
 	static void insertTrack(int index, int type);
 	static void setTrackColor(int index, const juce::Colour& color);
 	static void setTrackName(int index, const juce::String& name);
@@ -135,6 +138,9 @@ public:
 	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
 	static void removeEffectGUI(int track, int index);
 
+	static void loadPluginPresetGUI(quickAPI::PluginHolder plugin);
+	static void savePluginPresetGUI(quickAPI::PluginHolder plugin);
+
 	static void insertTrackGUI(int index);
 	static void insertTrackGUI();
 	static void setTrackColorGUI(int index);
@@ -210,4 +216,7 @@ public:
 	static void askForAudioSaveFormatsAsync(
 		const std::function<void(bool, int, int)>& callback,
 		const juce::String& format);
+	static void askForPluginPresetAsync(
+		const std::function<void(const juce::String&)>& callback,
+		const juce::String& identifier, bool saveMode);
 };

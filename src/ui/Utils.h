@@ -54,6 +54,7 @@ namespace utils {
 		const juce::String& file = "pluginPaths.txt");
 	const juce::File getPluginDeadTempDir(
 		const juce::String& path = "./deadPlugins/");
+	const juce::File getPluginPresetDir();
 
 	const juce::URL getHelpPage(
 		const juce::String& version, const juce::String& branch,

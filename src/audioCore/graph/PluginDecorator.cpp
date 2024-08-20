@@ -81,6 +81,10 @@ const juce::AudioChannelSet& PluginDecorator::getAudioChannelSet() const {
 	return this->audioChannels;
 }
 
+const juce::String PluginDecorator::getPluginIdentifier() const {
+	return this->pluginIdentifier;
+}
+
 bool PluginDecorator::canPluginAddBus(bool isInput) const {
 	if (!this->plugin) { return false; }
 	return this->plugin->canAddBus(isInput);
@@ -596,10 +600,10 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 	/** Plugin Info */
 	auto info = mes->mutable_info();
 	if (this->plugin) {
-		info->set_id(this->pluginIdentifier.toStdString());
+		info->set_id(this->getPluginIdentifier().toStdString());
 	}
 	info->set_decoratortype(static_cast<vsp4::TrackType>(
-		utils::getTrackType(this->audioChannels)));
+		utils::getTrackType(this->getAudioChannelSet())));
 
 	/** Plugin State */
 	if (this->plugin) {

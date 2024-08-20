@@ -231,6 +231,18 @@ void CoreActions::replaceEffect(
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::loadPluginPreset(quickAPI::PluginHolder plugin, const juce::String& path) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionLoadPluginState{ plugin, path });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::savePluginPreset(quickAPI::PluginHolder plugin, const juce::String& path) {
+	auto action = std::unique_ptr<ActionBase>(
+		new ActionSavePluginState{ plugin, path });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::insertTrack(int index, int type) {
 	auto action = std::unique_ptr<ActionBase>(
 		new ActionAddMixerTrack{ index, type });
@@ -716,6 +728,26 @@ void CoreActions::removeEffectGUI(int track, int index) {
 	}
 
 	CoreActions::removeEffect(track, index);
+}
+
+void CoreActions::loadPluginPresetGUI(quickAPI::PluginHolder plugin) {
+	auto callback = [plugin](const juce::String& path) {
+		CoreActions::loadPluginPreset(plugin, path);
+		};
+
+	auto identifier = quickAPI::getPluginIdentifier(plugin);
+
+	CoreActions::askForPluginPresetAsync(callback, identifier, false);
+}
+
+void CoreActions::savePluginPresetGUI(quickAPI::PluginHolder plugin) {
+	auto callback = [plugin](const juce::String& path) {
+		CoreActions::savePluginPreset(plugin, path);
+		};
+
+	auto identifier = quickAPI::getPluginIdentifier(plugin);
+
+	CoreActions::askForPluginPresetAsync(callback, identifier, true);
 }
 
 void CoreActions::insertTrackGUI(int index) {
@@ -1688,4 +1720,30 @@ void CoreActions::askForAudioSaveFormatsAsync(
 			callback(addMetaData, bitDepth, quality);
 		}
 	), true);
+}
+
+void CoreActions::askForPluginPresetAsync(
+	const std::function<void(const juce::String&)>& callback,
+	const juce::String& identifier, bool saveMode) {
+	if (identifier.isEmpty()) { return; }
+
+	auto presetDir = utils::getPluginPresetDir();
+	if (!presetDir.exists()) {
+		presetDir.createDirectory();
+	}
+
+	auto pluginPresetDir = presetDir.getChildFile("./" + identifier + "/");
+	if (!pluginPresetDir.exists()) {
+		pluginPresetDir.createDirectory();
+	}
+
+	juce::String title = TRANS(saveMode ? "Save Plugin Preset" : "Load Plugin Preset");
+	juce::FileChooser chooser(title, pluginPresetDir, "*.pre");
+	if (saveMode ? chooser.browseForFileToSave(true) : chooser.browseForFileToOpen()) {
+		juce::File presetFile = chooser.getResult();
+		if (saveMode && presetFile.getFileExtension().isEmpty()) {
+			presetFile = presetFile.withFileExtension("pre");
+		}
+		callback(presetFile.getFullPathName());
+	}
 }

@@ -302,6 +302,13 @@ namespace quickAPI {
 		return {};
 	}
 
+	const juce::String getPluginIdentifier(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getPluginIdentifier();
+		}
+		return "";
+	}
+
 	PluginHolder getInstrPointer(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {

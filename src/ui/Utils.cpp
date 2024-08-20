@@ -163,6 +163,10 @@ namespace utils {
 		return getAudioDir().getChildFile(path);
 	}
 
+	const juce::File getPluginPresetDir() {
+		return getAudioDir().getChildFile("./presets/");
+	}
+
 	const juce::URL getHelpPage(const juce::String& version,
 		const juce::String& branch, const juce::String& language) {
 		return juce::URL{ "https://help.daw.org.cn" }
