@@ -25,6 +25,9 @@
 #if JUCE_PLUGINHOST_LV2
 #include <juce_audio_processors/format_types/LV2_SDK/juce_lv2_config.h>
 #endif //JUCE_PLUGINHOST_LV2
+#if JUCE_PLUGINHOST_ARA
+#define ARA_VERSION "2.2.0"
+#endif //JUCE_PLUGINHOST_ARA
 #include <DMDA.h>
 
 namespace utils {
@@ -827,6 +830,16 @@ namespace utils {
 		return "";
 
 #endif //JUCE_PLUGINHOST_VST
+	}
+
+	juce::String getARASDKVersion() {
+#if JUCE_PLUGINHOST_ARA
+		return ARA_VERSION;
+
+#else //JUCE_PLUGINHOST_ARA
+		return "";
+
+#endif //JUCE_PLUGINHOST_ARA
 	}
 
 	juce::String getLV2Version() {

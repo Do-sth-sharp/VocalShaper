@@ -10,6 +10,7 @@ countries: cn
 "VST2 SDK Version:" = "VST2 SDK版本："
 "LV2 SDK Version:" = "LV2 SDK版本："
 "DMDA SDK Version:" = "DMDA SDK版本："
+"ARA SDK Version:" = "ARA SDK版本："
 "This product available under the GPLv3 license." = "此产品在GPLv3许可证下提供。"
 "All Rights Reserved." = "保留所有权利。"
 "VocalSharp Org." = "VocalSharp 开源社区"

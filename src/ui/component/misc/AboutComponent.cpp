@@ -32,6 +32,9 @@ AboutComponent::AboutComponent() {
 #if JUCE_PLUGINHOST_VST
 		TRANS("VST2 SDK Version:") + " " + utils::getVST2SDKVersion() + "\n" +
 #endif //JUCE_PLUGINHOST_VST
+#if JUCE_PLUGINHOST_ARA
+		TRANS("ARA SDK Version:") + " " + utils::getARASDKVersion() + "\n" +
+#endif //JUCE_PLUGINHOST_ARA
 #if JUCE_PLUGINHOST_LV2
 		TRANS("LV2 SDK Version:") + " " + utils::getLV2Version() + "\n" +
 #endif //JUCE_PLUGINHOST_LV2

@@ -113,6 +113,7 @@ namespace utils {
 	juce::String getJUCEVersion();
 	juce::String getVST3SDKVersion();
 	juce::String getVST2SDKVersion();
+	juce::String getARASDKVersion();
 	juce::String getLV2Version();
 	juce::String getDMDAVersion();
 	juce::String getCompilerVersion();
