@@ -77,9 +77,13 @@ void PluginDecorator::setPlugin(
 	}
 }
 
-void PluginDecorator::setPlugin(
+void PluginDecorator::setARA(
 	juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier) {
-	/** TODO */
+	if (this->plugin && pluginIdentifier == this->pluginIdentifier) {
+		/** TODO Create ARA Host Document Controller */
+		/** TODO Bind To Plugin Instance */
+		/** TODO Set Plugin Extension Instance */
+	}
 }
 
 const juce::AudioChannelSet& PluginDecorator::getAudioChannelSet() const {

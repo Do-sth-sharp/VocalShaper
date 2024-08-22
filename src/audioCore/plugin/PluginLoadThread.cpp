@@ -118,6 +118,40 @@ void PluginLoadThread::run() {
 		/** Prepare Plugin Load */
 		auto& [pluginDescription, ptr, sampleRate, blockSize, callback] = task;
 
+		/** Load Callback */
+		auto asyncCallback =
+			[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
+			if (p) {
+				auto identifier = pluginDescription.createIdentifierString();
+
+				if (auto plugin = ptr.getPlugin()) {
+					plugin->setPlugin(std::move(p), identifier);
+					callback();
+				}
+
+				return;
+			}
+
+			/** Handle Error */
+			jassertfalse;
+			};
+
+#if PLUGIN_LOAD_ON_MESSAGE_THREAD
+		/** Load Async */
+		this->pluginFormatManager->createPluginInstanceAsync(
+			pluginDescription, sampleRate, blockSize, asyncCallback);
+
+#else // PLUGIN_LOAD_ON_MESSAGE_THREAD
+		/** Load Sync */
+		juce::String errorMessage;
+		auto pluginInstance = this->pluginFormatManager->createPluginInstance(
+			pluginDescription, sampleRate, blockSize, errorMessage);
+
+		/** Send Callback */
+		this->messageHelper->postMessage(new PluginLoadMessage{
+			asyncCallback, std::move(pluginInstance), errorMessage });
+#endif // PLUGIN_LOAD_ON_MESSAGE_THREAD
+
 		/** Load ARA */
 		if (pluginDescription.hasARAExtension) {
 			/** Load Callback */
@@ -126,7 +160,7 @@ void PluginLoadThread::run() {
 					auto identifier = pluginDescription.createIdentifierString();
 
 					if (auto plugin = ptr.getPlugin()) {
-						plugin->setPlugin(result.araFactory, identifier);
+						plugin->setARA(result.araFactory, identifier);
 						callback();
 					}
 
@@ -140,42 +174,6 @@ void PluginLoadThread::run() {
 			/** Load Async */
 			this->messageHelper->postMessage(new ARALoadMessage{
 				pluginDescription, araLoadCallback });
-		}
-		/** Load Plugin */
-		else {
-			/** Load Callback */
-			auto asyncCallback =
-				[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
-				if (p) {
-					auto identifier = pluginDescription.createIdentifierString();
-
-					if (auto plugin = ptr.getPlugin()) {
-						plugin->setPlugin(std::move(p), identifier);
-						callback();
-					}
-
-					return;
-				}
-
-				/** Handle Error */
-				jassertfalse;
-				};
-
-#if PLUGIN_LOAD_ON_MESSAGE_THREAD
-			/** Load Async */
-			this->pluginFormatManager->createPluginInstanceAsync(
-				pluginDescription, sampleRate, blockSize, asyncCallback);
-
-#else // PLUGIN_LOAD_ON_MESSAGE_THREAD
-			/** Load Sync */
-			juce::String errorMessage;
-			auto pluginInstance = this->pluginFormatManager->createPluginInstance(
-				pluginDescription, sampleRate, blockSize, errorMessage);
-
-			/** Send Callback */
-			this->messageHelper->postMessage(new PluginLoadMessage{
-				asyncCallback, std::move(pluginInstance), errorMessage });
-#endif // PLUGIN_LOAD_ON_MESSAGE_THREAD
 		}
 	}
 }
