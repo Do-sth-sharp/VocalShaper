@@ -31,12 +31,41 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginLoadMessage)
 };
 
+class ARALoadMessage final : public juce::Message {
+public:
+	ARALoadMessage() = delete;
+	explicit ARALoadMessage(
+		const juce::PluginDescription& description,
+		const juce::AudioPluginFormat::ARAFactoryCreationCallback& callback)
+	: description(description), callback(callback) {
+		this->pluginFormatManager = std::make_unique<juce::AudioPluginFormatManager>();
+		this->pluginFormatManager->addDefaultFormats();
+	};
+
+private:
+	const juce::PluginDescription description;
+	const juce::AudioPluginFormat::ARAFactoryCreationCallback callback;
+
+	std::unique_ptr<juce::AudioPluginFormatManager> pluginFormatManager;
+
+	friend class PluginLoadMessageHelper;
+	void invoke() const {
+		this->pluginFormatManager->createARAFactoryAsync(
+			this->description, this->callback);
+	};
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARALoadMessage)
+};
+
 class PluginLoadMessageHelper final : public juce::MessageListener {
 public:
 	PluginLoadMessageHelper() = default;
 
 	void handleMessage(const juce::Message& message) override {
 		if (auto m = dynamic_cast<const PluginLoadMessage*>(&message)) {
+			m->invoke();
+		}
+		else if (auto m = dynamic_cast<const ARALoadMessage*>(&message)) {
 			m->invoke();
 		}
 	};
@@ -52,10 +81,8 @@ PluginLoadThread::PluginLoadThread()
 	this->pluginFormatManager = std::make_unique<juce::AudioPluginFormatManager>();
 	this->pluginFormatManager->addDefaultFormats();
 
-#if !PLUGIN_LOAD_ON_MESSAGE_THREAD
 	this->messageHelper =
 		std::unique_ptr<juce::MessageListener>(new PluginLoadMessageHelper);
-#endif // !PLUGIN_LOAD_ON_MESSAGE_THREAD
 }
 
 PluginLoadThread::~PluginLoadThread() {
@@ -90,37 +117,65 @@ void PluginLoadThread::run() {
 
 		/** Prepare Plugin Load */
 		auto& [pluginDescription, ptr, sampleRate, blockSize, callback] = task;
-		auto asyncCallback =
-			[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
-			if (p) {
-				auto identifier = pluginDescription.createIdentifierString();
-				
-				if (auto plugin = ptr.getPlugin()) {
-					plugin->setPlugin(std::move(p), identifier);
-					callback();
+
+		/** Load ARA */
+		if (pluginDescription.hasARAExtension) {
+			/** Load Callback */
+			auto araLoadCallback = [ptr, pluginDescription, callback](juce::ARAFactoryResult result) {
+				if (result.araFactory.get()) {
+					auto identifier = pluginDescription.createIdentifierString();
+
+					if (auto plugin = ptr.getPlugin()) {
+						plugin->setPlugin(result.araFactory, identifier);
+						callback();
+					}
+
+					return;
 				}
 
-				return;
-			}
+				/** Handle Error */
+				jassertfalse;
+				};
 
-			/** Handle Error */
-			jassertfalse;
-		};
+			/** Load Async */
+			this->messageHelper->postMessage(new ARALoadMessage{
+				pluginDescription, araLoadCallback });
+		}
+		/** Load Plugin */
+		else {
+			/** Load Callback */
+			auto asyncCallback =
+				[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
+				if (p) {
+					auto identifier = pluginDescription.createIdentifierString();
+
+					if (auto plugin = ptr.getPlugin()) {
+						plugin->setPlugin(std::move(p), identifier);
+						callback();
+					}
+
+					return;
+				}
+
+				/** Handle Error */
+				jassertfalse;
+				};
 
 #if PLUGIN_LOAD_ON_MESSAGE_THREAD
-		/** Load Async */
-		this->pluginFormatManager->createPluginInstanceAsync(
-			pluginDescription, sampleRate, blockSize, asyncCallback);
+			/** Load Async */
+			this->pluginFormatManager->createPluginInstanceAsync(
+				pluginDescription, sampleRate, blockSize, asyncCallback);
 
 #else // PLUGIN_LOAD_ON_MESSAGE_THREAD
-		/** Load Sync */
-		juce::String errorMessage;
-		auto pluginInstance = this->pluginFormatManager->createPluginInstance(
-			pluginDescription, sampleRate, blockSize, errorMessage);
+			/** Load Sync */
+			juce::String errorMessage;
+			auto pluginInstance = this->pluginFormatManager->createPluginInstance(
+				pluginDescription, sampleRate, blockSize, errorMessage);
 
-		/** Send Callback */
-		this->messageHelper->postMessage(new PluginLoadMessage(
-			asyncCallback, std::move(pluginInstance), errorMessage));
+			/** Send Callback */
+			this->messageHelper->postMessage(new PluginLoadMessage{
+				asyncCallback, std::move(pluginInstance), errorMessage });
 #endif // PLUGIN_LOAD_ON_MESSAGE_THREAD
+		}
 	}
 }

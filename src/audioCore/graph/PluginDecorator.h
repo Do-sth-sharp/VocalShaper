@@ -16,6 +16,8 @@ public:
 
 	void setPlugin(
 		std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier);
+	void setPlugin(
+		juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier);
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 	const juce::String getPluginIdentifier() const;

@@ -77,6 +77,11 @@ void PluginDecorator::setPlugin(
 	}
 }
 
+void PluginDecorator::setPlugin(
+	juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier) {
+	/** TODO */
+}
+
 const juce::AudioChannelSet& PluginDecorator::getAudioChannelSet() const {
 	return this->audioChannels;
 }
