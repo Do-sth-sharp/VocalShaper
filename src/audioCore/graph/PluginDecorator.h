@@ -7,8 +7,10 @@ class PluginDecorator final : public juce::AudioProcessor,
 	public Serializable {
 public:
 	PluginDecorator() = delete;
-	PluginDecorator(bool isInstr = false, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	PluginDecorator(juce::AudioProcessor* track,
+		bool isInstr = false, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
+		juce::AudioProcessor* track,
 		const juce::String& identifier,
 		bool isInstr = false,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
@@ -139,6 +141,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
+	juce::AudioProcessor* const track = nullptr;
+
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
 	juce::String pluginIdentifier;
 	std::unique_ptr<juce::AudioBuffer<float>> buffer = nullptr;
@@ -152,6 +156,9 @@ private:
 	const bool isInstr = false;
 
 	MIDICCListener ccListener;
+
+	std::unique_ptr<juce::ARAHostDocumentController> araDocumentController = nullptr;
+	juce::ARAHostModel::PlugInExtensionInstance araPluginExtensionInstance;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;

@@ -10,7 +10,8 @@ class PluginDock final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
 	PluginDock() = delete;
-	PluginDock(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	PluginDock(juce::AudioProcessor* track,
+		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	~PluginDock() override;
 	
 	void updateIndex(int index);
@@ -82,6 +83,7 @@ public:
 
 private:
 	int index = -1;
+	juce::AudioProcessor* const track = nullptr;
 
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;

@@ -4,15 +4,16 @@
 #include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
+#include "../misc/ARAController.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
 #include <DMDA.h>
 using namespace org::vocalsharp::vocalshaper;
 
-PluginDecorator::PluginDecorator(bool isInstr,
-	const juce::AudioChannelSet& type)
-	: isInstr(isInstr), audioChannels(type) {
+PluginDecorator::PluginDecorator(juce::AudioProcessor* track,
+	bool isInstr, const juce::AudioChannelSet& type)
+	: track(track), isInstr(isInstr), audioChannels(type) {
 	/** Channels */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
@@ -28,9 +29,10 @@ PluginDecorator::PluginDecorator(bool isInstr,
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
+	juce::AudioProcessor* track,
 	const juce::String& identifier,
 	bool isInstr, const juce::AudioChannelSet& type)
-	: PluginDecorator(isInstr, type) {
+	: PluginDecorator(track, isInstr, type) {
 	this->setPlugin(std::move(plugin), identifier);
 }
 
@@ -80,9 +82,22 @@ void PluginDecorator::setPlugin(
 void PluginDecorator::setARA(
 	juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier) {
 	if (this->plugin && pluginIdentifier == this->pluginIdentifier) {
-		/** TODO Create ARA Host Document Controller */
-		/** TODO Bind To Plugin Instance */
-		/** TODO Set Plugin Extension Instance */
+		/** Create ARA Host Document Controller */
+		if (auto controller = juce::ARAHostDocumentController::create(
+			factory, "test",
+			std::make_unique<ARAAudioAccessController>(this->track),
+			std::make_unique<ARAArchivingController>(this->track),
+			std::make_unique<ARAContentAccessController>(this->track),
+			std::make_unique<ARAModelUpdateController>(this->track))) {
+			/** Bind To Plugin Instance */
+			auto pluginInstance = controller->bindDocumentToPluginInstance(*(this->plugin),
+				ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole,
+				ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole);
+
+			/** Set Plugin Extension Instance */
+			this->araDocumentController = std::move(controller);
+			this->araPluginExtensionInstance = pluginInstance;
+		}
 	}
 }
 

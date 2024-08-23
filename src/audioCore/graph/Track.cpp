@@ -47,7 +47,7 @@ Track::Track(const juce::AudioChannelSet& type)
 	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
 
 	/** The Plugin Dock Node Of The Track */
-	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(type));
+	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(this, type));
 
 	/** Connect Plugin Dock Node To IO Node */
 	int mainBusInputChannels = this->audioChannels.size();
