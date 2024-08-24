@@ -90,6 +90,7 @@ namespace quickAPI {
 	const juce::String getInstrName(PluginHolder pointer);
 	bool getInstrBypass(PluginHolder pointer);
 	EditorPointer getInstrEditor(PluginHolder pointer);
+	EditorPointer getInstrEditorExists(PluginHolder pointer);
 	int getInstrMIDIChannel(PluginHolder pointer);
 	bool getInstrMIDICCIntercept(PluginHolder pointer);
 	bool getInstrMIDIOutput(PluginHolder pointer);
@@ -104,6 +105,7 @@ namespace quickAPI {
 	const juce::String getEffectName(PluginHolder pointer);
 	bool getEffectBypass(PluginHolder pointer);
 	EditorPointer getEffectEditor(PluginHolder pointer);
+	EditorPointer getEffectEditorExists(PluginHolder pointer);
 	int getEffectMIDIChannel(PluginHolder pointer);
 	bool getEffectMIDICCIntercept(PluginHolder pointer);
 	bool getEffectMIDIOutput(PluginHolder pointer);

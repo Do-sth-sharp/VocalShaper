@@ -1,4 +1,5 @@
 ﻿#include "PluginLoadThread.h"
+#include "../uiCallback/UICallback.h"
 
 #define PLUGIN_LOAD_ON_MESSAGE_THREAD 0
 
@@ -120,12 +121,13 @@ void PluginLoadThread::run() {
 
 		/** Load Callback */
 		auto asyncCallback =
-			[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& /*e*/) {
+			[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& errorMessage) {
 			if (p) {
 				auto identifier = pluginDescription.createIdentifierString();
 
 				if (auto plugin = ptr.getPlugin()) {
-					plugin->setPlugin(std::move(p), identifier);
+					plugin->setPlugin(std::move(p), identifier,
+						pluginDescription.hasARAExtension);
 					callback();
 				}
 
@@ -133,6 +135,9 @@ void PluginLoadThread::run() {
 			}
 
 			/** Handle Error */
+			UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+				UICallbackType::ErrorAlert, "Load Plugin",
+				"Can't load plugin with error message: " + errorMessage);
 			jassertfalse;
 			};
 
@@ -168,6 +173,13 @@ void PluginLoadThread::run() {
 				}
 
 				/** Handle Error */
+				if (auto plugin = ptr.getPlugin()) {
+					auto identifier = pluginDescription.createIdentifierString();
+					plugin->handleARALoadError(identifier);
+				}
+				UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+					UICallbackType::ErrorAlert, "Load ARA Plugin",
+					"Can't load ara plugin with error message: " + result.errorMessage);
 				jassertfalse;
 				};
 

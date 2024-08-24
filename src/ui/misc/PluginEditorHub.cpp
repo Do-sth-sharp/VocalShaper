@@ -68,7 +68,7 @@ void PluginEditorHub::closeInstr(int index) {
 
 bool PluginEditorHub::checkInstr(int index) const {
 	if (auto plugin = quickAPI::getInstrPointer(index)) {
-		if (auto editor = quickAPI::getInstrEditor(plugin)) {
+		if (auto editor = quickAPI::getInstrEditorExists(plugin)) {
 			for (int i = 0; i < this->instrEditors.size(); i++) {
 				auto container = this->instrEditors.getUnchecked(i);
 				if (container->getEditor() == editor) {
@@ -129,7 +129,7 @@ void PluginEditorHub::closeEffect(int track, int index) {
 
 bool PluginEditorHub::checkEffect(int track, int index) const {
 	if (auto plugin = quickAPI::getEffectPointer(track, index)) {
-		if (auto editor = quickAPI::getEffectEditor(plugin)) {
+		if (auto editor = quickAPI::getEffectEditorExists(plugin)) {
 			for (int i = 0; i < this->effectEditors.size(); i++) {
 				auto container = this->effectEditors.getUnchecked(i);
 				if (container->getEditor() == editor) {

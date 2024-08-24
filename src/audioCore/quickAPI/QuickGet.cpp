@@ -251,6 +251,13 @@ namespace quickAPI {
 		return nullptr;
 	}
 
+	static EditorPointer getPluginEditorExists(PluginHolder pointer) {
+		if (pointer) {
+			return pointer->getActiveEditor();
+		}
+		return nullptr;
+	}
+
 	static int getPluginMIDIChannel(PluginHolder pointer) {
 		if (pointer) {
 			return pointer->getMIDIChannel();
@@ -381,6 +388,10 @@ namespace quickAPI {
 		return getPluginEditor(pointer);
 	}
 
+	EditorPointer getInstrEditorExists(PluginHolder pointer) {
+		return getPluginEditorExists(pointer);
+	}
+
 	int getInstrMIDIChannel(PluginHolder pointer) {
 		return getPluginMIDIChannel(pointer);
 	}
@@ -463,6 +474,10 @@ namespace quickAPI {
 
 	EditorPointer getEffectEditor(PluginHolder pointer) {
 		return getPluginEditor(pointer);
+	}
+
+	EditorPointer getEffectEditorExists(PluginHolder pointer) {
+		return getPluginEditorExists(pointer);
 	}
 
 	int getEffectMIDIChannel(PluginHolder pointer) {

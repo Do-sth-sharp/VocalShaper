@@ -17,9 +17,11 @@ public:
 	~PluginDecorator();
 
 	void setPlugin(
-		std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier);
+		std::unique_ptr<juce::AudioPluginInstance> plugin,
+		const juce::String& pluginIdentifier, bool prepareLater = false);
 	void setARA(
 		juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier);
+	void handleARALoadError(const juce::String& pluginIdentifier);
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 	const juce::String getPluginIdentifier() const;
@@ -154,6 +156,7 @@ private:
 	std::atomic_bool midiCCShouldIntercept = true;
 	const juce::AudioChannelSet audioChannels;
 	const bool isInstr = false;
+	std::atomic_bool pluginPrepared = false;
 
 	MIDICCListener ccListener;
 

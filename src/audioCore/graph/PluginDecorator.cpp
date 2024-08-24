@@ -45,7 +45,8 @@ PluginDecorator::~PluginDecorator() {
 }
 
 void PluginDecorator::setPlugin(
-	std::unique_ptr<juce::AudioPluginInstance> plugin, const juce::String& pluginIdentifier) {
+	std::unique_ptr<juce::AudioPluginInstance> plugin,
+	const juce::String& pluginIdentifier, bool prepareLater) {
 	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
 
 	if (!plugin) { return; }
@@ -61,9 +62,12 @@ void PluginDecorator::setPlugin(
 
 	this->updateBuffer();
 
-	this->plugin->setPlayHead(this->getPlayHead());
-	this->plugin->setNonRealtime(this->isNonRealtime());
-	this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+	if (!prepareLater) {
+		this->plugin->setPlayHead(this->getPlayHead());
+		this->plugin->setNonRealtime(this->isNonRealtime());
+		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+		this->pluginPrepared = true;
+	}
 
 	//this->updatePluginBuses();
 
@@ -97,6 +101,38 @@ void PluginDecorator::setARA(
 			/** Set Plugin Extension Instance */
 			this->araDocumentController = std::move(controller);
 			this->araPluginExtensionInstance = pluginInstance;
+		}
+
+		/** Prepare Plugin */
+		this->plugin->setPlayHead(this->getPlayHead());
+		this->plugin->setNonRealtime(this->isNonRealtime());
+		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+		this->pluginPrepared = true;
+
+		/** Callback */
+		if (this->isInstr) {
+			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		}
+		else {
+			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		}
+	}
+}
+
+void PluginDecorator::handleARALoadError(const juce::String& pluginIdentifier) {
+	if (this->plugin && pluginIdentifier == this->pluginIdentifier) {
+		/** Prepare Plugin */
+		this->plugin->setPlayHead(this->getPlayHead());
+		this->plugin->setNonRealtime(this->isNonRealtime());
+		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
+		this->pluginPrepared = true;
+
+		/** Callback */
+		if (this->isInstr) {
+			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		}
+		else {
+			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
 		}
 	}
 }
@@ -343,10 +379,12 @@ void PluginDecorator::prepareToPlay(
 	}
 
 	this->plugin->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
+	this->pluginPrepared = true;
 }
 
 void PluginDecorator::releaseResources() {
 	if (!this->plugin) { return; }
+	this->pluginPrepared = false;
 	this->plugin->releaseResources();
 }
 
@@ -362,7 +400,7 @@ void PluginDecorator::processBlock(
 	PluginDecorator::interceptMIDICCMessage(this->midiCCShouldIntercept, midiMessages);
 
 	{
-		if (this->plugin && this->buffer) {
+		if (this->plugin && this->pluginPrepared && this->buffer) {
 			this->buffer->clear();
 
 			int totalChannels = std::min(buffer.getNumChannels(), this->buffer->getNumChannels());
@@ -393,7 +431,7 @@ void PluginDecorator::processBlock(
 	PluginDecorator::interceptMIDICCMessage(this->midiCCShouldIntercept, midiMessages);
 
 	{
-		if (this->plugin && this->doubleBuffer) {
+		if (this->plugin && this->pluginPrepared && this->doubleBuffer) {
 			this->doubleBuffer->clear();
 
 			int totalChannels = std::min(buffer.getNumChannels(), this->buffer->getNumChannels());
@@ -415,14 +453,14 @@ void PluginDecorator::processBlock(
 
 void PluginDecorator::processBlockBypassed(
 	juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
-	if (this->plugin) {
+	if (this->plugin && this->pluginPrepared) {
 		this->plugin->processBlockBypassed(buffer, midiMessages);
 	}
 }
 
 void PluginDecorator::processBlockBypassed(
 	juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages) {
-	if (this->plugin) {
+	if (this->plugin && this->pluginPrepared) {
 		this->plugin->processBlockBypassed(buffer, midiMessages);
 	}
 }
