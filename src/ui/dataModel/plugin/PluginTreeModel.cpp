@@ -133,7 +133,8 @@ public:
 			+ TRANS("Last Info Update Time:") + " " + this->plugin.lastInfoUpdateTime.formatted("%Y-%m-%d %H:%M:%S") + "\n"
 			+ TRANS("Is Instrument:") + " " + (this->plugin.isInstrument ? TRANS("Yes") : TRANS("No")) + "\n"
 			+ TRANS("Input Channels:") + " " + juce::String{ this->plugin.numInputChannels } + "\n"
-			+ TRANS("Output Channels:") + " " + juce::String{ this->plugin.numOutputChannels } + "\n";
+			+ TRANS("Output Channels:") + " " + juce::String{ this->plugin.numOutputChannels } + "\n"
+			+ TRANS("ARA Extension:") + " " + (this->plugin.hasARAExtension ? TRANS("Yes") : TRANS("No")) + "\n";
 	};
 
 	juce::var getDragSourceDescription() override {

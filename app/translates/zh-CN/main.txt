@@ -65,6 +65,7 @@ countries: cn
 "Is Instrument:" = "乐器："
 "Input Channels:" = "输入通道："
 "Output Channels:" = "输出通道："
+"ARA Extension:" = "ARA扩展："
 
 "Expand All" = "全部展开"
 "Fold All" = "全部折叠"
