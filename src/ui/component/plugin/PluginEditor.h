@@ -18,6 +18,7 @@ public:
 	~PluginEditorContent();
 
 	quickAPI::EditorPointer getEditor() const;
+	bool isResizable() const;
 
 	juce::Point<int> getPerferedSize();
 	void resized() override;
@@ -73,6 +74,8 @@ private:
 
 private:
 	std::unique_ptr<juce::OpenGLContext> renderer = nullptr;
+
+	void limitBounds();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

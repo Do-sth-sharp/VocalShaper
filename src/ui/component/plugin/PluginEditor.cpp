@@ -57,6 +57,13 @@ quickAPI::EditorPointer PluginEditorContent::getEditor() const {
 	return this->editor;
 }
 
+bool PluginEditorContent::isResizable() const {
+	if (this->editor) {
+		return this->editor->isResizable();
+	}
+	return false;
+}
+
 juce::Point<int> PluginEditorContent::getPerferedSize() {
 	auto screenSize = utils::getScreenSize(this);
 	int toolBarHeight = screenSize.getHeight() * 0.03;
@@ -84,7 +91,12 @@ void PluginEditorContent::resized() {
 		this->getLocalBounds().withTrimmedTop(toolBarHeight);
 	this->configViewport->setBounds(contentRect);
 	if (this->editor) {
-		this->editor->setTopLeftPosition(contentRect.getTopLeft());
+		if (this->editor->isResizable()) {
+			this->editor->setBounds(contentRect);
+		}
+		else {
+			this->editor->setTopLeftPosition(contentRect.getTopLeft());
+		}
 	}
 
 	/** Config View Port */
@@ -129,8 +141,8 @@ void PluginEditorContent::componentMovedOrResized(
 
 		/** Update Size Again */
 		juce::MessageManager::callAsync(
-			[comp = juce::Component::SafePointer(this)] {
-				if (comp) {
+			[comp = juce::Component::SafePointer(this), size] {
+				if (comp && (!comp->isResizable())) {
 					comp->resized();
 				}
 			}
@@ -176,22 +188,23 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 		juce::ResizableWindow::ColourIds::backgroundColourId), 
 		juce::DocumentWindow::allButtons, true) {
 	this->setUsingNativeTitleBar(true);
-	this->setResizable(false, false);
 
-	this->setContentOwned(
-		new PluginEditorContent{
-			this, name, type, plugin, editor }, false);
+	auto content = new PluginEditorContent{
+			this, name, type, plugin, editor };
+	this->setContentOwned(content, false);
 
-	if (auto content = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
-		auto size = content->getPerferedSize();
-		juce::MessageManager::callAsync(
-			[size, comp = juce::Component::SafePointer(this)] {
-				if (comp) {
-					comp->centreWithSize(size.getX(), size.getY());
-				}
+	bool resizable = content->isResizable();
+	this->setResizable(resizable, false);
+
+	auto size = content->getPerferedSize();
+	juce::MessageManager::callAsync(
+		[size, comp = juce::Component::SafePointer(this)] {
+			if (comp) {
+				comp->centreWithSize(size.getX(), size.getY());
+				comp->limitBounds();
 			}
-		);
-	}
+		}
+	);
 }
 
 PluginEditor::~PluginEditor() {
@@ -216,7 +229,12 @@ void PluginEditor::sizeChanged(const juce::Point<int>& size) {
 	juce::MessageManager::callAsync(
 		[width, height, comp = juce::Component::SafePointer(this)] {
 			if (comp) {
-				comp->setSize(width, height);
+				if (auto content = dynamic_cast<PluginEditorContent*>(comp->getContentComponent())) {
+					if (!content->isResizable()) {
+						comp->setSize(width, height);
+						comp->limitBounds();
+					}
+				}
 			}
 		}
 	);
@@ -248,5 +266,17 @@ bool PluginEditor::getPinned() const {
 void PluginEditor::closeButtonPressed() {
 	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
 		return ptr->deleteEditor();
+	}
+}
+
+void PluginEditor::limitBounds() {
+	auto screenBounds = this->getBounds();
+	/**
+	 * I can't get the native title bar height.
+	 * I think 31px is enough for title area.
+	 */
+	int titleHeight = 31;
+	if (screenBounds.getY() < titleHeight) {
+		this->setBounds(screenBounds.withY(titleHeight));
 	}
 }
