@@ -36,6 +36,8 @@ private:
 	std::unique_ptr<juce::Viewport> configViewport = nullptr;
 	std::unique_ptr<PluginPropComponent> pluginProp = nullptr;
 
+	bool resizingFlag = false;
+
 	void componentBeingDeleted(juce::Component&) override;
 	void componentMovedOrResized(juce::Component&,
 		bool wasMoved, bool wasResized) override;
@@ -47,6 +49,8 @@ private:
 
 	friend class PluginEditor;
 	void deleteEditor();
+
+	int getToolBarHeight() const;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditorContent)
 };
@@ -61,7 +65,7 @@ public:
 	quickAPI::EditorPointer getEditor() const;
 
 	void update();
-	void sizeChanged(const juce::Point<int>& size);
+	void sizeChanged();
 
 	void setOpenGL(bool openGLOn);
 	void setWindowIcon(const juce::Image& icon);

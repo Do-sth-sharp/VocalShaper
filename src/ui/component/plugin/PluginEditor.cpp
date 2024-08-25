@@ -38,13 +38,8 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->update();
 
 	/** Update Size */
-	juce::MessageManager::callAsync(
-		[editor, comp = juce::Component::SafePointer(this)] {
-			if (editor && comp) {
-				comp->componentMovedOrResized(*editor, false, true);
-			}
-		}
-	);
+	auto size = this->getPerferedSize();
+	this->setSize(size.getX(), size.getY());
 }
 
 PluginEditorContent::~PluginEditorContent() {
@@ -66,7 +61,7 @@ bool PluginEditorContent::isResizable() const {
 
 juce::Point<int> PluginEditorContent::getPerferedSize() {
 	auto screenSize = utils::getScreenSize(this);
-	int toolBarHeight = screenSize.getHeight() * 0.03;
+	int toolBarHeight = this->getToolBarHeight();
 	if (this->editor) {
 		auto bounds = this->editor->getBounds();
 		return { bounds.getWidth(), bounds.getHeight() + toolBarHeight };
@@ -76,8 +71,7 @@ juce::Point<int> PluginEditorContent::getPerferedSize() {
 
 void PluginEditorContent::resized() {
 	/** Size */
-	auto screenSize = utils::getScreenSize(this);
-	int toolBarHeight = screenSize.getHeight() * 0.03;
+	int toolBarHeight = this->getToolBarHeight();
 
 	/** Tool Bar */
 	this->toolBar->setBounds(
@@ -136,14 +130,15 @@ void PluginEditorContent::componentBeingDeleted(juce::Component&) {
 void PluginEditorContent::componentMovedOrResized(
 	juce::Component&, bool wasMoved, bool wasResized) {
 	if (wasResized) {
-		auto size = this->getPerferedSize();
-		this->parent->sizeChanged(size);
-
-		/** Update Size Again */
 		juce::MessageManager::callAsync(
-			[comp = juce::Component::SafePointer(this), size] {
-				if (comp && (!comp->isResizable())) {
-					comp->resized();
+			[comp = PluginEditorContent::SafePointer{ this }] {
+				if (comp) {
+					auto size = comp->getPerferedSize();
+					if (size.getX() != comp->getWidth() ||
+						size.getY() != comp->getHeight()) {
+						comp->setSize(size.getX(), size.getY());
+						comp->parent->sizeChanged();
+					}
 				}
 			}
 		);
@@ -182,6 +177,11 @@ void PluginEditorContent::deleteEditor() {
 	}
 }
 
+int PluginEditorContent::getToolBarHeight() const {
+	auto screenSize = utils::getScreenSize(this);
+	return screenSize.getHeight() * 0.03;
+}
+
 PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 	quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor)
 	: DocumentWindow(name, juce::LookAndFeel::getDefaultLookAndFeel().findColour(
@@ -191,20 +191,12 @@ PluginEditor::PluginEditor(const juce::String& name, PluginType type,
 
 	auto content = new PluginEditorContent{
 			this, name, type, plugin, editor };
-	this->setContentOwned(content, false);
+	this->setContentOwned(content, true);
 
 	bool resizable = content->isResizable();
 	this->setResizable(resizable, false);
 
-	auto size = content->getPerferedSize();
-	juce::MessageManager::callAsync(
-		[size, comp = juce::Component::SafePointer(this)] {
-			if (comp) {
-				comp->centreWithSize(size.getX(), size.getY());
-				comp->limitBounds();
-			}
-		}
-	);
+	this->sizeChanged();
 }
 
 PluginEditor::~PluginEditor() {
@@ -224,17 +216,11 @@ void PluginEditor::update() {
 	}
 }
 
-void PluginEditor::sizeChanged(const juce::Point<int>& size) {
-	int width = size.getX(), height = size.getY();
+void PluginEditor::sizeChanged() {
 	juce::MessageManager::callAsync(
-		[width, height, comp = juce::Component::SafePointer(this)] {
+		[comp = juce::Component::SafePointer(this)] {
 			if (comp) {
-				if (auto content = dynamic_cast<PluginEditorContent*>(comp->getContentComponent())) {
-					if (!content->isResizable()) {
-						comp->setSize(width, height);
-						comp->limitBounds();
-					}
-				}
+				comp->limitBounds();
 			}
 		}
 	);
