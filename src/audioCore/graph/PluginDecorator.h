@@ -161,7 +161,8 @@ private:
 	MIDICCListener ccListener;
 
 	std::unique_ptr<juce::ARAHostDocumentController> araDocumentController = nullptr;
-	juce::ARAHostModel::PlugInExtensionInstance araPluginExtensionInstance;
+	juce::ARAHostModel::EditorRendererInterface araEditorRenderer;
+	juce::ARAHostModel::PlaybackRendererInterface araPlaybackRenderer;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;

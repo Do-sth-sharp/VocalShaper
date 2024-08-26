@@ -98,9 +98,14 @@ void PluginDecorator::setARA(
 				ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole,
 				ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole);
 
-			/** Set Plugin Extension Instance */
-			this->araDocumentController = std::move(controller);
-			this->araPluginExtensionInstance = pluginInstance;
+			if (pluginInstance.isValid()) {
+				/** Set ARA Document Controller */
+				this->araDocumentController = std::move(controller);
+
+				/** Get Renderer Interfaces */
+				this->araEditorRenderer = pluginInstance.getEditorRendererInterface();
+				this->araPlaybackRenderer = pluginInstance.getPlaybackRendererInterface();
+			}
 		}
 
 		/** Prepare Plugin */
