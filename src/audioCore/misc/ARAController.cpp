@@ -1,4 +1,5 @@
 ﻿#include "ARAController.h"
+#include "../AudioCore.h"
 
 ARAAudioAccessController::ARAAudioAccessController(
 	juce::AudioProcessor* track)
@@ -171,25 +172,38 @@ ARAPlaybackController::ARAPlaybackController(
 	: track(track) {}
 
 void ARAPlaybackController::requestStartPlayback() noexcept {
-	/** TODO */
+	AudioCore::getInstance()->play();
 }
 
 void ARAPlaybackController::requestStopPlayback() noexcept {
-	/** TODO */
+	AudioCore::getInstance()->stop();
 }
 
 void ARAPlaybackController::requestSetPlaybackPosition(
 	ARA::ARATimePosition timePosition) noexcept {
-	/** TODO */
+	AudioCore::getInstance()->setPositon(timePosition);
 }
 
 void ARAPlaybackController::requestSetCycleRange(
 	ARA::ARATimePosition startTime,
 	ARA::ARATimeDuration duration) noexcept {
-	/** TODO */
+	this->loopStartTime = startTime;
+	this->loopEndTime = startTime + duration;
+
+	if (this->shouldLoop) {
+		AudioCore::getInstance()->setLoop(
+			this->loopStartTime, this->loopEndTime);
+	}
 }
 
 void ARAPlaybackController::requestEnableCycle(bool enable) noexcept {
-	/** TODO */
-}
+	this->shouldLoop = enable;
 
+	if (enable) {
+		AudioCore::getInstance()->setLoop(
+			this->loopStartTime, this->loopEndTime);
+	}
+	else {
+		AudioCore::getInstance()->setLoop(-1, -1);
+	}
+}

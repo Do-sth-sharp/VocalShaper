@@ -125,4 +125,7 @@ private:
 
 private:
 	juce::AudioProcessor* const track = nullptr;
+
+	double loopStartTime = -1, loopEndTime = -1;
+	bool shouldLoop = false;
 };
