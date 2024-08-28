@@ -8,7 +8,6 @@
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
-#include <DMDA.h>
 using namespace org::vocalsharp::vocalshaper;
 
 PluginDecorator::PluginDecorator(juce::AudioProcessor* track,
@@ -46,7 +45,7 @@ PluginDecorator::~PluginDecorator() {
 
 void PluginDecorator::setPlugin(
 	std::unique_ptr<juce::AudioPluginInstance> plugin,
-	const juce::String& pluginIdentifier, bool prepareLater) {
+	const juce::String& pluginIdentifier, bool hasARA) {
 	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
 
 	if (!plugin) { return; }
@@ -62,24 +61,46 @@ void PluginDecorator::setPlugin(
 
 	this->updateBuffer();
 
-	if (!prepareLater) {
+	/** Load ARA */
+	if (hasARA) {
+		/** Load Callback */
+		auto araLoadCallback = [ptr = SafePointer{ this }, pluginIdentifier](juce::ARAFactoryWrapper factory) {
+			if (factory.get()) {
+				if (ptr) {
+					ptr->setARA(factory, pluginIdentifier);
+				}
+
+				return;
+			}
+
+			/** Handle Error */
+			if (ptr) {
+				ptr->handleARALoadError(pluginIdentifier);
+			}
+			UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+				UICallbackType::ErrorAlert, "Load ARA Plugin",
+				"Can't load ara plugin: " + pluginIdentifier);
+			jassertfalse;
+			};
+
+		/** Load Async */
+		juce::createARAFactoryAsync(*(this->plugin), araLoadCallback);
+	}
+	else {
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
 		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 		this->pluginPrepared = true;
-	}
 
-	//this->updatePluginBuses();
+		//this->updatePluginBuses();
 
-	/** DMDA Hand Shake */
-	this->doDMDAHandShake();
-
-	/** Callback */
-	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
-	}
-	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		/** Callback */
+		if (this->isInstr) {
+			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		}
+		else {
+			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		}
 	}
 }
 
@@ -114,6 +135,8 @@ void PluginDecorator::setARA(
 		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 		this->pluginPrepared = true;
 
+		//this->updatePluginBuses();
+
 		/** Callback */
 		if (this->isInstr) {
 			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
@@ -131,6 +154,8 @@ void PluginDecorator::handleARALoadError(const juce::String& pluginIdentifier) {
 		this->plugin->setNonRealtime(this->isNonRealtime());
 		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 		this->pluginPrepared = true;
+
+		//this->updatePluginBuses();
 
 		/** Callback */
 		if (this->isInstr) {
@@ -337,27 +362,6 @@ void PluginDecorator::setMIDICCListener(const MIDICCListener& listener) {
 void PluginDecorator::clearMIDICCListener() {
 	juce::ScopedWriteLock locker(audioLock::getPluginLock());
 	this->ccListener = MIDICCListener{};
-}
-
-void PluginDecorator::doDMDAHandShake() {
-	if (!this->plugin) { return; }
-
-	DMDA::PluginHandler handShakeHandler(
-		[](DMDA::Context* context) { context->handShake(); });
-	this->plugin->getExtensions(handShakeHandler);
-}
-
-void PluginDecorator::setDMDAData(const juce::MidiFile* ptrData) {
-	if (!this->plugin) { return; }
-
-	DMDA::PluginHandler contextDataHandler(
-		[ptrData](DMDA::Context* context) {
-			if (auto ptrContext = dynamic_cast<DMDA::MidiFileContext*>(context)) {
-				juce::ScopedWriteLock locker(ptrContext->getLock());
-				ptrContext->setData(ptrData);
-			}
-		});
-	this->plugin->getExtensions(contextDataHandler);
 }
 
 const juce::String PluginDecorator::getName() const {

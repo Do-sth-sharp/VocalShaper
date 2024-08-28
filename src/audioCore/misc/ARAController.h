@@ -20,6 +20,19 @@ private:
 
 private:
 	juce::AudioProcessor* const track = nullptr;
+
+	struct AudioReader {
+		AudioReader(ARA::ARAAudioSourceHostRef source, bool use64BitSamples)
+			: sourceHostRef(source), use64Bit(use64BitSamples) {}
+
+		ARA::ARAAudioSourceHostRef sourceHostRef;
+		bool use64Bit;
+	};
+
+	using Converter = juce::ARAHostModel::ConversionFunctions<AudioReader*, ARA::ARAAudioReaderHostRef>;
+	using SourceConverter = juce::ARAHostModel::ConversionFunctions<juce::AudioSampleBuffer*, ARA::ARAAudioSourceHostRef>;
+
+	std::map<AudioReader*, std::unique_ptr<AudioReader>> audioReaders;
 };
 
 class ARAArchivingController : public ARA::Host::ArchivingControllerInterface {

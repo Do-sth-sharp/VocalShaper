@@ -32,41 +32,12 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginLoadMessage)
 };
 
-class ARALoadMessage final : public juce::Message {
-public:
-	ARALoadMessage() = delete;
-	explicit ARALoadMessage(
-		const juce::PluginDescription& description,
-		const juce::AudioPluginFormat::ARAFactoryCreationCallback& callback)
-	: description(description), callback(callback) {
-		this->pluginFormatManager = std::make_unique<juce::AudioPluginFormatManager>();
-		this->pluginFormatManager->addDefaultFormats();
-	};
-
-private:
-	const juce::PluginDescription description;
-	const juce::AudioPluginFormat::ARAFactoryCreationCallback callback;
-
-	std::unique_ptr<juce::AudioPluginFormatManager> pluginFormatManager;
-
-	friend class PluginLoadMessageHelper;
-	void invoke() const {
-		this->pluginFormatManager->createARAFactoryAsync(
-			this->description, this->callback);
-	};
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARALoadMessage)
-};
-
 class PluginLoadMessageHelper final : public juce::MessageListener {
 public:
 	PluginLoadMessageHelper() = default;
 
 	void handleMessage(const juce::Message& message) override {
 		if (auto m = dynamic_cast<const PluginLoadMessage*>(&message)) {
-			m->invoke();
-		}
-		else if (auto m = dynamic_cast<const ARALoadMessage*>(&message)) {
 			m->invoke();
 		}
 	};
@@ -156,36 +127,5 @@ void PluginLoadThread::run() {
 		this->messageHelper->postMessage(new PluginLoadMessage{
 			asyncCallback, std::move(pluginInstance), errorMessage });
 #endif // PLUGIN_LOAD_ON_MESSAGE_THREAD
-
-		/** Load ARA */
-		if (pluginDescription.hasARAExtension) {
-			/** Load Callback */
-			auto araLoadCallback = [ptr, pluginDescription, callback](juce::ARAFactoryResult result) {
-				if (result.araFactory.get()) {
-					auto identifier = pluginDescription.createIdentifierString();
-
-					if (auto plugin = ptr.getPlugin()) {
-						plugin->setARA(result.araFactory, identifier);
-						callback();
-					}
-
-					return;
-				}
-
-				/** Handle Error */
-				if (auto plugin = ptr.getPlugin()) {
-					auto identifier = pluginDescription.createIdentifierString();
-					plugin->handleARALoadError(identifier);
-				}
-				UICallbackAPI<const juce::String&, const juce::String&>::invoke(
-					UICallbackType::ErrorAlert, "Load ARA Plugin",
-					"Can't load ara plugin with error message: " + result.errorMessage);
-				jassertfalse;
-				};
-
-			/** Load Async */
-			this->messageHelper->postMessage(new ARALoadMessage{
-				pluginDescription, araLoadCallback });
-		}
 	}
 }

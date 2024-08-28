@@ -8,8 +8,12 @@ ARAAudioAccessController::ARAAudioAccessController(
 ARA::ARAAudioReaderHostRef ARAAudioAccessController::createAudioReaderForSource(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
 	bool use64BitSamples) noexcept {
-	/** TODO */
-	return nullptr;
+	auto audioReader = std::make_unique<AudioReader>(audioSourceHostRef, use64BitSamples);
+	auto audioReaderHostRef = Converter::toHostRef(audioReader.get());
+
+	this->audioReaders.emplace(audioReader.get(), std::move(audioReader));
+
+	return audioReaderHostRef;
 }
 
 bool ARAAudioAccessController::readAudioSamples(
@@ -17,13 +21,15 @@ bool ARAAudioAccessController::readAudioSamples(
 	ARA::ARASamplePosition samplePosition,
 	ARA::ARASampleCount samplesPerChannel,
 	void* const buffers[]) noexcept {
+	const bool use64BitSamples = Converter::fromHostRef(audioReaderHostRef)->use64Bit;
+	auto* audioSource = SourceConverter::fromHostRef(Converter::fromHostRef(audioReaderHostRef)->sourceHostRef);
 	/** TODO */
 	return false;
 }
 
 void ARAAudioAccessController::destroyAudioReader(
 	ARA::ARAAudioReaderHostRef audioReaderHostRef) noexcept {
-	/** TODO */
+	this->audioReaders.erase(Converter::fromHostRef(audioReaderHostRef));
 }
 
 ARAArchivingController::ARAArchivingController(

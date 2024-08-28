@@ -18,7 +18,7 @@ public:
 
 	void setPlugin(
 		std::unique_ptr<juce::AudioPluginInstance> plugin,
-		const juce::String& pluginIdentifier, bool prepareLater = false);
+		const juce::String& pluginIdentifier, bool hasARA = false);
 	void setARA(
 		juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier);
 	void handleARALoadError(const juce::String& pluginIdentifier);
@@ -54,9 +54,6 @@ public:
 	using MIDICCListener = std::function<void(int)>;
 	void setMIDICCListener(const MIDICCListener& listener);
 	void clearMIDICCListener();
-
-	void doDMDAHandShake();
-	void setDMDAData(const juce::MidiFile* ptrData);
 
 	class SafePointer {
 	private:
