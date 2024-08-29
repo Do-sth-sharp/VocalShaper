@@ -360,25 +360,6 @@ bool ActionSaveMidiSource::doAction() {
 	return false;
 }
 
-ActionSynth::ActionSynth(int index)
-	: index(index) {}
-
-bool ActionSynth::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->startSynth();
-
-			this->output("Synth: [" + juce::String{ this->index } + "]\n");
-			return true;
-		}
-	}
-	this->error("Can't synth: [" + juce::String{ this->index } + "]\n");
-	return false;
-}
-
 ActionSplitSequencerBlock::ActionSplitSequencerBlock(
 	int track, int block, double time)
 	: ACTION_DB{ track, block, time } {}

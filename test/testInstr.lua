@@ -16,9 +16,6 @@ AC.setInstrBypass(0, false);
 AC.setInstrOffline(0, true);
 AC.setInstrOffline(0, false);
 
--- Synth
-AC.synth(0);
-
 -- Instrument Plugin MIDI Channel
 AC.setInstrMIDIChannel(0, 0);
 

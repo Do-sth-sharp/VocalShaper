@@ -44,9 +44,6 @@ public:
 	void setInstrOffline(bool offline);
 	bool getInstrOffline() const;
 
-	bool isSynthRunning() const;
-	void startSynth();
-
 	uint64_t getAudioRef() const;
 	uint64_t getMIDIRef() const;
 

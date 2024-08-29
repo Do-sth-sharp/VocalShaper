@@ -96,7 +96,6 @@ public:
 		const std::function<void(uint64_t)>& callback = {});
 	static void setSeqMIDIRef(int index, const juce::String& path,
 		bool getTempo, const std::function<void(uint64_t)>& callback = {});
-	static void synthSeq(int index);
 	static void removeSeq(int index);
 
 	static void addTempoLabel(double time, double tempo);

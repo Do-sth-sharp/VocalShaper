@@ -47,8 +47,6 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 			{ this->audioOutputNode->nodeID, i } });
 	}
 
-	/** TODO Synth Thread */
-
 	/** Set Level Size */
 	this->outputLevels.resize(type.size());
 
@@ -64,8 +62,6 @@ SeqSourceProcessor::~SeqSourceProcessor() {
 void SeqSourceProcessor::updateIndex(int index) {
 	this->index = index;
 	this->srcs.updateIndex(index);
-
-	/** TODO Synth Index */
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
@@ -276,15 +272,6 @@ void SeqSourceProcessor::setInstrOffline(bool offline) {
 
 bool SeqSourceProcessor::getInstrOffline() const {
 	return this->instrOffline;
-}
-
-bool SeqSourceProcessor::isSynthRunning() const {
-	/** TODO */
-	return false;
-}
-
-void SeqSourceProcessor::startSynth() {
-	/** TODO */
 }
 
 uint64_t SeqSourceProcessor::getAudioRef() const {

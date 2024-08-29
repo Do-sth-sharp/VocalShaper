@@ -151,13 +151,6 @@ AUDIOCORE_FUNC(saveMIDI) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(synth) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSynth{
-		(int)luaL_checkinteger(L, 1) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
 void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, clearPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, searchPlugin);
@@ -177,5 +170,4 @@ void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, loadMIDI);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveAudio);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, saveMIDI);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, synth);
 }
