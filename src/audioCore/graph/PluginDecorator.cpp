@@ -366,7 +366,7 @@ void PluginDecorator::clearMIDICCListener() {
 
 const juce::String PluginDecorator::getName() const {
 	if (!this->plugin) { return ""; }
-	return this->plugin->getName();
+	return this->plugin->getName() + ((bool)this->araDocumentController ? "(ARA)" : "");
 }
 
 juce::StringArray PluginDecorator::getAlternateDisplayNames() const {
