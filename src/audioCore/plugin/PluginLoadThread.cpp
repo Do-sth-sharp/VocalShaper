@@ -63,11 +63,11 @@ PluginLoadThread::~PluginLoadThread() {
 	}
 }
 
-void PluginLoadThread::load(const juce::PluginDescription& pluginInfo,
+void PluginLoadThread::load(const juce::PluginDescription& pluginInfo, bool addARA,
 	DstPointer ptr, const Callback& callback, double sampleRate, int blockSize) {
 	juce::GenericScopedLock locker(this->lock);
 
-	this->list.push(std::make_tuple(pluginInfo, ptr, sampleRate, blockSize, callback));
+	this->list.push(std::make_tuple(pluginInfo, addARA, ptr, sampleRate, blockSize, callback));
 
 	this->startThread();
 }
@@ -88,17 +88,17 @@ void PluginLoadThread::run() {
 		}
 
 		/** Prepare Plugin Load */
-		auto& [pluginDescription, ptr, sampleRate, blockSize, callback] = task;
+		auto& [pluginDescription, addARA, ptr, sampleRate, blockSize, callback] = task;
 
 		/** Load Callback */
 		auto asyncCallback =
-			[ptr, pluginDescription, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& errorMessage) {
+			[ptr, pluginDescription, addARA, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& errorMessage) {
 			if (p) {
 				auto identifier = pluginDescription.createIdentifierString();
 
 				if (auto plugin = ptr.getPlugin()) {
 					plugin->setPlugin(std::move(p), identifier,
-						pluginDescription.hasARAExtension);
+						addARA && pluginDescription.hasARAExtension);
 					callback();
 				}
 

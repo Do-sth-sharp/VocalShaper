@@ -10,7 +10,7 @@ public:
 
 	using Callback = PluginLoadThread::Callback;
 	void loadPlugin(const juce::PluginDescription& pluginInfo,
-		PluginDecorator::SafePointer ptr,
+		bool addARA, PluginDecorator::SafePointer ptr,
 		const Callback& callback = [] {});
 
 	bool isRunning() const;

@@ -1994,7 +1994,7 @@ bool ActionSetEffect::doAction() {
 
 					/** Add */
 					if (auto ptr = pluginDock->insertPlugin(ACTION_DATA(effect))) {
-						PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+						PluginLoader::getInstance()->loadPlugin(*(des.get()), false, ptr);
 
 						this->output("Set Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
 						ACTION_RESULT(true);

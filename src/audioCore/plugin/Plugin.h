@@ -13,7 +13,7 @@ public:
 	void clearPluginTemporary();
 	bool pluginSearchThreadIsRunning() const;
 	const std::unique_ptr<juce::PluginDescription> findPlugin(
-		const juce::String& identifier, bool isInstrument = false) const;
+		const juce::String& identifier, bool isInstrument = false, bool isARA = false) const;
 
 	/**
 	 * @attention	Don't change plugin black list while searching plugin.

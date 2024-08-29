@@ -35,7 +35,7 @@ public:
 	static void rewind();
 	static void record(bool start);
 
-	static void insertInstr(int index, const juce::String& pid);
+	static void insertInstr(int index, const juce::String& pid, bool addARA);
 	static void bypassInstr(int index, bool bypass);
 	static void offlineInstr(int index, bool offline);
 	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
@@ -184,7 +184,7 @@ public:
 		const std::function<void(const juce::String&)>& callback,
 		const juce::String& defaultName = "");
 	static void askForPluginGUIAsync(
-		const std::function<void(const juce::String&)>& callback,
+		const std::function<void(const juce::String&, bool)>& callback,
 		bool filter = false, bool instr = true);
 	static void askForBusTypeGUIAsync(
 		const std::function<void(int)>& callback,

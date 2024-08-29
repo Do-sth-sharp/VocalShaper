@@ -651,10 +651,10 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 			pluginData.c_str(), pluginData.size());
 	};
 
-	auto pluginDes = Plugin::getInstance()->findPlugin(info.id(), this->isInstr);
+	auto pluginDes = Plugin::getInstance()->findPlugin(info.id(), this->isInstr, info.addara());
 	if (pluginDes) {
 		PluginLoader::getInstance()->loadPlugin(
-			*(pluginDes.get()), ptrPlugin, callback);
+			*(pluginDes.get()), info.addara(), ptrPlugin, callback);
 	}
 	else {
 		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
@@ -672,6 +672,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 	auto info = mes->mutable_info();
 	if (this->plugin) {
 		info->set_id(this->getPluginIdentifier().toStdString());
+		info->set_addara((bool)this->araDocumentController);
 	}
 	info->set_decoratortype(static_cast<vsp4::TrackType>(
 		utils::getTrackType(this->getAudioChannelSet())));

@@ -434,7 +434,7 @@ bool SeqTrackComponent::isInterestedInDragSource(
 
 	/** From Plugins */
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		return des["instrument"];
+		return des["instrument"] || des["ara"];
 	}
 
 	return false;
@@ -475,8 +475,9 @@ void SeqTrackComponent::itemDropped(const SourceDetails& dragSourceDetails) {
 	/** From Plugins */
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
 		juce::String pid = des["id"].toString();
+		bool ara = des["ara"];
 
-		this->setInstr(pid);
+		this->setInstr(pid, ara);
 		return;
 	}
 }
@@ -583,7 +584,7 @@ void SeqTrackComponent::instrMenuShow() {
 	/** Callback */
 	auto addCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
 		if (comp) {
-			comp->setInstr(pluginDes.createIdentifierString());
+			comp->setInstr(pluginDes.createIdentifierString(), pluginDes.hasARAExtension);
 		}
 		};
 
@@ -635,8 +636,8 @@ void SeqTrackComponent::menuShow() {
 	}
 }
 
-void SeqTrackComponent::setInstr(const juce::String& pid) {
-	CoreActions::insertInstr(this->index, pid);
+void SeqTrackComponent::setInstr(const juce::String& pid, bool addARA) {
+	CoreActions::insertInstr(this->index, pid, addARA);
 }
 
 void SeqTrackComponent::add() {

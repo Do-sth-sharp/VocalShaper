@@ -173,6 +173,9 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 		if (!(this->instrOffline)) {
 			this->linkInstr();
 		}
+		else {
+			this->unlinkInstr();
+		}
 
 		/** Callback */
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
@@ -193,9 +196,7 @@ void SeqSourceProcessor::removeInstr() {
 		this->instr = nullptr;
 
 		/** Disconnect IO */
-		if (!(this->instrOffline)) {
-			this->unlinkInstr();
-		}
+		this->unlinkInstr();
 
 		/** Remove Node */
 		this->removeNode(ptrNode->nodeID);
@@ -570,8 +571,13 @@ void SeqSourceProcessor::processBlock(
 	}
 
 	/** Process Graph */
-	if (!(this->instrOffline)) {
+	if (this->instr && !(this->instrOffline)) {
 		this->juce::AudioProcessorGraph::processBlock(buffer, midiMessages);
+	}
+
+	/** Process Mute */
+	if (this->isMute) {
+		vMath::zeroAllAudioData(buffer);
 	}
 
 	/** Update Level Meter */
@@ -739,6 +745,15 @@ const SeqSourceProcessor::AudioFormat SeqSourceProcessor::getAudioFormat() const
 
 void SeqSourceProcessor::linkInstr() {
 	if (auto ptrNode = this->instr) {
+		/** Unlink Main IO */
+		this->removeConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+		for (int i = 0; i < this->audioChannels.size(); i++) {
+			this->removeConnection({ { this->audioInputNode->nodeID, i },
+				{ this->audioOutputNode->nodeID, i } });
+		}
+
+		/** Link Instr IO */
 		this->addConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
 			{ ptrNode->nodeID, this->midiChannelIndex } });
 		this->addConnection({ { ptrNode->nodeID, this->midiChannelIndex },
@@ -754,6 +769,7 @@ void SeqSourceProcessor::linkInstr() {
 
 void SeqSourceProcessor::unlinkInstr() {
 	if (auto ptrNode = this->instr) {
+		/** Unlink Instr IO */
 		this->removeConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
 			{ ptrNode->nodeID, this->midiChannelIndex } });
 		this->removeConnection({ { ptrNode->nodeID, this->midiChannelIndex },
@@ -762,6 +778,14 @@ void SeqSourceProcessor::unlinkInstr() {
 			this->removeConnection({ { this->audioInputNode->nodeID, i },
 				{ ptrNode->nodeID, i } });
 			this->removeConnection({ { ptrNode->nodeID, i },
+				{ this->audioOutputNode->nodeID, i } });
+		}
+
+		/** Link Main IO */
+		this->addConnection({ { this->midiInputNode->nodeID, this->midiChannelIndex },
+			{ this->midiOutputNode->nodeID, this->midiChannelIndex } });
+		for (int i = 0; i < this->audioChannels.size(); i++) {
+			this->addConnection({ { this->audioInputNode->nodeID, i },
 				{ this->audioOutputNode->nodeID, i } });
 		}
 	}

@@ -7,7 +7,8 @@ public:
 	PluginItemModel() = delete;
 	PluginItemModel(const juce::String& groupName, const juce::PluginDescription& plugin,
 		const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback)
-		: groupName(groupName), plugin(plugin), menuCallback(pluginMenuCallback) {};
+		: groupName(groupName), plugin(plugin), menuCallback(pluginMenuCallback),
+		tempName(plugin.name + (plugin.hasARAExtension ? "(ARA)" : "")) {};
 
 	bool mightContainSubItems() override { return false; };
 	juce::String getUniqueName() const override {
@@ -70,7 +71,7 @@ public:
 				width - paddingWidth * 2, textHeight);
 			g.setColour(textColor);
 			g.setFont(textFont);
-			g.drawFittedText(this->plugin.name, textRect,
+			g.drawFittedText(this->tempName, textRect,
 				juce::Justification::centredLeft, 1, 1.f);
 		}
 	};
@@ -122,7 +123,7 @@ public:
 	};
 
 	juce::String getTooltip() override {
-		return this->plugin.name + "\n"
+		return this->tempName + "\n"
 			+ TRANS("Description:") + " " + this->plugin.descriptiveName + "\n"
 			+ TRANS("Format:") + " " + this->plugin.pluginFormatName + "\n"
 			+ TRANS("Category:") + " " + this->plugin.category + "\n"
@@ -145,6 +146,7 @@ public:
 		object->setProperty("format", this->plugin.pluginFormatName);
 		object->setProperty("instrument", this->plugin.isInstrument);
 		object->setProperty("id", this->plugin.createIdentifierString());
+		object->setProperty("ara", this->plugin.hasARAExtension);
 
 		return juce::var{ object.release() };
 	};
@@ -156,6 +158,7 @@ private:
 	const juce::String groupName;
 	const juce::PluginDescription plugin;
 	const std::function<void(const juce::PluginDescription&)> menuCallback;
+	const juce::String tempName;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginItemModel)
 };

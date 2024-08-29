@@ -1,9 +1,9 @@
 ﻿-- Add Instrument Plugin
-AC.addInstr(0, "VST3-MONSTER Piano v2-2022.07-d77ff23b-efa9463a");
-AC.addInstr(1, "VST3-ACE Bridge-60483eb8-ca199f24");
-AC.addInstr(2, "VST-VOCALOID5 VSTi-b099a95-56355632");
-AC.addInstr(3, "VST-synthesizer-v-plugin64-c0552195-53796e56");
-AC.addInstr(4, "VST3-MONSTER Guitar v2.2022.09-e47046df-d16e2f22");
+AC.addInstr(0, "VST3-MONSTER Piano v2-2022.07-d77ff23b-efa9463a", false);
+AC.addInstr(1, "VST3-ACE Bridge-60483eb8-ca199f24", false);
+AC.addInstr(2, "VST-VOCALOID5 VSTi-b099a95-56355632", false);
+AC.addInstr(3, "VST-synthesizer-v-plugin64-c0552195-53796e56", false);
+AC.addInstr(4, "VST3-MONSTER Guitar v2.2022.09-e47046df-d16e2f22", false);
 
 -- Remove Instrument Plugin
 AC.removeInstr(0);

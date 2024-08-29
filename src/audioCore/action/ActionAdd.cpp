@@ -225,7 +225,7 @@ bool ActionAddEffect::doAction() {
 			if (auto track = graph->getTrackProcessor(ACTION_DATA(track))) {
 				if (auto pluginDock = track->getPluginDock()) {
 					if (auto ptr = pluginDock->insertPlugin(ACTION_DATA(effect))) {
-						PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+						PluginLoader::getInstance()->loadPlugin(*(des.get()), false, ptr);
 
 						this->output("Insert Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "] " + ACTION_DATA(pid) + "\n");
 						ACTION_RESULT(true);
@@ -266,8 +266,8 @@ bool ActionAddEffect::undo() {
 }
 
 ActionAddInstr::ActionAddInstr(
-	int index, const juce::String& pid)
-	: ACTION_DB{ index, pid } {}
+	int index, const juce::String& pid, bool addARA)
+	: ACTION_DB{ index, pid, addARA } {}
 
 bool ActionAddInstr::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -281,11 +281,11 @@ bool ActionAddInstr::doAction() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	if (auto des = Plugin::getInstance()->findPlugin(ACTION_DATA(pid), true)) {
+	if (auto des = Plugin::getInstance()->findPlugin(ACTION_DATA(pid), true, ACTION_DATA(addARA))) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(ACTION_DATA(index))) {
 				if (auto ptr = track->prepareInstr()) {
-					PluginLoader::getInstance()->loadPlugin(*(des.get()), ptr);
+					PluginLoader::getInstance()->loadPlugin(*(des.get()), ACTION_DATA(addARA), ptr);
 
 					this->output("Insert Plugin: [" + juce::String(ACTION_DATA(index)) + "] " + ACTION_DATA(pid) + "\n");
 					ACTION_RESULT(true);

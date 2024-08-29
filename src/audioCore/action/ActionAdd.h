@@ -139,7 +139,7 @@ class ActionAddInstr final : public ActionUndoableBase {
 public:
 	ActionAddInstr() = delete;
 	ActionAddInstr(
-		int index, const juce::String& pid);
+		int index, const juce::String& pid, bool addARA);
 
 	bool doAction() override;
 	bool undo() override;
@@ -151,6 +151,7 @@ private:
 	ACTION_DATABLOCK{
 		const int index;
 		const juce::String pid;
+		const bool addARA;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionAddInstr)

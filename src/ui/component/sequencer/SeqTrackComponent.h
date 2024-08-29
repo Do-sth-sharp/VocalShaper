@@ -96,7 +96,7 @@ private:
 	void instrMenuShow();
 	void menuShow();
 
-	void setInstr(const juce::String& pid);
+	void setInstr(const juce::String& pid, bool addARA);
 	void add();
 	void remove();
 

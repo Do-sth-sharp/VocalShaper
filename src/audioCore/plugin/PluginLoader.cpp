@@ -7,7 +7,7 @@ PluginLoader::PluginLoader() {
 }
 
 void PluginLoader::loadPlugin(
-	const juce::PluginDescription& pluginInfo,
+	const juce::PluginDescription& pluginInfo, bool addARA,
 	PluginDecorator::SafePointer ptr, const Callback& callback) {
 	/** Get Audio Config */
 	auto mainGraph = AudioCore::getInstance()->getGraph();
@@ -19,7 +19,7 @@ void PluginLoader::loadPlugin(
 	int bufferSize = mainGraph->getBlockSize();
 
 	/** Create Task */
-	this->loadThread->load(pluginInfo, ptr, callback, sampleRate, bufferSize);
+	this->loadThread->load(pluginInfo, addARA, ptr, callback, sampleRate, bufferSize);
 }
 
 bool PluginLoader::isRunning() const {

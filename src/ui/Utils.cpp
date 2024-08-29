@@ -589,7 +589,11 @@ namespace utils {
 		for (auto& [name, plugins] : list) {
 			menu.addSectionHeader(name);
 			for (auto& i : plugins) {
-				menu.addItem(i.name, std::bind(callback, i));
+				auto tempName = i.name;
+				if (i.hasARAExtension) {
+					tempName += "(ARA)";
+				}
+				menu.addItem(tempName, std::bind(callback, i));
 			}
 		}
 

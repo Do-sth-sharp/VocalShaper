@@ -400,7 +400,7 @@ bool MixerTrackComponent::isInterestedInDragSource(
 
 	/** From Plugins */
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		if (des["instrument"]) { return false; }
+		if (des["instrument"] || des["ara"]) { return false; }
 		return true;
 	}
 

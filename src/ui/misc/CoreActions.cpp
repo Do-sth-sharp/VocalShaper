@@ -108,9 +108,9 @@ void CoreActions::record(bool start) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::insertInstr(int index, const juce::String& pid) {
+void CoreActions::insertInstr(int index, const juce::String& pid, bool addARA) {
 	auto action = std::unique_ptr<ActionBase>(
-		new ActionAddInstr{ index, pid });
+		new ActionAddInstr{ index, pid, addARA });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
@@ -669,8 +669,8 @@ void CoreActions::renderGUI() {
 }
 
 void CoreActions::insertInstrGUI(int index) {
-	auto callback = [index](const juce::String& id) {
-		CoreActions::insertInstr(index, id); };
+	auto callback = [index](const juce::String& id, bool addARA) {
+		CoreActions::insertInstr(index, id, addARA); };
 	CoreActions::askForPluginGUIAsync(callback, true, true);
 }
 
@@ -698,7 +698,7 @@ void CoreActions::removeInstrGUI(int index) {
 }
 
 void CoreActions::insertEffectGUI(int track, int index) {
-	auto callback = [track, index](const juce::String& id) {
+	auto callback = [track, index](const juce::String& id, bool) {
 		CoreActions::insertEffect(track, index, id); };
 	CoreActions::askForPluginGUIAsync(callback, true, false);
 }
@@ -1386,13 +1386,17 @@ void CoreActions::askForNameGUIAsync(
 }
 
 void CoreActions::askForPluginGUIAsync(
-	const std::function<void(const juce::String&)>& callback,
+	const std::function<void(const juce::String&, bool)>& callback,
 	bool filter, bool instr) {
 	/** Get Plugin List */
 	auto [result, list] = quickAPI::getPluginList(filter, instr);
 	juce::StringArray pluginNames;
 	for (auto& i : list) {
-		pluginNames.add(i.name);
+		auto name = i.name;
+		if (i.hasARAExtension) {
+			name += "(ARA)";
+		}
+		pluginNames.add(name);
 	}
 
 	/** Create Selector */
@@ -1415,7 +1419,7 @@ void CoreActions::askForPluginGUIAsync(
 			auto& pluginDes = list.getReference(index);
 			if(pluginDes.name != name){ return; }
 
-			callback(pluginDes.createIdentifierString());
+			callback(pluginDes.createIdentifierString(), pluginDes.hasARAExtension);
 		}
 	), true);
 }

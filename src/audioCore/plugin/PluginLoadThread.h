@@ -10,7 +10,7 @@ public:
 
 	using Callback = std::function<void()>;
 	using DstPointer = PluginDecorator::SafePointer;
-	void load(const juce::PluginDescription& pluginInfo,
+	void load(const juce::PluginDescription& pluginInfo, bool addARA,
 		DstPointer ptr, const Callback& callback, double sampleRate, int blockSize);
 
 private:
@@ -18,7 +18,7 @@ private:
 
 private:
 	using PluginLoadTask =
-		std::tuple<juce::PluginDescription, DstPointer, double, int, Callback>;
+		std::tuple<juce::PluginDescription, bool, DstPointer, double, int, Callback>;
 	std::queue<PluginLoadTask> list;
 	juce::CriticalSection lock;
 

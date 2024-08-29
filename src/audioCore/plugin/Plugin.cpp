@@ -33,11 +33,11 @@ bool Plugin::pluginSearchThreadIsRunning() const {
 }
 
 const std::unique_ptr<juce::PluginDescription> Plugin::findPlugin(
-	const juce::String& identifier, bool isInstrument) const {
+	const juce::String& identifier, bool isInstrument, bool isARA) const {
 	auto& list = std::get<1>(this->getPluginList());
 
 	auto ptr = list.getTypeForIdentifierString(identifier);
-	if (ptr && ptr->isInstrument == isInstrument) {
+	if (ptr && (ptr->isInstrument == isInstrument || (isARA && ptr->hasARAExtension))) {
 		return std::move(ptr);
 	}
 

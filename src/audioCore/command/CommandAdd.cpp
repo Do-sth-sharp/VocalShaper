@@ -56,7 +56,8 @@ AUDIOCORE_FUNC(addEffect) {
 
 AUDIOCORE_FUNC(addInstr) {
 	auto action = std::unique_ptr<ActionBase>(new ActionAddInstr{
-		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)) });
+		(int)luaL_checkinteger(L, 1), juce::String::fromUTF8(luaL_checkstring(L, 2)),
+		(bool)lua_toboolean(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }

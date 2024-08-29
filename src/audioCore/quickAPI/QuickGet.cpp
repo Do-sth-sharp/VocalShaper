@@ -208,16 +208,34 @@ namespace quickAPI {
 		getPluginList(bool filter, bool instr) {
 		auto [result, list] = Plugin::getInstance()->getPluginList();
 
-		if (!filter) { return { result, list.getTypes() }; }
-
 		juce::Array<juce::PluginDescription> listRes;
 		auto listAll = list.getTypes();
-		for (auto& i : listAll) {
-			if (i.isInstrument == instr) {
-				listRes.add(i);
+
+		if (filter) {
+			for (auto& i : listAll) {
+				if (i.isInstrument == instr) {
+					auto temp = i;
+					temp.hasARAExtension = false;
+					listRes.add(temp);
+				}
+				if (instr && i.hasARAExtension) {
+					listRes.add(i);
+				}
 			}
 		}
-
+		else {
+			for (auto& i : listAll) {
+				{
+					auto temp = i;
+					temp.hasARAExtension = false;
+					listRes.add(temp);
+				}
+				if (i.hasARAExtension) {
+					listRes.add(i);
+				}
+			}
+		}
+		
 		return { result, listRes };
 	}
 
