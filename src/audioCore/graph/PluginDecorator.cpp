@@ -109,15 +109,17 @@ void PluginDecorator::setARA(
 	if (this->plugin && pluginIdentifier == this->pluginIdentifier) {
 		/** Create ARA Host Document Controller */
 		if (auto controller = juce::ARAHostDocumentController::create(
-			factory, "test",
+			factory, juce::String{ "ARA Virtual Document for " } + this->plugin->getName(),
 			std::make_unique<ARAAudioAccessController>(this->track),
 			std::make_unique<ARAArchivingController>(this->track),
 			std::make_unique<ARAContentAccessController>(this->track),
 			std::make_unique<ARAModelUpdateController>(this->track))) {
 			/** Bind To Plugin Instance */
-			auto pluginInstance = controller->bindDocumentToPluginInstance(*(this->plugin),
-				ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole,
-				ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole);
+			auto allRoles = ARA::kARAPlaybackRendererRole
+				| ARA::kARAEditorRendererRole
+				| ARA::kARAEditorViewRole;
+			auto pluginInstance = controller->bindDocumentToPluginInstance(
+				*(this->plugin), allRoles, allRoles);
 
 			if (pluginInstance.isValid()) {
 				/** Set ARA Document Controller */
