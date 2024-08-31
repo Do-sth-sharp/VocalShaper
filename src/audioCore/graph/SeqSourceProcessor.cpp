@@ -362,16 +362,18 @@ const juce::String SeqSourceProcessor::getAudioFileName() const {
 	if (name.isEmpty()) { name = this->trackName; }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 	
-	auto [extension, metaData, bitDepth, quality] = this->getAudioFormat();
-	if (!utils::getAudioFormatsSupported(true).contains("*" + extension)) {
+	auto file = juce::File::createFileWithoutCheckingPath(utils::getLegalFileName(name));
+	auto extension = file.getFileExtension();
+
+	auto formats = utils::getAudioFormatsSupported(true);
+	if (!formats.contains("*" + extension)) {
 		extension.clear();
 	}
 	if (extension.isEmpty()) {
-		extension = utils::getAudioFormatsSupported(true)[0]
-			.trimCharactersAtStart("*");
+		extension = formats[0].trimCharactersAtStart("*");
 	}
 
-	return utils::getLegalFileName(name) + extension;
+	return file.getFileNameWithoutExtension() + extension;
 }
 
 const juce::String SeqSourceProcessor::getMIDIFileName() const {
@@ -379,9 +381,18 @@ const juce::String SeqSourceProcessor::getMIDIFileName() const {
 	if (name.isEmpty()) { name = this->trackName; }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 
-	juce::String extension = utils::getMidiFormatsSupported(true)[0]
-		.trimCharactersAtStart("*");
-	return utils::getLegalFileName(name) + extension;
+	auto file = juce::File::createFileWithoutCheckingPath(utils::getLegalFileName(name));
+	auto extension = file.getFileExtension();
+
+	auto formats = utils::getMidiFormatsSupported(true);
+	if (!formats.contains("*" + extension)) {
+		extension.clear();
+	}
+	if (extension.isEmpty()) {
+		extension = formats[0].trimCharactersAtStart("*");
+	}
+
+	return file.getFileNameWithoutExtension() + extension;
 }
 
 const juce::String SeqSourceProcessor::getAudioName() const {

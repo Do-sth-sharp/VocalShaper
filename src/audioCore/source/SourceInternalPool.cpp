@@ -3,6 +3,8 @@
 std::shared_ptr<SourceInternalContainer>
 SourceInternalPool::add(const juce::String& name,
 	SourceInternalContainer::SourceType type) {
+	juce::ScopedWriteLock locker(this->sourceLock);
+
 	auto it = this->list.find(name);
 	if (it == this->list.end()) {
 		auto item = std::make_shared<SourceInternalContainer>(type, name);
@@ -18,7 +20,16 @@ SourceInternalPool::add(const juce::String& name,
 }
 
 std::shared_ptr<SourceInternalContainer>
+SourceInternalPool::create(
+	SourceInternalContainer::SourceType type) {
+	auto name = this->getNewSourceName();
+	return this->add(name, type);
+}
+
+std::shared_ptr<SourceInternalContainer>
 SourceInternalPool::find(const juce::String& name) const {
+	juce::ScopedReadLock locker(this->sourceLock);
+
 	auto it = this->list.find(name);
 	if (it != this->list.end()) {
 		return it->second;
@@ -28,6 +39,8 @@ SourceInternalPool::find(const juce::String& name) const {
 
 std::shared_ptr<SourceInternalContainer>
 SourceInternalPool::fork(const juce::String& name) {
+	juce::ScopedWriteLock locker(this->sourceLock);
+
 	auto it = this->list.find(name);
 	if (it != this->list.end()) {
 		auto item = std::make_shared<SourceInternalContainer>(*(it->second));
@@ -38,12 +51,22 @@ SourceInternalPool::fork(const juce::String& name) {
 }
 
 void SourceInternalPool::checkSourceReleased(const juce::String& name) {
+	juce::ScopedWriteLock locker(this->sourceLock);
+
 	auto it = this->list.find(name);
 	if (it != this->list.end()) {
 		if (it->second.use_count() == 1) {
 			this->list.erase(it);
 		}
 	}
+}
+
+uint64_t SourceInternalPool::getNewSourceId() {
+	return this->newSourceCount++;
+}
+
+const juce::String SourceInternalPool::getNewSourceName() {
+	return "New Source #" + juce::String{ this->getNewSourceId() };
 }
 
 SourceInternalPool* SourceInternalPool::getInstance() {

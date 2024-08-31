@@ -30,9 +30,20 @@ public:
 	void initMidiData();
 	void initAudioData(int channelNum, double sampleRate, double length);
 
+	void setMIDI(const juce::MidiFile& data);
+	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data);
+
+	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;
+	void setAudioFormat(const AudioFormat& format);
+	const AudioFormat getAudioFormat() const;
+
+	bool isForked() const;
+
 private:
 	const SourceType type;
 	const juce::String name;
+
+	const bool forked = false;
 
 	std::unique_ptr<juce::MidiFile> midiData = nullptr;
 	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
@@ -48,5 +59,5 @@ private:
 
 	static const juce::String getForkName(const juce::String& name);
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceInternalContainer)
+	JUCE_LEAK_DETECTOR(SourceInternalContainer)
 };

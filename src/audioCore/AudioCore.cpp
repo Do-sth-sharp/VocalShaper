@@ -93,6 +93,7 @@ AudioCore::~AudioCore() {
 	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
 	Plugin::releaseInstance();
+	SourceIO::releaseInstance();
 	SourceManager::releaseInstance();
 	UICallback::releaseInstance();
 }
@@ -478,6 +479,9 @@ void AudioCore::saveSource(const google::protobuf::Message* data) const {
 	auto ptrProj = dynamic_cast<const vsp4::Project*>(data);
 	if (!ptrProj) { return; }
 
+	/** To Avoid Repeat Save */
+	std::unordered_set<std::string> savedSet;
+
 	auto& graph = ptrProj->graph();
 	auto mainGraph = this->mainAudioGraph.get();
 	for (int i = 0; i < graph.seqtracks_size(); i++) {
@@ -486,19 +490,29 @@ void AudioCore::saveSource(const google::protobuf::Message* data) const {
 
 			if (!seqData.midisrc().empty()) {
 				if (auto ref = track->getMIDIRef()) {
-					juce::String path = utils::getProjectDir()
-						.getChildFile(seqData.midisrc()).getFullPathName();
-					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Write, ref, path, false, {} });
+					auto& name = seqData.midisrc();
+					if (!savedSet.contains(name)) {
+						savedSet.insert(name);
+
+						juce::String path = utils::getProjectDir()
+							.getChildFile(name).getFullPathName();
+						SourceIO::getInstance()->addTask(
+							{ SourceIO::TaskType::Write, ref, path, false, {} });
+					}
 				}
 			}
 
 			if (!seqData.audiosrc().empty()) {
 				if (auto ref = track->getAudioRef()) {
-					juce::String path = utils::getProjectDir()
-						.getChildFile(seqData.audiosrc()).getFullPathName();
-					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Write, ref, path, false, {} });
+					auto& name = seqData.audiosrc();
+					if (!savedSet.contains(name)) {
+						savedSet.insert(name);
+
+						juce::String path = utils::getProjectDir()
+							.getChildFile(name).getFullPathName();
+						SourceIO::getInstance()->addTask(
+							{ SourceIO::TaskType::Write, ref, path, false, {} });
+					}
 				}
 			}
 		}

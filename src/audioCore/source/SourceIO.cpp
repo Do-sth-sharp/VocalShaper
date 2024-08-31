@@ -1,5 +1,6 @@
 ﻿#include "SourceIO.h"
 #include "SourceManager.h"
+#include "SourceInternalPool.h"
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../Utils.h"
@@ -48,31 +49,44 @@ void SourceIO::run() {
 
 			juce::File file = utils::getProjectDir().getChildFile(path);
 			juce::String extension = file.getFileExtension();
-			juce::String name = file.getFileNameWithoutExtension();
+			juce::String name = file.getFileName();
 			
 			auto& audioTypes = ((type == TaskType::Read) ? this->audioFormatsIn : this->audioFormatsOut);
 			auto& midiTypes = ((type == TaskType::Read) ? this->midiFormatsIn : this->midiFormatsOut);
 
 			if (audioTypes.contains(extension)) {
 				if (type == TaskType::Read) {
-					/** Load Audio Data */
-					auto [sampleRate, buffer, metaData, bitDepth] = SourceIO::loadAudio(file);
-					if (sampleRate <= 0) { continue; }
+					/** Check Source Exists */
+					if (!SourceInternalPool::getInstance()->find(name)) {
+						/** Load Audio Data */
+						auto [sampleRate, buffer, metaData, bitDepth] = SourceIO::loadAudio(file);
+						if (sampleRate <= 0) { continue; }
 
-					/** Set Data */
-					juce::MessageManager::callAsync(
-						[sampleRate, buffer, name, ref, metaData, bitDepth, extension, callback] {
-							SourceManager::getInstance()->setAudio(
-								ref, sampleRate, buffer, name);
-							SourceManager::getInstance()->setAudioFormat(
-								ref, { extension, metaData, bitDepth,
-								SourceIO::getBestQualityForFormat(extension) });
-							SourceManager::getInstance()->saved(
-								ref, SourceManager::SourceType::Audio);
+						/** Set Data */
+						juce::MessageManager::callAsync(
+							[sampleRate, buffer, name, ref, metaData, bitDepth, extension, callback] {
+								SourceManager::getInstance()->setAudio(
+									ref, sampleRate, buffer, name);
+								SourceManager::getInstance()->setAudioFormat(
+									ref, { extension, metaData, bitDepth,
+									SourceIO::getBestQualityForFormat(extension) });
+								SourceManager::getInstance()->saved(
+									ref, SourceManager::SourceType::Audio);
 
-							if (callback) { callback(ref); }
-						}
-					);
+								if (callback) { callback(ref); }
+							}
+						);
+					}
+					else {
+						/** Set Reference */
+						juce::MessageManager::callAsync(
+							[ref, name, callback] {
+								SourceManager::getInstance()->setAudio(
+									ref, name);
+								if (callback) { callback(ref); }
+							}
+						);
+					}
 				}
 				else if (type == TaskType::Write) {
 					/** Get Data */
@@ -112,33 +126,46 @@ void SourceIO::run() {
 			}
 			else if (midiTypes.contains(extension)) {
 				if (type == TaskType::Read) {
-					/** Load MIDI Data */
-					auto [valid, data] = SourceIO::loadMIDI(file);
-					if (!valid) { continue; }
+					/** Check Source Exists */
+					if (!SourceInternalPool::getInstance()->find(name)) {
+						/** Load MIDI Data */
+						auto [valid, data] = SourceIO::loadMIDI(file);
+						if (!valid) { continue; }
 
-					/** Split Data */
-					auto [tempo, buffer] = SourceIO::splitMIDI(data);
+						/** Split Data */
+						auto [tempo, buffer] = SourceIO::splitMIDI(data);
 
-					/** Set Tempo */
-					if (getTempo) {
+						/** Set Tempo */
+						if (getTempo) {
+							juce::MessageManager::callAsync(
+								[tempo] {
+									PlayPosition::getInstance()->insertTempoSequence(tempo);
+								}
+							);
+						}
+
+						/** Set Data */
 						juce::MessageManager::callAsync(
-							[tempo] {
-								PlayPosition::getInstance()->insertTempoSequence(tempo);
+							[buffer, name, ref, callback] {
+								SourceManager::getInstance()->setMIDI(
+									ref, buffer, name);
+								SourceManager::getInstance()->saved(
+									ref, SourceManager::SourceType::MIDI);
+
+								if (callback) { callback(ref); }
 							}
 						);
 					}
-
-					/** Set Data */
-					juce::MessageManager::callAsync(
-						[buffer, name, ref, callback] {
-							SourceManager::getInstance()->setMIDI(
-								ref, buffer, name);
-							SourceManager::getInstance()->saved(
-								ref, SourceManager::SourceType::MIDI);
-
-							if (callback) { callback(ref); }
-						}
-					);
+					else {
+						/** Set Reference */
+						juce::MessageManager::callAsync(
+							[ref, name, callback] {
+								SourceManager::getInstance()->setMIDI(
+									ref, name);
+								if (callback) { callback(ref); }
+							}
+						);
+					}
 				}
 				else if (type == TaskType::Write) {
 					/** Get Data */

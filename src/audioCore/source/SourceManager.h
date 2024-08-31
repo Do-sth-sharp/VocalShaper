@@ -24,6 +24,8 @@ public:
 	void initMIDI(uint64_t ref);
 	void setAudio(uint64_t ref, double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
 	void setMIDI(uint64_t ref, const juce::MidiFile& data, const juce::String& name);
+	void setAudio(uint64_t ref, const juce::String& name);
+	void setMIDI(uint64_t ref, const juce::String& name);
 	const std::tuple<double, juce::AudioSampleBuffer> getAudio(uint64_t ref) const;
 	const juce::MidiMessageSequence getMIDI(uint64_t ref, int trackIndex) const;
 	const juce::MidiFile getMIDIFile(uint64_t ref) const;

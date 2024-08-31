@@ -126,6 +126,22 @@ void SourceManager::setMIDI(uint64_t ref, const juce::MidiFile& data, const juce
 	}
 }
 
+void SourceManager::setAudio(uint64_t ref, const juce::String& name) {
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	if (auto ptr = this->getSource(ref, SourceType::Audio)) {
+		ptr->setAudio(name);
+	}
+}
+
+void SourceManager::setMIDI(uint64_t ref, const juce::String& name) {
+	juce::ScopedWriteLock locker(audioLock::getSourceLock());
+
+	if (auto ptr = this->getSource(ref, SourceType::MIDI)) {
+		ptr->setMIDI(name);
+	}
+}
+
 const std::tuple<double, juce::AudioSampleBuffer> SourceManager::getAudio(uint64_t ref) const {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 

@@ -139,7 +139,7 @@ void SeqTrackContentViewer::updateDataRef() {
 	this->midiName = this->midiValid ? quickAPI::getSeqTrackDataRefMIDI(this->index) : juce::String{};
 
 	this->blockNameCombined = this->audioName
-		+ ((this->audioValid&& this->midiValid) ? " + " : "")
+		+ ((this->audioValid&& this->midiValid) ? " / " : "")
 		+ this->midiName;
 
 	this->updateData();

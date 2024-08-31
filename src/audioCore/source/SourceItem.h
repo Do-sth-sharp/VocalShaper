@@ -1,20 +1,22 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "SourceInternalContainer.h"
 
 class SourceItem final {
 public:
-	enum class SourceType {
-		Undefined, MIDI, Audio
-	};
+	using SourceType = SourceInternalContainer::SourceType;
 
 	SourceItem() = delete;
 	SourceItem(SourceType type);
+	~SourceItem();
 
 	void initAudio(int channelNum, double sampleRate, double length);
 	void initMIDI();
 	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data, const juce::String& name);
 	void setMIDI(const juce::MidiFile& data, const juce::String& name);
+	void setAudio(const juce::String& name);
+	void setMIDI(const juce::String& name);
 	const std::tuple<double, juce::AudioSampleBuffer> getAudio() const;
 	const juce::MidiMessageSequence getMIDI(int trackIndex) const;
 	const juce::MidiFile getMIDIFile() const;
@@ -42,9 +44,11 @@ public:
 	void setCallback(const ChangedCallback& callback);
 	void invokeCallback() const;
 
-	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;
+	using AudioFormat = SourceInternalContainer::AudioFormat;
 	void setAudioFormat(const AudioFormat& format);
 	const AudioFormat getAudioFormat() const;
+
+	void forkIfNeed();
 
 public:
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
@@ -58,18 +62,10 @@ public:
 
 private:
 	const SourceType type;
-	std::unique_ptr<juce::MidiFile> midiData = nullptr;
-	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
+	std::shared_ptr<SourceInternalContainer> container = nullptr;
+
 	std::unique_ptr<juce::MemoryAudioSource> memSource = nullptr;
 	std::unique_ptr<juce::ResamplingAudioSource> resampleSource = nullptr;
-	double audioSampleRate = 0;
-	juce::String fileName;
-	std::atomic_bool savedFlag = true;
-
-	juce::String format;
-	juce::StringPairArray metaData;
-	int bitsPerSample = 0;
-	int quality = 0;
 
 	const double recordInitLength = 30;
 	juce::AudioSampleBuffer recordBuffer, recordBufferTemp;
@@ -83,4 +79,6 @@ private:
 
 	void prepareAudioData(double length, int channelNum);
 	void prepareMIDIData();
+
+	void releaseContainer();
 };

@@ -10,13 +10,19 @@ public:
 
 	std::shared_ptr<SourceInternalContainer> add(const juce::String& name,
 		SourceInternalContainer::SourceType type);
+	std::shared_ptr<SourceInternalContainer> create(
+		SourceInternalContainer::SourceType type);
 	std::shared_ptr<SourceInternalContainer> find(const juce::String& name) const;
 	std::shared_ptr<SourceInternalContainer> fork(const juce::String& name);
 	void checkSourceReleased(const juce::String& name);
 
 private:
 	std::unordered_map<juce::String, std::shared_ptr<SourceInternalContainer>> list;
+	juce::ReadWriteLock sourceLock;
 	uint64_t newSourceCount = 0;
+
+	uint64_t getNewSourceId();
+	const juce::String getNewSourceName();
 
 public:
 	static SourceInternalPool* getInstance();
