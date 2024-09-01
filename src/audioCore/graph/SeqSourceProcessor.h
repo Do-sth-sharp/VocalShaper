@@ -54,6 +54,11 @@ public:
 	void applyAudioIfNeed();
 	void applyMIDIIfNeed();
 
+	const juce::String getAudioName() const;
+	const juce::String getMIDIName() const;
+	double getMIDILength() const;
+	double getAudioLength() const;
+
 	void setCurrentMIDITrack(int trackIndex);
 	int getCurrentMIDITrack() const;
 	int getTotalMIDITrackNum() const;
@@ -141,16 +146,12 @@ private:
 
 	const juce::String getAudioFileName() const;
 	const juce::String getMIDIFileName() const;
-	const juce::String getAudioName() const;
-	const juce::String getMIDIName() const;
 	bool isAudioSaved() const;
 	bool isMIDISaved() const;
 	bool isAudioValid() const;
 	bool isMIDIValid() const;
 
 	double getSourceLength() const;
-	double getMIDILength() const;
-	double getAudioLength() const;
 
 	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;
 	const AudioFormat getAudioFormat() const;

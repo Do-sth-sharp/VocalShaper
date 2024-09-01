@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "ARAObjects.h"
 
 class ARAAudioAccessController : public ARA::Host::AudioAccessControllerInterface {
 public:
@@ -30,7 +31,7 @@ private:
 	};
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<AudioReader*, ARA::ARAAudioReaderHostRef>;
-	using SourceConverter = juce::ARAHostModel::ConversionFunctions<juce::AudioSampleBuffer*, ARA::ARAAudioSourceHostRef>;
+	using SourceConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioSource*, ARA::ARAAudioSourceHostRef>;
 
 	std::map<AudioReader*, std::unique_ptr<AudioReader>> audioReaders;
 };

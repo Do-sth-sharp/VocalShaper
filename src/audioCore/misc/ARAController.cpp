@@ -23,7 +23,12 @@ bool ARAAudioAccessController::readAudioSamples(
 	void* const buffers[]) noexcept {
 	const bool use64BitSamples = Converter::fromHostRef(audioReaderHostRef)->use64Bit;
 	auto* audioSource = SourceConverter::fromHostRef(Converter::fromHostRef(audioReaderHostRef)->sourceHostRef);
-	/** TODO */
+	
+	if (!use64BitSamples) {
+		return audioSource->readAudioSamples(
+			reinterpret_cast<float* const*>(buffers), samplePosition, samplesPerChannel);
+	}
+
 	return false;
 }
 
