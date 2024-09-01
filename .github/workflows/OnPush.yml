@@ -90,6 +90,26 @@ jobs:
             c_compiler: gcc
             cxx_compiler: c++
             asm_compiler: ''
+          - os: windows-latest
+            build_type: Debug
+            compiler: MSVC
+            cmake_config: 'Ninja Debug x64'
+            build_path: 'ninja-debug-x64'
+          - os: windows-latest
+            build_type: Release
+            compiler: MSVC
+            cmake_config: 'Ninja Release x64'
+            build_path: 'ninja-release-x64'
+          - os: windows-latest
+            build_type: Debug
+            compiler: MinGW
+            cmake_config: 'Ninja Debug MinGW64'
+            build_path: 'ninja-debug-mingw64'
+          - os: windows-latest
+            build_type: Release
+            compiler: MinGW
+            cmake_config: 'Ninja Release MinGW64'
+            build_path: 'ninja-release-mingw64'
 
     permissions:
       id-token: write
@@ -139,43 +159,33 @@ jobs:
       with:
         arch: ${{runner.arch}}
 
-    - name: Configure CMake MSVC
-      if: runner.os == 'Windows' && matrix.compiler == 'MSVC'
+    - name: Configure CMake
       working-directory: ${{github.workspace}}
       env:
         CC: ${{matrix.c_compiler}}
         CXX: ${{matrix.cxx_compiler}}
         ASM: ${{matrix.asm_compiler}}
-      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-windows -B out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}} .
-
-    - name: Configure CMake MinGW
-      if: runner.os == 'Windows' && matrix.compiler == 'MinGW'
-      working-directory: ${{github.workspace}}
-      env:
-        CC: ${{matrix.c_compiler}}
-        CXX: ${{matrix.cxx_compiler}}
-        ASM: ${{matrix.asm_compiler}}
-      run: cmake -G "Ninja" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DCMAKE_TOOLCHAIN_FILE:STRING=./vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET:STRING=x64-mingw-dynamic -B out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}} .
+      run: cmake --preset ${{matrix.cmake_config}}
 
     - name: Build
       working-directory: ${{github.workspace}}
-      run: ninja -C out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}} -j 2 VocalShaper
+      run: cmake --build build/${{matrix.build_path}} --target VocalShaper
 
     - name: Pre Packing Windows
       if: runner.os == 'Windows'
       working-directory: ${{github.workspace}}
-      run: .\prePacking.bat .\out\build\${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}\bin
+      run: .\prePacking.bat .\out\build\${{matrix.build_path}}\bin
 
     - name: Generate Artifact Attestation
       if: runner.os == 'Windows'
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: '"${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.exe","${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/*.dll","${{github.workspace}}/out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/synth-engines/*.vst3"'
+        subject-path: '"${{github.workspace}}/out/build/${{matrix.build_path}}/bin/*.exe","${{github.workspace}}/out/build/${{matrix.build_path}}/bin/*.dll","${{github.workspace}}/out/build/${{matrix.build_path}}/bin/synth-engines/*.vst3"'
     
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: VocalShaper-${{runner.os}}-${{runner.arch}}-${{matrix.compiler}}-${{matrix.build_type}}-${{github.sha}}
         path: |
-          out/build/${{runner.arch}}-${{matrix.build_type}}-${{matrix.compiler}}/bin/**
+          out/build/${{matrix.build_path}}/bin/**
         compression-level: 9
