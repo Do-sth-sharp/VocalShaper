@@ -1,4 +1,4 @@
-﻿name: OnPush
+﻿name: Build Artifacts
 
 on:
   push:
