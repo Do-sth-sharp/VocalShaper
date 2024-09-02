@@ -26,14 +26,14 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
     - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@master
+      uses: seanmiddleditch/gha-setup-ninja@master
       with:
-        version: 1.11.0
+        version: 1.11.1
 
     - name: Install MinGW
       if: matrix.compiler == 'MinGW'
@@ -139,14 +139,14 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
     - name: Setup Ninja
-      uses: ashutoshvarma/setup-ninja@master
+      uses: seanmiddleditch/gha-setup-ninja@master
       with:
-        version: 1.11.0
+        version: 1.11.1
 
     - name: Install MinGW
       if: matrix.compiler == 'MinGW'

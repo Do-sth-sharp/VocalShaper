@@ -55,6 +55,9 @@
 [Ii]nstall/**
 cmake-build-*/**
 
+# Github Action Ninja
+ninja-build/**
+
 # Resources
 *.aps
 
