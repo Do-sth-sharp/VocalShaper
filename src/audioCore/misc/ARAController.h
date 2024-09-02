@@ -5,7 +5,7 @@
 
 class ARAAudioAccessController : public ARA::Host::AudioAccessControllerInterface {
 public:
-	ARAAudioAccessController(juce::AudioProcessor* track);
+	ARAAudioAccessController() = default;
 
 private:
 	ARA::ARAAudioReaderHostRef createAudioReaderForSource(
@@ -20,8 +20,6 @@ private:
 		ARA::ARAAudioReaderHostRef audioReaderHostRef) noexcept override;
 
 private:
-	juce::AudioProcessor* const track = nullptr;
-
 	struct AudioReader {
 		AudioReader(ARA::ARAAudioSourceHostRef source, bool use64BitSamples)
 			: sourceHostRef(source), use64Bit(use64BitSamples) {}
@@ -34,11 +32,13 @@ private:
 	using SourceConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioSource*, ARA::ARAAudioSourceHostRef>;
 
 	std::map<AudioReader*, std::unique_ptr<AudioReader>> audioReaders;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAAudioAccessController)
 };
 
 class ARAArchivingController : public ARA::Host::ArchivingControllerInterface {
 public:
-	ARAArchivingController(juce::AudioProcessor* track);
+	ARAArchivingController() = default;
 
 private:
 	ARA::ARASize getArchiveSize(
@@ -59,12 +59,15 @@ private:
 		ARA::ARAArchiveReaderHostRef archiveReaderHostRef) noexcept override;
 
 private:
-	juce::AudioProcessor* const track = nullptr;
+	using ReaderConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryBlock*, ARA::ARAArchiveReaderHostRef>;
+	using WriterConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryOutputStream*, ARA::ARAArchiveWriterHostRef>;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAArchivingController)
 };
 
 class ARAContentAccessController : public ARA::Host::ContentAccessControllerInterface {
 public:
-	ARAContentAccessController(juce::AudioProcessor* track);
+	ARAContentAccessController() = default;
 
 private:
 	bool isMusicalContextContentAvailable(
@@ -94,12 +97,12 @@ private:
 		ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept override;
 
 private:
-	juce::AudioProcessor* const track = nullptr;
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAContentAccessController)
 };
 
 class ARAModelUpdateController : public ARA::Host::ModelUpdateControllerInterface {
 public:
-	ARAModelUpdateController(juce::AudioProcessor* track);
+	ARAModelUpdateController() = default;
 
 private:
 	void notifyAudioSourceAnalysisProgress(
@@ -120,12 +123,12 @@ private:
 	void notifyDocumentDataChanged() noexcept override;
 
 private:
-	juce::AudioProcessor* const track = nullptr;
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAModelUpdateController)
 };
 
 class ARAPlaybackController : public ARA::Host::PlaybackControllerInterface {
 public:
-	ARAPlaybackController(juce::AudioProcessor* track);
+	ARAPlaybackController() = default;
 
 private:
 	void requestStartPlayback() noexcept override;
@@ -138,8 +141,8 @@ private:
 	void requestEnableCycle(bool enable) noexcept override;
 
 private:
-	juce::AudioProcessor* const track = nullptr;
-
 	double loopStartTime = -1, loopEndTime = -1;
 	bool shouldLoop = false;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAPlaybackController)
 };

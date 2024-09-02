@@ -10,9 +10,9 @@
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-PluginDecorator::PluginDecorator(juce::AudioProcessor* track,
+PluginDecorator::PluginDecorator(
 	bool isInstr, const juce::AudioChannelSet& type)
-	: track(track), isInstr(isInstr), audioChannels(type) {
+	: isInstr(isInstr), audioChannels(type) {
 	/** Channels */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
@@ -28,10 +28,9 @@ PluginDecorator::PluginDecorator(juce::AudioProcessor* track,
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
-	juce::AudioProcessor* track,
 	const juce::String& identifier,
 	bool isInstr, const juce::AudioChannelSet& type)
-	: PluginDecorator(track, isInstr, type) {
+	: PluginDecorator(isInstr, type) {
 	this->setPlugin(std::move(plugin), identifier);
 }
 
@@ -110,10 +109,10 @@ void PluginDecorator::setARA(
 		/** Create ARA Host Document Controller */
 		if (auto controller = juce::ARAHostDocumentController::create(
 			factory, juce::String{ "ARA Virtual Document for " } + this->plugin->getName(),
-			std::make_unique<ARAAudioAccessController>(this->track),
-			std::make_unique<ARAArchivingController>(this->track),
-			std::make_unique<ARAContentAccessController>(this->track),
-			std::make_unique<ARAModelUpdateController>(this->track))) {
+			std::make_unique<ARAAudioAccessController>(),
+			std::make_unique<ARAArchivingController>(),
+			std::make_unique<ARAContentAccessController>(),
+			std::make_unique<ARAModelUpdateController>())) {
 			/** Bind To Plugin Instance */
 			auto allRoles = ARA::kARAPlaybackRendererRole
 				| ARA::kARAEditorRendererRole

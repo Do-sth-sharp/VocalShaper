@@ -1,5 +1,6 @@
 ﻿#include "ARAVirtualDocument.h"
 
 ARAVirtualDocument::ARAVirtualDocument(
+	SeqSourceProcessor* seq,
 	ARA::Host::DocumentController* controller)
-	: controller(controller) {}
+	: seq(seq), controller(controller) {}

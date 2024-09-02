@@ -1,10 +1,6 @@
 ﻿#include "ARAController.h"
 #include "../AudioCore.h"
 
-ARAAudioAccessController::ARAAudioAccessController(
-	juce::AudioProcessor* track)
-	: track(track) {}
-
 ARA::ARAAudioReaderHostRef ARAAudioAccessController::createAudioReaderForSource(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
 	bool use64BitSamples) noexcept {
@@ -37,21 +33,23 @@ void ARAAudioAccessController::destroyAudioReader(
 	this->audioReaders.erase(Converter::fromHostRef(audioReaderHostRef));
 }
 
-ARAArchivingController::ARAArchivingController(
-	juce::AudioProcessor* track)
-	: track(track) {}
-
 ARA::ARASize ARAArchivingController::getArchiveSize(
 	ARA::ARAArchiveReaderHostRef archiveReaderHostRef) noexcept {
-	/** TODO */
-	return 0;
+	return (ARA::ARASize)ReaderConverter::fromHostRef(archiveReaderHostRef)->getSize();
 }
 
 bool ARAArchivingController::readBytesFromArchive(
 	ARA::ARAArchiveReaderHostRef archiveReaderHostRef,
 	ARA::ARASize position, ARA::ARASize length,
 	ARA::ARAByte buffer[]) noexcept {
-	/** TODO */
+	auto* archiveReader = ReaderConverter::fromHostRef(archiveReaderHostRef);
+
+	if ((position + length) <= archiveReader->getSize()) {
+		std::memcpy(buffer, juce::addBytesToPointer(
+			archiveReader->getData(), position), length);
+		return true;
+	}
+
 	return false;
 }
 
@@ -59,29 +57,25 @@ bool ARAArchivingController::writeBytesToArchive(
 	ARA::ARAArchiveWriterHostRef archiveWriterHostRef,
 	ARA::ARASize position, ARA::ARASize length,
 	const ARA::ARAByte buffer[]) noexcept {
-	/** TODO */
-	return false;
+	auto* archiveWriter = WriterConverter::fromHostRef(archiveWriterHostRef);
+	return (archiveWriter->setPosition((int64_t)position) && archiveWriter->write(buffer, length));
 }
 
 void ARAArchivingController::notifyDocumentArchivingProgress(
-	float value) noexcept {
-	/** TODO */
+	float /*value*/) noexcept {
+	/** Nothing To Do */
 }
 
 void ARAArchivingController::notifyDocumentUnarchivingProgress(
-	float value) noexcept {
-	/** TODO */
+	float /*value*/) noexcept {
+	/** Nothing To Do */
 }
 
 ARA::ARAPersistentID ARAArchivingController::getDocumentArchiveID(
 	ARA::ARAArchiveReaderHostRef archiveReaderHostRef) noexcept {
-	/** TODO */
-	return "";
+	/** Nothing To Do */
+	return nullptr;
 }
-
-ARAContentAccessController::ARAContentAccessController(
-	juce::AudioProcessor* track)
-	: track(track) {}
 
 bool ARAContentAccessController::isMusicalContextContentAvailable(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
@@ -143,10 +137,6 @@ void ARAContentAccessController::destroyContentReader(
 	/** TODO */
 }
 
-ARAModelUpdateController::ARAModelUpdateController(
-	juce::AudioProcessor* track)
-	: track(track) {}
-
 void ARAModelUpdateController::notifyAudioSourceAnalysisProgress(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
 	ARA::ARAAnalysisProgressState state, float value) noexcept {
@@ -177,10 +167,6 @@ void ARAModelUpdateController::notifyPlaybackRegionContentChanged(
 void ARAModelUpdateController::notifyDocumentDataChanged() noexcept {
 	/** TODO */
 }
-
-ARAPlaybackController::ARAPlaybackController(
-	juce::AudioProcessor* track)
-	: track(track) {}
 
 void ARAPlaybackController::requestStartPlayback() noexcept {
 	AudioCore::getInstance()->play();

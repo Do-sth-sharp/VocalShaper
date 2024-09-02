@@ -3,9 +3,9 @@
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-PluginDock::PluginDock(juce::AudioProcessor* track,
+PluginDock::PluginDock(
 	const juce::AudioChannelSet& type) 
-	: track(track), audioChannels(type) {
+	: audioChannels(type) {
 	/** Set Channel Layout */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
@@ -64,7 +64,7 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::Audi
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(this->track, false, this->audioChannels));
+	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(false, this->audioChannels));
 	if (ptrNode) {
 		/** Set Bus Num */
 		{
