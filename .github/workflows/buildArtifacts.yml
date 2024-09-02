@@ -68,6 +68,12 @@ jobs:
         VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=${{matrix.vcpkg_triplet}}
 
+    - name: Get Short SHA
+      uses: benjlevesque/short-sha@v3.0
+      id: short-sha
+      with:
+        length: 7
+
     - name: Archive vcpkg Logs
       if: ${{!cancelled()}}
       uses: actions/upload-artifact@v4
