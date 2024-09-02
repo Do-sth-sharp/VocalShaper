@@ -8,8 +8,10 @@ if (-not (Test-Path -Path $DirectoryPath)) {
 }
 
 # Remove audio plugin list
-$AUDIO_PATH = $DirectoryPath + "/data/audio/*"
-Remove-Item $AUDIO_PATH -Include "blackPlugins.txt", "pluginPaths.txt", "plugins.xml"
+$AUDIO_PATH = $DirectoryPath + "/data/audio"
+if ((Test-Path $AUDIO_PATH) -eq "True") {
+	Remove-Item ($AUDIO_PATH + "/*") -Include "blackPlugins.txt", "pluginPaths.txt", "plugins.xml"
+}
 
 $DEAD_PLUGINS_PATH = $AUDIO_PATH + "/deadPlugins"
 if ((Test-Path $DEAD_PLUGINS_PATH) -eq "True") {
