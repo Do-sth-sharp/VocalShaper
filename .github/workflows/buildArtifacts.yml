@@ -111,12 +111,12 @@ jobs:
         CC: ${{matrix.c_compiler}}
         CXX: ${{matrix.cxx_compiler}}
         ASM: ${{matrix.asm_compiler}}
-      run: cmake --preset ${{matrix.cmake_config}}
+      run: cmake --preset "${{matrix.cmake_config}}"
 
     - name: Build
       working-directory: ${{github.workspace}}
       shell: pwsh
-      run: cmake --build build/${{matrix.build_path}} --target VocalShaper
+      run: cmake --build "build/${{matrix.build_path}}" --target VocalShaper
 
     - name: Pre Packing
       working-directory: ${{github.workspace}}
