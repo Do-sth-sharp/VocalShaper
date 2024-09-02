@@ -178,11 +178,11 @@ target_compile_definitions (PluginSearcher PRIVATE
 if (NOT MSVC)
 	target_compile_options (PluginSearcher PRIVATE
 		-pthread -fPIE)
-	if (WIN32)
-		target_compile_options (PluginSearcher PRIVATE
-			-static -static-libgcc -static-libstdc++)
-	endif (WIN32)
 endif (NOT MSVC)
+if (MINGW)
+	target_link_options (PluginSearcher PRIVATE
+		-static -static-libgcc -static-libstdc++)
+endif (MINGW)
 if (MSVC)
 	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full)
 else (MSVC)
@@ -207,11 +207,11 @@ target_compile_definitions (FileRegistrar PRIVATE
 if (NOT MSVC)
 	target_compile_options (FileRegistrar PRIVATE
 		-pthread -fPIE)
-	if (WIN32)
-		target_compile_options (FileRegistrar PRIVATE
-			-static -static-libgcc -static-libstdc++)
-	endif (WIN32)
 endif (NOT MSVC)
+if (MINGW)
+	target_link_options (FileRegistrar PRIVATE
+		-static -static-libgcc -static-libstdc++)
+endif (MINGW)
 if (MSVC)
 	target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
 else (MSVC)
@@ -245,11 +245,11 @@ if (NOT MSVC)
 	target_compile_options (VocalShaper PRIVATE
 		-pthread -fPIE
 		-msse3 -mavx2 -mavx512f)
-	if (WIN32)
-		target_compile_options (VocalShaper PRIVATE
-			-static -static-libgcc -static-libstdc++)
-	endif (WIN32)
 endif (NOT MSVC)
+if (MINGW)
+	target_link_options (VocalShaper PRIVATE
+		-static -static-libgcc -static-libstdc++)
+endif (MINGW)
 if (MSVC)
 	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
 else (MSVC)
