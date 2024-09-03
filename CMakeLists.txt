@@ -178,6 +178,9 @@ target_compile_definitions (PluginSearcher PRIVATE
 if (NOT MSVC)
 	target_compile_options (PluginSearcher PRIVATE
 		-pthread -fPIE)
+	if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+		target_compile_options (PluginSearcher PRIVATE -g)
+	endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif (NOT MSVC)
 if (MINGW)
 	target_link_options (PluginSearcher PRIVATE
@@ -207,6 +210,9 @@ target_compile_definitions (FileRegistrar PRIVATE
 if (NOT MSVC)
 	target_compile_options (FileRegistrar PRIVATE
 		-pthread -fPIE)
+	if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+		target_compile_options (FileRegistrar PRIVATE -g)
+	endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif (NOT MSVC)
 if (MINGW)
 	target_link_options (FileRegistrar PRIVATE
@@ -243,8 +249,10 @@ target_link_libraries (VocalShaper PRIVATE
 )
 if (NOT MSVC)
 	target_compile_options (VocalShaper PRIVATE
-		-pthread -fPIE
-		-msse3 -mavx2 -mavx512f)
+		-pthread -fPIE)
+	if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+		target_compile_options (VocalShaper PRIVATE -g)
+	endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif (NOT MSVC)
 if (MINGW)
 	target_link_options (VocalShaper PRIVATE

@@ -1,5 +1,9 @@
 ﻿#include "VMath.h"
 
+#if (!JUCE_MSVC) && (__SSE3__ || __AVX2__ || __AVX512F__)
+#include <immintrin.h>
+#endif //(!JUCE_MSVC) && (__SSE3__ || __AVX2__ || __AVX512F__)
+
 namespace vMath {
 	static void copyDataNormal(float* dst, const float* src, int length) {
 		std::memcpy(dst, src, length * sizeof(float));
@@ -23,6 +27,7 @@ namespace vMath {
 		}
 	}
 
+#if __SSE3__ || JUCE_MSVC
 	static void copyDataSSE3(float* dst, const float* src, int length) {
 		int clipSize = sizeof(__m128) / sizeof(float);
 		int clipNum = length / clipSize;
@@ -81,6 +86,26 @@ namespace vMath {
 		averageDataNormal(&(dst[clipMax]), &(src[clipMax]), length - clipMax);
 	}
 
+#else //__SSE3__ || JUCE_MSVC
+	static void copyDataSSE3(float* dst, const float* src, int length) {
+		copyDataNormal(dst, src, length);
+	}
+
+	static void addDataSSE3(float* dst, const float* src, int length) {
+		addDataNormal(dst, src, length);
+	}
+
+	static void fillDataSSE3(float* dst, float data, int length) {
+		fillDataNormal(dst, data, length);
+	}
+
+	static void averageDataSSE3(float* dst, const float* src, int length) {
+		averageDataNormal(dst, src, length);
+	}
+
+#endif //__SSE3__ || JUCE_MSVC
+
+#if __AVX2__ || JUCE_MSVC
 	static void copyDataAVX2(float* dst, const float* src, int length) {
 		int clipSize = sizeof(__m256) / sizeof(float);
 		int clipNum = length / clipSize;
@@ -139,6 +164,26 @@ namespace vMath {
 		averageDataNormal(&(dst[clipMax]), &(src[clipMax]), length - clipMax);
 	}
 
+#else //__AVX2__ || JUCE_MSVC
+	static void copyDataAVX2(float* dst, const float* src, int length) {
+		copyDataSSE3(dst, src, length);
+	}
+
+	static void addDataAVX2(float* dst, const float* src, int length) {
+		addDataSSE3(dst, src, length);
+	}
+
+	static void fillDataAVX2(float* dst, float data, int length) {
+		fillDataSSE3(dst, data, length);
+	}
+
+	static void averageDataAVX2(float* dst, const float* src, int length) {
+		averageDataSSE3(dst, src, length);
+	}
+
+#endif //__AVX2__ || JUCE_MSVC
+
+#if __AVX512F__ || JUCE_MSVC
 	static void copyDataAVX512(float* dst, const float* src, int length) {
 		int clipSize = sizeof(__m512) / sizeof(float);
 		int clipNum = length / clipSize;
@@ -196,6 +241,25 @@ namespace vMath {
 
 		averageDataNormal(&(dst[clipMax]), &(src[clipMax]), length - clipMax);
 	}
+
+#else //__AVX512F__ || JUCE_MSVC
+	static void copyDataAVX512(float* dst, const float* src, int length) {
+		copyDataAVX2(dst, src, length);
+	}
+
+	static void addDataAVX512(float* dst, const float* src, int length) {
+		addDataAVX2(dst, src, length);
+	}
+
+	static void fillDataAVX512(float* dst, float data, int length) {
+		fillDataAVX2(dst, data, length);
+	}
+
+	static void averageDataAVX512(float* dst, const float* src, int length) {
+		averageDataAVX2(dst, src, length);
+	}
+
+#endif //__AVX512F__ || JUCE_MSVC
 
 	static InsType type = InsType::Normal;
 	static auto copyData = copyDataNormal;
