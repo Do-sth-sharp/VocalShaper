@@ -14,6 +14,7 @@ A JUCE-based Open Source DAW.
 - VST
 - VST3
 - LV2
+- ARA
 - AU (TODO)
 
 ### Audio Drivers
