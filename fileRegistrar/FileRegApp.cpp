@@ -83,6 +83,9 @@ public:
 			OUT("");
 		}
 
+		/** Refresh Icon Cache */
+		refreshSystemIconCache();
+
 		/** Return */
 		juce::JUCEApplication::quit();
 	};

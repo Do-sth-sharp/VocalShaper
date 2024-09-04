@@ -2,6 +2,7 @@
 
 #if JUCE_WINDOWS
 #include <Windows.h>
+#include <ShlObj.h>
 #endif //JUCE_WINDOWS
 
 #define REG_RROJ_ROOT "HKEY_CLASSES_ROOT\\"
@@ -96,6 +97,13 @@ bool unregProjectFileFromSystem() {
 
 #else //JUCE_WINDOWS
     return false;
+
+#endif //JUCE_WINDOWS
+}
+
+void refreshSystemIconCache() {
+#if JUCE_WINDOWS
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
 
 #endif //JUCE_WINDOWS
 }
