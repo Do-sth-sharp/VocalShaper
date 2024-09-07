@@ -79,44 +79,48 @@ ARA::ARAPersistentID ARAArchivingController::getDocumentArchiveID(
 
 bool ARAContentAccessController::isMusicalContextContentAvailable(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
-	ARA::ARAContentType type) noexcept {
-	/** TODO */
-	return false;
+	ARA::ARAContentType /*type*/) noexcept {
+	return true;
 }
 
 ARA::ARAContentGrade ARAContentAccessController::getMusicalContextContentGrade(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
-	ARA::ARAContentType type) noexcept {
-	/** TODO */
-	return 0;
+	ARA::ARAContentType /*type*/) noexcept {
+	return ARA::kARAContentGradeInitial;
 }
 
 ARA::ARAContentReaderHostRef ARAContentAccessController::createMusicalContextContentReader(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
-	ARA::ARAContentType type, const ARA::ARAContentTimeRange* range) noexcept {
-	/** TODO */
-	return nullptr;
+	ARA::ARAContentType /*type*/, const ARA::ARAContentTimeRange* /*range*/) noexcept {
+	auto contextReader = std::make_unique<ContextReader>(musicalContextHostRef, nullptr);
+	auto audioReaderHostRef = Converter::toHostRef(contextReader.get());
+
+	this->contextReaders.emplace(contextReader.get(), std::move(contextReader));
+
+	return audioReaderHostRef;
 }
 
 bool ARAContentAccessController::isAudioSourceContentAvailable(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
-	ARA::ARAContentType type) noexcept {
-	/** TODO */
-	return false;
+	ARA::ARAContentType /*type*/) noexcept {
+	return true;
 }
 
 ARA::ARAContentGrade ARAContentAccessController::getAudioSourceContentGrade(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
-	ARA::ARAContentType type) noexcept {
-	/** TODO */
-	return 0;
+	ARA::ARAContentType /*type*/) noexcept {
+	return ARA::kARAContentGradeInitial;
 }
 
 ARA::ARAContentReaderHostRef ARAContentAccessController::createAudioSourceContentReader(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
-	ARA::ARAContentType type, const ARA::ARAContentTimeRange* range) noexcept {
-	/** TODO */
-	return nullptr;
+	ARA::ARAContentType /*type*/, const ARA::ARAContentTimeRange* /*range*/) noexcept {
+	auto contextReader = std::make_unique<ContextReader>(nullptr, audioSourceHostRef);
+	auto audioReaderHostRef = Converter::toHostRef(contextReader.get());
+
+	this->contextReaders.emplace(contextReader.get(), std::move(contextReader));
+
+	return audioReaderHostRef;
 }
 
 ARA::ARAInt32 ARAContentAccessController::getContentReaderEventCount(
@@ -134,7 +138,7 @@ const void* ARAContentAccessController::getContentReaderDataForEvent(
 
 void ARAContentAccessController::destroyContentReader(
 	ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept {
-	/** TODO */
+	this->contextReaders.erase(Converter::fromHostRef(contentReaderHostRef));
 }
 
 void ARAModelUpdateController::notifyAudioSourceAnalysisProgress(

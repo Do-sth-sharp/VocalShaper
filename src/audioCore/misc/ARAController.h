@@ -97,6 +97,26 @@ private:
 		ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept override;
 
 private:
+	struct ContextReader {
+		ContextReader(ARA::ARAMusicalContextHostRef context, ARA::ARAAudioSourceHostRef audio)
+			: contextHostRef(context), audioHostRef(audio){}
+
+		ARA::ARAMusicalContextHostRef contextHostRef;
+		ARA::ARAAudioSourceHostRef audioHostRef;
+	};
+
+	using Converter = juce::ARAHostModel::ConversionFunctions<ContextReader*, ARA::ARAContentReaderHostRef>;
+	using ContextConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualMusicalContext*, ARA::ARAMusicalContextHostRef>;
+
+	std::map<ContextReader*, std::unique_ptr<ContextReader>> contextReaders;
+
+	const std::set<ARA::ARAContentType> typeAllows = {
+		ARA::kARAContentTypeNotes,
+		ARA::kARAContentTypeTempoEntries,
+		ARA::kARAContentTypeBarSignatures,
+		ARA::kARAContentTypeKeySignatures
+	};
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAContentAccessController)
 };
 
