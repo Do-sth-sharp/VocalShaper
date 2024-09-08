@@ -61,17 +61,14 @@ public:
 	ARA::ARAContentKeySignature getGlobalKeyEvent(int32_t index);
 
 private:
-	const int32_t id = 0;
 	SeqSourceProcessor* const seq = nullptr;
 
 	juce::ARAHostModel::MusicalContext musicalContext;
 
 	ARA::ARAColor color;
 
-	static int32_t contextIdCounter;
-
 	static const ARA::ARAMusicalContextProperties createProperties(
-		SeqSourceProcessor* seq, int32_t id, ARA::ARAColor* color);
+		SeqSourceProcessor* seq, ARA::ARAColor* color);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualMusicalContext)
 };

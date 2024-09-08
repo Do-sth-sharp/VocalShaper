@@ -3,10 +3,15 @@
 #include "../source/SourceManager.h"
 #include "../misc/AudioLock.h"
 #include "../misc/PlayPosition.h"
+#include "../AudioCore.h"
 
 class GlobalMidiEventHelper {
 	static MovablePlayHead* getPlayHead(SeqSourceProcessor* seq) {
 		return dynamic_cast<MovablePlayHead*>(seq->getPlayHead());
+	}
+
+	static double getTotalTime() {
+		return AudioCore::getInstance()->getGraph()->getTailLengthSeconds();
 	}
 
 public:
@@ -15,18 +20,24 @@ public:
 	static int32_t getCount(SeqSourceProcessor* seq) {
 		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
 			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			return ph->getTempoLabelNum();
+			return ph->getTempoLabelNum() + 1;/**< Last Tempo Sync Point */
 		}
 		return 0;
 	}
 	static MidiEventType getType(SeqSourceProcessor* seq, int32_t index) {
 		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
 			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			if (ph->isTempoLabelTempoEvent(index)) {
-				return MidiEventType::TempoEntry;
+			if (index < ph->getTempoLabelNum()) {
+				if (ph->isTempoLabelTempoEvent(index)) {
+					return MidiEventType::TempoEntry;
+				}
+				else {
+					return MidiEventType::BarSignature;
+				}
 			}
 			else {
-				return MidiEventType::BarSignature;
+				/** Last Tempo Sync Point */
+				return MidiEventType::TempoEntry;
 			}
 		}
 		return MidiEventType::Unknown;
@@ -34,15 +45,32 @@ public:
 	static ARA::ARAContentTempoEntry getTempoEvent(SeqSourceProcessor* seq, int32_t index) {
 		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
 			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			/** TODO */
+			if (index < ph->getTempoLabelNum()) {
+				double timeSec = ph->getTempoLabelTime(index);
+				double timeQuarter = ph->toQuarter(timeSec);
+				return { timeSec, timeQuarter };
+			}
+			else {
+				/** Last Tempo Sync Point */
+				double timeSec = 0;
+				if (int num = ph->getTempoLabelNum()) {
+					timeSec = ph->getTempoLabelTime(num - 1);
+				}
+				timeSec += 1;
+
+				double timeQuarter = ph->toQuarter(timeSec);
+				return { timeSec, timeQuarter };
+			}
 		}
 		return {};
 	}
 	static ARA::ARAContentBarSignature getBarEvent(SeqSourceProcessor* seq, int32_t index) {
 		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
 			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			auto beat = ph->getTempoLabelBeat(index);
-			return { std::get<0>(beat), std::get<1>(beat), ph->getTempoLabelTime(index) };
+			if (index < ph->getTempoLabelNum()) {
+				auto beat = ph->getTempoLabelBeat(index);
+				return { std::get<0>(beat), std::get<1>(beat), ph->getTempoLabelTime(index) };
+			}
 		}
 		return {};
 	}
@@ -124,11 +152,11 @@ ARAVirtualAudioSource::createProperties(SeqSourceProcessor* seq) {
 ARAVirtualMusicalContext::ARAVirtualMusicalContext(
 	ARA::Host::DocumentController& dc,
 	SeqSourceProcessor* seq)
-	: seq(seq), id(ARAVirtualMusicalContext::contextIdCounter++), musicalContext(
-		Converter::toHostRef(this), dc, ARAVirtualMusicalContext::createProperties(seq, this->id, &(this->color))) {}
+	: seq(seq), musicalContext(
+		Converter::toHostRef(this), dc, ARAVirtualMusicalContext::createProperties(seq, &(this->color))) {}
 
 void ARAVirtualMusicalContext::update() {
-	this->musicalContext.update(ARAVirtualMusicalContext::createProperties(this->seq, this->id, &(this->color)));
+	this->musicalContext.update(ARAVirtualMusicalContext::createProperties(this->seq, &(this->color)));
 }
 
 int32_t ARAVirtualMusicalContext::getGlobalMidiEventCount() {
@@ -155,15 +183,13 @@ ARAVirtualMusicalContext::getGlobalKeyEvent(int32_t index) {
 	return GlobalMidiEventHelper::getKeyEvent(this->seq, index);
 }
 
-int32_t ARAVirtualMusicalContext::contextIdCounter = 0;
-
 const ARA::ARAMusicalContextProperties
-ARAVirtualMusicalContext::createProperties(SeqSourceProcessor* seq, int32_t id, ARA::ARAColor* color) {
+ARAVirtualMusicalContext::createProperties(SeqSourceProcessor* seq, ARA::ARAColor* color) {
 	auto properties = juce::ARAHostModel::MusicalContext::getEmptyProperties();
 
 	if (seq) {
 		properties.name = seq->getMIDIName().toRawUTF8();
-		properties.orderIndex = id;
+		properties.orderIndex = 0;
 
 		auto seqColor = seq->getTrackColor();
 		color->r = seqColor.getFloatRed();
