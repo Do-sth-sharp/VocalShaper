@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "SourceMIDITemp.h"
 
 class SourceInternalContainer {
 public:
@@ -45,7 +46,7 @@ private:
 
 	const bool forked = false;
 
-	std::unique_ptr<juce::MidiFile> midiData = nullptr;
+	std::unique_ptr<SourceMIDITemp> midiData = nullptr;
 	std::unique_ptr<juce::AudioSampleBuffer> audioData = nullptr;
 	double audioSampleRate = 0;
 	std::atomic_bool savedFlag = true;

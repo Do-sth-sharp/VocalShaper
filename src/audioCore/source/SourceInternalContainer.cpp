@@ -10,7 +10,8 @@ SourceInternalContainer::SourceInternalContainer(
 	: type(other.type), name(SourceInternalContainer::getForkName(other.name)), forked(true) {
 	if (&other != this) {
 		if (other.midiData) {
-			this->midiData = std::make_unique<juce::MidiFile>(*(other.midiData));
+			this->midiData = std::make_unique<SourceMIDITemp>();
+			this->midiData->setData(*(other.midiData->getSourceData()));
 		}
 		if (other.audioData) {
 			this->audioData = std::make_unique<juce::AudioSampleBuffer>(*(other.audioData));
@@ -35,7 +36,10 @@ const juce::String SourceInternalContainer::getName() const {
 }
 
 juce::MidiFile* SourceInternalContainer::getMidiData() const {
-	return this->midiData.get();
+	if (this->midiData) {
+		return this->midiData->getSourceData();
+	}
+	return nullptr;
 }
 
 juce::AudioSampleBuffer* SourceInternalContainer::getAudioData() const {
@@ -76,7 +80,10 @@ int SourceInternalContainer::getQuality() const {
 
 void SourceInternalContainer::initMidiData() {
 	if (this->type == SourceType::MIDI) {
-		this->midiData = std::make_unique<juce::MidiFile>();
+		if (!this->midiData) {
+			this->midiData = std::make_unique<SourceMIDITemp>();
+		}
+
 		this->midiData->addTrack(juce::MidiMessageSequence{});
 
 		this->changed();
@@ -99,7 +106,10 @@ void SourceInternalContainer::initAudioData(
 
 void SourceInternalContainer::setMIDI(const juce::MidiFile& data) {
 	if (this->type == SourceType::MIDI) {
-		this->midiData = std::make_unique<juce::MidiFile>(data);
+		if (!this->midiData) {
+			this->midiData = std::make_unique<SourceMIDITemp>();
+		}
+		this->midiData->setData(data);
 
 		this->changed();
 	}
