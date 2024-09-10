@@ -60,6 +60,28 @@ public:
 	void writeMIDIData(const juce::MidiBuffer& buffer,
 		int offset, int trackIndex);
 
+public:
+	int getMIDINoteNum(int track) const;
+	int getMIDISustainPedalNum(int track) const;
+	int getMIDISostenutoPedalNum(int track) const;
+	int getMIDISoftPedalNum(int track) const;
+	int getMIDIPitchWheelNum(int track) const;
+	int getMIDIAfterTouchNum(int track) const;
+	int getMIDIChannelPressureNum(int track) const;
+	const std::set<uint8_t> getMIDIControllerNumbers(int track) const;
+	int getMIDIControllerNum(int track, uint8_t number) const;
+	int getMIDIMiscNum(int track) const;
+
+	const SourceMIDITemp::Note getMIDINote(int track, int index) const;
+	const SourceMIDITemp::Pedal getMIDISustainPedal(int track, int index) const;
+	const SourceMIDITemp::Pedal getMIDISostenutoPedal(int track, int index) const;
+	const SourceMIDITemp::Pedal getMIDISoftPedal(int track, int index) const;
+	const SourceMIDITemp::IntParam getMIDIPitchWheel(int track, int index) const;
+	const SourceMIDITemp::IntParam getMIDIAfterTouch(int track, int index) const;
+	const SourceMIDITemp::IntParam getMIDIChannelPressure(int track, int index) const;
+	const SourceMIDITemp::Controller getMIDIController(int track, uint8_t number, int index) const;
+	const SourceMIDITemp::Misc getMIDIMisc(int track, int index) const;
+
 private:
 	const SourceType type;
 	std::shared_ptr<SourceInternalContainer> container = nullptr;

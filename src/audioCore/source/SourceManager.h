@@ -53,10 +53,31 @@ public:
 	void writeMIDIData(uint64_t ref, const juce::MidiBuffer& buffer, int offset, int trackIndex);
 
 public:
+	int getMIDINoteNum(uint64_t ref, int track) const;
+	int getMIDISustainPedalNum(uint64_t ref, int track) const;
+	int getMIDISostenutoPedalNum(uint64_t ref, int track) const;
+	int getMIDISoftPedalNum(uint64_t ref, int track) const;
+	int getMIDIPitchWheelNum(uint64_t ref, int track) const;
+	int getMIDIAfterTouchNum(uint64_t ref, int track) const;
+	int getMIDIChannelPressureNum(uint64_t ref, int track) const;
+	const std::set<uint8_t> getMIDIControllerNumbers(uint64_t ref, int track) const;
+	int getMIDIControllerNum(uint64_t ref, int track, uint8_t number) const;
+	int getMIDIMiscNum(uint64_t ref, int track) const;
+
+	const SourceMIDITemp::Note getMIDINote(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::Pedal getMIDISustainPedal(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::Pedal getMIDISostenutoPedal(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::Pedal getMIDISoftPedal(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::IntParam getMIDIPitchWheel(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::IntParam getMIDIAfterTouch(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::IntParam getMIDIChannelPressure(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::Controller getMIDIController(uint64_t ref, int track, uint8_t number, int index) const;
+	const SourceMIDITemp::Misc getMIDIMisc(uint64_t ref, int track, int index) const;
+
+public:
 	void sampleRateChanged(double sampleRate, int blockSize);
 
 private:
-	
 	std::map<uint64_t, std::shared_ptr<SourceItem>> sources;
 
 	double sampleRate = 0;

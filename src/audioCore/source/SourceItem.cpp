@@ -424,6 +424,101 @@ void SourceItem::writeMIDIData(
 	}
 }
 
+int SourceItem::getMIDINoteNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDINoteNum(track);
+}
+
+int SourceItem::getMIDISustainPedalNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDISustainPedalNum(track);
+}
+
+int SourceItem::getMIDISostenutoPedalNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDISostenutoPedalNum(track);
+}
+
+int SourceItem::getMIDISoftPedalNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDISoftPedalNum(track);
+}
+
+int SourceItem::getMIDIPitchWheelNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDIPitchWheelNum(track);
+}
+
+int SourceItem::getMIDIAfterTouchNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDIAfterTouchNum(track);
+}
+
+int SourceItem::getMIDIChannelPressureNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDIChannelPressureNum(track);
+}
+
+const std::set<uint8_t> SourceItem::getMIDIControllerNumbers(int track) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDIControllerNumbers(track);
+}
+
+int SourceItem::getMIDIControllerNum(int track, uint8_t number) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDIControllerNum(track, number);
+}
+
+int SourceItem::getMIDIMiscNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDIMiscNum(track);
+}
+
+const SourceMIDITemp::Note SourceItem::getMIDINote(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDINote(track, index);
+}
+
+const SourceMIDITemp::Pedal SourceItem::getMIDISustainPedal(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDISustainPedal(track, index);
+}
+
+const SourceMIDITemp::Pedal SourceItem::getMIDISostenutoPedal(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDISustainPedal(track, index);
+}
+
+const SourceMIDITemp::Pedal SourceItem::getMIDISoftPedal(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDISoftPedal(track, index);
+}
+
+const SourceMIDITemp::IntParam SourceItem::getMIDIPitchWheel(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDIPitchWheel(track, index);
+}
+
+const SourceMIDITemp::IntParam SourceItem::getMIDIAfterTouch(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDIAfterTouch(track, index);
+}
+
+const SourceMIDITemp::IntParam SourceItem::getMIDIChannelPressure(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDIChannelPressure(track, index);
+}
+
+const SourceMIDITemp::Controller SourceItem::getMIDIController(int track, uint8_t number, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDIController(track, number, index);
+}
+
+const SourceMIDITemp::Misc SourceItem::getMIDIMisc(int track, int index) const {
+	if (!this->container) { return {}; }
+	return this->container->getMIDIMisc(track, index);
+}
+
 void SourceItem::updateAudioResampler() {
 	/** Check Audio Data */
 	if (!this->audioValid()) { return; }

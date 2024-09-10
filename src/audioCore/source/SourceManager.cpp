@@ -251,6 +251,139 @@ void SourceManager::writeMIDIData(uint64_t ref, const juce::MidiBuffer& buffer, 
 	}
 }
 
+int SourceManager::getMIDINoteNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDINoteNum(track);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDISustainPedalNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDISustainPedalNum(track);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDISostenutoPedalNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDISostenutoPedalNum(track);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDISoftPedalNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDISoftPedalNum(track);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDIPitchWheelNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIPitchWheelNum(track);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDIAfterTouchNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIAfterTouchNum(track);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDIChannelPressureNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIChannelPressureNum(track);
+	}
+	return 0;
+}
+
+const std::set<uint8_t> SourceManager::getMIDIControllerNumbers(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIControllerNumbers(track);
+	}
+	return {};
+}
+
+int SourceManager::getMIDIControllerNum(uint64_t ref, int track, uint8_t number) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIControllerNum(track, number);
+	}
+	return 0;
+}
+
+int SourceManager::getMIDIMiscNum(uint64_t ref, int track) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIMiscNum(track);
+	}
+	return 0;
+}
+
+const SourceMIDITemp::Note SourceManager::getMIDINote(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDINote(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::Pedal SourceManager::getMIDISustainPedal(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDISustainPedal(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::Pedal SourceManager::getMIDISostenutoPedal(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDISostenutoPedal(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::Pedal SourceManager::getMIDISoftPedal(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDISoftPedal(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::IntParam SourceManager::getMIDIPitchWheel(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIPitchWheel(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::IntParam SourceManager::getMIDIAfterTouch(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIAfterTouch(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::IntParam SourceManager::getMIDIChannelPressure(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIChannelPressure(track, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::Controller SourceManager::getMIDIController(uint64_t ref, int track, uint8_t number, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIController(track, number, index);
+	}
+	return {};
+}
+
+const SourceMIDITemp::Misc SourceManager::getMIDIMisc(uint64_t ref, int track, int index) const {
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIMisc(track, index);
+	}
+	return {};
+}
+
 void SourceManager::sampleRateChanged(double sampleRate, int blockSize) {
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 	

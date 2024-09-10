@@ -172,3 +172,213 @@ void SourceMIDITemp::update() {
 juce::MidiFile* SourceMIDITemp::getSourceData() {
 	return &(this->sourceData);
 }
+
+int SourceMIDITemp::getTrackNum() const {
+	return this->sourceData.getNumTracks();
+}
+
+int SourceMIDITemp::getNoteNum(int track) const {
+	if (track < 0 || track >= this->noteList.size()) {
+		return 0;
+	}
+	return this->noteList.getReference(track).size();
+}
+
+int SourceMIDITemp::getSustainPedalNum(int track) const {
+	if (track < 0 || track >= this->sustainPedalList.size()) {
+		return 0;
+	}
+	return this->sustainPedalList.getReference(track).size();
+}
+
+int SourceMIDITemp::getSostenutoPedalNum(int track) const {
+	if (track < 0 || track >= this->sostenutoPedalList.size()) {
+		return 0;
+	}
+	return this->sostenutoPedalList.getReference(track).size();
+}
+
+int SourceMIDITemp::getSoftPedalNum(int track) const {
+	if (track < 0 || track >= this->softPedalList.size()) {
+		return 0;
+	}
+	return this->softPedalList.getReference(track).size();
+}
+
+int SourceMIDITemp::getPitchWheelNum(int track) const {
+	if (track < 0 || track >= this->pitchWheelList.size()) {
+		return 0;
+	}
+	return this->pitchWheelList.getReference(track).size();
+}
+
+int SourceMIDITemp::getAfterTouchNum(int track) const {
+	if (track < 0 || track >= this->afterTouchList.size()) {
+		return 0;
+	}
+	return this->afterTouchList.getReference(track).size();
+}
+
+int SourceMIDITemp::getChannelPressureNum(int track) const {
+	if (track < 0 || track >= this->channelPressureList.size()) {
+		return 0;
+	}
+	return this->channelPressureList.getReference(track).size();
+}
+
+const std::set<uint8_t> SourceMIDITemp::getControllerNumbers(int track) const {
+	if (track < 0 || track >= this->controllerList.size()) {
+		return {};
+	}
+
+	std::set<uint8_t> result;
+	auto& map = this->controllerList.getReference(track);
+	for (auto& i : map) {
+		result.insert(i.first);
+	}
+
+	return result;
+}
+
+int SourceMIDITemp::getControllerNum(int track, uint8_t number) const {
+	if (track < 0 || track >= this->controllerList.size()) {
+		return 0;
+	}
+
+	auto& map = this->controllerList.getReference(track);
+	auto it = map.find(number);
+	if (it == map.end()) {
+		return 0;
+	}
+
+	return it->second.size();
+}
+
+int SourceMIDITemp::getMiscNum(int track) const {
+	if (track < 0 || track >= this->miscList.size()) {
+		return 0;
+	}
+	return this->miscList.getReference(track).size();
+}
+
+const SourceMIDITemp::Note SourceMIDITemp::getNote(int track, int index) const {
+	if (track < 0 || track >= this->noteList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->noteList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::Pedal SourceMIDITemp::getSustainPedal(int track, int index) const {
+	if (track < 0 || track >= this->sustainPedalList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->sustainPedalList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::Pedal SourceMIDITemp::getSostenutoPedal(int track, int index) const {
+	if (track < 0 || track >= this->sostenutoPedalList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->sostenutoPedalList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::Pedal SourceMIDITemp::getSoftPedal(int track, int index) const {
+	if (track < 0 || track >= this->softPedalList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->softPedalList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::IntParam SourceMIDITemp::getPitchWheel(int track, int index) const {
+	if (track < 0 || track >= this->pitchWheelList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->pitchWheelList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::IntParam SourceMIDITemp::getAfterTouch(int track, int index) const {
+	if (track < 0 || track >= this->afterTouchList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->afterTouchList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::IntParam SourceMIDITemp::getChannelPressure(int track, int index) const {
+	if (track < 0 || track >= this->channelPressureList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->channelPressureList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
+
+const SourceMIDITemp::Controller SourceMIDITemp::getController(int track, uint8_t number, int index) const {
+	if (track < 0 || track >= this->controllerList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->controllerList.getReference(track);
+	auto it = trackRef.find(number);
+	if (it == trackRef.end()) {
+		return {};
+	}
+
+	if (track < 0 || track >= it->second.size()) {
+		return {};
+	}
+
+	return it->second.getUnchecked(index);
+}
+
+const SourceMIDITemp::Misc SourceMIDITemp::getMisc(int track, int index) const {
+	if (track < 0 || track >= this->miscList.size()) {
+		return {};
+	}
+
+	auto& trackRef = this->miscList.getReference(track);
+	if (track < 0 || track >= trackRef.size()) {
+		return {};
+	}
+
+	return trackRef.getUnchecked(index);
+}
