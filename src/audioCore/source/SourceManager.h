@@ -69,7 +69,7 @@ public:
 	const SourceMIDITemp::Pedal getMIDISostenutoPedal(uint64_t ref, int track, int index) const;
 	const SourceMIDITemp::Pedal getMIDISoftPedal(uint64_t ref, int track, int index) const;
 	const SourceMIDITemp::IntParam getMIDIPitchWheel(uint64_t ref, int track, int index) const;
-	const SourceMIDITemp::IntParam getMIDIAfterTouch(uint64_t ref, int track, int index) const;
+	const SourceMIDITemp::AfterTouch getMIDIAfterTouch(uint64_t ref, int track, int index) const;
 	const SourceMIDITemp::IntParam getMIDIChannelPressure(uint64_t ref, int track, int index) const;
 	const SourceMIDITemp::Controller getMIDIController(uint64_t ref, int track, uint8_t number, int index) const;
 	const SourceMIDITemp::Misc getMIDIMisc(uint64_t ref, int track, int index) const;

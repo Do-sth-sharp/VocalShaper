@@ -35,6 +35,14 @@ public:
 
 		int event;
 	};
+	struct AfterTouch {
+		uint8_t channel;
+		double timeSec;
+		uint8_t notePitch;
+		uint8_t value;
+
+		int event;
+	};
 	struct Controller {
 		uint8_t channel;
 		double timeSec;
@@ -70,7 +78,7 @@ public:
 	const Pedal getSostenutoPedal(int track, int index) const;
 	const Pedal getSoftPedal(int track, int index) const;
 	const IntParam getPitchWheel(int track, int index) const;
-	const IntParam getAfterTouch(int track, int index) const;
+	const AfterTouch getAfterTouch(int track, int index) const;
 	const IntParam getChannelPressure(int track, int index) const;
 	const Controller getController(int track, uint8_t number, int index) const;
 	const Misc getMisc(int track, int index) const;
@@ -85,7 +93,7 @@ private:
 	juce::Array<juce::Array<Pedal>> softPedalList;
 
 	juce::Array<juce::Array<IntParam>> pitchWheelList;
-	juce::Array<juce::Array<IntParam>> afterTouchList;
+	juce::Array<juce::Array<AfterTouch>> afterTouchList;
 	juce::Array<juce::Array<IntParam>> channelPressureList;
 
 	juce::Array<std::unordered_map<uint8_t, juce::Array<Controller>>> controllerList;

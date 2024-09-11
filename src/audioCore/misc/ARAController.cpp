@@ -125,14 +125,39 @@ ARA::ARAContentReaderHostRef ARAContentAccessController::createAudioSourceConten
 
 ARA::ARAInt32 ARAContentAccessController::getContentReaderEventCount(
 	ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept {
-	/** TODO */
+	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
+
+	if (contextReader->audioHostRef) {
+		auto audioSource = SourceConverter::fromHostRef(contextReader->audioHostRef);
+		return audioSource->getGlobalMidiEventCount();
+	}
+
+	if (contextReader->contextHostRef) {
+		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
+		/** TODO */
+		//return midiContext->getGlobalMidiEventCount() + midiContext->getNoteCount();
+	}
+
 	return 0;
 }
 
 const void* ARAContentAccessController::getContentReaderDataForEvent(
 	ARA::ARAContentReaderHostRef contentReaderHostRef,
 	ARA::ARAInt32 eventIndex) noexcept {
-	/** TODO */
+	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
+
+	if (contextReader->audioHostRef) {
+		auto audioSource = SourceConverter::fromHostRef(contextReader->audioHostRef);
+		/** TODO */
+		//return audioSource->getGlobalMidiEventCount();
+	}
+
+	if (contextReader->contextHostRef) {
+		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
+		/** TODO */
+		//return midiContext->getGlobalMidiEventCount() + midiContext->getNoteCount();
+	}
+
 	return nullptr;
 }
 

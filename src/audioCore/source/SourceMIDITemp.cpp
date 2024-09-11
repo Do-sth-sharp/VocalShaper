@@ -35,7 +35,8 @@ void SourceMIDITemp::update() {
 		double lyricsTimeTemp = 0;
 
 		juce::Array<Pedal> sustain, sostenuto, soft;
-		juce::Array<IntParam> pitchWheel, afterTouch, channelPressure;
+		juce::Array<IntParam> pitchWheel, channelPressure;
+		juce::Array<AfterTouch> afterTouch;
 		std::unordered_map<uint8_t, juce::Array<Controller>> controllers;
 		juce::Array<Misc> miscs;
 
@@ -111,10 +112,11 @@ void SourceMIDITemp::update() {
 			}
 			/** After Touch */
 			if (event->message.isAftertouch()) {
-				IntParam param{};
+				AfterTouch param{};
 				param.channel = (uint8_t)event->message.getChannel();
 				param.timeSec = event->message.getTimeStamp();
-				param.value = event->message.getAfterTouchValue();
+				param.notePitch = (uint8_t)event->message.getNoteNumber();
+				param.value = (uint8_t)event->message.getAfterTouchValue();
 				param.event = i;
 
 				afterTouch.add(param);
@@ -326,7 +328,7 @@ const SourceMIDITemp::IntParam SourceMIDITemp::getPitchWheel(int track, int inde
 	return trackRef.getUnchecked(index);
 }
 
-const SourceMIDITemp::IntParam SourceMIDITemp::getAfterTouch(int track, int index) const {
+const SourceMIDITemp::AfterTouch SourceMIDITemp::getAfterTouch(int track, int index) const {
 	if (track < 0 || track >= this->afterTouchList.size()) {
 		return {};
 	}

@@ -499,7 +499,7 @@ const SourceMIDITemp::IntParam SourceItem::getMIDIPitchWheel(int track, int inde
 	return this->container->getMIDIPitchWheel(track, index);
 }
 
-const SourceMIDITemp::IntParam SourceItem::getMIDIAfterTouch(int track, int index) const {
+const SourceMIDITemp::AfterTouch SourceItem::getMIDIAfterTouch(int track, int index) const {
 	if (!this->container) { return {}; }
 	return this->container->getMIDIAfterTouch(track, index);
 }

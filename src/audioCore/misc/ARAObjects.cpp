@@ -15,7 +15,7 @@ class GlobalMidiEventHelper {
 	}
 
 public:
-	using MidiEventType = ARAVirtualMidiEventType;
+	using MidiEventType = ARAExtension::ARAContentType;
 	
 	static int32_t getCount(SeqSourceProcessor* seq) {
 		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
@@ -29,18 +29,18 @@ public:
 			juce::ScopedReadLock locker(audioLock::getPositionLock());
 			if (index < ph->getTempoLabelNum()) {
 				if (ph->isTempoLabelTempoEvent(index)) {
-					return MidiEventType::TempoEntry;
+					return MidiEventType::ARAContentTypeTempoEntry;
 				}
 				else {
-					return MidiEventType::BarSignature;
+					return MidiEventType::ARAContentTypeBarSignature;
 				}
 			}
 			else {
 				/** Last Tempo Sync Point */
-				return MidiEventType::TempoEntry;
+				return MidiEventType::ARAContentTypeTempoEntry;
 			}
 		}
-		return MidiEventType::Unknown;
+		return MidiEventType::ARAContentTypeUnknown;
 	}
 	static ARA::ARAContentTempoEntry getTempoEvent(SeqSourceProcessor* seq, int32_t index) {
 		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
@@ -151,45 +151,20 @@ ARAVirtualAudioSource::createProperties(SeqSourceProcessor* seq) {
 
 ARAVirtualMusicalContext::ARAVirtualMusicalContext(
 	ARA::Host::DocumentController& dc,
-	SeqSourceProcessor* seq)
-	: seq(seq), musicalContext(
-		Converter::toHostRef(this), dc, ARAVirtualMusicalContext::createProperties(seq, &(this->color))) {}
-
-void ARAVirtualMusicalContext::update() {
-	this->musicalContext.update(ARAVirtualMusicalContext::createProperties(this->seq, &(this->color)));
-}
-
-int32_t ARAVirtualMusicalContext::getGlobalMidiEventCount() {
-	return GlobalMidiEventHelper::getCount(this->seq);
-}
-
-ARAVirtualMusicalContext::MidiEventType
-ARAVirtualMusicalContext::getGlobalMidiEventType(int32_t index) {
-	return GlobalMidiEventHelper::getType(this->seq, index);
-}
-
-ARA::ARAContentTempoEntry
-ARAVirtualMusicalContext::getGlobalTempoEvent(int32_t index) {
-	return GlobalMidiEventHelper::getTempoEvent(this->seq, index);
-}
-
-ARA::ARAContentBarSignature
-ARAVirtualMusicalContext::getGlobalBarEvent(int32_t index) {
-	return GlobalMidiEventHelper::getBarEvent(this->seq, index);
-}
-
-ARA::ARAContentKeySignature
-ARAVirtualMusicalContext::getGlobalKeyEvent(int32_t index) {
-	return GlobalMidiEventHelper::getKeyEvent(this->seq, index);
-}
+	SeqSourceProcessor* seq,
+	ARAVirtualMusicalContextType type)
+	: seq(seq), type(type), musicalContext(
+		Converter::toHostRef(this), dc,
+		ARAVirtualMusicalContext::createProperties(seq, &(this->color), type)) {}
 
 const ARA::ARAMusicalContextProperties
-ARAVirtualMusicalContext::createProperties(SeqSourceProcessor* seq, ARA::ARAColor* color) {
+ARAVirtualMusicalContext::createProperties(
+	SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualMusicalContextType type) {
 	auto properties = juce::ARAHostModel::MusicalContext::getEmptyProperties();
 
 	if (seq) {
 		properties.name = seq->getMIDIName().toRawUTF8();
-		properties.orderIndex = 0;
+		properties.orderIndex = (int32_t)type;
 
 		auto seqColor = seq->getTrackColor();
 		color->r = seqColor.getFloatRed();
@@ -199,4 +174,193 @@ ARAVirtualMusicalContext::createProperties(SeqSourceProcessor* seq, ARA::ARAColo
 	}
 
 	return properties;
+}
+
+void ARAVirtualMusicalContext::update() {
+	this->musicalContext.update(ARAVirtualMusicalContext::createProperties(
+		this->seq, &(this->color), this->type));
+}
+
+ARAVirtualMusicalContextType ARAVirtualMusicalContext::getType() const {
+	return this->type;
+}
+
+SeqSourceProcessor* ARAVirtualMusicalContext::getSeq() const {
+	return this->seq;
+}
+
+ARAVirtualGlobalContext::ARAVirtualGlobalContext(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq)
+	: ARAVirtualMusicalContext(dc, seq, ARAVirtualMusicalContextType::Global) {}
+
+int32_t ARAVirtualGlobalContext::getEventCount() {
+	return GlobalMidiEventHelper::getCount(this->getSeq());
+}
+
+ARAVirtualGlobalContext::MidiEventType
+ARAVirtualGlobalContext::getEventType(int32_t index) {
+	return GlobalMidiEventHelper::getType(this->getSeq(), index);
+}
+
+ARA::ARAContentTempoEntry
+ARAVirtualGlobalContext::getTempo(int32_t index) {
+	return GlobalMidiEventHelper::getTempoEvent(this->getSeq(), index);
+}
+
+ARA::ARAContentBarSignature
+ARAVirtualGlobalContext::getBar(int32_t index) {
+	return GlobalMidiEventHelper::getBarEvent(this->getSeq(), index);
+}
+
+ARA::ARAContentKeySignature
+ARAVirtualGlobalContext::getKey(int32_t index) {
+	return GlobalMidiEventHelper::getKeyEvent(this->getSeq(), index);
+}
+
+ARAVirtualNoteContext::ARAVirtualNoteContext(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq)
+	: ARAVirtualMusicalContext(dc, seq, ARAVirtualMusicalContextType::Note) {}
+
+int32_t ARAVirtualNoteContext::getNoteCount() {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		return SourceManager::getInstance()->getMIDINoteNum(
+			ref, this->getSeq()->getCurrentMIDITrack());
+	}
+	return 0;
+}
+
+ARA::ARAContentNote ARAVirtualNoteContext::getNote(int32_t index) {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		auto note = SourceManager::getInstance()->getMIDINote(
+			ref, this->getSeq()->getCurrentMIDITrack(), index);
+
+		ARA::ARAContentNote result{};
+		result.frequency = (float)juce::MidiMessage::getMidiNoteInHertz(note.pitch);
+		result.pitchNumber = note.pitch;
+		result.volume = note.vel / (float)UINT8_MAX;
+		result.startPosition = note.startSec;
+		result.attackDuration = 0;
+		result.noteDuration = note.endSec - note.startSec;
+		result.signalDuration = result.noteDuration;
+
+		return result;
+	}
+	return {};
+}
+
+ARAVirtualNotePlusContext::ARAVirtualNotePlusContext(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq)
+	: ARAVirtualMusicalContext(dc, seq, ARAVirtualMusicalContextType::NotePlus) {}
+
+int32_t ARAVirtualNotePlusContext::getNoteCount() {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		return SourceManager::getInstance()->getMIDINoteNum(
+			ref, this->getSeq()->getCurrentMIDITrack());
+	}
+	return 0;
+}
+
+ARAExtension::ARAContentNote ARAVirtualNotePlusContext::getNote(int32_t index) {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		auto note = SourceManager::getInstance()->getMIDINote(
+			ref, this->getSeq()->getCurrentMIDITrack(), index);
+
+		ARAExtension::ARAContentNote result{};
+		result.channel = note.channel;
+		result.startSec = note.startSec;
+		result.endSec = note.endSec;
+		result.pitch = note.pitch;
+		result.vel = note.vel;
+		result.lyrics = note.lyrics;
+
+		return result;
+	}
+	return {};
+}
+
+ARAVirtualSustainPedalContext::ARAVirtualSustainPedalContext(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq)
+	: ARAVirtualMusicalContext(dc, seq, ARAVirtualMusicalContextType::SustainPedal) {}
+
+int32_t ARAVirtualSustainPedalContext::getSustainPedalCount() {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		return SourceManager::getInstance()->getMIDISustainPedalNum(
+			ref, this->getSeq()->getCurrentMIDITrack());
+	}
+	return 0;
+}
+
+ARAExtension::ARAContentPedal ARAVirtualSustainPedalContext::getSustainPedal(int32_t index) {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		auto pedal = SourceManager::getInstance()->getMIDISustainPedal(
+			ref, this->getSeq()->getCurrentMIDITrack(), index);
+
+		ARAExtension::ARAContentPedal result{};
+		result.channel = pedal.channel;
+		result.timeSec = pedal.timeSec;
+		result.pedalOn = pedal.value;
+
+		return result;
+	}
+	return {};
+}
+
+ARAVirtualSostenutoPedalContext::ARAVirtualSostenutoPedalContext(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq)
+	: ARAVirtualMusicalContext(dc, seq, ARAVirtualMusicalContextType::SostenutoPedal) {}
+
+int32_t ARAVirtualSostenutoPedalContext::getSostenutoPedalCount() {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		return SourceManager::getInstance()->getMIDISostenutoPedalNum(
+			ref, this->getSeq()->getCurrentMIDITrack());
+	}
+	return 0;
+}
+
+ARAExtension::ARAContentPedal ARAVirtualSostenutoPedalContext::getSostenutoPedal(int32_t index) {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		auto pedal = SourceManager::getInstance()->getMIDISostenutoPedal(
+			ref, this->getSeq()->getCurrentMIDITrack(), index);
+
+		ARAExtension::ARAContentPedal result{};
+		result.channel = pedal.channel;
+		result.timeSec = pedal.timeSec;
+		result.pedalOn = pedal.value;
+
+		return result;
+	}
+	return {};
+}
+
+ARAVirtualSoftPedalContext::ARAVirtualSoftPedalContext(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq)
+	: ARAVirtualMusicalContext(dc, seq, ARAVirtualMusicalContextType::SoftPedal) {}
+
+int32_t ARAVirtualSoftPedalContext::getSoftPedalCount() {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		return SourceManager::getInstance()->getMIDISoftPedalNum(
+			ref, this->getSeq()->getCurrentMIDITrack());
+	}
+	return 0;
+}
+
+ARAExtension::ARAContentPedal ARAVirtualSoftPedalContext::getSoftPedal(int32_t index) {
+	if (auto ref = this->getSeq()->getMIDIRef()) {
+		auto pedal = SourceManager::getInstance()->getMIDISoftPedal(
+			ref, this->getSeq()->getCurrentMIDITrack(), index);
+
+		ARAExtension::ARAContentPedal result{};
+		result.channel = pedal.channel;
+		result.timeSec = pedal.timeSec;
+		result.pedalOn = pedal.value;
+
+		return result;
+	}
+	return {};
 }

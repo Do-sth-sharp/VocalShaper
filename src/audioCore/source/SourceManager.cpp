@@ -356,7 +356,7 @@ const SourceMIDITemp::IntParam SourceManager::getMIDIPitchWheel(uint64_t ref, in
 	return {};
 }
 
-const SourceMIDITemp::IntParam SourceManager::getMIDIAfterTouch(uint64_t ref, int track, int index) const {
+const SourceMIDITemp::AfterTouch SourceManager::getMIDIAfterTouch(uint64_t ref, int track, int index) const {
 	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
 		return ptr->getMIDIAfterTouch(track, index);
 	}

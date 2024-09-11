@@ -107,6 +107,7 @@ private:
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ContextReader*, ARA::ARAContentReaderHostRef>;
 	using ContextConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualMusicalContext*, ARA::ARAMusicalContextHostRef>;
+	using SourceConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioSource*, ARA::ARAAudioSourceHostRef>;
 
 	std::map<ContextReader*, std::unique_ptr<ContextReader>> contextReaders;
 
