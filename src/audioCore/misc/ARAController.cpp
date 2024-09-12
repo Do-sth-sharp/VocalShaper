@@ -79,8 +79,10 @@ ARA::ARAPersistentID ARAArchivingController::getDocumentArchiveID(
 
 bool ARAContentAccessController::isMusicalContextContentAvailable(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
-	ARA::ARAContentType /*type*/) noexcept {
-	return true;
+	ARA::ARAContentType type) noexcept {
+	auto midiContext = ContextConverter::fromHostRef(musicalContextHostRef);
+	return midiContext->getType() == (ARAExtension::ARAContentType)type
+		&& this->allowedContentTypes.contains((ARAExtension::ARAContentType)type);
 }
 
 ARA::ARAContentGrade ARAContentAccessController::getMusicalContextContentGrade(
@@ -92,7 +94,7 @@ ARA::ARAContentGrade ARAContentAccessController::getMusicalContextContentGrade(
 ARA::ARAContentReaderHostRef ARAContentAccessController::createMusicalContextContentReader(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
 	ARA::ARAContentType /*type*/, const ARA::ARAContentTimeRange* /*range*/) noexcept {
-	auto contextReader = std::make_unique<ContextReader>(musicalContextHostRef, nullptr);
+	auto contextReader = std::make_unique<ContextReader>(musicalContextHostRef);
 	auto audioReaderHostRef = Converter::toHostRef(contextReader.get());
 
 	this->contextReaders.emplace(contextReader.get(), std::move(contextReader));
@@ -101,41 +103,31 @@ ARA::ARAContentReaderHostRef ARAContentAccessController::createMusicalContextCon
 }
 
 bool ARAContentAccessController::isAudioSourceContentAvailable(
-	ARA::ARAAudioSourceHostRef audioSourceHostRef,
+	ARA::ARAAudioSourceHostRef /*audioSourceHostRef*/,
 	ARA::ARAContentType /*type*/) noexcept {
-	return true;
+	/** Nothing To Do */
+	return false;
 }
 
 ARA::ARAContentGrade ARAContentAccessController::getAudioSourceContentGrade(
-	ARA::ARAAudioSourceHostRef audioSourceHostRef,
+	ARA::ARAAudioSourceHostRef /*audioSourceHostRef*/,
 	ARA::ARAContentType /*type*/) noexcept {
+	/** Nothing To Do */
 	return ARA::kARAContentGradeInitial;
 }
 
 ARA::ARAContentReaderHostRef ARAContentAccessController::createAudioSourceContentReader(
-	ARA::ARAAudioSourceHostRef audioSourceHostRef,
+	ARA::ARAAudioSourceHostRef /*audioSourceHostRef*/,
 	ARA::ARAContentType /*type*/, const ARA::ARAContentTimeRange* /*range*/) noexcept {
-	auto contextReader = std::make_unique<ContextReader>(nullptr, audioSourceHostRef);
-	auto audioReaderHostRef = Converter::toHostRef(contextReader.get());
-
-	this->contextReaders.emplace(contextReader.get(), std::move(contextReader));
-
-	return audioReaderHostRef;
+	return nullptr;
 }
 
 ARA::ARAInt32 ARAContentAccessController::getContentReaderEventCount(
 	ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept {
 	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
-
-	if (contextReader->audioHostRef) {
-		auto audioSource = SourceConverter::fromHostRef(contextReader->audioHostRef);
-		return audioSource->getGlobalMidiEventCount();
-	}
-
 	if (contextReader->contextHostRef) {
 		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
-		/** TODO */
-		//return midiContext->getGlobalMidiEventCount() + midiContext->getNoteCount();
+		return midiContext->getEventCount();
 	}
 
 	return 0;
@@ -145,17 +137,117 @@ const void* ARAContentAccessController::getContentReaderDataForEvent(
 	ARA::ARAContentReaderHostRef contentReaderHostRef,
 	ARA::ARAInt32 eventIndex) noexcept {
 	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
-
-	if (contextReader->audioHostRef) {
-		auto audioSource = SourceConverter::fromHostRef(contextReader->audioHostRef);
-		/** TODO */
-		//return audioSource->getGlobalMidiEventCount();
-	}
-
 	if (contextReader->contextHostRef) {
 		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
-		/** TODO */
-		//return midiContext->getGlobalMidiEventCount() + midiContext->getNoteCount();
+
+		/** Shit Code! It Blames to ARA. */
+
+		switch (midiContext->getType()) {
+
+		case ARAExtension::ARAContentTypeTempoEntry: {
+			if (auto context = dynamic_cast<ARAVirtualTempoContext*>(midiContext)) {
+				this->tempoTemp = context->getTempo(eventIndex);
+				return &(this->tempoTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeBarSignature: {
+			if (auto context = dynamic_cast<ARAVirtualBarContext*>(midiContext)) {
+				this->barTemp = context->getBar(eventIndex);
+				return &(this->barTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeKeySignature: {
+			if (auto context = dynamic_cast<ARAVirtualKeyContext*>(midiContext)) {
+				this->keyTemp = context->getKey(eventIndex);
+				return &(this->keyTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeNote: {
+			if (auto context = dynamic_cast<ARAVirtualNoteContext*>(midiContext)) {
+				this->noteTemp = context->getNote(eventIndex);
+				return &(this->noteTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeNotePlus: {
+			if (auto context = dynamic_cast<ARAVirtualNotePlusContext*>(midiContext)) {
+				this->notePlusTemp = context->getNote(eventIndex);
+				return &(this->notePlusTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeSustainPedal: {
+			if (auto context = dynamic_cast<ARAVirtualSustainPedalContext*>(midiContext)) {
+				this->pedalTemp = context->getSustainPedal(eventIndex);
+				return &(this->pedalTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeSostenutoPedal: {
+			if (auto context = dynamic_cast<ARAVirtualSostenutoPedalContext*>(midiContext)) {
+				this->pedalTemp = context->getSostenutoPedal(eventIndex);
+				return &(this->pedalTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeSoftPedal: {
+			if (auto context = dynamic_cast<ARAVirtualSoftPedalContext*>(midiContext)) {
+				this->pedalTemp = context->getSoftPedal(eventIndex);
+				return &(this->pedalTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypePitchWheel: {
+			if (auto context = dynamic_cast<ARAVirtualPitchWheelContext*>(midiContext)) {
+				this->intParamTemp = context->getPitchWheel(eventIndex);
+				return &(this->intParamTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeAfterTouch: {
+			if (auto context = dynamic_cast<ARAVirtualAfterTouchContext*>(midiContext)) {
+				this->afterTouchTemp = context->getAfterTouch(eventIndex);
+				return &(this->afterTouchTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeChannelPressure: {
+			if (auto context = dynamic_cast<ARAVirtualChannelPressureContext*>(midiContext)) {
+				this->intParamTemp = context->getChannelPressure(eventIndex);
+				return &(this->intParamTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeController: {
+			if (auto context = dynamic_cast<ARAVirtualControllerContext*>(midiContext)) {
+				this->controllerTemp = context->getController(eventIndex);
+				return &(this->controllerTemp);
+			}
+			break;
+		}
+
+		case ARAExtension::ARAContentTypeMisc: {
+			if (auto context = dynamic_cast<ARAVirtualMiscContext*>(midiContext)) {
+				this->miscTemp = context->getMisc(eventIndex);
+				return &(this->miscTemp);
+			}
+			break;
+		}
+		}
 	}
 
 	return nullptr;

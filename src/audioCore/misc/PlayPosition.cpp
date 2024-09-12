@@ -169,6 +169,7 @@ void MovablePlayHead::insertTempoSequence(const juce::MidiMessageSequence& seq) 
 		this->insert(i->message);
 	}
 	this->updateTempoTemp();
+	this->updateLabelTypeTemp();
 }
 
 const juce::MidiMessageSequence MovablePlayHead::getTempoSequence() const {
@@ -248,6 +249,7 @@ int MovablePlayHead::addTempoLabelTempo(
 	int index = this->insert(juce::MidiMessage::tempoMetaEvent(
 		1000000.0 / (tempo / 60.0)).withTimeStamp(time), newIndex);
 	this->updateTempoTemp();
+	this->updateLabelTypeTemp();
 
 	/** Return Index */
 	return index;
@@ -259,6 +261,7 @@ int MovablePlayHead::addTempoLabelBeat(
 	int index = this->insert(juce::MidiMessage::timeSignatureMetaEvent(
 		numerator, denominator).withTimeStamp(time), newIndex);
 	this->updateTempoTemp();
+	this->updateLabelTypeTemp();
 
 	/** Return Index */
 	return index;
@@ -269,6 +272,7 @@ void MovablePlayHead::removeTempoLabel(int index) {
 
 	/** Update Temp */
 	this->updateTempoTemp();
+	this->updateLabelTypeTemp();
 }
 
 int MovablePlayHead::getTempoLabelNum() const {
@@ -297,6 +301,7 @@ int MovablePlayHead::setTempoLabelTime(int index, double time, int newIndex) {
 
 		/** Update Temp */
 		this->updateTempoTemp();
+		this->updateLabelTypeTemp();
 
 		/** Return */
 		return indexTemp;
@@ -315,6 +320,7 @@ void MovablePlayHead::setTempoLabelTempo(int index, double tempo) {
 
 			/** Update Temp */
 			this->updateTempoTemp();
+			this->updateLabelTypeTemp();
 		}
 	}
 }
@@ -331,6 +337,7 @@ void MovablePlayHead::setTempoLabelBeat(
 
 			/** Update Temp */
 			this->updateTempoTemp();
+			this->updateLabelTypeTemp();
 		}
 	}
 }
@@ -458,6 +465,47 @@ int MovablePlayHead::getTempoInsertIndex(double time) const {
 	}
 
 	/** Error */
+	return -1;
+}
+
+void MovablePlayHead::updateLabelTypeTemp() {
+	juce::ScopedWriteLock locker(audioLock::getPositionLock());
+
+	this->tempoTypeIndexTemp.clear();
+	this->beatTypeIndexTemp.clear();
+
+	for (int i = 0; i < this->tempos.size(); i++) {
+		auto& message = this->tempos.getReference(i);
+		if (message.isTempoMetaEvent()) {
+			this->tempoTypeIndexTemp.add(i);
+			continue;
+		}
+		if (message.isTimeSignatureMetaEvent()) {
+			this->beatTypeIndexTemp.add(i);
+			continue;
+		}
+	}
+}
+
+int MovablePlayHead::getTempoTypeLabelNum() const {
+	return this->tempoTypeIndexTemp.size();
+}
+
+int MovablePlayHead::getBeatTypeLabelNum() const {
+	return this->beatTypeIndexTemp.size();
+}
+
+int MovablePlayHead::getTempoTypeLabelIndex(int typeIndex) const {
+	if (typeIndex >= 0 && typeIndex < this->tempoTypeIndexTemp.size()) {
+		return this->tempoTypeIndexTemp.getUnchecked(typeIndex);
+	}
+	return -1;
+}
+
+int MovablePlayHead::getBeatTypeLabelIndex(int typeIndex) const {
+	if (typeIndex >= 0 && typeIndex < this->beatTypeIndexTemp.size()) {
+		return this->beatTypeIndexTemp.getUnchecked(typeIndex);
+	}
 	return -1;
 }
 

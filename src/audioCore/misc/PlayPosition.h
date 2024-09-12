@@ -66,6 +66,12 @@ public:
 
 	int getTempoInsertIndex(double time) const;
 
+	void updateLabelTypeTemp();
+	int getTempoTypeLabelNum() const;
+	int getBeatTypeLabelNum() const;
+	int getTempoTypeLabelIndex(int typeIndex) const;
+	int getBeatTypeLabelIndex(int typeIndex) const;
+
 protected:
 	mutable juce::AudioPlayHead::PositionInfo position;
 	juce::Array<juce::MidiMessage> tempos;
@@ -74,6 +80,8 @@ protected:
 	std::atomic<double> sampleRate = 48000;
 	std::atomic_bool overflowFlag = false;
 	std::atomic<double> loopStartSec = 0, loopEndSec = 0;
+
+	juce::Array<int> tempoTypeIndexTemp, beatTypeIndexTemp;
 
 	int insert(const juce::MidiMessage& mes, int newIndex = -1);
 	const juce::MidiMessage remove(int index);

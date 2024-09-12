@@ -68,6 +68,7 @@ private:
 class ARAContentAccessController : public ARA::Host::ContentAccessControllerInterface {
 public:
 	ARAContentAccessController() = default;
+	~ARAContentAccessController() = default;
 
 private:
 	bool isMusicalContextContentAvailable(
@@ -98,25 +99,46 @@ private:
 
 private:
 	struct ContextReader {
-		ContextReader(ARA::ARAMusicalContextHostRef context, ARA::ARAAudioSourceHostRef audio)
-			: contextHostRef(context), audioHostRef(audio){}
+		ContextReader(ARA::ARAMusicalContextHostRef context)
+			: contextHostRef(context) {}
 
 		ARA::ARAMusicalContextHostRef contextHostRef;
-		ARA::ARAAudioSourceHostRef audioHostRef;
 	};
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ContextReader*, ARA::ARAContentReaderHostRef>;
 	using ContextConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualMusicalContext*, ARA::ARAMusicalContextHostRef>;
-	using SourceConverter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioSource*, ARA::ARAAudioSourceHostRef>;
 
 	std::map<ContextReader*, std::unique_ptr<ContextReader>> contextReaders;
 
-	const std::set<ARA::ARAContentType> typeAllows = {
-		ARA::kARAContentTypeNotes,
-		ARA::kARAContentTypeTempoEntries,
-		ARA::kARAContentTypeBarSignatures,
-		ARA::kARAContentTypeKeySignatures
+	const std::unordered_set<ARAExtension::ARAContentType> allowedContentTypes{
+		ARAExtension::ARAContentTypeNote,
+		ARAExtension::ARAContentTypeTempoEntry,
+		ARAExtension::ARAContentTypeBarSignature,
+		ARAExtension::ARAContentTypeKeySignature,
+		ARAExtension::ARAContentTypeNotePlus,
+		ARAExtension::ARAContentTypeSustainPedal,
+		ARAExtension::ARAContentTypeSostenutoPedal,
+		ARAExtension::ARAContentTypeSoftPedal,
+		ARAExtension::ARAContentTypePitchWheel,
+		ARAExtension::ARAContentTypeAfterTouch,
+		ARAExtension::ARAContentTypeChannelPressure,
+		ARAExtension::ARAContentTypeController,
+		ARAExtension::ARAContentTypeMisc
 	};
+
+	/** Shit! Can't using union because of the destructor auto deletion. Blame to ARA. */
+
+	ARA::ARAContentNote noteTemp;
+	ARA::ARAContentTempoEntry tempoTemp;
+	ARA::ARAContentBarSignature barTemp;
+	ARA::ARAContentKeySignature keyTemp;
+
+	ARAExtension::ARAContentNote notePlusTemp;
+	ARAExtension::ARAContentPedal pedalTemp;
+	ARAExtension::ARAContentIntParam intParamTemp;
+	ARAExtension::ARAContentAfterTouch afterTouchTemp;
+	ARAExtension::ARAContentController controllerTemp;
+	ARAExtension::ARAContentMisc miscTemp;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAContentAccessController)
 };

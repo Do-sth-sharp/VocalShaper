@@ -5,13 +5,6 @@
 
 class SeqSourceProcessor;
 
-enum class ARAVirtualMusicalContextType {
-	Unknown, Global, Note, NotePlus,
-	SustainPedal, SostenutoPedal, SoftPedal,
-	PitchWheel, AfterTouch, ChannelPressure,
-	Controller, Misc
-};
-
 class ARAVirtualAudioSource {
 public:
 	ARAVirtualAudioSource() = delete;
@@ -24,15 +17,6 @@ public:
 		float* const* buffers, int64_t startSample, int64_t numSamples) const;
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioSource*, ARA::ARAAudioSourceHostRef>;
-
-	using MidiEventType = ARAExtension::ARAContentType;
-
-public:
-	int32_t getGlobalMidiEventCount();
-	MidiEventType getGlobalMidiEventType(int32_t index);
-	ARA::ARAContentTempoEntry getGlobalTempoEvent(int32_t index);
-	ARA::ARAContentBarSignature getGlobalBarEvent(int32_t index);
-	ARA::ARAContentKeySignature getGlobalKeyEvent(int32_t index);
 
 private:
 	SeqSourceProcessor* const seq = nullptr;
@@ -50,48 +34,78 @@ public:
 	ARAVirtualMusicalContext(
 		ARA::Host::DocumentController& dc,
 		SeqSourceProcessor* seq,
-		ARAVirtualMusicalContextType type);
+		ARAExtension::ARAContentType type);
 
 	void update();
 
-	ARAVirtualMusicalContextType getType() const;
+	ARAExtension::ARAContentType getType() const;
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ARAVirtualMusicalContext*, ARA::ARAMusicalContextHostRef>;
 	using MidiEventType = ARAExtension::ARAContentType;
+
+public:
+	virtual int32_t getEventCount() { return 0; };
 
 protected:
 	SeqSourceProcessor* getSeq() const;
 
 private:
 	SeqSourceProcessor* const seq = nullptr;
-	const ARAVirtualMusicalContextType type = ARAVirtualMusicalContextType::Unknown;
+	const ARAExtension::ARAContentType type = ARAExtension::ARAContentTypeUnknown;
 
 	juce::ARAHostModel::MusicalContext musicalContext;
 
 	ARA::ARAColor color;
 
 	static const ARA::ARAMusicalContextProperties createProperties(
-		SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualMusicalContextType type);
+		SeqSourceProcessor* seq, ARA::ARAColor* color, ARAExtension::ARAContentType type);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualMusicalContext)
 };
 
-class ARAVirtualGlobalContext : public ARAVirtualMusicalContext {
+class ARAVirtualTempoContext : public ARAVirtualMusicalContext {
 public:
-	ARAVirtualGlobalContext() = delete;
-	ARAVirtualGlobalContext(
+	ARAVirtualTempoContext() = delete;
+	ARAVirtualTempoContext(
 		ARA::Host::DocumentController& dc,
 		SeqSourceProcessor* seq);
 
 public:
-	int32_t getEventCount();
-	MidiEventType getEventType(int32_t index);
+	int32_t getEventCount() override;
 	ARA::ARAContentTempoEntry getTempo(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualTempoContext)
+};
+
+class ARAVirtualBarContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualBarContext() = delete;
+	ARAVirtualBarContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
 	ARA::ARAContentBarSignature getBar(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualBarContext)
+};
+
+class ARAVirtualKeyContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualKeyContext() = delete;
+	ARAVirtualKeyContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
 	ARA::ARAContentKeySignature getKey(int32_t index);
 
 private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualGlobalContext)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualKeyContext)
 };
 
 class ARAVirtualNoteContext : public ARAVirtualMusicalContext {
@@ -102,7 +116,7 @@ public:
 		SeqSourceProcessor* seq);
 
 public:
-	int32_t getNoteCount();
+	int32_t getEventCount() override;
 	ARA::ARAContentNote getNote(int32_t index);
 
 private:
@@ -117,7 +131,7 @@ public:
 		SeqSourceProcessor* seq);
 
 public:
-	int32_t getNoteCount();
+	int32_t getEventCount() override;
 	ARAExtension::ARAContentNote getNote(int32_t index);
 
 private:
@@ -132,7 +146,7 @@ public:
 		SeqSourceProcessor* seq);
 
 public:
-	int32_t getSustainPedalCount();
+	int32_t getEventCount() override;
 	ARAExtension::ARAContentPedal getSustainPedal(int32_t index);
 
 private:
@@ -147,7 +161,7 @@ public:
 		SeqSourceProcessor* seq);
 
 public:
-	int32_t getSostenutoPedalCount();
+	int32_t getEventCount() override;
 	ARAExtension::ARAContentPedal getSostenutoPedal(int32_t index);
 
 private:
@@ -162,9 +176,84 @@ public:
 		SeqSourceProcessor* seq);
 
 public:
-	int32_t getSoftPedalCount();
+	int32_t getEventCount() override;
 	ARAExtension::ARAContentPedal getSoftPedal(int32_t index);
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualSoftPedalContext)
+};
+
+class ARAVirtualPitchWheelContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualPitchWheelContext() = delete;
+	ARAVirtualPitchWheelContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
+	ARAExtension::ARAContentIntParam getPitchWheel(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualPitchWheelContext)
+};
+
+class ARAVirtualAfterTouchContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualAfterTouchContext() = delete;
+	ARAVirtualAfterTouchContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
+	ARAExtension::ARAContentAfterTouch getAfterTouch(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualAfterTouchContext)
+};
+
+class ARAVirtualChannelPressureContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualChannelPressureContext() = delete;
+	ARAVirtualChannelPressureContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
+	ARAExtension::ARAContentIntParam getChannelPressure(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualChannelPressureContext)
+};
+
+class ARAVirtualControllerContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualControllerContext() = delete;
+	ARAVirtualControllerContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
+	ARAExtension::ARAContentController getController(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualControllerContext)
+};
+
+class ARAVirtualMiscContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualMiscContext() = delete;
+	ARAVirtualMiscContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
+	ARAExtension::ARAContentMisc getMisc(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualMiscContext)
 };
