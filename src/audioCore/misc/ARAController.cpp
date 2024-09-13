@@ -259,30 +259,30 @@ void ARAContentAccessController::destroyContentReader(
 }
 
 void ARAModelUpdateController::notifyAudioSourceAnalysisProgress(
-	ARA::ARAAudioSourceHostRef audioSourceHostRef,
-	ARA::ARAAnalysisProgressState state, float value) noexcept {
-	/** TODO */
+	ARA::ARAAudioSourceHostRef /*audioSourceHostRef*/,
+	ARA::ARAAnalysisProgressState /*state*/, float /*value*/) noexcept {
+	/** Nothing To Do */
 }
 
 void ARAModelUpdateController::notifyAudioSourceContentChanged(
-	ARA::ARAAudioSourceHostRef audioSourceHostRef,
-	const ARA::ARAContentTimeRange* range,
-	ARA::ContentUpdateScopes scopeFlags) noexcept {
-	/** TODO */
+	ARA::ARAAudioSourceHostRef /*audioSourceHostRef*/,
+	const ARA::ARAContentTimeRange* /*range*/,
+	ARA::ContentUpdateScopes /*scopeFlags*/) noexcept {
+	/** Nothing To Do */
 }
 
 void ARAModelUpdateController::notifyAudioModificationContentChanged(
-	ARA::ARAAudioModificationHostRef audioModificationHostRef,
-	const ARA::ARAContentTimeRange* range,
-	ARA::ContentUpdateScopes scopeFlags) noexcept {
-	/** TODO */
+	ARA::ARAAudioModificationHostRef /*audioModificationHostRef*/,
+	const ARA::ARAContentTimeRange* /*range*/,
+	ARA::ContentUpdateScopes /*scopeFlags*/) noexcept {
+	/** Nothing To Do */
 }
 
 void ARAModelUpdateController::notifyPlaybackRegionContentChanged(
-	ARA::ARAPlaybackRegionHostRef playbackRegionHostRef,
-	const ARA::ARAContentTimeRange* range,
-	ARA::ContentUpdateScopes scopeFlags) noexcept {
-	/** TODO */
+	ARA::ARAPlaybackRegionHostRef /*playbackRegionHostRef*/,
+	const ARA::ARAContentTimeRange* /*range*/,
+	ARA::ContentUpdateScopes /*scopeFlags*/) noexcept {
+	/** Nothing To Do */
 }
 
 void ARAModelUpdateController::notifyDocumentDataChanged() noexcept {

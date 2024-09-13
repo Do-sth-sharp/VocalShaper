@@ -105,6 +105,17 @@ bool ARAVirtualAudioSource::readAudioSamples(
 	return false;
 }
 
+double ARAVirtualAudioSource::getLength() const {
+	if (this->seq) {
+		return this->seq->getAudioLength();
+	}
+	return 0;
+}
+
+juce::ARAHostModel::AudioSource& ARAVirtualAudioSource::getProperties() {
+	return this->audioSource;
+}
+
 const ARA::ARAAudioSourceProperties 
 ARAVirtualAudioSource::createProperties(SeqSourceProcessor* seq) {
 	auto properties = juce::ARAHostModel::AudioSource::getEmptyProperties();
@@ -155,6 +166,10 @@ void ARAVirtualMusicalContext::update() {
 
 ARAExtension::ARAContentType ARAVirtualMusicalContext::getType() const {
 	return this->type;
+}
+
+juce::ARAHostModel::MusicalContext& ARAVirtualMusicalContext::getProperties() {
+	return this->musicalContext;
 }
 
 SeqSourceProcessor* ARAVirtualMusicalContext::getSeq() const {
@@ -511,4 +526,198 @@ ARAExtension::ARAContentMisc ARAVirtualMiscContext::getMisc(int32_t index) {
 		return result;
 	}
 	return {};
+}
+
+ARAVirtualAudioModification::ARAVirtualAudioModification(
+	ARA::Host::DocumentController& dc,
+	ARAVirtualAudioSource& source)
+	: source(source), audioModification(
+		Converter::toHostRef(this), dc, source.getProperties(),
+		ARAVirtualAudioModification::createProperties()) {}
+
+ARAVirtualAudioSource& ARAVirtualAudioModification::getSource() {
+	return this->source;
+}
+
+juce::ARAHostModel::AudioModification& ARAVirtualAudioModification::getProperties() {
+	return this->audioModification;
+}
+
+const ARA::ARAAudioModificationProperties
+ARAVirtualAudioModification::createProperties() {
+	auto properties = juce::ARAHostModel::AudioModification::getEmptyProperties();
+
+	properties.persistentID = "-";
+
+	return properties;
+}
+
+juce::ARAHostModel::RegionSequence& ARAVirtualRegionSequence::getProperties() {
+	return this->regionSequence;
+}
+
+SeqSourceProcessor* ARAVirtualRegionSequence::getSeq() const {
+	return this->seq;
+}
+
+ARAVirtualRegionSequence::ARAVirtualRegionSequence(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq,
+	const ARA::ARARegionSequenceProperties& properties)
+	: seq(seq), regionSequence(Converter::toHostRef(this), dc, properties) {}
+
+ARAVirtualMusicalContextRegionSequence::ARAVirtualMusicalContextRegionSequence(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq,
+	ARAVirtualMusicalContext& context)
+	: ARAVirtualRegionSequence(dc, seq,
+		ARAVirtualMusicalContextRegionSequence::createProperties(
+			seq, &(this->color), context)), context(context) {}
+
+void ARAVirtualMusicalContextRegionSequence::update() {
+	this->regionSequence.update(
+		ARAVirtualMusicalContextRegionSequence::createProperties(
+			this->seq, &(this->color), this->context));
+}
+
+ARAVirtualMusicalContext& ARAVirtualMusicalContextRegionSequence::getContext() {
+	return this->context;
+}
+
+const ARA::ARARegionSequenceProperties
+ARAVirtualMusicalContextRegionSequence::createProperties(
+	SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualMusicalContext& context) {
+	auto properties = juce::ARAHostModel::RegionSequence::getEmptyProperties();
+
+	if (seq) {
+		properties.name = seq->getTrackName().toRawUTF8();
+
+		auto seqColor = seq->getTrackColor();
+		color->r = seqColor.getFloatRed();
+		color->g = seqColor.getFloatGreen();
+		color->b = seqColor.getFloatBlue();
+		properties.color = color;
+	}
+	properties.orderIndex = (int32_t)context.getType();
+	properties.musicalContextRef = context.getProperties().getPluginRef();
+
+	return properties;
+}
+
+ARAVirtualAudioSourceRegionSequence::ARAVirtualAudioSourceRegionSequence(
+	ARA::Host::DocumentController& dc,
+	SeqSourceProcessor* seq,
+	ARAVirtualAudioModification& modification)
+	: ARAVirtualRegionSequence(dc, seq,
+		ARAVirtualAudioSourceRegionSequence::createProperties(
+			seq, &(this->color), modification)), modification(modification) {}
+
+void ARAVirtualAudioSourceRegionSequence::update() {
+	this->regionSequence.update(
+		ARAVirtualAudioSourceRegionSequence::createProperties(
+			this->seq, &(this->color), this->modification));
+}
+
+ARAVirtualAudioModification& ARAVirtualAudioSourceRegionSequence::getModification() {
+	return this->modification;
+}
+
+const ARA::ARARegionSequenceProperties ARAVirtualAudioSourceRegionSequence::createProperties(
+	SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualAudioModification& context) {
+	auto properties = juce::ARAHostModel::RegionSequence::getEmptyProperties();
+
+	if (seq) {
+		properties.name = seq->getTrackName().toRawUTF8();
+
+		auto seqColor = seq->getTrackColor();
+		color->r = seqColor.getFloatRed();
+		color->g = seqColor.getFloatGreen();
+		color->b = seqColor.getFloatBlue();
+		properties.color = color;
+	}
+	properties.orderIndex = 0;
+	properties.musicalContextRef = nullptr;
+
+	return properties;
+}
+
+ARAVirtualPlaybackRegion::ARAVirtualPlaybackRegion(
+	ARA::Host::DocumentController& dc,
+	ARAVirtualRegionSequence& sequence,
+	ARAVirtualAudioModification& modification,
+	const ARA::ARAPlaybackRegionProperties& properties)
+	: sequence(sequence), 
+	playbackRegion(Converter::toHostRef(this), dc, modification.getProperties(), properties) {}
+
+juce::ARAHostModel::PlaybackRegion& ARAVirtualPlaybackRegion::getProperties() {
+	return this->playbackRegion;
+}
+
+ARAVirtualAudioPlaybackRegion::ARAVirtualAudioPlaybackRegion(
+	ARA::Host::DocumentController& dc,
+	ARAVirtualRegionSequence& sequence,
+	ARAVirtualAudioModification& modification)
+	: ARAVirtualPlaybackRegion(dc, sequence, modification,
+		ARAVirtualAudioPlaybackRegion::createProperties(
+			dynamic_cast<ARAVirtualAudioSourceRegionSequence&>(sequence))) {}
+
+void ARAVirtualAudioPlaybackRegion::update() {
+	this->playbackRegion.update(
+		ARAVirtualAudioPlaybackRegion::createProperties(
+			dynamic_cast<ARAVirtualAudioSourceRegionSequence&>(this->sequence)));
+}
+
+const ARA::ARAPlaybackRegionProperties
+ARAVirtualAudioPlaybackRegion::createProperties(ARAVirtualAudioSourceRegionSequence& sequence) {
+	auto properties = juce::ARAHostModel::PlaybackRegion::getEmptyProperties();
+
+	double totalTime = sequence.getModification().getSource().getLength();
+
+	properties.transformationFlags = ARA::kARAPlaybackTransformationNoChanges;
+	properties.startInModificationTime = 0.0;
+	properties.durationInModificationTime = totalTime;
+	properties.startInPlaybackTime = 0.0;
+	properties.durationInPlaybackTime = totalTime;
+	properties.musicalContextRef = nullptr;
+	properties.regionSequenceRef = sequence.getProperties().getPluginRef();
+
+	properties.name = nullptr;
+	properties.color = nullptr;
+
+	return properties;
+}
+
+ARAVirtualMusicalContextPlaybackRegion::ARAVirtualMusicalContextPlaybackRegion(
+	ARA::Host::DocumentController& dc,
+	ARAVirtualRegionSequence& sequence,
+	ARAVirtualAudioModification& modification)
+	: ARAVirtualPlaybackRegion(dc, sequence, modification,
+		ARAVirtualMusicalContextPlaybackRegion::createProperties(
+			dynamic_cast<ARAVirtualMusicalContextRegionSequence&>(sequence))) {}
+
+void ARAVirtualMusicalContextPlaybackRegion::update() {
+	this->playbackRegion.update(
+		ARAVirtualMusicalContextPlaybackRegion::createProperties(
+			dynamic_cast<ARAVirtualMusicalContextRegionSequence&>(this->sequence)));
+}
+
+const ARA::ARAPlaybackRegionProperties
+ARAVirtualMusicalContextPlaybackRegion::createProperties(
+	ARAVirtualMusicalContextRegionSequence& sequence) {
+	auto properties = juce::ARAHostModel::PlaybackRegion::getEmptyProperties();
+
+	double totalTime = sequence.getContext().getLength();
+
+	properties.transformationFlags = ARA::kARAPlaybackTransformationNoChanges;
+	properties.startInModificationTime = 0.0;
+	properties.durationInModificationTime = totalTime;
+	properties.startInPlaybackTime = 0.0;
+	properties.durationInPlaybackTime = totalTime;
+	properties.musicalContextRef = sequence.getContext().getProperties().getPluginRef();
+	properties.regionSequenceRef = sequence.getProperties().getPluginRef();
+
+	properties.name = nullptr;
+	properties.color = nullptr;
+
+	return properties;
 }
