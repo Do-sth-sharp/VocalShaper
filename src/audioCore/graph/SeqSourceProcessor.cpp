@@ -154,7 +154,7 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 
 	/** Add Node */
 	if (auto ptrNode = this->addNode(
-		std::make_unique<PluginDecorator>(true, this->audioChannels))) {
+		std::make_unique<PluginDecorator>(this, true, this->audioChannels))) {
 		/** Set Instr */
 		this->instr = ptrNode;
 

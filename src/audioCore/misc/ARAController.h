@@ -111,6 +111,7 @@ private:
 	std::map<ContextReader*, std::unique_ptr<ContextReader>> contextReaders;
 
 	const std::unordered_set<ARAExtension::ARAContentType> allowedContentTypes{
+		ARAExtension::ARAContentTypeUnknown,
 		ARAExtension::ARAContentTypeNote,
 		ARAExtension::ARAContentTypeTempoEntry,
 		ARAExtension::ARAContentTypeBarSignature,

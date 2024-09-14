@@ -64,7 +64,7 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::Audi
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 	/** Add To The Graph */
-	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(false, this->audioChannels));
+	auto ptrNode = this->addNode(std::make_unique<PluginDecorator>(nullptr, false, this->audioChannels));
 	if (ptrNode) {
 		/** Set Bus Num */
 		{

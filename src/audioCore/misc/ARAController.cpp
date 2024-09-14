@@ -144,6 +144,13 @@ const void* ARAContentAccessController::getContentReaderDataForEvent(
 
 		switch (midiContext->getType()) {
 
+		case ARAExtension::ARAContentTypeUnknown: {
+			if (auto context = dynamic_cast<ARAVirtualEmptyContext*>(midiContext)) {
+				return context->getData(eventIndex);
+			}
+			break;
+		}
+
 		case ARAExtension::ARAContentTypeTempoEntry: {
 			if (auto context = dynamic_cast<ARAVirtualTempoContext*>(midiContext)) {
 				this->tempoTemp = context->getTempo(eventIndex);

@@ -70,6 +70,21 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualMusicalContext)
 };
 
+class ARAVirtualEmptyContext : public ARAVirtualMusicalContext {
+public:
+	ARAVirtualEmptyContext() = delete;
+	ARAVirtualEmptyContext(
+		ARA::Host::DocumentController& dc,
+		SeqSourceProcessor* seq);
+
+public:
+	int32_t getEventCount() override;
+	const char* getData(int32_t index);
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualEmptyContext)
+};
+
 class ARAVirtualTempoContext : public ARAVirtualMusicalContext {
 public:
 	ARAVirtualTempoContext() = delete;
@@ -339,17 +354,21 @@ public:
 	ARAVirtualAudioSourceRegionSequence(
 		ARA::Host::DocumentController& dc,
 		SeqSourceProcessor* seq,
-		ARAVirtualAudioModification& modification);
+		ARAVirtualAudioModification& modification,
+		ARAVirtualMusicalContext& emptyContext);
 
 	void update() override;
 
 	ARAVirtualAudioModification& getModification();
+	ARAVirtualMusicalContext& getEmptyContext();
 
 private:
 	ARAVirtualAudioModification& modification;
+	ARAVirtualMusicalContext& emptyContext;
 
 	static const ARA::ARARegionSequenceProperties createProperties(
-		SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualAudioModification& context);
+		SeqSourceProcessor* seq, ARA::ARAColor* color,
+		ARAVirtualAudioModification& modification, ARAVirtualMusicalContext& emptyContext);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualAudioSourceRegionSequence)
 };

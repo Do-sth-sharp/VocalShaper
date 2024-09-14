@@ -2,15 +2,18 @@
 
 #include <JuceHeader.h>
 #include "../project/Serializable.h"
+#include "../misc/ARAVirtualDocument.h"
+
+class SeqSourceProcessor;
 
 class PluginDecorator final : public juce::AudioProcessor,
 	public Serializable {
 public:
 	PluginDecorator() = delete;
-	PluginDecorator(bool isInstr = false,
+	PluginDecorator(SeqSourceProcessor* seq, bool isInstr = false,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	explicit PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
-		const juce::String& identifier,
+		const juce::String& identifier, SeqSourceProcessor* seq,
 		bool isInstr = false,
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	~PluginDecorator();
@@ -139,6 +142,8 @@ public:
 	std::unique_ptr<google::protobuf::Message> serialize() const override;
 
 private:
+	SeqSourceProcessor* const seq;
+
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
 	juce::String pluginIdentifier;
 	std::unique_ptr<juce::AudioBuffer<float>> buffer = nullptr;
@@ -157,6 +162,7 @@ private:
 	std::unique_ptr<juce::ARAHostDocumentController> araDocumentController = nullptr;
 	juce::ARAHostModel::EditorRendererInterface araEditorRenderer;
 	juce::ARAHostModel::PlaybackRendererInterface araPlaybackRenderer;
+	std::unique_ptr<ARAVirtualDocument> araVirtualDocument = nullptr;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;

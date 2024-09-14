@@ -10,9 +10,9 @@
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-PluginDecorator::PluginDecorator(
+PluginDecorator::PluginDecorator(SeqSourceProcessor* seq,
 	bool isInstr, const juce::AudioChannelSet& type)
-	: isInstr(isInstr), audioChannels(type) {
+	: seq(seq), isInstr(isInstr), audioChannels(type) {
 	/** Channels */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
@@ -28,9 +28,9 @@ PluginDecorator::PluginDecorator(
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
-	const juce::String& identifier,
+	const juce::String& identifier, SeqSourceProcessor* seq,
 	bool isInstr, const juce::AudioChannelSet& type)
-	: PluginDecorator(isInstr, type) {
+	: PluginDecorator(seq, isInstr, type) {
 	this->setPlugin(std::move(plugin), identifier);
 }
 
@@ -40,6 +40,7 @@ PluginDecorator::~PluginDecorator() {
 			delete editor;
 		}
 	}
+	this->araVirtualDocument = nullptr;
 }
 
 void PluginDecorator::setPlugin(
@@ -54,6 +55,7 @@ void PluginDecorator::setPlugin(
 			delete editor;
 		}
 	}
+	this->araVirtualDocument = nullptr;
 
 	this->plugin = std::move(plugin);
 	this->pluginIdentifier = pluginIdentifier;
@@ -120,13 +122,18 @@ void PluginDecorator::setARA(
 			auto pluginInstance = controller->bindDocumentToPluginInstance(
 				*(this->plugin), allRoles, allRoles);
 
-			if (pluginInstance.isValid()) {
+			if (pluginInstance.isValid() && this->seq) {
 				/** Set ARA Document Controller */
 				this->araDocumentController = std::move(controller);
 
 				/** Get Renderer Interfaces */
 				this->araEditorRenderer = pluginInstance.getEditorRendererInterface();
 				this->araPlaybackRenderer = pluginInstance.getPlaybackRendererInterface();
+
+				/** Create ARA Virtual Document */
+				this->araVirtualDocument = std::make_unique<ARAVirtualDocument>(
+					this->seq, this->araDocumentController->getDocumentController());
+				this->araVirtualDocument->update();
 			}
 		}
 
