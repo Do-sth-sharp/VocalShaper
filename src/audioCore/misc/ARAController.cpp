@@ -81,6 +81,7 @@ bool ARAContentAccessController::isMusicalContextContentAvailable(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
 	ARA::ARAContentType type) noexcept {
 	auto midiContext = ContextConverter::fromHostRef(musicalContextHostRef);
+
 	return midiContext->getType() == (ARAExtension::ARAContentType)type
 		&& this->allowedContentTypes.contains((ARAExtension::ARAContentType)type);
 }
@@ -127,6 +128,7 @@ ARA::ARAInt32 ARAContentAccessController::getContentReaderEventCount(
 	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
 	if (contextReader->contextHostRef) {
 		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
+
 		return midiContext->getEventCount();
 	}
 

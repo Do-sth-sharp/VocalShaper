@@ -354,21 +354,17 @@ public:
 	ARAVirtualAudioSourceRegionSequence(
 		ARA::Host::DocumentController& dc,
 		SeqSourceProcessor* seq,
-		ARAVirtualAudioModification& modification,
 		ARAVirtualMusicalContext& emptyContext);
 
 	void update() override;
 
-	ARAVirtualAudioModification& getModification();
 	ARAVirtualMusicalContext& getEmptyContext();
 
 private:
-	ARAVirtualAudioModification& modification;
 	ARAVirtualMusicalContext& emptyContext;
 
 	static const ARA::ARARegionSequenceProperties createProperties(
-		SeqSourceProcessor* seq, ARA::ARAColor* color,
-		ARAVirtualAudioModification& modification, ARAVirtualMusicalContext& emptyContext);
+		SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualMusicalContext& emptyContext);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualAudioSourceRegionSequence)
 };
@@ -383,6 +379,8 @@ public:
 		const ARA::ARAPlaybackRegionProperties& properties);
 	virtual ~ARAVirtualPlaybackRegion() = default;
 
+	ARAVirtualAudioModification& getModification();
+
 	virtual void update() = 0;
 
 	juce::ARAHostModel::PlaybackRegion& getProperties();
@@ -391,6 +389,7 @@ public:
 
 protected:
 	ARAVirtualRegionSequence& sequence;
+	ARAVirtualAudioModification& modification;
 
 	juce::ARAHostModel::PlaybackRegion playbackRegion;
 
@@ -409,7 +408,8 @@ public:
 
 private:
 	static const ARA::ARAPlaybackRegionProperties createProperties(
-		ARAVirtualAudioSourceRegionSequence& sequence);
+		ARAVirtualAudioSourceRegionSequence& sequence,
+		ARAVirtualAudioModification& modification);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualAudioPlaybackRegion)
 };

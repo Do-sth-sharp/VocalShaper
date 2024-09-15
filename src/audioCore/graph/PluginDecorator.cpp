@@ -132,7 +132,8 @@ void PluginDecorator::setARA(
 
 				/** Create ARA Virtual Document */
 				this->araVirtualDocument = std::make_unique<ARAVirtualDocument>(
-					this->seq, this->araDocumentController->getDocumentController());
+					this->seq, this->araDocumentController->getDocumentController(),
+					this->araEditorRenderer, this->araPlaybackRenderer);
 				this->araVirtualDocument->update();
 			}
 		}

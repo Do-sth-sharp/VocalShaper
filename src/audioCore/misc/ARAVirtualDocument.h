@@ -9,7 +9,9 @@ class ARAVirtualDocument {
 public:
 	ARAVirtualDocument() = delete;
 	ARAVirtualDocument(SeqSourceProcessor* seq,
-		ARA::Host::DocumentController& controller);
+		ARA::Host::DocumentController& controller,
+		juce::ARAHostModel::EditorRendererInterface& araEditorRenderer,
+		juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer);
 	~ARAVirtualDocument();
 
 	void update();
@@ -18,6 +20,8 @@ public:
 private:
 	SeqSourceProcessor* const seq = nullptr;
 	ARA::Host::DocumentController& controller;
+	juce::ARAHostModel::EditorRendererInterface& araEditorRenderer;
+	juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer;
 
 	std::unique_ptr<ARAVirtualAudioSource> audioSource = nullptr;
 	std::unique_ptr<ARAVirtualAudioModification> audioModification = nullptr;
@@ -26,6 +30,8 @@ private:
 	juce::OwnedArray<ARAVirtualPlaybackRegion> playbackRegions;
 
 	void clearUnsafe();
+	void removeRegions();
+	void addRegions();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualDocument)
 };

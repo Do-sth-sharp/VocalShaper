@@ -2,8 +2,11 @@
 
 ARAVirtualDocument::ARAVirtualDocument(
 	SeqSourceProcessor* seq,
-	ARA::Host::DocumentController& controller)
-	: seq(seq), controller(controller) {}
+	ARA::Host::DocumentController& controller,
+	juce::ARAHostModel::EditorRendererInterface& araEditorRenderer,
+	juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer)
+	: seq(seq), controller(controller),
+	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {}
 
 ARAVirtualDocument::~ARAVirtualDocument() {
 	this->clear();
@@ -18,7 +21,7 @@ void ARAVirtualDocument::update() {
 
 	/** Audio Source */
 	this->audioSource = std::make_unique<ARAVirtualAudioSource>(
-		this->controller, this->seq);/**< TODO At Least 2 Samples In Audio Source */
+		this->controller, this->seq);
 	
 	/** Audio Modification */
 	this->audioModification = std::make_unique<ARAVirtualAudioModification>(
@@ -58,7 +61,7 @@ void ARAVirtualDocument::update() {
 	for (auto i : this->musicalContexts) {
 		if (auto p = dynamic_cast<ARAVirtualEmptyContext*>(i)) {
 			this->regionSequences.add(std::make_unique<ARAVirtualAudioSourceRegionSequence>(
-				this->controller, this->seq, *(this->audioModification), *i));
+				this->controller, this->seq, *i));
 		}
 		else {
 			this->regionSequences.add(std::make_unique<ARAVirtualMusicalContextRegionSequence>(
@@ -77,6 +80,9 @@ void ARAVirtualDocument::update() {
 				this->controller, *i, *(this->audioModification)));
 		}
 	}
+
+	/** Add Regions To Renderer */
+	this->addRegions();
 }
 
 void ARAVirtualDocument::clear() {
@@ -85,9 +91,35 @@ void ARAVirtualDocument::clear() {
 }
 
 void ARAVirtualDocument::clearUnsafe() {
+	/** Remove Regions From Renderer */
+	this->removeRegions();
+
+	/** Clear Objects */
 	this->playbackRegions.clear();
 	this->regionSequences.clear();
 	this->musicalContexts.clear();
 	this->audioModification = nullptr;
 	this->audioSource = nullptr;
+}
+
+void ARAVirtualDocument::removeRegions() {
+	for (auto i : this->playbackRegions) {
+		if (this->araEditorRenderer.isValid()) {
+			this->araEditorRenderer.remove(i->getProperties());
+		}
+		if (this->araPlaybackRenderer.isValid()) {
+			this->araPlaybackRenderer.remove(i->getProperties());
+		}
+	}
+}
+
+void ARAVirtualDocument::addRegions() {
+	for (auto i : this->playbackRegions) {
+		if (this->araEditorRenderer.isValid()) {
+			this->araEditorRenderer.add(i->getProperties());
+		}
+		if (this->araPlaybackRenderer.isValid()) {
+			this->araPlaybackRenderer.add(i->getProperties());
+		}
+	}
 }

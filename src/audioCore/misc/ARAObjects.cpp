@@ -605,7 +605,8 @@ ARAVirtualMusicalContextRegionSequence::createProperties(
 	auto properties = juce::ARAHostModel::RegionSequence::getEmptyProperties();
 
 	if (seq) {
-		properties.name = seq->getTrackName().toRawUTF8();
+		auto trackName = seq->getTrackName();
+		properties.name = trackName.isNotEmpty() ? trackName.toRawUTF8() : "Untitled Track";
 
 		auto seqColor = seq->getTrackColor();
 		color->r = seqColor.getFloatRed();
@@ -622,21 +623,16 @@ ARAVirtualMusicalContextRegionSequence::createProperties(
 ARAVirtualAudioSourceRegionSequence::ARAVirtualAudioSourceRegionSequence(
 	ARA::Host::DocumentController& dc,
 	SeqSourceProcessor* seq,
-	ARAVirtualAudioModification& modification,
 	ARAVirtualMusicalContext& emptyContext)
 	: ARAVirtualRegionSequence(dc, seq,
 		ARAVirtualAudioSourceRegionSequence::createProperties(
-			seq, &(this->color), modification, emptyContext)),
-	modification(modification), emptyContext(emptyContext) {}
+			seq, &(this->color), emptyContext)),
+	emptyContext(emptyContext) {}
 
 void ARAVirtualAudioSourceRegionSequence::update() {
 	this->regionSequence.update(
 		ARAVirtualAudioSourceRegionSequence::createProperties(
-			this->seq, &(this->color), this->modification, this->emptyContext));
-}
-
-ARAVirtualAudioModification& ARAVirtualAudioSourceRegionSequence::getModification() {
-	return this->modification;
+			this->seq, &(this->color), this->emptyContext));
 }
 
 ARAVirtualMusicalContext& ARAVirtualAudioSourceRegionSequence::getEmptyContext() {
@@ -644,12 +640,12 @@ ARAVirtualMusicalContext& ARAVirtualAudioSourceRegionSequence::getEmptyContext()
 }
 
 const ARA::ARARegionSequenceProperties ARAVirtualAudioSourceRegionSequence::createProperties(
-	SeqSourceProcessor* seq, ARA::ARAColor* color,
-	ARAVirtualAudioModification& /*modification*/, ARAVirtualMusicalContext& emptyContext) {
+	SeqSourceProcessor* seq, ARA::ARAColor* color, ARAVirtualMusicalContext& emptyContext) {
 	auto properties = juce::ARAHostModel::RegionSequence::getEmptyProperties();
 
 	if (seq) {
-		properties.name = seq->getTrackName().toRawUTF8();
+		auto trackName = seq->getTrackName();
+		properties.name = trackName.isNotEmpty() ? trackName.toRawUTF8() : "Untitled Track";
 
 		auto seqColor = seq->getTrackColor();
 		color->r = seqColor.getFloatRed();
@@ -668,8 +664,12 @@ ARAVirtualPlaybackRegion::ARAVirtualPlaybackRegion(
 	ARAVirtualRegionSequence& sequence,
 	ARAVirtualAudioModification& modification,
 	const ARA::ARAPlaybackRegionProperties& properties)
-	: sequence(sequence), 
+	: sequence(sequence), modification(modification),
 	playbackRegion(Converter::toHostRef(this), dc, modification.getProperties(), properties) {}
+
+ARAVirtualAudioModification& ARAVirtualPlaybackRegion::getModification() {
+	return this->modification;
+}
 
 juce::ARAHostModel::PlaybackRegion& ARAVirtualPlaybackRegion::getProperties() {
 	return this->playbackRegion;
@@ -681,19 +681,21 @@ ARAVirtualAudioPlaybackRegion::ARAVirtualAudioPlaybackRegion(
 	ARAVirtualAudioModification& modification)
 	: ARAVirtualPlaybackRegion(dc, sequence, modification,
 		ARAVirtualAudioPlaybackRegion::createProperties(
-			dynamic_cast<ARAVirtualAudioSourceRegionSequence&>(sequence))) {}
+			dynamic_cast<ARAVirtualAudioSourceRegionSequence&>(sequence), modification)) {}
 
 void ARAVirtualAudioPlaybackRegion::update() {
 	this->playbackRegion.update(
 		ARAVirtualAudioPlaybackRegion::createProperties(
-			dynamic_cast<ARAVirtualAudioSourceRegionSequence&>(this->sequence)));
+			dynamic_cast<ARAVirtualAudioSourceRegionSequence&>(this->sequence), this->modification));
 }
 
 const ARA::ARAPlaybackRegionProperties
-ARAVirtualAudioPlaybackRegion::createProperties(ARAVirtualAudioSourceRegionSequence& sequence) {
+ARAVirtualAudioPlaybackRegion::createProperties(
+	ARAVirtualAudioSourceRegionSequence& sequence,
+	ARAVirtualAudioModification& modification) {
 	auto properties = juce::ARAHostModel::PlaybackRegion::getEmptyProperties();
 
-	double totalTime = sequence.getModification().getSource().getLength();
+	double totalTime = modification.getSource().getLength();
 
 	properties.transformationFlags = ARA::kARAPlaybackTransformationNoChanges;
 	properties.startInModificationTime = 0.0;
