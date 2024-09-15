@@ -115,7 +115,7 @@ private:
 		ARAExtension::ARAContentTypeNote,
 		ARAExtension::ARAContentTypeTempoEntry,
 		ARAExtension::ARAContentTypeBarSignature,
-		ARAExtension::ARAContentTypeKeySignature,
+		//ARAExtension::ARAContentTypeKeySignature,/**< At Least 1 Key Signature Event In Context */
 		ARAExtension::ARAContentTypeNotePlus,
 		ARAExtension::ARAContentTypeSustainPedal,
 		ARAExtension::ARAContentTypeSostenutoPedal,

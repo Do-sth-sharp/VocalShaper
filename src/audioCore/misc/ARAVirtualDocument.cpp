@@ -18,7 +18,7 @@ void ARAVirtualDocument::update() {
 
 	/** Audio Source */
 	this->audioSource = std::make_unique<ARAVirtualAudioSource>(
-		this->controller, this->seq);/**< TODO At Least 1 Sample In Audio Source */
+		this->controller, this->seq);/**< TODO At Least 2 Samples In Audio Source */
 	
 	/** Audio Modification */
 	this->audioModification = std::make_unique<ARAVirtualAudioModification>(
@@ -31,8 +31,8 @@ void ARAVirtualDocument::update() {
 		std::make_unique<ARAVirtualTempoContext>(this->controller, this->seq));
 	this->musicalContexts.add(
 		std::make_unique<ARAVirtualBarContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualKeyContext>(this->controller, this->seq));/**< TODO At Least 1 Key Signature Event In Context */
+	//this->musicalContexts.add(
+	//	std::make_unique<ARAVirtualKeyContext>(this->controller, this->seq));/**< At Least 1 Key Signature Event In Context */
 	this->musicalContexts.add(
 		std::make_unique<ARAVirtualNoteContext>(this->controller, this->seq));
 	this->musicalContexts.add(
