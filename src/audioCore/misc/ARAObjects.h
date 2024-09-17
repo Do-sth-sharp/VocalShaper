@@ -85,51 +85,6 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualEmptyContext)
 };
 
-class ARAVirtualTempoContext : public ARAVirtualMusicalContext {
-public:
-	ARAVirtualTempoContext() = delete;
-	ARAVirtualTempoContext(
-		ARA::Host::DocumentController& dc,
-		SeqSourceProcessor* seq);
-
-public:
-	int32_t getEventCount() override;
-	ARA::ARAContentTempoEntry getTempo(int32_t index);
-
-private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualTempoContext)
-};
-
-class ARAVirtualBarContext : public ARAVirtualMusicalContext {
-public:
-	ARAVirtualBarContext() = delete;
-	ARAVirtualBarContext(
-		ARA::Host::DocumentController& dc,
-		SeqSourceProcessor* seq);
-
-public:
-	int32_t getEventCount() override;
-	ARA::ARAContentBarSignature getBar(int32_t index);
-
-private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualBarContext)
-};
-
-class ARAVirtualKeyContext : public ARAVirtualMusicalContext {
-public:
-	ARAVirtualKeyContext() = delete;
-	ARAVirtualKeyContext(
-		ARA::Host::DocumentController& dc,
-		SeqSourceProcessor* seq);
-
-public:
-	int32_t getEventCount() override;
-	ARA::ARAContentKeySignature getKey(int32_t index);
-
-private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualKeyContext)
-};
-
 class ARAVirtualNoteContext : public ARAVirtualMusicalContext {
 public:
 	ARAVirtualNoteContext() = delete;

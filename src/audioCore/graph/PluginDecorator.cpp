@@ -114,7 +114,8 @@ void PluginDecorator::setARA(
 			std::make_unique<ARAAudioAccessController>(),
 			std::make_unique<ARAArchivingController>(),
 			std::make_unique<ARAContentAccessController>(),
-			std::make_unique<ARAModelUpdateController>())) {
+			std::make_unique<ARAModelUpdateController>(),
+			std::make_unique<ARAPlaybackController>())) {
 			/** Bind To Plugin Instance */
 			auto allRoles = ARA::kARAPlaybackRendererRole
 				| ARA::kARAEditorRendererRole

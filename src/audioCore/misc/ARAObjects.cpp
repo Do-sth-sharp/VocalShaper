@@ -1,83 +1,7 @@
 ﻿#include "ARAObjects.h"
 #include "../graph/SeqSourceProcessor.h"
 #include "../source/SourceManager.h"
-#include "../misc/AudioLock.h"
-#include "../misc/PlayPosition.h"
 #include "../AudioCore.h"
-
-class GlobalMidiEventHelper {
-	static MovablePlayHead* getPlayHead(SeqSourceProcessor* seq) {
-		return dynamic_cast<MovablePlayHead*>(seq->getPlayHead());
-	}
-
-public:
-	static int32_t getTempoCount(SeqSourceProcessor* seq) {
-		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
-			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			return ph->getTempoTypeLabelNum() + 1;/**< Last Tempo Sync Point */
-		}
-		return 0;
-	}
-	static ARA::ARAContentTempoEntry getTempoEvent(SeqSourceProcessor* seq, int32_t index) {
-		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
-			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			if (index < ph->getTempoTypeLabelNum()) {
-				int labelIndex = ph->getTempoTypeLabelIndex(index);
-				if (labelIndex > -1) {
-					double timeSec = ph->getTempoLabelTime(labelIndex);
-					double timeQuarter = ph->toQuarter(timeSec);
-					return { timeSec, timeQuarter };
-				}
-			}
-			else {
-				/** Last Tempo Sync Point */
-				double timeSec = 0;
-				if (int num = ph->getTempoLabelNum()) {
-					timeSec = ph->getTempoLabelTime(num - 1);
-				}
-				timeSec += 1;
-
-				double timeQuarter = ph->toQuarter(timeSec);
-				return { timeSec, timeQuarter };
-			}
-		}
-		return {};
-	}
-	static int32_t getBarCount(SeqSourceProcessor* seq) {
-		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
-			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			return ph->getBeatTypeLabelNum();
-		}
-		return 0;
-	}
-	static ARA::ARAContentBarSignature getBarEvent(SeqSourceProcessor* seq, int32_t index) {
-		if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
-			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			int labelIndex = ph->getBeatTypeLabelIndex(index);
-			if (labelIndex > -1) {
-				auto beat = ph->getTempoLabelBeat(labelIndex);
-				return { std::get<0>(beat), std::get<1>(beat), ph->getTempoLabelTime(index) };
-			}
-		}
-		return {};
-	}
-	static int32_t getKeyCount(SeqSourceProcessor* seq) {
-		/** Nothing To Do */
-		/*if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
-			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			return 0;
-		}*/
-		return 0;
-	}
-	static ARA::ARAContentKeySignature getKeyEvent(SeqSourceProcessor* seq, int32_t index) {
-		/** Nothing To Do */
-		/*if (auto ph = GlobalMidiEventHelper::getPlayHead(seq)) {
-			juce::ScopedReadLock locker(audioLock::getPositionLock());
-			return {};
-		}*/
-		return {};
-	}
-};
 
 ARAVirtualAudioSource::ARAVirtualAudioSource(
 	ARA::Host::DocumentController& dc,
@@ -189,48 +113,6 @@ int32_t ARAVirtualEmptyContext::getEventCount() {
 const char* ARAVirtualEmptyContext::getData(int32_t /*index*/) {
 	/** No Events In Empty Context */
 	return nullptr;
-}
-
-ARAVirtualTempoContext::ARAVirtualTempoContext(
-	ARA::Host::DocumentController& dc,
-	SeqSourceProcessor* seq)
-	: ARAVirtualMusicalContext(dc, seq, ARAExtension::ARAContentTypeTempoEntry) {}
-
-int32_t ARAVirtualTempoContext::getEventCount() {
-	return GlobalMidiEventHelper::getTempoCount(this->getSeq());
-}
-
-ARA::ARAContentTempoEntry
-ARAVirtualTempoContext::getTempo(int32_t index) {
-	return GlobalMidiEventHelper::getTempoEvent(this->getSeq(), index);
-}
-
-ARAVirtualBarContext::ARAVirtualBarContext(
-	ARA::Host::DocumentController& dc,
-	SeqSourceProcessor* seq)
-	: ARAVirtualMusicalContext(dc, seq, ARAExtension::ARAContentTypeBarSignature) {}
-
-int32_t ARAVirtualBarContext::getEventCount() {
-	return GlobalMidiEventHelper::getBarCount(this->getSeq());
-}
-
-ARA::ARAContentBarSignature
-ARAVirtualBarContext::getBar(int32_t index) {
-	return GlobalMidiEventHelper::getBarEvent(this->getSeq(), index);
-}
-
-ARAVirtualKeyContext::ARAVirtualKeyContext(
-	ARA::Host::DocumentController& dc,
-	SeqSourceProcessor* seq)
-	: ARAVirtualMusicalContext(dc, seq, ARAExtension::ARAContentTypeKeySignature) {}
-
-int32_t ARAVirtualKeyContext::getEventCount() {
-	return GlobalMidiEventHelper::getKeyCount(this->getSeq());
-}
-
-ARA::ARAContentKeySignature
-ARAVirtualKeyContext::getKey(int32_t index) {
-	return GlobalMidiEventHelper::getKeyEvent(this->getSeq(), index);
 }
 
 ARAVirtualNoteContext::ARAVirtualNoteContext(

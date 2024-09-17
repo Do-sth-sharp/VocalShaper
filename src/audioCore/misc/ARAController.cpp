@@ -1,5 +1,90 @@
 ﻿#include "ARAController.h"
+#include "../misc/PlayPosition.h"
+#include "../misc/AudioLock.h"
 #include "../AudioCore.h"
+
+class GlobalMidiEventHelper {
+	static MovablePlayHead* getPlayHead() {
+		return PlayPosition::getInstance();
+	}
+
+public:
+	static int32_t getTempoCount() {
+		if (auto ph = GlobalMidiEventHelper::getPlayHead()) {
+			juce::ScopedReadLock locker(audioLock::getPositionLock());
+
+			/** At Least 2 Tempo Sync Points */
+			if (ph->getTempoTypeLabelNum() < 1) {
+				return 2;
+			}
+
+			return ph->getTempoTypeLabelNum() + 1;/**< Last Tempo Sync Point */
+		}
+		return 0;
+	}
+	static ARA::ARAContentTempoEntry getTempoEvent(int32_t index) {
+		if (auto ph = GlobalMidiEventHelper::getPlayHead()) {
+			juce::ScopedReadLock locker(audioLock::getPositionLock());
+			if (index < ph->getTempoTypeLabelNum()) {
+				int labelIndex = ph->getTempoTypeLabelIndex(index);
+				if (labelIndex > -1) {
+					double timeSec = ph->getTempoLabelTime(labelIndex);
+					double timeQuarter = ph->toQuarter(timeSec);
+					return { timeSec, timeQuarter };
+				}
+			}
+			else if (index == 0) {
+				return { 0, 0 };
+			}
+			else {
+				/** Last Tempo Sync Point */
+				double timeSec = 0;
+				if (int num = ph->getTempoLabelNum()) {
+					timeSec = ph->getTempoLabelTime(num - 1);
+				}
+				timeSec += 1;
+
+				double timeQuarter = ph->toQuarter(timeSec);
+				return { timeSec, timeQuarter };
+			}
+		}
+		return { 0, 0 };
+	}
+	static int32_t getBarCount() {
+		if (auto ph = GlobalMidiEventHelper::getPlayHead()) {
+			juce::ScopedReadLock locker(audioLock::getPositionLock());
+			return std::max(ph->getBeatTypeLabelNum(), 1);
+		}
+		return 0;
+	}
+	static ARA::ARAContentBarSignature getBarEvent(int32_t index) {
+		if (auto ph = GlobalMidiEventHelper::getPlayHead()) {
+			juce::ScopedReadLock locker(audioLock::getPositionLock());
+			int labelIndex = ph->getBeatTypeLabelIndex(index);
+			if (labelIndex > -1) {
+				auto beat = ph->getTempoLabelBeat(labelIndex);
+				return { std::get<0>(beat), std::get<1>(beat), ph->getTempoLabelTime(index) };
+			}
+		}
+		return { 4, 4, 0 };
+	}
+	static int32_t getKeyCount() {
+		/** Nothing To Do */
+		/*if (auto ph = GlobalMidiEventHelper::getPlayHead()) {
+			juce::ScopedReadLock locker(audioLock::getPositionLock());
+			return 0;
+		}*/
+		return 0;
+	}
+	static ARA::ARAContentKeySignature getKeyEvent(int32_t index) {
+		/** Nothing To Do */
+		/*if (auto ph = GlobalMidiEventHelper::getPlayHead()) {
+			juce::ScopedReadLock locker(audioLock::getPositionLock());
+			return {};
+		}*/
+		return {};
+	}
+};
 
 ARA::ARAAudioReaderHostRef ARAAudioAccessController::createAudioReaderForSource(
 	ARA::ARAAudioSourceHostRef audioSourceHostRef,
@@ -82,6 +167,12 @@ bool ARAContentAccessController::isMusicalContextContentAvailable(
 	ARA::ARAContentType type) noexcept {
 	auto midiContext = ContextConverter::fromHostRef(musicalContextHostRef);
 
+	/** Each Context Must Has Tempo And Bar Signature Events */
+	if (type == ARAExtension::ARAContentTypeTempoEntry ||
+		type == ARAExtension::ARAContentTypeBarSignature) {
+		return true;
+	}
+
 	return midiContext->getType() == (ARAExtension::ARAContentType)type
 		&& this->allowedContentTypes.contains((ARAExtension::ARAContentType)type);
 }
@@ -94,8 +185,20 @@ ARA::ARAContentGrade ARAContentAccessController::getMusicalContextContentGrade(
 
 ARA::ARAContentReaderHostRef ARAContentAccessController::createMusicalContextContentReader(
 	ARA::ARAMusicalContextHostRef musicalContextHostRef,
-	ARA::ARAContentType /*type*/, const ARA::ARAContentTimeRange* /*range*/) noexcept {
-	auto contextReader = std::make_unique<ContextReader>(musicalContextHostRef);
+	ARA::ARAContentType type, const ARA::ARAContentTimeRange* /*range*/) noexcept {
+	std::unique_ptr<ContextReader> contextReader;
+
+	/** Each Context Must Has Tempo And Bar Signature Events */
+	if (type == ARAExtension::ARAContentTypeTempoEntry) {
+		contextReader = std::make_unique<ContextReader>(ContextReader::Type::Tempo);
+	}
+	else if (type == ARAExtension::ARAContentTypeBarSignature) {
+		contextReader = std::make_unique<ContextReader>(ContextReader::Type::Bar);
+	}
+	else {
+		contextReader = std::make_unique<ContextReader>(musicalContextHostRef);
+	}
+
 	auto audioReaderHostRef = Converter::toHostRef(contextReader.get());
 
 	this->contextReaders.emplace(contextReader.get(), std::move(contextReader));
@@ -126,7 +229,15 @@ ARA::ARAContentReaderHostRef ARAContentAccessController::createAudioSourceConten
 ARA::ARAInt32 ARAContentAccessController::getContentReaderEventCount(
 	ARA::ARAContentReaderHostRef contentReaderHostRef) noexcept {
 	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
-	if (contextReader->contextHostRef) {
+
+	/** Each Context Must Has Tempo And Bar Signature Events */
+	if (contextReader->type == ContextReader::Type::Tempo) {
+		return GlobalMidiEventHelper::getTempoCount();
+	}
+	else if (contextReader->type == ContextReader::Type::Bar) {
+		return GlobalMidiEventHelper::getBarCount();
+	}
+	else if (contextReader->contextHostRef) {
 		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
 
 		return midiContext->getEventCount();
@@ -139,7 +250,17 @@ const void* ARAContentAccessController::getContentReaderDataForEvent(
 	ARA::ARAContentReaderHostRef contentReaderHostRef,
 	ARA::ARAInt32 eventIndex) noexcept {
 	auto contextReader = Converter::fromHostRef(contentReaderHostRef);
-	if (contextReader->contextHostRef) {
+
+	/** Each Context Must Has Tempo And Bar Signature Events */
+	if (contextReader->type == ContextReader::Type::Tempo) {
+		this->tempoTemp = GlobalMidiEventHelper::getTempoEvent(eventIndex);
+		return &(this->tempoTemp);
+	}
+	else if (contextReader->type == ContextReader::Type::Bar) {
+		this->barTemp = GlobalMidiEventHelper::getBarEvent(eventIndex);
+		return &(this->barTemp);
+	}
+	else if (contextReader->contextHostRef) {
 		auto midiContext = ContextConverter::fromHostRef(contextReader->contextHostRef);
 
 		/** Shit Code! It Blames to ARA. */
@@ -149,30 +270,6 @@ const void* ARAContentAccessController::getContentReaderDataForEvent(
 		case ARAExtension::ARAContentTypeUnknown: {
 			if (auto context = dynamic_cast<ARAVirtualEmptyContext*>(midiContext)) {
 				return context->getData(eventIndex);
-			}
-			break;
-		}
-
-		case ARAExtension::ARAContentTypeTempoEntry: {
-			if (auto context = dynamic_cast<ARAVirtualTempoContext*>(midiContext)) {
-				this->tempoTemp = context->getTempo(eventIndex);
-				return &(this->tempoTemp);
-			}
-			break;
-		}
-
-		case ARAExtension::ARAContentTypeBarSignature: {
-			if (auto context = dynamic_cast<ARAVirtualBarContext*>(midiContext)) {
-				this->barTemp = context->getBar(eventIndex);
-				return &(this->barTemp);
-			}
-			break;
-		}
-
-		case ARAExtension::ARAContentTypeKeySignature: {
-			if (auto context = dynamic_cast<ARAVirtualKeyContext*>(midiContext)) {
-				this->keyTemp = context->getKey(eventIndex);
-				return &(this->keyTemp);
 			}
 			break;
 		}

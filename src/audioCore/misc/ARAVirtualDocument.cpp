@@ -35,12 +35,6 @@ void ARAVirtualDocument::update() {
 	this->musicalContexts.add(
 		std::make_unique<ARAVirtualEmptyContext>(this->controller, this->seq));
 	this->musicalContexts.add(
-		std::make_unique<ARAVirtualTempoContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualBarContext>(this->controller, this->seq));
-	//this->musicalContexts.add(
-	//	std::make_unique<ARAVirtualKeyContext>(this->controller, this->seq));/**< At Least 1 Key Signature Event In Context */
-	this->musicalContexts.add(
 		std::make_unique<ARAVirtualNoteContext>(this->controller, this->seq));
 	this->musicalContexts.add(
 		std::make_unique<ARAVirtualNotePlusContext>(this->controller, this->seq));

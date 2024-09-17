@@ -99,10 +99,17 @@ private:
 
 private:
 	struct ContextReader {
-		ContextReader(ARA::ARAMusicalContextHostRef context)
-			: contextHostRef(context) {}
+		enum class Type {
+			Context, Tempo, Bar
+		};
 
-		ARA::ARAMusicalContextHostRef contextHostRef;
+		ContextReader() = delete;
+		ContextReader(Type type) : type(type), contextHostRef(nullptr) {};
+		ContextReader(ARA::ARAMusicalContextHostRef context)
+			: type(Type::Context), contextHostRef(context) {}
+
+		const Type type = Type::Context;
+		const ARA::ARAMusicalContextHostRef contextHostRef;
 	};
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ContextReader*, ARA::ARAContentReaderHostRef>;
@@ -113,9 +120,6 @@ private:
 	const std::unordered_set<ARAExtension::ARAContentType> allowedContentTypes{
 		ARAExtension::ARAContentTypeUnknown,
 		ARAExtension::ARAContentTypeNote,
-		ARAExtension::ARAContentTypeTempoEntry,
-		ARAExtension::ARAContentTypeBarSignature,
-		//ARAExtension::ARAContentTypeKeySignature,/**< At Least 1 Key Signature Event In Context */
 		ARAExtension::ARAContentTypeNotePlus,
 		ARAExtension::ARAContentTypeSustainPedal,
 		ARAExtension::ARAContentTypeSostenutoPedal,
@@ -132,7 +136,6 @@ private:
 	ARA::ARAContentNote noteTemp;
 	ARA::ARAContentTempoEntry tempoTemp;
 	ARA::ARAContentBarSignature barTemp;
-	ARA::ARAContentKeySignature keyTemp;
 
 	ARAExtension::ARAContentNote notePlusTemp;
 	ARAExtension::ARAContentPedal pedalTemp;
