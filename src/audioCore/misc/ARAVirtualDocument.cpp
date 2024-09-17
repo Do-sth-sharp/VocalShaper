@@ -31,56 +31,20 @@ void ARAVirtualDocument::update() {
 	this->audioModification = std::make_unique<ARAVirtualAudioModification>(
 		this->controller, *(this->audioSource));
 
-	/** Musical Contexts */
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualEmptyContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualNoteContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualNotePlusContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualSustainPedalContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualSostenutoPedalContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualSoftPedalContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualPitchWheelContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualAfterTouchContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualChannelPressureContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualControllerContext>(this->controller, this->seq));
-	this->musicalContexts.add(
-		std::make_unique<ARAVirtualMiscContext>(this->controller, this->seq));
-
+	/** Musical Context */
+	this->musicalContext =
+		std::make_unique<ARAVirtualMusicalContext>(this->controller, this->seq);
+	
 	/** Region Sequence */
-	for (auto i : this->musicalContexts) {
-		if (auto p = dynamic_cast<ARAVirtualEmptyContext*>(i)) {
-			this->regionSequences.add(std::make_unique<ARAVirtualAudioSourceRegionSequence>(
-				this->controller, this->seq, *i));
-		}
-		else {
-			this->regionSequences.add(std::make_unique<ARAVirtualMusicalContextRegionSequence>(
-				this->controller, this->seq, *i));
-		}
-	}
+	this->regionSequence = std::make_unique<ARAVirtualRegionSequence>(
+		this->controller, this->seq, *(this->musicalContext));
 
 	/** Playback Region */
-	for (auto i : this->regionSequences) {
-		if (auto p = dynamic_cast<ARAVirtualAudioSourceRegionSequence*>(i)) {
-			this->playbackRegions.add(std::make_unique<ARAVirtualAudioPlaybackRegion>(
-				this->controller, *i, *(this->audioModification)));
-		}
-		else if (auto p = dynamic_cast<ARAVirtualMusicalContextRegionSequence*>(i)) {
-			this->playbackRegions.add(std::make_unique<ARAVirtualMusicalContextPlaybackRegion>(
-				this->controller, *i, *(this->audioModification)));
-		}
-	}
+	this->playbackRegion = std::make_unique<ARAVirtualPlaybackRegion>(
+		this->controller, *(this->regionSequence), *(this->audioModification));
 
 	/** Add Regions To Renderer */
-	this->addRegions();
+	this->addRegionToRenderer();
 
 	/** Turn On Plugin */
 	this->pluginOnOff(true);
@@ -102,34 +66,34 @@ void ARAVirtualDocument::clear() {
 
 void ARAVirtualDocument::clearUnsafe() {
 	/** Remove Regions From Renderer */
-	this->removeRegions();
+	this->removeRegionToRenderer();
 
 	/** Clear Objects */
-	this->playbackRegions.clear();
-	this->regionSequences.clear();
-	this->musicalContexts.clear();
+	this->playbackRegion = nullptr;
+	this->regionSequence = nullptr;
+	this->musicalContext = nullptr;
 	this->audioModification = nullptr;
 	this->audioSource = nullptr;
 }
 
-void ARAVirtualDocument::removeRegions() {
-	for (auto i : this->playbackRegions) {
+void ARAVirtualDocument::removeRegionToRenderer() {
+	if (this->playbackRegion) {
 		if (this->araEditorRenderer.isValid()) {
-			this->araEditorRenderer.remove(i->getProperties());
+			this->araEditorRenderer.remove(this->playbackRegion->getProperties());
 		}
 		if (this->araPlaybackRenderer.isValid()) {
-			this->araPlaybackRenderer.remove(i->getProperties());
+			this->araPlaybackRenderer.remove(this->playbackRegion->getProperties());
 		}
 	}
 }
 
-void ARAVirtualDocument::addRegions() {
-	for (auto i : this->playbackRegions) {
+void ARAVirtualDocument::addRegionToRenderer() {
+	if (this->playbackRegion) {
 		if (this->araEditorRenderer.isValid()) {
-			this->araEditorRenderer.add(i->getProperties());
+			this->araEditorRenderer.add(this->playbackRegion->getProperties());
 		}
 		if (this->araPlaybackRenderer.isValid()) {
-			this->araPlaybackRenderer.add(i->getProperties());
+			this->araPlaybackRenderer.add(this->playbackRegion->getProperties());
 		}
 	}
 }

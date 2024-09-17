@@ -29,13 +29,13 @@ private:
 
 	std::unique_ptr<ARAVirtualAudioSource> audioSource = nullptr;
 	std::unique_ptr<ARAVirtualAudioModification> audioModification = nullptr;
-	juce::OwnedArray<ARAVirtualMusicalContext> musicalContexts;
-	juce::OwnedArray<ARAVirtualRegionSequence> regionSequences;
-	juce::OwnedArray<ARAVirtualPlaybackRegion> playbackRegions;
+	std::unique_ptr<ARAVirtualMusicalContext> musicalContext = nullptr;
+	std::unique_ptr<ARAVirtualRegionSequence> regionSequence = nullptr;
+	std::unique_ptr<ARAVirtualPlaybackRegion> playbackRegion = nullptr;
 
 	void clearUnsafe();
-	void removeRegions();
-	void addRegions();
+	void removeRegionToRenderer();
+	void addRegionToRenderer();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualDocument)
 };

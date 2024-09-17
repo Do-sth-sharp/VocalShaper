@@ -99,16 +99,13 @@ private:
 
 private:
 	struct ContextReader {
-		enum class Type {
-			Context, Tempo, Bar
-		};
-
 		ContextReader() = delete;
-		ContextReader(Type type) : type(type), contextHostRef(nullptr) {};
-		ContextReader(ARA::ARAMusicalContextHostRef context)
-			: type(Type::Context), contextHostRef(context) {}
+		ContextReader(
+			ARAExtension::ARAContentType type,
+			ARA::ARAMusicalContextHostRef context)
+			: type(type), contextHostRef(context) {}
 
-		const Type type = Type::Context;
+		const ARAExtension::ARAContentType type = ARAExtension::ARAContentTypeUnknown;
 		const ARA::ARAMusicalContextHostRef contextHostRef;
 	};
 
@@ -119,6 +116,9 @@ private:
 
 	const std::unordered_set<ARAExtension::ARAContentType> allowedContentTypes{
 		ARAExtension::ARAContentTypeUnknown,
+		ARAExtension::ARAContentTypeTempoEntry,
+		ARAExtension::ARAContentTypeBarSignature,
+		//ARAExtension::ARAContentTypeKeySignature,
 		ARAExtension::ARAContentTypeNote,
 		ARAExtension::ARAContentTypeNotePlus,
 		ARAExtension::ARAContentTypeSustainPedal,
@@ -136,6 +136,7 @@ private:
 	ARA::ARAContentNote noteTemp;
 	ARA::ARAContentTempoEntry tempoTemp;
 	ARA::ARAContentBarSignature barTemp;
+	ARA::ARAContentKeySignature keyTemp;
 
 	ARAExtension::ARAContentNote notePlusTemp;
 	ARAExtension::ARAContentPedal pedalTemp;
