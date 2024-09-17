@@ -130,11 +130,22 @@ void PluginDecorator::setARA(
 				this->araEditorRenderer = pluginInstance.getEditorRendererInterface();
 				this->araPlaybackRenderer = pluginInstance.getPlaybackRendererInterface();
 
+				/** Plugin On Off */
+				auto pluginOnOffFunc = [plugin = this->plugin.get()](bool on) {
+					if (plugin) {
+						if (on) {
+							plugin->prepareToPlay(plugin->getSampleRate(), plugin->getBlockSize());
+						}
+						else {
+							plugin->releaseResources();
+						}
+					}
+					};
+
 				/** Create ARA Virtual Document */
 				this->araVirtualDocument = std::make_unique<ARAVirtualDocument>(
 					this->seq, this->araDocumentController->getDocumentController(),
-					this->araEditorRenderer, this->araPlaybackRenderer);
-				this->araVirtualDocument->update();
+					this->araEditorRenderer, this->araPlaybackRenderer, pluginOnOffFunc);
 			}
 		}
 
@@ -145,6 +156,11 @@ void PluginDecorator::setARA(
 		this->pluginPrepared = true;
 
 		//this->updatePluginBuses();
+
+		/** Prepare ARA Document */
+		if (this->araDocumentController) {
+			this->araVirtualDocument->update();
+		}
 
 		/** Callback */
 		if (this->isInstr) {

@@ -4,8 +4,9 @@ ARAVirtualDocument::ARAVirtualDocument(
 	SeqSourceProcessor* seq,
 	ARA::Host::DocumentController& controller,
 	juce::ARAHostModel::EditorRendererInterface& araEditorRenderer,
-	juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer)
-	: seq(seq), controller(controller),
+	juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer,
+	const PluginOnOffFunc& pluginOnOff)
+	: seq(seq), controller(controller), pluginOnOff(pluginOnOff),
 	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {}
 
 ARAVirtualDocument::~ARAVirtualDocument() {
@@ -13,6 +14,9 @@ ARAVirtualDocument::~ARAVirtualDocument() {
 }
 
 void ARAVirtualDocument::update() {
+	/** Turn Off Plugin */
+	this->pluginOnOff(false);
+
 	/** Lock Document */
 	juce::ARAEditGuard locker(this->controller);
 
@@ -83,11 +87,23 @@ void ARAVirtualDocument::update() {
 
 	/** Add Regions To Renderer */
 	this->addRegions();
+
+	/** Turn On Plugin */
+	this->pluginOnOff(true);
 }
 
 void ARAVirtualDocument::clear() {
+	/** Turn Off Plugin */
+	this->pluginOnOff(false);
+
+	/** Lock Document */
 	juce::ARAEditGuard locker(this->controller);
+
+	/** Clear Objects */
 	this->clearUnsafe();
+
+	/** Turn On Plugin */
+	this->pluginOnOff(true);
 }
 
 void ARAVirtualDocument::clearUnsafe() {

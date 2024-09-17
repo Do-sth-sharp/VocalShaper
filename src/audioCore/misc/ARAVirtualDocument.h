@@ -7,11 +7,14 @@ class SeqSourceProcessor;
 
 class ARAVirtualDocument {
 public:
+	using PluginOnOffFunc = std::function<void(bool)>;
+
 	ARAVirtualDocument() = delete;
 	ARAVirtualDocument(SeqSourceProcessor* seq,
 		ARA::Host::DocumentController& controller,
 		juce::ARAHostModel::EditorRendererInterface& araEditorRenderer,
-		juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer);
+		juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer,
+		const PluginOnOffFunc& pluginOnOff);
 	~ARAVirtualDocument();
 
 	void update();
@@ -22,6 +25,7 @@ private:
 	ARA::Host::DocumentController& controller;
 	juce::ARAHostModel::EditorRendererInterface& araEditorRenderer;
 	juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer;
+	const PluginOnOffFunc pluginOnOff;
 
 	std::unique_ptr<ARAVirtualAudioSource> audioSource = nullptr;
 	std::unique_ptr<ARAVirtualAudioModification> audioModification = nullptr;
