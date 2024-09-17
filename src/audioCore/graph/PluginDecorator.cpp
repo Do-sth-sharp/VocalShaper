@@ -84,7 +84,12 @@ void PluginDecorator::setPlugin(
 			jassertfalse;
 			};
 
-		/** Load Async */
+		/**
+		 * Load Async.
+		 * Load a plugin whose createARAFactory() returns a nullptr will cause a failure.
+		 * It blames to the plugin and JUCE, not me.
+		 * Never use an ARA plugin which returns a nullptr factory.
+		 */
 		juce::createARAFactoryAsync(*(this->plugin), araLoadCallback);
 	}
 	else {
