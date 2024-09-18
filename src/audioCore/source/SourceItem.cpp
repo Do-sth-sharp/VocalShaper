@@ -282,7 +282,7 @@ void SourceItem::setCallback(const ChangedCallback& callback) {
 
 void SourceItem::invokeCallback() const {
 	if (this->callback) {
-		this->callback();
+		juce::MessageManager::callAsync(this->callback);
 	}
 }
 

@@ -7,15 +7,20 @@ ARAVirtualDocument::ARAVirtualDocument(
 	juce::ARAHostModel::PlaybackRendererInterface& araPlaybackRenderer,
 	const PluginOnOffFunc& pluginOnOff)
 	: seq(seq), controller(controller), pluginOnOff(pluginOnOff),
-	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {}
+	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {
+	this->listener = std::make_unique<ARAChangeListener>(this);
+}
 
 ARAVirtualDocument::~ARAVirtualDocument() {
 	this->clear();
 }
 
 void ARAVirtualDocument::update() {
+	/** Invoke This On Message Thread */
+	JUCE_ASSERT_MESSAGE_THREAD
+
 	/** Turn Off Plugin */
-	this->pluginOnOff(false);
+	this->lockPlugin(true);
 
 	/** Lock Document */
 	juce::ARAEditGuard locker(this->controller);
@@ -47,12 +52,12 @@ void ARAVirtualDocument::update() {
 	this->addRegionToRenderer();
 
 	/** Turn On Plugin */
-	this->pluginOnOff(true);
+	this->lockPlugin(false);
 }
 
 void ARAVirtualDocument::clear() {
 	/** Turn Off Plugin */
-	this->pluginOnOff(false);
+	this->lockPlugin(true);
 
 	/** Lock Document */
 	juce::ARAEditGuard locker(this->controller);
@@ -61,7 +66,11 @@ void ARAVirtualDocument::clear() {
 	this->clearUnsafe();
 
 	/** Turn On Plugin */
-	this->pluginOnOff(true);
+	this->lockPlugin(false);
+}
+
+juce::ChangeListener* ARAVirtualDocument::getListener() const {
+	return this->listener.get();
 }
 
 void ARAVirtualDocument::clearUnsafe() {
@@ -94,6 +103,23 @@ void ARAVirtualDocument::addRegionToRenderer() {
 		}
 		if (this->araPlaybackRenderer.isValid()) {
 			this->araPlaybackRenderer.add(this->playbackRegion->getProperties());
+		}
+	}
+}
+
+void ARAVirtualDocument::lockPlugin(bool locked) {
+	juce::GenericScopedLock locker(this->pluginLockMutex);
+
+	if (locked) {
+		if (this->pluginLockCount == 0) {
+			this->pluginOnOff(false);
+		}
+		this->pluginLockCount++;
+	}
+	else {
+		this->pluginLockCount--;
+		if (this->pluginLockCount == 0) {
+			this->pluginOnOff(true);
 		}
 	}
 }

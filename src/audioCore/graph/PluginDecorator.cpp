@@ -4,7 +4,7 @@
 #include "../uiCallback/UICallback.h"
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
-#include "../misc/ARAController.h"
+#include "../ara/ARAController.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -25,6 +25,9 @@ PluginDecorator::PluginDecorator(SeqSourceProcessor* seq,
 	for (int i = 0; i < this->paramCCList.size(); i++) {
 		this->paramCCList[i] = -1;
 	}
+
+	/** ARA Change Broadcaster */
+	this->araChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
@@ -95,8 +98,8 @@ void PluginDecorator::setPlugin(
 	else {
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
-		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
-		this->pluginPrepared = true;
+		this->pluginOnOffInternal(true,
+			this->getSampleRate(), this->getBlockSize());
 
 		//this->updatePluginBuses();
 
@@ -137,15 +140,8 @@ void PluginDecorator::setARA(
 				this->araPlaybackRenderer = pluginInstance.getPlaybackRendererInterface();
 
 				/** Plugin On Off */
-				auto pluginOnOffFunc = [plugin = this->plugin.get()](bool on) {
-					if (plugin) {
-						if (on) {
-							plugin->prepareToPlay(plugin->getSampleRate(), plugin->getBlockSize());
-						}
-						else {
-							plugin->releaseResources();
-						}
-					}
+				auto pluginOnOffFunc = [this](bool on) {
+					this->pluginOnOffInternal(on, this->getSampleRate(), this->getBlockSize());
 					};
 
 				/** Create ARA Virtual Document */
@@ -158,14 +154,18 @@ void PluginDecorator::setARA(
 		/** Prepare Plugin */
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
-		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
-		this->pluginPrepared = true;
+		this->pluginOnOffInternal(true,
+			this->getSampleRate(), this->getBlockSize());
 
 		//this->updatePluginBuses();
 
 		/** Prepare ARA Document */
-		if (this->araDocumentController) {
+		if (this->araVirtualDocument) {
 			this->araVirtualDocument->update();
+
+			/** Add Change Listener */
+			this->araChangeBroadcaster->addChangeListener(
+				this->araVirtualDocument->getListener());
 		}
 
 		/** Callback */
@@ -183,8 +183,8 @@ void PluginDecorator::handleARALoadError(const juce::String& pluginIdentifier) {
 		/** Prepare Plugin */
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
-		this->plugin->prepareToPlay(this->getSampleRate(), this->getBlockSize());
-		this->pluginPrepared = true;
+		this->pluginOnOffInternal(true,
+			this->getSampleRate(), this->getBlockSize());
 
 		//this->updatePluginBuses();
 
@@ -395,6 +395,41 @@ void PluginDecorator::clearMIDICCListener() {
 	this->ccListener = MIDICCListener{};
 }
 
+void PluginDecorator::invokeARADocumentChange() {
+	/**
+	 * TODO Make the Celemony Melodyne happy.
+	 * Celemony Melodyne GUI make the host crashed when ARA host document changed.
+	 * Solve this later.
+	 */
+
+	this->pluginOnOffInternal(false,
+		this->getSampleRate(), this->getBlockSize());
+
+	this->araChangeBroadcaster->sendSynchronousChangeMessage();
+	//if (this->araDocumentController) {
+	//	/** Plugin On Off */
+	//	auto pluginOnOffFunc = [this](bool on) {
+	//		this->pluginOnOffInternal(on, this->getSampleRate(), this->getBlockSize());
+	//		};
+
+	//	/** Create ARA Virtual Document */
+	//	this->araVirtualDocument = std::make_unique<ARAVirtualDocument>(
+	//		this->seq, this->araDocumentController->getDocumentController(),
+	//		this->araEditorRenderer, this->araPlaybackRenderer, pluginOnOffFunc);
+
+	//	if (this->araVirtualDocument) {
+	//		this->araVirtualDocument->update();
+
+	//		/** Add Change Listener */
+	//		this->araChangeBroadcaster->addChangeListener(
+	//			this->araVirtualDocument->getListener());
+	//	}
+	//}
+
+	this->pluginOnOffInternal(true,
+		this->getSampleRate(), this->getBlockSize());
+}
+
 const juce::String PluginDecorator::getName() const {
 	if (!this->plugin) { return ""; }
 	return this->plugin->getName() + ((bool)this->araDocumentController ? "(ARA)" : "");
@@ -418,14 +453,15 @@ void PluginDecorator::prepareToPlay(
 		this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
 	}
 
-	this->plugin->prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
-	this->pluginPrepared = true;
+	this->pluginOnOffInternal(true,
+		this->getSampleRate(), this->getBlockSize());
 }
 
 void PluginDecorator::releaseResources() {
 	if (!this->plugin) { return; }
-	this->pluginPrepared = false;
-	this->plugin->releaseResources();
+	
+	this->pluginOnOffInternal(false,
+		this->getSampleRate(), this->getBlockSize());
 }
 
 void PluginDecorator::memoryWarningReceived() {
@@ -825,6 +861,39 @@ void PluginDecorator::updateBuffer() {
 		this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
 		if (this->plugin->supportsDoublePrecisionProcessing()) {
 			this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
+		}
+	}
+}
+
+void PluginDecorator::pluginOnOffInternal(bool shouldOn, double sampleRate, int blockSize) {
+	/** Try to fix Celemony Melodyne crash but this not works */
+	/*juce::GenericScopedLock locker(this->pluginOnOffMutex);
+
+	if (shouldOn) {
+		if (this->pluginOnOffCount == 0 && plugin) {
+			plugin->prepareToPlay(sampleRate, blockSize);
+			this->pluginPrepared = true;
+		}
+		this->pluginOnOffCount++;
+	}
+	else {
+		this->pluginOnOffCount--;
+		if (this->pluginOnOffCount == 0 && plugin) {
+			this->pluginPrepared = false;
+			plugin->releaseResources();
+		}
+	}*/
+
+	if (shouldOn) {
+		if (plugin) {
+			plugin->prepareToPlay(sampleRate, blockSize);
+			this->pluginPrepared = true;
+		}
+	}
+	else {
+		if (plugin) {
+			this->pluginPrepared = false;
+			plugin->releaseResources();
 		}
 	}
 }

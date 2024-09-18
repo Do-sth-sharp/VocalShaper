@@ -99,6 +99,11 @@ int SeqSourceProcessor::resetSeqTime(
 void SeqSourceProcessor::setTrackName(const juce::String& name) {
 	this->trackName = name;
 
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
+
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, this->index);
 }
@@ -109,6 +114,11 @@ const juce::String SeqSourceProcessor::getTrackName() const {
 
 void SeqSourceProcessor::setTrackColor(const juce::Colour& color) {
 	this->trackColor = color;
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, this->index);
@@ -291,11 +301,22 @@ void SeqSourceProcessor::applyAudio() {
 	/** Callback */
 	auto callback = [ptr = SafePointer{ this }] {
 		if (ptr) {
+			/** ARA Change */
+			if (auto plugin = ptr->getInstrProcessor()) {
+				plugin->invokeARADocumentChange();
+			}
+
+			/** UI Change */
 			ptr->invokeDataCallbacks();
 		}
 		};
 	SourceManager::getInstance()->setCallback(this->audioSourceRef,
 		SourceManager::SourceType::Audio, callback);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 }
 
 void SeqSourceProcessor::applyMIDI() {
@@ -308,11 +329,22 @@ void SeqSourceProcessor::applyMIDI() {
 	/** Callback */
 	auto callback = [ptr = SafePointer{ this }] {
 		if (ptr) {
+			/** ARA Change */
+			if (auto plugin = ptr->getInstrProcessor()) {
+				plugin->invokeARADocumentChange();
+			}
+
+			/** UI Change */
 			ptr->invokeDataCallbacks();
 		}
 		};
 	SourceManager::getInstance()->setCallback(this->midiSourceRef,
 		SourceManager::SourceType::MIDI, callback);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 }
 
 void SeqSourceProcessor::releaseAudio() {
@@ -320,6 +352,11 @@ void SeqSourceProcessor::releaseAudio() {
 	if (this->audioSourceRef > 0) {
 		SourceManager::getInstance()->releaseSource(this->audioSourceRef);
 		this->audioSourceRef = 0;
+	}
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
 	}
 }
 
@@ -330,6 +367,11 @@ void SeqSourceProcessor::releaseMIDI() {
 		this->midiSourceRef = 0;
 	}
 	this->currentMIDITrack = 0;
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 }
 
 void SeqSourceProcessor::applyAudioIfNeed() {
@@ -350,11 +392,21 @@ void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 	this->applyAudio();
 	SourceManager::getInstance()->initAudio(this->audioSourceRef,
 		this->audioChannels.size(), sampleRate, length);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 }
 
 void SeqSourceProcessor::initMIDI() {
 	this->applyMIDI();
 	SourceManager::getInstance()->initMIDI(this->midiSourceRef);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 }
 
 const juce::String SeqSourceProcessor::getAudioFileName() const {
@@ -407,6 +459,11 @@ const juce::String SeqSourceProcessor::getMIDIName() const {
 
 void SeqSourceProcessor::setCurrentMIDITrack(int trackIndex) {
 	this->currentMIDITrack = trackIndex;
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentChange();
+	}
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);

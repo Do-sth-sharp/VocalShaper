@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 #include "../project/Serializable.h"
-#include "../misc/ARAVirtualDocument.h"
+#include "../ara/ARAVirtualDocument.h"
 
 class SeqSourceProcessor;
 
@@ -56,6 +56,8 @@ public:
 	using MIDICCListener = std::function<void(int)>;
 	void setMIDICCListener(const MIDICCListener& listener);
 	void clearMIDICCListener();
+
+	void invokeARADocumentChange();
 
 	class SafePointer {
 	private:
@@ -163,6 +165,10 @@ private:
 	juce::ARAHostModel::EditorRendererInterface araEditorRenderer;
 	juce::ARAHostModel::PlaybackRendererInterface araPlaybackRenderer;
 	std::unique_ptr<ARAVirtualDocument> araVirtualDocument = nullptr;
+	std::unique_ptr<juce::ChangeBroadcaster> araChangeBroadcaster = nullptr;
+
+	int pluginOnOffCount = 0;
+	juce::SpinLock pluginOnOffMutex;
 
 	void numChannelsChanged() override;
 	void numBusesChanged() override;
@@ -174,6 +180,8 @@ private:
 	void parseMIDICC(juce::MidiBuffer& midiMessages);
 	
 	void updateBuffer();
+
+	void pluginOnOffInternal(bool shouldOn, double sampleRate, int blockSize);
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDecorator)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)
