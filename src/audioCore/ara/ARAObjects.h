@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "ARASharedObject.h"
+#include <ARASharedObject.h>
 
 class SeqSourceProcessor;
 
