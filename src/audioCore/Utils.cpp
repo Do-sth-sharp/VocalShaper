@@ -28,7 +28,6 @@
 #if JUCE_PLUGINHOST_ARA
 #define ARA_VERSION "2.2.0"
 #endif //JUCE_PLUGINHOST_ARA
-#include <DMDA.h>
 
 namespace utils {
 	std::tuple<int, int> getChannelIndexAndNumOfBus(
@@ -850,10 +849,6 @@ namespace utils {
 		return "";
 
 #endif //JUCE_PLUGINHOST_LV2
-	}
-
-	juce::String getDMDAVersion() {
-		return DMDA_VERSION;
 	}
 
 	juce::String getCompilerVersion() {

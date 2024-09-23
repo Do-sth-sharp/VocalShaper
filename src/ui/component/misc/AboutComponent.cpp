@@ -36,9 +36,8 @@ AboutComponent::AboutComponent() {
 		TRANS("ARA SDK Version:") + " " + utils::getARASDKVersion() + "\n" +
 #endif //JUCE_PLUGINHOST_ARA
 #if JUCE_PLUGINHOST_LV2
-		TRANS("LV2 SDK Version:") + " " + utils::getLV2Version() + "\n" +
+		TRANS("LV2 SDK Version:") + " " + utils::getLV2Version();
 #endif //JUCE_PLUGINHOST_LV2
-		TRANS("DMDA SDK Version:") + " " + utils::getDMDAVersion();
 	this->copyMes = TRANS("This product available under the GPLv3 license.") + "\n" +
 		TRANS("VocalSharp Org.") + " © 2023-2024 " + TRANS("All Rights Reserved.");
 

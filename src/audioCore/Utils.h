@@ -115,7 +115,6 @@ namespace utils {
 	juce::String getVST2SDKVersion();
 	juce::String getARASDKVersion();
 	juce::String getLV2Version();
-	juce::String getDMDAVersion();
 	juce::String getCompilerVersion();
 
 	juce::String getLegalFileName(const juce::String& name);
