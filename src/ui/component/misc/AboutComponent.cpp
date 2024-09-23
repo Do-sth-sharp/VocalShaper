@@ -68,6 +68,7 @@ AboutComponent::AboutComponent() {
 		TRANS("Yukitoha") + "\n" +
 		TRANS("Lin Yuansu P") + "\n" +
 		TRANS("Severle") + "\n" +
+		TRANS("29bot") + "\n" +
 		TRANS("Warsic Music Club") + "\n" +
 		TRANS("Software Engineering and Visualization Laboratory of HFUT(Xuancheng)");
 	this->thanksLines = juce::StringArray::fromLines(this->thanksList).size();

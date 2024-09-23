@@ -42,6 +42,7 @@ countries: cn
 "Yukitoha" = "雪葉"
 "Lin Yuansu P" = "磷元素P"
 "Severle" = "Severle颀"
+"29bot" = "二九"
 "Warsic Music Club" = "Warsic音乐社团"
 "Software Engineering and Visualization Laboratory of HFUT(Xuancheng)" = "合肥工业大学宣城校区软件工程与可视化实验室"
 
