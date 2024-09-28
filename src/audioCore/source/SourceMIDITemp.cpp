@@ -26,8 +26,9 @@ void SourceMIDITemp::update() {
 
 	/** For Each Track */
 	for (int i = 0; i < this->sourceData.getNumTracks(); i++) {
-		auto track = this->sourceData.getTrack(i);
-		double endTime = track->getEndTime();
+		juce::MidiMessageSequence track{ *(this->sourceData.getTrack(i)) };
+		track.updateMatchedPairs();
+		double endTime = track.getEndTime();
 
 		/** Track Event Temp */
 		juce::Array<Note> noteTrack;
@@ -41,8 +42,8 @@ void SourceMIDITemp::update() {
 		juce::Array<Misc> miscs;
 
 		/** For Each Event */
-		for (int i = 0; i < track->getNumEvents(); i++) {
-			auto event = track->getEventPointer(i);
+		for (int i = 0; i < track.getNumEvents(); i++) {
+			auto event = track.getEventPointer(i);
 
 			/** Get Notes */
 			if (event->message.isNoteOn(true)) {
