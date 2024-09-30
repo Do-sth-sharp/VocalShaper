@@ -58,6 +58,7 @@ public:
 	void clearMIDICCListener();
 
 	void invokeARADocumentChange();
+	void invokeARADocumentRegionChange();
 
 	class SafePointer {
 	private:
@@ -166,6 +167,7 @@ private:
 	juce::ARAHostModel::PlaybackRendererInterface araPlaybackRenderer;
 	std::unique_ptr<ARAVirtualDocument> araVirtualDocument = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araChangeBroadcaster = nullptr;
+	std::unique_ptr<juce::ChangeBroadcaster> araRegionChangeBroadcaster = nullptr;
 
 	int pluginOnOffCount = 0;
 	juce::SpinLock pluginOnOffMutex;

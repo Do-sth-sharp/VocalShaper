@@ -547,12 +547,14 @@ ARAVirtualRegionSequence::createProperties(
 }
 
 ARAVirtualPlaybackRegion::ARAVirtualPlaybackRegion(
+	TimeRangeMap time,
 	ARA::Host::DocumentController& dc,
 	ARAVirtualRegionSequence& sequence,
 	ARAVirtualAudioModification& modification)
-	: sequence(sequence), modification(modification),
+	: time(time), sequence(sequence), modification(modification),
 	playbackRegion(Converter::toHostRef(this), dc, modification.getProperties(),
-		ARAVirtualPlaybackRegion::createProperties(sequence, modification, &(this->color))) {}
+		ARAVirtualPlaybackRegion::createProperties(
+			time, sequence, modification, &(this->color))) {}
 
 ARAVirtualAudioModification& ARAVirtualPlaybackRegion::getModification() {
 	return this->modification;
@@ -565,24 +567,24 @@ juce::ARAHostModel::PlaybackRegion& ARAVirtualPlaybackRegion::getProperties() {
 void ARAVirtualPlaybackRegion::update() {
 	this->playbackRegion.update(
 		ARAVirtualPlaybackRegion::createProperties(
-			this->sequence, this->modification, &(this->color)));
+			this->time, this->sequence, this->modification, &(this->color)));
 }
 
 const ARA::ARAPlaybackRegionProperties
 ARAVirtualPlaybackRegion::createProperties(
+	TimeRangeMap time,
 	ARAVirtualRegionSequence& sequence,
 	ARAVirtualAudioModification& modification,
 	ARA::ARAColor* color) {
 	auto properties = juce::ARAHostModel::PlaybackRegion::getEmptyProperties();
 
-	double totalTime = std::max(modification.getSource().getLength(),
-		sequence.getContext().getLength());
+	auto [seqStartTime, contextStartTime, length] = time;
 
 	properties.transformationFlags = ARA::kARAPlaybackTransformationNoChanges;
-	properties.startInModificationTime = 0.0;
-	properties.durationInModificationTime = totalTime;
-	properties.startInPlaybackTime = 0.0;
-	properties.durationInPlaybackTime = totalTime;
+	properties.startInModificationTime = contextStartTime;
+	properties.durationInModificationTime = length;
+	properties.startInPlaybackTime = seqStartTime;
+	properties.durationInPlaybackTime = length;
 	properties.musicalContextRef = sequence.getContext().getProperties().getPluginRef();
 	properties.regionSequenceRef = sequence.getProperties().getPluginRef();
 

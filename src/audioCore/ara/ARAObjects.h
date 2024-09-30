@@ -157,8 +157,12 @@ private:
 
 class ARAVirtualPlaybackRegion {
 public:
+	/** StartTimeInSequence, StartTimeInContext, Length */
+	using TimeRangeMap = std::tuple<double, double, double>;
+
 	ARAVirtualPlaybackRegion() = delete;
 	ARAVirtualPlaybackRegion(
+		TimeRangeMap time,
 		ARA::Host::DocumentController& dc,
 		ARAVirtualRegionSequence& sequence,
 		ARAVirtualAudioModification& modification);
@@ -172,6 +176,7 @@ public:
 	using Converter = juce::ARAHostModel::ConversionFunctions<ARAVirtualPlaybackRegion*, ARA::ARAPlaybackRegionHostRef>;
 
 private:
+	const TimeRangeMap time;
 	ARAVirtualRegionSequence& sequence;
 	ARAVirtualAudioModification& modification;
 
@@ -180,6 +185,7 @@ private:
 	ARA::ARAColor color{};
 
 	static const ARA::ARAPlaybackRegionProperties createProperties(
+		TimeRangeMap time,
 		ARAVirtualRegionSequence& sequence,
 		ARAVirtualAudioModification& modification,
 		ARA::ARAColor* color);

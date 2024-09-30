@@ -1,4 +1,5 @@
 ﻿#include "ARAVirtualDocument.h"
+#include "../graph/SeqSourceProcessor.h"
 
 ARAVirtualDocument::ARAVirtualDocument(
 	SeqSourceProcessor* seq,
@@ -9,10 +10,38 @@ ARAVirtualDocument::ARAVirtualDocument(
 	: seq(seq), controller(controller), pluginOnOff(pluginOnOff),
 	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {
 	this->listener = std::make_unique<ARAChangeListener>(this);
+	this->regionListener = std::make_unique<ARARegionChangeListener>(this);
 }
 
 ARAVirtualDocument::~ARAVirtualDocument() {
 	this->clear();
+}
+
+void ARAVirtualDocument::updateRegions() {
+	/** Invoke This On Message Thread */
+	JUCE_ASSERT_MESSAGE_THREAD
+
+	/** Turn Off Plugin */
+	this->lockPlugin(true);
+
+	/** Lock Document */
+	juce::ARAEditGuard locker(this->controller);
+
+	/** Clear Regions */
+	this->clearRegionsUnsafe();
+
+	/** Playback Regions */
+	for (int i = 0; i < this->seq->getSeqNum(); i++) {
+		auto [startTime, endTime, offset] = this->seq->getSeq(i);
+		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { startTime, startTime + offset, endTime - startTime },
+			this->controller, *(this->regionSequence), *(this->audioModification) });
+	}
+
+	/** Add Regions To Renderer */
+	this->addRegionsToRenderer();
+
+	/** Turn On Plugin */
+	this->lockPlugin(false);
 }
 
 void ARAVirtualDocument::update() {
@@ -44,12 +73,15 @@ void ARAVirtualDocument::update() {
 	this->regionSequence = std::make_unique<ARAVirtualRegionSequence>(
 		this->controller, this->seq, *(this->musicalContext));
 
-	/** Playback Region */
-	this->playbackRegion = std::make_unique<ARAVirtualPlaybackRegion>(
-		this->controller, *(this->regionSequence), *(this->audioModification));
+	/** Playback Regions */
+	for (int i = 0; i < this->seq->getSeqNum(); i++) {
+		auto [startTime, endTime, offset] = this->seq->getSeq(i);
+		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { startTime, startTime + offset, endTime - startTime },
+			this->controller, *(this->regionSequence), *(this->audioModification) });
+	}
 
 	/** Add Regions To Renderer */
-	this->addRegionToRenderer();
+	this->addRegionsToRenderer();
 
 	/** Turn On Plugin */
 	this->lockPlugin(false);
@@ -73,36 +105,47 @@ juce::ChangeListener* ARAVirtualDocument::getListener() const {
 	return this->listener.get();
 }
 
-void ARAVirtualDocument::clearUnsafe() {
-	/** Remove Regions From Renderer */
-	this->removeRegionToRenderer();
+juce::ChangeListener* ARAVirtualDocument::getRegionListener() const {
+	return this->regionListener.get();
+}
 
+void ARAVirtualDocument::clearUnsafe() {
+	/** Remove Regions */
+	this->clearRegionsUnsafe();
+	
 	/** Clear Objects */
-	this->playbackRegion = nullptr;
 	this->regionSequence = nullptr;
 	this->musicalContext = nullptr;
 	this->audioModification = nullptr;
 	this->audioSource = nullptr;
 }
 
-void ARAVirtualDocument::removeRegionToRenderer() {
-	if (this->playbackRegion) {
+void ARAVirtualDocument::clearRegionsUnsafe() {
+	/** Remove Regions From Renderer */
+	this->removeRegionsFromRenderer();
+
+	/** Clear Objects */
+	this->playbackRegions.clear();
+}
+
+void ARAVirtualDocument::removeRegionsFromRenderer() {
+	for (auto region : this->playbackRegions) {
 		if (this->araEditorRenderer.isValid()) {
-			this->araEditorRenderer.remove(this->playbackRegion->getProperties());
+			this->araEditorRenderer.remove(region->getProperties());
 		}
 		if (this->araPlaybackRenderer.isValid()) {
-			this->araPlaybackRenderer.remove(this->playbackRegion->getProperties());
+			this->araPlaybackRenderer.remove(region->getProperties());
 		}
 	}
 }
 
-void ARAVirtualDocument::addRegionToRenderer() {
-	if (this->playbackRegion) {
+void ARAVirtualDocument::addRegionsToRenderer() {
+	for (auto region : this->playbackRegions) {
 		if (this->araEditorRenderer.isValid()) {
-			this->araEditorRenderer.add(this->playbackRegion->getProperties());
+			this->araEditorRenderer.add(region->getProperties());
 		}
 		if (this->araPlaybackRenderer.isValid()) {
-			this->araPlaybackRenderer.add(this->playbackRegion->getProperties());
+			this->araPlaybackRenderer.add(region->getProperties());
 		}
 	}
 }

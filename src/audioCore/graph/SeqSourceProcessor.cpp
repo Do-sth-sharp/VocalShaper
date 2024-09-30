@@ -68,11 +68,23 @@ void SeqSourceProcessor::updateIndex(int index) {
 }
 
 int SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {
-	return this->srcs.add(block);
+	auto index = this->srcs.add(block);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentRegionChange();
+	}
+
+	return index;
 }
 
 void SeqSourceProcessor::removeSeq(int index) {
 	this->srcs.remove(index);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentRegionChange();
+	}
 }
 
 int SeqSourceProcessor::getSeqNum() const {
@@ -84,16 +96,37 @@ const SourceList::SeqBlock SeqSourceProcessor::getSeq(int index) const {
 }
 
 bool SeqSourceProcessor::splitSeq(int index, double time) {
-	return this->srcs.split(index, time);
+	auto result = this->srcs.split(index, time);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentRegionChange();
+	}
+
+	return result;
 }
 
 bool SeqSourceProcessor::stickSeqWithNext(int index) {
-	return this->srcs.stickWithNext(index);
+	auto result = this->srcs.stickWithNext(index);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentRegionChange();
+	}
+
+	return result;
 }
 
 int SeqSourceProcessor::resetSeqTime(
 	int index, const SourceList::SeqBlock& block) {
-	return this->srcs.resetTime(index, block);
+	auto newIndex = this->srcs.resetTime(index, block);
+
+	/** ARA Change */
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentRegionChange();
+	}
+
+	return newIndex;
 }
 
 void SeqSourceProcessor::setTrackName(const juce::String& name) {

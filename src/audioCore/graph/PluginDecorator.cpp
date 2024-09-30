@@ -28,6 +28,7 @@ PluginDecorator::PluginDecorator(SeqSourceProcessor* seq,
 
 	/** ARA Change Broadcaster */
 	this->araChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+	this->araRegionChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
@@ -166,6 +167,8 @@ void PluginDecorator::setARA(
 			/** Add Change Listener */
 			this->araChangeBroadcaster->addChangeListener(
 				this->araVirtualDocument->getListener());
+			this->araRegionChangeBroadcaster->addChangeListener(
+				this->araVirtualDocument->getRegionListener());
 		}
 
 		/** Callback */
@@ -401,33 +404,11 @@ void PluginDecorator::invokeARADocumentChange() {
 	 * Celemony Melodyne GUI make the host crashed when ARA host document changed.
 	 * Solve this later.
 	 */
+	this->araChangeBroadcaster->sendChangeMessage();
+}
 
-	this->pluginOnOffInternal(false,
-		this->getSampleRate(), this->getBlockSize());
-
-	this->araChangeBroadcaster->sendSynchronousChangeMessage();
-	//if (this->araDocumentController) {
-	//	/** Plugin On Off */
-	//	auto pluginOnOffFunc = [this](bool on) {
-	//		this->pluginOnOffInternal(on, this->getSampleRate(), this->getBlockSize());
-	//		};
-
-	//	/** Create ARA Virtual Document */
-	//	this->araVirtualDocument = std::make_unique<ARAVirtualDocument>(
-	//		this->seq, this->araDocumentController->getDocumentController(),
-	//		this->araEditorRenderer, this->araPlaybackRenderer, pluginOnOffFunc);
-
-	//	if (this->araVirtualDocument) {
-	//		this->araVirtualDocument->update();
-
-	//		/** Add Change Listener */
-	//		this->araChangeBroadcaster->addChangeListener(
-	//			this->araVirtualDocument->getListener());
-	//	}
-	//}
-
-	this->pluginOnOffInternal(true,
-		this->getSampleRate(), this->getBlockSize());
+void PluginDecorator::invokeARADocumentRegionChange() {
+	this->araRegionChangeBroadcaster->sendChangeMessage();
 }
 
 const juce::String PluginDecorator::getName() const {
