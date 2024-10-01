@@ -11,6 +11,7 @@ ARAVirtualDocument::ARAVirtualDocument(
 	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {
 	this->listener = std::make_unique<ARAChangeListener>(this);
 	this->regionListener = std::make_unique<ARARegionChangeListener>(this);
+	this->contextListener = std::make_unique<ARAContextChangeListener>(this);
 }
 
 ARAVirtualDocument::~ARAVirtualDocument() {
@@ -39,6 +40,37 @@ void ARAVirtualDocument::updateRegions() {
 
 	/** Add Regions To Renderer */
 	this->addRegionsToRenderer();
+
+	/** Turn On Plugin */
+	this->lockPlugin(false);
+}
+
+void ARAVirtualDocument::updateAudioAndContext() {
+	/** Invoke This On Message Thread */
+	JUCE_ASSERT_MESSAGE_THREAD
+
+	/** Turn Off Plugin */
+	this->lockPlugin(true);
+
+	/** Lock Document */
+	juce::ARAEditGuard locker(this->controller);
+
+	/** Remove Audio Modification */
+	this->audioModification = nullptr;
+
+	/** Update Audio Source */
+	if (this->audioSource) {
+		this->audioSource->update();
+	}
+
+	/** Create New Audio Modification */
+	this->audioModification = std::make_unique<ARAVirtualAudioModification>(
+		this->controller, *(this->audioSource));
+
+	/** Update Musical Context */
+	if (this->musicalContext) {
+		this->musicalContext->update();
+	}
 
 	/** Turn On Plugin */
 	this->lockPlugin(false);
@@ -107,6 +139,10 @@ juce::ChangeListener* ARAVirtualDocument::getListener() const {
 
 juce::ChangeListener* ARAVirtualDocument::getRegionListener() const {
 	return this->regionListener.get();
+}
+
+juce::ChangeListener* ARAVirtualDocument::getContextListener() const {
+	return this->contextListener.get();
 }
 
 void ARAVirtualDocument::clearUnsafe() {

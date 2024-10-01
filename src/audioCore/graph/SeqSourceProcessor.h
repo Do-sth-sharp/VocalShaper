@@ -71,6 +71,8 @@ public:
 
 	const juce::Array<float> getOutputLevels() const;
 
+	void syncARAContext();
+
 public:
 	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void releaseResources() override {};

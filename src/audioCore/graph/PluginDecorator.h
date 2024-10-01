@@ -59,6 +59,7 @@ public:
 
 	void invokeARADocumentChange();
 	void invokeARADocumentRegionChange();
+	void invokeARADocumentContextChange();
 
 	class SafePointer {
 	private:
@@ -168,6 +169,7 @@ private:
 	std::unique_ptr<ARAVirtualDocument> araVirtualDocument = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araChangeBroadcaster = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araRegionChangeBroadcaster = nullptr;
+	std::unique_ptr<juce::ChangeBroadcaster> araContextChangeBroadcaster = nullptr;
 
 	int pluginOnOffCount = 0;
 	juce::SpinLock pluginOnOffMutex;

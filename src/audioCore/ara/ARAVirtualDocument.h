@@ -19,11 +19,13 @@ public:
 	~ARAVirtualDocument();
 
 	void updateRegions();
+	void updateAudioAndContext();
 	void update();
 	void clear();
 
 	juce::ChangeListener* getListener() const;
 	juce::ChangeListener* getRegionListener() const;
+	juce::ChangeListener* getContextListener() const;
 
 private:
 	SeqSourceProcessor* const seq = nullptr;
@@ -42,6 +44,7 @@ private:
 
 	std::unique_ptr<ARAChangeListener> listener = nullptr;
 	std::unique_ptr<ARARegionChangeListener> regionListener = nullptr;
+	std::unique_ptr<ARAContextChangeListener> contextListener = nullptr;
 
 	void clearUnsafe();
 	void clearRegionsUnsafe();

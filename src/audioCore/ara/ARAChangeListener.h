@@ -27,3 +27,15 @@ private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARARegionChangeListener)
 };
+
+class ARAContextChangeListener : public juce::ChangeListener {
+public:
+	ARAContextChangeListener(ARAVirtualDocument* document);
+
+	void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
+private:
+	ARAVirtualDocument* const document;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAContextChangeListener)
+};

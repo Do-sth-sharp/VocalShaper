@@ -14,3 +14,10 @@ ARARegionChangeListener::ARARegionChangeListener(ARAVirtualDocument* document)
 void ARARegionChangeListener::changeListenerCallback(juce::ChangeBroadcaster* source) {
 	this->document->updateRegions();
 }
+
+ARAContextChangeListener::ARAContextChangeListener(ARAVirtualDocument* document)
+	: document(document) {}
+
+void ARAContextChangeListener::changeListenerCallback(juce::ChangeBroadcaster* source) {
+	this->document->updateAudioAndContext();
+}

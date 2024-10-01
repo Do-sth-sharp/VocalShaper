@@ -520,6 +520,11 @@ void SeqSourceProcessor::setRecording(bool recording) {
 	}
 	this->recordingFlag = recording;
 
+	/** Sync ARA */
+	if (!recording) {
+		this->syncARAContext();
+	}
+
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::SeqRecChanged, this->index);
 }
@@ -547,6 +552,12 @@ bool SeqSourceProcessor::getMute() const {
 const juce::Array<float> SeqSourceProcessor::getOutputLevels() const {
 	juce::ScopedReadLock locker(audioLock::getLevelMeterLock());
 	return this->outputLevels;
+}
+
+void SeqSourceProcessor::syncARAContext() {
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentContextChange();
+	}
 }
 
 void SeqSourceProcessor::prepareToPlay(

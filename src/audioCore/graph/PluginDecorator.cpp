@@ -29,6 +29,7 @@ PluginDecorator::PluginDecorator(SeqSourceProcessor* seq,
 	/** ARA Change Broadcaster */
 	this->araChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 	this->araRegionChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+	this->araContextChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
@@ -169,6 +170,8 @@ void PluginDecorator::setARA(
 				this->araVirtualDocument->getListener());
 			this->araRegionChangeBroadcaster->addChangeListener(
 				this->araVirtualDocument->getRegionListener());
+			this->araContextChangeBroadcaster->addChangeListener(
+				this->araVirtualDocument->getContextListener());
 		}
 
 		/** Callback */
@@ -409,6 +412,10 @@ void PluginDecorator::invokeARADocumentChange() {
 
 void PluginDecorator::invokeARADocumentRegionChange() {
 	this->araRegionChangeBroadcaster->sendChangeMessage();
+}
+
+void PluginDecorator::invokeARADocumentContextChange() {
+	this->araContextChangeBroadcaster->sendChangeMessage();
 }
 
 const juce::String PluginDecorator::getName() const {
