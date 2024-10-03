@@ -85,6 +85,7 @@ private:
 	friend class AudioDeviceChangeListener;
 	void initAudioDevice();
 	void updateAudioBuses();
+	void updateARAContext();
 
 	void saveSource(const google::protobuf::Message* data) const;
 	void loadSource(const google::protobuf::Message* data) const;

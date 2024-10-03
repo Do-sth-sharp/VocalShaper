@@ -124,13 +124,30 @@ void AudioCore::play() {
 }
 
 void AudioCore::pause() {
+	bool isRecording = PlayPosition::getInstance()
+		->getPosition()->getIsRecording();
+
 	PlayPosition::getInstance()->transportPlay(false);
 	this->mainAudioGraph->closeAllNote();
+
+	/** Sync ARA Context */
+	if (isRecording) {
+		this->updateARAContext();
+	}
 }
 
 void AudioCore::stop() {
+	bool isRecording = PlayPosition::getInstance()
+		->getPosition()->getIsRecording();
+
 	PlayPosition::getInstance()->transportPlay(false);
 	this->mainAudioGraph->closeAllNote();
+
+	/** Sync ARA Context */
+	if (isRecording) {
+		this->updateARAContext();
+	}
+
 	if (this->returnToStart) {
 		PlayPosition::getInstance()->setPositionInSeconds(this->playStartTime);
 	}
@@ -143,7 +160,15 @@ void AudioCore::rewind() {
 }
 
 void AudioCore::record(bool start) {
+	bool isPlaying = PlayPosition::getInstance()
+		->getPosition()->getIsPlaying();
+
 	PlayPosition::getInstance()->transportRecord(start);
+
+	/** Sync ARA Context */
+	if ((!start) && isPlaying) {
+		this->updateARAContext();
+	}
 }
 
 void AudioCore::setPositon(double pos) {
@@ -473,6 +498,21 @@ void AudioCore::updateAudioBuses() {
 
 	/** Update Mackie Control Devices */
 	this->mackieHub->removeUnavailableDevices();
+}
+
+void AudioCore::updateARAContext() {
+	if (auto graph = this->getGraph()) {
+		/** For Each Seq Track */
+		int trackNum = graph->getSourceNum();
+		for (int i = 0; i < trackNum; i++) {
+			auto track = graph->getSourceProcessor(i);
+
+			/** Update ARA Context Data for Recording Track */
+			if (track->getRecording()) {
+				track->syncARAContext();
+			}
+		}
+	}
 }
 
 void AudioCore::saveSource(const google::protobuf::Message* data) const {
