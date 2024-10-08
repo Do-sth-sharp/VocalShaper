@@ -1,4 +1,5 @@
 ﻿#include "ARAVirtualDocument.h"
+#include "ARAController.h"
 #include "../graph/SeqSourceProcessor.h"
 
 ARAVirtualDocument::ARAVirtualDocument(
@@ -9,6 +10,7 @@ ARAVirtualDocument::ARAVirtualDocument(
 	const PluginOnOffFunc& pluginOnOff)
 	: seq(seq), controller(controller), pluginOnOff(pluginOnOff),
 	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {
+	/** Listeners */
 	this->regionListener = std::make_unique<ARARegionChangeListener>(this);
 	this->contextListener = std::make_unique<ARAContextChangeListener>(this);
 	this->infoListener = std::make_unique<ARATrackInfoChangeListener>(this);
@@ -170,6 +172,161 @@ juce::ChangeListener* ARAVirtualDocument::getContextListener() const {
 
 juce::ChangeListener* ARAVirtualDocument::getTrackInfoListener() const {
 	return this->infoListener.get();
+}
+
+void ARAVirtualDocument::storeToStream(juce::MemoryOutputStream& stream) const {
+	/** Invoke This On Message Thread */
+	JUCE_ASSERT_MESSAGE_THREAD
+
+	/** Store State */
+	ARA::ARAStoreObjectsFilter filter{};
+	ARAVirtualDocument::initStoreFilter(filter,
+		this->audioSource.get(), this->audioModification.get());
+
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	this->storeObjectsToArchive(
+		ARAArchivingController::WriterConverter::toHostRef(&stream), &filter);
+
+	ARAVirtualDocument::destoryStoreFilter(filter);
+}
+
+void ARAVirtualDocument::restoreFromBlock(juce::MemoryBlock& block) {
+	/** Invoke This On Message Thread */
+	JUCE_ASSERT_MESSAGE_THREAD
+
+	/** Turn Off Plugin */
+	this->lockPlugin(true);
+
+	/** Lock Document */
+	juce::ARAEditGuard locker(this->controller);
+
+	/** Restore State */
+	ARA::ARARestoreObjectsFilter filter{};
+	ARAVirtualDocument::initRestoreFilter(filter,
+		this->audioSource.get(), this->audioModification.get());
+
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	this->restoreObjectsFromArchive(
+		ARAArchivingController::ReaderConverter::toHostRef(&block), &filter);
+
+	ARAVirtualDocument::destoryRestoreFilter(filter);
+
+	/** Turn On Plugin */
+	this->lockPlugin(false);
+}
+
+void ARAVirtualDocument::initStoreFilter(
+	ARA::ARAStoreObjectsFilter& filter,
+	ARAVirtualAudioSource* source, ARAVirtualAudioModification* modification) {
+	filter.structSize = ARA::kARAStoreObjectsFilterMinSize;
+	filter.documentData = true;
+
+	if (source) {
+		filter.audioSourceRefsCount = 1;
+
+		ARA::ARAAudioSourceRef* list = static_cast<ARA::ARAAudioSourceRef*>(
+			malloc(sizeof(ARA::ARAAudioSourceRef) * filter.audioSourceRefsCount));
+		if (list) {
+			list[0] = source->getProperties().getPluginRef();
+		}
+
+		filter.audioSourceRefs = list;
+		
+	}
+	if (modification) {
+		filter.audioModificationRefsCount = 1;
+
+		ARA::ARAAudioModificationRef* list = static_cast<ARA::ARAAudioModificationRef*>(
+			malloc(sizeof(ARA::ARAAudioModificationRef) * filter.audioModificationRefsCount));
+		if (list) {
+			list[0] = modification->getProperties().getPluginRef();
+		}
+
+		filter.audioModificationRefs = list;
+	}
+}
+
+void ARAVirtualDocument::initRestoreFilter(
+	ARA::ARARestoreObjectsFilter& filter,
+	ARAVirtualAudioSource* source, ARAVirtualAudioModification* modification) {
+	filter.structSize = ARA::kARAStoreObjectsFilterMinSize;
+	filter.documentData = true;
+
+	if (source) {
+		filter.audioSourceIDsCount = 1;
+
+		ARA::ARAPersistentID* list = static_cast<ARA::ARAPersistentID*>(
+			malloc(sizeof(ARA::ARAPersistentID) * filter.audioSourceIDsCount));
+		if (list) {
+			list[0] = ARAVirtualAudioSource::defaultID;
+		}
+
+		filter.audioSourceArchiveIDs = list;
+	}
+	if (modification) {
+		filter.audioModificationIDsCount = 1;
+
+		ARA::ARAPersistentID* list = static_cast<ARA::ARAPersistentID*>(
+			malloc(sizeof(ARA::ARAPersistentID) * filter.audioModificationIDsCount));
+		if (list) {
+			list[0] = ARAVirtualAudioModification::defaultID;
+		}
+
+		filter.audioModificationArchiveIDs = list;
+	}
+}
+
+void ARAVirtualDocument::destoryStoreFilter(ARA::ARAStoreObjectsFilter& filter) {
+	filter.audioSourceRefsCount = 0;
+	free((void*)(filter.audioSourceRefs));
+	filter.audioSourceRefs = nullptr;
+
+	filter.audioModificationRefsCount = 0;
+	free((void*)(filter.audioModificationRefs));
+	filter.audioModificationRefs = nullptr;
+}
+
+void ARAVirtualDocument::destoryRestoreFilter(ARA::ARARestoreObjectsFilter& filter) {
+	filter.audioSourceIDsCount = 0;
+	free((void*)(filter.audioSourceArchiveIDs));
+	filter.audioSourceArchiveIDs = nullptr;
+	free((void*)(filter.audioSourceCurrentIDs));
+	filter.audioSourceCurrentIDs = nullptr;
+
+	filter.audioModificationIDsCount = 0;
+	free((void*)(filter.audioModificationArchiveIDs));
+	filter.audioModificationArchiveIDs = nullptr;
+	free((void*)(filter.audioModificationCurrentIDs));
+	filter.audioModificationCurrentIDs = nullptr;
+}
+
+bool ARAVirtualDocument::supportsPartialPersistency() const {
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	return this->controller.getInterface()
+		.implements<ARA_STRUCT_MEMBER(ARADocumentControllerInterface, storeObjectsToArchive)>();
+}
+
+bool ARAVirtualDocument::restoreObjectsFromArchive(
+	ARA::ARAArchiveReaderHostRef archiveReaderHostRef, const ARA::ARARestoreObjectsFilter* filter) {
+	if (!this->supportsPartialPersistency()) {
+		return false;
+	}	
+
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	return this->controller.getInterface()
+		->restoreObjectsFromArchive(this->controller.getRef(), archiveReaderHostRef, filter);
+}
+
+bool ARAVirtualDocument::storeObjectsToArchive(
+	ARA::ARAArchiveWriterHostRef archiveWriterHostRef,
+	const ARA::ARAStoreObjectsFilter* filter) const {
+	if (!this->supportsPartialPersistency()) {
+		return false;
+	}
+
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	return this->controller.getInterface()
+		->storeObjectsToArchive(this->controller.getRef(), archiveWriterHostRef, filter);
 }
 
 void ARAVirtualDocument::clearUnsafe() {

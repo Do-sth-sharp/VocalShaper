@@ -127,13 +127,15 @@ juce::ARAHostModel::AudioSource& ARAVirtualAudioSource::getProperties() {
 	return this->audioSource;
 }
 
+const char* ARAVirtualAudioSource::defaultID = "-";
+
 const ARA::ARAAudioSourceProperties 
 ARAVirtualAudioSource::createProperties(SeqSourceProcessor* seq) {
 	auto properties = juce::ARAHostModel::AudioSource::getEmptyProperties();
 
 	if (seq) {
 		properties.name = seq->getAudioName().toRawUTF8();
-		properties.persistentID = "-";
+		properties.persistentID = ARAVirtualAudioSource::defaultID;
 		properties.sampleCount = std::max((uint64_t)(seq->getAudioLength() * seq->getSampleRate()), (uint64_t)2);/**< At Least 2 Samples In Audio Source */
 		properties.sampleRate = seq->getSampleRate();
 		properties.channelCount = seq->getAudioChannelSet().size();
@@ -492,12 +494,14 @@ juce::ARAHostModel::AudioModification& ARAVirtualAudioModification::getPropertie
 	return this->audioModification;
 }
 
+const char* ARAVirtualAudioModification::defaultID = "-";
+
 const ARA::ARAAudioModificationProperties
 ARAVirtualAudioModification::createProperties() {
 	auto properties = juce::ARAHostModel::AudioModification::getEmptyProperties();
 
 	properties.name = nullptr;
-	properties.persistentID = "-";
+	properties.persistentID = ARAVirtualAudioModification::defaultID;
 
 	return properties;
 }

@@ -21,6 +21,8 @@ public:
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioSource*, ARA::ARAAudioSourceHostRef>;
 
+	static const char* defaultID;
+
 private:
 	SeqSourceProcessor* const seq = nullptr;
 
@@ -112,6 +114,8 @@ public:
 	juce::ARAHostModel::AudioModification& getProperties();
 
 	using Converter = juce::ARAHostModel::ConversionFunctions<ARAVirtualAudioModification*, ARA::ARAAudioModificationHostRef>;
+
+	static const char* defaultID;
 
 private:
 	ARAVirtualAudioSource& source;

@@ -40,6 +40,9 @@ class ARAArchivingController : public ARA::Host::ArchivingControllerInterface {
 public:
 	ARAArchivingController() = default;
 
+	using ReaderConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryBlock*, ARA::ARAArchiveReaderHostRef>;
+	using WriterConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryOutputStream*, ARA::ARAArchiveWriterHostRef>;
+
 private:
 	ARA::ARASize getArchiveSize(
 		ARA::ARAArchiveReaderHostRef archiveReaderHostRef) noexcept override;
@@ -59,9 +62,6 @@ private:
 		ARA::ARAArchiveReaderHostRef archiveReaderHostRef) noexcept override;
 
 private:
-	using ReaderConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryBlock*, ARA::ARAArchiveReaderHostRef>;
-	using WriterConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryOutputStream*, ARA::ARAArchiveWriterHostRef>;
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAArchivingController)
 };
 
