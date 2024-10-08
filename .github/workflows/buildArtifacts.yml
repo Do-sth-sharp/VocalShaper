@@ -69,6 +69,7 @@ jobs:
       run: vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=${{matrix.vcpkg_triplet}}
 
     - name: Get Short SHA
+      if: ${{!cancelled()}}
       uses: benjlevesque/short-sha@v3.0
       id: short-sha
       with:
