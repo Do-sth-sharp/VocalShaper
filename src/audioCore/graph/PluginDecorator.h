@@ -57,9 +57,9 @@ public:
 	void setMIDICCListener(const MIDICCListener& listener);
 	void clearMIDICCListener();
 
-	void invokeARADocumentChange();
 	void invokeARADocumentRegionChange();
 	void invokeARADocumentContextChange();
+	void invokeARADocumentTrackInfoChange();
 
 	class SafePointer {
 	private:
@@ -167,9 +167,9 @@ private:
 	juce::ARAHostModel::EditorRendererInterface araEditorRenderer;
 	juce::ARAHostModel::PlaybackRendererInterface araPlaybackRenderer;
 	std::unique_ptr<ARAVirtualDocument> araVirtualDocument = nullptr;
-	std::unique_ptr<juce::ChangeBroadcaster> araChangeBroadcaster = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araRegionChangeBroadcaster = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araContextChangeBroadcaster = nullptr;
+	std::unique_ptr<juce::ChangeBroadcaster> araTrackInfoChangeBroadcaster = nullptr;
 
 	int pluginOnOffCount = 0;
 	juce::SpinLock pluginOnOffMutex;
@@ -185,7 +185,9 @@ private:
 	
 	void updateBuffer();
 
-	void pluginOnOffInternal(bool shouldOn, double sampleRate, int blockSize);
+	void pluginOnOffInternal(
+		bool shouldOn, double sampleRate, int blockSize,
+		bool stateQuickSwitch = false);
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDecorator)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)

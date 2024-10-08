@@ -27,9 +27,9 @@ PluginDecorator::PluginDecorator(SeqSourceProcessor* seq,
 	}
 
 	/** ARA Change Broadcaster */
-	this->araChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 	this->araRegionChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 	this->araContextChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
+	this->araTrackInfoChangeBroadcaster = std::make_unique<juce::ChangeBroadcaster>();
 }
 
 PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plugin,
@@ -143,7 +143,8 @@ void PluginDecorator::setARA(
 
 				/** Plugin On Off */
 				auto pluginOnOffFunc = [this](bool on) {
-					this->pluginOnOffInternal(on, this->getSampleRate(), this->getBlockSize());
+					this->pluginOnOffInternal(
+						on, this->getSampleRate(), this->getBlockSize());
 					};
 
 				/** Create ARA Virtual Document */
@@ -163,15 +164,15 @@ void PluginDecorator::setARA(
 
 		/** Prepare ARA Document */
 		if (this->araVirtualDocument) {
-			this->araVirtualDocument->update();
+			this->araVirtualDocument->init();
 
 			/** Add Change Listener */
-			this->araChangeBroadcaster->addChangeListener(
-				this->araVirtualDocument->getListener());
 			this->araRegionChangeBroadcaster->addChangeListener(
 				this->araVirtualDocument->getRegionListener());
 			this->araContextChangeBroadcaster->addChangeListener(
 				this->araVirtualDocument->getContextListener());
+			this->araTrackInfoChangeBroadcaster->addChangeListener(
+				this->araVirtualDocument->getTrackInfoListener());
 		}
 
 		/** Callback */
@@ -401,21 +402,16 @@ void PluginDecorator::clearMIDICCListener() {
 	this->ccListener = MIDICCListener{};
 }
 
-void PluginDecorator::invokeARADocumentChange() {
-	/**
-	 * TODO Make the Celemony Melodyne happy.
-	 * Celemony Melodyne GUI make the host crashed when ARA host document changed.
-	 * Solve this later.
-	 */
-	this->araChangeBroadcaster->sendChangeMessage();
-}
-
 void PluginDecorator::invokeARADocumentRegionChange() {
 	this->araRegionChangeBroadcaster->sendChangeMessage();
 }
 
 void PluginDecorator::invokeARADocumentContextChange() {
 	this->araContextChangeBroadcaster->sendChangeMessage();
+}
+
+void PluginDecorator::invokeARADocumentTrackInfoChange() {
+	this->araTrackInfoChangeBroadcaster->sendChangeMessage();
 }
 
 const juce::String PluginDecorator::getName() const {
@@ -853,35 +849,22 @@ void PluginDecorator::updateBuffer() {
 	}
 }
 
-void PluginDecorator::pluginOnOffInternal(bool shouldOn, double sampleRate, int blockSize) {
-	/** Try to fix Celemony Melodyne crash but this not works */
-	/*juce::GenericScopedLock locker(this->pluginOnOffMutex);
-
-	if (shouldOn) {
-		if (this->pluginOnOffCount == 0 && plugin) {
-			plugin->prepareToPlay(sampleRate, blockSize);
-			this->pluginPrepared = true;
-		}
-		this->pluginOnOffCount++;
-	}
-	else {
-		this->pluginOnOffCount--;
-		if (this->pluginOnOffCount == 0 && plugin) {
-			this->pluginPrepared = false;
-			plugin->releaseResources();
-		}
-	}*/
-
+void PluginDecorator::pluginOnOffInternal(
+	bool shouldOn, double sampleRate, int blockSize, bool stateQuickSwitch) {
 	if (shouldOn) {
 		if (plugin) {
-			plugin->prepareToPlay(sampleRate, blockSize);
+			if (!stateQuickSwitch) {
+				plugin->prepareToPlay(sampleRate, blockSize);
+			}
 			this->pluginPrepared = true;
 		}
 	}
 	else {
 		if (plugin) {
 			this->pluginPrepared = false;
-			plugin->releaseResources();
+			if (!stateQuickSwitch) {
+				plugin->releaseResources();
+			}
 		}
 	}
 }

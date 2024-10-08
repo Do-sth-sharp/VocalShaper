@@ -1,13 +1,6 @@
 ﻿#include "ARAChangeListener.h"
 #include "ARAVirtualDocument.h"
 
-ARAChangeListener::ARAChangeListener(ARAVirtualDocument* document)
-	: document(document) {}
-
-void ARAChangeListener::changeListenerCallback(juce::ChangeBroadcaster* source) {
-	this->document->update();
-}
-
 ARARegionChangeListener::ARARegionChangeListener(ARAVirtualDocument* document)
 	: document(document) {}
 
@@ -20,4 +13,11 @@ ARAContextChangeListener::ARAContextChangeListener(ARAVirtualDocument* document)
 
 void ARAContextChangeListener::changeListenerCallback(juce::ChangeBroadcaster* source) {
 	this->document->updateAudioAndContext();
+}
+
+ARATrackInfoChangeListener::ARATrackInfoChangeListener(ARAVirtualDocument* document)
+	: document(document) {}
+
+void ARATrackInfoChangeListener::changeListenerCallback(juce::ChangeBroadcaster* source) {
+	this->document->updateTrackBaseInfo();
 }

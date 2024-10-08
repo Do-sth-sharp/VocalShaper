@@ -97,7 +97,9 @@ ARAVirtualAudioSource::ARAVirtualAudioSource(
 }
 
 void ARAVirtualAudioSource::update() {
+	this->audioSource.enableAudioSourceSamplesAccess(false);
 	this->audioSource.update(ARAVirtualAudioSource::createProperties(this->seq));
+	this->audioSource.enableAudioSourceSamplesAccess(true);
 }
 
 bool ARAVirtualAudioSource::readAudioSamples(

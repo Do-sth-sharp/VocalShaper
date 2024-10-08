@@ -134,7 +134,7 @@ void SeqSourceProcessor::setTrackName(const juce::String& name) {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentTrackInfoChange();
 	}
 
 	/** Callback */
@@ -150,7 +150,7 @@ void SeqSourceProcessor::setTrackColor(const juce::Colour& color) {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentTrackInfoChange();
 	}
 
 	/** Callback */
@@ -336,7 +336,7 @@ void SeqSourceProcessor::applyAudio() {
 		if (ptr) {
 			/** ARA Change */
 			if (auto plugin = ptr->getInstrProcessor()) {
-				plugin->invokeARADocumentChange();
+				plugin->invokeARADocumentContextChange();
 			}
 
 			/** UI Change */
@@ -348,7 +348,7 @@ void SeqSourceProcessor::applyAudio() {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 }
 
@@ -364,7 +364,7 @@ void SeqSourceProcessor::applyMIDI() {
 		if (ptr) {
 			/** ARA Change */
 			if (auto plugin = ptr->getInstrProcessor()) {
-				plugin->invokeARADocumentChange();
+				plugin->invokeARADocumentContextChange();
 			}
 
 			/** UI Change */
@@ -376,7 +376,7 @@ void SeqSourceProcessor::applyMIDI() {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 }
 
@@ -389,7 +389,7 @@ void SeqSourceProcessor::releaseAudio() {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 }
 
@@ -403,7 +403,7 @@ void SeqSourceProcessor::releaseMIDI() {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 }
 
@@ -428,7 +428,7 @@ void SeqSourceProcessor::initAudio(double sampleRate, double length) {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 }
 
@@ -438,7 +438,7 @@ void SeqSourceProcessor::initMIDI() {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 }
 
@@ -495,7 +495,7 @@ void SeqSourceProcessor::setCurrentMIDITrack(int trackIndex) {
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentChange();
+		plugin->invokeARADocumentContextChange();
 	}
 
 	/** Callback */

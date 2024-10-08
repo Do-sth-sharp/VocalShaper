@@ -20,12 +20,13 @@ public:
 
 	void updateRegions();
 	void updateAudioAndContext();
-	void update();
+	void updateTrackBaseInfo();
+	void init();
 	void clear();
 
-	juce::ChangeListener* getListener() const;
 	juce::ChangeListener* getRegionListener() const;
 	juce::ChangeListener* getContextListener() const;
+	juce::ChangeListener* getTrackInfoListener() const;
 
 private:
 	SeqSourceProcessor* const seq = nullptr;
@@ -42,9 +43,9 @@ private:
 	std::unique_ptr<ARAVirtualRegionSequence> regionSequence = nullptr;
 	juce::OwnedArray<ARAVirtualPlaybackRegion> playbackRegions;
 
-	std::unique_ptr<ARAChangeListener> listener = nullptr;
 	std::unique_ptr<ARARegionChangeListener> regionListener = nullptr;
 	std::unique_ptr<ARAContextChangeListener> contextListener = nullptr;
+	std::unique_ptr<ARATrackInfoChangeListener> infoListener = nullptr;
 
 	void clearUnsafe();
 	void clearRegionsUnsafe();

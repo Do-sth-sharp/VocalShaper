@@ -9,9 +9,9 @@ ARAVirtualDocument::ARAVirtualDocument(
 	const PluginOnOffFunc& pluginOnOff)
 	: seq(seq), controller(controller), pluginOnOff(pluginOnOff),
 	araEditorRenderer(araEditorRenderer), araPlaybackRenderer(araPlaybackRenderer) {
-	this->listener = std::make_unique<ARAChangeListener>(this);
 	this->regionListener = std::make_unique<ARARegionChangeListener>(this);
 	this->contextListener = std::make_unique<ARAContextChangeListener>(this);
+	this->infoListener = std::make_unique<ARATrackInfoChangeListener>(this);
 }
 
 ARAVirtualDocument::~ARAVirtualDocument() {
@@ -55,17 +55,10 @@ void ARAVirtualDocument::updateAudioAndContext() {
 	/** Lock Document */
 	juce::ARAEditGuard locker(this->controller);
 
-	/** Remove Audio Modification */
-	this->audioModification = nullptr;
-
 	/** Update Audio Source */
 	if (this->audioSource) {
 		this->audioSource->update();
 	}
-
-	/** Create New Audio Modification */
-	this->audioModification = std::make_unique<ARAVirtualAudioModification>(
-		this->controller, *(this->audioSource));
 
 	/** Update Musical Context */
 	if (this->musicalContext) {
@@ -76,7 +69,41 @@ void ARAVirtualDocument::updateAudioAndContext() {
 	this->lockPlugin(false);
 }
 
-void ARAVirtualDocument::update() {
+void ARAVirtualDocument::updateTrackBaseInfo() {
+	/** Invoke This On Message Thread */
+	JUCE_ASSERT_MESSAGE_THREAD
+
+		/** Turn Off Plugin */
+		this->lockPlugin(true);
+
+	/** Lock Document */
+	juce::ARAEditGuard locker(this->controller);
+
+	/** Update Audio Source */
+	if (this->audioSource) {
+		this->audioSource->update();
+	}
+
+	/** Update Musical Context */
+	if (this->musicalContext) {
+		this->musicalContext->update();
+	}
+
+	/** Update Region Sequence */
+	if (this->regionSequence) {
+		this->regionSequence->update();
+	}
+
+	/** Update Playback Regions */
+	for (auto i : this->playbackRegions) {
+		i->update();
+	}
+
+	/** Turn On Plugin */
+	this->lockPlugin(false);
+}
+
+void ARAVirtualDocument::init() {
 	/** Invoke This On Message Thread */
 	JUCE_ASSERT_MESSAGE_THREAD
 
@@ -133,16 +160,16 @@ void ARAVirtualDocument::clear() {
 	this->lockPlugin(false);
 }
 
-juce::ChangeListener* ARAVirtualDocument::getListener() const {
-	return this->listener.get();
-}
-
 juce::ChangeListener* ARAVirtualDocument::getRegionListener() const {
 	return this->regionListener.get();
 }
 
 juce::ChangeListener* ARAVirtualDocument::getContextListener() const {
 	return this->contextListener.get();
+}
+
+juce::ChangeListener* ARAVirtualDocument::getTrackInfoListener() const {
+	return this->infoListener.get();
 }
 
 void ARAVirtualDocument::clearUnsafe() {
