@@ -9,5 +9,12 @@
       "sigar",
       "juce-host-dev-kit",
       "synth-engine-demo"
+    ],
+    "builtin-baseline": "797ae22b76f0e78c3aeb03d625722a0cbfe9f52e",
+    "overrides": [
+      { 
+        "name": "protobuf", 
+        "version": "3.21.12#4"
+      }
     ]
 }
