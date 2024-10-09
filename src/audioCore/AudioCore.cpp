@@ -14,6 +14,7 @@
 #include "project/ProjectInfoData.h"
 #include "action/ActionDispatcher.h"
 #include "uiCallback/UICallback.h"
+#include "ara/ARADataIOThread.h"
 #include "Utils.h"
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
@@ -93,6 +94,7 @@ AudioCore::~AudioCore() {
 	PlayWatcher::releaseInstance();
 	PlayPosition::releaseInstance();
 	Plugin::releaseInstance();
+	ARADataIOThread::releaseInstance();
 	SourceIO::releaseInstance();
 	SourceManager::releaseInstance();
 	UICallback::releaseInstance();

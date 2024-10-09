@@ -29,7 +29,28 @@ public:
 	juce::ChangeListener* getTrackInfoListener() const;
 
 	void storeToStream(juce::MemoryOutputStream& stream) const;
-	void restoreFromBlock(juce::MemoryBlock& block);
+	void restoreFromBlock(const juce::MemoryBlock& block);
+
+	class SafePointer {
+	private:
+		juce::WeakReference<ARAVirtualDocument> weakRef;
+
+	public:
+		SafePointer() = default;
+		SafePointer(ARAVirtualDocument* source) : weakRef(source) {};
+		SafePointer(const SafePointer& other) noexcept : weakRef(other.weakRef) {};
+
+		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
+		SafePointer& operator= (ARAVirtualDocument* newSource) { weakRef = newSource; return *this; };
+
+		ARAVirtualDocument* getPlugin() const noexcept { return dynamic_cast<ARAVirtualDocument*> (weakRef.get()); };
+		operator ARAVirtualDocument* () const noexcept { return getPlugin(); };
+		ARAVirtualDocument* operator->() const noexcept { return getPlugin(); };
+		void deleteAndZero() { delete getPlugin(); };
+
+		bool operator== (ARAVirtualDocument* component) const noexcept { return weakRef == component; };
+		bool operator!= (ARAVirtualDocument* component) const noexcept { return weakRef != component; };
+	};
 
 private:
 	SeqSourceProcessor* const seq = nullptr;
@@ -75,5 +96,6 @@ private:
 
 	void lockPlugin(bool locked);
 
+	JUCE_DECLARE_WEAK_REFERENCEABLE(ARAVirtualDocument)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ARAVirtualDocument)
 };

@@ -190,7 +190,7 @@ void ARAVirtualDocument::storeToStream(juce::MemoryOutputStream& stream) const {
 	ARAVirtualDocument::destoryStoreFilter(filter);
 }
 
-void ARAVirtualDocument::restoreFromBlock(juce::MemoryBlock& block) {
+void ARAVirtualDocument::restoreFromBlock(const juce::MemoryBlock& block) {
 	/** Invoke This On Message Thread */
 	JUCE_ASSERT_MESSAGE_THREAD
 
@@ -207,7 +207,8 @@ void ARAVirtualDocument::restoreFromBlock(juce::MemoryBlock& block) {
 
 	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
 	this->restoreObjectsFromArchive(
-		ARAArchivingController::ReaderConverter::toHostRef(&block), &filter);
+		ARAArchivingController::ReaderConverter::toHostRef(
+			const_cast<juce::MemoryBlock*>(&block)), &filter);
 
 	ARAVirtualDocument::destoryRestoreFilter(filter);
 
@@ -225,7 +226,7 @@ void ARAVirtualDocument::initStoreFilter(
 		filter.audioSourceRefsCount = 1;
 
 		ARA::ARAAudioSourceRef* list = static_cast<ARA::ARAAudioSourceRef*>(
-			malloc(sizeof(ARA::ARAAudioSourceRef) * filter.audioSourceRefsCount));
+			std::malloc(sizeof(ARA::ARAAudioSourceRef) * filter.audioSourceRefsCount));
 		if (list) {
 			list[0] = source->getProperties().getPluginRef();
 		}
@@ -237,7 +238,7 @@ void ARAVirtualDocument::initStoreFilter(
 		filter.audioModificationRefsCount = 1;
 
 		ARA::ARAAudioModificationRef* list = static_cast<ARA::ARAAudioModificationRef*>(
-			malloc(sizeof(ARA::ARAAudioModificationRef) * filter.audioModificationRefsCount));
+			std::malloc(sizeof(ARA::ARAAudioModificationRef) * filter.audioModificationRefsCount));
 		if (list) {
 			list[0] = modification->getProperties().getPluginRef();
 		}
@@ -256,7 +257,7 @@ void ARAVirtualDocument::initRestoreFilter(
 		filter.audioSourceIDsCount = 1;
 
 		ARA::ARAPersistentID* list = static_cast<ARA::ARAPersistentID*>(
-			malloc(sizeof(ARA::ARAPersistentID) * filter.audioSourceIDsCount));
+			std::malloc(sizeof(ARA::ARAPersistentID) * filter.audioSourceIDsCount));
 		if (list) {
 			list[0] = ARAVirtualAudioSource::defaultID;
 		}
@@ -267,7 +268,7 @@ void ARAVirtualDocument::initRestoreFilter(
 		filter.audioModificationIDsCount = 1;
 
 		ARA::ARAPersistentID* list = static_cast<ARA::ARAPersistentID*>(
-			malloc(sizeof(ARA::ARAPersistentID) * filter.audioModificationIDsCount));
+			std::malloc(sizeof(ARA::ARAPersistentID) * filter.audioModificationIDsCount));
 		if (list) {
 			list[0] = ARAVirtualAudioModification::defaultID;
 		}
@@ -278,25 +279,25 @@ void ARAVirtualDocument::initRestoreFilter(
 
 void ARAVirtualDocument::destoryStoreFilter(ARA::ARAStoreObjectsFilter& filter) {
 	filter.audioSourceRefsCount = 0;
-	free((void*)(filter.audioSourceRefs));
+	std::free((void*)(filter.audioSourceRefs));
 	filter.audioSourceRefs = nullptr;
 
 	filter.audioModificationRefsCount = 0;
-	free((void*)(filter.audioModificationRefs));
+	std::free((void*)(filter.audioModificationRefs));
 	filter.audioModificationRefs = nullptr;
 }
 
 void ARAVirtualDocument::destoryRestoreFilter(ARA::ARARestoreObjectsFilter& filter) {
 	filter.audioSourceIDsCount = 0;
-	free((void*)(filter.audioSourceArchiveIDs));
+	std::free((void*)(filter.audioSourceArchiveIDs));
 	filter.audioSourceArchiveIDs = nullptr;
-	free((void*)(filter.audioSourceCurrentIDs));
+	std::free((void*)(filter.audioSourceCurrentIDs));
 	filter.audioSourceCurrentIDs = nullptr;
 
 	filter.audioModificationIDsCount = 0;
-	free((void*)(filter.audioModificationArchiveIDs));
+	std::free((void*)(filter.audioModificationArchiveIDs));
 	filter.audioModificationArchiveIDs = nullptr;
-	free((void*)(filter.audioModificationCurrentIDs));
+	std::free((void*)(filter.audioModificationCurrentIDs));
 	filter.audioModificationCurrentIDs = nullptr;
 }
 
