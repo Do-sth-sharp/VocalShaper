@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "ARAObjects.h"
+#include "ARAArchive.h"
 
 class ARAAudioAccessController : public ARA::Host::AudioAccessControllerInterface {
 public:
@@ -40,8 +41,8 @@ class ARAArchivingController : public ARA::Host::ArchivingControllerInterface {
 public:
 	ARAArchivingController() = default;
 
-	using ReaderConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryBlock*, ARA::ARAArchiveReaderHostRef>;
-	using WriterConverter = juce::ARAHostModel::ConversionFunctions<juce::MemoryOutputStream*, ARA::ARAArchiveWriterHostRef>;
+	using ReaderConverter = juce::ARAHostModel::ConversionFunctions<ARAArchiveReader*, ARA::ARAArchiveReaderHostRef>;
+	using WriterConverter = juce::ARAHostModel::ConversionFunctions<ARAArchiveWriter*, ARA::ARAArchiveWriterHostRef>;
 
 private:
 	ARA::ARASize getArchiveSize(

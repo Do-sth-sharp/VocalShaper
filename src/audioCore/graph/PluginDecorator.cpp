@@ -5,6 +5,7 @@
 #include "../misc/AudioLock.h"
 #include "../misc/VMath.h"
 #include "../ara/ARAController.h"
+#include "../ara/ARADataIOThread.h"
 #include "../AudioCore.h"
 #include "../Utils.h"
 #include <VSP4.h>
@@ -151,6 +152,9 @@ void PluginDecorator::setARA(
 				this->araVirtualDocument = std::make_unique<ARAVirtualDocument>(
 					this->seq, this->araDocumentController->getDocumentController(),
 					this->araEditorRenderer, this->araPlaybackRenderer, pluginOnOffFunc);
+
+				/** Create ARA Data ID */
+				this->createARADataID();
 			}
 		}
 
@@ -202,6 +206,39 @@ void PluginDecorator::handleARALoadError(const juce::String& pluginIdentifier) {
 		else {
 			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
 		}
+	}
+}
+
+bool PluginDecorator::isARAValid() const {
+	return (bool)this->araDocumentController;
+}
+
+void PluginDecorator::createARADataID() {
+	this->araDataID = juce::Uuid{}.toDashedString();
+}
+
+const juce::String PluginDecorator::getARADataID() const {
+	return this->araDataID;
+}
+
+void PluginDecorator::loadARADataFrom(const juce::String& id) {
+	/** Set Current ID */
+	this->araDataID = id;
+
+	/** Load Data */
+	if (this->araVirtualDocument) {
+		juce::String path = utils::getARADataFile(id).getFullPathName();
+		ARADataIOThread::getInstance()->addTask(
+			path, this->araVirtualDocument.get(), false);
+	}
+}
+
+void PluginDecorator::saveARAData() const {
+	/** Save Data */
+	if (this->araVirtualDocument && this->araDataID.isNotEmpty()) {
+		juce::String path = utils::getARADataFile(this->araDataID).getFullPathName();
+		ARADataIOThread::getInstance()->addTask(
+			path, this->araVirtualDocument.get(), true);
 	}
 }
 
@@ -700,6 +737,10 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 		auto& pluginData = state.data();
 		ptrPlugin->setStateInformation(
 			pluginData.c_str(), pluginData.size());
+
+		if (ptrPlugin->isARAValid() && !(state.aradataid().empty())) {
+			ptrPlugin->loadARADataFrom(state.aradataid());
+		}
 	};
 
 	auto pluginDes = Plugin::getInstance()->findPlugin(info.id(), this->isInstr, info.addara());
@@ -723,7 +764,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 	auto info = mes->mutable_info();
 	if (this->plugin) {
 		info->set_id(this->getPluginIdentifier().toStdString());
-		info->set_addara((bool)this->araDocumentController);
+		info->set_addara(this->isARAValid());
 	}
 	info->set_decoratortype(static_cast<vsp4::TrackType>(
 		utils::getTrackType(this->getAudioChannelSet())));
@@ -745,6 +786,11 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 			if (this->paramCCList[i] >= 0) {
 				paramCCLinks->insert(google::protobuf::MapPair((uint32_t)i, (uint32_t)this->paramCCList[i]));
 			}
+		}
+
+		if (this->isARAValid()) {
+			this->saveARAData();
+			state->set_aradataid(this->getARADataID().toStdString());
 		}
 	}
 

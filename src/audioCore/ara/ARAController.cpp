@@ -42,23 +42,16 @@ bool ARAArchivingController::readBytesFromArchive(
 	ARA::ARAArchiveReaderHostRef archiveReaderHostRef,
 	ARA::ARASize position, ARA::ARASize length,
 	ARA::ARAByte buffer[]) noexcept {
-	auto* archiveReader = ReaderConverter::fromHostRef(archiveReaderHostRef);
-
-	if ((position + length) <= archiveReader->getSize()) {
-		std::memcpy(buffer, juce::addBytesToPointer(
-			archiveReader->getData(), position), length);
-		return true;
-	}
-
-	return false;
+	return ReaderConverter::fromHostRef(archiveReaderHostRef)
+		->read(position, length, buffer);
 }
 
 bool ARAArchivingController::writeBytesToArchive(
 	ARA::ARAArchiveWriterHostRef archiveWriterHostRef,
 	ARA::ARASize position, ARA::ARASize length,
 	const ARA::ARAByte buffer[]) noexcept {
-	auto* archiveWriter = WriterConverter::fromHostRef(archiveWriterHostRef);
-	return (archiveWriter->setPosition((int64_t)position) && archiveWriter->write(buffer, length));
+	return WriterConverter::fromHostRef(archiveWriterHostRef)
+		->write(position, length, buffer);
 }
 
 void ARAArchivingController::notifyDocumentArchivingProgress(
@@ -72,9 +65,8 @@ void ARAArchivingController::notifyDocumentUnarchivingProgress(
 }
 
 ARA::ARAPersistentID ARAArchivingController::getDocumentArchiveID(
-	ARA::ARAArchiveReaderHostRef /*archiveReaderHostRef*/) noexcept {
-	/** Nothing To Do */
-	return nullptr;
+	ARA::ARAArchiveReaderHostRef archiveReaderHostRef) noexcept {
+	return ReaderConverter::fromHostRef(archiveReaderHostRef)->getID();
 }
 
 bool ARAContentAccessController::isMusicalContextContentAvailable(

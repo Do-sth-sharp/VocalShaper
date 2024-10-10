@@ -25,6 +25,13 @@ public:
 		juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier);
 	void handleARALoadError(const juce::String& pluginIdentifier);
 
+	bool isARAValid() const;
+
+	void createARADataID();
+	const juce::String getARADataID() const;
+	void loadARADataFrom(const juce::String& id);
+	void saveARAData() const;
+
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 	const juce::String getPluginIdentifier() const;
 
@@ -170,6 +177,8 @@ private:
 	std::unique_ptr<juce::ChangeBroadcaster> araRegionChangeBroadcaster = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araContextChangeBroadcaster = nullptr;
 	std::unique_ptr<juce::ChangeBroadcaster> araTrackInfoChangeBroadcaster = nullptr;
+
+	juce::String araDataID;
 
 	int pluginOnOffCount = 0;
 	juce::SpinLock pluginOnOffMutex;

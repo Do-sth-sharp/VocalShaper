@@ -88,6 +88,8 @@ private:
 	bool storeObjectsToArchive(
 		ARA::ARAArchiveWriterHostRef archiveWriterHostRef,
 		const ARA::ARAStoreObjectsFilter* filter) const;
+	const ARA::ARAFactory* getFactory() const;
+	const char* getArchiveID() const;
 
 	void clearUnsafe();
 	void clearRegionsUnsafe();

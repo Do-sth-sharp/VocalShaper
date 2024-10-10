@@ -1,5 +1,6 @@
 ﻿#include "ARAVirtualDocument.h"
 #include "ARAController.h"
+#include "ARAArchive.h"
 #include "../graph/SeqSourceProcessor.h"
 
 ARAVirtualDocument::ARAVirtualDocument(
@@ -183,9 +184,12 @@ void ARAVirtualDocument::storeToStream(juce::MemoryOutputStream& stream) const {
 	ARAVirtualDocument::initStoreFilter(filter,
 		this->audioSource.get(), this->audioModification.get());
 
+	/** Archive Writer */
+	ARAArchiveWriter writer(stream, this->getArchiveID());
+
 	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
 	this->storeObjectsToArchive(
-		ARAArchivingController::WriterConverter::toHostRef(&stream), &filter);
+		ARAArchivingController::WriterConverter::toHostRef(&writer), &filter);
 
 	ARAVirtualDocument::destoryStoreFilter(filter);
 }
@@ -193,6 +197,9 @@ void ARAVirtualDocument::storeToStream(juce::MemoryOutputStream& stream) const {
 void ARAVirtualDocument::restoreFromBlock(const juce::MemoryBlock& block) {
 	/** Invoke This On Message Thread */
 	JUCE_ASSERT_MESSAGE_THREAD
+
+	/** Data Size Must Greater Than 0 */
+	if (block.getSize() == 0) { return; }
 
 	/** Turn Off Plugin */
 	this->lockPlugin(true);
@@ -205,10 +212,13 @@ void ARAVirtualDocument::restoreFromBlock(const juce::MemoryBlock& block) {
 	ARAVirtualDocument::initRestoreFilter(filter,
 		this->audioSource.get(), this->audioModification.get());
 
-	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
-	this->restoreObjectsFromArchive(
-		ARAArchivingController::ReaderConverter::toHostRef(
-			const_cast<juce::MemoryBlock*>(&block)), &filter);
+	/** Archive Reader */
+	ARAArchiveReader reader(block);
+	if (reader.isValid() && (reader.getSize() > 0)) {
+		/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+		this->restoreObjectsFromArchive(
+			ARAArchivingController::ReaderConverter::toHostRef(&reader), &filter);
+	}
 
 	ARAVirtualDocument::destoryRestoreFilter(filter);
 
@@ -328,6 +338,20 @@ bool ARAVirtualDocument::storeObjectsToArchive(
 	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
 	return this->controller.getInterface()
 		->storeObjectsToArchive(this->controller.getRef(), archiveWriterHostRef, filter);
+}
+
+const ARA::ARAFactory* ARAVirtualDocument::getFactory() const {
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	return this->controller.getInterface()
+		->getFactory(this->controller.getRef());
+}
+
+const char* ARAVirtualDocument::getArchiveID() const {
+	/** ARA Doesn't Export It's Symbols. Using C API To Make ARA Library Symbols Happy */
+	if (auto ptrFactory = this->getFactory()) {
+		return ptrFactory->documentArchiveID;
+	}
+	return nullptr;
 }
 
 void ARAVirtualDocument::clearUnsafe() {

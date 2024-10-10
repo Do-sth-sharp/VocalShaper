@@ -70,7 +70,9 @@ void ARADataIOThread::run() {
 }
 
 bool ARADataIOThread::writeToFile(const juce::MemoryBlock& data, const juce::String& path) {
-	juce::File file = utils::getProjectDir().getChildFile(path);;
+	juce::File file = utils::getProjectDir().getChildFile(path);
+	file.getParentDirectory().createDirectory();
+
 	juce::FileOutputStream stream(file);
 	if (!stream.openedOk()) { return false; }
 

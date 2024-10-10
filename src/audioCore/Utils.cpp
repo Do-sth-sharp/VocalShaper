@@ -899,6 +899,14 @@ namespace utils {
 			.getChildFile("./VocalShaperProjectTemp/");
 	}
 
+	juce::File getARADataDir() {
+		return getProjectDir().getChildFile("./ARA/");
+	}
+
+	juce::File getARADataFile(const juce::String& id) {
+		return getARADataDir().getChildFile("./" + id + ".dat");
+	}
+
 	const juce::StringArray getProjectFormatsSupported(bool /*isWrite*/) {
 		return juce::StringArray{ "*.vsp4" };
 	}
