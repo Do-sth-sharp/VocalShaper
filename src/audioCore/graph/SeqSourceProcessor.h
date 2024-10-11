@@ -59,6 +59,12 @@ public:
 	double getMIDILength() const;
 	double getAudioLength() const;
 
+	double getAudioSampleRate() const;
+
+	bool isSourceInfoValid() const;
+	double getAudioSampleRateTemped() const;
+	double getAudioLengthTemped() const;
+
 	void setCurrentMIDITrack(int trackIndex);
 	int getCurrentMIDITrack() const;
 	int getTotalMIDITrackNum() const;
@@ -133,6 +139,14 @@ private:
 
 	juce::Array<float> outputLevels;
 
+	struct SourceInfo final {
+		double audioSampleRate = 0;
+		double audioLength = 0;
+	};
+	/** To Make ARA Happy.Only Valid On Current Track Has Audio Source And Audio Loading Not Completed */
+	SourceInfo sourceInfo{};
+	bool sourceInfoValid = false;
+
 	friend class SourceRecordProcessor;
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
@@ -155,6 +169,7 @@ private:
 
 	double getSourceLength() const;
 
+	/** Format, MetaData, BitDepth, Quality */
 	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;
 	const AudioFormat getAudioFormat() const;
 

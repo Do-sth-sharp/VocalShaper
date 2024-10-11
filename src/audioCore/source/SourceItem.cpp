@@ -296,6 +296,11 @@ const SourceItem::AudioFormat SourceItem::getAudioFormat() const {
 	return this->container->getAudioFormat();
 }
 
+double SourceItem::getAudioSampleRate() const {
+	if (this->type != SourceType::Audio || !this->container) { return 0; }
+	return this->container->getAudioSampleRate();
+}
+
 void SourceItem::forkIfNeed() {
 	if (this->container && this->container.use_count() > 2) {
 		/** Clear Audio Source */

@@ -37,7 +37,7 @@ PluginDecorator::PluginDecorator(std::unique_ptr<juce::AudioPluginInstance> plug
 	const juce::String& identifier, SeqSourceProcessor* seq,
 	bool isInstr, const juce::AudioChannelSet& type)
 	: PluginDecorator(seq, isInstr, type) {
-	this->setPlugin(std::move(plugin), identifier);
+	this->setPlugin(std::move(plugin), identifier, {});
 }
 
 PluginDecorator::~PluginDecorator() {
@@ -51,7 +51,8 @@ PluginDecorator::~PluginDecorator() {
 
 void PluginDecorator::setPlugin(
 	std::unique_ptr<juce::AudioPluginInstance> plugin,
-	const juce::String& pluginIdentifier, bool hasARA) {
+	const juce::String& pluginIdentifier,
+	SetPluginCallback callback, bool hasARA) {
 	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
 
 	if (!plugin) { return; }
@@ -66,15 +67,13 @@ void PluginDecorator::setPlugin(
 	this->plugin = std::move(plugin);
 	this->pluginIdentifier = pluginIdentifier;
 
-	this->updateBuffer();
-
 	/** Load ARA */
 	if (hasARA) {
 		/** Load Callback */
-		auto araLoadCallback = [ptr = SafePointer{ this }, pluginIdentifier](juce::ARAFactoryWrapper factory) {
+		auto araLoadCallback = [ptr = SafePointer{ this }, pluginIdentifier, callback](juce::ARAFactoryWrapper factory) {
 			if (factory.get()) {
 				if (ptr) {
-					ptr->setARA(factory, pluginIdentifier);
+					ptr->setARA(factory, pluginIdentifier, callback);
 				}
 
 				return;
@@ -82,7 +81,7 @@ void PluginDecorator::setPlugin(
 
 			/** Handle Error */
 			if (ptr) {
-				ptr->handleARALoadError(pluginIdentifier);
+				ptr->handleARALoadError(pluginIdentifier, callback);
 			}
 			UICallbackAPI<const juce::String&, const juce::String&>::invoke(
 				UICallbackType::ErrorAlert, "Load ARA Plugin",
@@ -99,12 +98,17 @@ void PluginDecorator::setPlugin(
 		juce::createARAFactoryAsync(*(this->plugin), araLoadCallback);
 	}
 	else {
+		this->updatePluginBuses();
+
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
 		this->pluginOnOffInternal(true,
 			this->getSampleRate(), this->getBlockSize());
 
-		//this->updatePluginBuses();
+		/** Plugin Loading Callback */
+		if (callback) {
+			callback();
+		}
 
 		/** Callback */
 		if (this->isInstr) {
@@ -117,7 +121,8 @@ void PluginDecorator::setPlugin(
 }
 
 void PluginDecorator::setARA(
-	juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier) {
+	juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier,
+	SetPluginCallback callback) {
 	if (this->plugin && pluginIdentifier == this->pluginIdentifier) {
 		/** Create ARA Host Document Controller */
 		if (auto controller = juce::ARAHostDocumentController::create(
@@ -159,12 +164,12 @@ void PluginDecorator::setARA(
 		}
 
 		/** Prepare Plugin */
+		this->updatePluginBuses();
+
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
 		this->pluginOnOffInternal(true,
 			this->getSampleRate(), this->getBlockSize());
-
-		//this->updatePluginBuses();
 
 		/** Prepare ARA Document */
 		if (this->araVirtualDocument) {
@@ -179,6 +184,11 @@ void PluginDecorator::setARA(
 				this->araVirtualDocument->getTrackInfoListener());
 		}
 
+		/** Plugin Loading Callback */
+		if (callback) {
+			callback();
+		}
+
 		/** Callback */
 		if (this->isInstr) {
 			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
@@ -189,15 +199,22 @@ void PluginDecorator::setARA(
 	}
 }
 
-void PluginDecorator::handleARALoadError(const juce::String& pluginIdentifier) {
+void PluginDecorator::handleARALoadError(
+	const juce::String& pluginIdentifier,
+	SetPluginCallback callback) {
 	if (this->plugin && pluginIdentifier == this->pluginIdentifier) {
 		/** Prepare Plugin */
+		this->updatePluginBuses();
+
 		this->plugin->setPlayHead(this->getPlayHead());
 		this->plugin->setNonRealtime(this->isNonRealtime());
 		this->pluginOnOffInternal(true,
 			this->getSampleRate(), this->getBlockSize());
 
-		//this->updatePluginBuses();
+		/** Plugin Loading Callback */
+		if (callback) {
+			callback();
+		}
 
 		/** Callback */
 		if (this->isInstr) {
@@ -465,14 +482,7 @@ void PluginDecorator::prepareToPlay(
 	double sampleRate, int maximumExpectedSamplesPerBlock) {
 	this->setRateAndBufferSizeDetails(sampleRate, maximumExpectedSamplesPerBlock);
 
-	juce::ScopedWriteLock locker(audioLock::getPluginLock());
-	if (!this->plugin) { return; }
-
-	int channels = std::max(this->plugin->getTotalNumInputChannels(), this->plugin->getTotalNumOutputChannels());
-	this->buffer = std::make_unique<juce::AudioBuffer<float>>(channels, this->getBlockSize());
-	if (this->plugin->supportsDoublePrecisionProcessing()) {
-		this->doubleBuffer = std::make_unique<juce::AudioBuffer<double>>(channels, this->getBlockSize());
-	}
+	this->updateBuffer();
 
 	this->pluginOnOffInternal(true,
 		this->getSampleRate(), this->getBlockSize());
@@ -677,7 +687,7 @@ void PluginDecorator::setCurrentProgramStateInformation(const void* data, int si
 }
 
 void PluginDecorator::processorLayoutsChanged() {
-	this->updateBuffer();
+	this->updatePluginBuses();
 }
 
 void PluginDecorator::addListener(juce::AudioProcessorListener* newListener) {
@@ -803,14 +813,6 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }
 
-void PluginDecorator::numChannelsChanged() {
-	//this->updatePluginBuses();
-}
-
-void PluginDecorator::numBusesChanged() {
-	//this->updatePluginBuses();
-}
-
 void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages) {
 	/** Filter MIDI Channel */
 	if (channel >= 1 && channel <= 16) {
@@ -913,4 +915,36 @@ void PluginDecorator::pluginOnOffInternal(
 			}
 		}
 	}
+}
+
+void PluginDecorator::updatePluginBuses() {
+	/** Get Current Layout */
+	int numInputBuses = this->getTotalNumInputChannels() / this->audioChannels.size();
+	int numOutputBuses = this->getTotalNumOutputChannels() / this->audioChannels.size();
+
+	juce::AudioProcessor::BusesLayout layout;
+	for (int i = 0; i < numInputBuses; i++) {
+		layout.inputBuses.add(this->audioChannels);
+	}
+	for (int i = 0; i < numOutputBuses; i++) {
+		layout.outputBuses.add(this->audioChannels);
+	}
+
+	if (this->plugin && this->plugin->checkBusesLayoutSupported(layout)) {
+		this->plugin->setBusesLayout(layout);
+	}
+	else {
+		/** Fallback Layout */
+		layout.inputBuses.clear();
+		layout.outputBuses.clear();
+		layout.inputBuses.add(this->audioChannels);
+		layout.outputBuses.add(this->audioChannels);
+
+		if (this->plugin && this->plugin->checkBusesLayoutSupported(layout)) {
+			this->plugin->setBusesLayout(layout);
+		}
+	}
+
+	/** Update Buffer */
+	this->updateBuffer();
 }

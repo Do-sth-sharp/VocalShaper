@@ -88,18 +88,17 @@ void PluginLoadThread::run() {
 		}
 
 		/** Prepare Plugin Load */
-		auto& [pluginDescription, addARA, ptr, sampleRate, blockSize, callback] = task;
+		auto& [pluginDescription, addARA, ptr, sampleRate, blockSize, loadCallback] = task;
 
 		/** Load Callback */
 		auto asyncCallback =
-			[ptr, pluginDescription, addARA, callback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& errorMessage) {
+			[ptr, pluginDescription, addARA, callback = loadCallback](std::unique_ptr<juce::AudioPluginInstance> p, const juce::String& errorMessage) {
 			if (p) {
 				auto identifier = pluginDescription.createIdentifierString();
 
 				if (auto plugin = ptr.getPlugin()) {
-					plugin->setPlugin(std::move(p), identifier,
+					plugin->setPlugin(std::move(p), identifier, callback,
 						addARA && pluginDescription.hasARAExtension);
-					callback();
 				}
 
 				return;

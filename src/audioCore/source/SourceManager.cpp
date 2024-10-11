@@ -224,6 +224,14 @@ const SourceManager::AudioFormat SourceManager::getAudioFormat(uint64_t ref) con
 	return AudioFormat{};
 }
 
+double SourceManager::getAudioSampleRate(uint64_t ref) const {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSource(ref, SourceType::Audio)) {
+		return ptr->getAudioSampleRate();
+	}
+	return 0;
+}
+
 void SourceManager::readAudioData(uint64_t ref, juce::AudioBuffer<float>& buffer, int bufferOffset,
 	int dataOffset, int length) const {
 	if (auto ptr = this->getSourceFast(ref, SourceType::Audio)) {

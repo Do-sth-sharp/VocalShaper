@@ -47,6 +47,7 @@ public:
 	using AudioFormat = SourceInternalContainer::AudioFormat;
 	void setAudioFormat(const AudioFormat& format);
 	const AudioFormat getAudioFormat() const;
+	double getAudioSampleRate() const;
 
 	void forkIfNeed();
 

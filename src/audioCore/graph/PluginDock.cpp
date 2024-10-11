@@ -53,7 +53,7 @@ void PluginDock::updateIndex(int index) {
 PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,
 	const juce::String& identifier, int index) {
 	if (auto ptr = this->insertPlugin(index)) {
-		ptr->setPlugin(std::move(processor), identifier);
+		ptr->setPlugin(std::move(processor), identifier, {});
 		return ptr;
 	}
 	else {

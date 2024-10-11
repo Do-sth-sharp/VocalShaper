@@ -34,6 +34,7 @@ public:
 	void setMIDI(const juce::MidiFile& data);
 	void setAudio(double sampleRate, const juce::AudioSampleBuffer& data);
 
+	/** Format, MetaData, BitDepth, Quality */
 	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;
 	void setAudioFormat(const AudioFormat& format);
 	const AudioFormat getAudioFormat() const;

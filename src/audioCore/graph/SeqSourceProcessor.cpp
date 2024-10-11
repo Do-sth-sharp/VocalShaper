@@ -179,7 +179,7 @@ void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> pro
 	/** Add Node */
 	if (auto ptrNode = this->prepareInstr()) {
 		/** Set Plugin */
-		ptrNode->setPlugin(std::move(processor), identifier);
+		ptrNode->setPlugin(std::move(processor), identifier, {});
 
 		/** Callback */
 		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
@@ -328,12 +328,16 @@ uint64_t SeqSourceProcessor::getMIDIRef() const {
 void SeqSourceProcessor::applyAudio() {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	this->releaseAudio();
+	this->sourceInfoValid = false;
 	this->audioSourceRef = SourceManager::getInstance()->applySource(
 		SourceManager::SourceType::Audio);
 
 	/** Callback */
 	auto callback = [ptr = SafePointer{ this }] {
 		if (ptr) {
+			/** Source Info Invalid */
+			ptr->sourceInfoValid = false;
+
 			/** ARA Change */
 			if (auto plugin = ptr->getInstrProcessor()) {
 				plugin->invokeARADocumentContextChange();
@@ -384,6 +388,7 @@ void SeqSourceProcessor::releaseAudio() {
 	juce::ScopedWriteLock locker(audioLock::getAudioLock());
 	if (this->audioSourceRef > 0) {
 		SourceManager::getInstance()->releaseSource(this->audioSourceRef);
+		this->sourceInfoValid = false;
 		this->audioSourceRef = 0;
 	}
 
@@ -721,6 +726,12 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 
 	if (!mes->audiosrc().empty()) {
 		this->applyAudio();
+
+		if (mes->has_sourceinfo()) {
+			this->sourceInfo.audioSampleRate = mes->sourceinfo().audiosamplerate();
+			this->sourceInfo.audioLength = mes->sourceinfo().audiolength();
+			this->sourceInfoValid = true;
+		}
 	}
 	if (!mes->midisrc().empty()) {
 		this->applyMIDI();
@@ -765,6 +776,10 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	if (this->isAudioValid()) {
 		juce::String name = this->getAudioFileName();
 		mes->set_audiosrc(name.toStdString());
+
+		auto sourceInfo = mes->mutable_sourceinfo();
+		sourceInfo->set_audiosamplerate(this->getAudioSampleRate());
+		sourceInfo->set_audiolength(this->getAudioLength());
 	}
 	if (this->isMIDIValid()) {
 		juce::String name = this->getMIDIFileName();
@@ -836,6 +851,22 @@ double SeqSourceProcessor::getMIDILength() const {
 double SeqSourceProcessor::getAudioLength() const {
 	return SourceManager::getInstance()->getLength(
 		this->audioSourceRef, SourceManager::SourceType::Audio);
+}
+
+double SeqSourceProcessor::getAudioSampleRate() const {
+	return SourceManager::getInstance()->getAudioSampleRate(this->audioSourceRef);
+}
+
+bool SeqSourceProcessor::isSourceInfoValid() const {
+	return this->sourceInfoValid;
+}
+
+double SeqSourceProcessor::getAudioSampleRateTemped() const {
+	return this->sourceInfo.audioSampleRate;
+}
+
+double SeqSourceProcessor::getAudioLengthTemped() const {
+	return this->sourceInfo.audioLength;
 }
 
 const SeqSourceProcessor::AudioFormat SeqSourceProcessor::getAudioFormat() const {

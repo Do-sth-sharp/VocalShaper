@@ -40,6 +40,11 @@ void ARAVirtualDocument::updateRegions() {
 		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { startTime, startTime + offset, endTime - startTime },
 			this->controller, *(this->regionSequence), *(this->audioModification) });
 	}
+	if (this->playbackRegions.size() == 0) {
+		/** Add A Virtual Region To Make ARA Happy */
+		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { 0, 0, this->seq->getTailLengthSeconds() },
+			this->controller, *(this->regionSequence), *(this->audioModification) });
+	}
 
 	/** Add Regions To Renderer */
 	this->addRegionsToRenderer();
@@ -76,8 +81,8 @@ void ARAVirtualDocument::updateTrackBaseInfo() {
 	/** Invoke This On Message Thread */
 	JUCE_ASSERT_MESSAGE_THREAD
 
-		/** Turn Off Plugin */
-		this->lockPlugin(true);
+	/** Turn Off Plugin */
+	this->lockPlugin(true);
 
 	/** Lock Document */
 	juce::ARAEditGuard locker(this->controller);
@@ -136,14 +141,7 @@ void ARAVirtualDocument::init() {
 		this->controller, this->seq, *(this->musicalContext));
 
 	/** Playback Regions */
-	for (int i = 0; i < this->seq->getSeqNum(); i++) {
-		auto [startTime, endTime, offset] = this->seq->getSeq(i);
-		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { startTime, startTime + offset, endTime - startTime },
-			this->controller, *(this->regionSequence), *(this->audioModification) });
-	}
-
-	/** Add Regions To Renderer */
-	this->addRegionsToRenderer();
+	this->updateRegions();
 
 	/** Turn On Plugin */
 	this->lockPlugin(false);

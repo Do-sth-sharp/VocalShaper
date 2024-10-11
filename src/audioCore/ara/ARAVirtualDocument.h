@@ -43,10 +43,10 @@ public:
 		SafePointer& operator= (const SafePointer& other) { weakRef = other.weakRef; return *this; };
 		SafePointer& operator= (ARAVirtualDocument* newSource) { weakRef = newSource; return *this; };
 
-		ARAVirtualDocument* getPlugin() const noexcept { return dynamic_cast<ARAVirtualDocument*> (weakRef.get()); };
-		operator ARAVirtualDocument* () const noexcept { return getPlugin(); };
-		ARAVirtualDocument* operator->() const noexcept { return getPlugin(); };
-		void deleteAndZero() { delete getPlugin(); };
+		ARAVirtualDocument* getDocument() const noexcept { return dynamic_cast<ARAVirtualDocument*> (weakRef.get()); };
+		operator ARAVirtualDocument* () const noexcept { return getDocument(); };
+		ARAVirtualDocument* operator->() const noexcept { return getDocument(); };
+		void deleteAndZero() { delete getDocument(); };
 
 		bool operator== (ARAVirtualDocument* component) const noexcept { return weakRef == component; };
 		bool operator!= (ARAVirtualDocument* component) const noexcept { return weakRef != component; };

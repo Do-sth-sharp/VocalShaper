@@ -136,8 +136,15 @@ ARAVirtualAudioSource::createProperties(SeqSourceProcessor* seq) {
 	if (seq) {
 		properties.name = seq->getAudioName().toRawUTF8();
 		properties.persistentID = ARAVirtualAudioSource::defaultID;
-		properties.sampleCount = std::max((uint64_t)(seq->getAudioLength() * seq->getSampleRate()), (uint64_t)2);/**< At Least 2 Samples In Audio Source */
-		properties.sampleRate = seq->getSampleRate();
+		properties.sampleRate = seq->isSourceInfoValid()
+			? seq->getAudioSampleRateTemped()
+			: seq->getAudioSampleRate();
+		if (properties.sampleRate <= 0) {
+			properties.sampleRate = seq->getSampleRate();
+		}
+		properties.sampleCount = std::max((uint64_t)(
+			(seq->isSourceInfoValid() ? seq->getAudioLengthTemped() : seq->getAudioLength())
+			* properties.sampleRate), (uint64_t)2);/**< At Least 2 Samples In Audio Source */
 		properties.channelCount = seq->getAudioChannelSet().size();
 		properties.merits64BitSamples = seq->isUsingDoublePrecision();
 	}

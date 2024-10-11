@@ -18,12 +18,16 @@ public:
 		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	~PluginDecorator();
 
+	using SetPluginCallback = std::function<void(void)>;
 	void setPlugin(
 		std::unique_ptr<juce::AudioPluginInstance> plugin,
-		const juce::String& pluginIdentifier, bool hasARA = false);
+		const juce::String& pluginIdentifier, SetPluginCallback callback, bool hasARA = false);
 	void setARA(
-		juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier);
-	void handleARALoadError(const juce::String& pluginIdentifier);
+		juce::ARAFactoryWrapper factory, const juce::String& pluginIdentifier,
+		SetPluginCallback callback);
+	void handleARALoadError(
+		const juce::String& pluginIdentifier,
+		SetPluginCallback callback);
 
 	bool isARAValid() const;
 
@@ -183,9 +187,6 @@ private:
 	int pluginOnOffCount = 0;
 	juce::SpinLock pluginOnOffMutex;
 
-	void numChannelsChanged() override;
-	void numBusesChanged() override;
-
 	static void filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages);
 	static void interceptMIDIMessage(bool shouldMIDIOutput, juce::MidiBuffer& midiMessages);
 	static void interceptMIDICCMessage(bool shouldMIDICCIntercept, juce::MidiBuffer& midiMessages);
@@ -197,6 +198,8 @@ private:
 	void pluginOnOffInternal(
 		bool shouldOn, double sampleRate, int blockSize,
 		bool stateQuickSwitch = false);
+
+	void updatePluginBuses();
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDecorator)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDecorator)

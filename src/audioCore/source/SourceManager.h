@@ -42,6 +42,7 @@ public:
 	using AudioFormat = SourceItem::AudioFormat;
 	void setAudioFormat(uint64_t ref, const AudioFormat& format);
 	const AudioFormat getAudioFormat(uint64_t ref) const;
+	double getAudioSampleRate(uint64_t ref) const;
 
 public:
 	void readAudioData(uint64_t ref, juce::AudioBuffer<float>& buffer, int bufferOffset,
