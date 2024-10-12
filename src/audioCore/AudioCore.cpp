@@ -331,14 +331,20 @@ bool AudioCore::load(const juce::String& path) {
 		{ projVer.major(), projVer.minor(), projVer.patch() })) {
 		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
 			UICallbackType::ErrorAlert, "Load Project",
-			"Project version is too low.");
+			"Project version is too low. Current application can only read projects saved by applications with version " +
+			utils::createVersionString(utils::getAudioPlatformVersionMinimumSupported()) + " or higher.");
 		return false;
 	}
-	if (!utils::projectVersionLowEnough(
-		{ projVer.major(), projVer.minor(), projVer.patch() })) {
+	auto& projMinSupportVer = proj->has_minversionsupported() ? proj->minversionsupported() : projVer;
+	utils::Version projMinSupportVersion{
+		projMinSupportVer.major(),
+		projMinSupportVer.minor(),
+		projMinSupportVer.patch() };
+	if (!utils::projectVersionLowEnough(projMinSupportVersion)) {
 		UICallbackAPI<const juce::String&, const juce::String&>::invoke(
 			UICallbackType::ErrorAlert, "Load Project",
-			"Audio core version is too low.");
+			"Audio core version is too low. Current project can only be read by applications with version " +
+			utils::createVersionString(projMinSupportVersion) + " or higher");
 		return false;
 	}
 
@@ -448,6 +454,13 @@ std::unique_ptr<google::protobuf::Message> AudioCore::serialize(
 	version->set_major(majorVer);
 	version->set_minor(minorVer);
 	version->set_patch(patchVer);
+
+	/** Get Minimum Supported Version */
+	auto [majorSupportVer, minorSupportVer, patchSupportVer] = utils::getAudioProjectVersionMinimumSupported();
+	auto supportVersion = mes->mutable_minversionsupported();
+	supportVersion->set_major(majorSupportVer);
+	supportVersion->set_minor(minorSupportVer);
+	supportVersion->set_patch(patchSupportVer);
 
 	/** Get Tempo */
 	{

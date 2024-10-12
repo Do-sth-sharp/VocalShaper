@@ -771,9 +771,20 @@ namespace utils {
 			VS_MINIMUM_SUPPORTED_PATCH_VERSION };
 	}
 
-	juce::String getAudioPlatformVersionString() {
-		auto [major, minor, patch] = getAudioPlatformVersion();
+	Version getAudioProjectVersionMinimumSupported() {
+		return Version{
+			VS_PROJECT_MINIMUM_SUPPORTED_MAJOR_VERSION,
+			VS_PROJECT_MINIMUM_SUPPORTED_MINOR_VERSION,
+			VS_PROJECT_MINIMUM_SUPPORTED_PATCH_VERSION };
+	}
+
+	juce::String createVersionString(const Version& version) {
+		auto& [major, minor, patch] = version;
 		return juce::String(major) + "." + juce::String(minor) + "." + juce::String(patch);
+	}
+
+	juce::String getAudioPlatformVersionString() {
+		return createVersionString(getAudioPlatformVersion());
 	}
 
 	juce::String getAudioPlatformCompileTime() {

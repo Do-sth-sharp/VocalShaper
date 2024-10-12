@@ -100,8 +100,13 @@ namespace utils {
 
 	uint32_t getCurrentTime();
 	juce::String getAudioPlatformName();
+	/** Current Application Version */
 	Version getAudioPlatformVersion();
+	/** The Minimum Project Verison Which Current Application Can Read */
 	Version getAudioPlatformVersionMinimumSupported();
+	/** The Minimum Application Verison That Can Read The Project Saved By Current Application */
+	Version getAudioProjectVersionMinimumSupported();
+	juce::String createVersionString(const Version& version);
 	juce::String getAudioPlatformVersionString();
 	juce::String getAudioPlatformCompileTime();
 	juce::String getSystemNameAndVersion();
