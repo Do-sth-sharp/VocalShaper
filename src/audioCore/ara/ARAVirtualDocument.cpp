@@ -42,7 +42,8 @@ void ARAVirtualDocument::updateRegions() {
 	}
 	if (this->playbackRegions.size() == 0) {
 		/** Add A Virtual Region To Make ARA Happy */
-		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { 0, 0, this->seq->getTailLengthSeconds() },
+		double length = this->seq->getTailLengthSeconds();
+		this->playbackRegions.add(new ARAVirtualPlaybackRegion{ { 0, length, length },
 			this->controller, *(this->regionSequence), *(this->audioModification) });
 	}
 
