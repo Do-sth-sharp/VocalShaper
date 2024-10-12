@@ -42,8 +42,11 @@ private:
 				/** Init Path */
 				::initCrashHandler(utils::getAppRootDir().getFullPathName());
 
-				/** ShutDown FlowUI */
-				::setUICrashCallback([] { flowUI::FlowWindowHub::shutdown(); });
+				/** ShutDown FlowUI And Close All Plugin Editors */
+				::setUICrashCallback([] {
+					flowUI::FlowWindowHub::shutdown();
+					PluginEditorHub::getInstance()->closeAll();
+					});
 			}
 		);
 	};

@@ -19,6 +19,10 @@ PluginEditorHub::PluginEditorHub() {
 	);
 }
 
+PluginEditorHub::~PluginEditorHub() {
+	this->closeAll();
+}
+
 void PluginEditorHub::openInstr(int index) {
 	if (this->checkInstr(index)) { return; }
 
@@ -163,6 +167,15 @@ void PluginEditorHub::setIcon(const juce::String& path) {
 	}
 	for (auto i : this->effectEditors) {
 		i->setWindowIcon(this->iconTemp);
+	}
+}
+
+void PluginEditorHub::closeAll() {
+	while (this->instrEditors.size() > 0) {
+		this->deleteInstrEditor(this->instrEditors.getUnchecked(0));
+	}
+	while (this->effectEditors.size() > 0) {
+		this->deleteEffectEditor(this->effectEditors.getUnchecked(0));
 	}
 }
 

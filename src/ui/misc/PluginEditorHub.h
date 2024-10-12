@@ -6,6 +6,7 @@
 class PluginEditorHub final : private juce::DeletedAtShutdown {
 public:
 	PluginEditorHub();
+	~PluginEditorHub();
 
 	void openInstr(int index);
 	void closeInstr(int index);
@@ -17,6 +18,8 @@ public:
 
 	void setOpenGL(bool opneGLOn);
 	void setIcon(const juce::String& path);
+
+	void closeAll();
 
 private:
 	juce::OwnedArray<PluginEditor> instrEditors;
