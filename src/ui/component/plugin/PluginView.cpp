@@ -93,6 +93,8 @@ void PluginView::paint(juce::Graphics& g) {
 	int paddingHeight = screenSize.getHeight() * 0.02;
 	float textHeight = screenSize.getHeight() * 0.02f;
 
+	auto searchRect = this->getLocalBounds().withHeight(searchHeight);
+
 	/** Color */
 	juce::Colour backgroundColor = laf.findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId);
@@ -108,20 +110,6 @@ void PluginView::paint(juce::Graphics& g) {
 	g.setColour(backgroundColor);
 	g.fillAll();
 
-	/** Search Box */
-	auto searchRect = this->getLocalBounds().withHeight(searchHeight);
-	g.setColour(searchBackgroundColor);
-	g.fillRect(searchRect);
-
-	/** Search Icon */
-	auto searchIconArea = searchRect.withWidth(searchRect.getHeight());
-	juce::Rectangle<float> searchIconRect(
-		searchIconArea.getCentreX() - searchIconHeight / 2,
-		searchIconArea.getCentreY() - searchIconHeight / 2,
-		searchIconHeight, searchIconHeight);
-	this->searchIcon->drawWithin(g, searchIconRect,
-		juce::RectanglePlacement::centred | juce::RectanglePlacement::fillDestination, 1.f);
-
 	/** Searching Text */
 	if (!this->pluginTree->isVisible()) {
 		juce::Rectangle<int> textRect(
@@ -133,6 +121,19 @@ void PluginView::paint(juce::Graphics& g) {
 		g.drawFittedText(this->searchTextTemp, textRect,
 			juce::Justification::centredBottom, 3, 1.f);
 	}
+
+	/** Search Box */
+	g.setColour(searchBackgroundColor);
+	g.fillRect(searchRect);
+
+	/** Search Icon */
+	auto searchIconArea = searchRect.withWidth(searchRect.getHeight());
+	juce::Rectangle<float> searchIconRect(
+		searchIconArea.getCentreX() - searchIconHeight / 2,
+		searchIconArea.getCentreY() - searchIconHeight / 2,
+		searchIconHeight, searchIconHeight);
+	this->searchIcon->drawWithin(g, searchIconRect,
+		juce::RectanglePlacement::centred | juce::RectanglePlacement::fillDestination, 1.f);
 }
 
 void PluginView::update() {
