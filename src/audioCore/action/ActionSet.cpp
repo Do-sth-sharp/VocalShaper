@@ -1980,7 +1980,7 @@ bool ActionSetEffect::doAction() {
 					/** Save Effect State */
 					auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect));
 					if (!effect) { ACTION_RESULT(false); }
-					auto state = effect->serialize();
+					auto state = effect->serialize(Serializable::createSerializeConfigQuickly());
 
 					auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
 					if (!statePtr) { ACTION_RESULT(false); }
@@ -2044,7 +2044,7 @@ bool ActionSetEffect::undo() {
 				/** Recover Effect State */
 				auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect));
 				pluginDock->setPluginBypass(ACTION_DATA(effect), state->bypassed());
-				effect->parse(state.get());
+				effect->parse(state.get(), Serializable::createParseConfigQuickly());
 
 				this->output("Undo Set Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "]" + "\n");
 				ACTION_RESULT(true);

@@ -20,8 +20,11 @@ public:
 	void unsave();
 
 public:
-	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<google::protobuf::Message> serialize() const override;
+	bool parse(
+		const google::protobuf::Message* data,
+		const ParseConfig& config) override;
+	std::unique_ptr<google::protobuf::Message> serialize(
+		const SerializeConfig& config) const override;
 
 private:
 	struct Content final {

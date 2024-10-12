@@ -307,7 +307,9 @@ const juce::Array<float> Track::getOutputLevels() const {
 	return this->outputLevels;
 }
 
-bool Track::parse(const google::protobuf::Message* data) {
+bool Track::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::MixerTrack*>(data);
 	if (!mes) { return false; }
 
@@ -324,7 +326,7 @@ bool Track::parse(const google::protobuf::Message* data) {
 
 	auto& plugins = mes->effects();
 	if (!dynamic_cast<PluginDock*>(
-		this->pluginDockNode->getProcessor())->parse(&plugins)) {
+		this->pluginDockNode->getProcessor())->parse(&plugins, config)) {
 		return false;
 	}
 
@@ -336,7 +338,8 @@ bool Track::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> Track::serialize() const {
+std::unique_ptr<google::protobuf::Message> Track::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::MixerTrack>();
 
 	mes->set_type(static_cast<vsp4::TrackType>(utils::getTrackType(this->audioChannels)));
@@ -345,7 +348,7 @@ std::unique_ptr<google::protobuf::Message> Track::serialize() const {
 	info->set_color(this->getTrackColor().getARGB());
 	mes->set_additionalbuses(this->getAdditionalAudioBusNum());
 
-	auto plugins = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())->serialize();
+	auto plugins = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())->serialize(config);
 	if (!dynamic_cast<vsp4::PluginDock*>(plugins.get())) { return nullptr; }
 	mes->set_allocated_effects(dynamic_cast<vsp4::PluginDock*>(plugins.release()));
 

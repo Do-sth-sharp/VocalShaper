@@ -126,8 +126,8 @@ namespace utils {
 	bool setProjectDir(const juce::File& dir);
 	juce::File getDefaultWorkingDir();
 
-	juce::File getARADataDir();
-	juce::File getARADataFile(const juce::String& id);
+	juce::File getARADataDir(const juce::String& projectDir, const juce::String& projectFileName);
+	juce::File getARADataFile(const juce::String& araDir, const juce::String& id);
 
 	const juce::StringArray getProjectFormatsSupported(bool isWrite);
 	const juce::StringArray getPluginFormatsSupported();

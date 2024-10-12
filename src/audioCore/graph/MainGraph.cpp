@@ -199,7 +199,9 @@ const juce::Array<float> MainGraph::getOutputLevels() const {
 	return this->outputLevels;
 }
 
-bool MainGraph::parse(const google::protobuf::Message* data) {
+bool MainGraph::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::MainGraph*>(data);
 	if (!mes) { return false; }
 
@@ -211,7 +213,7 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 		if (auto sourceNode = this->audioSourceNodeList.getLast()) {
 			sourceNode->setBypassed(i.bypassed());
 			if (auto source = dynamic_cast<SeqSourceProcessor*>(sourceNode->getProcessor())) {
-				if (!source->parse(&i)) { return false; }
+				if (!source->parse(&i, config)) { return false; }
 			}
 		}
 	}
@@ -222,7 +224,7 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 		if (auto trackNode = this->trackNodeList.getLast()) {
 			trackNode->setBypassed(i.bypassed());
 			if (auto track = dynamic_cast<Track*>(trackNode->getProcessor())) {
-				if (!track->parse(&i)) { return false; }
+				if (!track->parse(&i, config)) { return false; }
 			}
 		}
 	}
@@ -267,13 +269,14 @@ bool MainGraph::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
+std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::MainGraph>();
 
 	auto seqTracks = mes->mutable_seqtracks();
 	for (auto& i : this->audioSourceNodeList) {
 		if (auto track = dynamic_cast<SeqSourceProcessor*>(i->getProcessor())) {
-			auto tmes = track->serialize();
+			auto tmes = track->serialize(config);
 			if (!dynamic_cast<vsp4::SeqTrack*>(tmes.get())) { return nullptr; }
 			dynamic_cast<vsp4::SeqTrack*>(tmes.get())->set_bypassed(i->isBypassed());
 			seqTracks->AddAllocated(dynamic_cast<vsp4::SeqTrack*>(tmes.release()));
@@ -283,7 +286,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize() const {
 	auto mixTracks = mes->mutable_mixertracks();
 	for (auto& i : this->trackNodeList) {
 		if (auto track = dynamic_cast<Track*>(i->getProcessor())) {
-			auto tmes = track->serialize();
+			auto tmes = track->serialize(config);
 			if (!dynamic_cast<vsp4::MixerTrack*>(tmes.get())) { return nullptr; }
 			dynamic_cast<vsp4::MixerTrack*>(tmes.get())->set_bypassed(i->isBypassed());
 			mixTracks->AddAllocated(dynamic_cast<vsp4::MixerTrack*>(tmes.release()));

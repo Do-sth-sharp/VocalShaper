@@ -33,8 +33,8 @@ public:
 
 	void createARADataID();
 	const juce::String getARADataID() const;
-	void loadARADataFrom(const juce::String& id);
-	void saveARAData() const;
+	void loadARADataFrom(const juce::String& araDir, const juce::String& id);
+	void saveARAData(const juce::String& araDir) const;
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 	const juce::String getPluginIdentifier() const;
@@ -153,8 +153,11 @@ public:
 		const juce::AudioProcessor::TrackProperties& properties) override;
 
 public:
-	bool parse(const google::protobuf::Message* data) override;
-	std::unique_ptr<google::protobuf::Message> serialize() const override;
+	bool parse(
+		const google::protobuf::Message* data,
+		const ParseConfig& config) override;
+	std::unique_ptr<google::protobuf::Message> serialize(
+		const SerializeConfig& config) const override;
 
 private:
 	SeqSourceProcessor* const seq;

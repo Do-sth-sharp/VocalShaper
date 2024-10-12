@@ -262,8 +262,19 @@ bool AudioCore::save(const juce::String& name) {
 	ProjectInfoData::getInstance()->push();
 	ProjectInfoData::getInstance()->update();
 
+	/** Serialize Config */
+	SerializeConfig config{};
+	config.projectFilePath = projFile.getFullPathName();
+	config.projectFileName = projFile.getFileName();
+	config.projectDir = projDir.getFullPathName();
+	config.araDir = utils::getARADataDir(config.projectDir, config.projectFileName).getFullPathName();
+
+	/** Clear ARA Data Dir */
+	juce::File araDir(config.araDir);
+	araDir.deleteRecursively();
+
 	/** Get Project Data */
-	auto mes = this->serialize();
+	auto mes = this->serialize(config);
 	if (!dynamic_cast<vsp4::Project*>(mes.get())) { ProjectInfoData::getInstance()->pop(); return false; };
 	auto proj = std::unique_ptr<vsp4::Project>(dynamic_cast<vsp4::Project*>(mes.release()));
 
@@ -340,8 +351,15 @@ bool AudioCore::load(const juce::String& path) {
 	juce::File projDir = projFile.getParentDirectory();
 	utils::setProjectDir(projDir);
 
+	/** Parse Config */
+	ParseConfig config{};
+	config.projectFilePath = projFile.getFullPathName();
+	config.projectFileName = projFile.getFileName();
+	config.projectDir = projDir.getFullPathName();
+	config.araDir = utils::getARADataDir(config.projectDir, config.projectFileName).getFullPathName();
+
 	/** Change Graph */
-	if (this->parse(proj.get())) {
+	if (this->parse(proj.get(), config)) {
 		/** Load Source File */
 		this->loadSource(proj.get());
 
@@ -384,13 +402,15 @@ void AudioCore::clearGraph() {
 	this->mainAudioGraph->clearGraph();
 }
 
-bool AudioCore::parse(const google::protobuf::Message* data) {
+bool AudioCore::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::Project*>(data);
 	if (!mes) { return false; }
 
 	/** Set Info */
 	ProjectInfoData::getInstance()->init();
-	if (!ProjectInfoData::getInstance()->parse(&(mes->info()))) { return false; }
+	if (!ProjectInfoData::getInstance()->parse(&(mes->info()), config)) { return false; }
 
 	/** Set Tempo */
 	{
@@ -408,16 +428,17 @@ bool AudioCore::parse(const google::protobuf::Message* data) {
 	}
 
 	/** Load Graph */
-	if (!this->mainAudioGraph->parse(&(mes->graph()))) { return false; }
+	if (!this->mainAudioGraph->parse(&(mes->graph()), config)) { return false; }
 
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {
+std::unique_ptr<google::protobuf::Message> AudioCore::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::Project>();
 
 	/** Get Info */
-	auto info = ProjectInfoData::getInstance()->serialize();
+	auto info = ProjectInfoData::getInstance()->serialize(config);
 	if (!dynamic_cast<vsp4::ProjectInfo*>(info.get())) { return nullptr; }
 	mes->set_allocated_info(dynamic_cast<vsp4::ProjectInfo*>(info.release()));
 
@@ -443,7 +464,7 @@ std::unique_ptr<google::protobuf::Message> AudioCore::serialize() const {
 	}
 
 	/** Get Graph */
-	auto graph = this->mainAudioGraph->serialize();
+	auto graph = this->mainAudioGraph->serialize(config);
 	if (!dynamic_cast<vsp4::MainGraph*>(graph.get())) { return nullptr; }
 	mes->set_allocated_graph(dynamic_cast<vsp4::MainGraph*>(graph.release()));
 

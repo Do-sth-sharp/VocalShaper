@@ -325,7 +325,9 @@ void PluginDock::clearGraph() {
 	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, -1);
 }
 
-bool PluginDock::parse(const google::protobuf::Message* data) {
+bool PluginDock::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::PluginDock*>(data);
 	if (!mes) { return false; }
 
@@ -337,7 +339,7 @@ bool PluginDock::parse(const google::protobuf::Message* data) {
 		if (auto pluginNode = this->pluginNodeList.getLast()) {
 			if (auto plugin = dynamic_cast<PluginDecorator*>(pluginNode->getProcessor())) {
 				PluginDock::setPluginBypass(PluginDecorator::SafePointer{ plugin }, i.bypassed());
-				if (!plugin->parse(&i)) { return false; }
+				if (!plugin->parse(&i, config)) { return false; }
 			}
 		}
 	}
@@ -345,13 +347,14 @@ bool PluginDock::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> PluginDock::serialize() const {
+std::unique_ptr<google::protobuf::Message> PluginDock::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::PluginDock>();
 
 	auto plugins = mes->mutable_plugins();
 	for (auto& i : this->pluginNodeList) {
 		if (auto plugin = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
-			if (auto item = plugin->serialize()) {
+			if (auto item = plugin->serialize(config)) {
 				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
 					plu->set_bypassed(PluginDock::getPluginBypass(
 						PluginDecorator::SafePointer{ plugin }));

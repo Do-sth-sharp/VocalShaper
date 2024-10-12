@@ -899,12 +899,12 @@ namespace utils {
 			.getChildFile("./VocalShaperProjectTemp/");
 	}
 
-	juce::File getARADataDir() {
-		return getProjectDir().getChildFile("./ARA/");
+	juce::File getARADataDir(const juce::String& projectDir, const juce::String& projectFileName) {
+		return juce::File{ projectDir }.getChildFile("./" + projectFileName + ".ara/");
 	}
 
-	juce::File getARADataFile(const juce::String& id) {
-		return getARADataDir().getChildFile("./" + id + ".dat");
+	juce::File getARADataFile(const juce::String& araDir, const juce::String& id) {
+		return juce::File{ araDir }.getChildFile("./" + id + ".dat");
 	}
 
 	const juce::StringArray getProjectFormatsSupported(bool /*isWrite*/) {

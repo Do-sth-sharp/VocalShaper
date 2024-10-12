@@ -129,7 +129,7 @@ bool ActionRemoveMixerTrack::doAction() {
 		/** Save Track State */
 		auto track = graph->getTrackProcessor(ACTION_DATA(index));
 		if (!track) { ACTION_RESULT(false); }
-		auto state = track->serialize();
+		auto state = track->serialize(Serializable::createSerializeConfigQuickly());
 
 		auto statePtr = dynamic_cast<vsp4::MixerTrack*>(state.get());
 		if (!statePtr) { ACTION_RESULT(false); }
@@ -234,7 +234,7 @@ bool ActionRemoveMixerTrack::undo() {
 		/** Recover Track State */
 		auto track = graph->getTrackProcessor(ACTION_DATA(index));
 		graph->setTrackBypass(ACTION_DATA(index), state->bypassed());
-		track->parse(state.get());
+		track->parse(state.get(), Serializable::createParseConfigQuickly());
 
 		/** Recover Connections */
 		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioT2Trk)) {
@@ -489,7 +489,7 @@ bool ActionRemoveEffect::doAction() {
 				/** Save Effect State */
 				auto effect = dock->getPluginProcessor(ACTION_DATA(effect));
 				if (!effect) { ACTION_RESULT(false); }
-				auto state = effect->serialize();
+				auto state = effect->serialize(Serializable::createSerializeConfigQuickly());
 
 				auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
 				if (!statePtr) { ACTION_RESULT(false); }
@@ -538,7 +538,7 @@ bool ActionRemoveEffect::undo() {
 				/** Recover Effect State */
 				auto effect = dock->getPluginProcessor(ACTION_DATA(effect));
 				dock->setPluginBypass(ACTION_DATA(effect), state->bypassed());
-				effect->parse(state.get());
+				effect->parse(state.get(), Serializable::createParseConfigQuickly());
 
 				this->output("Undo Remove Plugin: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String(ACTION_DATA(effect)) + "]" + "\n");
 				ACTION_RESULT(true);
@@ -568,7 +568,7 @@ bool ActionRemoveInstr::doAction() {
 			/** Save Instr State */
 			auto instr = track->getInstrProcessor();
 			if (!instr) { ACTION_RESULT(false); }
-			auto state = instr->serialize();
+			auto state = instr->serialize(Serializable::createSerializeConfigQuickly());
 
 			auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
 			if (!statePtr) { ACTION_RESULT(false); }
@@ -615,7 +615,7 @@ bool ActionRemoveInstr::undo() {
 			/** Recover Instr State */
 			auto instr = track->getInstrProcessor();
 			track->setInstrumentBypass(state->bypassed());
-			instr->parse(state.get());
+			instr->parse(state.get(), Serializable::createParseConfigQuickly());
 
 			this->output("Undo Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
 			ACTION_RESULT(true);
@@ -854,7 +854,7 @@ bool ActionRemoveSequencerTrack::doAction() {
 		/** Save Track State */
 		auto track = graph->getSourceProcessor(ACTION_DATA(index));
 		if (!track) { ACTION_RESULT(false); }
-		auto state = track->serialize();
+		auto state = track->serialize(Serializable::createSerializeConfigQuickly());
 
 		auto statePtr = dynamic_cast<vsp4::SeqTrack*>(state.get());
 		if (!statePtr) { ACTION_RESULT(false); }
@@ -915,7 +915,7 @@ bool ActionRemoveSequencerTrack::undo() {
 		/** Recover Track State */
 		auto track = graph->getSourceProcessor(ACTION_DATA(index));
 		graph->setSourceBypass(ACTION_DATA(index), state->bypassed());
-		track->parse(state.get());
+		track->parse(state.get(), Serializable::createParseConfigQuickly());
 
 		/** Recover Connections */
 		for (auto [src, srcc, dst, dstc] : ACTION_DATA(audioSrc2Trk)) {

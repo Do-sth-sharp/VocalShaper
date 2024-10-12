@@ -703,7 +703,9 @@ void SeqSourceProcessor::clearGraph() {
 	this->srcs.clearGraph();
 }
 
-bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
+bool SeqSourceProcessor::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::SeqTrack*>(data);
 	if (!mes) { return false; }
 
@@ -712,14 +714,14 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 	this->setTrackColor(juce::Colour{ info.color() });
 
 	auto& sources = mes->sources();
-	if (!this->srcs.parse(&sources)) { return false; }
+	if (!this->srcs.parse(&sources, config)) { return false; }
 
 	if (mes->has_instr()) {
 		auto& instr = mes->instr();
 
 		if (auto plugin = this->prepareInstr()) {
 			SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{ plugin }, instr.bypassed());
-			if (!plugin->parse(&instr)) { return false; }
+			if (!plugin->parse(&instr, config)) { return false; }
 		}
 	}
 	this->setInstrOffline(mes->offline());
@@ -744,7 +746,8 @@ bool SeqSourceProcessor::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const {
+std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::SeqTrack>();
 
 	mes->set_type(static_cast<vsp4::TrackType>(utils::getTrackType(this->audioChannels)));
@@ -752,13 +755,13 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize() const
 	info->set_name(this->getTrackName().toStdString());
 	info->set_color(this->getTrackColor().getARGB());
 
-	auto srcs = this->srcs.serialize();
+	auto srcs = this->srcs.serialize(config);
 	if (!dynamic_cast<vsp4::SourceInstanceList*>(srcs.get())) { return nullptr; }
 	mes->set_allocated_sources(dynamic_cast<vsp4::SourceInstanceList*>(srcs.release()));
 
 	if (this->instr) {
 		if (auto plugin = dynamic_cast<PluginDecorator*>(this->instr->getProcessor())) {
-			if (auto item = plugin->serialize()) {
+			if (auto item = plugin->serialize(config)) {
 				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
 					plu->set_bypassed(SeqSourceProcessor::getInstrumentBypass(
 						PluginDecorator::SafePointer{ plugin }));

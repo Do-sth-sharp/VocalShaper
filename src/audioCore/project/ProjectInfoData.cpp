@@ -59,7 +59,9 @@ void ProjectInfoData::unsave() {
 	this->content.saved = false;
 }
 
-bool ProjectInfoData::parse(const google::protobuf::Message* data) {
+bool ProjectInfoData::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::ProjectInfo*>(data);
 	if (!mes) { return false; }
 
@@ -85,7 +87,8 @@ bool ProjectInfoData::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> ProjectInfoData::serialize() const {
+std::unique_ptr<google::protobuf::Message> ProjectInfoData::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::ProjectInfo>();
 
 	mes->set_createdtime(this->content.createTime);

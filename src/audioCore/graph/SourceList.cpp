@@ -194,7 +194,9 @@ void SourceList::clearGraph() {
 		UICallbackType::SeqBlockChanged, this->index, -1);
 }
 
-bool SourceList::parse(const google::protobuf::Message* data) {
+bool SourceList::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::SourceInstanceList*>(data);
 	if (!mes) { return false; }
 
@@ -206,7 +208,8 @@ bool SourceList::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> SourceList::serialize() const {
+std::unique_ptr<google::protobuf::Message> SourceList::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::SourceInstanceList>();
 
 	auto list = mes->mutable_sources();

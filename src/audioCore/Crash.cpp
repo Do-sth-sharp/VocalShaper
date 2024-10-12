@@ -1,7 +1,7 @@
 ﻿#include "AudioCore.h"
 
 extern "C" char* audioCoreCreateProjectDataBlock() {
-	auto data = AudioCore::getInstance()->serialize();
+	auto data = AudioCore::getInstance()->serialize(Serializable::createSerializeConfigQuickly());
 	return (char*)(data.release());
 }
 

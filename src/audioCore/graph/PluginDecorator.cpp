@@ -238,22 +238,23 @@ const juce::String PluginDecorator::getARADataID() const {
 	return this->araDataID;
 }
 
-void PluginDecorator::loadARADataFrom(const juce::String& id) {
+void PluginDecorator::loadARADataFrom(
+	const juce::String& araDir, const juce::String& id) {
 	/** Set Current ID */
 	this->araDataID = id;
 
 	/** Load Data */
 	if (this->araVirtualDocument) {
-		juce::String path = utils::getARADataFile(id).getFullPathName();
+		juce::String path = utils::getARADataFile(araDir, id).getFullPathName();
 		ARADataIOThread::getInstance()->addTask(
 			path, this->araVirtualDocument.get(), false);
 	}
 }
 
-void PluginDecorator::saveARAData() const {
+void PluginDecorator::saveARAData(const juce::String& araDir) const {
 	/** Save Data */
 	if (this->araVirtualDocument && this->araDataID.isNotEmpty()) {
-		juce::String path = utils::getARADataFile(this->araDataID).getFullPathName();
+		juce::String path = utils::getARADataFile(araDir, this->araDataID).getFullPathName();
 		ARADataIOThread::getInstance()->addTask(
 			path, this->araVirtualDocument.get(), true);
 	}
@@ -719,7 +720,9 @@ void PluginDecorator::updateTrackProperties(
 	this->plugin->updateTrackProperties(properties);
 }
 
-bool PluginDecorator::parse(const google::protobuf::Message* data) {
+bool PluginDecorator::parse(
+	const google::protobuf::Message* data,
+	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::Plugin*>(data);
 	if (!mes) { return false; }
 
@@ -732,7 +735,7 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 	auto& state = mes->state();
 
 	auto ptrPlugin = PluginDecorator::SafePointer(this);
-	auto callback = [state, ptrPlugin] {
+	auto callback = [state, ptrPlugin, araDir = config.araDir] {
 		if (!ptrPlugin) { return; }
 
 		ptrPlugin->setMIDIChannel(state.midichannel());
@@ -749,7 +752,7 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 			pluginData.c_str(), pluginData.size());
 
 		if (ptrPlugin->isARAValid() && !(state.aradataid().empty())) {
-			ptrPlugin->loadARADataFrom(state.aradataid());
+			ptrPlugin->loadARADataFrom(araDir, state.aradataid());
 		}
 	};
 
@@ -767,7 +770,8 @@ bool PluginDecorator::parse(const google::protobuf::Message* data) {
 	return true;
 }
 
-std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
+std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize(
+	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::Plugin>();
 
 	/** Plugin Info */
@@ -799,7 +803,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize() const {
 		}
 
 		if (this->isARAValid()) {
-			this->saveARAData();
+			this->saveARAData(config.araDir);
 			state->set_aradataid(this->getARADataID().toStdString());
 		}
 	}
