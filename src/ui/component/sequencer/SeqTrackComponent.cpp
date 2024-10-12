@@ -556,7 +556,11 @@ void SeqTrackComponent::editTrackName() {
 
 void SeqTrackComponent::instrEditorShow() {
 	bool instrValid = quickAPI::isInstrValid(this->index);
-	if (!instrValid) { return; }
+	if (!instrValid) { 
+		/** Show Add Instr Menu When Instr Invalid */
+		this->instrMenuShow();
+		return;
+	}
 	
 	if (this->instrButton->getToggleState()) {
 		PluginEditorHub::getInstance()->closeInstr(this->index);
