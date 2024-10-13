@@ -1,4 +1,5 @@
 ﻿#include "ARAController.h"
+#include "ARAGlobalState.h"
 #include "../AudioCore.h"
 
 ARA::ARAAudioReaderHostRef ARAAudioAccessController::createAudioReaderForSource(
@@ -267,9 +268,14 @@ void ARAContentAccessController::destroyContentReader(
 }
 
 void ARAModelUpdateController::notifyAudioSourceAnalysisProgress(
-	ARA::ARAAudioSourceHostRef /*audioSourceHostRef*/,
-	ARA::ARAAnalysisProgressState /*state*/, float /*value*/) noexcept {
-	/** Nothing To Do */
+	ARA::ARAAudioSourceHostRef audioSourceHostRef,
+	ARA::ARAAnalysisProgressState state, float /*value*/) noexcept {
+	if (state == ARA::kARAAnalysisProgressStarted) {
+		ARAGlobalState::startSourceAnalysising(audioSourceHostRef);
+	}
+	else if (state == ARA::kARAAnalysisProgressCompleted) {
+		ARAGlobalState::completeSourceAnalysising(audioSourceHostRef);
+	}
 }
 
 void ARAModelUpdateController::notifyAudioSourceContentChanged(

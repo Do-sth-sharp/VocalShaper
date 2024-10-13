@@ -9,6 +9,7 @@
 #include "../project/ProjectInfoData.h"
 #include "../recovery/DataWrite.hpp"
 #include "../recovery/ActionType.hpp"
+#include "../ara/ARAGlobalState.h"
 
 #define ACTION_CHECK_RENDERING(s) \
 	do { \
@@ -37,6 +38,14 @@
 #define ACTION_CHECK_PLUGIN_SEARCHING(s) \
 	do { \
 		if(Plugin::getInstance()->pluginSearchThreadIsRunning()) { \
+			this->error(s); \
+			return false; \
+		} \
+	} while(false)
+
+#define ACTION_CHECK_ARA_ANALYSISING(s) \
+	do { \
+		if(ARAGlobalState::hasSourceAnalysising()) { \
 			this->error(s); \
 			return false; \
 		} \

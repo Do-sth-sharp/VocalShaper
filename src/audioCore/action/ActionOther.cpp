@@ -125,6 +125,8 @@ bool ActionRenderNow::doAction() {
 		"Don't do this while rendering.");
 	ACTION_CHECK_SOURCE_IO_RUNNING(
 		"Don't do this while source IO running.");
+	ACTION_CHECK_ARA_ANALYSISING(
+		"Don't do this while ARA source analysising.");
 
 	if (AudioCore::getInstance()->renderNow(
 		this->tracks, this->path, this->name, this->extension,
@@ -177,6 +179,8 @@ bool ActionSave::doAction() {
 		"Don't do this while rendering.");
 	ACTION_CHECK_SOURCE_IO_RUNNING(
 		"Don't do this while source IO running.");
+	ACTION_CHECK_ARA_ANALYSISING(
+		"Don't do this while ARA source analysising.");
 
 	ACTION_WRITE_TYPE(ActionSave);
 	ACTION_WRITE_DB();
