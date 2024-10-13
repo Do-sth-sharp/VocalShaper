@@ -87,6 +87,7 @@ private:
 
 	friend class AudioDeviceChangeListener;
 	void initAudioDevice();
+	void initAudioDevice(const juce::XmlElement* state);
 	void updateAudioBuses();
 	void updateARAContext();
 

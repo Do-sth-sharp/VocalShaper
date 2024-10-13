@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "quickGet.h"
+#include "../misc/Device.h"
 
 namespace quickAPI {
 	void setPluginSearchPathListFilePath(const juce::String& path);
@@ -34,4 +35,8 @@ namespace quickAPI {
 
 	void setPlayPosition(double timeSec);
 	void setPlayLoop(double startSec, double endSec);
+
+	using AudioDeviceCallback = Device::AudioDeviceCallback;
+	void setAudioDeviceCallback(const AudioDeviceCallback& callback);
+	void setAudioDeviceInitState(std::unique_ptr<juce::XmlElement> state);
 }

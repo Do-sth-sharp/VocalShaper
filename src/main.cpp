@@ -72,6 +72,12 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
+				/** Audio Device */
+				auto kmFile = utils::getAudioConfigFile();
+				if (auto kmData = utils::readXml(kmFile)) {
+					quickAPI::setAudioDeviceInitState(std::move(kmData));
+				}
+
 				/** Plugin Path */
 				quickAPI::setPluginSearchPathListFilePath(utils::getPluginSearchPathFile().getFullPathName());
 				quickAPI::setPluginListTemporaryFilePath(utils::getPluginListFile().getFullPathName());
@@ -396,6 +402,23 @@ private:
 		);
 	};
 
+	void addAudioDeviceCallback() {
+		InitTaskList::getInstance()->add(
+			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
+				if (splash) { splash->showMessage("Register Audio Device Callbacks..."); }
+			}
+		);
+		InitTaskList::getInstance()->add(
+			[] {
+				auto audioDeviceCallback = [](juce::XmlElement* data) {
+					auto file = utils::getAudioConfigFile();
+					utils::saveXml(file, data);
+					};
+				quickAPI::setAudioDeviceCallback(audioDeviceCallback);
+			}
+		);
+	};
+
 	void autoLayout() {
 		InitTaskList::getInstance()->add(
 			[splash = Splash::SafePointer<Splash>(this->splash.get())] {
@@ -572,6 +595,9 @@ public:
 
 		/** Add Core Callback */
 		this->addCoreCallback();
+
+		/** Set Audio Device Callback */
+		this->addAudioDeviceCallback();
 
 		/** Auto Layout */
 		this->autoLayout();

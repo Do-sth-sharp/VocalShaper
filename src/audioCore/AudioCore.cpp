@@ -72,7 +72,7 @@ AudioCore::AudioCore() {
 	Device::getInstance()->addChangeListener(this->audioDeviceListener.get());
 
 	/** Init Audio Device */
-	this->initAudioDevice();
+	this->initAudioDevice(AudioStartupConfig::getInstance()->getConfig());
 
 	/** Init Project */
 	ProjectInfoData::getInstance()->init();
@@ -485,8 +485,12 @@ std::unique_ptr<google::protobuf::Message> AudioCore::serialize(
 }
 
 void AudioCore::initAudioDevice() {
+	this->initAudioDevice(nullptr);
+}
+
+void AudioCore::initAudioDevice(const juce::XmlElement* state) {
 	/** Init With Default Device */
-	Device::getInstance()->initialise(1, 2, nullptr, true);
+	Device::getInstance()->initialise(1, 2, state, true);
 
 	/** Add Main Graph To Main Player */
 	this->mainGraphPlayer->setProcessor(this->mainAudioGraph.get());

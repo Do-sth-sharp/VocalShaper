@@ -7,7 +7,9 @@ public:
 	Device();
 	~Device();
 
+	using AudioDeviceCallback = std::function<void(juce::XmlElement*)>;
 	void addChangeListener(juce::ChangeListener* listener);
+	void addChangeCallback(const AudioDeviceCallback& callback);
 
 	juce::String initialise(int numInputChannelsNeeded,
 		int numOutputChannelsNeeded,
@@ -93,6 +95,8 @@ public:
 private:
 	std::unique_ptr<juce::AudioDeviceManager> audioDeviceManager = nullptr;
 	juce::AudioIODeviceCallback* callback = nullptr;
+
+	std::unique_ptr<juce::ChangeListener> internalCallbackListener = nullptr;
 
 public:
 	static Device* getInstance();

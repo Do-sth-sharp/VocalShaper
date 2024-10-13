@@ -29,6 +29,8 @@ namespace utils {
 	const juce::File getEditorDataFile(const juce::String& name);
 	const juce::File getKeyMappingFile(
 		const juce::String& file = "keyMapping.xml");
+	const juce::File getAudioConfigFile(
+		const juce::String& file = "audioConfig.xml");
 	const juce::File getThemeColorFile(const juce::String& name,
 		const juce::String& file = "colors.json");
 	const juce::File getFontFile(const juce::String& name,

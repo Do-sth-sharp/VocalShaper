@@ -66,3 +66,22 @@ private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioSaveConfig)
 };
+
+class AudioStartupConfig final : private juce::DeletedAtShutdown {
+public:
+	AudioStartupConfig() = default;
+
+	void setConfig(std::unique_ptr<juce::XmlElement> data);
+	const juce::XmlElement* getConfig() const;
+
+private:
+	std::unique_ptr<juce::XmlElement> startupConfig = nullptr;
+
+public:
+	static AudioStartupConfig* getInstance();
+
+private:
+	static AudioStartupConfig* instance;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioStartupConfig)
+};

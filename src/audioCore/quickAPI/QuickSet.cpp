@@ -122,4 +122,12 @@ namespace quickAPI {
 	void setPlayLoop(double startSec, double endSec) {
 		AudioCore::getInstance()->setLoop(startSec, endSec);
 	}
+
+	void setAudioDeviceCallback(const AudioDeviceCallback& callback) {
+		Device::getInstance()->addChangeCallback(callback);
+	}
+
+	void setAudioDeviceInitState(std::unique_ptr<juce::XmlElement> state) {
+		AudioStartupConfig::getInstance()->setConfig(std::move(state));
+	}
 }

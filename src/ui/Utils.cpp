@@ -103,6 +103,11 @@ namespace utils {
 		return getConfigDir().getChildFile(file);
 	}
 
+	const juce::File getAudioConfigFile(
+		const juce::String& file) {
+		return getConfigDir().getChildFile(file);
+	}
+
 	const juce::File getThemeColorFile(const juce::String& name,
 		const juce::String& file) {
 		return getThemeRootDir(name).getChildFile(file);

@@ -1,8 +1,37 @@
 ﻿#include "Device.h"
 
+class InternalAudioDeviceListener final : public juce::ChangeListener {
+public:
+	InternalAudioDeviceListener() = default;
+
+	using AudioDeviceCallback = Device::AudioDeviceCallback;
+	void addCallback(const AudioDeviceCallback& callback) {
+		this->callbacks.add(callback);
+	};
+
+private:
+	juce::Array<AudioDeviceCallback> callbacks;
+
+	void changeListenerCallback(juce::ChangeBroadcaster* source) override {
+		if (auto deviceManager = dynamic_cast<juce::AudioDeviceManager*>(source)) {
+			if (auto state = deviceManager->createStateXml()) {
+				for (auto& i : this->callbacks) {
+					i(state.get());
+				}
+			}
+		}
+	}
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InternalAudioDeviceListener)
+};
+
 Device::Device() {
 	/** Main Audio Device Manager */
 	this->audioDeviceManager = std::make_unique<juce::AudioDeviceManager>();
+
+	/** Internal Audio Device Listener */
+	this->internalCallbackListener = std::make_unique<InternalAudioDeviceListener>();
+	this->audioDeviceManager->addChangeListener(this->internalCallbackListener.get());
 }
 
 Device::~Device() {
@@ -14,6 +43,12 @@ Device::~Device() {
 
 void Device::addChangeListener(juce::ChangeListener* listener) {
 	this->audioDeviceManager->addChangeListener(listener);
+}
+
+void Device::addChangeCallback(const AudioDeviceCallback& callback) {
+	if (auto listener = dynamic_cast<InternalAudioDeviceListener*>(this->internalCallbackListener.get())) {
+		listener->addCallback(callback);
+	}
 }
 
 juce::String Device::initialise(int numInputChannelsNeeded,

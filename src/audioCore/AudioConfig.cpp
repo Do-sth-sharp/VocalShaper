@@ -102,3 +102,18 @@ AudioSaveConfig* AudioSaveConfig::getInstance() {
 
 AudioSaveConfig* AudioSaveConfig::instance = nullptr;
 
+void AudioStartupConfig::setConfig(std::unique_ptr<juce::XmlElement> data) {
+	this->startupConfig = std::move(data);
+}
+
+const juce::XmlElement* AudioStartupConfig::getConfig() const {
+	return this->startupConfig.get();
+}
+
+AudioStartupConfig* AudioStartupConfig::getInstance() {
+	return AudioStartupConfig::instance
+		? AudioStartupConfig::instance
+		: (AudioStartupConfig::instance = new AudioStartupConfig);
+}
+
+AudioStartupConfig* AudioStartupConfig::instance = nullptr;
