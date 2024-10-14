@@ -141,3 +141,5 @@ countries: cn
 
 "Empty" = "空"
 "From Output Config" = "从输出设置"
+
+"Switch Editor Source" = "切换编辑器源"

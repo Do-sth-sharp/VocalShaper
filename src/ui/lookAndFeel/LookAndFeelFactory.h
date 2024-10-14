@@ -34,6 +34,7 @@ public:
 	juce::LookAndFeel_V4* forSeqTrackName() const;
 	juce::LookAndFeel_V4* forInstrName() const;
 	juce::LookAndFeel_V4* forSeqBlock() const;
+	juce::LookAndFeel_V4* forEditorSwitchBar() const;
 
 private:
 	std::unique_ptr<juce::LookAndFeel> mainLAF = nullptr;
@@ -62,6 +63,7 @@ private:
 	std::unique_ptr<juce::LookAndFeel_V4> seqTrackNameLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> instrNameLAF = nullptr;
 	std::unique_ptr<juce::LookAndFeel_V4> seqBlockLAF = nullptr;
+	std::unique_ptr<juce::LookAndFeel_V4> editorSwitchBarLAF = nullptr;
 
 public:
 	static LookAndFeelFactory* getInstance();
