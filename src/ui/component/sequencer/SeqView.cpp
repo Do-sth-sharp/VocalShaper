@@ -17,10 +17,12 @@ SeqView::TrackList::TrackList(
 	const WheelAltFunc& wheelAltVFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
-	const DragEndFunc& dragEndFunc)
+	const DragEndFunc& dragEndFunc,
+	const EditingFunc& editingFunc)
 	: scrollFunc(scrollFunc), wheelHFunc(wheelHFunc), wheelAltHFunc(wheelAltHFunc),
 	wheelVFunc(wheelVFunc), wheelAltVFunc(wheelAltVFunc),
-	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc) {
+	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc), dragEndFunc(dragEndFunc),
+	editingFunc(editingFunc) {
 	this->setWantsKeyboardFocus(true);
 }
 
@@ -160,6 +162,9 @@ void SeqView::TrackList::mouseDown(const juce::MouseEvent& event) {
 			}
 		}
 	}
+
+	/** Change Editing Index */
+	this->editingFunc(-1);
 }
 
 void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
@@ -348,6 +353,12 @@ SeqView::SeqView()
 		[comp = ScrollerBase::SafePointer(this)] {
 			if (comp) {
 				comp->processAreaDragEnd();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int index) {
+			if (comp) {
+				comp->editing(index);
 			}
 		});
 	this->addAndMakeVisible(this->trackList.get());
@@ -1079,5 +1090,11 @@ void SeqView::processAreaDragEnd() {
 }
 
 void SeqView::seqTrackSelected(int index, bool selected) {
-	/** TODO */
+	if (selected) {
+		this->editing(index);
+	}
+}
+
+void SeqView::editing(int index) {
+	CoreCallbacks::getInstance()->invokeEditingTrackChanged(index);
 }

@@ -15,7 +15,7 @@ AC.setSequencerTrackBypass(0, true);
 AC.setSequencerTrackBypass(0, false);
 
 -- Init Source
-AC.initAudio(0, 48000, 2);
+AC.initAudio(0, 48000, 2, 2);
 AC.initMIDI(0);
 
 -- Load And Save Source

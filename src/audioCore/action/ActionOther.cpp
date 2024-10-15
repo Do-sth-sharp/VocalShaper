@@ -219,8 +219,8 @@ bool ActionLoad::doAction() {
 }
 
 ActionInitAudioSource::ActionInitAudioSource(int index,
-	double sampleRate, double length)
-	: index(index), sampleRate(sampleRate), length(length) {};
+	double sampleRate, int channels, double length)
+	: index(index), sampleRate(sampleRate), channels(channels), length(length) {};
 
 bool ActionInitAudioSource::doAction() {
 	ACTION_CHECK_RENDERING(
@@ -232,15 +232,14 @@ bool ActionInitAudioSource::doAction() {
 		if (auto track = graph->getSourceProcessor(this->index)) {
 			track->applyAudio();
 			auto ref = track->getAudioRef();
-			int channels = track->getAudioChannelSet().size();
 			SourceManager::getInstance()->initAudio(ref,
-				channels, this->sampleRate, this->length);
+				this->channels, this->sampleRate, this->length);
 
-			this->output("Init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->length } + "s\n");
+			this->output("Init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
 			return true;
 		}
 	}
-	this->error("Can't init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->length } + "s\n");
+	this->error("Can't init audio source: [" + juce::String{ this->index } + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
 	return false;
 }
 

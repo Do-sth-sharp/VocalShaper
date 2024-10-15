@@ -106,7 +106,7 @@ AUDIOCORE_FUNC(load) {
 AUDIOCORE_FUNC(initAudio) {
 	auto action = std::unique_ptr<ActionBase>(new ActionInitAudioSource{
 		(int)luaL_checkinteger(L, 1), (double)luaL_checknumber(L, 2),
-		(double)luaL_checknumber(L, 3) });
+		(int)luaL_checkinteger(L, 3), (double)luaL_checknumber(L, 4) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }

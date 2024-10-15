@@ -143,3 +143,5 @@ countries: cn
 "From Output Config" = "从输出设置"
 
 "Switch Editor Source" = "切换编辑器源"
+"Create Audio Source" = "创建音频源"
+"Create MIDI Source" = "创建 MIDI 源"

@@ -180,6 +180,10 @@ void CoreCallbacks::addSourceRecord(const SourceRecordCallback& callback) {
 	this->sourceRecord.add(callback);
 }
 
+void CoreCallbacks::addEditingTrackChanged(const EditingTrackChangedCallback& callback) {
+	this->editingTrackChanged.add(callback);
+}
+
 void CoreCallbacks::invokeError(
 	const juce::String& title, const juce::String& mes) const {
 	for (auto& i : this->error) {
@@ -310,6 +314,12 @@ void CoreCallbacks::invokeSynthStatus(int index, bool status) const {
 void CoreCallbacks::invokeSourceRecord(const std::set<int>& trackList) const {
 	for (auto& i : this->sourceRecord) {
 		i(trackList);
+	}
+}
+
+void CoreCallbacks::invokeEditingTrackChanged(int index) const {
+	for (auto& i : this->editingTrackChanged) {
+		i(index);
 	}
 }
 

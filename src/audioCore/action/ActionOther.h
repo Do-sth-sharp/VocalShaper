@@ -185,7 +185,7 @@ class ActionInitAudioSource final : public ActionBase {
 public:
 	ActionInitAudioSource() = delete;
 	ActionInitAudioSource(int index,
-		double sampleRate, double length);
+		double sampleRate, int channels, double length);
 
 	bool doAction() override;
 	const juce::String getName() override {
@@ -195,6 +195,7 @@ public:
 private:
 	const int index;
 	const double sampleRate;
+	const int channels;
 	const double length;
 
 	JUCE_LEAK_DETECTOR(ActionInitAudioSource)

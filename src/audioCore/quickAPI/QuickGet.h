@@ -188,4 +188,8 @@ namespace quickAPI {
 
 	double getAudioSourceLength(uint64_t ref);
 	double getMIDISourceLength(uint64_t ref);
+	const juce::String getAudioSourceName(uint64_t ref);
+	const juce::String getMIDISourceName(uint64_t ref);
+	bool isAudioSourceValid(uint64_t ref);
+	bool isMIDISourceValid(uint64_t ref);
 }

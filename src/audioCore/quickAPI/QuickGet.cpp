@@ -1046,4 +1046,28 @@ namespace quickAPI {
 		return SourceManager::getInstance()->getLength(
 			ref, SourceManager::SourceType::MIDI);
 	}
+
+	const juce::String getAudioSourceName(uint64_t ref) {
+		if (ref == 0) { return ""; }
+		return SourceManager::getInstance()->getFileName(
+			ref, SourceManager::SourceType::Audio);
+	}
+
+	const juce::String getMIDISourceName(uint64_t ref) {
+		if (ref == 0) { return ""; }
+		return SourceManager::getInstance()->getFileName(
+			ref, SourceManager::SourceType::MIDI);
+	}
+
+	bool isAudioSourceValid(uint64_t ref) {
+		if (ref == 0) { return false; }
+		return SourceManager::getInstance()->isValid(
+			ref, SourceManager::SourceType::Audio);
+	}
+
+	bool isMIDISourceValid(uint64_t ref) {
+		if (ref == 0) { return false; }
+		return SourceManager::getInstance()->isValid(
+			ref, SourceManager::SourceType::MIDI);
+	}
 }

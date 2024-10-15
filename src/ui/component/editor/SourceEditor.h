@@ -11,8 +11,17 @@ public:
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
+	void update();
+	void setTrack(int trackIndex);
+	void update(int trackIndex);
+	void update(uint64_t audioRef, uint64_t midiRef);
+
 private:
 	std::unique_ptr<SourceSwitchBar> switchBar = nullptr;
+	SourceSwitchBar::SwitchState switchState = SourceSwitchBar::SwitchState::Off;
+
+	int trackIndex = -1;
+	uint64_t audioRef = 0, midiRef = 0;
 
 	void switchEditor(SourceSwitchBar::SwitchState state);
 

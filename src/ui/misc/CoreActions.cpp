@@ -449,6 +449,16 @@ void CoreActions::setSeqMIDIRef(int index, const juce::String& path,
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::createSeqAudioSource(int index, double sampleRate, int channels, double length) {
+	auto action = std::unique_ptr<ActionBase>(new ActionInitAudioSource{ index, sampleRate, channels, length });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::createSeqMIDISource(int index) {
+	auto action = std::unique_ptr<ActionBase>(new ActionInitMidiSource{ index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::removeSeq(int index) {
 	auto action = std::unique_ptr<ActionBase>(new ActionRemoveSequencerTrack{ index });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -1126,6 +1136,20 @@ void CoreActions::setSeqMIDIRefGUI(int index, const juce::String& path) {
 	CoreActions::setSeqMIDIRefGUIThenAddBlock(index, path, getTempo == 1);
 }
 
+void CoreActions::createSeqAudioSourceGUI(int index) {
+	/** Callback */
+	auto callback = [index](double sampleRate, int channels, double length) {
+		CoreActions::createSeqAudioSource(index, sampleRate, channels, length);
+		};
+
+	/** Ask For Audio Props */
+	CoreActions::askForAudioPropGUIAsync(callback);
+}
+
+void CoreActions::createSeqMIDISourceGUI(int index) {
+	CoreActions::createSeqMIDISource(index);
+}
+
 void CoreActions::removeSeqGUI(int index) {
 	if (index <= -1) { return; }
 
@@ -1232,7 +1256,7 @@ void CoreActions::askForAudioPropGUIAsync(
 
 	sampleRateSeletor->setText(juce::String{ currentSampleRate });
 	channelsEditor->setInputFilter(new utils::TextIntegerFilter{ 0, 1024 }, true);
-	lengthEditor->setInputFilter(new utils::TextDoubleFilter{ 0, INT_MAX, 2 }, true);
+	lengthEditor->setInputFilter(new utils::TextDoubleFilter{ 0, DBL_MAX, 2 }, true);
 
 	/** Show Window */
 	configWindow->enterModalState(true, juce::ModalCallbackFunction::create(

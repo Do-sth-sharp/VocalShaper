@@ -45,6 +45,7 @@ private:
 		using DragStartFunc = std::function<void(void)>;
 		using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 		using DragEndFunc = std::function<void(void)>;
+		using EditingFunc = std::function<void(int)>;
 		TrackList(const ScrollFunc& scrollFunc,
 			const WheelFunc& wheelHFunc,
 			const WheelAltFunc& wheelAltHFunc,
@@ -52,7 +53,8 @@ private:
 			const WheelAltFunc& wheelAltVFunc,
 			const DragStartFunc& dragStartFunc,
 			const DragProcessFunc& dragProcessFunc,
-			const DragEndFunc& dragEndFunc);
+			const DragEndFunc& dragEndFunc,
+			const EditingFunc& editingFunc);
 
 		int size() const;
 		void remove(int index);
@@ -90,6 +92,7 @@ private:
 		const DragStartFunc dragStartFunc;
 		const DragProcessFunc dragProcessFunc;
 		const DragEndFunc dragEndFunc;
+		const EditingFunc editingFunc;
 
 		double pos = 0, itemSize = 0;
 		double secStart = 0, secEnd = 0;
@@ -157,6 +160,7 @@ private:
 	void processAreaDragEnd();
 
 	void seqTrackSelected(int index, bool selected);
+	void editing(int index);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };
