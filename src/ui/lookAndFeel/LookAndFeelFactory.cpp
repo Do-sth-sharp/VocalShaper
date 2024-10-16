@@ -25,6 +25,7 @@
 #include "sequencer/SeqTrackNameLookAndFeel.h" 
 #include "sequencer/InstrNameLookAndFeel.h"
 #include "sequencer/SeqBlockLookAndFeel.h"
+#include "editor/EditorLookAndFeel.h"
 #include "editor/EditorSwitchBarLookAndFeel.h"
 #include "../misc/ColorMap.h"
 #include <FlowUI.h>
@@ -136,6 +137,9 @@ void LookAndFeelFactory::initialise() {
 	/** Seq Block */
 	this->seqBlockLAF = std::make_unique<SeqBlockLookAndFeel>();
 
+	/** Editor */
+	this->editorLAF = std::make_unique<EditorLookAndFeel>();
+
 	/** Editor Switch Bar */
 	this->editorSwitchBarLAF = std::make_unique<EditorSwitchBarLookAndFeel>();
 }
@@ -239,6 +243,10 @@ juce::LookAndFeel_V4* LookAndFeelFactory::forSeqTrackName() const {
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forInstrName() const {
 	return this->instrNameLAF.get();
+}
+
+juce::LookAndFeel_V4* LookAndFeelFactory::forEditor() const {
+	return this->editorLAF.get();
 }
 
 juce::LookAndFeel_V4* LookAndFeelFactory::forSeqBlock() const {

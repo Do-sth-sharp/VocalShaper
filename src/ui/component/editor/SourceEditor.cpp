@@ -1,4 +1,5 @@
 ﻿#include "SourceEditor.h"
+#include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreCallbacks.h"
 #include "../../misc/CoreActions.h"
 #include "../../Utils.h"
@@ -6,12 +7,19 @@
 
 SourceEditor::SourceEditor()
 	: FlowComponent(TRANS("Resource Editor")) {
+	/** Look And Feel */
+	this->setLookAndFeel(
+		LookAndFeelFactory::getInstance()->forEditor());
+
 	/** Switch Bar */
 	auto switchCallback = [this](SourceSwitchBar::SwitchState state) {
 		this->switchEditor(state);
 		};
 	this->switchBar = std::make_unique<SourceSwitchBar>(switchCallback);
 	this->addAndMakeVisible(this->switchBar.get());
+
+	/** Empty Str */
+	this->emptyStr = TRANS("Please select a data source for editing.");
 
 	/** Callback */
 	CoreCallbacks::getInstance()->addSourceChanged(
@@ -49,13 +57,31 @@ void SourceEditor::resized() {
 }
 
 void SourceEditor::paint(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int switchBarHeight = screenSize.getHeight() * 0.03;
+
+	float fontHeight = screenSize.getHeight() * 0.02;
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId);
+	juce::Colour textColor = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+
+	/** Font */
+	juce::Font textFont(fontHeight);
 
 	/** Background */
 	g.fillAll(backgroundColor);
+
+	/** Empty Text */
+	juce::Rectangle<int> contentRect = this->getLocalBounds().withTrimmedTop(switchBarHeight);
+	g.setFont(textFont);
+	g.setColour(textColor);
+	g.drawFittedText(this->emptyStr, contentRect,
+		juce::Justification::centred, 1);
 }
 
 void SourceEditor::update() {

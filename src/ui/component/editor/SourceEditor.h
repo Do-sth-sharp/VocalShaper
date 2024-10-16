@@ -23,6 +23,8 @@ private:
 	int trackIndex = -1;
 	uint64_t audioRef = 0, midiRef = 0;
 
+	juce::String emptyStr;
+
 	void switchEditor(SourceSwitchBar::SwitchState state);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceEditor)

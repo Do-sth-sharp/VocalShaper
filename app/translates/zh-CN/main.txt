@@ -145,3 +145,4 @@ countries: cn
 "Switch Editor Source" = "切换编辑器源"
 "Create Audio Source" = "创建音频源"
 "Create MIDI Source" = "创建 MIDI 源"
+"Please select a data source for editing." = "请选择一个数据源进行编辑。"
