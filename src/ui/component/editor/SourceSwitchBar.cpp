@@ -39,6 +39,9 @@ SourceSwitchBar::SourceSwitchBar(
 	this->audioCreateStr = TRANS("Create Audio Source");
 	this->midiCreateStr = TRANS("Create MIDI Source");
 
+	/** Track Empty Name */
+	this->trackEmptyName = TRANS("Untitled");
+
 	/** Sync Name Button */
 	this->syncButtonName();
 }
@@ -47,17 +50,27 @@ void SourceSwitchBar::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	int buttonPaddingHeight = screenSize.getHeight() * 0.003;
-	int buttonPaddingWidth = screenSize.getWidth() * 0.003;
+	int buttonPaddingWidth = screenSize.getWidth() * 0.005;
 	int buttonSplitWidth = screenSize.getWidth() * 0.003;
 
 	int buttonHeight = this->getHeight() - buttonPaddingHeight * 2;
 	int nameButtonWidth = screenSize.getWidth() * 0.03;
+
+	float trackNameFontHeight = screenSize.getHeight() * 0.02;
+	int trackNameMaxWidth = screenSize.getWidth() * 0.05;
+
+	/** Font */
+	juce::Font trackNameFont(trackNameFontHeight);
 
 	/** Switch Button */
 	juce::Rectangle<int> switchRect(
 		buttonPaddingWidth, buttonPaddingHeight,
 		buttonHeight, buttonHeight);
 	this->switchButton->setBounds(switchRect);
+
+	/** Track Name */
+	int trackNameWidth = std::min(trackNameMaxWidth, trackNameFont.getStringWidth(this->trackName));
+	int rightLimit = this->getWidth() - buttonPaddingWidth - trackNameWidth - buttonSplitWidth;
 
 	/** Name Button */
 	juce::Rectangle<int> nameRect(
@@ -67,7 +80,6 @@ void SourceSwitchBar::resized() {
 
 	/** Fit Name Button Width */
 	this->nameButton->changeWidthToFitText();
-	int rightLimit = this->getWidth() - buttonPaddingWidth;
 	if (this->nameButton->getWidth() < nameButtonWidth) {
 		nameRect.setWidth(nameButtonWidth);
 		this->nameButton->setBounds(nameRect);
@@ -79,18 +91,61 @@ void SourceSwitchBar::resized() {
 }
 
 void SourceSwitchBar::paint(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int buttonPaddingHeight = screenSize.getHeight() * 0.003;
+	int buttonPaddingWidth = screenSize.getWidth() * 0.005;
+	int buttonSplitWidth = screenSize.getWidth() * 0.003;
+
+	int buttonHeight = this->getHeight() - buttonPaddingHeight * 2;
+
+	float trackNameFontHeight = screenSize.getHeight() * 0.02;
+	int trackNameMaxWidth = screenSize.getWidth() * 0.05;
+
+	/** Font */
+	juce::Font trackNameFont(trackNameFontHeight);
+
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour backgroundColor = laf.findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId);
+	juce::Colour trackNameColor = laf.findColour(
+		juce::Label::ColourIds::textColourId);
 
 	/** Background */
 	g.fillAll(backgroundColor);
+
+	/** Switch Button */
+	juce::Rectangle<int> switchRect(
+		buttonPaddingWidth, buttonPaddingHeight,
+		buttonHeight, buttonHeight);
+
+	/** Track Name */
+	int trackNameWidth = std::min(trackNameMaxWidth, trackNameFont.getStringWidth(this->trackName));
+	int trackNamePosX = this->getWidth() - buttonPaddingWidth - trackNameWidth - buttonSplitWidth;
+	if (trackNamePosX < switchRect.getRight()) {
+		trackNamePosX = switchRect.getRight();
+		trackNameWidth = this->getWidth() - buttonPaddingWidth - trackNamePosX;
+	}
+	juce::Rectangle<int> trackNameRect(
+		trackNamePosX, 0, trackNameWidth, this->getHeight());
+	g.setFont(trackNameFont);
+	g.setColour(trackNameColor);
+	g.drawFittedText(this->trackName, trackNameRect,
+		juce::Justification::centredRight, 1, 0.75f);
 }
 
 void SourceSwitchBar::update(int index, uint64_t audioRef, uint64_t midiRef) {
 	/** Set Source Info Temp */
 	this->index = index;
+	if (index >= 0) {
+		auto name = quickAPI::getSeqTrackName(index);
+		this->trackName = name.isEmpty() ? this->trackEmptyName : name;
+	}
+	else {
+		this->trackName = "";
+	}
+
 	this->audioRef = audioRef;
 	this->midiRef = midiRef;
 	this->audioName = quickAPI::getAudioSourceName(audioRef);
@@ -105,6 +160,9 @@ void SourceSwitchBar::update(int index, uint64_t audioRef, uint64_t midiRef) {
 
 	/** Update Name */
 	this->syncButtonName();
+
+	/** Repaint */
+	this->repaint();
 }
 
 void SourceSwitchBar::switchTo(SwitchState state) {

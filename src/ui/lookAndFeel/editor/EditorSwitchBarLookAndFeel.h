@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "../MainLookAndFeel.h"
+#include "EditorLookAndFeel.h"
 
-class EditorSwitchBarLookAndFeel : public MainLookAndFeel {
+class EditorSwitchBarLookAndFeel : public EditorLookAndFeel {
 public:
 	EditorSwitchBarLookAndFeel();
 

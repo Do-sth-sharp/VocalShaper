@@ -25,6 +25,7 @@ private:
 
 	SwitchState current = SwitchState::Off;
 	int index = -1;
+	juce::String trackName, trackEmptyName;
 	uint64_t audioRef = 0, midiRef = 0;
 	juce::String audioName, midiName;
 	juce::String audioCreateStr, midiCreateStr;

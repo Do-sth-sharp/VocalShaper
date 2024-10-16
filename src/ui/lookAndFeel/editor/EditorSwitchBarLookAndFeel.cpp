@@ -2,7 +2,7 @@
 #include "../../misc/ColorMap.h"
 
 EditorSwitchBarLookAndFeel::EditorSwitchBarLookAndFeel()
-	: MainLookAndFeel() {
+	: EditorLookAndFeel() {
 	/** Button */
 	this->setColour(juce::TextButton::ColourIds::buttonColourId,
 		ColorMap::getInstance()->get("ThemeColorB2"));
