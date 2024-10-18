@@ -18,6 +18,12 @@ SourceEditor::SourceEditor()
 	this->switchBar = std::make_unique<SourceSwitchBar>(switchCallback);
 	this->addAndMakeVisible(this->switchBar.get());
 
+	/** Editors */
+	this->midiEditor = std::make_unique<MIDISourceEditor>();
+	this->addChildComponent(this->midiEditor.get());
+	this->audioEditor = std::make_unique<AudioSourceEditor>();
+	this->addChildComponent(this->audioEditor.get());
+
 	/** Empty Str */
 	this->emptyStr = TRANS("Please select a data source for editing.");
 
@@ -54,6 +60,11 @@ void SourceEditor::resized() {
 	juce::Rectangle<int> switchBarRect(
 		0, 0, this->getWidth(), switchBarHeight);
 	this->switchBar->setBounds(switchBarRect);
+
+	/** Editors */
+	juce::Rectangle<int> contentRect = this->getLocalBounds().withTrimmedTop(switchBarHeight);
+	this->midiEditor->setBounds(contentRect);
+	this->audioEditor->setBounds(contentRect);
 }
 
 void SourceEditor::paint(juce::Graphics& g) {
@@ -114,6 +125,8 @@ void SourceEditor::update(uint64_t audioRef, uint64_t midiRef) {
 	this->audioRef = audioRef;
 	this->midiRef = midiRef;
 	this->switchBar->update(this->trackIndex, audioRef, midiRef);
+	this->midiEditor->update(midiRef);
+	this->audioEditor->update(audioRef);
 }
 
 void SourceEditor::switchEditor(SourceSwitchBar::SwitchState state) {
@@ -127,6 +140,10 @@ void SourceEditor::switchEditor(SourceSwitchBar::SwitchState state) {
 	if ((this->midiRef == 0) && (state == SourceSwitchBar::SwitchState::MIDI)) {
 		CoreActions::createSeqMIDISourceGUI(this->trackIndex);
 	}
+
+	/** Change Editor Visible */
+	this->midiEditor->setVisible(state == SourceSwitchBar::SwitchState::MIDI);
+	this->audioEditor->setVisible(state == SourceSwitchBar::SwitchState::Audio);
 
 	/** Update Bar State */
 	this->switchBar->switchTo(state);

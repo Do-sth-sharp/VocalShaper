@@ -3,6 +3,8 @@
 #include <JuceHeader.h>
 #include <FlowUI.h>
 #include "SourceSwitchBar.h"
+#include "MIDISourceEditor.h"
+#include "AudioSourceEditor.h"
 
 class SourceEditor final : public flowUI::FlowComponent {
 public:
@@ -19,6 +21,9 @@ public:
 private:
 	std::unique_ptr<SourceSwitchBar> switchBar = nullptr;
 	SourceSwitchBar::SwitchState switchState = SourceSwitchBar::SwitchState::Off;
+
+	std::unique_ptr<MIDISourceEditor> midiEditor = nullptr;
+	std::unique_ptr<AudioSourceEditor> audioEditor = nullptr;
 
 	int trackIndex = -1;
 	uint64_t audioRef = 0, midiRef = 0;
