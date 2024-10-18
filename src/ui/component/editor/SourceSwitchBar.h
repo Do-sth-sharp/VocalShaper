@@ -15,7 +15,7 @@ public:
 	void paint(juce::Graphics& g) override;
 
 	void update(int index, uint64_t audioRef, uint64_t midiRef);
-	void switchTo(SwitchState state);
+	void switchTo(SwitchState state, bool invokeCallback);
 
 private:
 	const StateChangedCallback stateCallback;
@@ -31,7 +31,6 @@ private:
 	juce::String audioCreateStr, midiCreateStr;
 
 	void showSwitchMenu();
-	void switchInternal(SwitchState state);
 	void syncButtonName();
 	juce::PopupMenu createSwitchMenu() const;
 	

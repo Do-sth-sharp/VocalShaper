@@ -144,7 +144,4 @@ void SourceEditor::switchEditor(SourceSwitchBar::SwitchState state) {
 	/** Change Editor Visible */
 	this->midiEditor->setVisible(state == SourceSwitchBar::SwitchState::MIDI);
 	this->audioEditor->setVisible(state == SourceSwitchBar::SwitchState::Audio);
-
-	/** Update Bar State */
-	this->switchBar->switchTo(state);
 }

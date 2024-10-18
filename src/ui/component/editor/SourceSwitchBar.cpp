@@ -151,23 +151,31 @@ void SourceSwitchBar::update(int index, uint64_t audioRef, uint64_t midiRef) {
 	this->audioName = quickAPI::getAudioSourceName(audioRef);
 	this->midiName = quickAPI::getMIDISourceName(midiRef);
 
-	/** Current Source Invalid */
-	if (((this->current == SwitchState::Audio) && (audioRef == 0))
-		|| ((this->current == SwitchState::MIDI) && (midiRef == 0))) {
-		this->switchInternal(SwitchState::Off);
+	/** Auto Switch Editors */
+	if ((midiRef != 0) && (this->current != SwitchState::MIDI)) {
+		this->switchTo(SwitchState::MIDI, true);
+		return;
+	}
+	if ((audioRef != 0) && (this->current != SwitchState::Audio)) {
+		this->switchTo(SwitchState::Audio, true);
+		return;
+	}
+	if ((audioRef == 0) && (midiRef == 0) && (this->current != SwitchState::Off)) {
+		this->switchTo(SwitchState::Off, true);
 		return;
 	}
 
 	/** Update Name */
 	this->syncButtonName();
-
-	/** Repaint */
-	this->repaint();
 }
 
-void SourceSwitchBar::switchTo(SwitchState state) {
+void SourceSwitchBar::switchTo(SwitchState state, bool invokeCallback) {
 	this->current = state;
 	this->syncButtonName();
+
+	if (invokeCallback) {
+		this->stateCallback(state);
+	}
 }
 
 void SourceSwitchBar::showSwitchMenu() {
@@ -175,12 +183,8 @@ void SourceSwitchBar::showSwitchMenu() {
 	int result = menu.showAt(this->switchButton.get());
 
 	if (result > 0) {
-		this->switchInternal((SourceSwitchBar::SwitchState)result);
+		this->switchTo((SourceSwitchBar::SwitchState)result, true);
 	}
-}
-
-void SourceSwitchBar::switchInternal(SwitchState state) {
-	this->stateCallback(state);
 }
 
 void SourceSwitchBar::syncButtonName() {
@@ -201,6 +205,9 @@ void SourceSwitchBar::syncButtonName() {
 
 	/** Update Button Size */
 	this->resized();
+
+	/** Update Track Name */
+	this->repaint();
 }
 
 juce::PopupMenu SourceSwitchBar::createSwitchMenu() const {
