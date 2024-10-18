@@ -322,42 +322,11 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 				}
 				break;
 			}
-			case Tools::Type::Hand:
-				/** Move View Area */
-				this->viewMoving = true;
-				this->dragStartFunc();
-				break;
 			case Tools::Type::Pencil: {
 				/** Add Label */
 				double labelTime = this->secStart + (event.position.getX() / (double)this->getWidth()) * (this->secEnd - this->secStart);
 				labelTime = this->limitTimeSec(labelTime);
 				this->addTempoLabel(labelTime);
-				break;
-			}
-			case Tools::Type::Magic: {
-				/** Get Label Index */
-				this->dragLabelIndex = this->selectTempoLabel(event.position);
-				if (this->dragLabelIndex > -1) {
-					/** Move Label */
-					double labelTime = std::get<0>(this->tempoTemp.getReference(this->dragLabelIndex));
-					float labelPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-					this->labelDragOffset = event.position.getX() - labelPos;
-					this->labelDragPos = labelPos;
-				}
-				else {
-					/** Add Label */
-					double labelTime = this->secStart + (event.position.getX() / (double)this->getWidth()) * (this->secEnd - this->secStart);
-					labelTime = this->limitTimeSec(labelTime);
-					this->addTempoLabel(labelTime);
-				}
-				break;
-			}
-			case Tools::Type::Eraser: {
-				/** Remove Label */
-				int labelIndex = this->selectTempoLabel(event.position);
-				if (labelIndex > -1) {
-					this->removeTempoLabel(labelIndex);
-				}
 				break;
 			}
 			}
@@ -516,17 +485,11 @@ void SeqTimeRuler::mouseMove(const juce::MouseEvent& event) {
 		auto tool = Tools::getInstance()->getType();
 		switch (tool) {
 		case Tools::Type::Arrow:
-		case Tools::Type::Pencil:
-		case Tools::Type::Magic:
-		case Tools::Type::Eraser: {
+		case Tools::Type::Pencil: {
 			if (this->selectTempoLabel(event.position) > -1) {
 				/** Labels */
 				cursor = juce::MouseCursor::PointingHandCursor;
 			}
-			break;
-		}
-		case Tools::Type::Hand: {
-			cursor = juce::MouseCursor::DraggingHandCursor;
 			break;
 		}
 		}

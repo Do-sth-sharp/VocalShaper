@@ -7,7 +7,7 @@ public:
 	Tools() = default;
 
 	enum class Type {
-		Arrow, Hand, Pencil, Magic, Scissors, Eraser
+		Arrow, Pencil
 	};
 	void setType(Type type);
 	Type getType() const;

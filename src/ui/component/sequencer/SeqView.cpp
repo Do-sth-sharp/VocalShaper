@@ -142,27 +142,6 @@ void SeqView::TrackList::updateVPos(double pos, double itemSize) {
 }
 
 void SeqView::TrackList::mouseDown(const juce::MouseEvent& event) {
-	/** Size */
-	auto screenSize = utils::getScreenSize(this);
-	int headWidth = screenSize.getWidth() * 0.1;
-
-	/** Get Tool Type */
-	auto tool = Tools::getInstance()->getType();
-
-	/** Not Head */
-	if (event.position.x > headWidth) {
-		if (event.mods.isLeftButtonDown()) {
-			/** Check Tool Type */
-			switch (tool) {
-			case Tools::Type::Hand:
-				/** Move View Area */
-				this->viewMoving = true;
-				this->dragStartFunc();
-				break;
-			}
-		}
-	}
-
 	/** Change Editing Index */
 	this->editingFunc(-1);
 }
@@ -180,25 +159,6 @@ void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
 			this->add();
 		}
 	}
-}
-
-void SeqView::TrackList::mouseMove(const juce::MouseEvent& event) {
-	/** Size */
-	auto screenSize = utils::getScreenSize(this);
-	int headWidth = screenSize.getWidth() * 0.1;
-
-	float posX = event.position.getX();
-
-	/** Not Head */
-	if (posX > headWidth) {
-		/** Move */
-		if (Tools::getInstance()->getType() == Tools::Type::Hand) {
-			this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
-			return;
-		}
-	}
-
-	this->setMouseCursor(juce::MouseCursor::NormalCursor);
 }
 
 void SeqView::TrackList::mouseDrag(const juce::MouseEvent& event) {

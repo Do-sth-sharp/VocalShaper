@@ -74,7 +74,6 @@ private:
 	int pressedBlockIndex = -1;
 	double mousePressedSecond = 0;
 	double mouseCurrentSecond = 0;
-	float scissorsPosX = -1;
 	bool blockValid = true;
 	bool copyMode = false;
 

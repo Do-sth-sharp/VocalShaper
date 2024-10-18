@@ -38,11 +38,7 @@ enum class GUICommandType : int {
 	Follow = 0x3400,
 
 	Arrow = 0x3410,
-	Hand,
 	Pencil,
-	Magic,
-	Scissors,
-	Eraser,
 
 	StartupConfig = 0x3500,
 	FunctionConfig,
