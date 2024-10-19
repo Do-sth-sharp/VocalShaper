@@ -46,8 +46,8 @@ public:
 	void addSynthStatus(const SynthStatusCallback& callback);
 	using SourceRecordCallback = std::function<void(const std::set<int>&)>;
 	void addSourceRecord(const SourceRecordCallback& callback);
-	using EditingTrackChangedCallback = std::function<void(int)>;
-	void addEditingTrackChanged(const EditingTrackChangedCallback& callback);
+	using EditingSeqChangedCallback = std::function<void(int)>;
+	void addEditingSeqChanged(const EditingSeqChangedCallback& callback);
 
 	void invokeError(const juce::String& title, const juce::String& mes) const;
 	void invokePlayingStatus(bool status) const;
@@ -71,7 +71,7 @@ public:
 	void invokePluginSearchMes(const juce::String& mes) const;
 	void invokeSynthStatus(int index, bool status) const;
 	void invokeSourceRecord(const std::set<int>& trackList) const;
-	void invokeEditingTrackChanged(int index) const;
+	void invokeEditingSeqChanged(int index) const;
 
 private:
 	juce::Array<ErrorCallback> error;
@@ -96,7 +96,7 @@ private:
 	juce::Array<PluginSearchMesCallback> pluginSearchMesChanged;
 	juce::Array<SynthStatusCallback> synthStatus;
 	juce::Array<SourceRecordCallback> sourceRecord;
-	juce::Array<EditingTrackChangedCallback> editingTrackChanged;
+	juce::Array<EditingSeqChangedCallback> editingSeqChanged;
 
 public:
 	static CoreCallbacks* getInstance();

@@ -142,8 +142,7 @@ void SeqView::TrackList::updateVPos(double pos, double itemSize) {
 }
 
 void SeqView::TrackList::mouseDown(const juce::MouseEvent& event) {
-	/** Change Editing Index */
-	this->editingFunc(-1);
+	/** Nothing To Do */
 }
 
 void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
@@ -716,9 +715,9 @@ void SeqView::update(int index) {
 					}
 				},
 				[comp = ScrollerBase::SafePointer(this)]
-				(int index, bool selected) {
+				(int index) {
 					if (comp) {
-						comp->seqTrackSelected(index, selected);
+						comp->editing(index);
 					}
 				});
 			this->trackList->add(std::move(track));
@@ -1049,12 +1048,6 @@ void SeqView::processAreaDragEnd() {
 	this->moveStartPosX = this->moveStartPosY = 0;
 }
 
-void SeqView::seqTrackSelected(int index, bool selected) {
-	if (selected) {
-		this->editing(index);
-	}
-}
-
 void SeqView::editing(int index) {
-	CoreCallbacks::getInstance()->invokeEditingTrackChanged(index);
+	CoreCallbacks::getInstance()->invokeEditingSeqChanged(index);
 }

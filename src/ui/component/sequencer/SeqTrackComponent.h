@@ -20,7 +20,7 @@ public:
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
-	using SeqTrackSelectFunc = std::function<void(int, bool)>;
+	using SeqTrackSelectFunc = std::function<void(int)>;
 	SeqTrackComponent(const ScrollFunc& scrollFunc,
 		const WheelFunc& wheelHFunc,
 		const WheelAltFunc& wheelAltHFunc,
@@ -47,6 +47,7 @@ public:
 	void paintOverChildren(juce::Graphics& g) override;
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseDoubleClick(const juce::MouseEvent& event) override;
 	void mouseWheelMove(const juce::MouseEvent& event,
 		const juce::MouseWheelDetails& wheel) override;
 

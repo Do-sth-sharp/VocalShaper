@@ -116,7 +116,7 @@ SeqTrackComponent::SeqTrackComponent(
 	/** Content */
 	this->content = std::make_unique<SeqTrackContentViewer>(
 		scrollFunc, wheelHFunc, wheelAltHFunc,
-		dragStartFunc, dragProcessFunc, dragEndFunc);
+		dragStartFunc, dragProcessFunc, dragEndFunc, trackSelectFunc);
 	this->addAndMakeVisible(this->content.get());
 
 	/** Focus */
@@ -398,6 +398,12 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
+void SeqTrackComponent::mouseDoubleClick(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		this->trackSelectFunc(this->index);
+	}
+}
+
 void SeqTrackComponent::mouseWheelMove(const juce::MouseEvent& event,
 	const juce::MouseWheelDetails& wheel) {
 	if (event.mods.isAltDown()) {
@@ -541,12 +547,10 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 }
 
 void SeqTrackComponent::focusGained(FocusChangeType cause) {
-	this->trackSelectFunc(this->index, true);
 	this->repaint();
 }
 
 void SeqTrackComponent::focusLost(FocusChangeType cause) {
-	this->trackSelectFunc(this->index, false);
 	this->repaint();
 }
 

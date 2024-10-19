@@ -37,10 +37,11 @@ SeqTrackContentViewer::SeqTrackContentViewer(
 	const WheelAltFunc& wheelAltFunc,
 	const DragStartFunc& dragStartFunc,
 	const DragProcessFunc& dragProcessFunc,
-	const DragEndFunc& dragEndFunc)
+	const DragEndFunc& dragEndFunc,
+	const SeqTrackSelectFunc& trackSelectFunc)
 	: scrollFunc(scrollFunc), wheelFunc(wheelFunc), wheelAltFunc(wheelAltFunc),
 	dragStartFunc(dragStartFunc), dragProcessFunc(dragProcessFunc),
-	dragEndFunc(dragEndFunc) {
+	dragEndFunc(dragEndFunc), trackSelectFunc(trackSelectFunc) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->forSeqBlock());
@@ -722,6 +723,12 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 
 void SeqTrackContentViewer::mouseExit(const juce::MouseEvent& event) {
 	this->repaint();
+}
+
+void SeqTrackContentViewer::mouseDoubleClick(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		this->trackSelectFunc(this->index);
+	}
 }
 
 void SeqTrackContentViewer::mouseWheelMove(const juce::MouseEvent& event,

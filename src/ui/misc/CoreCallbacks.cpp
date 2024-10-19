@@ -180,8 +180,8 @@ void CoreCallbacks::addSourceRecord(const SourceRecordCallback& callback) {
 	this->sourceRecord.add(callback);
 }
 
-void CoreCallbacks::addEditingTrackChanged(const EditingTrackChangedCallback& callback) {
-	this->editingTrackChanged.add(callback);
+void CoreCallbacks::addEditingSeqChanged(const EditingSeqChangedCallback& callback) {
+	this->editingSeqChanged.add(callback);
 }
 
 void CoreCallbacks::invokeError(
@@ -317,8 +317,8 @@ void CoreCallbacks::invokeSourceRecord(const std::set<int>& trackList) const {
 	}
 }
 
-void CoreCallbacks::invokeEditingTrackChanged(int index) const {
-	for (auto& i : this->editingTrackChanged) {
+void CoreCallbacks::invokeEditingSeqChanged(int index) const {
+	for (auto& i : this->editingSeqChanged) {
 		i(index);
 	}
 }

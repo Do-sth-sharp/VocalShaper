@@ -35,14 +35,14 @@ SourceEditor::SourceEditor()
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addTrackChanged(
+	CoreCallbacks::getInstance()->addSeqChanged(
 		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
 			if (comp) {
 				comp->update(trackIndex);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addEditingTrackChanged(
+	CoreCallbacks::getInstance()->addEditingSeqChanged(
 		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
 			if (comp) {
 				comp->setTrack(trackIndex);

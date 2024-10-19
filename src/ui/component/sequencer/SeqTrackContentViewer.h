@@ -10,12 +10,14 @@ public:
 	using DragStartFunc = std::function<void(void)>;
 	using DragProcessFunc = std::function<void(int, int, bool, bool)>;
 	using DragEndFunc = std::function<void(void)>;
+	using SeqTrackSelectFunc = std::function<void(int)>;
 	SeqTrackContentViewer(const ScrollFunc& scrollFunc,
 		const WheelFunc& wheelFunc,
 		const WheelAltFunc& wheelAltFunc,
 		const DragStartFunc& dragStartFunc,
 		const DragProcessFunc& dragProcessFunc,
-		const DragEndFunc& dragEndFunc);
+		const DragEndFunc& dragEndFunc,
+		const SeqTrackSelectFunc& trackSelectFunc);
 
 	void setCompressed(bool isCompressed);
 
@@ -33,6 +35,7 @@ public:
 	void mouseDown(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 	void mouseExit(const juce::MouseEvent& event) override;
+	void mouseDoubleClick(const juce::MouseEvent& event) override;
 	void mouseWheelMove(const juce::MouseEvent& event,
 		const juce::MouseWheelDetails& wheel) override;
 
@@ -43,6 +46,7 @@ private:
 	const DragStartFunc dragStartFunc;
 	const DragProcessFunc dragProcessFunc;
 	const DragEndFunc dragEndFunc;
+	const SeqTrackSelectFunc trackSelectFunc;
 
 	bool compressed = false;
 	int index = -1;
