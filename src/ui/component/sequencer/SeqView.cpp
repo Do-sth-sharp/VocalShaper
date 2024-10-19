@@ -142,7 +142,19 @@ void SeqView::TrackList::updateVPos(double pos, double itemSize) {
 }
 
 void SeqView::TrackList::mouseDown(const juce::MouseEvent& event) {
-	/** Nothing To Do */
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	int headWidth = screenSize.getWidth() * 0.1;
+
+	/** Not Head */
+	if (event.position.x > headWidth) {
+		if (event.mods.isLeftButtonDown() && event.mods.isAltDown()) {
+			/** Move View Area */
+			this->viewMoving = true;
+			this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+			this->dragStartFunc();
+		}
+	}
 }
 
 void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
@@ -150,6 +162,7 @@ void SeqView::TrackList::mouseUp(const juce::MouseEvent& event) {
 		/** Move View */
 		if (this->viewMoving) {
 			this->viewMoving = false;
+			this->setMouseCursor(juce::MouseCursor::NormalCursor);
 			this->dragEndFunc();
 		}
 	}

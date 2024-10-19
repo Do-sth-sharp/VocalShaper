@@ -303,60 +303,70 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 	auto screenSize = utils::getScreenSize(this);
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-	if (event.position.getY() < labelAreaHeight) {
-		/** Get Tool Type */
-		auto tool = Tools::getInstance()->getType();
-
+	if (event.mods.isAltDown()) {
 		if (event.mods.isLeftButtonDown()) {
-			/** Check Tool Type */
-			switch (tool) {
-			case Tools::Type::Arrow: {
-				/** Get Label Index */
-				this->dragLabelIndex = this->selectTempoLabel(event.position);
-				if (this->dragLabelIndex > -1) {
-					/** Move Label */
-					double labelTime = std::get<0>(this->tempoTemp.getReference(this->dragLabelIndex));
-					float labelPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-					this->labelDragOffset = event.position.getX() - labelPos;
-					this->labelDragPos = labelPos;
-				}
-				break;
-			}
-			case Tools::Type::Pencil: {
-				/** Add Label */
-				double labelTime = this->secStart + (event.position.getX() / (double)this->getWidth()) * (this->secEnd - this->secStart);
-				labelTime = this->limitTimeSec(labelTime);
-				this->addTempoLabel(labelTime);
-				break;
-			}
-			}
-		}
-		else if (event.mods.isRightButtonDown()) {
-			/** Check Tool Type */
-			switch (tool) {
-			case Tools::Type::Pencil:
-				/** Remove Label */
-				int labelIndex = this->selectTempoLabel(event.position);
-				if (labelIndex > -1) {
-					this->removeTempoLabel(labelIndex);
-				}
-				break;
-			}
+			/** Move View Area */
+			this->viewMoving = true;
+			this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+			this->dragStartFunc();
 		}
 	}
 	else {
-		/** Play Position Changed */
-		if (event.mods.isLeftButtonDown()) {
-			double per = xPos / (double)this->getWidth();
-			double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+		if (event.position.getY() < labelAreaHeight) {
+			/** Get Tool Type */
+			auto tool = Tools::getInstance()->getType();
 
-			quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
+			if (event.mods.isLeftButtonDown()) {
+				/** Check Tool Type */
+				switch (tool) {
+				case Tools::Type::Arrow: {
+					/** Get Label Index */
+					this->dragLabelIndex = this->selectTempoLabel(event.position);
+					if (this->dragLabelIndex > -1) {
+						/** Move Label */
+						double labelTime = std::get<0>(this->tempoTemp.getReference(this->dragLabelIndex));
+						float labelPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+						this->labelDragOffset = event.position.getX() - labelPos;
+						this->labelDragPos = labelPos;
+					}
+					break;
+				}
+				case Tools::Type::Pencil: {
+					/** Add Label */
+					double labelTime = this->secStart + (event.position.getX() / (double)this->getWidth()) * (this->secEnd - this->secStart);
+					labelTime = this->limitTimeSec(labelTime);
+					this->addTempoLabel(labelTime);
+					break;
+				}
+				}
+			}
+			else if (event.mods.isRightButtonDown()) {
+				/** Check Tool Type */
+				switch (tool) {
+				case Tools::Type::Pencil:
+					/** Remove Label */
+					int labelIndex = this->selectTempoLabel(event.position);
+					if (labelIndex > -1) {
+						this->removeTempoLabel(labelIndex);
+					}
+					break;
+				}
+			}
 		}
+		else {
+			/** Play Position Changed */
+			if (event.mods.isLeftButtonDown()) {
+				double per = xPos / (double)this->getWidth();
+				double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
-		/** Loop Changed */
-		else if (event.mods.isRightButtonDown()) {
-			double per = xPos / (double)this->getWidth();
-			this->mouseDownSecTemp = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
+				quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
+			}
+
+			/** Loop Changed */
+			else if (event.mods.isRightButtonDown()) {
+				double per = xPos / (double)this->getWidth();
+				this->mouseDownSecTemp = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
+			}
 		}
 	}
 }
@@ -382,34 +392,35 @@ void SeqTimeRuler::mouseDrag(const juce::MouseEvent& event) {
 	auto screenSize = utils::getScreenSize(this);
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-	if (event.mouseDownPosition.getY() < labelAreaHeight) {
-		if (event.mods.isLeftButtonDown()) {
-			/** Move Label */
-			if (this->dragLabelIndex > -1) {
-				/** Get Label Time */
-				double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
-				labelTime = this->limitTimeSec(labelTime);
-				this->labelDragPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-			}
+	if (event.mods.isLeftButtonDown()) {
+		/** Move Label */
+		if (this->dragLabelIndex > -1) {
+			/** Get Label Time */
+			double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			labelTime = this->limitTimeSec(labelTime);
+			this->labelDragPos = (labelTime - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		}
 
-			/** Move View */
-			else if (this->viewMoving) {
-				int distance = event.getDistanceFromDragStartX();
-				this->dragProcessFunc(distance, 0, true, false);
+		/** Move View */
+		else if (this->viewMoving) {
+			int distance = event.getDistanceFromDragStartX();
+			this->dragProcessFunc(distance, 0, true, false);
+		}
+
+		/** Play Position Changed */
+		else {
+			if (event.mouseDownPosition.getY() >= labelAreaHeight) {
+				double per = xPos / (double)this->getWidth();
+				double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
+
+				quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
 			}
 		}
 	}
-	else {
-		/** Play Position Changed */
-		if (event.mods.isLeftButtonDown()) {
-			double per = xPos / (double)this->getWidth();
-			double timeSec = this->secStart + (this->secEnd - this->secStart) * per;
 
-			quickAPI::setPlayPosition(this->limitTimeSec(timeSec));
-		}
-
-		/** Loop Changed */
-		else if (event.mods.isRightButtonDown()) {
+	/** Loop Changed */
+	else if (event.mods.isRightButtonDown()) {
+		if (event.mouseDownPosition.getY() >= labelAreaHeight) {
 			double per = xPos / (double)this->getWidth();
 			double timeSec = this->limitTimeSec(this->secStart + (this->secEnd - this->secStart) * per);
 
@@ -433,38 +444,39 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 	auto screenSize = utils::getScreenSize(this);
 	float labelAreaHeight = screenSize.getHeight() * 0.035;
 
-	if (event.mouseDownPosition.getY() < labelAreaHeight) {
-		if (event.mods.isLeftButtonDown()) {
-			/** Move Label */
-			if (this->dragLabelIndex > -1) {
-				if (event.mouseWasDraggedSinceMouseDown()) {
-					/** Get Label Time */
-					double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
-					labelTime = this->limitTimeSec(labelTime);
+	if (event.mods.isLeftButtonDown()) {
+		/** Move Label */
+		if (this->dragLabelIndex > -1) {
+			if (event.mouseWasDraggedSinceMouseDown()) {
+				/** Get Label Time */
+				double labelTime = this->secStart + ((event.position.getX() - this->labelDragOffset) / (double)this->getWidth()) * (this->secEnd - this->secStart);
+				labelTime = this->limitTimeSec(labelTime);
 
-					/** Move Label */
-					this->setTempoLabelTime(this->dragLabelIndex, labelTime);
-				}
-				else {
-					/** Edit Label */
-					this->editTempoLabel(this->dragLabelIndex);
-				}
-				
-				/** Reset State */
-				this->dragLabelIndex = -1;
-				this->labelDragOffset = 0;
-				this->labelDragPos = 0;
+				/** Move Label */
+				this->setTempoLabelTime(this->dragLabelIndex, labelTime);
+			}
+			else {
+				/** Edit Label */
+				this->editTempoLabel(this->dragLabelIndex);
 			}
 
-			/** Move View */
-			else if (this->viewMoving) {
-				this->dragEndFunc();
-			}
+			/** Reset State */
+			this->dragLabelIndex = -1;
+			this->labelDragOffset = 0;
+			this->labelDragPos = 0;
+		}
+
+		/** Move View */
+		else if (this->viewMoving) {
+			this->viewMoving = false;
+			this->mouseMove(event);/**< Update Mouse Cursor */
+			this->dragEndFunc();
 		}
 	}
-	else {
-		/** Loop Changed */
-		if (event.mods.isRightButtonDown()) {
+
+	/** Loop Changed */
+	else if (event.mods.isRightButtonDown()) {
+		if (event.mouseDownPosition.getY() >= labelAreaHeight) {
 			if (!(event.mouseWasDraggedSinceMouseDown())) {
 				quickAPI::setPlayLoop(0, 0);
 			}
@@ -473,6 +485,8 @@ void SeqTimeRuler::mouseUp(const juce::MouseEvent& event) {
 }
 
 void SeqTimeRuler::mouseMove(const juce::MouseEvent& event) {
+	/** Current Method Also Invoked by mouseUp() */
+
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float labelAreaHeight = screenSize.getHeight() * 0.035;

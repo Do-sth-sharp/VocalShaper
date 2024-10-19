@@ -470,6 +470,8 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 }
 
 void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
+	/** Current Method Also Invoked by mouseUp() */
+
 	/** Block */
 	float posX = event.position.getX();
 	std::tuple<SeqTrackContentViewer::BlockControllerType, int> blockController;
@@ -586,38 +588,46 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 	auto tool = Tools::getInstance()->getType();
 
 	if (event.mods.isLeftButtonDown()) {
-		/** Check Tool Type */
-		switch (tool) {
-		case Tools::Type::Pencil: {
-			/** Edit */
-			auto [controller, index] = this->getBlockController(posX);
-
-			this->pressedBlockIndex = index;
-			if (controller == BlockControllerType::Inside) {
-				this->dragType = DragType::Move;
-			}
-			else if (controller == BlockControllerType::Left) {
-				this->dragType = DragType::Left;
-			}
-			else if (controller == BlockControllerType::Right) {
-				this->dragType = DragType::Right;
-			}
-			else {
-				this->dragType = DragType::Add;
-			}
-			this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
-			this->mousePressedSecond = this->limitTimeSec(this->mousePressedSecond);
-			this->mouseCurrentSecond = this->mousePressedSecond;
-			this->copyMode = (controller == BlockControllerType::Inside) && event.mods.isCtrlDown();
-
-			this->repaint();
-
-			break;
+		if (event.mods.isAltDown()) {
+			/** Move View Area */
+			this->viewMoving = true;
+			this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+			this->dragStartFunc();
 		}
-		case Tools::Type::Arrow: {
-			/** TODO */
-			break;
-		}
+		else {
+			/** Check Tool Type */
+			switch (tool) {
+			case Tools::Type::Pencil: {
+				/** Edit */
+				auto [controller, index] = this->getBlockController(posX);
+
+				this->pressedBlockIndex = index;
+				if (controller == BlockControllerType::Inside) {
+					this->dragType = DragType::Move;
+				}
+				else if (controller == BlockControllerType::Left) {
+					this->dragType = DragType::Left;
+				}
+				else if (controller == BlockControllerType::Right) {
+					this->dragType = DragType::Right;
+				}
+				else {
+					this->dragType = DragType::Add;
+				}
+				this->mousePressedSecond = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+				this->mousePressedSecond = this->limitTimeSec(this->mousePressedSecond);
+				this->mouseCurrentSecond = this->mousePressedSecond;
+				this->copyMode = (controller == BlockControllerType::Inside) && event.mods.isCtrlDown();
+
+				this->repaint();
+
+				break;
+			}
+			case Tools::Type::Arrow: {
+				/** TODO */
+				break;
+			}
+			}
 		}
 	}
 	else if (event.mods.isRightButtonDown()) {
@@ -641,6 +651,7 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 		/** Move View */
 		if (this->viewMoving) {
 			this->viewMoving = false;
+			this->mouseMove(event);/**< Update Mouse Cursor */
 			this->dragEndFunc();
 		}
 
