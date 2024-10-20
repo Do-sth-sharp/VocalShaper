@@ -77,7 +77,7 @@ private:
 	DragType dragType = DragType::None;
 	int pressedBlockIndex = -1;
 	double mousePressedSecond = 0;
-	double mouseCurrentSecond = 0;
+	double mouseCurrentSecond = -1;
 	bool blockValid = true;
 	bool copyMode = false;
 
@@ -98,6 +98,9 @@ private:
 	void setBlock(int blockIndex, double startSec, double endSec, double offset);
 	void splitBlock(int blockIndex, double timeSec);
 	void removeBlock(int blockIndex);
+
+	void showMenu(double seconds, int blockIndex);
+	juce::PopupMenu createMenu(double seconds, int blockIndex);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackContentViewer)
 };

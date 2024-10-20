@@ -139,6 +139,10 @@ countries: cn
 "Instrument Offline:" = "乐器离线："
 "Instrument Bypass:" = "乐器旁路："
 
+"Remove Block" = "移除块"
+"Split Block" = "分割块"
+"Open Source In Editor" = "在编辑器中打开源"
+
 "Empty" = "空"
 "From Output Config" = "从输出设置"
 

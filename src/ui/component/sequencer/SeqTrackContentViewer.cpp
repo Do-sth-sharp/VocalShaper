@@ -224,10 +224,10 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 
 	float noteMaxHeight = screenSize.getHeight() * 0.015;
 
-	float scissorsLineThickness = screenSize.getWidth() * 0.001;
-	float scissorsLineDashLength = screenSize.getHeight() * 0.005;
-	float scissorsLineSkipLength = scissorsLineDashLength;
-	float scissorsLineArray[2] = { scissorsLineDashLength, scissorsLineSkipLength };
+	float cursorLineThickness = screenSize.getWidth() * 0.001;
+	float cursorLineDashLength = screenSize.getHeight() * 0.005;
+	float cursorLineSkipLength = cursorLineDashLength;
+	float cursorLineArray[2] = { cursorLineDashLength, cursorLineSkipLength };
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
@@ -467,6 +467,19 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 			paintBlockFunc(blockStartTime, blockEndTime, blockOffset, alpha);
 		}
 	}
+
+	/** Cursor Line */
+	if (this->mouseCurrentSecond >= this->secStart &&
+		this->mouseCurrentSecond <= this->secEnd) {
+		float cursorPosX = (this->mouseCurrentSecond - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+		juce::Line<float> sciLine(
+			cursorPosX, paddingHeight,
+			cursorPosX, this->getHeight() - paddingHeight);
+		g.setColour(this->nameColor);
+		g.drawDashedLine(sciLine, cursorLineArray,
+			sizeof(cursorLineArray) / sizeof(float),
+			cursorLineThickness, 0);
+	}
 }
 
 void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
@@ -484,20 +497,26 @@ void SeqTrackContentViewer::mouseMove(const juce::MouseEvent& event) {
 		break;
 	}
 
-	if (std::get<0>(blockController) == BlockControllerType::Left) {
+	switch (std::get<0>(blockController)) {
+	case BlockControllerType::Left:
 		this->setMouseCursor(juce::MouseCursor::LeftEdgeResizeCursor);
-		return;
-	}
-	else if (std::get<0>(blockController) == BlockControllerType::Right) {
+		break;
+	case BlockControllerType::Right:
 		this->setMouseCursor(juce::MouseCursor::RightEdgeResizeCursor);
-		return;
-	}
-	else if (std::get<0>(blockController) == BlockControllerType::Inside) {
+		break;
+	case BlockControllerType::Inside:
 		this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-		return;
+		break;
+	default:
+		this->setMouseCursor(juce::MouseCursor::NormalCursor);
+		break;
 	}
 
-	this->setMouseCursor(juce::MouseCursor::NormalCursor);
+	/** Mouse Second */
+	this->mouseCurrentSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+	this->mouseCurrentSecond = this->limitTimeSec(this->mouseCurrentSecond);
+
+	this->repaint();
 }
 
 void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
@@ -517,6 +536,10 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 		}
 	}
 
+	/** Mouse Second */
+	this->mouseCurrentSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
+	this->mouseCurrentSecond = this->limitTimeSec(this->mouseCurrentSecond);
+
 	if (event.mods.isLeftButtonDown()) {
 		/** Move View */
 		if (this->viewMoving) {
@@ -527,9 +550,6 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 
 		/** Edit Block */
 		else if (this->dragType != DragType::None) {
-			this->mouseCurrentSecond = this->secStart + (event.position.x / (double)this->getWidth()) * (this->secEnd - this->secStart);
-			this->mouseCurrentSecond = this->limitTimeSec(this->mouseCurrentSecond);
-
 			switch (this->dragType) {
 			case DragType::Add: {
 				double blockStartSec = std::min(this->mousePressedSecond, this->mouseCurrentSecond);
@@ -575,10 +595,10 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 				break;
 			}
 			}
-
-			this->repaint();
 		}
 	}
+
+	this->repaint();
 }
 
 void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
@@ -630,22 +650,16 @@ void SeqTrackContentViewer::mouseDown(const juce::MouseEvent& event) {
 			}
 		}
 	}
-	else if (event.mods.isRightButtonDown()) {
-		/** Check Tool Type */
-		switch (tool) {
-		case Tools::Type::Pencil: {
-			auto blockController = this->getBlockControllerWithoutEdge(posX);
-			if (std::get<0>(blockController) == BlockControllerType::Inside) {
-				this->removeBlock(std::get<1>(blockController));
-			}
-			break;
-		}
-		}
-	}
+
+	/** Repaint */
+	this->repaint();
 }
 
 void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 	float posX = event.position.x;
+
+	/** Get Tool Type */
+	auto tool = Tools::getInstance()->getType();
 
 	if (event.mods.isLeftButtonDown()) {
 		/** Move View */
@@ -723,16 +737,37 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 		this->dragType = DragType::None;
 		this->pressedBlockIndex = -1;
 		this->mousePressedSecond = 0;
-		this->mouseCurrentSecond = 0;
 		this->blockValid = true;
 		this->copyMode = false;
 
 		/** Repaint */
 		this->repaint();
 	}
+	else if (event.mods.isRightButtonDown()) {
+		/** Check Tool Type */
+		switch (tool) {
+		case Tools::Type::Pencil: {
+			/** Remove Block */
+			auto blockController = this->getBlockControllerWithoutEdge(posX);
+			if (std::get<0>(blockController) == BlockControllerType::Inside) {
+				this->removeBlock(std::get<1>(blockController));
+			}
+			break;
+		}
+		case Tools::Type::Arrow: {
+			/** Show Menu */
+			auto [controller, index] = this->getBlockController(posX);
+			double currentSec = this->secStart + (posX / (double)this->getWidth()) * (this->secEnd - this->secStart);
+			currentSec = this->limitTimeSec(currentSec);
+			this->showMenu(currentSec, index);
+			break;
+		}
+		}
+	}
 }
 
 void SeqTrackContentViewer::mouseExit(const juce::MouseEvent& event) {
+	this->mouseCurrentSecond = -1;
 	this->repaint();
 }
 
@@ -894,4 +929,43 @@ void SeqTrackContentViewer::splitBlock(int blockIndex, double timeSec) {
 
 void SeqTrackContentViewer::removeBlock(int blockIndex) {
 	CoreActions::removeSeqBlock(this->index, blockIndex);
+}
+
+enum SeqBlockMenuActionType {
+	Remove = 1, Split, OpenInEditor
+};
+
+void SeqTrackContentViewer::showMenu(double seconds, int blockIndex) {
+	auto menu = this->createMenu(seconds, blockIndex);
+	int result = menu.show();
+
+	switch (result) {
+	case SeqBlockMenuActionType::Remove:
+		this->removeBlock(blockIndex);
+		break;
+	case SeqBlockMenuActionType::Split:
+		this->splitBlock(blockIndex, seconds);
+		break;
+	case SeqBlockMenuActionType::OpenInEditor:
+		this->trackSelectFunc(this->index);
+		break;
+	}
+}
+
+juce::PopupMenu SeqTrackContentViewer::createMenu(double seconds, int blockIndex) {
+	/** Title */
+	juce::String title = juce::String{ seconds, 2 } + "s";
+	if (blockIndex >= 0) {
+		title += (", #" + juce::String{ blockIndex });
+	}
+
+	/** Menu */
+	juce::PopupMenu menu;
+
+	menu.addSectionHeader(title);
+	menu.addItem(SeqBlockMenuActionType::Remove, TRANS("Remove Block"), (blockIndex >= 0));
+	menu.addItem(SeqBlockMenuActionType::Split, TRANS("Split Block"), (blockIndex >= 0));
+	menu.addItem(SeqBlockMenuActionType::OpenInEditor, TRANS("Open Source In Editor"), true);
+
+	return menu;
 }
