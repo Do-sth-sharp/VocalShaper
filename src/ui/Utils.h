@@ -76,6 +76,9 @@ namespace utils {
 
 	int matchKMP(const juce::String& line, const juce::String& word);
 	const juce::StringArray searchKMP(const juce::StringArray& list, const juce::String& word);
+	
+	bool fuzzyMatch(const juce::String& line, const juce::StringArray& keyWords, bool ignoreCase);
+	const juce::StringArray searchFuzzy(const juce::StringArray& list, const juce::String& word, bool ignoreCase);
 
 	bool saveXml(const juce::File& file, juce::XmlElement* xml);
 	std::unique_ptr<juce::XmlElement> readXml(const juce::File& file);

@@ -227,7 +227,7 @@ void OutputConfigComponent::showMetaEditor(
 		keyEditor->onReturnKey = [keyEditor, possibleKeys] {
 			juce::String word = keyEditor->getText();
 			auto possibleList = word.isEmpty()
-				? possibleKeys : utils::searchKMP(possibleKeys, word);
+				? possibleKeys : utils::searchFuzzy(possibleKeys, word, true);
 			if (possibleList.isEmpty()) { return; }
 
 			juce::PopupMenu menu;

@@ -387,6 +387,41 @@ namespace utils {
 		return result;
 	}
 
+	bool fuzzyMatch(const juce::String& line, const juce::StringArray& keyWords, bool ignoreCase) {
+		juce::String lineTemp = (ignoreCase ? line.toLowerCase() : line);
+
+		auto kmpTemp = preKMP(lineTemp);
+
+		for (auto& key : keyWords) {
+			if (KMP((ignoreCase ? key.toLowerCase() : key), lineTemp, kmpTemp) < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	const juce::StringArray searchFuzzy(const juce::StringArray& list, const juce::String& word, bool ignoreCase) {
+		/** Split Tokens */
+		juce::String breakChars = " \r\n\t";
+		juce::String quoteChars = "\"";
+		juce::StringArray keyWords = juce::StringArray::fromTokens(word, breakChars, quoteChars);
+
+		for (auto& key : keyWords) {
+			if (key.startsWith(quoteChars) && key.endsWith(quoteChars)) {
+				key = key.substring(1, key.length() - 1);
+			}
+		}
+
+		/** Match */
+		juce::StringArray result;
+		for (auto& s : list) {
+			if (fuzzyMatch(s, keyWords, ignoreCase)) {
+				result.add(s);
+			}
+		}
+		return result;
+	}
+
 	bool saveXml(const juce::File& file, juce::XmlElement* xml) {
 		if (!xml) { return false; }
 
@@ -565,8 +600,8 @@ namespace utils {
 
 			/** Searching By Name */
 			if (search) {
-				if (utils::matchKMP(i.name, searchText) < 0
-					&& utils::searchKMP(indexs, searchText).isEmpty()) {
+				if (utils::searchFuzzy({ i.name }, searchText, true).isEmpty()
+					&& utils::searchFuzzy(indexs, searchText, true).isEmpty()) {
 					continue;
 				}
 			}
