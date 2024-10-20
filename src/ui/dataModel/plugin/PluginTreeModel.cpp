@@ -24,7 +24,7 @@ public:
 
 			/** Font */
 			juce::Font textFont(textHeight);
-			return textFont.getStringWidth(this->plugin.name) + paddingWidth * 2;
+			return textFont.getStringWidth(this->tempName) + paddingWidth * 2;
 		}
 		return 0;
 	};
@@ -67,12 +67,12 @@ public:
 
 			/** Text */
 			juce::Rectangle<int> textRect(
-				paddingWidth, paddingHeight,
-				width - paddingWidth * 2, textHeight);
+				0, 0,
+				width, height);
 			g.setColour(textColor);
 			g.setFont(textFont);
 			g.drawFittedText(this->tempName, textRect,
-				juce::Justification::centredLeft, 1, 1.f);
+				juce::Justification::centred, 1, 1.f);
 		}
 	};
 
@@ -183,7 +183,7 @@ public:
 		if (auto view = this->getOwnerView()) {
 			/** Size */
 			auto screenSize = utils::getScreenSize(view);
-			int paddingWidth = screenSize.getWidth() * 0.005;
+			int paddingWidth = screenSize.getWidth() * 0.0025;
 			float textHeight = screenSize.getHeight() * 0.02f;
 
 			/** Font */
@@ -210,7 +210,7 @@ public:
 			auto& laf = view->getLookAndFeel();
 
 			/** Size */
-			int paddingWidth = screenSize.getWidth() * 0.005;
+			int paddingWidth = screenSize.getWidth() * 0.0025;
 			int paddingHeight = screenSize.getHeight() * 0.005;
 			float textHeight = screenSize.getHeight() * 0.02f;
 

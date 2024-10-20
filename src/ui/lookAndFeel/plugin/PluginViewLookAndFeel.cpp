@@ -62,8 +62,8 @@ void PluginViewLookAndFeel::drawTreeviewPlusMinusBox(
 	juce::Colour lineColor = this->findColour(
 		juce::TreeView::ColourIds::linesColourId);
 
-	float rectWidth  = area.getWidth() * 0.6;
-	float rectHeight = area.getHeight() * 0.6;
+	float rectHeight = area.getHeight() * 0.55;
+	float rectWidth  = rectHeight;
 	float lineTickness = rectHeight * 0.075;
 	float iconHeight = rectHeight * 0.5;
 	float iconWidth = rectWidth * 0.5;
