@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "CommandOutputComponent.h"
 
 class AudioCore;
 
@@ -17,7 +18,8 @@ public:
 
 private:
 	std::unique_ptr<juce::AudioDeviceSelectorComponent> deviceSelector = nullptr;
-	std::unique_ptr<juce::TextEditor> commandInput = nullptr, commandOutput = nullptr;
+	std::unique_ptr<juce::TextEditor> commandInput = nullptr;
+	std::unique_ptr<CommandOutputComponent> commandOutput = nullptr;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioDebugger)
 };

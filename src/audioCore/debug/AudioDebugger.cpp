@@ -11,11 +11,7 @@ AudioDebugger::AudioDebugger() {
 	this->addAndMakeVisible(this->deviceSelector.get());
 
 	/** Command */
-	this->commandOutput = std::make_unique<juce::TextEditor>();
-	this->commandOutput->setMultiLine(true);
-	this->commandOutput->setReadOnly(true);
-	this->commandOutput->setTabKeyUsedAsCharacter(true);
-	this->commandOutput->setScrollToShowCursor(true);
+	this->commandOutput = std::make_unique<CommandOutputComponent>();
 	this->addAndMakeVisible(this->commandOutput.get());
 
 	this->commandInput = std::make_unique<juce::TextEditor>();
@@ -35,11 +31,11 @@ AudioDebugger::AudioDebugger() {
 		AudioCommand::getInstance()->processCommandAsync(str, [debugger](const AudioCommand::CommandResult& result) {
 			if (debugger) {
 				if (std::get<0>(result)) {
-					debugger->output(std::get<2>(result));
+					debugger->output(std::get<2>(result) + "\n");
 				}
 				else {
 					debugger->output("<<<FAILED!!!>>>\n");
-					debugger->output(std::get<2>(result));
+					debugger->output(std::get<2>(result) + "\n");
 				}
 				debugger->output("\n");
 			}
@@ -68,15 +64,5 @@ void AudioDebugger::userTriedToCloseWindow() {
 }
 
 void AudioDebugger::output(const juce::String& mes) {
-	auto currentText = this->commandOutput->getText();
-	this->commandOutput->moveCaretToEnd();
-	if (currentText.isNotEmpty() && currentText.getLastCharacter() != '\n') {
-		this->commandOutput->insertTextAtCaret("\n");
-	}
-
-	this->commandOutput->insertTextAtCaret(mes);
-
-	if (mes.isNotEmpty() && mes.getLastCharacter() != '\n') {
-		this->commandOutput->insertTextAtCaret("\n");
-	}
+	this->commandOutput->add(mes);
 }
