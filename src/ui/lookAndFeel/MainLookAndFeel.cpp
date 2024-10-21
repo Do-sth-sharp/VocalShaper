@@ -234,7 +234,7 @@ void MainLookAndFeel::drawPopupMenuItem(juce::Graphics& g, const juce::Rectangle
 
 		auto font = this->getPopupMenuFont();
 
-		auto maxFontHeight = (float)r.getHeight() / 1.3f;
+		auto maxFontHeight = (float)r.getHeight() * 0.7f;
 
 		if (font.getHeight() > maxFontHeight)
 			font.setHeight(maxFontHeight);
