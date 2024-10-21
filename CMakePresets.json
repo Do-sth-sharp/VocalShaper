@@ -31,32 +31,6 @@
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
-    },
-    {
-      "name": "Ninja Debug MinGW64",
-      "displayName": "Ninja Debug MinGW64",
-      "description": "Ninja Debug MinGW64",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/ninja-debug-mingw64",
-      "installDir": "${sourceDir}/install/ninja-debug-mingw64",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
-      }
-    },
-    {
-      "name": "Ninja Release MinGW64",
-      "displayName": "Ninja Release MinGW64",
-      "description": "Ninja Release MinGW64",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/ninja-release-mingw64",
-      "installDir": "${sourceDir}/install/ninja-release-mingw64",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
-      }
     }
   ],
   "buildPresets": [
@@ -72,20 +46,6 @@
       "displayName": "Ninja Release x64",
       "description": "Ninja Release x64",
       "configurePreset": "Ninja Release x64",
-      "jobs": 16
-    },
-    {
-      "name": "Ninja Debug MinGW64",
-      "displayName": "Ninja Debug MinGW64",
-      "description": "Ninja Debug MinGW64",
-      "configurePreset": "Ninja Debug MinGW64",
-      "jobs": 16
-    },
-    {
-      "name": "Ninja Release MinGW64",
-      "displayName": "Ninja Release MinGW64",
-      "description": "Ninja Release MinGW64",
-      "configurePreset": "Ninja Release MinGW64",
       "jobs": 16
     }
   ]

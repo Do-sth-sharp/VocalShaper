@@ -65,18 +65,6 @@ vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./ins
 cd ..
 ```
 
-### Windows (MinGW)
-```
-git clone https://github.com/Do-sth-sharp/VocalShaper.git
-cd VocalShaper
-git checkout develop
-git submodule update --init --recursive
-cd vcpkg
-.\bootstrap-vcpkg.bat
-vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-mingw-dynamic
-cd ..
-```
-
 ## Compile
 ### Windows Debug (MSVC)
 ```
@@ -90,20 +78,4 @@ cmake --build build/ninja-debug-x64 --target VocalShaper
 "%VCINSTALLDIR%\Auxiliary\Build\vcvarsall.bat" amd64
 cmake --preset "Ninja Release x64"
 cmake --build build/ninja-release-x64 --target VocalShaper
-```
-
-### Windows Debug (MinGW)
-```
-set CC=gcc
-set CXX=c++
-cmake --preset "Ninja Debug MinGW64"
-cmake --build build/ninja-debug-mingw64 --target VocalShaper
-```
-
-### Windows Release (MinGW)
-```
-set CC=gcc
-set CXX=c++
-cmake --preset "Ninja Release MinGW64"
-cmake --build build/ninja-release-mingw64 --target VocalShaper
 ```

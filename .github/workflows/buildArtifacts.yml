@@ -15,14 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        compiler: [MSVC, MinGW]
+        compiler: [MSVC]
         include:
           - os: windows-latest
             compiler: MSVC
             vcpkg_triplet: x64-windows
-          - os: windows-latest
-            compiler: MinGW
-            vcpkg_triplet: x64-mingw-dynamic
 
     steps:
     - name: Checkout
@@ -35,13 +32,6 @@ jobs:
       uses: seanmiddleditch/gha-setup-ninja@master
       with:
         version: 1.11.1
-
-    - name: Install MinGW
-      if: matrix.compiler == 'MinGW'
-      uses: egor-tensin/setup-mingw@v2
-      with:
-        platform: x64
-        static: 0
 
     - name: Install vcpkg Windows
       if: runner.os == 'Windows'
@@ -95,23 +85,16 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Debug, Release]
-        compiler: [MSVC, MinGW]
+        compiler: [MSVC]
         include:
           - compiler: MSVC
             c_compiler: cl
             cxx_compiler: cl
             asm_compiler: cl
-          - compiler: MinGW
-            c_compiler: gcc
-            cxx_compiler: c++
-            asm_compiler: ''
 
           - os: windows-latest
             compiler: MSVC
             vcpkg_triplet: x64-windows
-          - os: windows-latest
-            compiler: MinGW
-            vcpkg_triplet: x64-mingw-dynamic
 
           - os: windows-latest
             build_type: Debug
@@ -123,16 +106,6 @@ jobs:
             compiler: MSVC
             cmake_config: 'Ninja Release x64'
             build_path: 'ninja-release-x64'
-          - os: windows-latest
-            build_type: Debug
-            compiler: MinGW
-            cmake_config: 'Ninja Debug MinGW64'
-            build_path: 'ninja-debug-mingw64'
-          - os: windows-latest
-            build_type: Release
-            compiler: MinGW
-            cmake_config: 'Ninja Release MinGW64'
-            build_path: 'ninja-release-mingw64'
 
     permissions:
       id-token: write
@@ -150,13 +123,6 @@ jobs:
       uses: seanmiddleditch/gha-setup-ninja@master
       with:
         version: 1.11.1
-
-    - name: Install MinGW
-      if: matrix.compiler == 'MinGW'
-      uses: egor-tensin/setup-mingw@v2
-      with:
-        platform: x64
-        static: 0
 
     - name: Install vcpkg Windows
       if: runner.os == 'Windows'
