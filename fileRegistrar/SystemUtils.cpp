@@ -6,8 +6,9 @@
 #endif //JUCE_WINDOWS
 
 #define REG_RROJ_ROOT "HKEY_CLASSES_ROOT\\"
-#define REG_PROJ_MIME "VocalShaper.Project.4"
+#define REG_PROJ_TYPE "VocalShaper.vsp4"
 #define REG_PROJ_EXT ".vsp4"
+#define REG_PROJ_MIME "application/vnd.vocalshaper.vsp4"
 #define REG_PROJ_DESCRIPTION "VocalShaper Project Version 4"
 
 bool checkAdmin() {
@@ -68,10 +69,11 @@ bool checkAdmin() {
 
 bool regProjectFileInSystem(const juce::String& appPath) {
 #if JUCE_WINDOWS
-    bool result = juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_EXT "\\", REG_PROJ_MIME)
-        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_MIME "\\", REG_PROJ_DESCRIPTION)
-        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_MIME "\\shell\\open\\command\\", appPath + " \"%1\"")
-        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_MIME "\\DefaultIcon\\", appPath + "," + juce::String{ 1 });
+    bool result = juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_EXT "\\", REG_PROJ_TYPE)
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_EXT "\\Content Type", REG_PROJ_MIME)
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_TYPE "\\", REG_PROJ_DESCRIPTION)
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_TYPE "\\shell\\open\\command\\", appPath + " \"%1\"")
+        && juce::WindowsRegistry::setValue(REG_RROJ_ROOT REG_PROJ_TYPE "\\DefaultIcon\\", appPath + "," + juce::String{ 1 });
 
     return result;
 
@@ -88,8 +90,8 @@ bool unregProjectFileFromSystem() {
         flagOk = juce::WindowsRegistry::deleteKey(REG_RROJ_ROOT REG_PROJ_EXT) && flagOk;
         flagExists = true;
     }
-    if (juce::WindowsRegistry::keyExists(REG_RROJ_ROOT REG_PROJ_MIME)) {
-        flagOk = juce::WindowsRegistry::deleteKey(REG_RROJ_ROOT REG_PROJ_MIME) && flagOk;
+    if (juce::WindowsRegistry::keyExists(REG_RROJ_ROOT REG_PROJ_TYPE)) {
+        flagOk = juce::WindowsRegistry::deleteKey(REG_RROJ_ROOT REG_PROJ_TYPE) && flagOk;
         flagExists = true;
     }
 
