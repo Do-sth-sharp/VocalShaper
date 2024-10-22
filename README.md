@@ -7,7 +7,7 @@
 [![forthebadge](https://github.com/FangCunWuChang/for-the-badge/blob/master/src/images/badges/powered-by-black-magic.svg)](https://github.com/FangCunWuChang/for-the-badge/)
 [![forthebadge](https://github.com/FangCunWuChang/for-the-badge/blob/master/src/images/badges/works-on-my-machine.svg)](https://github.com/FangCunWuChang/for-the-badge/)
   
-A JUCE-based Open Source DAW. 
+A JUCE-based Open Source DAW. This DAW is lightweight and can meet most daily usage needs.  
 > [!IMPORTANT]
 > Under development, not released.  
 
