@@ -91,6 +91,7 @@ cmake --build build/ninja-debug-x64 --target VocalShaper
 cmake --preset "Ninja Release x64"
 cmake --build build/ninja-release-x64 --target VocalShaper
 ```
+
 ### Windows Debug (Clang-LLVM)
 ```
 cmake --preset "Ninja Debug Win64 LLVM"
