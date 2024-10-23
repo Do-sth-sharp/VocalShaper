@@ -5,11 +5,9 @@
     std::cout << (x) << std::endl
 
 /** Fixed JUCE Symbol Export */
-#if JUCE_MSVC
-    namespace juce {
-        XmlElement::TextFormat::TextFormat() {}
-    }
-#endif //JUCE_MSVC
+namespace juce {
+	XmlElement::TextFormat::TextFormat() {}
+}
 
 PluginSearcher::PluginSearcher(
 	const juce::String& pluginSearchPathListFilePath,

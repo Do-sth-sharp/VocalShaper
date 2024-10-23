@@ -13,9 +13,9 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")# Using /MD and /MDd on MSVC
-if (MSVC)
+if (WIN32)
     add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
-endif (MSVC)
+endif (WIN32)
 
 if (WIN32)
 	set (COMPILE_SYS_DEF "WIN32=1")
@@ -32,7 +32,6 @@ find_package (Lua REQUIRED)
 find_package (cmake-lame CONFIG REQUIRED)
 find_package (vsp4 CONFIG REQUIRED)
 find_package (flowui CONFIG REQUIRED)
-find_package (sigar CONFIG REQUIRED)
 
 set (OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
 set (ENGINES_DIR "${OUTPUT_DIR}/synth-engines")
@@ -176,26 +175,20 @@ target_compile_definitions (PluginSearcher PRIVATE
 	"PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
 )
 if (NOT MSVC)
-	target_compile_options (PluginSearcher PRIVATE
-		-pthread -fPIE)
+	target_compile_options (PluginSearcher PRIVATE -pthread)
+	if (NOT (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND WIN32))
+		target_compile_options (PluginSearcher PRIVATE -fPIE)
+	endif ()
 	if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 		target_compile_options (PluginSearcher PRIVATE -g)
 	endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif (NOT MSVC)
-if (MINGW)
-	target_link_options (PluginSearcher PRIVATE
-		-static -static-libgcc -static-libstdc++)
-endif (MINGW)
+target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full)
 if (MSVC)
-	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full)
-else (MSVC)
-	target_link_libraries (PluginSearcher PRIVATE juce-host-dev-kit::juce-full-static)
-endif (MSVC)
-if (MSVC)
-	target_link_options (PluginSearcher PRIVATE 
-		/SUBSYSTEM:WINDOWS
-	)
-endif (MSVC)
+	target_link_options (PluginSearcher PRIVATE /SUBSYSTEM:WINDOWS)
+elseif (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND WIN32)
+	target_link_options (PluginSearcher PRIVATE -Xlinker /SUBSYSTEM:WINDOWS)
+endif ()
 
 set_target_properties (PluginSearcher PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 
@@ -208,33 +201,27 @@ target_compile_definitions (FileRegistrar PRIVATE
 	"PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}"
 )
 if (NOT MSVC)
-	target_compile_options (FileRegistrar PRIVATE
-		-pthread -fPIE)
+	target_compile_options (FileRegistrar PRIVATE -pthread)
+	if (NOT (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND WIN32))
+		target_compile_options (FileRegistrar PRIVATE -fPIE)
+	endif ()
 	if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 		target_compile_options (FileRegistrar PRIVATE -g)
 	endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif (NOT MSVC)
-if (MINGW)
-	target_link_options (FileRegistrar PRIVATE
-		-static -static-libgcc -static-libstdc++)
-endif (MINGW)
+target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
 if (MSVC)
-	target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core)
-else (MSVC)
-	target_link_libraries (FileRegistrar PRIVATE juce-host-dev-kit::juce-core-static)#To avoid "[[deprecated]] __attribute__ ((visibility ("default")))" failure.
-endif (MSVC)
-if (MSVC)
-	target_link_options (FileRegistrar PRIVATE 
-		/SUBSYSTEM:WINDOWS
-	)
-endif (MSVC)
+	target_link_options (FileRegistrar PRIVATE /SUBSYSTEM:WINDOWS)
+elseif (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND WIN32)
+	target_link_options (FileRegistrar PRIVATE -Xlinker /SUBSYSTEM:WINDOWS)
+endif ()
 
 set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.c" "./src/*.rc")
 add_executable (VocalShaper ${VOCALSHAPER_SRC} "./JuceFix/fix.cpp")
-target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./sigar/include" "./src")
+target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./src")
 target_compile_definitions (VocalShaper PRIVATE ${COMPILE_SYS_DEF})
 target_compile_definitions (VocalShaper PRIVATE
 	"PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}"
@@ -245,32 +232,25 @@ target_link_libraries (VocalShaper PRIVATE
 	flowui::flowui
 	${LUA_LIBRARIES}
 	vsp4::vsp4
-	sigar::sigar
 )
 if (NOT MSVC)
-	target_compile_options (VocalShaper PRIVATE
-		-pthread -fPIE)
+	target_compile_options (VocalShaper PRIVATE -pthread)
+	if (NOT (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND WIN32))
+		target_compile_options (VocalShaper PRIVATE -fPIE)
+	endif ()
 	if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 		target_compile_options (VocalShaper PRIVATE -g)
 	endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 endif (NOT MSVC)
-if (MINGW)
-	target_link_options (VocalShaper PRIVATE
-		-static -static-libgcc -static-libstdc++)
-endif (MINGW)
-if (MSVC)
-	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
-else (MSVC)
-	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full-static)
-endif (MSVC)
+target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
 if (WIN32)
     target_link_libraries (VocalShaper PRIVATE Dbghelp)
 endif (WIN32)
 if (MSVC)
-	target_link_options (VocalShaper PRIVATE 
-		/SUBSYSTEM:WINDOWS
-	)
-endif (MSVC)
+	target_link_options (VocalShaper PRIVATE /SUBSYSTEM:WINDOWS)
+elseif (("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") AND WIN32)
+	target_link_options (VocalShaper PRIVATE -Xlinker /SUBSYSTEM:WINDOWS)
+endif ()
 
 add_dependencies (VocalShaper
 	PluginSearcher FileRegistrar

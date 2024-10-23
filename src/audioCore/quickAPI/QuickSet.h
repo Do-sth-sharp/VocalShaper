@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "quickGet.h"
+#include "QuickGet.h"
 #include "../misc/Device.h"
 
 namespace quickAPI {

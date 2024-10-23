@@ -1,18 +1,16 @@
 ﻿#include "SysStatus.h"
 
-extern "C" {
-#include <sigar_format.h>
-}
-
 #if JUCE_WINDOWS
 #include <Windows.h>
 #include <Psapi.h>
+#else //JUCE_WINDOWS
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <unistd.h>
 #endif //JUCE_WINDOWS
 
 SysStatus::SysStatus() {
-	/** Open Sigar */
-	sigar_open(&this->pSigar);
-
 	/** Get Current Process */
 #if JUCE_WINDOWS
 	this->hProcess = GetCurrentProcess();
@@ -20,52 +18,91 @@ SysStatus::SysStatus() {
 #endif //JUCE_WINDOWS
 }
 
-SysStatus::~SysStatus() {
-	/** Clear Sigar */
-	sigar_close(this->pSigar);
-}
+SysStatus::~SysStatus() {}
 
 double SysStatus::getCPUUsage(CPUPercTemp& temp) {
-	/** Check Sigar */
-	if (!this->pSigar) { return 0; }
+#if JUCE_WINDOWS
+	FILETIME newIdleTime, newKernelTime, newUserTime;
+	GetSystemTimes(&newIdleTime, &newKernelTime, &newUserTime);
 
-	/** Get CPU List */
-	sigar_cpu_list_t cpuList = {};
-	sigar_cpu_list_get(this->pSigar, &cpuList);
+	uint64_t newIdleTimeTemp = (*(ULARGE_INTEGER*)&newIdleTime).QuadPart;
+	uint64_t newKernelTimeTemp = (*(ULARGE_INTEGER*)&newKernelTime).QuadPart;
+	uint64_t newUserTimeTemp = (*(ULARGE_INTEGER*)&newUserTime).QuadPart;
 
-	/** Get CPU Prec */
-	double total = 0;
-	int cpuNum = cpuList.number;
-	temp.cpuTemp.resize(cpuNum);
-	for (int i = 0; i < cpuNum; i++) {
-		sigar_cpu_t* cpu = &(cpuList.data[i]);
-		sigar_cpu_perc_t perc = {};
-		sigar_cpu_perc_calculate(
-			&(temp.cpuTemp.getRawDataPointer()[i]), cpu, &perc);
+	uint64_t idle = newIdleTimeTemp - temp.cpuTemp[0];
+	uint64_t kernel = newKernelTimeTemp - temp.cpuTemp[1];
+	uint64_t user = newUserTimeTemp - temp.cpuTemp[2];
 
-		total += perc.combined;
-		temp.cpuTemp.getReference(i) = *cpu;
+	temp.cpuTemp[0] = newIdleTimeTemp;
+	temp.cpuTemp[1] = newKernelTimeTemp;
+	temp.cpuTemp[2] = newUserTimeTemp;
+
+	return (kernel + user) / (double)(idle + kernel + user);
+
+#else //JUCE_WINDOWS
+	long total = 0, idle = 0;
+
+	std::ifstream file("/proc/stat");
+	if (file.is_open()) {
+		std::string line;
+		std::getline(file, line);
+		std::istringstream ss(line);
+		std::string cpu;
+		ss >> cpu;
+
+		long user, nice, system, idle, iowait, irq, softirq, steal;
+		ss >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal;
+
+		total = user + nice + system + idle + iowait + irq + softirq + steal;
+		idle = idle + iowait;
+
+		long totalDiff = total - temp.cpuTemp[0];
+		long idleDiff = idle - temp.cpuTemp[1];
+
+		float cpuUsage = 100.0 * (totalDiff - idleDiff) / totalDiff;
+
+		temp.cpuTemp[0] = total;
+		temp.cpuTemp[1] = idle;
+
+		return cpuUsage;
 	}
-	total /= cpuNum;
 
-	/** Clear */
-	sigar_cpu_list_destroy(this->pSigar, &cpuList);
-	
-	return total;
+	return 0.0;
+
+#endif //JUCE_WINDOWS
 }
 
 double SysStatus::getMemUsage() {
-	/** Check Sigar */
-	if (!this->pSigar) { return 0; }
+#if JUCE_WINDOWS
+	MEMORYSTATUSEX memInfo{};
+	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&memInfo);
 
-	/** Get Mem */
-	sigar_mem_t mem = {};
-	sigar_mem_get(this->pSigar, &mem);
+	return (memInfo.ullTotalPhys - memInfo.ullAvailPhys) / (double)(memInfo.ullTotalPhys);
 
-	/** Get Result */
-	double result = mem.used_percent / 100;
+#else //JUCE_WINDOWS
+	std::ifstream file("/proc/meminfo");
+	std::string line;
+	unsigned long total = 0, free = 0, buffers = 0, cached = 0;
 
-	return result;
+	while (std::getline(file, line)) {
+		if (line.find("MemTotal:") == 0) {
+			total = std::stoul(line.substr(line.find_first_of("0123456789")));
+		}
+		else if (line.find("MemFree:") == 0) {
+			free = std::stoul(line.substr(line.find_first_of("0123456789")));
+		}
+		else if (line.find("Buffers:") == 0) {
+			buffers = std::stoul(line.substr(line.find_first_of("0123456789")));
+		}
+		else if (line.find("Cached:") == 0) {
+			cached = std::stoul(line.substr(line.find_first_of("0123456789")));
+		}
+	}
+
+	return (total - free - buffers - cached) / (double)total;
+
+#endif //JUCE_WINDOWS
 }
 
 uint64_t SysStatus::getProcMemUsage() {
@@ -77,20 +114,11 @@ uint64_t SysStatus::getProcMemUsage() {
 	return 0;
 
 #else //JUCE_WINDOWS
-	/** Check Sigar */
-	if (!this->pSigar) { return 0; }
+	std::ifstream file("/proc/self/statm");
+	unsigned long size;
+	file >> size;
 
-	/** Get PID */
-	sigar_pid_t pid = sigar_pid_get(this->pSigar);
-
-	/** Get Mem */
-	sigar_proc_mem_t mem = {};
-	sigar_proc_mem_get(this->pSigar, pid, &mem);
-
-	/** Get Result */
-	uint64_t result = mem.size;
-
-	return result;
+	return static_cast<float>(size) * sysconf(_SC_PAGESIZE);
 
 #endif //JUCE_WINDOWS
 }

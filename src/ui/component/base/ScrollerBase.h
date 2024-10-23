@@ -34,13 +34,13 @@ public:
 	void mouseWheelOutside(float deltaY, bool reversed);
 	void mouseWheelOutsideWithAlt(double centerNum, double thumbPer, float deltaY, bool reversed);
 
-	void mouseMove(const juce::MouseEvent& event);
-	void mouseDrag(const juce::MouseEvent& event);
-	void mouseDown(const juce::MouseEvent& event);
-	void mouseUp(const juce::MouseEvent& event);
-	void mouseExit(const juce::MouseEvent& event);
+	void mouseMove(const juce::MouseEvent& event) override;
+	void mouseDrag(const juce::MouseEvent& event) override;
+	void mouseDown(const juce::MouseEvent& event) override;
+	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseExit(const juce::MouseEvent& event) override;
 	void mouseWheelMove(const juce::MouseEvent& event,
-		const juce::MouseWheelDetails& wheel);
+		const juce::MouseWheelDetails& wheel) override;
 
 protected:
 	virtual double createViewSize() = 0;

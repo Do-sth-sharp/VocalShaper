@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include <sigar.h>
 
 class SysStatus final: private juce::DeletedAtShutdown {
 public:
@@ -9,7 +8,7 @@ public:
 	~SysStatus();
 
 	struct CPUPercTemp final {
-		juce::Array<sigar_cpu_t> cpuTemp;
+		std::array<uint64_t, 3> cpuTemp;
 	};
 
 	double getCPUUsage(CPUPercTemp& temp);
@@ -17,7 +16,6 @@ public:
 	uint64_t getProcMemUsage();
 
 private:
-	sigar_t* pSigar = nullptr;
 	void* hProcess = nullptr;/**< For Windows Only */
 
 public:

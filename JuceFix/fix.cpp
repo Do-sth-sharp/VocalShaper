@@ -1,7 +1,5 @@
 ﻿#include <JuceHeader.h>
 
-#if JUCE_MSVC
-
 /** To Fix Symbol Export Error Of juce::ScopedMessageBox */
 #include <juce_gui_basics/detail/juce_ScopedMessageBoxInterface.h>
 #include <juce_gui_basics/detail/juce_ScopedMessageBoxImpl.h>
@@ -28,5 +26,3 @@ namespace juce {
 /** To Fix Symbol Export Of juce::AudioProcessorParameterGroup */
 //juce_audio_processors/processors/juce_AudioProcessorParameterGroup.cpp
 #include "juce_AudioProcessorParameterGroup.cpp"
-
-#endif //JUCE_MSVC

@@ -1,20 +1,13 @@
 ﻿{
-    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "dependencies": [
-      "protobuf",
-      "cmake-lame",
-      "lua",
-      "vsp4",
-      "flowui",
-      "sigar",
-      "juce-host-dev-kit",
-      "synth-engine-demo"
-    ],
-    "builtin-baseline": "797ae22b76f0e78c3aeb03d625722a0cbfe9f52e",
-    "overrides": [
-      { 
-        "name": "protobuf", 
-        "version": "3.21.12#4"
-      }
-    ]
+	"$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+	"dependencies": [
+		"protobuf",
+		"cmake-lame",
+		"lua",
+		"vsp4",
+		"flowui",
+		"juce-host-dev-kit",
+		"synth-engine-demo"
+	],
+	"builtin-baseline": "797ae22b76f0e78c3aeb03d625722a0cbfe9f52e"
 }
