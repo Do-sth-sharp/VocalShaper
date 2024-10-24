@@ -183,7 +183,6 @@ jobs:
     - name: Configure CMake
       working-directory: ${{github.workspace}}
       shell: pwsh
-      env:
       run: cmake --preset "${{matrix.cmake_config}}"
 
     - name: Build
