@@ -10,7 +10,6 @@ on:
 env:
   ninja-version: '1.11.1'
   clang-version: '19.1.2'
-  clang-install-path: ${{runner.temp}}/llvm
   sha-length: 7
 
 jobs:
@@ -59,7 +58,7 @@ jobs:
       uses: KyleMayes/install-llvm-action@v2
       with:
         version: ${{env.clang-version}}
-        directory: ${{env.clang-install-path}}
+        directory: ${{runner.temp}}/llvm
 
     - name: Export GitHub Actions Cache Environment Variables
       uses: actions/github-script@v7
@@ -165,7 +164,7 @@ jobs:
       uses: KyleMayes/install-llvm-action@v2
       with:
         version: ${{env.clang-version}}
-        directory: ${{env.clang-install-path}}
+        directory: ${{runner.temp}}/llvm
 
     - name: Export GitHub Actions Cache Environment Variables
       uses: actions/github-script@v7
