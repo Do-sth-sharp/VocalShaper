@@ -9,7 +9,7 @@ on:
 
 env:
   ninja-version: '1.11.1'
-  clang-version: '19.1.2'
+  clang-version: '18.1.8'
   sha-length: 7
 
 jobs:
