@@ -315,7 +315,7 @@ void ColorEditorContent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::outlineColourId);
 
 	/** Font */
-	juce::Font titleFont(titleFontHeight);
+	juce::Font titleFont(juce::FontOptions{ titleFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

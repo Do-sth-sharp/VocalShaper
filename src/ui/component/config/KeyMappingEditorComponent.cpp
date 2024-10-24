@@ -54,7 +54,7 @@ public:
 		if (this->keyNum < 0)
 			this->setSize(h, h);
 		else
-			this->setSize(juce::jlimit(h * 4, h * 8, 6 + juce::Font((float)h * 0.6f).getStringWidth(this->getName())), h);
+			this->setSize(juce::jlimit(h * 4, h * 8, 6 + (int)std::ceil(juce::TextLayout::getStringWidth(juce::Font{ juce::FontOptions{ (float)h * 0.6f } }, this->getName()))), h);
 	};
 
 	//==============================================================================
@@ -262,7 +262,7 @@ public:
 	juce::String getAccessibilityName() override { return this->categoryName; };
 
 	void paintItem(juce::Graphics& g, int width, int height) override {
-		g.setFont(juce::Font((float)height * 0.7f, juce::Font::bold));
+		g.setFont(juce::Font{ juce::FontOptions{ (float)height * 0.7f, juce::Font::bold } });
 		g.setColour(this->owner.findColour(KeyMappingEditorComponent::textColourId));
 
 		g.drawText(TRANS(this->categoryName), 2, 0, width - 2, height, juce::Justification::centredLeft, true);

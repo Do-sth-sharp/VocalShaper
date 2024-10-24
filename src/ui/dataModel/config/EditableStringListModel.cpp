@@ -28,7 +28,7 @@ void EditableStringListModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font font(height * 0.8);
+	juce::Font font(juce::FontOptions{ height * 0.8f });
 
 	/** Background */
 	g.setColour(backgroundColor);

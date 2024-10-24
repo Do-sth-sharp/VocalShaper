@@ -77,7 +77,7 @@ void SideChainComponent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font numFont(numFontHeight);
+	juce::Font numFont(juce::FontOptions{ numFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

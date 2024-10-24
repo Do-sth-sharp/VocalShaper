@@ -34,7 +34,7 @@ void MetaDataModel::paintCell(juce::Graphics& g, int rowNumber, int columnId,
 		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font font(height * 0.6);
+	juce::Font font(juce::FontOptions{ height * 0.6f });
 
 	/** Text */
 	juce::Rectangle<int> textRect(

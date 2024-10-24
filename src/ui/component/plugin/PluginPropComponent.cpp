@@ -141,8 +141,8 @@ void PluginPropComponent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font titleFont(titleFontHeight);
-	juce::Font labelFont(labelFontHeight);
+	juce::Font titleFont(juce::FontOptions{ titleFontHeight });
+	juce::Font labelFont(juce::FontOptions{ labelFontHeight });
 
 	/** MIDI Title */
 	juce::Rectangle<int> midiTitleRect(

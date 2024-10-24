@@ -66,8 +66,8 @@ void KnobBase::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font nameFont(nameFontHeight);
-	juce::Font valueFont(valueFontHeight);
+	juce::Font nameFont(juce::FontOptions{ nameFontHeight });
+	juce::Font valueFont(juce::FontOptions{ valueFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

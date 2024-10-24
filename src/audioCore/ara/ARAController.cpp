@@ -175,6 +175,10 @@ ARA::ARAInt32 ARAContentAccessController::getContentReaderEventCount(
 		case ARAExtension::ARAContentTypeMisc: {
 			return midiContext->getMiscCount();
 		}
+
+		default: {
+			break;
+		}
 		}
 	}
 
@@ -255,6 +259,10 @@ const void* ARAContentAccessController::getContentReaderDataForEvent(
 		case ARAExtension::ARAContentTypeMisc: {
 			this->miscTemp = midiContext->getMisc(eventIndex);
 			return &(this->miscTemp);
+		}
+
+		default: {
+			break;
 		}
 		}
 	}

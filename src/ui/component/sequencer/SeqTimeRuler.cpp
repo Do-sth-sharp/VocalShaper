@@ -94,8 +94,8 @@ void SeqTimeRuler::updateRulerTemp() {
 		juce::TextEditor::ColourIds::outlineColourId);
 
 	/** Font */
-	juce::Font numFont(numFontHeight);
-	juce::Font labelFont(labelFontHeight);
+	juce::Font numFont(juce::FontOptions{ numFontHeight });
+	juce::Font labelFont(juce::FontOptions{ labelFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);
@@ -226,7 +226,7 @@ void SeqTimeRuler::paint(juce::Graphics& g) {
 	float labelMovingAlpha = 0.7f;
 
 	/** Font */
-	juce::Font labelFont(labelFontHeight);
+	juce::Font labelFont(juce::FontOptions{ labelFontHeight });
 
 	/** Ruler */
 	if (this->rulerTemp) {
@@ -343,12 +343,15 @@ void SeqTimeRuler::mouseDown(const juce::MouseEvent& event) {
 			else if (event.mods.isRightButtonDown()) {
 				/** Check Tool Type */
 				switch (tool) {
-				case Tools::Type::Pencil:
+				case Tools::Type::Pencil: {
 					/** Remove Label */
 					int labelIndex = this->selectTempoLabel(event.position);
 					if (labelIndex > -1) {
 						this->removeTempoLabel(labelIndex);
 					}
+					break;
+				}
+				default:
 					break;
 				}
 			}

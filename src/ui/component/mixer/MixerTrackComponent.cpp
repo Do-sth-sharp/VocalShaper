@@ -216,7 +216,7 @@ void MixerTrackComponent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::backgroundColourId);
 
 	/** Font */
-	juce::Font titleFont(titleFontHeight);
+	juce::Font titleFont(juce::FontOptions{ titleFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

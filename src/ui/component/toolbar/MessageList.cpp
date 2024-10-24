@@ -63,7 +63,7 @@ void MessageList::update(const juce::Array<MessageModel::Message>& list) {
 		juce::TextEditor::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font textFont(textHeight);
+	juce::Font textFont(juce::FontOptions{ textHeight });
 
 	/** Messages */
 	this->list.clear();

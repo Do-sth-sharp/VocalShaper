@@ -110,7 +110,7 @@ void MixerView::paint(juce::Graphics& g) {
 		juce::TableListBox::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font emptyTextFont(emptyTextFontHeight);
+	juce::Font emptyTextFont(juce::FontOptions{ emptyTextFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

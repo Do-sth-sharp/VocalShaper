@@ -145,7 +145,7 @@ bool PluginEditorHub::checkEffect(int track, int index) const {
 	return false;
 }
 
-void PluginEditorHub::setOpenGL(bool opneGLOn) {
+void PluginEditorHub::setOpenGL(bool openGLOn) {
 	this->openGLOn = openGLOn;
 	for (auto i : this->instrEditors) {
 		i->setOpenGL(openGLOn);

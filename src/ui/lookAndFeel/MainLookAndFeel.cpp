@@ -188,7 +188,7 @@ void MainLookAndFeel::drawTableHeaderColumn(
 	}
 
 	g.setColour(header.findColour(juce::TableHeaderComponent::textColourId));
-	g.setFont(juce::Font((float)height * 0.5f, juce::Font::bold));
+	g.setFont(juce::Font{ juce::FontOptions{ (float)height * 0.5f, juce::Font::bold } });
 	g.drawFittedText(columnName, area, juce::Justification::centredLeft, 1);
 }
 
@@ -282,7 +282,7 @@ void MainLookAndFeel::drawPopupMenuItem(juce::Graphics& g, const juce::Rectangle
 
 juce::Font MainLookAndFeel::getTextButtonFont(juce::TextButton& b, int) {
 	auto screenSize = utils::getScreenSize(&b);
-	return juce::Font{ screenSize.getHeight() * 0.02f };
+	return juce::Font{ juce::FontOptions{ screenSize.getHeight() * 0.02f } };
 }
 
 void MainLookAndFeel::drawCallOutBoxBackground(
@@ -320,7 +320,7 @@ static juce::TextLayout layoutTooltipText(const juce::String& text, juce::Colour
 
 	juce::AttributedString s;
 	s.setJustification(juce::Justification::centredLeft);
-	s.append(text, juce::Font{ tooltipFontSize, juce::Font::bold }, colour);
+	s.append(text, juce::Font{ juce::FontOptions{ tooltipFontSize, juce::Font::bold } }, colour);
 
 	juce::TextLayout tl;
 	tl.createLayoutWithBalancedLineLengths(s, (float)maxToolTipWidth);

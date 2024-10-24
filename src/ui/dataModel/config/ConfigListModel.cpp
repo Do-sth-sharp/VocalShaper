@@ -27,7 +27,7 @@ void ConfigListModel::paintListBoxItem(
 		: this->lookAndFeel.findColour(juce::ListBox::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font font(height * 0.5);
+	juce::Font font(juce::FontOptions{ height * 0.5f });
 
 	/** Background */
 	g.setColour(backgroundColor);

@@ -4,11 +4,6 @@
     DBG(x); \
     std::cout << (x) << std::endl
 
-/** Fixed JUCE Symbol Export */
-namespace juce {
-	XmlElement::TextFormat::TextFormat() {}
-}
-
 PluginSearcher::PluginSearcher(
 	const juce::String& pluginSearchPathListFilePath,
 	const juce::String& pluginListTemporaryFilePath,

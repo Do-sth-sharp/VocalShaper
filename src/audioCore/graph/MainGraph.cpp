@@ -472,6 +472,8 @@ void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& 
 				case juce::MidiMessage::MidiMachineControlCommand::mmc_recordStop:
 					juce::MessageManager::callAsync([] { AudioCore::getInstance()->record(false); });
 					continue;
+				default:
+					break;
 				}
 			}
 		}

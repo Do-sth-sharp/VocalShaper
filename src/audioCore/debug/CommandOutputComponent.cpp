@@ -23,7 +23,7 @@ void CommandOutputComponent::paint(juce::Graphics& g) {
 		juce::TextEditor::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font font(15.f);
+	juce::Font font(juce::FontOptions{ 15.f });
 
 	/** Background */
 	g.fillAll(backgroundColor);

@@ -55,7 +55,7 @@ void MessageComponent::paint(juce::Graphics& g) {
 	juce::Colour noticeColor = juce::Colours::red;
 
 	/** Font */
-	juce::Font textFont(textHeight);
+	juce::Font textFont(juce::FontOptions{ textHeight });
 
 	/** BackGround */
 	g.setColour(backgroundColor);

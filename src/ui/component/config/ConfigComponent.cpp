@@ -141,7 +141,7 @@ void ConfigComponent::paint(juce::Graphics& g) {
 		juce::AlertWindow::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font textFont(textHeight);
+	juce::Font textFont(juce::FontOptions{ textHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

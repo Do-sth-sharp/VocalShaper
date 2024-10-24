@@ -235,7 +235,7 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::outlineColourId);
 
 	/** Font */
-	juce::Font blockNameFont(blockNameFontHeight);
+	juce::Font blockNameFont(juce::FontOptions{ blockNameFontHeight });
 
 	/** Data Scale Ratio */
 	auto& [sampleRate, data] = this->audioDataTemp;
@@ -404,6 +404,8 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 						blockEndTime = std::max(blockEndTime, blockStartTime);
 						break;
 					}
+					default:
+						break;
 					}
 				}
 			}
@@ -586,6 +588,8 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 						blockEndTime = std::max(blockEndTime, blockStartTime);
 						break;
 					}
+					default:
+						break;
 					}
 
 					this->blockValid = this->checkBlockValid(blockStartTime, blockEndTime,
@@ -594,6 +598,8 @@ void SeqTrackContentViewer::mouseDrag(const juce::MouseEvent& event) {
 
 				break;
 			}
+			default:
+				break;
 			}
 		}
 	}
@@ -714,6 +720,8 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 					blockEndTime = std::max(blockEndTime, blockStartTime);
 					break;
 				}
+				default:
+					break;
 				}
 
 				if (this->copyMode) {
@@ -731,6 +739,8 @@ void SeqTrackContentViewer::mouseUp(const juce::MouseEvent& event) {
 
 			break;
 		}
+		default:
+			break;
 		}
 
 		/** Other */

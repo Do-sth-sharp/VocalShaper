@@ -16,7 +16,7 @@ public:
 	void closeEffect(int track, int index);
 	bool checkEffect(int track, int index) const;
 
-	void setOpenGL(bool opneGLOn);
+	void setOpenGL(bool openGLOn);
 	void setIcon(const juce::String& path);
 
 	void closeAll();

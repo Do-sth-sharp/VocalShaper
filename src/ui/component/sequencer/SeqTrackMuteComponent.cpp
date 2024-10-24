@@ -29,7 +29,7 @@ void SeqTrackMuteComponent::paint(juce::Graphics& g) {
 		: juce::TextButton::ColourIds::textColourOffId);
 
 	/** Font */
-	juce::Font textFont(textFontHeight);
+	juce::Font textFont(juce::FontOptions{ textFontHeight });
 
 	/** Button */
 	juce::Rectangle<float> buttonRect(

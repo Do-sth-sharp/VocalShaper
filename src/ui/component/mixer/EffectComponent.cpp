@@ -74,7 +74,7 @@ void EffectComponent::paint(juce::Graphics& g) {
 		: juce::Label::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font textFont(textHeight);
+	juce::Font textFont(juce::FontOptions{ textHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

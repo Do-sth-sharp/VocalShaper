@@ -23,8 +23,8 @@ public:
 			float textHeight = screenSize.getHeight() * 0.0175f;
 
 			/** Font */
-			juce::Font textFont(textHeight);
-			return textFont.getStringWidth(this->tempName) + paddingWidth * 2;
+			juce::Font textFont(juce::FontOptions{ textHeight });
+			return std::ceil(juce::TextLayout::getStringWidth(textFont, this->tempName)) + paddingWidth * 2;
 		}
 		return 0;
 	};
@@ -59,7 +59,7 @@ public:
 				: laf.findColour(juce::Label::ColourIds::textColourId);
 
 			/** Font */
-			juce::Font textFont(textHeight);
+			juce::Font textFont(juce::FontOptions{ textHeight });
 
 			/** Background */
 			g.setColour(backgroundColor);
@@ -151,8 +151,8 @@ public:
 		return juce::var{ object.release() };
 	};
 
-	bool isInterestedInFileDrag(const juce::StringArray&) { return false; };
-	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) { return false; };
+	bool isInterestedInFileDrag(const juce::StringArray&) override { return false; };
+	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) override { return false; };
 
 private:
 	const juce::String groupName;
@@ -187,8 +187,8 @@ public:
 			float textHeight = screenSize.getHeight() * 0.02f;
 
 			/** Font */
-			juce::Font textFont(textHeight);
-			return textFont.getStringWidth(this->name) + paddingWidth * 2;
+			juce::Font textFont(juce::FontOptions{ textHeight });
+			return std::ceil(juce::TextLayout::getStringWidth(textFont, this->name)) + paddingWidth * 2;
 		}
 		return 0;
 	};
@@ -221,7 +221,7 @@ public:
 				juce::Label::ColourIds::textColourId);
 
 			/** Font */
-			juce::Font textFont(textHeight);
+			juce::Font textFont(juce::FontOptions{ textHeight });
 
 			/** Background */
 			g.setColour(backgroundColor);
@@ -254,8 +254,8 @@ public:
 	};
 	void itemDoubleClicked(const juce::MouseEvent&) override {};
 
-	bool isInterestedInFileDrag(const juce::StringArray&) { return false; };
-	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) { return false; };
+	bool isInterestedInFileDrag(const juce::StringArray&) override { return false; };
+	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) override { return false; };
 
 	void changeAllOpenness(bool open) {
 		/** Current */

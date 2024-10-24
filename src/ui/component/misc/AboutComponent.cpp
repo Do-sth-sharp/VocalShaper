@@ -133,11 +133,11 @@ void AboutComponent::paint(juce::Graphics& g) {
 	float picRoundCorner = screenSize.getHeight() * 0.01;
 
 	/** Font */
-	juce::Font nameFont(this->nameType);
+	juce::Font nameFont(juce::FontOptions{ this->nameType });
 	nameFont.setHeight(productNameHeight);
 	nameFont.setBold(true);
-	juce::Font titleFont(titleHeight);
-	juce::Font textFont(textHeight);
+	juce::Font titleFont(juce::FontOptions{ (float)titleHeight });
+	juce::Font textFont(juce::FontOptions{ (float)textHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);
@@ -155,7 +155,7 @@ void AboutComponent::paint(juce::Graphics& g) {
 	/** Product Name */
 	juce::Rectangle<int> nameRect(
 		logoRect.getRight() + splitWidth, paddingHeight,
-		nameFont.getStringWidth(this->productName), productNameHeight);
+		std::ceil(juce::TextLayout::getStringWidth(nameFont, this->productName)), productNameHeight);
 	g.setFont(nameFont);
 	g.setColour(productNameColor);
 	g.drawFittedText(this->productName, nameRect,

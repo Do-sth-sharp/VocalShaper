@@ -108,15 +108,15 @@ void Splash::paint(juce::Graphics& g) {
 	float textFontHeight = backGroundRect.getHeight() * 0.06f;
 
 	/** Fonts */
-	juce::Font titleFont(this->titleType);
+	juce::Font titleFont(juce::FontOptions{ this->titleType });
 	titleFont.setBold(true);
 	titleFont.setHeight(titleFontHeight);
 
-	juce::Font subTitleFont(this->subTitleType);
+	juce::Font subTitleFont(juce::FontOptions{ this->subTitleType });
 	subTitleFont.setItalic(true);
 	subTitleFont.setHeight(subTitleFontHeight);
 
-	juce::Font textFont(this->textType);
+	juce::Font textFont(juce::FontOptions{ this->textType });
 	textFont.setHeight(textFontHeight);
 
 	/** BackGround */
@@ -171,7 +171,7 @@ void Splash::paint(juce::Graphics& g) {
 
 	/** Sub Title */
 	juce::Rectangle<int> subTitleRect(
-		backGroundRect.getWidth() * 0.28, backGroundRect.getHeight() * 0.285,
+		backGroundRect.getWidth() * 0.2925, backGroundRect.getHeight() * 0.285,
 		backGroundRect.getWidth() * 0.1, subTitleFontHeight);
 
 	g.setFont(subTitleFont);

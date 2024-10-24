@@ -245,6 +245,8 @@ void ScrollerBase::mouseDrag(const juce::MouseEvent& event) {
 			this->setPos(newPos);
 			break;
 		}
+		default:
+			break;
 		}
 	}
 }
@@ -281,6 +283,8 @@ void ScrollerBase::mouseDown(const juce::MouseEvent& event) {
 			}
 			break;
 		}
+		default:
+			break;
 		}
 	}
 }
@@ -306,6 +310,8 @@ void ScrollerBase::mouseUp(const juce::MouseEvent& event) {
 			this->setPos(newPos);
 			break;
 		}
+		default:
+			break;
 		}
 
 		/** Update State */

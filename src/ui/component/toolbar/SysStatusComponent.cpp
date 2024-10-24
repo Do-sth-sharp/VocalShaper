@@ -80,8 +80,8 @@ void SysStatusComponent::paint(juce::Graphics& g) {
 	juce::Colour alertColor = juce::Colours::red;
 
 	/** Font */
-	juce::Font labelFont(labelHeight);
-	juce::Font textFont(textHeight);
+	juce::Font labelFont(juce::FontOptions{ (float)labelHeight });
+	juce::Font textFont(juce::FontOptions{ (float)textHeight });
 
 	/** BackGround */
 	g.setColour(backgroundColor);

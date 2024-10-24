@@ -6,7 +6,7 @@ InstrNameLookAndFeel::InstrNameLookAndFeel()
 
 juce::Font InstrNameLookAndFeel::getTextButtonFont(
     juce::TextButton&, int buttonHeight) {
-    return juce::Font(juce::jmin(15.0f, (float)buttonHeight * 0.6f));
+    return juce::Font{ juce::FontOptions{ juce::jmin(15.0f, (float)buttonHeight * 0.6f) } };
 }
 
 void InstrNameLookAndFeel::drawButtonText(juce::Graphics& g, juce::TextButton& b,

@@ -81,8 +81,8 @@ void ChannelLinkViewContent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::outlineWhenEditingColourId);
 
 	/** Fonts */
-	juce::Font titleFont(titleFontHeight);
-	juce::Font textFont(textFontHeight);
+	juce::Font titleFont(juce::FontOptions{ titleFontHeight });
+	juce::Font textFont(juce::FontOptions{ textFontHeight });
 
 	/** H Title */
 	juce::Rectangle<int> hTitleRect(

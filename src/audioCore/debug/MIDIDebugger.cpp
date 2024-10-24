@@ -23,7 +23,7 @@ void MIDIDebugger::paint(juce::Graphics& g) {
 	float fontHeight = 15.0f;
 
 	/** Font */
-	juce::Font textFont(fontHeight);
+	juce::Font textFont(juce::FontOptions{ fontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

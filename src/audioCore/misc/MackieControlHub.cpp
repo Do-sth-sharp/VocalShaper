@@ -252,6 +252,8 @@ void MackieControlHub::sendMackieControlMessage(
 				dev->sendMessageNow(mackieControl::Message::toMidi(mes));
 				continue;
 			}
+			default:
+				break;
 			}
 		}
 		else if (message.isNote()) {
@@ -349,6 +351,8 @@ void MackieControlHub::sendMackieControlMessage(
 				rewriteFunc(mackieControl::NoteMessage::FaderTouchCh1, chan);
 				continue;
 			}
+			default:
+				break;
 			}
 		}
 		else if (message.isCC()) {
@@ -390,6 +394,8 @@ void MackieControlHub::sendMackieControlMessage(
 				rewriteFunc(mackieControl::CCMessage::VPotLEDRing1, chan);
 				continue;
 			}
+			default:
+				break;
 			}
 		}
 		else if (message.isPitchWheel()) {
@@ -453,6 +459,8 @@ void MackieControlHub::processInputMessage(
 			this->invokeInternal(std::make_tuple(channel, mackie));
 			return;
 		}
+		default:
+			break;
 		}
 	}
 	else if (mackie.isNote()) {
@@ -533,6 +541,8 @@ void MackieControlHub::processInputMessage(
 			rewriteFunc(mackieControl::NoteMessage::FaderTouchCh1);
 			return;
 		}
+		default:
+			break;
 		}
 	}
 	else if (mackie.isCC()) {
@@ -569,6 +579,8 @@ void MackieControlHub::processInputMessage(
 			rewriteFunc(mackieControl::CCMessage::VPotLEDRing1);
 			return;
 		}
+		default:
+			break;
 		}
 	}
 	else if (mackie.isPitchWheel()) {

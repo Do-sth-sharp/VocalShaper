@@ -104,7 +104,7 @@ void PluginView::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font textFont(textHeight);
+	juce::Font textFont(juce::FontOptions{ textHeight });
 
 	/** BackGround */
 	g.setColour(backgroundColor);

@@ -12,6 +12,8 @@ set(CMAKE_C_STANDARD 17)# Using C17
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)# For Clang-Tidy
+
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")# Using /MD and /MDd on MSVC
 if (WIN32)
     add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
@@ -220,7 +222,7 @@ set_target_properties (FileRegistrar PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTP
 
 # Main Target
 file (GLOB_RECURSE VOCALSHAPER_SRC CONFIGURE_DEPENDS "./src/*.cpp" "./src/*.c" "./src/*.rc")
-add_executable (VocalShaper ${VOCALSHAPER_SRC} "./JuceFix/fix.cpp")
+add_executable (VocalShaper ${VOCALSHAPER_SRC})
 target_include_directories (VocalShaper PRIVATE ${LUA_INCLUDE_DIR} "./src")
 target_compile_definitions (VocalShaper PRIVATE ${COMPILE_SYS_DEF})
 target_compile_definitions (VocalShaper PRIVATE

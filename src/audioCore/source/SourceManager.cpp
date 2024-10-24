@@ -66,6 +66,8 @@ bool SourceManager::isValid(uint64_t ref, SourceType type) const {
 			return ptr->midiValid();
 		case SourceManager::SourceType::Audio:
 			return ptr->audioValid();
+		default:
+			break;
 		}
 	}
 	return false;
@@ -89,6 +91,8 @@ double SourceManager::getLength(uint64_t ref, SourceType type) const {
 			return ptr->getMIDILength();
 		case SourceManager::SourceType::Audio:
 			return ptr->getAudioLength();
+		default:
+			break;
 		}
 	}
 	return 0;

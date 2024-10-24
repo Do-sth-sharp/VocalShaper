@@ -60,8 +60,8 @@ void MixerTrackLevelMeter::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::outlineColourId);
 
 	/** Font */
-	juce::Font textFont(textFontHeight);
-	juce::Font valueFont(valueFontHeight);
+	juce::Font textFont(juce::FontOptions{ textFontHeight });
+	juce::Font valueFont(juce::FontOptions{ valueFontHeight });
 
 	/** Background */
 	g.setColour(backgroundColor);

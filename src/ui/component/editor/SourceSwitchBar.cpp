@@ -60,7 +60,7 @@ void SourceSwitchBar::resized() {
 	int trackNameMaxWidth = screenSize.getWidth() * 0.05;
 
 	/** Font */
-	juce::Font trackNameFont(trackNameFontHeight);
+	juce::Font trackNameFont(juce::FontOptions{ trackNameFontHeight });
 
 	/** Switch Button */
 	juce::Rectangle<int> switchRect(
@@ -69,7 +69,7 @@ void SourceSwitchBar::resized() {
 	this->switchButton->setBounds(switchRect);
 
 	/** Track Name */
-	int trackNameWidth = std::min(trackNameMaxWidth, trackNameFont.getStringWidth(this->trackName));
+	int trackNameWidth = std::min((float)trackNameMaxWidth, std::ceil(juce::TextLayout::getStringWidth(trackNameFont, this->trackName)));
 	int rightLimit = this->getWidth() - buttonPaddingWidth - trackNameWidth - buttonSplitWidth;
 
 	/** Name Button */
@@ -103,7 +103,7 @@ void SourceSwitchBar::paint(juce::Graphics& g) {
 	int trackNameMaxWidth = screenSize.getWidth() * 0.05;
 
 	/** Font */
-	juce::Font trackNameFont(trackNameFontHeight);
+	juce::Font trackNameFont(juce::FontOptions{ trackNameFontHeight });
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
@@ -121,7 +121,7 @@ void SourceSwitchBar::paint(juce::Graphics& g) {
 		buttonHeight, buttonHeight);
 
 	/** Track Name */
-	int trackNameWidth = std::min(trackNameMaxWidth, trackNameFont.getStringWidth(this->trackName));
+	int trackNameWidth = std::min((float)trackNameMaxWidth, std::ceil(juce::TextLayout::getStringWidth(trackNameFont, this->trackName)));
 	int trackNamePosX = this->getWidth() - buttonPaddingWidth - trackNameWidth - buttonSplitWidth;
 	if (trackNamePosX < switchRect.getRight()) {
 		trackNamePosX = switchRect.getRight();
@@ -199,6 +199,8 @@ void SourceSwitchBar::syncButtonName() {
 		buttonText = this->midiName;
 		break;
 	}
+	default:
+		break;
 	}
 
 	this->nameButton->setButtonText(buttonText);

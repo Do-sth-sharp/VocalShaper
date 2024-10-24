@@ -82,7 +82,7 @@ void SourceEditor::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::textColourId);
 
 	/** Font */
-	juce::Font textFont(fontHeight);
+	juce::Font textFont(juce::FontOptions{ fontHeight });
 
 	/** Background */
 	g.fillAll(backgroundColor);
