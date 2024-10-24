@@ -7,6 +7,12 @@ on:
     branches: [ "develop", "main" ]
   workflow_call:
 
+env:
+  ninja-version: '1.11.1'
+  clang-version: '19.1.2'
+  clang-install-path: ${{runner.temp}}/llvm
+  sha-length: 7
+
 jobs:
   prepare-package:
     runs-on: ${{matrix.os}}
@@ -15,11 +21,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        compiler: [MSVC]
+        compiler: [MSVC, Clang]
         include:
           - os: windows-latest
             compiler: MSVC
             vcpkg_triplet: x64-windows
+          - os: windows-latest
+            compiler: Clang
+            vcpkg_triplet: x64-windows-llvm
 
     steps:
     - name: Checkout
@@ -31,7 +40,7 @@ jobs:
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
       with:
-        version: 1.11.1
+        version: ${{env.ninja-version}}
 
     - name: Install vcpkg Windows
       if: runner.os == 'Windows'
@@ -44,6 +53,13 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{runner.arch}}
+
+    - name: Initialize Clang Compiler
+      if: matrix.compiler == 'Clang'
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: ${{env.clang-version}}
+        directory: ${{env.clang-install-path}}
 
     - name: Export GitHub Actions Cache Environment Variables
       uses: actions/github-script@v7
@@ -64,7 +80,7 @@ jobs:
       uses: benjlevesque/short-sha@v3.0
       id: short-sha
       with:
-        length: 7
+        length: ${{env.sha-length}}
 
     - name: Archive vcpkg Logs
       if: ${{!cancelled()}}
@@ -85,16 +101,14 @@ jobs:
       matrix:
         os: [windows-latest]
         build_type: [Debug, Release]
-        compiler: [MSVC]
+        compiler: [MSVC, Clang]
         include:
-          - compiler: MSVC
-            c_compiler: cl
-            cxx_compiler: cl
-            asm_compiler: cl
-
           - os: windows-latest
             compiler: MSVC
             vcpkg_triplet: x64-windows
+          - os: windows-latest
+            compiler: Clang
+            vcpkg_triplet: x64-windows-llvm
 
           - os: windows-latest
             build_type: Debug
@@ -106,6 +120,16 @@ jobs:
             compiler: MSVC
             cmake_config: 'Ninja Release x64'
             build_path: 'ninja-release-x64'
+          - os: windows-latest
+            build_type: Debug
+            compiler: Clang
+            cmake_config: 'Ninja Debug Win64 LLVM'
+            build_path: 'ninja-debug-win64-llvm'
+          - os: windows-latest
+            build_type: Release
+            compiler: Clang
+            cmake_config: 'Ninja Release Win64 LLVM'
+            build_path: 'ninja-release-win64-llvm'
 
     permissions:
       id-token: write
@@ -122,7 +146,7 @@ jobs:
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
       with:
-        version: 1.11.1
+        version: ${{env.ninja-version}}
 
     - name: Install vcpkg Windows
       if: runner.os == 'Windows'
@@ -135,6 +159,13 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{runner.arch}}
+
+    - name: Initialize Clang Compiler
+      if: matrix.compiler == 'Clang'
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: ${{env.clang-version}}
+        directory: ${{env.clang-install-path}}
 
     - name: Export GitHub Actions Cache Environment Variables
       uses: actions/github-script@v7
@@ -154,9 +185,6 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: pwsh
       env:
-        CC: ${{matrix.c_compiler}}
-        CXX: ${{matrix.cxx_compiler}}
-        ASM: ${{matrix.asm_compiler}}
       run: cmake --preset "${{matrix.cmake_config}}"
 
     - name: Build
@@ -189,7 +217,7 @@ jobs:
       uses: benjlevesque/short-sha@v3.0
       id: short-sha
       with:
-        length: 7
+        length: ${{env.sha-length}}
 
     - name: Archive Artifacts
       uses: actions/upload-artifact@v4
