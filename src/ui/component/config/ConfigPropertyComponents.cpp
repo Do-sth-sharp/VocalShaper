@@ -257,7 +257,7 @@ juce::String ConfigTextProp::getText() const {
 		return val.toString();
 	}
 	else if (this->valueType == ValueType::IntVal) {
-		return juce::String{ (int64_t)val };
+		return juce::String{ (juce::int64)val };
 	}
 	else if (this->valueType == ValueType::DoubleVal) {
 		return juce::String{ (double)val };
