@@ -5,8 +5,6 @@
 #include <Windows.h>
 #include <Winternl.h>
 #include <Psapi.h>
-
-#pragma comment(lib,"ntdll.lib")
 #else //JUCE_WINDOWS
 #include <iostream>
 #include <fstream>
