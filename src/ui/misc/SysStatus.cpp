@@ -73,14 +73,12 @@ double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* info = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)this->ptrProcessorInfo;
 
 	for (int i = 0; i < this->nProcessors; i++) {
-		uint64_t nDeltaCPUIdleTime;
-		uint64_t nDeltaCPUTotalTime;
 
 		this->ptrCPUIdleTime[i] = info[i].IdleTime.QuadPart;
 		this->ptrCPUTotalTime[i] = info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
 
-		nDeltaCPUIdleTime = this->ptrCPUIdleTime[i] - this->ptrPreviousCPUIdleTime[i];
-		nDeltaCPUTotalTime = this->ptrCPUTotalTime[i] - this->ptrPreviousCPUTotalTime[i];
+		uint64_t nDeltaCPUIdleTime = this->ptrCPUIdleTime[i] - this->ptrPreviousCPUIdleTime[i];
+		uint64_t nDeltaCPUTotalTime = this->ptrCPUTotalTime[i] - this->ptrPreviousCPUTotalTime[i];
 
 		nSumIdleTime += nDeltaCPUIdleTime;
 		nSumTotalTime += nDeltaCPUTotalTime;
