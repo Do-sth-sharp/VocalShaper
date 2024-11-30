@@ -19,21 +19,21 @@ SysStatus::SysStatus() {
 
 	SYSTEM_BASIC_INFORMATION BasicInfo;
 	NtQuerySystemInformation(SystemBasicInformation, &BasicInfo, sizeof(BasicInfo), NULL);
-	this->Processors = BasicInfo.NumberOfProcessors;
+	this->nProcessors = BasicInfo.NumberOfProcessors;
 
-	this->ProcessorInfo = malloc(sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->Processors);
+	this->ptrProcessorInfo = malloc(sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->nProcessors);
 
-	this->CPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
-	this->CPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
+	this->ptrCPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
+	this->ptrCPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
 
-	memset(this->CPUIdleTime, 0, sizeof(uint64_t) * this->Processors);
-	memset(this->CPUTotalTime, 0, sizeof(uint64_t) * this->Processors);
+	memset(this->ptrCPUIdleTime, 0, sizeof(uint64_t) * this->nProcessors);
+	memset(this->ptrCPUTotalTime, 0, sizeof(uint64_t) * this->nProcessors);
 
-	this->PreviousCPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
-	this->PreviousCPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
+	this->ptrPreviousCPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
+	this->ptrPreviousCPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
 
-	memset(this->PreviousCPUIdleTime, 0, sizeof(uint64_t) * this->Processors);
-	memset(this->PreviousCPUTotalTime, 0, sizeof(uint64_t) * this->Processors);
+	memset(this->ptrPreviousCPUIdleTime, 0, sizeof(uint64_t) * this->nProcessors);
+	memset(this->ptrPreviousCPUTotalTime, 0, sizeof(uint64_t) * this->nProcessors);
 
 #endif //JUCE_WINDOWS
 }
@@ -41,22 +41,22 @@ SysStatus::SysStatus() {
 SysStatus::~SysStatus() {
 
 #if JUCE_WINDOWS
-	if (this->ProcessorInfo) {
-		free(this->ProcessorInfo);
+	if (this->ptrProcessorInfo) {
+		free(this->ptrProcessorInfo);
 	}
 
-	if (this->CPUIdleTime) {
-		free(this->CPUIdleTime);
+	if (this->ptrCPUIdleTime) {
+		free(this->ptrCPUIdleTime);
 	}
-	if (this->CPUTotalTime) {
-		free(this->CPUTotalTime);
+	if (this->ptrCPUTotalTime) {
+		free(this->ptrCPUTotalTime);
 	}
 
-	if (this->PreviousCPUIdleTime) {
-		free(this->PreviousCPUIdleTime);
+	if (this->ptrPreviousCPUIdleTime) {
+		free(this->ptrPreviousCPUIdleTime);
 	}
-	if (this->PreviousCPUTotalTime) {
-		free(this->PreviousCPUTotalTime);
+	if (this->ptrPreviousCPUTotalTime) {
+		free(this->ptrPreviousCPUTotalTime);
 	}
 
 #endif //JUCE_WINDOWS
@@ -68,26 +68,26 @@ double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 	uint64_t SumIdleTime = 0;
 	uint64_t SumTotalTime = 0;
 
-	NtQuerySystemInformation(SystemProcessorPerformanceInformation, this->ProcessorInfo, sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * Processors, NULL);
+	NtQuerySystemInformation(SystemProcessorPerformanceInformation, this->ptrProcessorInfo, sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->nProcessors, NULL);
 
-	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* info = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)this->ProcessorInfo;
+	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* info = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)this->ptrProcessorInfo;
 
-	for (int i = 0; i < Processors; i++)
+	for (int i = 0; i < this->nProcessors; i++)
 	{
 		uint64_t DeltaCPUIdleTime;
 		uint64_t DeltaCPUTotalTime;
 
-		this->CPUIdleTime[i] = info[i].IdleTime.QuadPart;
-		this->CPUTotalTime[i] = info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
+		this->ptrCPUIdleTime[i] = info[i].IdleTime.QuadPart;
+		this->ptrCPUTotalTime[i] = info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
 
-		DeltaCPUIdleTime = this->CPUIdleTime[i] - this->PreviousCPUIdleTime[i];
-		DeltaCPUTotalTime = this->CPUTotalTime[i] - this->PreviousCPUTotalTime[i];
+		DeltaCPUIdleTime = this->ptrCPUIdleTime[i] - this->ptrPreviousCPUIdleTime[i];
+		DeltaCPUTotalTime = this->ptrCPUTotalTime[i] - this->ptrPreviousCPUTotalTime[i];
 
 		SumIdleTime += DeltaCPUIdleTime;
 		SumTotalTime += DeltaCPUTotalTime;
 
-		this->PreviousCPUIdleTime[i] = this->CPUIdleTime[i];
-		this->PreviousCPUTotalTime[i] = this->CPUTotalTime[i];
+		this->ptrPreviousCPUIdleTime[i] = this->ptrCPUIdleTime[i];
+		this->ptrPreviousCPUTotalTime[i] = this->ptrCPUTotalTime[i];
 	}
 
 	if (SumTotalTime != 0)
