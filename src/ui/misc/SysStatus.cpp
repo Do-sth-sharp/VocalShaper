@@ -90,10 +90,10 @@ double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 	}
 
 	if (nSumTotalTime) {
-        return (100 - ((nSumIdleTime * 100) / nSumTotalTime)) / 100.0;
-    }
+		return (100 - ((nSumIdleTime * 100) / nSumTotalTime)) / 100.0;
+	}
 
-    return 0;
+	return 0;
 
 #else //JUCE_WINDOWS
 	long total = 0, idle = 0;
