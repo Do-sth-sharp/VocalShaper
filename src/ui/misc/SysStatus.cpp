@@ -17,9 +17,9 @@ SysStatus::SysStatus() {
 #if JUCE_WINDOWS
 	this->hProcess = GetCurrentProcess();
 
-	SYSTEM_BASIC_INFORMATION BasicInfo;
-	NtQuerySystemInformation(SystemBasicInformation, &BasicInfo, sizeof(BasicInfo), NULL);
-	this->nProcessors = BasicInfo.NumberOfProcessors;
+	SYSTEM_BASIC_INFORMATION basicInfo{};
+	NtQuerySystemInformation(SystemBasicInformation, &basicInfo, sizeof(basicInfo), NULL);
+	this->nProcessors = basicInfo.NumberOfProcessors;
 
 	this->ptrProcessorInfo = malloc(sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->nProcessors);
 
