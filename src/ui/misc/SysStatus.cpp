@@ -43,18 +43,23 @@ SysStatus::SysStatus() {
 SysStatus::~SysStatus() {
 
 #if JUCE_WINDOWS
-	if (this->ProcessorInfo)
+	if (this->ProcessorInfo) {
 		free(this->ProcessorInfo);
+	}
 
-	if (this->CPUIdleTime)
+	if (this->CPUIdleTime) {
 		free(this->CPUIdleTime);
-	if (this->CPUTotalTime)
+	}
+	if (this->CPUTotalTime) {
 		free(this->CPUTotalTime);
+	}
 
-	if (this->PreviousCPUIdleTime)
+	if (this->PreviousCPUIdleTime) {
 		free(this->PreviousCPUIdleTime);
-	if (this->PreviousCPUTotalTime)
+	}
+	if (this->PreviousCPUTotalTime) {
 		free(this->PreviousCPUTotalTime);
+	}
 
 #endif //JUCE_WINDOWS
 
