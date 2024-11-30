@@ -65,39 +65,35 @@ SysStatus::~SysStatus() {
 
 double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 #if JUCE_WINDOWS
-	uint64_t SumIdleTime = 0;
-	uint64_t SumTotalTime = 0;
+	uint64_t nSumIdleTime = 0;
+	uint64_t nSumTotalTime = 0;
 
 	NtQuerySystemInformation(SystemProcessorPerformanceInformation, this->ptrProcessorInfo, sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->nProcessors, NULL);
 
 	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* info = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)this->ptrProcessorInfo;
 
-	for (int i = 0; i < this->nProcessors; i++)
-	{
-		uint64_t DeltaCPUIdleTime;
-		uint64_t DeltaCPUTotalTime;
+	for (int i = 0; i < this->nProcessors; i++) {
+		uint64_t nDeltaCPUIdleTime;
+		uint64_t nDeltaCPUTotalTime;
 
 		this->ptrCPUIdleTime[i] = info[i].IdleTime.QuadPart;
 		this->ptrCPUTotalTime[i] = info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
 
-		DeltaCPUIdleTime = this->ptrCPUIdleTime[i] - this->ptrPreviousCPUIdleTime[i];
-		DeltaCPUTotalTime = this->ptrCPUTotalTime[i] - this->ptrPreviousCPUTotalTime[i];
+		nDeltaCPUIdleTime = this->ptrCPUIdleTime[i] - this->ptrPreviousCPUIdleTime[i];
+		nDeltaCPUTotalTime = this->ptrCPUTotalTime[i] - this->ptrPreviousCPUTotalTime[i];
 
-		SumIdleTime += DeltaCPUIdleTime;
-		SumTotalTime += DeltaCPUTotalTime;
+		nSumIdleTime += nDeltaCPUIdleTime;
+		nSumTotalTime += nDeltaCPUTotalTime;
 
 		this->ptrPreviousCPUIdleTime[i] = this->ptrCPUIdleTime[i];
 		this->ptrPreviousCPUTotalTime[i] = this->ptrCPUTotalTime[i];
 	}
 
-	if (SumTotalTime != 0)
-    {
-        return (100 - ((SumIdleTime * 100) / SumTotalTime)) / 100.0;
+	if (nSumTotalTime) {
+        return (100 - ((nSumIdleTime * 100) / nSumTotalTime)) / 100.0;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 
 #else //JUCE_WINDOWS
 	long total = 0, idle = 0;
