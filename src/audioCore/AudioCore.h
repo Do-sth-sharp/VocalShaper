@@ -94,6 +94,8 @@ private:
 	void saveSource(const google::protobuf::Message* data) const;
 	void loadSource(const google::protobuf::Message* data) const;
 
+	void writeRecordingDataToSource(double currentTime);
+
 public:
 	static AudioCore* getInstance();
 	static AudioCore* getInstanceWithoutCreate();

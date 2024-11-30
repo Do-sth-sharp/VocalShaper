@@ -128,27 +128,35 @@ void AudioCore::play() {
 }
 
 void AudioCore::pause() {
-	bool isRecording = PlayPosition::getInstance()
-		->getPosition()->getIsRecording();
+	auto position = PlayPosition::getInstance()->getPosition();
+	bool isRecording = position->getIsRecording();
 
 	PlayPosition::getInstance()->transportPlay(false);
 	this->mainAudioGraph->closeAllNote();
 
-	/** Sync ARA Context */
 	if (isRecording) {
+		/** Write Source Data */
+		double currentTime = position->getTimeInSeconds().orFallback(0);
+		this->writeRecordingDataToSource(currentTime);
+
+		/** Sync ARA Context */
 		this->updateARAContext();
 	}
 }
 
 void AudioCore::stop() {
-	bool isRecording = PlayPosition::getInstance()
-		->getPosition()->getIsRecording();
+	auto position = PlayPosition::getInstance()->getPosition();
+	bool isRecording = position->getIsRecording();
 
 	PlayPosition::getInstance()->transportPlay(false);
 	this->mainAudioGraph->closeAllNote();
 
-	/** Sync ARA Context */
 	if (isRecording) {
+		/** Write Source Data */
+		double currentTime = position->getTimeInSeconds().orFallback(0);
+		this->writeRecordingDataToSource(currentTime);
+
+		/** Sync ARA Context */
 		this->updateARAContext();
 	}
 
@@ -164,13 +172,17 @@ void AudioCore::rewind() {
 }
 
 void AudioCore::record(bool start) {
-	bool isPlaying = PlayPosition::getInstance()
-		->getPosition()->getIsPlaying();
+	auto position = PlayPosition::getInstance()->getPosition();
+	bool isPlaying = position->getIsPlaying();
 
 	PlayPosition::getInstance()->transportRecord(start);
 
-	/** Sync ARA Context */
 	if ((!start) && isPlaying) {
+		/** Write Source Data */
+		double currentTime = position->getTimeInSeconds().orFallback(0);
+		this->writeRecordingDataToSource(currentTime);
+
+		/** Sync ARA Context */
 		this->updateARAContext();
 	}
 }
@@ -544,16 +556,7 @@ void AudioCore::updateAudioBuses() {
 
 void AudioCore::updateARAContext() {
 	if (auto graph = this->getGraph()) {
-		/** For Each Seq Track */
-		int trackNum = graph->getSourceNum();
-		for (int i = 0; i < trackNum; i++) {
-			auto track = graph->getSourceProcessor(i);
-
-			/** Update ARA Context Data for Recording Track */
-			if (track->getRecording()) {
-				track->syncARAContext();
-			}
-		}
+		graph->updateARAContext();
 	}
 }
 
@@ -630,6 +633,20 @@ void AudioCore::loadSource(const google::protobuf::Message* data) const {
 			}
 		}
 	}
+}
+
+void AudioCore::writeRecordingDataToSource(double currentTime) {
+	/** Get Data */
+	auto [sampleRate, startTime, midiData, audioData] = RecordTemp::getInstance()->getDataPacked();
+
+	/** Write Data */
+	if (auto mainGraph = this->mainAudioGraph.get()) {
+		mainGraph->writeRecordingDataToSource(
+			startTime, currentTime, sampleRate, midiData, audioData);
+	}
+
+	/** Clear Temp */
+	RecordTemp::getInstance()->clearAll();
 }
 
 AudioCore* AudioCore::getInstance() {

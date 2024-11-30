@@ -90,7 +90,13 @@ public:
 
 	const juce::Array<float> getOutputLevels() const;
 
+	using ChannelLink = std::tuple<int, int>;
+	using ChannelLinkList = juce::Array<ChannelLink>;
 	void syncARAContext();
+	void writeRecordingDataToSource(
+		double startTime, double currentTime, double sampleRate,
+		const juce::MidiMessageSequence& midiData, const juce::AudioSampleBuffer& audioData,
+		const ChannelLinkList& audioLinks);
 
 	void sendDirectMidiMessages(const juce::MidiMessage& message);
 
@@ -168,13 +174,17 @@ private:
 	SourceInfo sourceInfo{};
 	bool sourceInfoValid = false;
 
-	friend class SourceRecordProcessor;
 	void readAudioData(juce::AudioBuffer<float>& buffer, int bufferOffset,
 		int dataOffset, int length) const;
 	void readMIDIData(juce::MidiBuffer& buffer, int baseTime,
 		int startTime, int endTime) const;
 
-	friend class SynthThread;
+	void writeMIDISource(int type,
+		double startTime, double currentTime, double sampleRate,
+		const juce::MidiMessageSequence& midiData);
+	void writeAudioSource(int type,
+		double startTime, double currentTime, double sampleRate,
+		const juce::AudioSampleBuffer& audioData, const ChannelLinkList& audioLinks);
 
 	void initAudio(double sampleRate, double length);
 	void initMIDI();
