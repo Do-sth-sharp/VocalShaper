@@ -23,18 +23,6 @@ SysStatus::SysStatus() {
 
 	this->ptrProcessorInfo = malloc(sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->nProcessors);
 
-	this->ptrCPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
-	this->ptrCPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
-
-	memset(this->ptrCPUIdleTime, 0, sizeof(uint64_t) * this->nProcessors);
-	memset(this->ptrCPUTotalTime, 0, sizeof(uint64_t) * this->nProcessors);
-
-	this->ptrPreviousCPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
-	this->ptrPreviousCPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->nProcessors);
-
-	memset(this->ptrPreviousCPUIdleTime, 0, sizeof(uint64_t) * this->nProcessors);
-	memset(this->ptrPreviousCPUTotalTime, 0, sizeof(uint64_t) * this->nProcessors);
-
 #endif //JUCE_WINDOWS
 }
 
@@ -43,20 +31,6 @@ SysStatus::~SysStatus() {
 #if JUCE_WINDOWS
 	if (this->ptrProcessorInfo) {
 		free(this->ptrProcessorInfo);
-	}
-
-	if (this->ptrCPUIdleTime) {
-		free(this->ptrCPUIdleTime);
-	}
-	if (this->ptrCPUTotalTime) {
-		free(this->ptrCPUTotalTime);
-	}
-
-	if (this->ptrPreviousCPUIdleTime) {
-		free(this->ptrPreviousCPUIdleTime);
-	}
-	if (this->ptrPreviousCPUTotalTime) {
-		free(this->ptrPreviousCPUTotalTime);
 	}
 
 #endif //JUCE_WINDOWS
@@ -73,22 +47,18 @@ double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* info = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)this->ptrProcessorInfo;
 
 	for (int i = 0; i < this->nProcessors; i++) {
-
-		this->ptrCPUIdleTime[i] = info[i].IdleTime.QuadPart;
-		this->ptrCPUTotalTime[i] = info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
-
-		uint64_t nDeltaCPUIdleTime = this->ptrCPUIdleTime[i] - this->ptrPreviousCPUIdleTime[i];
-		uint64_t nDeltaCPUTotalTime = this->ptrCPUTotalTime[i] - this->ptrPreviousCPUTotalTime[i];
-
-		nSumIdleTime += nDeltaCPUIdleTime;
-		nSumTotalTime += nDeltaCPUTotalTime;
-
-		this->ptrPreviousCPUIdleTime[i] = this->ptrCPUIdleTime[i];
-		this->ptrPreviousCPUTotalTime[i] = this->ptrCPUTotalTime[i];
+		nSumIdleTime += info[i].IdleTime.QuadPart;
+		nSumTotalTime += info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
 	}
 
-	if (nSumTotalTime) {
-		return (100 - ((nSumIdleTime * 100) / nSumTotalTime)) / 100.0;
+	uint64_t nDeltaCPUIdleTime = nSumIdleTime - temp.cpuTemp[1];
+	uint64_t nDeltaCPUTotalTime = nSumTotalTime - temp.cpuTemp[0];
+
+	temp.cpuTemp[1] = nSumIdleTime;
+	temp.cpuTemp[0] = nSumTotalTime;
+
+	if (nDeltaCPUTotalTime) {
+		return (100 - ((nDeltaCPUIdleTime * 100.0) / nDeltaCPUTotalTime)) / 100.0;
 	}
 
 	return 0;
