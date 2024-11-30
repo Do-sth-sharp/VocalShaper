@@ -17,6 +17,12 @@ public:
 
 private:
 	void* hProcess = nullptr;/**< For Windows Only */
+	uint64_t* CPUIdleTime;
+	uint64_t* CPUTotalTime;
+	uint64_t* PreviousCPUIdleTime;
+	uint64_t* PreviousCPUTotalTime;
+	void* ProcessorInfo;
+	int Processors;
 
 public:
 	static SysStatus* getInstance();

@@ -2,7 +2,10 @@
 
 #if JUCE_WINDOWS
 #include <Windows.h>
+#include <Winternl.h>
 #include <Psapi.h>
+
+#pragma comment(lib,"ntdll.lib")
 #else //JUCE_WINDOWS
 #include <iostream>
 #include <fstream>
@@ -15,6 +18,24 @@ SysStatus::SysStatus() {
 #if JUCE_WINDOWS
 	this->hProcess = GetCurrentProcess();
 
+	SYSTEM_BASIC_INFORMATION BasicInfo;
+	NtQuerySystemInformation(SystemBasicInformation, &BasicInfo, sizeof(BasicInfo), NULL);
+	this->Processors = BasicInfo.NumberOfProcessors;
+
+	this->ProcessorInfo = malloc(sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * this->Processors);
+
+	this->CPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
+	this->CPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
+
+	memset(this->CPUIdleTime, 0, sizeof(uint64_t) * this->Processors);
+	memset(this->CPUTotalTime, 0, sizeof(uint64_t) * this->Processors);
+
+	this->PreviousCPUIdleTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
+	this->PreviousCPUTotalTime = (uint64_t*)malloc(sizeof(uint64_t) * this->Processors);
+
+	memset(this->PreviousCPUIdleTime, 0, sizeof(uint64_t) * this->Processors);
+	memset(this->PreviousCPUTotalTime, 0, sizeof(uint64_t) * this->Processors);
+
 #endif //JUCE_WINDOWS
 }
 
@@ -22,22 +43,39 @@ SysStatus::~SysStatus() {}
 
 double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 #if JUCE_WINDOWS
-	FILETIME newIdleTime, newKernelTime, newUserTime;
-	GetSystemTimes(&newIdleTime, &newKernelTime, &newUserTime);
+	uint64_t SumIdleTime = 0;
+	uint64_t SumTotalTime = 0;
 
-	uint64_t newIdleTimeTemp = (*(ULARGE_INTEGER*)&newIdleTime).QuadPart;
-	uint64_t newKernelTimeTemp = (*(ULARGE_INTEGER*)&newKernelTime).QuadPart;
-	uint64_t newUserTimeTemp = (*(ULARGE_INTEGER*)&newUserTime).QuadPart;
+	NtQuerySystemInformation(SystemProcessorPerformanceInformation, this->ProcessorInfo, sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * Processors, NULL);
 
-	uint64_t idle = newIdleTimeTemp - temp.cpuTemp[0];
-	uint64_t kernel = newKernelTimeTemp - temp.cpuTemp[1];
-	uint64_t user = newUserTimeTemp - temp.cpuTemp[2];
+	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* info = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)this->ProcessorInfo;
 
-	temp.cpuTemp[0] = newIdleTimeTemp;
-	temp.cpuTemp[1] = newKernelTimeTemp;
-	temp.cpuTemp[2] = newUserTimeTemp;
+	for (int i = 0; i < Processors; i++)
+	{
+		uint64_t DeltaCPUIdleTime;
+		uint64_t DeltaCPUTotalTime;
 
-	return (kernel + user) / (double)(idle + kernel + user);
+		this->CPUIdleTime[i] = info[i].IdleTime.QuadPart;
+		this->CPUTotalTime[i] = info[i].KernelTime.QuadPart + info[i].UserTime.QuadPart;
+
+		DeltaCPUIdleTime = this->CPUIdleTime[i] - this->PreviousCPUIdleTime[i];
+		DeltaCPUTotalTime = this->CPUTotalTime[i] - this->PreviousCPUTotalTime[i];
+
+		SumIdleTime += DeltaCPUIdleTime;
+		SumTotalTime += DeltaCPUTotalTime;
+
+		this->PreviousCPUIdleTime[i] = this->CPUIdleTime[i];
+		this->PreviousCPUTotalTime[i] = this->CPUTotalTime[i];
+	}
+
+	if (SumTotalTime != 0)
+    {
+        return (100 - ((SumIdleTime * 100) / SumTotalTime)) / 100.0;
+    }
+    else
+    {
+        return 0;
+    }
 
 #else //JUCE_WINDOWS
 	long total = 0, idle = 0;
