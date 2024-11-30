@@ -38,7 +38,7 @@ void RecordTemp::recordData(double timeSec,
 		for (auto i : midiMessages) {
 			auto message = i.getMessage();
 			message.setTimeStamp((timeSec - this->startTime) + message.getTimeStamp() / this->sampleRate);
-			this->midiCollector.addMessageToQueue(message);
+			this->midiBuffer.addEvent(message);
 		}
 	}
 	
@@ -91,7 +91,7 @@ void RecordTemp::clearAll() {
 
 void RecordTemp::clearMIDI() {
 	juce::GenericScopedLock locker(this->lock);
-	this->midiCollector.reset(sampleRate);
+	this->midiBuffer.clear();
 }
 
 void RecordTemp::clearAudio() {
@@ -99,6 +99,31 @@ void RecordTemp::clearAudio() {
 	this->audioBuffer.setSize(
 		this->audioBuffer.getNumChannels(),
 		AUDIO_BUFFER_MIN, false, true, true);
+}
+
+double RecordTemp::getSampleRate() const {
+	juce::GenericScopedLock locker(this->lock);
+	return this->sampleRate;
+}
+
+double RecordTemp::getStartTime() const {
+	juce::GenericScopedLock locker(this->lock);
+	return this->startTime;
+}
+
+const juce::MidiMessageSequence RecordTemp::getMIDIData() const {
+	juce::GenericScopedLock locker(this->lock);
+	return this->midiBuffer;
+}
+
+const juce::AudioSampleBuffer RecordTemp::getAudioData() const {
+	juce::GenericScopedLock locker(this->lock);
+	return this->audioBuffer;
+}
+
+const RecordTemp::DataPacked RecordTemp::getDataPacked() const {
+	juce::GenericScopedLock locker(this->lock);
+	return { this->sampleRate, this->startTime, this->midiBuffer, this->audioBuffer };
 }
 
 bool RecordTemp::tryToEnsureAudioBufferSamplesAllocated(uint64_t sampleNum) {

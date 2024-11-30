@@ -570,6 +570,23 @@ void SeqSourceProcessor::syncARAContext() {
 	}
 }
 
+void SeqSourceProcessor::writeRecordingDataToSource(
+	double startTime, double currentTime, double sampleRate,
+	const juce::MidiMessageSequence& midiData, const juce::AudioSampleBuffer& audioData,
+	const ChannelLinkList& audioLinks) {
+	/** MIDI Type */
+	if (int midiType = (this->recordingFlag & 0x0F) >> 0) {
+		this->writeMIDISource(midiType - 1,
+			startTime, currentTime, sampleRate, midiData);
+	}
+
+	/** Audio Type */
+	if (int audioType = (this->recordingFlag & 0xF0) >> 4) {
+		this->writeAudioSource(audioType - 1,
+			startTime, currentTime, sampleRate, audioData, audioLinks);
+	}
+}
+
 void SeqSourceProcessor::sendDirectMidiMessages(const juce::MidiMessage& message) {
 	juce::ScopedWriteLock locker(audioLock::getAudioControlLock());
 	this->directMessages.add(message);
@@ -826,6 +843,93 @@ void SeqSourceProcessor::readMIDIData(
 	SourceManager::getInstance()->readMIDIData(this->midiSourceRef,
 		buffer, baseTime / sampleRate, startTime / sampleRate, endTime / sampleRate,
 		this->currentMIDITrack);
+}
+
+void SeqSourceProcessor::writeMIDISource(int type,
+	double startTime, double currentTime, double sampleRate,
+	const juce::MidiMessageSequence& midiData) {
+	/** Init MIDI Source */
+	if (!this->isMIDIValid()) {
+		this->initMIDI();
+	}
+
+	/** Limit End Time */
+	double endTime = std::min(currentTime, startTime + midiData.getEndTime());
+
+	/** Get Each Block */
+	int blockNum = this->srcs.size();
+	for (int i = 0; i < blockNum; i++) {
+		auto [blockStartTime, blockEndTime, sourceOffset] = this->srcs.getUnchecked(i);
+
+		/** Check Overlap */
+		if (endTime >= blockStartTime && startTime <= blockEndTime) {
+			double overlapStartTime = std::max(startTime, blockStartTime);
+			double overlapEndTime = std::min(endTime, blockEndTime);
+			if (overlapEndTime <= overlapStartTime) { continue; }
+
+			/** Get Messages */
+			juce::MidiMessageSequence seqTemp;
+			for (auto mes : midiData) {
+				auto& message = mes->message;
+				double mesTime = startTime + message.getTimeStamp();
+				if (mesTime >= overlapStartTime && mesTime <= overlapEndTime) {
+					seqTemp.addEvent(message, startTime + sourceOffset);
+				}
+			}
+
+			/** Add Data */
+			SourceManager::getInstance()->writeMIDI(
+				this->midiSourceRef, static_cast<SourceManager::MIDIWriteType>(type),
+				seqTemp, 0, overlapEndTime + sourceOffset);
+		}
+	}
+}
+
+void SeqSourceProcessor::writeAudioSource(int type,
+	double startTime, double currentTime, double sampleRate,
+	const juce::AudioSampleBuffer& audioData, const ChannelLinkList& audioLinks) {
+	/** Init Audio Source */
+	if (!this->isAudioValid()) {
+		this->initAudio(sampleRate, 0);
+	}
+
+	/** Limit End Time */
+	double endTime = std::min(currentTime, startTime + audioData.getNumSamples() / sampleRate);
+
+	/** Get Audio Data */
+	juce::AudioSampleBuffer audioChannelTemp{ this->audioChannels.size(),
+		(int)(endTime * sampleRate) };
+	audioChannelTemp.clear();
+	for (auto [srcc, dstc] : audioLinks) {
+		vMath::addAudioData(audioChannelTemp, audioData,
+			0, 0, dstc, srcc, std::min(audioChannelTemp.getNumSamples(), audioData.getNumSamples()));
+	}
+
+	/** Get Each Block */
+	int blockNum = this->srcs.size();
+	for (int i = 0; i < blockNum; i++) {
+		auto [blockStartTime, blockEndTime, sourceOffset] = this->srcs.getUnchecked(i);
+
+		/** Check Overlap */
+		if (endTime >= blockStartTime && startTime <= blockEndTime) {
+			double overlapStartTime = std::max(startTime, blockStartTime);
+			double overlapEndTime = std::min(endTime, blockEndTime);
+			if (overlapEndTime <= overlapStartTime) { continue; }
+
+			/** Get Audio Block Temp */
+			juce::AudioSampleBuffer audioTemp{ audioChannelTemp.getNumChannels(),
+				(int)((overlapEndTime - overlapStartTime) * sampleRate) };
+			for (int j = 0; j < audioTemp.getNumChannels(); j++) {
+				vMath::copyAudioData(audioTemp, audioChannelTemp,
+					0, (int)(overlapStartTime * sampleRate), j, j, audioTemp.getNumChannels());
+			}
+
+			/** Add Data */
+			SourceManager::getInstance()->writeAudio(
+				this->audioSourceRef, static_cast<SourceManager::AudioWriteType>(type),
+				audioTemp, overlapStartTime + sourceOffset, overlapEndTime - overlapStartTime, sampleRate);
+		}
+	}
 }
 
 bool SeqSourceProcessor::isAudioSaved() const {

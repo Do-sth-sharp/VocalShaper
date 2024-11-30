@@ -20,11 +20,20 @@ public:
 	void clearMIDI();
 	void clearAudio();
 
+	double getSampleRate() const;
+	double getStartTime() const;
+	const juce::MidiMessageSequence getMIDIData() const;
+	const juce::AudioSampleBuffer getAudioData() const;
+
+	/** Sample Rate, Start Time, MIDI Data, Audio Data */
+	using DataPacked = std::tuple<double, double, const juce::MidiMessageSequence, const juce::AudioSampleBuffer>;
+	const DataPacked getDataPacked() const;
+
 private:
 	juce::CriticalSection lock;
 	double sampleRate = 0;
 
-	juce::MidiMessageCollector midiCollector;
+	juce::MidiMessageSequence midiBuffer;
 	juce::AudioSampleBuffer audioBuffer;
 	double startTime = -1;
 

@@ -157,7 +157,7 @@ void AudioExtractor::extractAsync(const void* ticket,
 	/** Exists */
 	if (it != this->templist.end()) {
 		if (auto ptrJob = dynamic_cast<AudioExtractorJob*>(it->second.job.get())) {
-			ptrJob->stopNow();
+			MainThreadPool::getInstance()->stopJob(ptrJob);
 			it->second.data = data;
 		}
 	}

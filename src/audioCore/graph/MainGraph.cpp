@@ -210,6 +210,40 @@ const juce::Array<float> MainGraph::getOutputLevels() const {
 	return this->outputLevels;
 }
 
+void MainGraph::updateARAContext() {
+	/** For Each Seq Track */
+	for (auto i:this->audioSourceNodeList) {
+		if (auto track = dynamic_cast<SeqSourceProcessor*>(i->getProcessor())) {
+			/** Update ARA Context Data for Recording Track */
+			if (track->getRecording() != SeqSourceProcessor::RecordState::NotRecording) {
+				track->syncARAContext();
+			}
+		}
+	}
+}
+
+void MainGraph::writeRecordingDataToSource(
+	double startTime, double currentTime, double sampleRate,
+	const juce::MidiMessageSequence& midiData, const juce::AudioSampleBuffer& audioData) {
+	/** For Each Seq Track */
+	for (int i = 0; i < this->getSourceNum(); i++) {
+		if (auto track = this->getSourceProcessor(i)) {
+			/** Update Source Data for Recording Track */
+			if (track->getRecording() != SeqSourceProcessor::RecordState::NotRecording) {
+				/** Get Audio Links */
+				auto linkTemp = this->getSourceInputFromDeviceConnections(i);
+				SeqSourceProcessor::ChannelLinkList links;
+				for (auto [src, srcc, dst, dstc] : linkTemp) {
+					links.add({ srcc, dstc });
+				}
+
+				track->writeRecordingDataToSource(
+					startTime, currentTime, sampleRate, midiData, audioData, links);
+			}
+		}
+	}
+}
+
 bool MainGraph::parse(
 	const google::protobuf::Message* data,
 	const ParseConfig& config) {

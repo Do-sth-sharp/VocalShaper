@@ -97,7 +97,12 @@ public:
 
 	void clearGraph();
 
+	void updateARAContext();
 	const juce::Array<float> getOutputLevels() const;
+
+	void writeRecordingDataToSource(
+		double startTime, double currentTime, double sampleRate,
+		const juce::MidiMessageSequence& midiData, const juce::AudioSampleBuffer& audioData);
 
 	class SafePointer {
 	private:

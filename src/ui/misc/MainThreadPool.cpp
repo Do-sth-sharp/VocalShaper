@@ -1,5 +1,7 @@
 ﻿#include "MainThreadPool.h"
 
+#define JOB_STOP_TIMEOUT 30000
+
 MainThreadPool::MainThreadPool() {
 	this->pool = std::make_unique<juce::ThreadPool>();
 }
@@ -9,7 +11,7 @@ MainThreadPool::~MainThreadPool() {
 }
 
 void MainThreadPool::stopAll() {
-	this->pool->removeAllJobs(true, 30000, nullptr);
+	this->pool->removeAllJobs(true, JOB_STOP_TIMEOUT, nullptr);
 }
 
 void MainThreadPool::runJob(const Job& job) {
@@ -19,6 +21,10 @@ void MainThreadPool::runJob(const Job& job) {
 void MainThreadPool::runJob(
 	juce::ThreadPoolJob* job, bool deleteJobWhenFinished) {
 	this->pool->addJob(job, deleteJobWhenFinished);
+}
+
+void MainThreadPool::stopJob(juce::ThreadPoolJob* job) {
+	this->pool->removeJob(job, true, JOB_STOP_TIMEOUT);
 }
 
 MainThreadPool* MainThreadPool::getInstance() {

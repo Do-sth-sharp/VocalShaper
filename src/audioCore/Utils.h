@@ -140,6 +140,7 @@ namespace utils {
 
 	juce::Colour getDefaultColour();
 
+	/** Src, SrcC, Dst, DstC */
 	using AudioConnection = std::tuple<int, int, int, int>;
 	using AudioConnectionList = juce::Array<AudioConnection>;
 
