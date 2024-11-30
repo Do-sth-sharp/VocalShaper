@@ -1,4 +1,5 @@
 ﻿#include "SysStatus.h"
+#include <cstdlib>
 
 #if JUCE_WINDOWS
 #include <Windows.h>
@@ -39,7 +40,25 @@ SysStatus::SysStatus() {
 #endif //JUCE_WINDOWS
 }
 
-SysStatus::~SysStatus() {}
+SysStatus::~SysStatus() {
+
+#if JUCE_WINDOWS
+	if (this->ProcessorInfo)
+		free(this->ProcessorInfo);
+
+	if (this->CPUIdleTime)
+		free(this->CPUIdleTime);
+	if (this->CPUTotalTime)
+		free(this->CPUTotalTime);
+
+	if (this->PreviousCPUIdleTime)
+		free(this->PreviousCPUIdleTime);
+	if (this->PreviousCPUTotalTime)
+		free(this->PreviousCPUTotalTime);
+
+#endif //JUCE_WINDOWS
+
+}
 
 double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 #if JUCE_WINDOWS
