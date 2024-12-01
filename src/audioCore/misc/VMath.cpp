@@ -27,6 +27,22 @@ namespace vMath {
 		}
 	}
 
+	static void resampleNormal(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		double ratio = srcSampleRate / dstSampleRate;
+
+		dstLength = std::min(dstLength, (int)(srcLength / ratio));
+
+		for (int i = start; i < dstLength; i++) {
+			double srcIndex = i * ratio;
+			int srcIndexLeft = std::floor(srcIndex);
+			int srcIndexRight = std::ceil(srcIndex);
+			double srcPer = srcIndex - srcIndexLeft;
+
+			dst[i] = src[srcIndexLeft] * (1 - srcPer) + src[srcIndexRight] * srcPer;
+		}
+	}
+
 #if __SSE3__ || JUCE_MSVC
 	static void copyDataSSE3(float* dst, const float* src, int length) {
 		int clipSize = sizeof(__m128) / sizeof(float);
@@ -86,6 +102,52 @@ namespace vMath {
 		averageDataNormal(&(dst[clipMax]), &(src[clipMax]), length - clipMax);
 	}
 
+	static void resampleSSE3(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		double ratio = srcSampleRate / dstSampleRate;
+
+		dstLength = std::min(dstLength, (int)(srcLength / ratio));
+
+		int clipSize = sizeof(__m128) / sizeof(float);
+		int clipNum = (dstLength - start) / clipSize;
+		int clipMax = start + clipNum * clipSize;
+
+		__m128 oneV = _mm_set1_ps(1.0f);
+		__m128 zeroV = _mm_set1_ps(0.0f);
+#if JUCE_MSVC
+		_MM_ALIGN16 float increaseList[4] = { 0, 1, 2, 3 };
+		__m128 increaseV = _mm_load_ps(increaseList);
+#else
+		float increaseList[4] = { 0, 1, 2, 3 };
+		__m128 increaseV = _mm_loadu_ps(increaseList);
+#endif
+		__m128 ratioV = _mm_set1_ps(ratio);
+		for (int i = start; i < clipMax; i += clipSize) {
+			__m128 baseIndex = _mm_set1_ps((float)i);
+			__m128 index = _mm_add_ps(baseIndex, increaseV);
+			
+			__m128 srcIndex = _mm_mul_ps(index, ratioV);
+			__m128 srcIndexLeft = _mm_floor_ps(srcIndex);
+			__m128 srcIndexRight = _mm_ceil_ps(srcIndex);
+			__m128 srcPer = _mm_sub_ps(srcIndex, srcIndexLeft);
+
+			__m128i srcIndexLeftI = _mm_cvtps_epi32(srcIndexLeft);
+			__m128i srcIndexRightI = _mm_cvtps_epi32(srcIndexRight);
+
+			__m128 srcLeftValues = _mm_i32gather_ps(src, srcIndexLeftI, sizeof(float));
+			__m128 srcRightValues = _mm_i32gather_ps(src, srcIndexRightI, sizeof(float));
+			__m128 rLeft = _mm_sub_ps(oneV, srcPer);
+			__m128 rRight = _mm_sub_ps(srcPer, zeroV);
+			__m128 dstLeftValues = _mm_mul_ps(srcLeftValues, rLeft);
+			__m128 dstRightValues = _mm_mul_ps(srcRightValues, rRight);
+			__m128 result = _mm_add_ps(dstLeftValues, dstRightValues);
+
+			_mm_storeu_ps(&(dst[i]), result);
+		}
+
+		resampleNormal(clipMax, dst, src, dstLength, srcLength, dstSampleRate, srcSampleRate);
+	}
+
 #else //__SSE3__ || JUCE_MSVC
 	static void copyDataSSE3(float* dst, const float* src, int length) {
 		copyDataNormal(dst, src, length);
@@ -101,6 +163,11 @@ namespace vMath {
 
 	static void averageDataSSE3(float* dst, const float* src, int length) {
 		averageDataNormal(dst, src, length);
+	}
+
+	static void resampleSSE3(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		resampleNormal(start, dst, src, dstLength, srcLength, dstSampleRate, srcSampleRate);
 	}
 
 #endif //__SSE3__ || JUCE_MSVC
@@ -164,6 +231,47 @@ namespace vMath {
 		averageDataNormal(&(dst[clipMax]), &(src[clipMax]), length - clipMax);
 	}
 
+	static void resampleAVX2(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		double ratio = srcSampleRate / dstSampleRate;
+
+		dstLength = std::min(dstLength, (int)(srcLength / ratio));
+
+		int clipSize = sizeof(__m256) / sizeof(float);
+		int clipNum = (dstLength - start) / clipSize;
+		int clipMax = start + clipNum * clipSize;
+
+		__m256 oneV = _mm256_set1_ps(1.0f);
+		__m256 zeroV = _mm256_set1_ps(0.0f);
+		float increaseList[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+		__m256 increaseV = _mm256_loadu_ps(increaseList);
+		__m256 ratioV = _mm256_set1_ps(ratio);
+		for (int i = start; i < clipMax; i += clipSize) {
+			__m256 baseIndex = _mm256_set1_ps((float)i);
+			__m256 index = _mm256_add_ps(baseIndex, increaseV);
+
+			__m256 srcIndex = _mm256_mul_ps(index, ratioV);
+			__m256 srcIndexLeft = _mm256_floor_ps(srcIndex);
+			__m256 srcIndexRight = _mm256_ceil_ps(srcIndex);
+			__m256 srcPer = _mm256_sub_ps(srcIndex, srcIndexLeft);
+
+			__m256i srcIndexLeftI = _mm256_cvtps_epi32(srcIndexLeft);
+			__m256i srcIndexRightI = _mm256_cvtps_epi32(srcIndexRight);
+
+			__m256 srcLeftValues = _mm256_i32gather_ps(src, srcIndexLeftI, sizeof(float));
+			__m256 srcRightValues = _mm256_i32gather_ps(src, srcIndexRightI, sizeof(float));
+			__m256 rLeft = _mm256_sub_ps(oneV, srcPer);
+			__m256 rRight = _mm256_sub_ps(srcPer, zeroV);
+			__m256 dstLeftValues = _mm256_mul_ps(srcLeftValues, rLeft);
+			__m256 dstRightValues = _mm256_mul_ps(srcRightValues, rRight);
+			__m256 result = _mm256_add_ps(dstLeftValues, dstRightValues);
+
+			_mm256_storeu_ps(&(dst[i]), result);
+		}
+
+		resampleNormal(clipMax, dst, src, dstLength, srcLength, dstSampleRate, srcSampleRate);
+	}
+
 #else //__AVX2__ || JUCE_MSVC
 	static void copyDataAVX2(float* dst, const float* src, int length) {
 		copyDataSSE3(dst, src, length);
@@ -179,6 +287,11 @@ namespace vMath {
 
 	static void averageDataAVX2(float* dst, const float* src, int length) {
 		averageDataSSE3(dst, src, length);
+	}
+
+	static void resampleAVX2(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		resampleNormal(start, dst, src, dstLength, srcLength, dstSampleRate, srcSampleRate);
 	}
 
 #endif //__AVX2__ || JUCE_MSVC
@@ -242,6 +355,48 @@ namespace vMath {
 		averageDataNormal(&(dst[clipMax]), &(src[clipMax]), length - clipMax);
 	}
 
+	static void resampleAVX512(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		double ratio = srcSampleRate / dstSampleRate;
+
+		dstLength = std::min(dstLength, (int)(srcLength / ratio));
+
+		int clipSize = sizeof(__m512) / sizeof(float);
+		int clipNum = (dstLength - start) / clipSize;
+		int clipMax = start + clipNum * clipSize;
+
+		__m512 oneV = _mm512_set1_ps(1.0f);
+		__m512 zeroV = _mm512_set1_ps(0.0f);
+		float increaseList[16] = {
+			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+		__m512 increaseV = _mm512_loadu_ps(increaseList);
+		__m512 ratioV = _mm512_set1_ps(ratio);
+		for (int i = start; i < clipMax; i += clipSize) {
+			__m512 baseIndex = _mm512_set1_ps((float)i);
+			__m512 index = _mm512_add_ps(baseIndex, increaseV);
+
+			__m512 srcIndex = _mm512_mul_ps(index, ratioV);
+			__m512 srcIndexLeft = _mm512_floor_ps(srcIndex);
+			__m512 srcIndexRight = _mm512_ceil_ps(srcIndex);
+			__m512 srcPer = _mm512_sub_ps(srcIndex, srcIndexLeft);
+
+			__m512i srcIndexLeftI = _mm512_cvtps_epi32(srcIndexLeft);
+			__m512i srcIndexRightI = _mm512_cvtps_epi32(srcIndexRight);
+
+			__m512 srcLeftValues = _mm512_i32gather_ps(srcIndexLeftI, src, sizeof(float));
+			__m512 srcRightValues = _mm512_i32gather_ps(srcIndexRightI, src, sizeof(float));
+			__m512 rLeft = _mm512_sub_ps(oneV, srcPer);
+			__m512 rRight = _mm512_sub_ps(srcPer, zeroV);
+			__m512 dstLeftValues = _mm512_mul_ps(srcLeftValues, rLeft);
+			__m512 dstRightValues = _mm512_mul_ps(srcRightValues, rRight);
+			__m512 result = _mm512_add_ps(dstLeftValues, dstRightValues);
+
+			_mm512_storeu_ps(&(dst[i]), result);
+		}
+
+		resampleNormal(clipMax, dst, src, dstLength, srcLength, dstSampleRate, srcSampleRate);
+	}
+
 #else //__AVX512F__ || JUCE_MSVC
 	static void copyDataAVX512(float* dst, const float* src, int length) {
 		copyDataAVX2(dst, src, length);
@@ -259,6 +414,11 @@ namespace vMath {
 		averageDataAVX2(dst, src, length);
 	}
 
+	static void resampleAVX512(int start, float* dst, const float* src,
+		int dstLength, int srcLength, double dstSampleRate, double srcSampleRate) {
+		resampleNormal(start, dst, src, dstLength, srcLength, dstSampleRate, srcSampleRate);
+	}
+
 #endif //__AVX512F__ || JUCE_MSVC
 
 	static InsType type = InsType::Normal;
@@ -266,6 +426,7 @@ namespace vMath {
 	static auto addData = addDataNormal;
 	static auto fillData = fillDataNormal;
 	static auto averageData = averageDataNormal;
+	static auto resample = resampleNormal;
 
 	void setInsType(InsType type) {
 		/** Check And Fallback */
@@ -289,11 +450,14 @@ namespace vMath {
 			= { vMath::fillDataNormal, vMath::fillDataSSE3, vMath::fillDataAVX2, vMath::fillDataAVX512 };
 		constexpr std::array<decltype(vMath::averageData), InsType::MaxNum> averageDataList
 			= { vMath::averageDataNormal, vMath::averageDataSSE3, vMath::averageDataAVX2, vMath::averageDataAVX512 };
+		constexpr std::array<decltype(vMath::resample), InsType::MaxNum> resampleList
+			= { vMath::resampleNormal, vMath::resampleSSE3, vMath::resampleAVX2, vMath::resampleAVX512 };
 		
 		vMath::copyData = copyDataList[type];
 		vMath::addData = addDataList[type];
 		vMath::fillData = fillDataList[type];
 		vMath::averageData = averageDataList[type];
+		vMath::resample = resampleList[type];
 	}
 
 	InsType getInsType() {
@@ -358,5 +522,27 @@ namespace vMath {
 		for (int i = 0; i < dst.getNumChannels(); i++) {
 			zeroAllAudioDataOnChannel(dst, i);
 		}
+	}
+
+	void resampleAudioData(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
+		int dstStartSample, int srcStartSample, int dstLength,
+		double dstSampleRate, double srcSampleRate) {
+		int dstChannels = dst.getNumChannels();
+		int srcChannels = src.getNumChannels();
+		int channels = std::min(dstChannels, srcChannels);
+		for (int i = 0; i < channels; i++) {
+			resampleAudioData(dst, src, dstStartSample, srcStartSample,
+				i, i, dstLength, dstSampleRate, srcSampleRate);
+		}
+	}
+	void resampleAudioData(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
+		int dstStartSample, int srcStartSample, int dstChannel, int srcChannel, int dstLength,
+		double dstSampleRate, double srcSampleRate) {
+		auto wPtr = dst.getWritePointer(dstChannel);
+		auto rPtr = src.getReadPointer(srcChannel);
+		if (!wPtr || !rPtr) { return; }
+
+		resample(0, &(wPtr[dstStartSample]), &(rPtr[srcStartSample]), dstLength,
+			src.getNumSamples() - srcStartSample, dstSampleRate, srcSampleRate);
 	}
 }

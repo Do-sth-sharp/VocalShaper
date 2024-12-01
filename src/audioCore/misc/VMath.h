@@ -25,4 +25,10 @@ namespace vMath {
 		int dstStartSample, int length);
 	void zeroAllAudioDataOnChannel(juce::AudioSampleBuffer& dst, int dstChannel);
 	void zeroAllAudioData(juce::AudioSampleBuffer& dst);
+	void resampleAudioData(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
+		int dstStartSample, int srcStartSample, int dstLength,
+		double dstSampleRate, double srcSampleRate);
+	void resampleAudioData(juce::AudioSampleBuffer& dst, const juce::AudioSampleBuffer& src,
+		int dstStartSample, int srcStartSample, int dstChannel, int srcChannel, int dstLength,
+		double dstSampleRate, double srcSampleRate);
 }
