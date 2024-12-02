@@ -898,7 +898,7 @@ void SeqSourceProcessor::writeAudioSource(int type,
 
 	/** Get Audio Data */
 	juce::AudioSampleBuffer audioChannelTemp{ this->audioChannels.size(),
-		(int)(endTime * sampleRate) };
+		(int)((endTime - startTime) * sampleRate) };
 	audioChannelTemp.clear();
 	for (auto [srcc, dstc] : audioLinks) {
 		vMath::addAudioData(audioChannelTemp, audioData,
@@ -921,7 +921,7 @@ void SeqSourceProcessor::writeAudioSource(int type,
 				(int)((overlapEndTime - overlapStartTime) * sampleRate) };
 			for (int j = 0; j < audioTemp.getNumChannels(); j++) {
 				vMath::copyAudioData(audioTemp, audioChannelTemp,
-					0, (int)(overlapStartTime * sampleRate), j, j, audioTemp.getNumChannels());
+					0, (int)((overlapStartTime - startTime) * sampleRate), j, j, audioTemp.getNumSamples());
 			}
 
 			/** Add Data */

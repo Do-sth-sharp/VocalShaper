@@ -179,6 +179,9 @@ void SourceItem::writeAudio(AudioWriteType type, const juce::AudioSampleBuffer& 
 	/** Write Data */
 	this->container->writeAudio(type, buffer, startTime, length, sampleRate);
 
+	/** Resampler */
+	this->updateAudioResampler();
+
 	/** Callback */
 	this->invokeCallback();
 }

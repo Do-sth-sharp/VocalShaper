@@ -142,12 +142,39 @@ void SourceInternalContainer::setAudio(
 void SourceInternalContainer::writeAudio(AudioWriteType type, const juce::AudioSampleBuffer& buffer,
 	double startTime, double length, double sampleRate) {
 	if (this->type == SourceType::Audio) {
+		/** Limit Length */
+		length = std::min(length, buffer.getNumSamples() / sampleRate);
+
 		/** Init Audio */
 		if (!this->audioData) {
 			this->initAudioData(buffer.getNumChannels(), sampleRate, startTime + length);
 		}
 		
-		/** TODO Write Data */
+		/** Write Data */
+		int dstStartSample = startTime * this->audioSampleRate;
+		int dstSampleLength = length * this->audioSampleRate;
+		int channels = std::min(this->audioData->getNumChannels(), buffer.getNumChannels());
+		if (this->audioData->getNumSamples() - dstSampleLength < dstStartSample) {
+			/** Increase Audio Length */
+			this->audioData->setSize(
+				channels, dstStartSample + dstSampleLength,
+				true, true, true);
+		}
+
+		juce::AudioSampleBuffer resampleTemp{ channels, dstSampleLength };
+		vMath::resampleAudioData(resampleTemp, buffer,
+			0, 0, resampleTemp.getNumSamples(), this->audioSampleRate, sampleRate);
+
+		if (type == AudioWriteType::Insert) {
+			for (int i = 0; i < channels; i++) {
+				vMath::addAudioData(*(this->audioData.get()), resampleTemp, dstStartSample, 0, i, i, dstSampleLength);
+			}
+		}
+		else if (type == AudioWriteType::Cover) {
+			for (int i = 0; i < channels; i++) {
+				vMath::copyAudioData(*(this->audioData.get()), resampleTemp, dstStartSample, 0, i, i, dstSampleLength);
+			}
+		}
 
 		/** Set Flag */
 		this->changed();
@@ -157,7 +184,7 @@ void SourceInternalContainer::writeAudio(AudioWriteType type, const juce::AudioS
 void SourceInternalContainer::writeMIDI(MIDIWriteType type, const juce::MidiMessageSequence& sequence,
 	double startTime, double length) {
 	if (this->type == SourceType::MIDI) {
-		/** Init Audio */
+		/** Init MIDI */
 		if (!this->midiData) {
 			this->initMidiData();
 		}
