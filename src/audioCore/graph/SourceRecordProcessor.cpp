@@ -23,13 +23,12 @@ void SourceRecordProcessor::processBlock(
 	if (!playHead) { return; }
 	auto playPosition = playHead->getPosition();
 	if (!playPosition->getIsPlaying() || !playPosition->getIsRecording()) { return; }
-	int timeInSamples = playPosition->getTimeInSamples().orFallback(0);
-	double timeInSeconds = playPosition->getTimeInSeconds().orFallback(0);
+	int64_t timeInSamples = playPosition->getTimeInSamples().orFallback(0);
 
 	/** Record Data Temp */
-	RecordTemp::getInstance()->recordData(timeInSeconds, buffer, midiMessages);
+	RecordTemp::getInstance()->recordData((uint64_t)timeInSamples, buffer, midiMessages);
 
-	/** TODO Callback */
+	/** Callback */
 	/*if (trackIndexList.size() > 0 && buffer.getNumSamples() > 0) {
 		this->limitedCall.call([trackIndexList] {
 			UICallbackAPI<const std::set<int>&>::invoke(

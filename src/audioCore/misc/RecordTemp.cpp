@@ -20,12 +20,14 @@ void RecordTemp::setInputChannelNum(int channels) {
 		std::max(this->audioBuffer.getNumSamples(), AUDIO_BUFFER_MIN), true, true, true);
 }
 
-void RecordTemp::recordData(double timeSec,
+void RecordTemp::recordData(uint64_t timeSample,
 	const juce::AudioBuffer<float>& buffer, const juce::MidiBuffer& midiMessages) {
 	/** Lock */
 	juce::GenericScopedLock locker(this->lock);
 
 	/** Set Start Time */
+	double timeSec = timeSample / this->sampleRate;
+	uint64_t bufferStartSample = this->startTime * this->sampleRate;
 	if (timeSec < this->startTime) {
 		this->clearAll();
 	}
@@ -44,7 +46,7 @@ void RecordTemp::recordData(double timeSec,
 	
 	/** Write Audio Buffer */
 	if (this->recordAudio) {
-		uint64_t startSample = (timeSec - this->startTime) * this->sampleRate;
+		uint64_t startSample = timeSample - bufferStartSample;
 		uint64_t endSample = startSample + buffer.getNumSamples();
 		if (this->tryToEnsureAudioBufferSamplesAllocated(endSample)) {
 			int channelNum = std::min(buffer.getNumChannels(), this->audioBuffer.getNumChannels());

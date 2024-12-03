@@ -8,7 +8,7 @@ public:
 
 	void setInputSampleRate(double sampleRate);
 	void setInputChannelNum(int channels);
-	void recordData(double timeSec,
+	void recordData(uint64_t timeSample,
 		const juce::AudioBuffer<float>& buffer, const juce::MidiBuffer& midiMessages);
 
 	void setRecordMIDI(bool recordMIDI);
