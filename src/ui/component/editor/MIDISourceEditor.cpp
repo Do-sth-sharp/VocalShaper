@@ -1,5 +1,6 @@
 ﻿#include "MIDISourceEditor.h"
 #include "../../misc/Tools.h"
+#include "../../misc/CoreActions.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 #include <IconManager.h>
@@ -302,6 +303,9 @@ void MIDISourceEditor::update(int index, uint64_t ref) {
 	/** Content */
 	this->content->update(index, ref);
 
+	/** Current MIDI Track */
+	this->currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(index);
+
 	/** Blocks */
 	this->updateBlocks();
 }
@@ -591,25 +595,9 @@ void MIDISourceEditor::updateMIDIScrollerImageTemp() {
 	}
 }
 
-enum MIDIEditorMenuActionType {
-	MIDIChannelBase = 0, AdsorbBase = 0x20
-};
-
 void MIDISourceEditor::menuButtonClicked() {
 	auto menu = this->createMenu();
-	int result = menu.showAt(this->menuButton.get());
-	if (result == 0) { return; }
-
-	if (result > MIDIEditorMenuActionType::MIDIChannelBase
-		&& result < MIDIEditorMenuActionType::AdsorbBase) {
-		Tools::getInstance()->setMIDIChannel((uint8_t)(result - MIDIEditorMenuActionType::MIDIChannelBase));
-	}
-	else if (result == MIDIEditorMenuActionType::AdsorbBase) {
-		Tools::getInstance()->setAdsorb(0);
-	}
-	else if (result > MIDIEditorMenuActionType::AdsorbBase) {
-		Tools::getInstance()->setAdsorb(1 / (double)(result - MIDIEditorMenuActionType::AdsorbBase));
-	}
+	[[maybe_unused]] int result = menu.showAt(this->menuButton.get());
 }
 
 juce::PopupMenu MIDISourceEditor::createMenu() {
@@ -617,6 +605,7 @@ juce::PopupMenu MIDISourceEditor::createMenu() {
 
 	menu.addSubMenu(TRANS("Adsorb"), this->createAdsorbMenu());
 	menu.addSubMenu(TRANS("MIDI Channel"), this->createMIDIChannelMenu());
+	menu.addSubMenu(TRANS("MIDI Track"), this->createMIDITrackMenu());
 
 	return menu;
 }
@@ -624,27 +613,41 @@ juce::PopupMenu MIDISourceEditor::createMenu() {
 juce::PopupMenu MIDISourceEditor::createAdsorbMenu() {
 	double currentAdsorb = Tools::getInstance()->getAdsorb();
 
+	auto setAdsorbFunc = [](double adsorb) {
+		Tools::getInstance()->setAdsorb(adsorb);
+		};
+
 	juce::PopupMenu menu;
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 1, "1", true,
-		juce::approximatelyEqual(currentAdsorb, 1.0));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 2, "1/2",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)2));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 4, "1/4",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)4));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 6, "1/6",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)6));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 8, "1/8",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)8));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 12, "1/12",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)12));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 16, "1/16",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)16));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 24, "1/24",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)24));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 32, "1/32",
-		true, juce::approximatelyEqual(currentAdsorb, 1 / (double)32));
-	menu.addItem(MIDIEditorMenuActionType::AdsorbBase + 0, "Off",
-		true, juce::approximatelyEqual(currentAdsorb, 0.0));
+	menu.addItem("1", true,
+		juce::approximatelyEqual(currentAdsorb, 1.0),
+		std::bind(setAdsorbFunc, 1.0));
+	menu.addItem("1/2", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)2),
+		std::bind(setAdsorbFunc, 1 / (double)2));
+	menu.addItem("1/4", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)4),
+		std::bind(setAdsorbFunc, 1 / (double)4));
+	menu.addItem("1/6", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)6),
+		std::bind(setAdsorbFunc, 1 / (double)6));
+	menu.addItem("1/8", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)8),
+		std::bind(setAdsorbFunc, 1 / (double)8));
+	menu.addItem("1/12", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)12),
+		std::bind(setAdsorbFunc, 1 / (double)12));
+	menu.addItem("1/16", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)16),
+		std::bind(setAdsorbFunc, 1 / (double)16));
+	menu.addItem("1/24", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)24),
+		std::bind(setAdsorbFunc, 1 / (double)24));
+	menu.addItem("1/32", true,
+		juce::approximatelyEqual(currentAdsorb, 1 / (double)32),
+		std::bind(setAdsorbFunc, 1 / (double)32));
+	menu.addItem("Off", true,
+		juce::approximatelyEqual(currentAdsorb, 0.0),
+		std::bind(setAdsorbFunc, 0.0));
 
 	return menu;
 }
@@ -652,11 +655,38 @@ juce::PopupMenu MIDISourceEditor::createAdsorbMenu() {
 juce::PopupMenu MIDISourceEditor::createMIDIChannelMenu() {
 	uint8_t midiChannel = Tools::getInstance()->getMIDIChannel();
 
+	auto setMIDIChannelFunc = [](int channel) {
+		Tools::getInstance()->setMIDIChannel(channel);
+		};
+
 	juce::PopupMenu menu;
 	for (int i = 1; i <= 16; i++) {
-		menu.addItem(MIDIEditorMenuActionType::MIDIChannelBase + i,
-			juce::String{ i }, true, midiChannel == i);
+		menu.addItem(juce::String{ i }, true, midiChannel == i,
+			std::bind(setMIDIChannelFunc, i));
 	}
+
+	return menu;
+}
+
+juce::PopupMenu MIDISourceEditor::createMIDITrackMenu() {
+	int totalTracks = quickAPI::getMIDISourceTrackNum(
+		quickAPI::getSeqTrackMIDIRef(this->index));
+
+	auto setMIDITrackFunc = [index = this->index](int midiTrack) {
+		CoreActions::setSeqMIDITrack(index, midiTrack);
+		};
+	auto addMIDITrackFunc = [index = this->index] {
+		/** TODO */
+		};
+
+	juce::PopupMenu menu;
+	for (int i = 0; i < totalTracks; i++) {
+		menu.addItem(juce::String{ i }, true, this->currentMIDITrack == i,
+			std::bind(setMIDITrackFunc, i));
+	}
+
+	menu.addSeparator();
+	menu.addItem(TRANS("New Track"), addMIDITrackFunc);
 
 	return menu;
 }

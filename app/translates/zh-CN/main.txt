@@ -159,3 +159,5 @@ countries: cn
 "Create MIDI Source" = "创建 MIDI 源"
 "Please select a data source for editing." = "请选择一个数据源进行编辑。"
 "Menu" = "菜单"
+"MIDI Track" = "MIDI 轨道"
+"New Track" = "新轨道"

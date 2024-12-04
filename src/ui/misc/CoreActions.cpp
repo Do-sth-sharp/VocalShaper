@@ -1085,7 +1085,7 @@ void CoreActions::setSeqMIDITrackGUI(int index) {
 		};
 
 	/** Get Total Track */
-	int totalMIDITrack = quickAPI::getSeqTrackMIDITrackNum(index);
+	int totalMIDITrack = quickAPI::getMIDISourceTrackNum(quickAPI::getSeqTrackMIDIRef(index));
 	int currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(index);
 
 	/** Ask For MIDI Track */

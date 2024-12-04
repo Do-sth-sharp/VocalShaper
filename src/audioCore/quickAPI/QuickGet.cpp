@@ -749,14 +749,14 @@ namespace quickAPI {
 		return {};
 	}*/
 
-	int getSeqTrackMIDITrackNum(int index) {
+	/*int getSeqTrackMIDITrackNum(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {
 				return track->getTotalMIDITrackNum();
 			}
 		}
 		return 0;
-	}
+	}*/
 
 	int getSeqTrackCurrentMIDITrack(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {

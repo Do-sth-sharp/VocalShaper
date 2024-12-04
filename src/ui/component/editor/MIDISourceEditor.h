@@ -26,6 +26,7 @@ private:
 	int index = -1;
 	uint64_t ref = 0;
 	double totalLength = 0;
+	int currentMIDITrack = -1;
 
 	std::unique_ptr<Scroller> hScroller = nullptr;
 	std::unique_ptr<Scroller> vScroller = nullptr;
@@ -86,6 +87,7 @@ private:
 	juce::PopupMenu createMenu();
 	juce::PopupMenu createAdsorbMenu();
 	juce::PopupMenu createMIDIChannelMenu();
+	juce::PopupMenu createMIDITrackMenu();
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
