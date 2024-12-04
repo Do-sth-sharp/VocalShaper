@@ -51,7 +51,8 @@ public:
 	bool isForked() const;
 
 public:
-	int getTrackNum() const;
+	int getMIDITrackNum() const;
+	bool isMIDITrackEmpty(int track) const;
 
 	int getMIDINoteNum(int track) const;
 	int getMIDIPitchWheelNum(int track) const;

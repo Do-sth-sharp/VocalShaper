@@ -1094,6 +1094,16 @@ namespace quickAPI {
 			ref, SourceManager::SourceType::MIDI);
 	}
 
+	int getMIDISourceTrackNum(uint64_t ref) {
+		if (ref == 0) { return 0; }
+		return SourceManager::getInstance()->getMIDITrackNum(ref);
+	}
+
+	bool isMIDISourceTrackEmpty(uint64_t ref, int track) {
+		if (ref == 0) { return true; }
+		return SourceManager::getInstance()->isMIDITrackEmpty(ref, track);
+	}
+
 	const NoteList getMIDISourceNotes(uint64_t ref, int track) {
 		if (ref == 0) { return {}; }
 		return SourceManager::getInstance()->getMIDINoteList(

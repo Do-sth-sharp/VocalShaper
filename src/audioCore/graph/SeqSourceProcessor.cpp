@@ -361,7 +361,7 @@ void SeqSourceProcessor::applyMIDI() {
 	this->releaseMIDI();
 	this->midiSourceRef = SourceManager::getInstance()->applySource(
 		SourceManager::SourceType::MIDI);
-	this->currentMIDITrack = 0;
+	this->currentMIDITrack = -1;
 
 	/** Callback */
 	auto callback = [ptr = SafePointer{ this }] {
@@ -404,7 +404,7 @@ void SeqSourceProcessor::releaseMIDI() {
 		SourceManager::getInstance()->releaseSource(this->midiSourceRef);
 		this->midiSourceRef = 0;
 	}
-	this->currentMIDITrack = 0;
+	this->currentMIDITrack = -1;
 
 	/** ARA Change */
 	if (auto plugin = this->getInstrProcessor()) {
@@ -880,7 +880,7 @@ void SeqSourceProcessor::writeMIDISource(int type,
 			/** Add Data */
 			SourceManager::getInstance()->writeMIDI(
 				this->midiSourceRef, static_cast<SourceManager::MIDIWriteType>(type),
-				seqTemp, 0, overlapEndTime + sourceOffset);
+				seqTemp, 0, overlapEndTime + sourceOffset, this->currentMIDITrack);
 		}
 	}
 }

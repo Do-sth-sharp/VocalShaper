@@ -66,6 +66,7 @@ private:
 
 	int index = -1;
 	uint64_t ref = 0;
+	int currentMIDITrack = -1;
 
 	double hPos = 0, hItemSize = 0;
 	double secStart = 0, secEnd = 0;

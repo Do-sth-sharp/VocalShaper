@@ -201,5 +201,7 @@ namespace quickAPI {
 	const juce::String getMIDISourceName(uint64_t ref);
 	bool isAudioSourceValid(uint64_t ref);
 	bool isMIDISourceValid(uint64_t ref);
+	int getMIDISourceTrackNum(uint64_t ref);
+	bool isMIDISourceTrackEmpty(uint64_t ref, int track);
 	const NoteList getMIDISourceNotes(uint64_t ref, int track);
 }

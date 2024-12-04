@@ -1145,12 +1145,29 @@ void CoreActions::setSeqMIDIRefGUIThenAddBlock(int index, const juce::String& pa
 		/** Add Block */
 		CoreActions::insertSeqBlock(index, 0, length, 0);
 		};
+
+	/** Set Current MIDI Track */
+	auto setMIDITrackFunc = [](int index) {
+		/** Get Source Ref */
+		auto ref = quickAPI::getSeqTrackMIDIRef(index);
+
+		/** Get MIDI Track Num */
+		int trackNum = quickAPI::getMIDISourceTrackNum(ref);
+		for (int i = 0; i < trackNum; i++) {
+			if (!quickAPI::isMIDISourceTrackEmpty(ref, i)) {
+				/** Set Current MIDI Track */
+				CoreActions::setSeqMIDITrack(index, i);
+				break;
+			}
+		}
+		};
 	
 	/** Source Loading Callback */
-	auto callback = [index, addBlockFunc] (uint64_t ref) {
+	auto callback = [index, addBlockFunc, setMIDITrackFunc] (uint64_t ref) {
 		/** Check Index Track Ref Firstly */
 		if (quickAPI::isSeqTrackMIDIRef(index, ref)) {
 			addBlockFunc(index);
+			setMIDITrackFunc(index);
 			return;
 		}
 
@@ -1159,6 +1176,7 @@ void CoreActions::setSeqMIDIRefGUIThenAddBlock(int index, const juce::String& pa
 		for (int i = 0; i < trackNum; i++) {
 			if (quickAPI::isSeqTrackMIDIRef(i, ref)) {
 				addBlockFunc(i);
+				setMIDITrackFunc(index);
 				return;
 			}
 		}

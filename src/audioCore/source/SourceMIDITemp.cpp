@@ -114,7 +114,7 @@ double SourceMIDITemp::getLength() const {
 
 bool SourceMIDITemp::isTrackEmpty(int track) const {
 	if (track < 0 || track >= this->eventList.size()) {
-		return false;
+		return true;
 	}
 
 	auto& trackRef = this->eventList.getReference(track);

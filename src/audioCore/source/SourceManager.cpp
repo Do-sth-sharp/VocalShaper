@@ -82,6 +82,15 @@ int SourceManager::getMIDITrackNum(uint64_t ref) const {
 	return 0;
 }
 
+bool SourceManager::isMIDITrackEmpty(uint64_t ref, int track) const {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	if (auto ptr = this->getSource(ref, SourceType::MIDI)) {
+		return ptr->isMIDITrackEmpty(track);
+	}
+	return true;
+}
+
 double SourceManager::getLength(uint64_t ref, SourceType type) const {
 	juce::ScopedReadLock locker(audioLock::getSourceLock()); 
 	

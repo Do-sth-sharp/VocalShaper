@@ -272,7 +272,13 @@ bool SourceItem::audioValid() const {
 int SourceItem::getMIDITrackNum() const {
 	if (!this->midiValid()) { return 0; }
 
-	return this->container->getTrackNum();
+	return this->container->getMIDITrackNum();
+}
+
+bool SourceItem::isMIDITrackEmpty(int track) const {
+	if (!this->midiValid()) { return true; }
+
+	return this->container->isMIDITrackEmpty(track);
 }
 
 double SourceItem::getMIDILength() const {

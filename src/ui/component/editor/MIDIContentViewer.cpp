@@ -121,8 +121,8 @@ void MIDIContentViewer::updateData() {
 
 	/** Update Note Temp */
 	if (this->index >= 0 && this->ref != 0) {
-		int currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(this->index);
-		auto midiNoteList = quickAPI::getMIDISourceNotes(this->ref, currentMIDITrack);
+		this->currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(this->index);
+		auto midiNoteList = quickAPI::getMIDISourceNotes(this->ref, this->currentMIDITrack);
 
 		/** Add Each Note */
 		this->midiDataTemp.ensureStorageAllocated(midiNoteList.size());
@@ -152,6 +152,7 @@ void MIDIContentViewer::updateData() {
 	}
 
 	/** Update UI */
+	this->updateBlockImageTemp();
 	this->updateNoteImageTemp();
 	this->repaint();
 }
@@ -507,7 +508,7 @@ void MIDIContentViewer::updateBlockImageTemp() {
 		juce::Label::ColourIds::textWhenEditingColourId);
 
 	/** Paint Each Area */
-	{
+	if (this->currentMIDITrack >= 0) {
 		double startSec = 0;
 		for (int i = 0; i < this->blockItemTemp.size() + 1; i++) {
 			double endSec = (i < this->blockItemTemp.size())
@@ -528,6 +529,11 @@ void MIDIContentViewer::updateBlockImageTemp() {
 				startSec = std::get<1>(this->blockItemTemp.getUnchecked(i));
 			}
 		}
+	}
+	/** No Track */
+	else {
+		g.setColour(offColor);
+		g.fillAll();
 	}
 }
 

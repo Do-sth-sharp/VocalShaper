@@ -237,9 +237,14 @@ bool SourceInternalContainer::isForked() const {
 	return this->forked;
 }
 
-int SourceInternalContainer::getTrackNum() const {
+int SourceInternalContainer::getMIDITrackNum() const {
 	if (!this->midiData) { return 0; }
 	return this->midiData->getTrackNum();
+}
+
+bool SourceInternalContainer::isMIDITrackEmpty(int track) const {
+	if (!this->midiData) { return true; }
+	return this->midiData->isTrackEmpty(track);
 }
 
 int SourceInternalContainer::getMIDINoteNum(int track) const {

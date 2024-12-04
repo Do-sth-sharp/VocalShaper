@@ -44,6 +44,7 @@ public:
 	bool midiValid() const;
 	bool audioValid() const;
 	int getMIDITrackNum() const;
+	bool isMIDITrackEmpty(int track) const;
 	double getMIDILength() const;
 	double getAudioLength() const;
 

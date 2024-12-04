@@ -18,6 +18,7 @@ public:
 	bool isValid(uint64_t ref, SourceType type) const;
 
 	int getMIDITrackNum(uint64_t ref) const;
+	bool isMIDITrackEmpty(uint64_t ref, int track) const;
 	double getLength(uint64_t ref, SourceType type) const;
 
 	void initAudio(uint64_t ref, const juce::String& name, int channelNum, double sampleRate, double length);

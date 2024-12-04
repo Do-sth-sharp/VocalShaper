@@ -155,7 +155,7 @@ private:
 	juce::Colour trackColor;
 
 	uint64_t audioSourceRef = 0, midiSourceRef = 0;
-	std::atomic_int currentMIDITrack = 0;
+	std::atomic_int currentMIDITrack = -1;
 
 	std::atomic<RecordState> recordingFlag = RecordState::NotRecording;
 
