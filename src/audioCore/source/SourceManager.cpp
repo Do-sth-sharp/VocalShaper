@@ -188,10 +188,10 @@ void SourceManager::writeAudio(uint64_t ref,
 
 void SourceManager::writeMIDI(uint64_t ref,
 	MIDIWriteType type, const juce::MidiMessageSequence& sequence,
-	double startTime, double length) {
+	double startTime, double length, int track) {
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 	if (auto ptr = this->getSource(ref, SourceType::Audio)) {
-		ptr->writeMIDI(type, sequence, startTime, length);
+		ptr->writeMIDI(type, sequence, startTime, length, track);
 	}
 }
 

@@ -187,7 +187,7 @@ void SourceItem::writeAudio(AudioWriteType type, const juce::AudioSampleBuffer& 
 }
 
 void SourceItem::writeMIDI(MIDIWriteType type, const juce::MidiMessageSequence& sequence,
-	double startTime, double length) {
+	double startTime, double length, int track) {
 	/** Check Type */
 	if (this->type != SourceType::MIDI) { return; }
 
@@ -200,7 +200,8 @@ void SourceItem::writeMIDI(MIDIWriteType type, const juce::MidiMessageSequence& 
 	}
 
 	/** Write Data */
-	this->container->writeMIDI(type, sequence, startTime, length);
+	this->container->writeMIDI(
+		type, sequence, startTime, length, track);
 
 	/** Callback */
 	this->invokeCallback();

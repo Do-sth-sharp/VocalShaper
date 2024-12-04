@@ -28,7 +28,7 @@ public:
 	void writeAudio(AudioWriteType type, const juce::AudioSampleBuffer& buffer,
 		double startTime, double length, double sampleRate);
 	void writeMIDI(MIDIWriteType type, const juce::MidiMessageSequence& sequence,
-		double startTime, double length);
+		double startTime, double length, int track);
 
 	void changed();
 	void saved();

@@ -59,6 +59,14 @@ void SourceMIDITemp::addTrack(const juce::MidiMessageSequence& track) {
 	this->miscList.add(miscs);
 }
 
+void SourceMIDITemp::removeEvents(int track, double startTime, double timeLength) {
+	/** TODO */
+}
+
+void SourceMIDITemp::addEvents(int track, const juce::MidiMessageSequence& list) {
+	/** TODO */
+}
+
 const juce::MidiFile SourceMIDITemp::makeMIDIFile() const {
 	juce::MidiFile file;
 	utils::setMIDITimeFormat(file, this->timeFormat);
@@ -102,6 +110,15 @@ double SourceMIDITemp::getLength() const {
 	}
 
 	return result;
+}
+
+bool SourceMIDITemp::isTrackEmpty(int track) const {
+	if (track < 0 || track >= this->eventList.size()) {
+		return false;
+	}
+
+	auto& trackRef = this->eventList.getReference(track);
+	return trackRef.isEmpty();
 }
 
 int SourceMIDITemp::getNoteNum(int track) const {

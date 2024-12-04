@@ -35,7 +35,7 @@ public:
 	void writeAudio(uint64_t ref, AudioWriteType type, const juce::AudioSampleBuffer& buffer,
 		double startTime, double length, double sampleRate);
 	void writeMIDI(uint64_t ref, MIDIWriteType type, const juce::MidiMessageSequence& sequence,
-		double startTime, double length);
+		double startTime, double length, int track);
 
 	void prepareAudioPlay(uint64_t ref);
 	void prepareMIDIPlay(uint64_t ref);

@@ -41,7 +41,7 @@ public:
 	void writeAudio(AudioWriteType type, const juce::AudioSampleBuffer& buffer,
 		double startTime, double length, double sampleRate);
 	void writeMIDI(MIDIWriteType type, const juce::MidiMessageSequence& sequence,
-		double startTime, double length);
+		double startTime, double length, int track);
 
 	/** Format, MetaData, BitDepth, Quality */
 	using AudioFormat = std::tuple<juce::String, juce::StringPairArray, int, int>;

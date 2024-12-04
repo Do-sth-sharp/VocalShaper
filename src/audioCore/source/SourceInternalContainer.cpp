@@ -98,7 +98,7 @@ void SourceInternalContainer::initMidiData() {
 			this->midiData = std::make_unique<SourceMIDITemp>();
 		}
 
-		this->midiData->addTrack(juce::MidiMessageSequence{});
+		//this->midiData->addTrack(juce::MidiMessageSequence{});
 
 		this->changed();
 	}
@@ -182,14 +182,38 @@ void SourceInternalContainer::writeAudio(AudioWriteType type, const juce::AudioS
 }
 
 void SourceInternalContainer::writeMIDI(MIDIWriteType type, const juce::MidiMessageSequence& sequence,
-	double startTime, double length) {
+	double startTime, double length, int track) {
 	if (this->type == SourceType::MIDI) {
 		/** Init MIDI */
 		if (!this->midiData) {
 			this->initMidiData();
 		}
 
-		/** TODO Write Data */
+		/** Copy MIDI Data */
+		juce::MidiMessageSequence seqTemp;
+		for (auto& i : sequence) {
+			if (i->message.getTimeStamp() <= length) {
+				seqTemp.addEvent(i->message, startTime);
+			}
+		}
+
+		/** Write Data */
+		switch (type) {
+		case SourceInternalContainer::MIDIWriteType::NewTrack:
+			/** Add As New Track */
+			this->midiData->addTrack(seqTemp);
+			break;
+		case SourceInternalContainer::MIDIWriteType::Cover:
+			/** Remove Old MIDI Data */
+			this->midiData->removeEvents(track, startTime, length);
+			[[fallthrough]];
+		case SourceInternalContainer::MIDIWriteType::Insert:
+			/** Add MIDI Data */
+			this->midiData->addEvents(track, seqTemp);
+			break;
+		default:
+			break;
+		}
 
 		/** Set Flag */
 		this->changed();

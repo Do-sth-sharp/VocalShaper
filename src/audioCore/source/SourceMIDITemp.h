@@ -9,6 +9,9 @@ public:
 	void setData(const juce::MidiFile& data);
 	void addTrack(const juce::MidiMessageSequence& track);
 
+	void removeEvents(int track, double startTime, double timeLength);
+	void addEvents(int track, const juce::MidiMessageSequence& list);
+
 	const juce::MidiFile makeMIDIFile() const;
 	const juce::MidiMessageSequence makeMIDITrack(int index) const;
 
@@ -49,6 +52,7 @@ public:
 	
 	int getTrackNum() const;
 	double getLength() const;
+	bool isTrackEmpty(int track) const;
 
 	int getNoteNum(int track) const;
 	int getPitchWheelNum(int track) const;
