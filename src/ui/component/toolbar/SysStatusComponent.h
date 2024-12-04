@@ -7,6 +7,7 @@ class SysStatusComponent final : public juce::AnimatedAppComponent,
 public:
 	SysStatusComponent();
 
+	void refresh();
 	void update() override;
 	void paint(juce::Graphics& g) override;
 	void resized() override;
@@ -16,28 +17,30 @@ public:
 	void mouseExit(const juce::MouseEvent& event) override;
 
 private:
-	juce::String curveName;
+	enum WatchType {
+		CPU, Audio, Memory, ProcessMem,
+		TotalNum
+	};
+
+	WatchType currentCurve = WatchType::Audio;
 	std::vector<double> curveData;
 	int curveHead = 0;
 
-	std::array<double, 3> watchData = { 0, 0 ,0 };
-	std::array<juce::String, 3> watchName;
-
-	std::map<juce::String, juce::String> nameTrans;
+	std::array<double, WatchType::TotalNum> watchData = { 0, 0, 0, 0 };
+	std::array<juce::String, WatchType::TotalNum> watchName;
+	std::array<WatchType, 3> currentWatchList;
 
 	void clearCurve(int size);
 	void addCurve(double data);
 	double getCurve(int index);
 
-	double getData(const juce::String& name) const;
-	std::tuple<double, double> getRange() const;
-	bool getAlert(const juce::String& name, double value) const;
-	juce::String getValueText(const juce::String& name, double value) const;
+	std::tuple<double, double> getRange(WatchType type) const;
+	bool getAlert(WatchType type, double value) const;
+	juce::String getValueText(WatchType type, double value) const;
 
 	void showCurveMenu();
 	void showWatchMenu(int index);
-	juce::PopupMenu createMenu(const juce::String& currentName,
-		int currentPoints, bool isCurve = false);
+	juce::PopupMenu createMenu(WatchType type, bool isCurve = false);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SysStatusComponent)
 };

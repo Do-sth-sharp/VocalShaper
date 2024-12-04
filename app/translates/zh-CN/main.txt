@@ -20,10 +20,10 @@ countries: cn
 "Select a license in the list to show content." = "从列表中选择一个许可证以展示内容。"
 "Waiting for a moment..." = "稍等一下..."
 
-"cpu" = "CPU"
-"audio" = "音频"
-"mem" = "内存"
-"mem-process" = "内存-本程序"
+"CPU" = "CPU"
+"Audio" = "音频"
+"RAM" = "内存"
+"Process RAM" = "进程内存"
 
 "Add" = "添加"
 "Remove" = "移除"

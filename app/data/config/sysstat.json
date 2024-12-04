@@ -1,9 +1,5 @@
 {
   "points": 20,
-  "curve": "audio",
-  "watch": [
-    "cpu",
-    "mem",
-    "mem-process"
-  ]
+  "curve": 1,
+  "watch": [ 0, 2, 3 ]
 }
