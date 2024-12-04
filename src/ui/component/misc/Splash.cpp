@@ -213,12 +213,12 @@ void Splash::paint(juce::Graphics& g) {
 	/** Status */
 	juce::Rectangle<int> statusRect(
 		backGroundRect.getWidth() * 0.055, backGroundRect.getHeight() * 0.8,
-		backGroundRect.getWidth() * 0.35, textFontHeight);
+		backGroundRect.getWidth() * 0.35, textFontHeight * 2);
 
 	g.setFont(textFont);
 	g.setColour(textColor);
 	//g.drawRect(statusRect);
-	g.drawFittedText(this->mesStr, statusRect, juce::Justification::centredLeft, 1, 1.f);
+	g.drawFittedText(this->mesStr, statusRect, juce::Justification::topLeft, 2, 0.7f);
 }
 
 void Splash::mouseDown(const juce::MouseEvent& e) {
