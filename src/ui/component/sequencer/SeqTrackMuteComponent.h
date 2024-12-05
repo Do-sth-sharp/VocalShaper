@@ -19,6 +19,7 @@ public:
 private:
 	int index = -1;
 	bool mute = false;
+	bool equivalentMute = false;
 
 	void changeMute();
 	void showMenu();

@@ -161,6 +161,11 @@ namespace utils {
 		const juce::File& base = utils::getProjectDir());
 
 	bool regardVel0NoteAsNoteOff();
+
+	void increaseSoloCount();
+	void decreaseSoloCount();
+	bool shouldSolo();
+	void resetSoloCount();
 }
 
 #define UNUSED(var) (void)var

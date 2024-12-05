@@ -21,10 +21,10 @@ void SeqTrackMuteComponent::paint(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(this->mute
+	juce::Colour backgroundColor = laf.findColour(this->equivalentMute
 		? juce::TextButton::ColourIds::buttonOnColourId
 		: juce::TextButton::ColourIds::buttonColourId);
-	juce::Colour textColor = laf.findColour(this->mute
+	juce::Colour textColor = laf.findColour(this->equivalentMute
 		? juce::TextButton::ColourIds::textColourOnId
 		: juce::TextButton::ColourIds::textColourOffId);
 
@@ -93,6 +93,7 @@ void SeqTrackMuteComponent::update(int index) {
 	this->index = index;
 	if (index > -1) {
 		this->mute = quickAPI::getSeqTrackMute(index);
+		this->equivalentMute = quickAPI::getSeqTrackEquivalentMute(index);
 
 		this->repaint();
 	}

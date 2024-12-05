@@ -1083,4 +1083,22 @@ namespace utils {
 	}
 
 	bool regardVel0NoteAsNoteOff() { return true; }
+
+	static std::atomic_int soloCount = 0;
+
+	void increaseSoloCount() {
+		soloCount++;
+	}
+
+	void decreaseSoloCount() {
+		soloCount--;
+	}
+
+	bool shouldSolo() {
+		return soloCount > 0;
+	}
+
+	void resetSoloCount() {
+		soloCount = 0;
+	}
 }

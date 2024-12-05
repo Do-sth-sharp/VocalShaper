@@ -146,7 +146,7 @@ void SeqTrackComponent::update(int index) {
 		}
 		this->trackName->setButtonText(juce::String{ index } + " - " + name);
 
-		this->updateMute();
+		this->updateMuteSolo();
 		this->updateInputMonitoring();
 		this->updateRec();
 
@@ -169,7 +169,7 @@ void SeqTrackComponent::updateBlock(int blockIndex) {
 	this->content->updateBlock(blockIndex);
 }
 
-void SeqTrackComponent::updateMute() {
+void SeqTrackComponent::updateMuteSolo() {
 	this->muteButton->update(this->index);
 }
 

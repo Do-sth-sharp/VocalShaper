@@ -34,7 +34,7 @@ public:
 
 	void update(int index);
 	void updateBlock(int blockIndex);
-	void updateMute();
+	void updateMuteSolo();
 	void updateInputMonitoring();
 	void updateRec();
 	void updateInstr();

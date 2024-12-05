@@ -648,6 +648,24 @@ namespace quickAPI {
 		return false;
 	}
 
+	bool getSeqTrackSolo(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getSolo();
+			}
+		}
+		return false;
+	}
+
+	bool getSeqTrackEquivalentMute(int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getSourceProcessor(index)) {
+				return track->getEquivalentMute();
+			}
+		}
+		return false;
+	}
+
 	bool getSeqTrackInputMonitoring(int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getSourceProcessor(index)) {

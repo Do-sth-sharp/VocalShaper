@@ -34,8 +34,8 @@ public:
 	void addSeqBlockChanged(const SeqBlockChangedCallback& callback);
 	using TempoChangedCallback = std::function<void(void)>;
 	void addTempoChanged(const TempoChangedCallback& callback);
-	using SeqMuteChangedCallback = std::function<void(int)>;
-	void addSeqMuteChanged(const SeqMuteChangedCallback& callback);
+	using SeqMuteSoloChangedCallback = std::function<void(int)>;
+	void addSeqMuteSoloChanged(const SeqMuteSoloChangedCallback& callback);
 	using SeqRecChangedCallback = std::function<void(int)>;
 	void addSeqRecChanged(const SeqRecChangedCallback& callback);
 	using SeqInputMonitoringChangedCallback = std::function<void(int)>;
@@ -67,7 +67,7 @@ public:
 	void invokeSeqChanged(int index) const;
 	void invokeSeqBlockChanged(int track, int index) const;
 	void invokeTempoChanged() const;
-	void invokeSeqMuteChanged(int index) const;
+	void invokeSeqMuteSoloChanged(int index) const;
 	void invokeSeqRecChanged(int index) const;
 	void invokeSeqInputMonitoringChanged(int index) const;
 	void invokeSeqDataRefChanged(int index) const;
@@ -93,7 +93,7 @@ private:
 	juce::Array<SeqChangedCallback> seqChanged;
 	juce::Array<SeqBlockChangedCallback> seqBlockChanged;
 	juce::Array<TempoChangedCallback> tempoChanged;
-	juce::Array<SeqMuteChangedCallback> seqMuteChanged;
+	juce::Array<SeqMuteSoloChangedCallback> seqMuteSoloChanged;
 	juce::Array<SeqInputMonitoringChangedCallback> seqInputMonitoringChanged;
 	juce::Array<SeqRecChangedCallback> seqRecChanged;
 	juce::Array<SeqDataRefChangedCallback> seqDataRefChanged;

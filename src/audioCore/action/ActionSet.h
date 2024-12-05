@@ -369,6 +369,29 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackMute)
 };
 
+class ActionSetSequencerTrackSolo final : public ActionUndoableBase {
+public:
+	ActionSetSequencerTrackSolo() = delete;
+	ActionSetSequencerTrackSolo(
+		int track, bool solo);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Sequencer Track Solo";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const bool solo;
+
+		bool oldSolo = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackSolo)
+};
+
 class ActionSetSequencerTrackName final : public ActionUndoableBase {
 public:
 	ActionSetSequencerTrackName() = delete;

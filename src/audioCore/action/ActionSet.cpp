@@ -1545,6 +1545,48 @@ bool ActionSetSequencerTrackMute::undo() {
 	ACTION_RESULT(false);
 }
 
+ActionSetSequencerTrackSolo::ActionSetSequencerTrackSolo(
+	int track, bool solo)
+	: ACTION_DB{ track, solo } {
+}
+
+bool ActionSetSequencerTrackSolo::doAction() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE(ActionSetSequencerTrackSolo);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			ACTION_DATA(oldSolo) = track->getSolo();
+			track->setSolo(ACTION_DATA(solo));
+
+			this->output("Set seq solo: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");;
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't set seq solo: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");
+	ACTION_RESULT(false);
+}
+
+bool ActionSetSequencerTrackSolo::undo() {
+	ACTION_UNSAVE_PROJECT();
+
+	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerTrackSolo);
+	ACTION_WRITE_DB();
+
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
+			track->setSolo(ACTION_DATA(oldSolo));
+
+			this->output("Undo set seq solo: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");;
+			ACTION_RESULT(true);
+		}
+	}
+	this->output("Can't undo set seq solo: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");
+	ACTION_RESULT(false);
+}
+
 ActionSetSequencerTrackName::ActionSetSequencerTrackName(
 	int track, const juce::String& name)
 	: ACTION_DB{ track, name } {}

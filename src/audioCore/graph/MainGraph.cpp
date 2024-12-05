@@ -199,6 +199,9 @@ void MainGraph::clearGraph() {
 	}
 	this->audioSourceNodeList.clear();
 
+	/** Reset Solo Count */
+	utils::resetSoloCount();
+
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);

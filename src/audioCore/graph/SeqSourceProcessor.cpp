@@ -535,16 +535,41 @@ SeqSourceProcessor::RecordState SeqSourceProcessor::getRecording() const {
 void SeqSourceProcessor::setMute(bool mute) {
 	this->isMute = mute;
 
-	/** Close All Note */
-	if (mute) {
-		this->closeAllNote();
-	}
-
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
 }
 
 bool SeqSourceProcessor::getMute() const {
+	return this->isMute;
+}
+
+void SeqSourceProcessor::setSolo(bool solo) {
+	bool shouldChange = (this->isSolo == solo);
+
+	this->isSolo = solo;
+
+	/** Global Solo Count */
+	if (shouldChange) {
+		if (solo) {
+			utils::increaseSoloCount();
+		}
+		else {
+			utils::decreaseSoloCount();
+		}
+	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
+}
+
+bool SeqSourceProcessor::getSolo() const {
+	return this->isSolo;
+}
+
+bool SeqSourceProcessor::getEquivalentMute() const {
+	if (utils::shouldSolo()) {
+		return !this->isSolo;
+	}
 	return this->isMute;
 }
 
@@ -711,7 +736,7 @@ void SeqSourceProcessor::processBlock(
 	}
 
 	/** Process Mute */
-	if (this->isMute) {
+	if (this->getEquivalentMute()) {
 		vMath::zeroAllAudioData(buffer);
 	}
 
@@ -774,6 +799,7 @@ bool SeqSourceProcessor::parse(
 	this->setRecording(static_cast<RecordState>(mes->recordstate()));
 	this->setInputMonitoring(mes->inputmonitoring());
 	this->setMute(mes->muted());
+	this->setSolo(mes->solo());
 
 	return true;
 }
@@ -825,6 +851,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
 	mes->set_recordstate(static_cast<vsp4::SeqTrack::RecordState>(this->getRecording()));
 	mes->set_inputmonitoring(this->getInputMonitoring());
 	mes->set_muted(this->getMute());
+	mes->set_solo(this->getSolo());
 
 	return std::unique_ptr<google::protobuf::Message>(mes.release());
 }

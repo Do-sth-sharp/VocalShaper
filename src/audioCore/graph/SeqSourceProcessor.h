@@ -84,6 +84,9 @@ public:
 
 	void setMute(bool mute);
 	bool getMute() const;
+	void setSolo(bool solo);
+	bool getSolo() const;
+	bool getEquivalentMute() const;
 
 	void setInputMonitoring(bool inputMonitoring);
 	bool getInputMonitoring() const;
@@ -160,6 +163,7 @@ private:
 	std::atomic<RecordState> recordingFlag = RecordState::NotRecording;
 
 	std::atomic_bool isMute = false;
+	std::atomic_bool isSolo = false;
 	std::atomic_bool inputMonitoring = false;
 
 	juce::Array<float> outputLevels;
