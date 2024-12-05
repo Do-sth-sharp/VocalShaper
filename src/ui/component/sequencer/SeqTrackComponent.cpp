@@ -40,6 +40,10 @@ SeqTrackComponent::SeqTrackComponent(
 	this->muteButton = std::make_unique<SeqTrackMuteComponent>();
 	this->addChildComponent(this->muteButton.get());
 
+	/** Solo Button */
+	this->soloButton = std::make_unique<SeqTrackSoloComponent>();
+	this->addChildComponent(this->soloButton.get());
+
 	/** Input Monitoring Button */
 	this->inputMonitoringButton = std::make_unique<SeqTrackInputMonitoringComponent>();
 	this->addChildComponent(this->inputMonitoringButton.get());
@@ -171,6 +175,7 @@ void SeqTrackComponent::updateBlock(int blockIndex) {
 
 void SeqTrackComponent::updateMuteSolo() {
 	this->muteButton->update(this->index);
+	this->soloButton->update(this->index);
 }
 
 void SeqTrackComponent::updateInputMonitoring() {
@@ -327,9 +332,16 @@ void SeqTrackComponent::resized() {
 	this->muteButton->setBounds(muteRect);
 	this->muteButton->setVisible(isIOLineShown);
 
+	/** Solo Button */
+	juce::Rectangle<int> soloRect(
+		muteRect.getRight() + buttonSplitWidth, inputMonitoringRect.getY(),
+		ioLineHeight, ioLineHeight);
+	this->soloButton->setBounds(soloRect);
+	this->soloButton->setVisible(isIOLineShown);
+
 	/** MIDI Output */
 	juce::Rectangle<int> midiOutputRect(
-		muteRect.getRight() + buttonSplitWidth, inputMonitoringRect.getY(),
+		soloRect.getRight() + buttonSplitWidth, inputMonitoringRect.getY(),
 		ioLineHeight, ioLineHeight);
 	this->midiOutput->setBounds(midiOutputRect);
 	this->midiOutput->setVisible(isIOLineShown);

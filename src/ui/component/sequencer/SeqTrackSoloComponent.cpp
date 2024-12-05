@@ -1,15 +1,15 @@
-﻿#include "SeqTrackMuteComponent.h"
+﻿#include "SeqTrackSoloComponent.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreActions.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
-SeqTrackMuteComponent::SeqTrackMuteComponent() {
+SeqTrackSoloComponent::SeqTrackSoloComponent() {
 	this->setLookAndFeel(
-		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::MuteButton));
+		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::SoloButton));
 }
 
-void SeqTrackMuteComponent::paint(juce::Graphics& g) {
+void SeqTrackSoloComponent::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float lineThickness = screenSize.getHeight() * 0.001;
@@ -21,10 +21,10 @@ void SeqTrackMuteComponent::paint(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(this->equivalentMute
+	juce::Colour backgroundColor = laf.findColour(this->solo
 		? juce::TextButton::ColourIds::buttonOnColourId
 		: juce::TextButton::ColourIds::buttonColourId);
-	juce::Colour textColor = laf.findColour(this->equivalentMute
+	juce::Colour textColor = laf.findColour(this->solo
 		? juce::TextButton::ColourIds::textColourOnId
 		: juce::TextButton::ColourIds::textColourOffId);
 
@@ -43,15 +43,15 @@ void SeqTrackMuteComponent::paint(juce::Graphics& g) {
 	g.drawRect(buttonRect, lineThickness);
 
 	g.setFont(textFont);
-	g.drawFittedText("M", buttonRect.toNearestInt(),
+	g.drawFittedText("S", buttonRect.toNearestInt(),
 		juce::Justification::centred, 1, 0.f);
 }
 
-void SeqTrackMuteComponent::mouseDrag(const juce::MouseEvent& event) {
+void SeqTrackSoloComponent::mouseDrag(const juce::MouseEvent& event) {
 	this->mouseMove(event);
 }
 
-void SeqTrackMuteComponent::mouseMove(const juce::MouseEvent& event) {
+void SeqTrackSoloComponent::mouseMove(const juce::MouseEvent& event) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float lineThickness = screenSize.getHeight() * 0.001;
@@ -68,7 +68,7 @@ void SeqTrackMuteComponent::mouseMove(const juce::MouseEvent& event) {
 		: juce::MouseCursor::NormalCursor);
 }
 
-void SeqTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
+void SeqTrackSoloComponent::mouseUp(const juce::MouseEvent& event) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float lineThickness = screenSize.getHeight() * 0.001;
@@ -81,24 +81,23 @@ void SeqTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
 
 	if (buttonRect.contains(event.position)) {
 		if (event.mods.isLeftButtonDown()) {
-			this->changeMute();
+			this->changeSolo();
 		}
 		else if (event.mods.isRightButtonDown()) {
-			this->changeMute();
+			this->changeSolo();
 		}
 	}
 }
 
-void SeqTrackMuteComponent::update(int index) {
+void SeqTrackSoloComponent::update(int index) {
 	this->index = index;
 	if (index > -1) {
-		this->mute = quickAPI::getSeqTrackMute(index);
-		this->equivalentMute = quickAPI::getSeqTrackEquivalentMute(index);
+		this->solo = quickAPI::getSeqTrackSolo(index);
 
 		this->repaint();
 	}
 }
 
-void SeqTrackMuteComponent::changeMute() {
-	CoreActions::setSeqMute(this->index, !(this->mute));
+void SeqTrackSoloComponent::changeSolo() {
+	CoreActions::setSeqSolo(this->index, !(this->solo));
 }

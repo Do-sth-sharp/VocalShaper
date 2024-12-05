@@ -2,11 +2,11 @@
 
 #include <JuceHeader.h>
 
-class SeqTrackMuteComponent final
+class SeqTrackSoloComponent final
 	: public juce::Component,
 	public juce::SettableTooltipClient {
 public:
-	SeqTrackMuteComponent();
+	SeqTrackSoloComponent();
 
 	void paint(juce::Graphics& g) override;
 
@@ -18,10 +18,9 @@ public:
 
 private:
 	int index = -1;
-	bool mute = false;
-	bool equivalentMute = false;
+	bool solo = false;
 
-	void changeMute();
+	void changeSolo();
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackMuteComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqTrackSoloComponent)
 };

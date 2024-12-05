@@ -13,7 +13,7 @@ public:
 		ToolBar, MainMenu, SysStatus, Time, Controller, Tools,
 		Message, MessageView, PluginView, PluginEditor, ChannelLink,
 		Mixer, Scroller, ColorEditor, SideChain, LevelMeter,
-		MuteButton, RecButton, Effect, Seq, TimeRuler, SeqTrack,
+		MuteButton, SoloButton, RecButton, Effect, Seq, TimeRuler, SeqTrack,
 		SeqTrackName, InstrName, SeqBlock, Editor, EditorSwitchBar,
 		Piano, MidiContent, InputMonitoringButton,
 

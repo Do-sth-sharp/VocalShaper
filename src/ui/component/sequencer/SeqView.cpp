@@ -50,9 +50,9 @@ void SeqView::TrackList::updateBlock(int track, int index) {
 	}
 }
 
-void SeqView::TrackList::updateMuteSolo(int index) {
-	if (index >= 0 && index < this->list.size()) {
-		this->list[index]->updateMuteSolo();
+void SeqView::TrackList::updateMuteSolo(int /*index*/) {
+	for (auto i : this->list) {
+		i->updateMuteSolo();
 	}
 }
 

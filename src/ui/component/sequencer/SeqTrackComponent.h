@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "SeqTrackMuteComponent.h"
+#include "SeqTrackSoloComponent.h"
 #include "SeqTrackInputMonitoringComponent.h"
 #include "SeqTrackRecComponent.h"
 #include "SeqTrackIOComponent.h"
@@ -78,6 +79,7 @@ private:
 
 	std::unique_ptr<juce::TextButton> trackName = nullptr;
 	std::unique_ptr<SeqTrackMuteComponent> muteButton = nullptr;
+	std::unique_ptr<SeqTrackSoloComponent> soloButton = nullptr;
 	std::unique_ptr<SeqTrackInputMonitoringComponent> inputMonitoringButton = nullptr;
 	std::unique_ptr<SeqTrackRecComponent> recButton = nullptr;
 

@@ -90,8 +90,7 @@ public:
 	static void setSeqMIDIOutputToMixer(int index, int mixerIndex, bool output);
 	static void setSeqAudioOutputToMixer(int index, int channel, int mixerIndex, int dstChannel, bool output);
 	static void setSeqMute(int index, bool mute);
-	static void setSeqSolo(int index);
-	static void setSeqMuteAll(bool mute);
+	static void setSeqSolo(int index, bool solo);
 	static void setSeqInputMonitoring(int index, bool inputMonitoring);
 	static void setSeqRec(int index, quickAPI::RecordState rec);
 	static void setSeqMIDITrack(int index, int midiTrack);

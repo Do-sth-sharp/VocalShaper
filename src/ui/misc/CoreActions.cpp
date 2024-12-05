@@ -427,18 +427,9 @@ void CoreActions::setSeqMute(int index, bool mute) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqSolo(int index) {
-	int trackNum = quickAPI::getSeqTrackNum();
-	for (int i = 0; i < trackNum; i++) {
-		CoreActions::setSeqMute(i, i != index);
-	}
-}
-
-void CoreActions::setSeqMuteAll(bool mute) {
-	int trackNum = quickAPI::getSeqTrackNum();
-	for (int i = 0; i < trackNum; i++) {
-		CoreActions::setSeqMute(i, mute);
-	}
+void CoreActions::setSeqSolo(int index, bool solo) {
+	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackSolo{ index, solo });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setSeqInputMonitoring(int index, bool inputMonitoring) {

@@ -55,6 +55,7 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 }
 
 SeqSourceProcessor::~SeqSourceProcessor() {
+	this->setSolo(false);
 	this->releaseAudio();
 	this->releaseMIDI();
 }
@@ -544,7 +545,7 @@ bool SeqSourceProcessor::getMute() const {
 }
 
 void SeqSourceProcessor::setSolo(bool solo) {
-	bool shouldChange = (this->isSolo == solo);
+	bool shouldChange = (this->isSolo != solo);
 
 	this->isSolo = solo;
 

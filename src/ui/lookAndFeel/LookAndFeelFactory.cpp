@@ -17,6 +17,7 @@
 #include "mixer/SideChainLookAndFeel.h"
 #include "mixer/LevelMeterLookAndFeel.h"
 #include "base/MuteButtonLookAndFeel.h"
+#include "base/SoloButtonLookAndFeel.h"
 #include "base/RecButtonLookAndFeel.h"
 #include "mixer/EffectLookAndFeel.h"
 #include "sequencer/SeqLookAndFeel.h"
@@ -85,6 +86,7 @@ void LookAndFeelFactory::initialise() {
 		new SideChainLookAndFeel{},
 		new LevelMeterLookAndFeel{},
 		new MuteButtonLookAndFeel{},
+		new SoloButtonLookAndFeel{},
 		new RecButtonLookAndFeel{},
 		new EffectLookAndFeel{},
 		new SeqLookAndFeel{},
