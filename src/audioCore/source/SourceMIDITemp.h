@@ -102,26 +102,16 @@ private:
 		juce::OwnedArray<MIDIStruct>& eventsList,
 		const juce::MidiMessage& message);
 
-	static void addMIDIMessages(
+	static void addMIDIMessagesInternal(
 		juce::OwnedArray<MIDIStruct>& eventsList,
-		juce::Array<int>& noteTrackIndexList,
-		juce::Array<int>& pitchWheelIndexList,
-		juce::Array<int>& channelPressureIndexList,
-		juce::Array<int>& afterTouchIndexList,
-		std::unordered_map<uint8_t, juce::Array<int>>& controllersIndexList,
-		juce::Array<int>& miscsIndexList,
 		const juce::MidiMessageSequence& list,
 		NoteOnTemp& noteOnTemp, int& indexTemp, LyricsItem& lyricsTemp);
-	static void addMIDIMessage(
+	static void addMIDIMessageInternal(
 		juce::OwnedArray<MIDIStruct>& eventsList,
-		juce::Array<int>& noteTrackIndexList,
-		juce::Array<int>& pitchWheelIndexList,
-		juce::Array<int>& channelPressureIndexList,
-		juce::Array<int>& afterTouchIndexList,
-		std::unordered_map<uint8_t, juce::Array<int>>& controllersIndexList,
-		juce::Array<int>& miscsIndexList,
 		const juce::MidiMessage& message,
 		NoteOnTemp& noteOnTemp, int& indexTemp, LyricsItem& lyricsTemp);
+
+	void updateIndexs(int track);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceMIDITemp)
 };

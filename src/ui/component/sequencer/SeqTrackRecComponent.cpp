@@ -106,7 +106,7 @@ enum SeqRecordMenuActionType {
 void SeqTrackRecComponent::changeRecQuick() {
 	CoreActions::setSeqRec(this->index, static_cast<quickAPI::RecordState>(
 		(this->rec == quickAPI::RecordState::NotRecording)
-		? quickAPI::RecordState::MIDIInsertMode | quickAPI::RecordState::AudioCoverMode
+		? quickAPI::RecordState::MIDICoverMode | quickAPI::RecordState::AudioCoverMode
 		: quickAPI::RecordState::NotRecording));
 }
 
