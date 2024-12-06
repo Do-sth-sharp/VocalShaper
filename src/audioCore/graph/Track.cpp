@@ -1,26 +1,23 @@
-﻿#include "Track.h"
-
+#include "Track.h"
+#include "SeqSourceProcessor.h"
+#include "MixerTrack.h"
+#include "../misc/VMath.h"
 #include "../misc/Renderer.h"
 #include "../misc/AudioLock.h"
-#include "../misc/VMath.h"
 #include "../uiCallback/UICallback.h"
-#include "../Utils.h"
 #include <VSP4.h>
+
 using namespace org::vocalsharp::vocalshaper;
 
-Track::Track(const juce::AudioChannelSet& type)
-	: audioChannels(type) {
-	/** Set Effects */
-	this->setGain(0);
-	this->setPan(0);
-	this->setSlider(1);
-
+Track::Track(TrackType type,
+	const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo())
+	: type(type), audioChannels(bus) {
 	/** Set Channel Layout */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(type.size()));
+		juce::AudioChannelSet::discreteChannels(bus.size()));
 	layout.outputBuses.add(
-		juce::AudioChannelSet::discreteChannels(type.size()));
+		juce::AudioChannelSet::discreteChannels(bus.size()));
 	this->setBusesLayout(layout);
 
 	/** The Main Audio IO Node Of The Track */
@@ -39,49 +36,170 @@ Track::Track(const juce::AudioChannelSet& type)
 		std::make_unique<juce::AudioProcessorGraph::AudioGraphIOProcessor>(
 			juce::AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode));
 
-	/** Set Audio Input Node Channel Num */
-	juce::AudioProcessorGraph::BusesLayout inputLayout;
-	inputLayout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(this->getTotalNumInputChannels()));
-	inputLayout.outputBuses = inputLayout.inputBuses;
-	this->audioInputNode->getProcessor()->setBusesLayout(inputLayout);
+	/** Set Audio IO Node Channel Num */
+	this->audioInputNode->getProcessor()->setBusesLayout(layout);
+	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
-	/** The Plugin Dock Node Of The Track */
-	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(type));
-
-	/** Connect Plugin Dock Node To IO Node */
-	int mainBusInputChannels = this->audioChannels.size();
-	for (int i = 0; i < mainBusInputChannels; i++) {
-		this->addConnection(
-			{ {this->audioInputNode->nodeID, i}, {this->pluginDockNode->nodeID, i} });
+	/** Add Sequencer Processor If Need */
+	if (type == TrackType::Track) {
+		this->sequencerNode = this->addNode(
+			std::make_unique<SeqSourceProcessor>(
+				[this] { return this->getTrackName(); },
+				[this] { return this->getTrackColor(); },
+				bus));
 	}
-	int mainBusOutputChannels = this->getMainBusNumOutputChannels();
-	for (int i = 0; i < mainBusOutputChannels; i++) {
-		this->addConnection(
-			{ {this->pluginDockNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
-	}
-	this->addConnection(
-		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->pluginDockNode->nodeID, this->midiChannelIndex} });
 
-	/** Connect MIDI IO Node */
-	this->addConnection(
-		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {this->midiOutputNode->nodeID, this->midiChannelIndex} });
+	/** Add Mixer Processor If Need */
+	this->mixerNode = this->addNode(
+		std::make_unique<MixerTrack>(bus));
+
+	/** Link Input Channel */
+	int channels = this->audioChannels.size();
+	if (type == TrackType::Track) {
+		/** Link Input to Sequencer Then to Mixer */
+		for (int i = 0; i < channels; i++) {
+			this->addConnection(
+				{ {this->audioInputNode->nodeID, i}, {this->sequencerNode->nodeID, i} });
+			this->addConnection(
+				{ {this->sequencerNode->nodeID, i}, {this->mixerNode->nodeID, i} });
+		}
+		this->addConnection(
+			{ {this->midiInputNode->nodeID, this->midiChannelIndex},
+			{this->sequencerNode->nodeID, this->midiChannelIndex} });
+		this->addConnection(
+			{ {this->sequencerNode->nodeID, this->midiChannelIndex},
+			{this->mixerNode->nodeID, this->midiChannelIndex} });
+	}
+	else {
+		/** Link Input to Mixer */
+		for (int i = 0; i < channels; i++) {
+			this->addConnection(
+				{ {this->audioInputNode->nodeID, i}, {this->mixerNode->nodeID, i} });
+		}
+		this->addConnection(
+			{ {this->midiInputNode->nodeID, this->midiChannelIndex},
+			{this->mixerNode->nodeID, this->midiChannelIndex} });
+	}
+
+	/** Link Output Channel */
+	{
+		for (int i = 0; i < channels; i++) {
+			this->addConnection(
+				{ {this->mixerNode->nodeID, i}, {this->audioOutputNode->nodeID, i} });
+		}
+		this->addConnection(
+			{ {this->mixerNode->nodeID, this->midiChannelIndex},
+			{this->audioOutputNode->nodeID, this->midiChannelIndex} });
+	}
 
 	/** Set Level Size */
-	this->outputLevels.resize(mainBusOutputChannels);
+	this->outputLevels.resize(channels);
 
 	/** Default Color */
 	this->trackColor = utils::getDefaultColour();
 }
 
+Track::~Track() {
+	this->setSolo(false);
+}
+
 void Track::updateIndex(int index) {
 	this->index = index;
+
+	if (auto seq = this->getSequencer()) {
+		seq->updateIndex(index);
+	}
+
+	if (auto mixer = this->getMixer()) {
+		mixer->updateIndex(index);
+	}
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
 }
 
+void Track::setTrackName(const juce::String& name) {
+	this->trackName = name;
+
+	/** ARA Change */
+	if (auto seq = this->getSequencer()) {
+		seq->syncARATrackInfo();
+	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
+}
+
+const juce::String Track::getTrackName() const {
+	return this->trackName;
+}
+
+void Track::setTrackColor(const juce::Colour& color) {
+	this->trackColor = color;
+
+	/** ARA Change */
+	if (auto seq = this->getSequencer()) {
+		seq->syncARATrackInfo();
+	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
+}
+
+const juce::Colour Track::getTrackColor() const {
+	return this->trackColor;
+}
+
+void Track::setMute(bool mute) {
+	this->isMute = mute;
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
+}
+
+bool Track::getMute() const {
+	return this->isMute;
+}
+
+void Track::setSolo(bool solo) {
+	if (this->type != TrackType::Track) { return; }
+
+	bool shouldChange = (this->isSolo != solo);
+
+	this->isSolo = solo;
+
+	/** Global Solo Count */
+	if (shouldChange) {
+		if (solo) {
+			utils::increaseSoloCount();
+		}
+		else {
+			utils::decreaseSoloCount();
+		}
+	}
+
+	/** Callback */
+	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
+}
+
+bool Track::getSolo() const {
+	if (this->type != TrackType::Track) { return false; }
+	return this->isSolo;
+}
+
+bool Track::getEquivalentMute() const {
+	if (this->type != TrackType::Track) { return this->isMute; }
+
+	if (utils::shouldSolo()) {
+		return !this->isSolo;
+	}
+	return this->isMute;
+}
+
 bool Track::addAdditionalAudioBus() {
+	/** Can't Add Bus To Normal Track */
+	if (this->type == TrackType::Track) { return false; }
+
 	/** Check Channel Num */
 	int oldNum = this->getTotalNumInputChannels();
 	if (oldNum + this->audioChannels.size() >= juce::AudioProcessorGraph::midiChannelIndex) {
@@ -108,15 +226,15 @@ bool Track::addAdditionalAudioBus() {
 	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Plugin Dock Node */
-	if (auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())) {
-		jassert(ptrPluginDock->addAdditionalAudioBus());
+	if (auto ptrMixer = this->getMixer()) {
+		jassert(ptrMixer->addAdditionalAudioBus());
 	}
 
 	/** Connect Bus To Plugin Dock */
 	for (int i = oldNum; i < newNum; i++) {
 		this->addConnection({ {this->audioInputNode->nodeID, i},
-			{this->pluginDockNode->nodeID, i} });
-		this->addConnection({ {this->pluginDockNode->nodeID, i},
+			{this->mixerNode->nodeID, i} });
+		this->addConnection({ {this->mixerNode->nodeID, i},
 			{this->audioOutputNode->nodeID, i} });
 	}
 
@@ -127,6 +245,9 @@ bool Track::addAdditionalAudioBus() {
 }
 
 bool Track::removeAdditionalAudioBus() {
+	/** Can't Add Bus To Normal Track */
+	if (this->type == TrackType::Track) { return false; }
+
 	/** Check Channel Num */
 	int oldNum = this->getTotalNumInputChannels();
 	if (oldNum - this->audioChannels.size() < this->audioChannels.size()) {
@@ -152,8 +273,8 @@ bool Track::removeAdditionalAudioBus() {
 	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
 	/** Set Bus Layout Of Plugin Dock Node */
-	if (auto ptrPluginDock = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())) {
-		jassert(ptrPluginDock->removeAdditionalAudioBus());
+	if (auto ptrMixer = this->getMixer()) {
+		jassert(ptrMixer->removeAdditionalAudioBus());
 	}
 
 	/** Auto Remove Connection */
@@ -170,150 +291,57 @@ int Track::getAdditionalAudioBusNum() const {
 	return this->getTotalNumInputChannels() / this->audioChannels.size() - 1;
 }
 
-void Track::setMute(bool mute) {
-	this->isMute = mute;
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackMuteChanged, this->index);
-}
-
-bool Track::getMute() const {
-	return this->isMute;
-}
-
-void Track::setGain(float gain) {
-	auto& gainDsp = this->gainAndPanner.get<0>();
-	gainDsp.setGainDecibels(gain);
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackGainChanged, this->index);
-}
-
-float Track::getGain() const {
-	auto& gainDsp = this->gainAndPanner.get<0>();
-	return gainDsp.getGainDecibels();
-}
-
-void Track::setPan(float pan) {
-	pan = juce::jlimit(-1.0f, 1.0f, pan);
-	this->panValue = pan;
-
-	auto& panDsp = this->gainAndPanner.get<1>();
-	panDsp.setPan(pan);
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackPanChanged, this->index);
-}
-
-float Track::getPan() const {
-	return this->panValue;
-}
-
-void Track::setSlider(float slider) {
-	auto& sliderDsp = this->slider.get<0>();
-	sliderDsp.setGainLinear(slider);
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackFaderChanged, this->index);
-}
-
-float Track::getSlider() const {
-	auto& sliderDsp = this->slider.get<0>();
-	return sliderDsp.getGainLinear();
-}
-
-void Track::setTrackName(const juce::String& name) {
-	this->trackName = name;
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
-}
-
-const juce::String Track::getTrackName() const {
-	return this->trackName;
-}
-
-void Track::setTrackColor(const juce::Colour& color) {
-	this->trackColor = color;
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
-}
-
-const juce::Colour Track::getTrackColor() const {
-	return this->trackColor;
-}
-
-const juce::AudioChannelSet& Track::getAudioChannelSet() const {
-	return this->audioChannels;
-}
-
-PluginDock* Track::getPluginDock() const {
-	return dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
-}
-                                  
-void Track::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) {
-	if (sampleRate <= 0 || maximumExpectedSamplesPerBlock <= 0) {
-		return;
-	}
-
-	if (this->audioChannels.size() > 0) {
-		/** Prepare Gain And Panner */
-		this->gainAndPanner.prepare(juce::dsp::ProcessSpec(
-			sampleRate, maximumExpectedSamplesPerBlock,
-			this->audioChannels.size()
-		));
-
-		/** Prepare Slider */
-		this->slider.prepare(juce::dsp::ProcessSpec(
-			sampleRate, maximumExpectedSamplesPerBlock,
-			this->audioChannels.size()
-		));
-	}
-
-	/** Prepare Current Graph */
-	this->AudioProcessorGraph::prepareToPlay(sampleRate, maximumExpectedSamplesPerBlock);
-}
-
-void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
-	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
-
-	/** Plugins */
-	if (auto pluginDock = this->getPluginDock()) {
-		pluginDock->setPlayHead(newPlayHead);
-	}
-}
-
-void Track::clearGraph() {
-	auto plugins = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor());
-	if (plugins) {
-		plugins->clearGraph();
-	}
-
-	while (this->getAdditionalAudioBusNum() > 0) {
-		this->removeAdditionalAudioBus();
-	}
-
-	this->setTrackName(juce::String{});
-	this->setTrackColor(juce::Colour{});
-	this->setMute(false);
-	this->setGain(0);
-	this->setPan(0);
-	this->setSlider(1);
-}
-
 const juce::Array<float> Track::getOutputLevels() const {
 	juce::ScopedReadLock locker(audioLock::getLevelMeterLock());
 	return this->outputLevels;
 }
 
+void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
+	this->juce::AudioProcessorGraph::setPlayHead(newPlayHead);
+
+	if (auto seq = this->getSequencer()) {
+		seq->setPlayHead(newPlayHead);
+	}
+
+	if (auto mixer = this->getMixer()) {
+		mixer->setPlayHead(newPlayHead);
+	}
+}
+
+void Track::clearGraph() {
+	while (this->getAdditionalAudioBusNum() > 0) {
+		this->removeAdditionalAudioBus();
+	}
+
+	if (auto seq = this->getSequencer()) {
+		seq->clearGraph();
+	}
+
+	if (auto mixer = this->getMixer()) {
+		mixer->clearGraph();
+	}
+}
+
 bool Track::parse(
 	const google::protobuf::Message* data,
 	const ParseConfig& config) {
-	auto mes = dynamic_cast<const vsp4::MixerTrack*>(data);
+	auto mes = dynamic_cast<const vsp4::Track*>(data);
 	if (!mes) { return false; }
 
 	this->clearGraph();
+
+	if (auto sequencer = this->getSequencer()) {
+		auto& seqTrack = mes->seqtrack();
+		if (!sequencer->parse(&seqTrack, config)) {
+			return false;
+		}
+	}
+	if (auto mixer = this->getMixer()) {
+		auto& mixerTrack = mes->mixertrack();
+		if (!mixer->parse(&mixerTrack, config)) {
+			return false;
+		}
+	}
 
 	auto& info = mes->info();
 	this->setTrackName(info.name());
@@ -324,71 +352,68 @@ bool Track::parse(
 		this->addAdditionalAudioBus();
 	}
 
-	auto& plugins = mes->effects();
-	if (!dynamic_cast<PluginDock*>(
-		this->pluginDockNode->getProcessor())->parse(&plugins, config)) {
-		return false;
-	}
-
-	this->setMute(mes->muted());
-	this->setGain(mes->gain());
-	this->setPan(mes->panner());
-	this->setSlider(mes->slider());
-
-	return true;
+	this->setMute(mes->mute());
+	this->setSolo(mes->solo());
 }
 
 std::unique_ptr<google::protobuf::Message> Track::serialize(
 	const SerializeConfig& config) const {
-	auto mes = std::make_unique<vsp4::MixerTrack>();
+	auto mes = std::make_unique<vsp4::Track>();
 
-	mes->set_type(static_cast<vsp4::TrackType>(utils::getTrackType(this->audioChannels)));
+	mes->set_type(static_cast<vsp4::TrackType>(this->type));
+	mes->set_bus(static_cast<vsp4::BusType>(utils::getTrackType(this->audioChannels)));
 	auto info = mes->mutable_info();
 	info->set_name(this->getTrackName().toStdString());
 	info->set_color(this->getTrackColor().getARGB());
 	mes->set_additionalbuses(this->getAdditionalAudioBusNum());
 
-	auto plugins = dynamic_cast<PluginDock*>(this->pluginDockNode->getProcessor())->serialize(config);
-	if (!dynamic_cast<vsp4::PluginDock*>(plugins.get())) { return nullptr; }
-	mes->set_allocated_effects(dynamic_cast<vsp4::PluginDock*>(plugins.release()));
+	mes->set_mute(this->getMute());
+	mes->set_solo(this->getSolo());
 
-	mes->set_muted(this->getMute());
-	mes->set_gain(this->getGain());
-	mes->set_panner(this->getPan());
-	mes->set_slider(this->getSlider());
+	if (auto sequencer = this->getSequencer()) {
+		auto seqTrack = sequencer->serialize(config);
+		if (!dynamic_cast<vsp4::SeqTrack*>(seqTrack.get())) { return nullptr; }
+		mes->set_allocated_seqtrack(dynamic_cast<vsp4::SeqTrack*>(seqTrack.release()));
+	}
+	if (auto mixer = this->getMixer()) {
+		auto mixerTrack = mixer->serialize(config);
+		if (!dynamic_cast<vsp4::MixerTrack*>(mixerTrack.get())) { return nullptr; }
+		mes->set_allocated_mixertrack(dynamic_cast<vsp4::MixerTrack*>(mixerTrack.release()));
+	}
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 bool Track::canAddBus(bool isInput) const {
-	return isInput;
+	return isInput && (this->type != TrackType::Track);
 }
 
 bool Track::canRemoveBus(bool isInput) const {
-	return isInput;
+	return isInput && (this->type != TrackType::Track);
+}
+
+SeqSourceProcessor* Track::getSequencer() const {
+	return dynamic_cast<SeqSourceProcessor*>(
+		this->sequencerNode->getProcessor());
+}
+
+MixerTrack* Track::getMixer() const {
+	return dynamic_cast<MixerTrack*>(
+		this->mixerNode->getProcessor());
 }
 
 void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Check Buffer Is Empty */
 	if (buffer.getNumChannels() <= 0) { return; }
 	if (buffer.getNumSamples() <= 0) { return; }
-	
-	/** Process Gain And Panner */
-	int mainChannels = this->audioChannels.size();
-	auto block = juce::dsp::AudioBlock<float>(buffer).getSubsetChannelBlock(
-		0, mainChannels);
-	this->gainAndPanner.process(juce::dsp::ProcessContextReplacing<float>(block));
 
 	/** Process Current Graph */
 	this->AudioProcessorGraph::processBlock(buffer, midiMessages);
 
 	/** Process Mute */
-	if (this->isMute) {
-		block.fill(0);
+	if (this->getEquivalentMute()) {
+		vMath::zeroAllAudioData(buffer);
 	}
-
-	/** Process Slider */
-	this->slider.process(juce::dsp::ProcessContextReplacing<float>(block));
 
 	/** Update Level Meter */
 	for (int i = 0; i < buffer.getNumChannels() && i < this->outputLevels.size(); i++) {
@@ -397,12 +422,13 @@ void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& mid
 	}
 
 	/** Render */
-	if (Renderer::getInstance()->getRendering()) {
+	/*if (Renderer::getInstance()->getRendering()) {
 		if (auto playHead = this->getPlayHead()) {
 			auto pos = playHead->getPosition();
 			int64_t offset = pos->getTimeInSamples().orFallback(0);
 
 			Renderer::getInstance()->writeData(this, buffer, offset);
 		}
-	}
+	}*/
 }
+

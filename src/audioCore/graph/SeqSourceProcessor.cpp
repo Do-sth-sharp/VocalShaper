@@ -9,8 +9,12 @@
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
-	: audioChannels(type) {
+SeqSourceProcessor::SeqSourceProcessor(
+	const GetNameFunc& getNameFunc,
+	const GetColorFunc& getColorFunc,
+	const juce::AudioChannelSet& type)
+	: getNameFunc(getNameFunc), getColorFunc(getColorFunc),
+	audioChannels(type) {
 	/** Set Channel Layout */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
@@ -49,13 +53,9 @@ SeqSourceProcessor::SeqSourceProcessor(const juce::AudioChannelSet& type)
 
 	/** Set Level Size */
 	this->outputLevels.resize(type.size());
-
-	/** Default Color */
-	this->trackColor = utils::getDefaultColour();
 }
 
 SeqSourceProcessor::~SeqSourceProcessor() {
-	this->setSolo(false);
 	this->releaseAudio();
 	this->releaseMIDI();
 }
@@ -63,9 +63,14 @@ SeqSourceProcessor::~SeqSourceProcessor() {
 void SeqSourceProcessor::updateIndex(int index) {
 	this->index = index;
 	this->srcs.updateIndex(index);
+}
 
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, index);
+const juce::String SeqSourceProcessor::getTrackName() const {
+	return this->getNameFunc();
+}
+
+const juce::Colour SeqSourceProcessor::getTrackColor() const {
+	return this->getColorFunc();
 }
 
 int SeqSourceProcessor::addSeq(const SourceList::SeqBlock& block) {
@@ -128,38 +133,6 @@ int SeqSourceProcessor::resetSeqTime(
 	}
 
 	return newIndex;
-}
-
-void SeqSourceProcessor::setTrackName(const juce::String& name) {
-	this->trackName = name;
-
-	/** ARA Change */
-	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentTrackInfoChange();
-	}
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, this->index);
-}
-
-const juce::String SeqSourceProcessor::getTrackName() const {
-	return this->trackName;
-}
-
-void SeqSourceProcessor::setTrackColor(const juce::Colour& color) {
-	this->trackColor = color;
-
-	/** ARA Change */
-	if (auto plugin = this->getInstrProcessor()) {
-		plugin->invokeARADocumentTrackInfoChange();
-	}
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, this->index);
-}
-
-const juce::Colour SeqSourceProcessor::getTrackColor() const {
-	return this->trackColor;
 }
 
 const juce::AudioChannelSet& SeqSourceProcessor::getAudioChannelSet() const {
@@ -450,7 +423,7 @@ void SeqSourceProcessor::initMIDI() {
 
 const juce::String SeqSourceProcessor::getAudioFileName() const {
 	juce::String name = this->getAudioName();
-	if (name.isEmpty()) { name = this->trackName; }
+	if (name.isEmpty()) { name = this->getNameFunc(); }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 	
 	auto file = juce::File::createFileWithoutCheckingPath(utils::getLegalFileName(name));
@@ -469,7 +442,7 @@ const juce::String SeqSourceProcessor::getAudioFileName() const {
 
 const juce::String SeqSourceProcessor::getMIDIFileName() const {
 	juce::String name = this->getMIDIName();
-	if (name.isEmpty()) { name = this->trackName; }
+	if (name.isEmpty()) { name = this->getNameFunc(); }
 	if (name.isEmpty()) { name = juce::String{ this->index }; }
 
 	auto file = juce::File::createFileWithoutCheckingPath(utils::getLegalFileName(name));
@@ -533,47 +506,6 @@ SeqSourceProcessor::RecordState SeqSourceProcessor::getRecording() const {
 	return this->recordingFlag;
 }
 
-void SeqSourceProcessor::setMute(bool mute) {
-	this->isMute = mute;
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
-}
-
-bool SeqSourceProcessor::getMute() const {
-	return this->isMute;
-}
-
-void SeqSourceProcessor::setSolo(bool solo) {
-	bool shouldChange = (this->isSolo != solo);
-
-	this->isSolo = solo;
-
-	/** Global Solo Count */
-	if (shouldChange) {
-		if (solo) {
-			utils::increaseSoloCount();
-		}
-		else {
-			utils::decreaseSoloCount();
-		}
-	}
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
-}
-
-bool SeqSourceProcessor::getSolo() const {
-	return this->isSolo;
-}
-
-bool SeqSourceProcessor::getEquivalentMute() const {
-	if (utils::shouldSolo()) {
-		return !this->isSolo;
-	}
-	return this->isMute;
-}
-
 void SeqSourceProcessor::setInputMonitoring(bool inputMonitoring) {
 	this->inputMonitoring = inputMonitoring;
 
@@ -593,6 +525,12 @@ const juce::Array<float> SeqSourceProcessor::getOutputLevels() const {
 void SeqSourceProcessor::syncARAContext() {
 	if (auto plugin = this->getInstrProcessor()) {
 		plugin->invokeARADocumentContextChange();
+	}
+}
+
+void SeqSourceProcessor::syncARATrackInfo() {
+	if (auto plugin = this->getInstrProcessor()) {
+		plugin->invokeARADocumentTrackInfoChange();
 	}
 }
 
@@ -654,7 +592,7 @@ void SeqSourceProcessor::processBlock(
 	/** Check Play State */
 	if (!position->getIsPlaying()) { isPlaying = false; }
 
-	if (isPlaying && !(this->isMute)) {
+	if (isPlaying) {
 		/** Get Time */
 		double startTime = position->getTimeInSeconds().orFallback(-1);
 		double sampleRate = this->getSampleRate();
@@ -736,11 +674,6 @@ void SeqSourceProcessor::processBlock(
 		this->juce::AudioProcessorGraph::processBlock(buffer, midiMessages);
 	}
 
-	/** Process Mute */
-	if (this->getEquivalentMute()) {
-		vMath::zeroAllAudioData(buffer);
-	}
-
 	/** Update Level Meter */
 	for (int i = 0; i < buffer.getNumChannels() && i < this->outputLevels.size(); i++) {
 		this->outputLevels.getReference(i) =
@@ -754,9 +687,6 @@ double SeqSourceProcessor::getTailLengthSeconds() const {
 }
 
 void SeqSourceProcessor::clearGraph() {
-	this->setTrackName(juce::String{});
-	this->setTrackColor(juce::Colour{});
-
 	this->srcs.clearGraph();
 }
 
@@ -765,10 +695,6 @@ bool SeqSourceProcessor::parse(
 	const ParseConfig& config) {
 	auto mes = dynamic_cast<const vsp4::SeqTrack*>(data);
 	if (!mes) { return false; }
-
-	auto& info = mes->info();
-	this->setTrackName(info.name());
-	this->setTrackColor(juce::Colour{ info.color() });
 
 	auto& sources = mes->sources();
 	if (!this->srcs.parse(&sources, config)) { return false; }
@@ -799,8 +725,6 @@ bool SeqSourceProcessor::parse(
 
 	this->setRecording(static_cast<RecordState>(mes->recordstate()));
 	this->setInputMonitoring(mes->inputmonitoring());
-	this->setMute(mes->muted());
-	this->setSolo(mes->solo());
 
 	return true;
 }
@@ -808,11 +732,6 @@ bool SeqSourceProcessor::parse(
 std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
 	const SerializeConfig& config) const {
 	auto mes = std::make_unique<vsp4::SeqTrack>();
-
-	mes->set_type(static_cast<vsp4::TrackType>(utils::getTrackType(this->audioChannels)));
-	auto info = mes->mutable_info();
-	info->set_name(this->getTrackName().toStdString());
-	info->set_color(this->getTrackColor().getARGB());
 
 	auto srcs = this->srcs.serialize(config);
 	if (!dynamic_cast<vsp4::SourceInstanceList*>(srcs.get())) { return nullptr; }
@@ -851,10 +770,8 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
 
 	mes->set_recordstate(static_cast<vsp4::SeqTrack::RecordState>(this->getRecording()));
 	mes->set_inputmonitoring(this->getInputMonitoring());
-	mes->set_muted(this->getMute());
-	mes->set_solo(this->getSolo());
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 void SeqSourceProcessor::readAudioData(

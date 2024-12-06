@@ -103,7 +103,7 @@ std::unique_ptr<google::protobuf::Message> ProjectInfoData::serialize(
 		authors->Add(s.toStdString());
 	}
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 ProjectInfoData* ProjectInfoData::getInstance() {

@@ -780,7 +780,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize(
 		info->set_id(this->getPluginIdentifier().toStdString());
 		info->set_addara(this->isARAValid());
 	}
-	info->set_decoratortype(static_cast<vsp4::TrackType>(
+	info->set_decoratortype(static_cast<vsp4::BusType>(
 		utils::getTrackType(this->getAudioChannelSet())));
 
 	/** Plugin State */
@@ -814,7 +814,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize(
 	// 	mes->set_bypassed(bypass->getValue());
 	// }
 	
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 void PluginDecorator::filterMIDIMessage(int channel, juce::MidiBuffer& midiMessages) {

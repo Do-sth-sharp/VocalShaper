@@ -368,7 +368,7 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize(
 		}
 	}
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 int PluginDock::findPlugin(const PluginDecorator* ptr) const {
