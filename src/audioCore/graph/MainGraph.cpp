@@ -478,7 +478,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 		midiTrack2O->AddAllocated(cmes.release());
 	}
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {

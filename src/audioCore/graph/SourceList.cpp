@@ -221,7 +221,7 @@ std::unique_ptr<google::protobuf::Message> SourceList::serialize(
 		list->AddAllocated(instance.release());
 	}
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 int SourceList::binarySearchInsert(int low, int high, double t) const {

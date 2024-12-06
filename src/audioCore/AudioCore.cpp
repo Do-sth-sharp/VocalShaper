@@ -495,7 +495,7 @@ std::unique_ptr<google::protobuf::Message> AudioCore::serialize(
 	if (!dynamic_cast<vsp4::MainGraph*>(graph.get())) { return nullptr; }
 	mes->set_allocated_graph(dynamic_cast<vsp4::MainGraph*>(graph.release()));
 
-	return std::unique_ptr<google::protobuf::Message>(mes.release());
+	return mes;
 }
 
 void AudioCore::initAudioDevice() {

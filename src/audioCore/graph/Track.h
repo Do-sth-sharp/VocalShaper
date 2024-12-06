@@ -1,16 +1,35 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
-#include "PluginDock.h"
 #include "../project/Serializable.h"
+
+class SeqSourceProcessor;
+class MixerTrack;
 
 class Track final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
+	enum class TrackType {
+		Track = 0, AuxTrack, MasterTrack
+	};
+
 	Track() = delete;
-	Track(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	Track(TrackType type,
+		const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo());
+	~Track();
 
 	void updateIndex(int index);
+
+	void setTrackName(const juce::String& name);
+	const juce::String getTrackName() const;
+	void setTrackColor(const juce::Colour& color);
+	const juce::Colour getTrackColor() const;
+
+	void setMute(bool mute);
+	bool getMute() const;
+	void setSolo(bool solo);
+	bool getSolo() const;
+	bool getEquivalentMute() const;
 
 	/**
 	 * @brief	Add an audio input bus onto the track.
@@ -22,30 +41,11 @@ public:
 	bool removeAdditionalAudioBus();
 	int getAdditionalAudioBusNum() const;
 
-	void setMute(bool mute);
-	bool getMute() const;
-	void setGain(float gain);
-	float getGain() const;
-	void setPan(float pan);
-	float getPan() const;
-	void setSlider(float slider);
-	float getSlider() const;
+	const juce::Array<float> getOutputLevels() const;
 
-	void setTrackName(const juce::String& name);
-	const juce::String getTrackName() const;
-	void setTrackColor(const juce::Colour& color);
-	const juce::Colour getTrackColor() const;
-
-	const juce::AudioChannelSet& getAudioChannelSet() const;
-
-	PluginDock* getPluginDock() const;
-
-	void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
 
 	void clearGraph();
-
-	const juce::Array<float> getOutputLevels() const;
 
 	class SafePointer {
 	private:
@@ -77,27 +77,27 @@ public:
 
 private:
 	int index = -1;
+	const TrackType type;
 
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	const juce::AudioChannelSet audioChannels;
 
-	juce::AudioProcessorGraph::Node::Ptr pluginDockNode;
-
-	juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Panner<float>> gainAndPanner;
-	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> slider;
-	std::atomic<bool> isMute = false;
-
-	std::atomic<float> panValue = 0.0;
+	juce::AudioProcessorGraph::Node::Ptr sequencerNode, mixerNode;
 
 	juce::String trackName;
 	juce::Colour trackColor;
 
+	std::atomic_bool isMute = false;
+	std::atomic_bool isSolo = false;
+
 	juce::Array<float> outputLevels;
 
-private:
 	bool canAddBus(bool isInput) const override;
 	bool canRemoveBus(bool isInput) const override;
+
+	SeqSourceProcessor* getSequencer() const;
+	MixerTrack* getMixer() const;
 
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 

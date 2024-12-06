@@ -10,10 +10,18 @@ class SeqSourceProcessor final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
 	SeqSourceProcessor() = delete;
-	SeqSourceProcessor(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	using GetNameFunc = std::function<const juce::String(void)>;
+	using GetColorFunc = std::function<const juce::Colour(void)>;
+	SeqSourceProcessor(
+		const GetNameFunc& getNameFunc,
+		const GetColorFunc& getColorFunc,
+		const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
 	~SeqSourceProcessor();
 
 	void updateIndex(int index);
+
+	const juce::String getTrackName() const;
+	const juce::Colour getTrackColor() const;
 
 	int addSeq(const SourceList::SeqBlock& block);
 	void removeSeq(int index);
@@ -22,11 +30,6 @@ public:
 	bool splitSeq(int index, double time);
 	bool stickSeqWithNext(int index);
 	int resetSeqTime(int index, const SourceList::SeqBlock& block);
-
-	void setTrackName(const juce::String& name);
-	const juce::String getTrackName() const;
-	void setTrackColor(const juce::Colour& color);
-	const juce::Colour getTrackColor() const;
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 
@@ -82,12 +85,6 @@ public:
 	void setRecording(RecordState recordState);
 	RecordState getRecording() const;
 
-	void setMute(bool mute);
-	bool getMute() const;
-	void setSolo(bool solo);
-	bool getSolo() const;
-	bool getEquivalentMute() const;
-
 	void setInputMonitoring(bool inputMonitoring);
 	bool getInputMonitoring() const;
 
@@ -96,6 +93,7 @@ public:
 	using ChannelLink = std::tuple<int, int>;
 	using ChannelLinkList = juce::Array<ChannelLink>;
 	void syncARAContext();
+	void syncARATrackInfo();
 	void writeRecordingDataToSource(
 		double startTime, double currentTime, double sampleRate,
 		const juce::MidiMessageSequence& midiData, const juce::AudioSampleBuffer& audioData,
@@ -143,6 +141,8 @@ public:
 private:
 	std::atomic_int index = -1;
 
+	const GetNameFunc getNameFunc;
+	const GetColorFunc getColorFunc;
 	const juce::AudioChannelSet audioChannels;
 
 	SourceList srcs;
@@ -154,16 +154,11 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr instr = nullptr;
 	std::atomic_bool instrOffline = false;
 
-	juce::String trackName;
-	juce::Colour trackColor;
-
 	uint64_t audioSourceRef = 0, midiSourceRef = 0;
 	std::atomic_int currentMIDITrack = -1;
 
 	std::atomic<RecordState> recordingFlag = RecordState::NotRecording;
 
-	std::atomic_bool isMute = false;
-	std::atomic_bool isSolo = false;
 	std::atomic_bool inputMonitoring = false;
 
 	juce::Array<float> outputLevels;
