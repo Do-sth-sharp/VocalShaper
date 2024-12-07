@@ -90,10 +90,11 @@ public:
 
 	const juce::Array<float> getOutputLevels() const;
 
-	using ChannelLink = std::tuple<int, int>;
-	using ChannelLinkList = juce::Array<ChannelLink>;
 	void syncARAContext();
 	void syncARATrackInfo();
+
+	using ChannelLink = std::tuple<int, int>;
+	using ChannelLinkList = juce::Array<ChannelLink>;
 	void writeRecordingDataToSource(
 		double startTime, double currentTime, double sampleRate,
 		const juce::MidiMessageSequence& midiData, const juce::AudioSampleBuffer& audioData,

@@ -5,8 +5,9 @@
 #include <VSP4.h>
 using namespace org::vocalsharp::vocalshaper;
 
-MixerTrack::MixerTrack(const juce::AudioChannelSet& type)
-	: audioChannels(type) {
+MixerTrack::MixerTrack(TrackType type,
+	const juce::AudioChannelSet& bus)
+	: type(type), audioChannels(bus) {
 	/** Set Effects */
 	this->setGain(0);
 	this->setPan(0);
@@ -15,9 +16,9 @@ MixerTrack::MixerTrack(const juce::AudioChannelSet& type)
 	/** Set Channel Layout */
 	juce::AudioProcessorGraph::BusesLayout layout;
 	layout.inputBuses.add(
-		juce::AudioChannelSet::discreteChannels(type.size()));
+		juce::AudioChannelSet::discreteChannels(bus.size()));
 	layout.outputBuses.add(
-		juce::AudioChannelSet::discreteChannels(type.size()));
+		juce::AudioChannelSet::discreteChannels(bus.size()));
 	this->setBusesLayout(layout);
 
 	/** The Main Audio IO Node Of The Track */
@@ -41,7 +42,7 @@ MixerTrack::MixerTrack(const juce::AudioChannelSet& type)
 	this->audioOutputNode->getProcessor()->setBusesLayout(layout);
 
 	/** The Plugin Dock Node Of The Track */
-	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(type));
+	this->pluginDockNode = this->addNode(std::make_unique<PluginDock>(bus));
 
 	/** Connect Plugin Dock Node To IO Node */
 	int mainBusInputChannels = this->audioChannels.size();
