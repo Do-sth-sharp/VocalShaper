@@ -1,17 +1,14 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "SeqSourceProcessor.h"
+#include "MixerTrack.h"
 #include "../project/Serializable.h"
-
-class SeqSourceProcessor;
-class MixerTrack;
 
 class Track final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
-	enum class TrackType {
-		Track = 0, AuxTrack, MasterTrack
-	};
+	using TrackType = MixerTrack::TrackType;
 
 	Track() = delete;
 	Track(TrackType type,
@@ -19,6 +16,11 @@ public:
 	~Track();
 
 	void updateIndex(int index);
+
+	SeqSourceProcessor* getSequencer() const;
+	MixerTrack* getMixer() const;
+
+	const juce::AudioChannelSet& getAudioChannelSet() const;
 
 	void setTrackName(const juce::String& name);
 	const juce::String getTrackName() const;
@@ -95,9 +97,6 @@ private:
 
 	bool canAddBus(bool isInput) const override;
 	bool canRemoveBus(bool isInput) const override;
-
-	SeqSourceProcessor* getSequencer() const;
-	MixerTrack* getMixer() const;
 
 	void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
 

@@ -1,6 +1,4 @@
 #include "Track.h"
-#include "SeqSourceProcessor.h"
-#include "MixerTrack.h"
 #include "../misc/VMath.h"
 #include "../misc/Renderer.h"
 #include "../misc/AudioLock.h"
@@ -10,7 +8,7 @@
 using namespace org::vocalsharp::vocalshaper;
 
 Track::Track(TrackType type,
-	const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo())
+	const juce::AudioChannelSet& bus)
 	: type(type), audioChannels(bus) {
 	/** Set Channel Layout */
 	juce::AudioProcessorGraph::BusesLayout layout;
@@ -116,6 +114,20 @@ void Track::updateIndex(int index) {
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+}
+
+SeqSourceProcessor* Track::getSequencer() const {
+	return dynamic_cast<SeqSourceProcessor*>(
+		this->sequencerNode->getProcessor());
+}
+
+MixerTrack* Track::getMixer() const {
+	return dynamic_cast<MixerTrack*>(
+		this->mixerNode->getProcessor());
+}
+
+const juce::AudioChannelSet& Track::getAudioChannelSet() const {
+	return this->audioChannels;
 }
 
 void Track::setTrackName(const juce::String& name) {
@@ -392,16 +404,6 @@ bool Track::canRemoveBus(bool isInput) const {
 	return isInput && (this->type != TrackType::Track);
 }
 
-SeqSourceProcessor* Track::getSequencer() const {
-	return dynamic_cast<SeqSourceProcessor*>(
-		this->sequencerNode->getProcessor());
-}
-
-MixerTrack* Track::getMixer() const {
-	return dynamic_cast<MixerTrack*>(
-		this->mixerNode->getProcessor());
-}
-
 void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
 	/** Check Buffer Is Empty */
 	if (buffer.getNumChannels() <= 0) { return; }
@@ -422,13 +424,13 @@ void Track::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& mid
 	}
 
 	/** Render */
-	/*if (Renderer::getInstance()->getRendering()) {
+	if (Renderer::getInstance()->getRendering()) {
 		if (auto playHead = this->getPlayHead()) {
 			auto pos = playHead->getPosition();
 			int64_t offset = pos->getTimeInSamples().orFallback(0);
 
 			Renderer::getInstance()->writeData(this, buffer, offset);
 		}
-	}*/
+	}
 }
 

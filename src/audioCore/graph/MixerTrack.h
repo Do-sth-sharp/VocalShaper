@@ -7,8 +7,13 @@
 class MixerTrack final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
+	enum class TrackType {
+		Track = 0, AuxTrack, MasterTrack
+	};
+
 	MixerTrack() = delete;
-	MixerTrack(const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
+	MixerTrack(TrackType type,
+		const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo());
 
 	void updateIndex(int index);
 
@@ -68,6 +73,7 @@ public:
 
 private:
 	int index = -1;
+	const TrackType type;
 
 	juce::AudioProcessorGraph::Node::Ptr audioInputNode, audioOutputNode;
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
