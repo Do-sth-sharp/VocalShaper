@@ -137,18 +137,29 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode, midiOutputNode;
 	std::unique_ptr<SourceRecordProcessor> recorder = nullptr;
 
-	juce::Array<juce::AudioProcessorGraph::Node::Ptr> audioSourceNodeList;
-	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackNodeList;
+	juce::Array<juce::AudioProcessorGraph::Node::Ptr> trackList;
+	juce::Array<juce::AudioProcessorGraph::Node::Ptr> auxTrackList;
+	juce::AudioProcessorGraph::Node::Ptr masterTrack;
 
-	juce::Array<juce::AudioProcessorGraph::Connection> midiI2SrcConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioI2SrcConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> midiSrc2TrkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioSrc2TrkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> midiI2TrkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioI2TrkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2TrkConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> audioTrk2OConnectionList;
-	juce::Array<juce::AudioProcessorGraph::Connection> midiTrk2OConnectionList;
+	enum class SendDstType {
+		ToDevice = 0, ToMaster, ToAUX
+	};
+
+	const static int audioSendSlotNum = 4;
+	const static int midiSendSlotNum = 2;
+
+	using AudioChannelLink = std::pair<int, int>;
+	using AudioChannelLinkList = std::set<AudioChannelLink>;
+	using SendDstIndex = juce::AudioProcessorGraph::NodeID;
+	using AudioSendDstGroup = std::pair<SendDstIndex, AudioChannelLinkList>;
+	using SendSrcIndex = juce::AudioProcessorGraph::NodeID;
+	std::set<SendSrcIndex> midiInputLinks;
+	std::map<SendSrcIndex, AudioChannelLinkList> audioInputLinks;
+	std::map<SendSrcIndex, std::array<SendDstIndex, midiSendSlotNum>> midiSendLinks;
+	std::map<SendSrcIndex, std::array<AudioSendDstGroup, audioSendSlotNum>> audioSendLinks;
+
+	std::map<SendDstIndex, std::multiset<SendSrcIndex>> midiSendSrcTemp;
+	std::map<SendDstIndex, std::multiset<SendSrcIndex>> audioSendSrcTemp;
 
 	std::function<void(const juce::MidiMessage&, bool)> midiHook;
 
@@ -157,6 +168,24 @@ private:
 	juce::Array<float> outputLevels;
 
 	mutable double totalLengthTemp = 0;
+
+	bool addMIDIInputLink(SendSrcIndex track);
+	bool addAudioInputLink(SendSrcIndex track, int inputChannel, int trackChannel);
+	bool addMIDISendLink(SendSrcIndex track, int slot, SendDstIndex dst);
+	bool addAudioSendLink(SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel);
+	bool removeMIDIInputLink(SendSrcIndex track);
+	bool removeAudioInputLink(SendSrcIndex track, int inputChannel, int trackChannel);
+	bool removeMIDISendLink(SendSrcIndex track, int slot, SendDstIndex dst);
+	bool removeAudioSendLink(SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel);
+	bool checkMIDIInputLink(SendSrcIndex track) const;
+	bool checkAudioInputLink(SendSrcIndex track, int inputChannel, int trackChannel) const;
+	bool checkMIDISendLink(SendSrcIndex track, int slot, SendDstIndex dst) const;
+	bool checkAudioSendLink(SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel) const;
+
+	const SendDstIndex getMIDISendSlot(SendSrcIndex track, int slot) const;
+	const AudioSendDstGroup getAudioSendSlot(SendSrcIndex track, int slot) const;
+	SendDstIndex& getMIDISendSlot(SendSrcIndex track, int slot);
+	AudioSendDstGroup& getAudioSendSlot(SendSrcIndex track, int slot);
 
 	void removeIllegalAudioI2SrcConnections();
 	void removeIllegalAudioI2TrkConnections();

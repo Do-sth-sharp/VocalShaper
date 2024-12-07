@@ -481,6 +481,198 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 	return mes;
 }
 
+bool MainGraph::addMIDIInputLink(SendSrcIndex track) {
+	if (this->checkMIDIInputLink(track)) { return false; }
+
+	this->midiInputLinks.insert(track);
+	return true;
+}
+
+bool MainGraph::addAudioInputLink(
+	SendSrcIndex track, int inputChannel, int trackChannel) {
+	auto& audioInputChannels = this->audioInputLinks[track];
+	AudioChannelLink link = { inputChannel, trackChannel };
+	if (audioInputChannels.contains(link)) {
+		return false;
+	}
+
+	audioInputChannels.insert(link);
+	return true;
+}
+
+bool MainGraph::addMIDISendLink(
+	SendSrcIndex track, int slot, SendDstIndex dst) {
+	if (track == dst) { return false; }
+	if (slot < 0 || slot >= MainGraph::midiSendSlotNum) { return false; }
+	auto& midiSendSlot = this->getMIDISendSlot(track, slot);
+	if (midiSendSlot == dst) {
+		return false;
+	}
+
+	if (midiSendSlot != SendDstIndex{}) {
+		this->midiSendSrcTemp[midiSendSlot].erase(track);
+	}
+
+	midiSendSlot = dst;
+	this->midiSendSrcTemp[dst].insert(track);
+	return true;
+}
+
+bool MainGraph::addAudioSendLink(
+	SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel) {
+	if (track == dst) { return false; }
+	if (slot < 0 || slot >= MainGraph::audioSendSlotNum) { return false; }
+	auto& audioSendSlot = this->getAudioSendSlot(track, slot);
+	AudioChannelLink link = { trackChannel, dstChannel };
+	if (audioSendSlot.first == dst) {
+		if (audioSendSlot.second.contains(link)) {
+			return false;
+		}
+	}
+	else {
+		int oldNum = audioSendSlot.second.size();
+		for (int i = 0; i < oldNum; i++) {
+			this->audioSendSrcTemp[audioSendSlot.first].erase(track);
+		}
+		audioSendSlot.second.clear();
+	}
+
+	audioSendSlot.first = dst;
+	audioSendSlot.second.insert(link);
+	this->audioSendSrcTemp[dst].insert(track);
+	return true;
+}
+
+bool MainGraph::removeMIDIInputLink(SendSrcIndex track) {
+	auto it = this->midiInputLinks.find(track);
+	if (it == this->midiInputLinks.end()) {
+		return false;
+	}
+
+	this->midiInputLinks.erase(it);
+	return true;
+}
+
+bool MainGraph::removeAudioInputLink(
+	SendSrcIndex track, int inputChannel, int trackChannel) {
+	auto audioChannelsIt = this->audioInputLinks.find(track);
+	if (audioChannelsIt == this->audioInputLinks.end()) {
+		return false;
+	}
+
+	AudioChannelLink link = { inputChannel, trackChannel };
+	auto it = audioChannelsIt->second.find(link);
+	if (it == audioChannelsIt->second.end()) {
+		return false;
+	}
+
+	audioChannelsIt->second.erase(it);
+	return true;
+}
+
+bool MainGraph::removeMIDISendLink(
+	SendSrcIndex track, int slot, SendDstIndex dst) {
+	if (track == dst) { return false; }
+	if (slot < 0 || slot >= MainGraph::midiSendSlotNum) { return false; }
+	auto& midiSendSlot = this->getMIDISendSlot(track, slot);
+	if (midiSendSlot != dst) {
+		return false;
+	}
+
+	this->midiSendSrcTemp[dst].erase(track);
+	midiSendSlot = SendDstIndex{};
+	return true;
+}
+
+bool MainGraph::removeAudioSendLink(
+	SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel) {
+	if (track == dst) { return false; }
+	if (slot < 0 || slot >= MainGraph::audioSendSlotNum) { return false; }
+	auto& audioSendSlot = this->getAudioSendSlot(track, slot);
+	AudioChannelLink link = { trackChannel, dstChannel };
+	if (audioSendSlot.first != dst) {
+		return false;
+	}
+
+	auto it = audioSendSlot.second.find(link);
+	if (it == audioSendSlot.second.end()) {
+		return false;
+	}
+
+	this->audioSendSrcTemp[dst].erase(track);
+	audioSendSlot.second.erase(it);
+	if (audioSendSlot.second.empty()) {
+		audioSendSlot.first = SendDstIndex{};
+	}
+	return true;
+}
+
+bool MainGraph::checkMIDIInputLink(SendSrcIndex track) const {
+	return this->midiInputLinks.contains(track);
+}
+
+bool MainGraph::checkAudioInputLink(
+	SendSrcIndex track, int inputChannel, int trackChannel) const {
+	auto audioChannelsIt = this->audioInputLinks.find(track);
+	if (audioChannelsIt == this->audioInputLinks.end()) {
+		return false;
+	}
+
+	AudioChannelLink link = { inputChannel, trackChannel };
+	return audioChannelsIt->second.contains(link);
+}
+
+bool MainGraph::checkMIDISendLink(
+	SendSrcIndex track, int slot, SendDstIndex dst) const {
+	if (track == dst) { return false; }
+	if (slot < 0 || slot >= MainGraph::midiSendSlotNum) { return false; }
+	auto midiSendSlot = this->getMIDISendSlot(track, slot);
+	return midiSendSlot == dst;
+}
+
+bool MainGraph::checkAudioSendLink(
+	SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel) const {
+	if (track == dst) { return false; }
+	if (slot < 0 || slot >= MainGraph::audioSendSlotNum) { return false; }
+	auto audioSendSlot = this->getAudioSendSlot(track, slot);
+
+	AudioChannelLink link = { trackChannel, dstChannel };
+	return audioSendSlot.first == dst
+		&& audioSendSlot.second.contains(link);
+}
+
+const MainGraph::SendDstIndex MainGraph::getMIDISendSlot(SendSrcIndex track, int slot) const {
+	auto trackMIDISendListIt = this->midiSendLinks.find(track);
+	if (trackMIDISendListIt != this->midiSendLinks.end()) {
+		auto& trackMIDISendList = trackMIDISendListIt->second;
+		if (slot >= 0 && slot < trackMIDISendList.size()) {
+			return trackMIDISendList[slot];
+		}
+	}
+	return {};
+}
+
+const MainGraph::AudioSendDstGroup MainGraph::getAudioSendSlot(SendSrcIndex track, int slot) const {
+	auto trackAudioSendListIt = this->audioSendLinks.find(track);
+	if (trackAudioSendListIt != this->audioSendLinks.end()) {
+		auto& trackAudioSendList = trackAudioSendListIt->second;
+		if (slot >= 0 && slot < trackAudioSendList.size()) {
+			return trackAudioSendList[slot];
+		}
+	}
+	return {};
+}
+
+MainGraph::SendDstIndex& MainGraph::getMIDISendSlot(SendSrcIndex track, int slot) {
+	auto& trackMIDISendList = this->midiSendLinks[track];
+	return trackMIDISendList[slot];
+}
+
+MainGraph::AudioSendDstGroup& MainGraph::getAudioSendSlot(SendSrcIndex track, int slot) {
+	auto& trackAudioSendList = this->audioSendLinks[track];
+	return trackAudioSendList[slot];
+}
+
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {
 	/** Lock */
 	juce::ScopedWriteLock levelLocker(audioLock::getLevelMeterLock());
