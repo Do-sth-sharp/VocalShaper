@@ -3,7 +3,6 @@
 #include <JuceHeader.h>
 #include "Track.h"
 #include "PluginDecorator.h"
-#include "SeqSourceProcessor.h"
 #include "SourceRecordProcessor.h"
 #include "../project/Serializable.h"
 #include "../Utils.h"
@@ -14,19 +13,13 @@ public:
 	MainGraph();
 	~MainGraph() override;
 
-	void insertSource(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
-	void removeSource(int index);
-	void insertTrack(int index = -1, const juce::AudioChannelSet& type = juce::AudioChannelSet::stereo());
-	void removeTrack(int index);
+	using TrackType = Track::TrackType;
+	void insertTrack(TrackType type, int index = -1,
+		const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo());
+	void removeTrack(TrackType type, int index);
 
-	int getSourceNum() const;
-	SeqSourceProcessor* getSourceProcessor(int index) const;
-	int getTrackNum() const;
-	Track* getTrackProcessor(int index) const;
-	void setSourceBypass(int index, bool bypass);
-	bool getSourceBypass(int index) const;
-	void setTrackBypass(int index, bool bypass);
-	bool getTrackBypass(int index) const;
+	int getTrackNum(TrackType type) const;
+	Track* getTrackProcessor(TrackType type, int index) const;
 
 	void setMIDII2SrcConnection(int sourceIndex);
 	void removeMIDII2SrcConnection(int sourceIndex);
@@ -150,16 +143,15 @@ private:
 
 	using AudioChannelLink = std::pair<int, int>;
 	using AudioChannelLinkList = std::set<AudioChannelLink>;
-	using SendDstIndex = juce::AudioProcessorGraph::NodeID;
-	using AudioSendDstGroup = std::pair<SendDstIndex, AudioChannelLinkList>;
-	using SendSrcIndex = juce::AudioProcessorGraph::NodeID;
-	std::set<SendSrcIndex> midiInputLinks;
-	std::map<SendSrcIndex, AudioChannelLinkList> audioInputLinks;
-	std::map<SendSrcIndex, std::array<SendDstIndex, midiSendSlotNum>> midiSendLinks;
-	std::map<SendSrcIndex, std::array<AudioSendDstGroup, audioSendSlotNum>> audioSendLinks;
+	using NodeIndex = juce::AudioProcessorGraph::NodeID;
+	using AudioSendDstGroup = std::pair<NodeIndex, AudioChannelLinkList>;
+	std::set<NodeIndex> midiInputLinks;
+	std::map<NodeIndex, AudioChannelLinkList> audioInputLinks;
+	std::map<NodeIndex, std::array<NodeIndex, midiSendSlotNum>> midiSendLinks;
+	std::map<NodeIndex, std::array<AudioSendDstGroup, audioSendSlotNum>> audioSendLinks;
 
-	std::map<SendDstIndex, std::multiset<SendSrcIndex>> midiSendSrcTemp;
-	std::map<SendDstIndex, std::multiset<SendSrcIndex>> audioSendSrcTemp;
+	std::map<NodeIndex, std::multiset<NodeIndex>> midiSendSrcTemp;
+	std::map<NodeIndex, std::multiset<NodeIndex>> audioSendSrcTemp;
 
 	std::function<void(const juce::MidiMessage&, bool)> midiHook;
 
@@ -169,23 +161,41 @@ private:
 
 	mutable double totalLengthTemp = 0;
 
-	bool addMIDIInputLink(SendSrcIndex track);
-	bool addAudioInputLink(SendSrcIndex track, int inputChannel, int trackChannel);
-	bool addMIDISendLink(SendSrcIndex track, int slot, SendDstIndex dst);
-	bool addAudioSendLink(SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel);
-	bool removeMIDIInputLink(SendSrcIndex track);
-	bool removeAudioInputLink(SendSrcIndex track, int inputChannel, int trackChannel);
-	bool removeMIDISendLink(SendSrcIndex track, int slot, SendDstIndex dst);
-	bool removeAudioSendLink(SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel);
-	bool checkMIDIInputLink(SendSrcIndex track) const;
-	bool checkAudioInputLink(SendSrcIndex track, int inputChannel, int trackChannel) const;
-	bool checkMIDISendLink(SendSrcIndex track, int slot, SendDstIndex dst) const;
-	bool checkAudioSendLink(SendSrcIndex track, int slot, SendDstIndex dst, int trackChannel, int dstChannel) const;
+	bool addMIDIInputLink(NodeIndex track);
+	bool addAudioInputLink(NodeIndex track, int inputChannel, int trackChannel);
+	bool addMIDISendLink(NodeIndex track, int slot, NodeIndex dst);
+	bool addAudioSendLink(NodeIndex track, int slot, NodeIndex dst, int trackChannel, int dstChannel);
+	bool removeMIDIInputLink(NodeIndex track);
+	bool removeAudioInputLink(NodeIndex track, int inputChannel, int trackChannel);
+	const AudioChannelLinkList removeAudioInputLink(NodeIndex track);
+	bool removeMIDISendLink(NodeIndex track, int slot, NodeIndex dst);
+	NodeIndex removeMIDISendLink(NodeIndex track, int slot);
+	bool removeAudioSendLink(NodeIndex track, int slot, NodeIndex dst, int trackChannel, int dstChannel);
+	const AudioChannelLinkList removeAudioSendLink(NodeIndex track, int slot, NodeIndex dst);
+	const AudioSendDstGroup removeAudioSendLink(NodeIndex track, int slot);
+	bool checkMIDIInputLink(NodeIndex track) const;
+	bool checkAudioInputLink(NodeIndex track, int inputChannel, int trackChannel) const;
+	bool checkAudioInputLink(NodeIndex track) const;
+	bool checkMIDISendLink(NodeIndex track, int slot, NodeIndex dst) const;
+	bool checkAudioSendLink(NodeIndex track, int slot, NodeIndex dst, int trackChannel, int dstChannel) const;
+	bool checkAudioSendLink(NodeIndex track, int slot, NodeIndex dst) const;
 
-	const SendDstIndex getMIDISendSlot(SendSrcIndex track, int slot) const;
-	const AudioSendDstGroup getAudioSendSlot(SendSrcIndex track, int slot) const;
-	SendDstIndex& getMIDISendSlot(SendSrcIndex track, int slot);
-	AudioSendDstGroup& getAudioSendSlot(SendSrcIndex track, int slot);
+	const NodeIndex getMIDISendSlot(NodeIndex track, int slot) const;
+	const AudioSendDstGroup getAudioSendSlot(NodeIndex track, int slot) const;
+	NodeIndex& getMIDISendSlot(NodeIndex track, int slot);
+	AudioSendDstGroup& getAudioSendSlot(NodeIndex track, int slot);
+
+	const std::set<NodeIndex> getMIDISendLinkSrc(NodeIndex track) const;
+	const std::set<NodeIndex> getAudioSendLinkSrc(NodeIndex track) const;
+
+	void disconnectTrackMIDIInputLinks(NodeIndex track);
+	void disconnectTrackAudioInputLinks(NodeIndex track);
+	void disconnectTrackMIDISendLinks(NodeIndex track);
+	void disconnectTrackAudioSendLinks(NodeIndex track);
+	void disconnectTrackMIDISendInLinks(NodeIndex track);
+	void disconnectTrackAudioSendInLinks(NodeIndex track);
+
+	void destoryTrackLinkTemps(NodeIndex track);
 
 	void removeIllegalAudioI2SrcConnections();
 	void removeIllegalAudioI2TrkConnections();
@@ -193,6 +203,9 @@ private:
 
 	int findSource(const SeqSourceProcessor* ptr) const;
 	int findTrack(const Track* ptr) const;
+
+	void ensureMasterTrackOutputLink();
+	void initMasterTrack(const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo());
 
 	friend class Renderer;
 	friend class RenderThread;
