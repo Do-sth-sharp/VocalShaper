@@ -170,6 +170,202 @@ Track* MainGraph::getTrackProcessor(TrackType type, int index) const {
 	return dynamic_cast<Track*>(trackList.getUnchecked(index)->getProcessor());
 }
 
+bool MainGraph::connectTrackMIDIInput(TrackType type, int index) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	auto inputNode = this->midiInputNode->nodeID;
+
+	/** Add Link */
+	if (this->addMIDIInputLink(trackNode)) {
+		this->addConnection({ {inputNode, midiChannelIndex}, {trackNode, midiChannelIndex} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::connectTrackAudioInput(
+	TrackType type, int index, int inputChannel, int trackChannel) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	auto inputNode = this->audioInputNode->nodeID;
+
+	/** Add Link */
+	if (this->addAudioInputLink(trackNode, inputChannel, trackChannel)) {
+		this->addConnection({ {inputNode, inputChannel}, {trackNode, trackChannel} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::connectTrackMIDISend(
+	TrackType type, int index, int slot, SendDstType dstType, int dstIndex) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Get Dst Node ID */
+	auto dstNode = this->getDstNodeIndex(dstType, dstIndex, true);
+	if (dstNode == NodeIndex{}) { return false; }
+
+	/** Add Link */
+	if (this->addMIDISendLink(trackNode, slot, dstNode)) {
+		this->addConnection({ {trackNode, midiChannelIndex}, {dstNode, midiChannelIndex} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::connectTrackAudioSend(TrackType type, int index, int slot,
+	SendDstType dstType, int dstIndex, int trackChannel, int dstChannel) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Get Dst Node ID */
+	auto dstNode = this->getDstNodeIndex(dstType, dstIndex, false);
+	if (dstNode == NodeIndex{}) { return false; }
+
+	/** Add Link */
+	if (this->addAudioSendLink(trackNode, slot, dstNode, trackChannel, dstChannel)) {
+		this->addConnection({ {trackNode, trackChannel}, {dstNode, dstChannel} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackMIDIInput(TrackType type, int index) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	auto inputNode = this->midiInputNode->nodeID;
+
+	/** Remove Link */
+	if (this->removeMIDIInputLink(trackNode)) {
+		this->removeConnection({ {inputNode, midiChannelIndex}, {trackNode, midiChannelIndex} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackAudioInput(
+	TrackType type, int index, int inputChannel, int trackChannel) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	auto inputNode = this->audioInputNode->nodeID;
+
+	/** Remove Link */
+	if (this->removeAudioInputLink(trackNode, inputChannel, trackChannel)) {
+		this->removeConnection({ {inputNode, inputChannel}, {trackNode, trackChannel} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackMIDISend(
+	TrackType type, int index, int slot, SendDstType dstType, int dstIndex) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Get Dst Node ID */
+	auto dstNode = this->getDstNodeIndex(dstType, dstIndex, true);
+	if (dstNode == NodeIndex{}) { return false; }
+
+	/** Remove Link */
+	if (this->removeMIDISendLink(trackNode, slot, dstNode)) {
+		this->removeConnection({ {trackNode, midiChannelIndex}, {dstNode, midiChannelIndex} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackMIDISend(TrackType type, int index, int slot) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Remove Link */
+	auto dstNode = this->removeMIDISendLink(trackNode, slot);
+	if (dstNode != NodeIndex{}) {
+		this->removeConnection({ {trackNode, midiChannelIndex}, {dstNode, midiChannelIndex} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackAudioSend(TrackType type, int index, int slot,
+	SendDstType dstType, int dstIndex, int trackChannel, int dstChannel) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Get Dst Node ID */
+	auto dstNode = this->getDstNodeIndex(dstType, dstIndex, false);
+	if (dstNode == NodeIndex{}) { return false; }
+
+	/** Remove Link */
+	if (this->removeAudioSendLink(trackNode, slot, dstNode, trackChannel, dstChannel)) {
+		this->removeConnection({ {trackNode, trackChannel}, {dstNode, dstChannel} });
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackAudioSend(TrackType type, int index, int slot,
+	SendDstType dstType, int dstIndex) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Get Dst Node ID */
+	auto dstNode = this->getDstNodeIndex(dstType, dstIndex, false);
+	if (dstNode == NodeIndex{}) { return false; }
+
+	/** Remove Link */
+	auto channels = this->removeAudioSendLink(trackNode, slot, dstNode);
+	if (!channels.empty()) {
+		for (auto& channel : channels) {
+			this->removeConnection({ {trackNode, channel.first}, {dstNode, channel.second} });
+		}
+		return true;
+	}
+
+	return false;
+}
+
+bool MainGraph::disconnectTrackAudioSend(TrackType type, int index, int slot) {
+	/** Get Node ID */
+	auto trackNode = this->getTrackNodeIndex(type, index);
+	if (trackNode == NodeIndex{}) { return false; }
+
+	/** Remove Link */
+	auto group = this->removeAudioSendLink(trackNode, slot);
+	if (group.first != NodeIndex{}) {
+		for (auto& channel : group.second) {
+			this->removeConnection({ {trackNode, channel.first}, {group.first, channel.second} });
+		}
+		return true;
+	}
+
+	return false;
+}
+
 void MainGraph::setAudioLayout(int inputChannelNum, int outputChannelNum) {
 	/** Create Buses Layout */
 	juce::AudioProcessorGraph::BusesLayout busLayout;
@@ -615,6 +811,51 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 	}
 
 	return mes;
+}
+
+MainGraph::NodeIndex MainGraph::getTrackNodeIndex(TrackType type, int index) const {
+	/** Check Track Type */
+	if (type == TrackType::MasterTrack) {
+		return this->masterTrack
+			? this->masterTrack->nodeID : NodeIndex{};
+	}
+
+	/** Get Track List */
+	auto& trackList = (type == TrackType::Track)
+		? this->trackList : this->auxTrackList;
+
+	/** Check Index */
+	if (index < 0 || index >= trackList.size()) {
+		return NodeIndex{};
+	}
+
+	/** Return Processor */
+	return trackList.getUnchecked(index)->nodeID;
+}
+
+MainGraph::NodeIndex MainGraph::getDstNodeIndex(
+	SendDstType type, int index, bool isMIDI) const {
+	/** To Master Track */
+	if (type == SendDstType::ToMaster) {
+		return this->masterTrack
+			? this->masterTrack->nodeID : NodeIndex{};
+	}
+
+	/** To Device */
+	if (type == SendDstType::ToDevice) {
+		return isMIDI ? this->midiOutputNode->nodeID : this->audioOutputNode->nodeID;
+	}
+
+	/** Get Track List */
+	auto& trackList = this->auxTrackList;
+
+	/** Check Index */
+	if (index < 0 || index >= trackList.size()) {
+		return NodeIndex{};
+	}
+
+	/** Return Processor */
+	return trackList.getUnchecked(index)->nodeID;
 }
 
 bool MainGraph::addMIDIInputLink(NodeIndex track) {

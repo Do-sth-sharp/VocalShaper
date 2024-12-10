@@ -21,24 +21,24 @@ public:
 	int getTrackNum(TrackType type) const;
 	Track* getTrackProcessor(TrackType type, int index) const;
 
-	void setMIDII2SrcConnection(int sourceIndex);
-	void removeMIDII2SrcConnection(int sourceIndex);
-	void setAudioI2SrcConnection(int sourceIndex, int srcChannel, int dstChannel);
-	void removeAudioI2SrcConnection(int sourceIndex, int srcChannel, int dstChannel);
-	void setMIDISrc2TrkConnection(int sourceIndex, int trackIndex);
-	void removeMIDISrc2TrkConnection(int sourceIndex, int trackIndex);
-	void setAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel);
-	void removeAudioSrc2TrkConnection(int sourceIndex, int trackIndex, int srcChannel, int dstChannel);
-	void setMIDII2TrkConnection(int trackIndex);
-	void removeMIDII2TrkConnection(int trackIndex);
-	void setAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel);
-	void removeAudioI2TrkConnection(int trackIndex, int srcChannel, int dstChannel);
-	void setAudioTrk2OConnection(int trackIndex, int srcChannel, int dstChannel);
-	void removeAudioTrk2OConnection(int trackIndex, int srcChannel, int dstChannel);
-	void setAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
-	void removeAudioTrk2TrkConnection(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel);
-	void setMIDITrk2OConnection(int trackIndex);
-	void removeMIDITrk2OConnection(int trackIndex);
+	enum class SendDstType {
+		ToDevice = 0, ToMaster, ToAUX
+	};
+
+	bool connectTrackMIDIInput(TrackType type, int index);
+	bool connectTrackAudioInput(TrackType type, int index, int inputChannel, int trackChannel);
+	bool connectTrackMIDISend(TrackType type, int index, int slot, SendDstType dstType, int dstIndex);
+	bool connectTrackAudioSend(TrackType type, int index, int slot,
+		SendDstType dstType, int dstIndex, int trackChannel, int dstChannel);
+	bool disconnectTrackMIDIInput(TrackType type, int index);
+	bool disconnectTrackAudioInput(TrackType type, int index, int inputChannel, int trackChannel);
+	bool disconnectTrackMIDISend(TrackType type, int index, int slot, SendDstType dstType, int dstIndex);
+	bool disconnectTrackMIDISend(TrackType type, int index, int slot);
+	bool disconnectTrackAudioSend(TrackType type, int index, int slot,
+		SendDstType dstType, int dstIndex, int trackChannel, int dstChannel);
+	bool disconnectTrackAudioSend(TrackType type, int index, int slot,
+		SendDstType dstType, int dstIndex);
+	bool disconnectTrackAudioSend(TrackType type, int index, int slot);
 
 	bool isMIDII2SrcConnected(int sourceIndex) const;
 	bool isAudioI2SrcConnected(int sourceIndex, int srcChannel, int dstChannel) const;
@@ -134,10 +134,6 @@ private:
 	juce::Array<juce::AudioProcessorGraph::Node::Ptr> auxTrackList;
 	juce::AudioProcessorGraph::Node::Ptr masterTrack;
 
-	enum class SendDstType {
-		ToDevice = 0, ToMaster, ToAUX
-	};
-
 	const static int audioSendSlotNum = 4;
 	const static int midiSendSlotNum = 2;
 
@@ -160,6 +156,9 @@ private:
 	juce::Array<float> outputLevels;
 
 	mutable double totalLengthTemp = 0;
+
+	NodeIndex getTrackNodeIndex(TrackType type, int index) const;
+	NodeIndex getDstNodeIndex(SendDstType type, int index, bool isMIDI) const;
 
 	bool addMIDIInputLink(NodeIndex track);
 	bool addAudioInputLink(NodeIndex track, int inputChannel, int trackChannel);
