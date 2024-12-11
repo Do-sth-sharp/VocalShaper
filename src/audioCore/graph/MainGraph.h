@@ -40,31 +40,18 @@ public:
 		SendDstType dstType, int dstIndex);
 	bool disconnectTrackAudioSend(TrackType type, int index, int slot);
 
-	bool isMIDII2SrcConnected(int sourceIndex) const;
-	bool isAudioI2SrcConnected(int sourceIndex, int srcChannel, int dstChannel) const;
-	bool isMIDISrc2TrkConnected(int sourceIndex, int trackIndex) const;
-	bool isAudioSrc2TrkConnected(int sourceIndex, int trackIndex, int srcChannel, int dstChannel) const;
-	bool isMIDII2TrkConnected(int trackIndex) const;
-	bool isAudioI2TrkConnected(int trackIndex, int srcChannel, int dstChannel) const;
-	bool isAudioTrk2OConnected(int trackIndex, int srcChannel, int dstChannel) const;
-	bool isAudioTrk2TrkConnected(int trackIndex, int dstTrackIndex, int srcChannel, int dstChannel) const;
-	bool isMIDITrk2OConnected(int trackIndex) const;
-
-	utils::AudioConnectionList getTrackInputFromTrackConnections(int index) const;
-	utils::AudioConnectionList getTrackInputFromSrcConnections(int index) const;
-	utils::AudioConnectionList getTrackInputFromDeviceConnections(int index) const;
-	utils::AudioConnectionList getTrackOutputToTrackConnections(int index) const;
-	utils::AudioConnectionList getTrackOutputToDeviceConnections(int index) const;
-
-	utils::MidiConnectionList getTrackMidiInputFromSrcConnections(int index) const;
-	utils::MidiConnectionList getTrackMidiInputFromDeviceConnections(int index) const;
-	utils::MidiConnectionList getTrackMidiOutputToDeviceConnections(int index) const;
-
-	utils::AudioConnectionList getSourceInputFromDeviceConnections(int index) const;
-	utils::AudioConnectionList getSourceOutputToTrackConnections(int index) const;
-
-	utils::MidiConnectionList getSourceMidiInputFromDeviceConnections(int index) const;
-	utils::MidiConnectionList getSourceMidiOutputToTrackConnections(int index) const;
+	using AudioChannelLink = std::pair<int, int>;
+	using AudioChannelLinkList = std::set<AudioChannelLink>;
+	using SendDst = std::pair<SendDstType, int>;
+	using TrackIndex = std::pair<TrackType, int>;
+	bool isTrackMIDIInputConnected(TrackType type, int index) const;
+	bool isTrackAudioInputConnected(TrackType type, int index) const;
+	const AudioChannelLinkList getTrackAudioInputChannels(TrackType type, int index) const;
+	bool isTrackMIDISendConnected(TrackType type, int index, int slot) const;
+	const SendDst getTrackMIDISendDst(TrackType type, int index, int slot) const;
+	bool isTrackAudioSendConnected(TrackType type, int index, int slot) const;
+	const SendDst getTrackAudioSendDst(TrackType type, int index, int slot) const;
+	const AudioChannelLinkList getTrackAudioSendChannels(TrackType type, int index, int slot) const;
 
 	/**
 	 * @brief	Set the input and output channel number of current audio device.
@@ -179,6 +166,9 @@ private:
 	bool checkAudioSendLink(NodeIndex track, int slot, NodeIndex dst, int trackChannel, int dstChannel) const;
 	bool checkAudioSendLink(NodeIndex track, int slot, NodeIndex dst) const;
 
+	const AudioChannelLinkList getAudioInputChannels(NodeIndex track) const;
+	AudioChannelLinkList& getAudioInputChannels(NodeIndex track);
+
 	const NodeIndex getMIDISendSlot(NodeIndex track, int slot) const;
 	const AudioSendDstGroup getAudioSendSlot(NodeIndex track, int slot) const;
 	NodeIndex& getMIDISendSlot(NodeIndex track, int slot);
@@ -200,8 +190,8 @@ private:
 	void removeIllegalAudioI2TrkConnections();
 	void removeIllegalAudioTrk2OConnections();
 
-	int findSource(const SeqSourceProcessor* ptr) const;
-	int findTrack(const Track* ptr) const;
+	const TrackIndex findTrack(NodeIndex track) const;
+	const SendDst findDst(NodeIndex dst) const;
 
 	void ensureMasterTrackOutputLink();
 	void initMasterTrack(const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo());
