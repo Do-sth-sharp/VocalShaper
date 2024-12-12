@@ -21,6 +21,10 @@ public:
 	int getTrackNum(TrackType type) const;
 	Track* getTrackProcessor(TrackType type, int index) const;
 
+	bool addTrackAdditionalAudioBus(TrackType type, int index);
+	bool removeTrackAdditionalAudioBus(TrackType type, int index);
+	int getTrackAdditionalAudioBusNum(TrackType type, int index) const;
+
 	enum class SendDstType {
 		ToDevice = 0, ToMaster, ToAUX
 	};
@@ -197,6 +201,7 @@ private:
 	void removeIllegalAuxTrackAudioOutputConnections(int index);
 	void removeIllegalTrackAudioOutputConnections(int index);
 
+	void removeIllegalNodeAudioSendInputConnections(NodeIndex track, int inputChannelNum);
 	void removeIllegalNodeAudioInputConnections(NodeIndex track);
 	void removeIllegalNodeAudioOutputConnections(NodeIndex track);
 
