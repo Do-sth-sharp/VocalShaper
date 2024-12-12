@@ -164,6 +164,47 @@ Track* MainGraph::getTrackProcessor(TrackType type, int index) const {
 	return dynamic_cast<Track*>(trackList.getUnchecked(index)->getProcessor());
 }
 
+bool MainGraph::addTrackAdditionalAudioBus(TrackType type, int index) {
+	/** Check Track Type */
+	if (type == TrackType::Track) { return false; }
+
+	/** Get Track Processor */
+	if (auto track = this->getTrackProcessor(type, index)) {
+		return track->addAdditionalAudioBus();
+	}
+
+	return false;
+}
+
+bool MainGraph::removeTrackAdditionalAudioBus(TrackType type, int index) {
+	/** Check Track Type */
+	if (type == TrackType::Track) { return false; }
+
+	/** Get Track Processor */
+	if (auto track = this->getTrackProcessor(type, index)) {
+		if (!track->removeAdditionalAudioBus()) { return false; }
+
+		/** Remove Illegal Connections */
+		auto nodeID = this->getTrackNodeIndex(type, index);
+		this->removeIllegalNodeAudioSendInputConnections(
+			nodeID, track->getTotalNumInputChannels());
+	}
+
+	return false;
+}
+
+int MainGraph::getTrackAdditionalAudioBusNum(TrackType type, int index) const {
+	/** Check Track Type */
+	if (type == TrackType::Track) { return 0; }
+
+	/** Get Track Processor */
+	if (auto track = this->getTrackProcessor(type, index)) {
+		return track->getAdditionalAudioBusNum();
+	}
+
+	return 0;
+}
+
 bool MainGraph::connectTrackMIDIInput(TrackType type, int index) {
 	/** Get Node ID */
 	auto trackNode = this->getTrackNodeIndex(type, index);
@@ -187,6 +228,15 @@ bool MainGraph::connectTrackAudioInput(
 	if (trackNode == NodeIndex{}) { return false; }
 
 	auto inputNode = this->audioInputNode->nodeID;
+
+	/** Check Channel Num */
+	if (inputChannel >= this->getTotalNumInputChannels()) { return false; }
+	if (auto track = this->getTrackProcessor(type, index)) {
+		if (trackChannel >= track->getTotalNumInputChannels()) { return false; }
+	}
+	else {
+		return false;
+	}
 
 	/** Add Link */
 	if (this->addAudioInputLink(trackNode, inputChannel, trackChannel)) {
@@ -225,6 +275,27 @@ bool MainGraph::connectTrackAudioSend(TrackType type, int index, int slot,
 	/** Get Dst Node ID */
 	auto dstNode = this->getDstNodeIndex(dstType, dstIndex, false);
 	if (dstNode == NodeIndex{}) { return false; }
+
+	/** Check Channel Num */
+	if (auto track = this->getTrackProcessor(type, index)) {
+		if (trackChannel >= track->getTotalNumOutputChannels()) { return false; }
+	}
+	else {
+		return false;
+	}
+
+	if (dstType == SendDstType::ToDevice) {
+		if (dstChannel >= this->getTotalNumOutputChannels()) { return false; }
+	}
+	else {
+		if (auto track = this->getTrackProcessor(
+			(dstType == SendDstType::ToAUX) ? TrackType::AuxTrack : TrackType::MasterTrack, dstIndex)) {
+			if (trackChannel >= track->getTotalNumInputChannels()) { return false; }
+		}
+		else {
+			return false;
+		}
+	}
 
 	/** Add Link */
 	if (this->addAudioSendLink(trackNode, slot, dstNode, trackChannel, dstChannel)) {
@@ -1421,6 +1492,27 @@ void MainGraph::removeIllegalTrackAudioOutputConnections(int index) {
 	this->removeIllegalNodeAudioOutputConnections(nodeIndex);
 }
 
+void MainGraph::removeIllegalNodeAudioSendInputConnections(NodeIndex track, int inputChannelNum) {
+	/** For Each Input */
+	auto audioInputNodes = this->getAudioSendLinkSrc(track);
+	for (auto& inputNode : audioInputNodes) {
+		/** For Each Slot */
+		for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
+			auto group = this->getAudioSendSlot(inputNode, slot);
+			if (group.first == track) {
+				/** For Each Link */
+				for (auto& i : group.second) {
+					if (i.second >= inputChannelNum) {
+						if (this->removeAudioSendLink(inputNode, slot, track, i.first, i.second)) {
+							this->removeConnection({ {inputNode, i.first}, {track, i.second} });
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void MainGraph::removeIllegalNodeAudioInputConnections(NodeIndex track) {
 	/** Get Input Connections */
 	auto channels = this->getAudioInputChannels(track);
@@ -1612,8 +1704,10 @@ void MainGraph::initMasterTrack(const juce::AudioChannelSet& bus) {
 		for (auto& [index, slot, channels] : audioInputTemp) {
 			auto inputNode = this->getTrackNodeIndex(index.first, index.second);
 			for (auto& i : channels) {
-				if (this->addAudioSendLink(inputNode, slot, nodeID, i.first, i.second)) {
-					this->addConnection({ {inputNode, i.first}, {nodeID, i.second} });
+				if (i.second < bus.size()) {
+					if (this->addAudioSendLink(inputNode, slot, nodeID, i.first, i.second)) {
+						this->addConnection({ {inputNode, i.first}, {nodeID, i.second} });
+					}
 				}
 			}
 		}
