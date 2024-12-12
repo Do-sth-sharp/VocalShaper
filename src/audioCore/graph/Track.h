@@ -46,6 +46,7 @@ public:
 	const juce::Array<float> getOutputLevels() const;
 
 	void setPlayHead(juce::AudioPlayHead* newPlayHead) override;
+	double getTailLengthSeconds() const override;
 
 	void clearGraph();
 
