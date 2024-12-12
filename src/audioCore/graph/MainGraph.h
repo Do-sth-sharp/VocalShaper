@@ -184,11 +184,21 @@ private:
 	void disconnectTrackMIDISendInLinks(NodeIndex track);
 	void disconnectTrackAudioSendInLinks(NodeIndex track);
 
+	void disconnectTrackLinks(NodeIndex track);
 	void destoryTrackLinkTemps(NodeIndex track);
 
-	void removeIllegalAudioI2SrcConnections();
-	void removeIllegalAudioI2TrkConnections();
-	void removeIllegalAudioTrk2OConnections();
+	void removeIllegalAudioInputConnections();
+	void removeIllegalAudioOutputConnections();
+
+	void removeIllegalMasterTrackAudioInputConnections();
+	void removeIllegalAuxTrackAudioInputConnections(int index);
+	void removeIllegalTrackAudioInputConnections(int index);
+	void removeIllegalMasterTrackAudioOutputConnections();
+	void removeIllegalAuxTrackAudioOutputConnections(int index);
+	void removeIllegalTrackAudioOutputConnections(int index);
+
+	void removeIllegalNodeAudioInputConnections(NodeIndex track);
+	void removeIllegalNodeAudioOutputConnections(NodeIndex track);
 
 	const TrackIndex findTrack(NodeIndex track) const;
 	const SendDst findDst(NodeIndex dst) const;

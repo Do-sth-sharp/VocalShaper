@@ -320,6 +320,13 @@ void Track::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 	}
 }
 
+double Track::getTailLengthSeconds() const {
+	if (auto seq = this->getSequencer()) {
+		return seq->getTailLengthSeconds();
+	}
+	return 0;
+}
+
 void Track::clearGraph() {
 	while (this->getAdditionalAudioBusNum() > 0) {
 		this->removeAdditionalAudioBus();
