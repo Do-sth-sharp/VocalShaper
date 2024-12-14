@@ -98,7 +98,7 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 		/** Callback */
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, index);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, index);
 
 		return PluginDecorator::SafePointer{ dynamic_cast<PluginDecorator*>(ptrNode->getProcessor()) };
 	}
@@ -126,7 +126,7 @@ void PluginDock::removePlugin(int index) {
 	this->removeNode(ptrNode->nodeID);
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, index);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, index);
 }
 
 void PluginDock::setPluginIndex(int oldIndex, int newIndex) {
@@ -144,8 +144,8 @@ void PluginDock::setPluginIndex(int oldIndex, int newIndex) {
 	this->insertPluginInternal(newIndex, ptr);
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, oldIndex);
-	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, newIndex);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, oldIndex);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, newIndex);
 }
 
 int PluginDock::getPluginNum() const {
@@ -181,7 +181,7 @@ void PluginDock::setPluginBypass(PluginDecorator::SafePointer plugin, bool bypas
 			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
 
 			/** Callback */
-			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+			UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 		}
 	}
 }
@@ -322,7 +322,7 @@ void PluginDock::clearGraph() {
 	}
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, this->index, -1);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, -1);
 }
 
 bool PluginDock::parse(
