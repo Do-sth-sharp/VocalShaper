@@ -761,22 +761,18 @@ bool MainGraph::parse(
 				TrackType::MasterTrack, 0, i.srcchannel(), i.dstchannel());
 		}
 		auto& midiSend = masterTrack.midisend();
-		for (int i = 0; i < MainGraph::midiSendSlotNum && i < midiSend.size(); i++) {
-			auto& slot = midiSend.at(i);
-			if (slot.dst() >= 0
-				&& slot.type() == vsp4::SendDstType::TO_DEVICE) {
+		for (auto& i : midiSend) {
+			if (i.type() == vsp4::SendDstType::TO_DEVICE) {
 				this->connectTrackMIDISend(
-					TrackType::MasterTrack, 0, i, SendDstType::ToDevice, 0);
+					TrackType::MasterTrack, 0, i.slot(), SendDstType::ToDevice, 0);
 			}
 		}
 		auto& audioSend = masterTrack.audiosend();
-		for (int i = 0; i < MainGraph::audioSendSlotNum && i < audioSend.size(); i++) {
-			auto& slot = audioSend.at(i);
-			if (slot.dst() >= 0
-				&& slot.type() == vsp4::SendDstType::TO_DEVICE) {
+		for (auto& i : audioSend) {
+			if (i.type() == vsp4::SendDstType::TO_DEVICE) {
 				this->connectTrackAudioSend(
-					TrackType::MasterTrack, 0, i, SendDstType::ToDevice, 0,
-					slot.srcchannel(), slot.dstchannel());
+					TrackType::MasterTrack, 0, i.slot(), SendDstType::ToDevice, 0,
+					i.srcchannel(), i.dstchannel());
 			}
 		}
 	}
@@ -802,23 +798,17 @@ bool MainGraph::parse(
 				TrackType::AuxTrack, i, j.srcchannel(), j.dstchannel());
 		}
 		auto& midiSend = auxTrack.midisend();
-		for (int j = 0; j < MainGraph::midiSendSlotNum && j < midiSend.size(); j++) {
-			auto& slot = midiSend.at(j);
-			if (slot.dst() >= 0) {
-				this->connectTrackMIDISend(
-					TrackType::AuxTrack, i, j,
-					static_cast<SendDstType>(slot.type()), slot.dst());
-			}
+		for (auto& j : midiSend) {
+			this->connectTrackMIDISend(
+				TrackType::AuxTrack, i, j.slot(),
+				static_cast<SendDstType>(j.type()), j.dst());
 		}
 		auto& audioSend = auxTrack.audiosend();
-		for (int j = 0; j < MainGraph::audioSendSlotNum && j < audioSend.size(); j++) {
-			auto& slot = audioSend.at(j);
-			if (slot.dst() >= 0) {
-				this->connectTrackAudioSend(
-					TrackType::AuxTrack, i, j,
-					static_cast<SendDstType>(slot.type()), slot.dst(),
-					slot.srcchannel(), slot.dstchannel());
-			}
+		for (auto& j : audioSend) {
+			this->connectTrackAudioSend(
+				TrackType::AuxTrack, i, j.slot(),
+				static_cast<SendDstType>(j.type()), j.dst(),
+				j.srcchannel(), j.dstchannel());
 		}
 	}
 
@@ -843,23 +833,17 @@ bool MainGraph::parse(
 				TrackType::Track, i, j.srcchannel(), j.dstchannel());
 		}
 		auto& midiSend = track.midisend();
-		for (int j = 0; j < MainGraph::midiSendSlotNum && j < midiSend.size(); j++) {
-			auto& slot = midiSend.at(j);
-			if (slot.dst() >= 0) {
-				this->connectTrackMIDISend(
-					TrackType::Track, i, j,
-					static_cast<SendDstType>(slot.type()), slot.dst());
-			}
+		for (auto& j : midiSend) {
+			this->connectTrackMIDISend(
+				TrackType::Track, i, j.slot(),
+				static_cast<SendDstType>(j.type()), j.dst());
 		}
 		auto& audioSend = track.audiosend();
-		for (int j = 0; j < MainGraph::audioSendSlotNum && j < audioSend.size(); j++) {
-			auto& slot = audioSend.at(j);
-			if (slot.dst() >= 0) {
-				this->connectTrackAudioSend(
-					TrackType::Track, i, j,
-					static_cast<SendDstType>(slot.type()), slot.dst(),
-					slot.srcchannel(), slot.dstchannel());
-			}
+		for (auto& j : audioSend) {
+			this->connectTrackAudioSend(
+				TrackType::Track, i, j.slot(),
+				static_cast<SendDstType>(j.type()), j.dst(),
+				j.srcchannel(), j.dstchannel());
 		}
 	}
 
@@ -888,6 +872,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 			auto connection = tmes->add_midisend();
 			connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
 			connection->set_dst(dst.second);
+			connection->set_slot(slot);
 		}
 		for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
 			auto dst = this->getTrackAudioSendDst(TrackType::MasterTrack, 0, slot);
@@ -897,6 +882,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 				auto connection = tmes->add_audiosend();
 				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
 				connection->set_dst(dst.second);
+				connection->set_slot(slot);
 				connection->set_srcchannel(i.first);
 				connection->set_dstchannel(i.second);
 			}
@@ -926,6 +912,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 				auto connection = tmes->add_midisend();
 				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
 				connection->set_dst(dst.second);
+				connection->set_slot(slot);
 			}
 			for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
 				auto dst = this->getTrackAudioSendDst(TrackType::AuxTrack, i, slot);
@@ -935,6 +922,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 					auto connection = tmes->add_audiosend();
 					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
 					connection->set_dst(dst.second);
+					connection->set_slot(slot);
 					connection->set_srcchannel(i.first);
 					connection->set_dstchannel(i.second);
 				}
@@ -965,6 +953,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 				auto connection = tmes->add_midisend();
 				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
 				connection->set_dst(dst.second);
+				connection->set_slot(slot);
 			}
 			for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
 				auto dst = this->getTrackAudioSendDst(TrackType::Track, i, slot);
@@ -974,6 +963,7 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 					auto connection = tmes->add_audiosend();
 					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
 					connection->set_dst(dst.second);
+					connection->set_slot(slot);
 					connection->set_srcchannel(i.first);
 					connection->set_dstchannel(i.second);
 				}
