@@ -110,7 +110,7 @@ int SourceList::add(const SourceList::SeqBlock& block) {
 
 	/** Callback */
 	UICallbackAPI<int, int>::invoke(
-		UICallbackType::SeqBlockChanged, this->index, index);
+		UICallbackType::TrackBlockChanged, this->index, index);
 
 	return index;
 }
@@ -122,7 +122,7 @@ void SourceList::remove(int index) {
 
 		/** Callback */
 		UICallbackAPI<int, int>::invoke(
-			UICallbackType::SeqBlockChanged, this->index, index);
+			UICallbackType::TrackBlockChanged, this->index, index);
 	}
 }
 
@@ -139,9 +139,9 @@ bool SourceList::split(int index, double time) {
 
 			/** Callback */
 			UICallbackAPI<int, int>::invoke(
-				UICallbackType::SeqBlockChanged, this->index, index);
+				UICallbackType::TrackBlockChanged, this->index, index);
 			UICallbackAPI<int, int>::invoke(
-				UICallbackType::SeqBlockChanged, this->index, index + 1);
+				UICallbackType::TrackBlockChanged, this->index, index + 1);
 
 			return true;
 		}
@@ -165,9 +165,9 @@ bool SourceList::stickWithNext(int index) {
 
 			/** Callback */
 			UICallbackAPI<int, int>::invoke(
-				UICallbackType::SeqBlockChanged, this->index, index);
+				UICallbackType::TrackBlockChanged, this->index, index);
 			UICallbackAPI<int, int>::invoke(
-				UICallbackType::SeqBlockChanged, this->index, index + 1);
+				UICallbackType::TrackBlockChanged, this->index, index + 1);
 
 			return true;
 		}
@@ -191,7 +191,7 @@ void SourceList::clearGraph() {
 
 	/** Callback */
 	UICallbackAPI<int, int>::invoke(
-		UICallbackType::SeqBlockChanged, this->index, -1);
+		UICallbackType::TrackBlockChanged, this->index, -1);
 }
 
 bool SourceList::parse(

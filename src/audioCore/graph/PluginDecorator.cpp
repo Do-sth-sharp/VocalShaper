@@ -112,10 +112,10 @@ void PluginDecorator::setPlugin(
 
 		/** Callback */
 		if (this->isInstr) {
-			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+			UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 		}
 		else {
-			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+			UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 		}
 	}
 }
@@ -191,10 +191,10 @@ void PluginDecorator::setARA(
 
 		/** Callback */
 		if (this->isInstr) {
-			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+			UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 		}
 		else {
-			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+			UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 		}
 	}
 }
@@ -218,10 +218,10 @@ void PluginDecorator::handleARALoadError(
 
 		/** Callback */
 		if (this->isInstr) {
-			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+			UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 		}
 		else {
-			UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+			UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 		}
 	}
 }
@@ -286,10 +286,10 @@ void PluginDecorator::setMIDIChannel(int channel) {
 
 	/** Callback */
 	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 	}
 	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 	}
 }
 
@@ -346,10 +346,10 @@ void PluginDecorator::setParamValue(int index, float value) {
 
 	/** Callback */
 	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 	}
 	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 	}
 }
 
@@ -366,10 +366,10 @@ void PluginDecorator::connectParamCC(int paramIndex, int CCIndex) {
 
 	/** Callback */
 	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 	}
 	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 	}
 }
 
@@ -394,10 +394,10 @@ void PluginDecorator::removeCCParamConnection(int CCIndex) {
 
 	/** Callback */
 	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 	}
 	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 	}
 }
 
@@ -420,10 +420,10 @@ void PluginDecorator::setMIDICCIntercept(bool midiCCShouldIntercept) {
 
 	/** Callback */
 	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 	}
 	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 	}
 }
 
@@ -436,10 +436,10 @@ void PluginDecorator::setMIDIOutput(bool midiShouldOutput) {
 
 	/** Callback */
 	if (this->isInstr) {
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 	}
 	else {
-		UICallbackAPI<int, int>::invoke(UICallbackType::EffectChanged, -1, -1);
+		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
 	}
 }
 

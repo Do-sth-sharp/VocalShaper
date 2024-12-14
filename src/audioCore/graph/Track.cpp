@@ -113,7 +113,8 @@ void Track::updateIndex(int index) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackInfoChanged, static_cast<int>(this->type), index);
 }
 
 SeqSourceProcessor* Track::getSequencer() const {
@@ -139,7 +140,8 @@ void Track::setTrackName(const juce::String& name) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackInfoChanged, static_cast<int>(this->type), this->index);
 }
 
 const juce::String Track::getTrackName() const {
@@ -155,7 +157,8 @@ void Track::setTrackColor(const juce::Colour& color) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackInfoChanged, static_cast<int>(this->type), this->index);
 }
 
 const juce::Colour Track::getTrackColor() const {
@@ -166,7 +169,8 @@ void Track::setMute(bool mute) {
 	this->isMute = mute;
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackMuteSoloChanged, static_cast<int>(this->type), this->index);
 }
 
 bool Track::getMute() const {
@@ -191,7 +195,8 @@ void Track::setSolo(bool solo) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqMuteSoloChanged, this->index);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackMuteSoloChanged, static_cast<int>(this->type), this->index);
 }
 
 bool Track::getSolo() const {
@@ -250,9 +255,6 @@ bool Track::addAdditionalAudioBus() {
 			{this->audioOutputNode->nodeID, i} });
 	}
 
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
-
 	return true;
 }
 
@@ -291,9 +293,6 @@ bool Track::removeAdditionalAudioBus() {
 
 	/** Auto Remove Connection */
 	this->removeIllegalConnections();
-
-	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, this->index);
 
 	return true;
 }

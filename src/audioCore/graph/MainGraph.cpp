@@ -91,7 +91,8 @@ void MainGraph::insertTrack(TrackType type, int index,
 		}
 
 		/** Callback */
-		UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackAdded, static_cast<int>(type), index);
 	}
 }
 
@@ -127,7 +128,8 @@ void MainGraph::removeTrack(TrackType type, int index) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, index);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackRemoved, static_cast<int>(type), index);
 }
 
 int MainGraph::getTrackNum(TrackType type) const {
@@ -170,7 +172,13 @@ bool MainGraph::addTrackAdditionalAudioBus(TrackType type, int index) {
 
 	/** Get Track Processor */
 	if (auto track = this->getTrackProcessor(type, index)) {
-		return track->addAdditionalAudioBus();
+		if (!track->addAdditionalAudioBus()) { return false; }
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSideChainChanged, static_cast<int>(type), index);
+
+		return true;
 	}
 
 	return false;
@@ -188,6 +196,12 @@ bool MainGraph::removeTrackAdditionalAudioBus(TrackType type, int index) {
 		auto nodeID = this->getTrackNodeIndex(type, index);
 		this->removeIllegalNodeAudioSendInputConnections(
 			nodeID, track->getTotalNumInputChannels());
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSideChainChanged, static_cast<int>(type), index);
+
+		return true;
 	}
 
 	return false;
@@ -215,6 +229,11 @@ bool MainGraph::connectTrackMIDIInput(TrackType type, int index) {
 	/** Add Link */
 	if (this->addMIDIInputLink(trackNode)) {
 		this->addConnection({ {inputNode, midiChannelIndex}, {trackNode, midiChannelIndex} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackInputConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -241,6 +260,11 @@ bool MainGraph::connectTrackAudioInput(
 	/** Add Link */
 	if (this->addAudioInputLink(trackNode, inputChannel, trackChannel)) {
 		this->addConnection({ {inputNode, inputChannel}, {trackNode, trackChannel} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackInputConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -260,6 +284,11 @@ bool MainGraph::connectTrackMIDISend(
 	/** Add Link */
 	if (this->addMIDISendLink(trackNode, slot, dstNode)) {
 		this->addConnection({ {trackNode, midiChannelIndex}, {dstNode, midiChannelIndex} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -300,6 +329,11 @@ bool MainGraph::connectTrackAudioSend(TrackType type, int index, int slot,
 	/** Add Link */
 	if (this->addAudioSendLink(trackNode, slot, dstNode, trackChannel, dstChannel)) {
 		this->addConnection({ {trackNode, trackChannel}, {dstNode, dstChannel} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -316,6 +350,11 @@ bool MainGraph::disconnectTrackMIDIInput(TrackType type, int index) {
 	/** Remove Link */
 	if (this->removeMIDIInputLink(trackNode)) {
 		this->removeConnection({ {inputNode, midiChannelIndex}, {trackNode, midiChannelIndex} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackInputConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -333,6 +372,11 @@ bool MainGraph::disconnectTrackAudioInput(
 	/** Remove Link */
 	if (this->removeAudioInputLink(trackNode, inputChannel, trackChannel)) {
 		this->removeConnection({ {inputNode, inputChannel}, {trackNode, trackChannel} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackInputConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -352,6 +396,11 @@ bool MainGraph::disconnectTrackMIDISend(
 	/** Remove Link */
 	if (this->removeMIDISendLink(trackNode, slot, dstNode)) {
 		this->removeConnection({ {trackNode, midiChannelIndex}, {dstNode, midiChannelIndex} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -367,6 +416,11 @@ bool MainGraph::disconnectTrackMIDISend(TrackType type, int index, int slot) {
 	auto dstNode = this->removeMIDISendLink(trackNode, slot);
 	if (dstNode != NodeIndex{}) {
 		this->removeConnection({ {trackNode, midiChannelIndex}, {dstNode, midiChannelIndex} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -386,6 +440,11 @@ bool MainGraph::disconnectTrackAudioSend(TrackType type, int index, int slot,
 	/** Remove Link */
 	if (this->removeAudioSendLink(trackNode, slot, dstNode, trackChannel, dstChannel)) {
 		this->removeConnection({ {trackNode, trackChannel}, {dstNode, dstChannel} });
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -408,6 +467,11 @@ bool MainGraph::disconnectTrackAudioSend(TrackType type, int index, int slot,
 		for (auto& channel : channels) {
 			this->removeConnection({ {trackNode, channel.first}, {dstNode, channel.second} });
 		}
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -425,6 +489,11 @@ bool MainGraph::disconnectTrackAudioSend(TrackType type, int index, int slot) {
 		for (auto& channel : group.second) {
 			this->removeConnection({ {trackNode, channel.first}, {group.first, channel.second} });
 		}
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackSendConnectionChanged, static_cast<int>(type), index);
+
 		return true;
 	}
 
@@ -687,9 +756,7 @@ void MainGraph::clearGraph() {
 	utils::resetSoloCount();
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
-	UICallbackAPI<int>::invoke(UICallbackType::SeqChanged, -1);
+	UICallbackAPI<void>::invoke(UICallbackType::GraphUpdated);
 }
 
 const juce::Array<float> MainGraph::getOutputLevels() const {

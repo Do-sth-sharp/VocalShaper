@@ -156,7 +156,7 @@ void SeqSourceProcessor::setInstr(std::unique_ptr<juce::AudioPluginInstance> pro
 		ptrNode->setPlugin(std::move(processor), identifier, {});
 
 		/** Callback */
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, this->index);
 	}
 	else {
 		jassertfalse;
@@ -191,7 +191,7 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 		}
 
 		/** Callback */
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, this->index);
 
 		return PluginDecorator::SafePointer{ decorator };
 	}
@@ -215,7 +215,7 @@ void SeqSourceProcessor::removeInstr() {
 		this->removeNode(ptrNode->nodeID);
 
 		/** Callback */
-		UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
+		UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, this->index);
 	}
 }
 
@@ -251,7 +251,7 @@ void SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer instr,
 			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
 
 			/** Callback */
-			UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, -1);
+			UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
 		}
 	}
 }
@@ -284,7 +284,7 @@ void SeqSourceProcessor::setInstrOffline(bool offline) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::InstrChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, this->index);
 }
 
 bool SeqSourceProcessor::getInstrOffline() const {
@@ -478,7 +478,7 @@ void SeqSourceProcessor::setCurrentMIDITrack(int trackIndex) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackDataRefChanged, this->index);
 }
 
 int SeqSourceProcessor::getCurrentMIDITrack() const {
@@ -499,7 +499,7 @@ void SeqSourceProcessor::setRecording(RecordState recordState) {
 	this->recordingFlag = recordState;
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqRecChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackRecordingChanged, this->index);
 }
 
 SeqSourceProcessor::RecordState SeqSourceProcessor::getRecording() const {
@@ -510,7 +510,7 @@ void SeqSourceProcessor::setInputMonitoring(bool inputMonitoring) {
 	this->inputMonitoring = inputMonitoring;
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::SeqInputMonitoringChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackInputMonitoringChanged, this->index);
 }
 
 bool SeqSourceProcessor::getInputMonitoring() const {
@@ -980,6 +980,6 @@ void SeqSourceProcessor::unlinkInstr() {
 }
 
 void SeqSourceProcessor::invokeDataCallbacks() const {
-	UICallbackAPI<int>::invoke(UICallbackType::SeqDataRefChanged, this->index);
-	UICallbackAPI<int>::invoke(UICallbackType::SourceChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackDataRefChanged, this->index);
+	UICallbackAPI<int>::invoke(UICallbackType::TrackSourceChanged, this->index);
 }
