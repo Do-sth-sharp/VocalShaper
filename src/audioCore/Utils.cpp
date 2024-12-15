@@ -431,306 +431,306 @@ namespace utils {
 		return AudioFormatInfo{};
 	}
 
-	const juce::Array<TrackType> getAllTrackTypes() {
+	const juce::Array<BusType> getAllBusTypes() {
 		return {
-			TrackType::DISABLED,
-			TrackType::MONO,
-			TrackType::STEREO,
-			TrackType::LCR,
-			TrackType::LRS,
-			TrackType::LCRS,
-			TrackType::SUR_5_0,
-			TrackType::SUR_5_1,
-			TrackType::SUR_5_0_2,
-			TrackType::SUR_5_1_2,
-			TrackType::SUR_5_0_4,
-			TrackType::SUR_5_1_4,
-			TrackType::SUR_6_0,
-			TrackType::SUR_6_1,
-			TrackType::SUR_6_0_M,
-			TrackType::SUR_6_1_M,
-			TrackType::SUR_7_0,
-			TrackType::SUR_7_0_SDSS,
-			TrackType::SUR_7_1,
-			TrackType::SUR_7_1_SDSS,
-			TrackType::SUR_7_0_2,
-			TrackType::SUR_7_1_2,
-			TrackType::SUR_7_0_4,
-			TrackType::SUR_7_1_4,
-			TrackType::SUR_7_0_6,
-			TrackType::SUR_7_1_6,
-			TrackType::SUR_9_0_4,
-			TrackType::SUR_9_1_4,
-			TrackType::SUR_9_0_6,
-			TrackType::SUR_9_1_6,
-			TrackType::QUADRAPHONIC,
-			TrackType::PENTAGONAL,
-			TrackType::HEXAGONAL,
-			TrackType::OCTAGONAL,
-			TrackType::AMBISONIC_0,
-			TrackType::AMBISONIC_1,
-			TrackType::AMBISONIC_2,
-			TrackType::AMBISONIC_3,
-			TrackType::AMBISONIC_4,
-			TrackType::AMBISONIC_5,
-			TrackType::AMBISONIC_6,
-			TrackType::AMBISONIC_7
+			BusType::DISABLED,
+			BusType::MONO,
+			BusType::STEREO,
+			BusType::LCR,
+			BusType::LRS,
+			BusType::LCRS,
+			BusType::SUR_5_0,
+			BusType::SUR_5_1,
+			BusType::SUR_5_0_2,
+			BusType::SUR_5_1_2,
+			BusType::SUR_5_0_4,
+			BusType::SUR_5_1_4,
+			BusType::SUR_6_0,
+			BusType::SUR_6_1,
+			BusType::SUR_6_0_M,
+			BusType::SUR_6_1_M,
+			BusType::SUR_7_0,
+			BusType::SUR_7_0_SDSS,
+			BusType::SUR_7_1,
+			BusType::SUR_7_1_SDSS,
+			BusType::SUR_7_0_2,
+			BusType::SUR_7_1_2,
+			BusType::SUR_7_0_4,
+			BusType::SUR_7_1_4,
+			BusType::SUR_7_0_6,
+			BusType::SUR_7_1_6,
+			BusType::SUR_9_0_4,
+			BusType::SUR_9_1_4,
+			BusType::SUR_9_0_6,
+			BusType::SUR_9_1_6,
+			BusType::QUADRAPHONIC,
+			BusType::PENTAGONAL,
+			BusType::HEXAGONAL,
+			BusType::OCTAGONAL,
+			BusType::AMBISONIC_0,
+			BusType::AMBISONIC_1,
+			BusType::AMBISONIC_2,
+			BusType::AMBISONIC_3,
+			BusType::AMBISONIC_4,
+			BusType::AMBISONIC_5,
+			BusType::AMBISONIC_6,
+			BusType::AMBISONIC_7
 		};
 	}
 
-	const juce::AudioChannelSet getChannelSet(TrackType type) {
-		juce::AudioChannelSet trackType;
+	const juce::AudioChannelSet getChannelSet(BusType type) {
+		juce::AudioChannelSet busType;
 
 		switch (type) {
-		case TrackType::DISABLED:
-			trackType = juce::AudioChannelSet::disabled();
+		case BusType::DISABLED:
+			busType = juce::AudioChannelSet::disabled();
 			break;
-		case TrackType::MONO:
-			trackType = juce::AudioChannelSet::mono();
+		case BusType::MONO:
+			busType = juce::AudioChannelSet::mono();
 			break;
-		case TrackType::STEREO:
-			trackType = juce::AudioChannelSet::stereo();
+		case BusType::STEREO:
+			busType = juce::AudioChannelSet::stereo();
 			break;
-		case TrackType::LCR:
-			trackType = juce::AudioChannelSet::createLCR();
+		case BusType::LCR:
+			busType = juce::AudioChannelSet::createLCR();
 			break;
-		case TrackType::LRS:
-			trackType = juce::AudioChannelSet::createLRS();
+		case BusType::LRS:
+			busType = juce::AudioChannelSet::createLRS();
 			break;
-		case TrackType::LCRS:
-			trackType = juce::AudioChannelSet::createLCRS();
+		case BusType::LCRS:
+			busType = juce::AudioChannelSet::createLCRS();
 			break;
-		case TrackType::SUR_5_0:
-			trackType = juce::AudioChannelSet::create5point0();
+		case BusType::SUR_5_0:
+			busType = juce::AudioChannelSet::create5point0();
 			break;
-		case TrackType::SUR_5_1:
-			trackType = juce::AudioChannelSet::create5point1();
+		case BusType::SUR_5_1:
+			busType = juce::AudioChannelSet::create5point1();
 			break;
-		case TrackType::SUR_5_0_2:
-			trackType = juce::AudioChannelSet::create5point0point2();
+		case BusType::SUR_5_0_2:
+			busType = juce::AudioChannelSet::create5point0point2();
 			break;
-		case TrackType::SUR_5_1_2:
-			trackType = juce::AudioChannelSet::create5point1point2();
+		case BusType::SUR_5_1_2:
+			busType = juce::AudioChannelSet::create5point1point2();
 			break;
-		case TrackType::SUR_5_0_4:
-			trackType = juce::AudioChannelSet::create5point0point4();
+		case BusType::SUR_5_0_4:
+			busType = juce::AudioChannelSet::create5point0point4();
 			break;
-		case TrackType::SUR_5_1_4:
-			trackType = juce::AudioChannelSet::create5point1point4();
+		case BusType::SUR_5_1_4:
+			busType = juce::AudioChannelSet::create5point1point4();
 			break;
-		case TrackType::SUR_6_0:
-			trackType = juce::AudioChannelSet::create6point0();
+		case BusType::SUR_6_0:
+			busType = juce::AudioChannelSet::create6point0();
 			break;
-		case TrackType::SUR_6_1:
-			trackType = juce::AudioChannelSet::create6point1();
+		case BusType::SUR_6_1:
+			busType = juce::AudioChannelSet::create6point1();
 			break;
-		case TrackType::SUR_6_0_M:
-			trackType = juce::AudioChannelSet::create6point0Music();
+		case BusType::SUR_6_0_M:
+			busType = juce::AudioChannelSet::create6point0Music();
 			break;
-		case TrackType::SUR_6_1_M:
-			trackType = juce::AudioChannelSet::create6point1Music();
+		case BusType::SUR_6_1_M:
+			busType = juce::AudioChannelSet::create6point1Music();
 			break;
-		case TrackType::SUR_7_0:
-			trackType = juce::AudioChannelSet::create7point0();
+		case BusType::SUR_7_0:
+			busType = juce::AudioChannelSet::create7point0();
 			break;
-		case TrackType::SUR_7_0_SDSS:
-			trackType = juce::AudioChannelSet::create7point0SDDS();
+		case BusType::SUR_7_0_SDSS:
+			busType = juce::AudioChannelSet::create7point0SDDS();
 			break;
-		case TrackType::SUR_7_1:
-			trackType = juce::AudioChannelSet::create7point1();
+		case BusType::SUR_7_1:
+			busType = juce::AudioChannelSet::create7point1();
 			break;
-		case TrackType::SUR_7_1_SDSS:
-			trackType = juce::AudioChannelSet::create7point1SDDS();
+		case BusType::SUR_7_1_SDSS:
+			busType = juce::AudioChannelSet::create7point1SDDS();
 			break;
-		case TrackType::SUR_7_0_2:
-			trackType = juce::AudioChannelSet::create7point0point2();
+		case BusType::SUR_7_0_2:
+			busType = juce::AudioChannelSet::create7point0point2();
 			break;
-		case TrackType::SUR_7_1_2:
-			trackType = juce::AudioChannelSet::create7point1point2();
+		case BusType::SUR_7_1_2:
+			busType = juce::AudioChannelSet::create7point1point2();
 			break;
-		case TrackType::SUR_7_0_4:
-			trackType = juce::AudioChannelSet::create7point0point4();
+		case BusType::SUR_7_0_4:
+			busType = juce::AudioChannelSet::create7point0point4();
 			break;
-		case TrackType::SUR_7_1_4:
-			trackType = juce::AudioChannelSet::create7point1point4();
+		case BusType::SUR_7_1_4:
+			busType = juce::AudioChannelSet::create7point1point4();
 			break;
-		case TrackType::SUR_7_0_6:
-			trackType = juce::AudioChannelSet::create7point0point6();
+		case BusType::SUR_7_0_6:
+			busType = juce::AudioChannelSet::create7point0point6();
 			break;
-		case TrackType::SUR_7_1_6:
-			trackType = juce::AudioChannelSet::create7point1point6();
+		case BusType::SUR_7_1_6:
+			busType = juce::AudioChannelSet::create7point1point6();
 			break;
-		case TrackType::SUR_9_0_4:
-			trackType = juce::AudioChannelSet::create9point0point4();
+		case BusType::SUR_9_0_4:
+			busType = juce::AudioChannelSet::create9point0point4();
 			break;
-		case TrackType::SUR_9_1_4:
-			trackType = juce::AudioChannelSet::create9point1point4();
+		case BusType::SUR_9_1_4:
+			busType = juce::AudioChannelSet::create9point1point4();
 			break;
-		case TrackType::SUR_9_0_6:
-			trackType = juce::AudioChannelSet::create9point0point6();
+		case BusType::SUR_9_0_6:
+			busType = juce::AudioChannelSet::create9point0point6();
 			break;
-		case TrackType::SUR_9_1_6:
-			trackType = juce::AudioChannelSet::create9point1point6();
+		case BusType::SUR_9_1_6:
+			busType = juce::AudioChannelSet::create9point1point6();
 			break;
-		case TrackType::QUADRAPHONIC:
-			trackType = juce::AudioChannelSet::quadraphonic();
+		case BusType::QUADRAPHONIC:
+			busType = juce::AudioChannelSet::quadraphonic();
 			break;
-		case TrackType::PENTAGONAL:
-			trackType = juce::AudioChannelSet::pentagonal();
+		case BusType::PENTAGONAL:
+			busType = juce::AudioChannelSet::pentagonal();
 			break;
-		case TrackType::HEXAGONAL:
-			trackType = juce::AudioChannelSet::hexagonal();
+		case BusType::HEXAGONAL:
+			busType = juce::AudioChannelSet::hexagonal();
 			break;
-		case TrackType::OCTAGONAL:
-			trackType = juce::AudioChannelSet::octagonal();
+		case BusType::OCTAGONAL:
+			busType = juce::AudioChannelSet::octagonal();
 			break;
-		case TrackType::AMBISONIC_0:
-		case TrackType::AMBISONIC_1:
-		case TrackType::AMBISONIC_2:
-		case TrackType::AMBISONIC_3:
-		case TrackType::AMBISONIC_4:
-		case TrackType::AMBISONIC_5:
-		case TrackType::AMBISONIC_6:
-		case TrackType::AMBISONIC_7:
-			trackType = juce::AudioChannelSet::ambisonic(static_cast<int>(type) - 100);
+		case BusType::AMBISONIC_0:
+		case BusType::AMBISONIC_1:
+		case BusType::AMBISONIC_2:
+		case BusType::AMBISONIC_3:
+		case BusType::AMBISONIC_4:
+		case BusType::AMBISONIC_5:
+		case BusType::AMBISONIC_6:
+		case BusType::AMBISONIC_7:
+			busType = juce::AudioChannelSet::ambisonic(static_cast<int>(type) - 100);
 			break;
 		default:
-			trackType = juce::AudioChannelSet::stereo();
+			busType = juce::AudioChannelSet::stereo();
 			break;
 		}
 
-		return trackType;
+		return busType;
 	}
 
-	TrackType getTrackType(const juce::AudioChannelSet& channels) {
+	BusType getBusType(const juce::AudioChannelSet& channels) {
 		if (channels == juce::AudioChannelSet::disabled()) {
-			return TrackType::DISABLED;
+			return BusType::DISABLED;
 		}
 		else if (channels == juce::AudioChannelSet::mono()) {
-			return TrackType::MONO;
+			return BusType::MONO;
 		}
 		else if (channels == juce::AudioChannelSet::stereo()) {
-			return TrackType::STEREO;
+			return BusType::STEREO;
 		}
 		else if (channels == juce::AudioChannelSet::createLCR()) {
-			return TrackType::LCR;
+			return BusType::LCR;
 		}
 		else if (channels == juce::AudioChannelSet::createLRS()) {
-			return TrackType::LRS;
+			return BusType::LRS;
 		}
 		else if (channels == juce::AudioChannelSet::createLCRS()) {
-			return TrackType::LCRS;
+			return BusType::LCRS;
 		}
 		else if (channels == juce::AudioChannelSet::create5point0()) {
-			return TrackType::SUR_5_0;
+			return BusType::SUR_5_0;
 		}
 		else if (channels == juce::AudioChannelSet::create5point1()) {
-			return TrackType::SUR_5_1;
+			return BusType::SUR_5_1;
 		}
 		else if (channels == juce::AudioChannelSet::create5point0point2()) {
-			return TrackType::SUR_5_0_2;
+			return BusType::SUR_5_0_2;
 		}
 		else if (channels == juce::AudioChannelSet::create5point1point2()) {
-			return TrackType::SUR_5_1_2;
+			return BusType::SUR_5_1_2;
 		}
 		else if (channels == juce::AudioChannelSet::create5point0point4()) {
-			return TrackType::SUR_5_0_4;
+			return BusType::SUR_5_0_4;
 		}
 		else if (channels == juce::AudioChannelSet::create5point1point4()) {
-			return TrackType::SUR_5_1_4;
+			return BusType::SUR_5_1_4;
 		}
 		else if (channels == juce::AudioChannelSet::create6point0()) {
-			return TrackType::SUR_6_0;
+			return BusType::SUR_6_0;
 		}
 		else if (channels == juce::AudioChannelSet::create6point1()) {
-			return TrackType::SUR_6_1;
+			return BusType::SUR_6_1;
 		}
 		else if (channels == juce::AudioChannelSet::create6point0Music()) {
-			return TrackType::SUR_6_0_M;
+			return BusType::SUR_6_0_M;
 		}
 		else if (channels == juce::AudioChannelSet::create6point1Music()) {
-			return TrackType::SUR_6_1_M;
+			return BusType::SUR_6_1_M;
 		}
 		else if (channels == juce::AudioChannelSet::create7point0()) {
-			return TrackType::SUR_7_0;
+			return BusType::SUR_7_0;
 		}
 		else if (channels == juce::AudioChannelSet::create7point0SDDS()) {
-			return TrackType::SUR_7_0_SDSS;
+			return BusType::SUR_7_0_SDSS;
 		}
 		else if (channels == juce::AudioChannelSet::create7point1()) {
-			return TrackType::SUR_7_1;
+			return BusType::SUR_7_1;
 		}
 		else if (channels == juce::AudioChannelSet::create7point1SDDS()) {
-			return TrackType::SUR_7_1_SDSS;
+			return BusType::SUR_7_1_SDSS;
 		}
 		else if (channels == juce::AudioChannelSet::create7point0point2()) {
-			return TrackType::SUR_7_0_2;
+			return BusType::SUR_7_0_2;
 		}
 		else if (channels == juce::AudioChannelSet::create7point1point2()) {
-			return TrackType::SUR_7_1_2;
+			return BusType::SUR_7_1_2;
 		}
 		else if (channels == juce::AudioChannelSet::create7point0point4()) {
-			return TrackType::SUR_7_0_4;
+			return BusType::SUR_7_0_4;
 		}
 		else if (channels == juce::AudioChannelSet::create7point1point4()) {
-			return TrackType::SUR_7_1_4;
+			return BusType::SUR_7_1_4;
 		}
 		else if (channels == juce::AudioChannelSet::create7point0point6()) {
-			return TrackType::SUR_7_0_6;
+			return BusType::SUR_7_0_6;
 		}
 		else if (channels == juce::AudioChannelSet::create7point1point6()) {
-			return TrackType::SUR_7_1_6;
+			return BusType::SUR_7_1_6;
 		}
 		else if (channels == juce::AudioChannelSet::create9point0point4()) {
-			return TrackType::SUR_9_0_4;
+			return BusType::SUR_9_0_4;
 		}
 		else if (channels == juce::AudioChannelSet::create9point1point4()) {
-			return TrackType::SUR_9_1_4;
+			return BusType::SUR_9_1_4;
 		}
 		else if (channels == juce::AudioChannelSet::create9point0point6()) {
-			return TrackType::SUR_9_0_6;
+			return BusType::SUR_9_0_6;
 		}
 		else if (channels == juce::AudioChannelSet::create9point1point6()) {
-			return TrackType::SUR_9_1_6;
+			return BusType::SUR_9_1_6;
 		}
 		else if (channels == juce::AudioChannelSet::quadraphonic()) {
-			return TrackType::QUADRAPHONIC;
+			return BusType::QUADRAPHONIC;
 		}
 		else if (channels == juce::AudioChannelSet::pentagonal()) {
-			return TrackType::PENTAGONAL;
+			return BusType::PENTAGONAL;
 		}
 		else if (channels == juce::AudioChannelSet::hexagonal()) {
-			return TrackType::HEXAGONAL;
+			return BusType::HEXAGONAL;
 		}
 		else if (channels == juce::AudioChannelSet::octagonal()) {
-			return TrackType::OCTAGONAL;
+			return BusType::OCTAGONAL;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(0)) {
-			return TrackType::AMBISONIC_0;
+			return BusType::AMBISONIC_0;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(1)) {
-			return TrackType::AMBISONIC_1;
+			return BusType::AMBISONIC_1;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(2)) {
-			return TrackType::AMBISONIC_2;
+			return BusType::AMBISONIC_2;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(3)) {
-			return TrackType::AMBISONIC_3;
+			return BusType::AMBISONIC_3;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(4)) {
-			return TrackType::AMBISONIC_4;
+			return BusType::AMBISONIC_4;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(5)) {
-			return TrackType::AMBISONIC_5;
+			return BusType::AMBISONIC_5;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(6)) {
-			return TrackType::AMBISONIC_6;
+			return BusType::AMBISONIC_6;
 		}
 		else if (channels == juce::AudioChannelSet::ambisonic(7)) {
-			return TrackType::AMBISONIC_7;
+			return BusType::AMBISONIC_7;
 		}
 
-		return static_cast<TrackType>(-1);
+		return static_cast<BusType>(-1);
 	}
 
 	int versionCompare(const Version& v1, const Version& v2) {

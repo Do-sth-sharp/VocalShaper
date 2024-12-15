@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 #include "../graph/PluginDecorator.h"
-#include "../graph/SeqSourceProcessor.h"
+#include "../graph/MainGraph.h"
 #include "../source/SourceMIDITemp.h"
 #include "../Utils.h"
 
@@ -29,8 +29,6 @@ namespace quickAPI {
 	using TempoData = std::tuple<double, double, double, double, int, int>;
 	const TempoData getTempoData(int tempIndex);
 	double limitTimeSec(double timeSec, double limitLevel);
-	using TrackInfo = std::tuple<juce::String, juce::String>;
-	const juce::Array<TrackInfo> getMixerTrackInfos();
 
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension);
 	const juce::Array<int> getFormatPossibleBitDepthsForExtension(const juce::String& extension);
@@ -65,21 +63,15 @@ namespace quickAPI {
 		getPluginList(bool filter = false, bool instr = true);
 
 	/** ID, Name */
-	using TrackType = std::tuple<int, juce::String>;
-	const juce::Array<TrackType> createAllTrackTypeWithName();
-	const juce::Array<TrackType> getAllTrackTypeWithName();
+	using BusType = std::tuple<int, juce::String>;
+	const juce::Array<BusType> createAllBusTypeWithName();
+	const juce::Array<BusType> getAllBusTypeWithName();
 
 	using PluginHolder = PluginDecorator::SafePointer;
 	using EditorPointer = juce::Component::SafePointer<juce::AudioProcessorEditor>;
 
 	/** Param Index，CC Channel  */
 	using PluginParamLink = std::tuple<int, int>;
-
-	/** Src Index, Dst Index */
-	using MIDILink = std::tuple<int, int>;
-
-	/** Src Index, Src Channel, Dst Index, Dst Channel */
-	using AudioLink = std::tuple<int, int, int, int>;
 
 	const juce::String getPluginIdentifier(PluginHolder pointer);
 
@@ -117,61 +109,45 @@ namespace quickAPI {
 	const juce::AudioChannelSet getEffectChannelSet(int trackIndex, int index);
 	int getEffectInputChannelNum(int trackIndex, int index);
 
+	using TrackType = Track::TrackType;
+	using AudioChannelLinkList = MainGraph::AudioChannelLinkList;
+	using SendDst = MainGraph::SendDst;
 	using RecordState = SeqSourceProcessor::RecordState;
-	int getSeqTrackNum();
-	const juce::String getSeqTrackName(int index);
-	const juce::Colour getSeqTrackColor(int index);
-	const juce::StringArray getSeqTrackNameList();
-	const juce::AudioChannelSet getSeqTrackChannelSet(int index);
-	int getSeqTrackInputChannelNum(int index);
-	int getSeqTrackOutputChannelNum(int index);
-	bool getSeqTrackMIDIInputFromDevice(int index);
-	const juce::Array<AudioLink> getSeqTrackAudioInputFromDevice(int index);
-	const juce::Array<MIDILink> getSeqTrackMIDIOutputToMixer(int index);
-	const juce::Array<AudioLink> getSeqTrackAudioOutputToMixer(int index);
-	bool getSeqTrackMute(int index);
-	bool getSeqTrackSolo(int index);
-	bool getSeqTrackEquivalentMute(int index);
-	bool getSeqTrackInputMonitoring(int index);
-	RecordState getSeqTrackRecording(int index);
-	const juce::Array<float> getSeqTrackOutputLevel(int index);
-	const juce::String getSeqTrackType(int index);
-	bool isSeqTrackHasAudioData(int index);
-	bool isSeqTrackHasMIDIData(int index);
-	const juce::String getSeqTrackDataRefAudio(int index);
-	const juce::String getSeqTrackDataRefMIDI(int index);
-	const std::tuple<double, juce::AudioSampleBuffer> getSeqTrackAudioData(int index);
-	//const juce::MidiMessageSequence getSeqTrackMIDIData(int index);
-	//int getSeqTrackMIDITrackNum(int index);
-	int getSeqTrackCurrentMIDITrack(int index);
-	bool isSeqTrackAudioRef(int index, uint64_t ref);
-	bool isSeqTrackMIDIRef(int index, uint64_t ref);
-	uint64_t getSeqTrackAudioRef(int index);
-	uint64_t getSeqTrackMIDIRef(int index);
-
-	int getMixerTrackNum();
-	const juce::String getMixerTrackName(int index);
-	const juce::StringArray getMixerTrackNameList();
-	const juce::Colour getMixerTrackColor(int index);
-	const juce::AudioChannelSet getMixerTrackChannelSet(int index);
-	int getMixerTrackInputChannelNum(int index);
-	int getMixerTrackOutputChannelNum(int index);
-	int getMixerTrackSideChainBusNum(int index);
-	bool getMixerTrackMIDIInputFromDevice(int index);
-	const juce::Array<MIDILink> getMixerTrackMIDIInputFromSource(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromDevice(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromSend(int index);
-	bool getMixerTrackMIDIOutputToDevice(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index);
-	const juce::Array<AudioLink> getMixerTrackAudioOutputToSend(int index);
-	float getMixerTrackGain(int index);
-	float getMixerTrackPan(int index);
-	float getMixerTrackFader(int index);
-	bool getMixerTrackMute(int index);
-	bool isMixerTrackPanValid(int index);
-	const juce::Array<float> getMixerTrackOutputLevel(int index);
-	const juce::String getMixerTrackType(int index);
+	int getTrackNum(TrackType type);
+	const juce::String getTrackName(TrackType type, int index);
+	const juce::Colour getTrackColor(TrackType type, int index);
+	const juce::StringArray getTrackNameList(TrackType type);
+	using TrackInfo = std::tuple<juce::String, juce::String>;
+	const juce::Array<TrackInfo> getTrackInfos(TrackType type);
+	const juce::AudioChannelSet getTrackChannelSet(TrackType type, int index);
+	int getTrackInputChannelNum(TrackType type, int index);
+	int getTrackOutputChannelNum(TrackType type, int index);
+	int getTrackSideChainBusNum(TrackType type, int index);
+	bool isTrackMIDIInputConnected(TrackType type, int index);
+	bool isTrackAudioInputConnected(TrackType type, int index);
+	const AudioChannelLinkList getTrackAudioInputChannels(TrackType type, int index);
+	bool isTrackMIDISendConnected(TrackType type, int index, int slot);
+	const SendDst getTrackMIDISendDst(TrackType type, int index, int slot);
+	bool isTrackAudioSendConnected(TrackType type, int index, int slot);
+	const SendDst getTrackAudioSendDst(TrackType type, int index, int slot);
+	const AudioChannelLinkList getTrackAudioSendChannels(TrackType type, int index, int slot);
+	float getTrackGain(TrackType type, int index);
+	float getTrackPan(TrackType type, int index);
+	float getTrackFader(TrackType type, int index);
+	bool isTrackPanValid(TrackType type, int index);
+	bool getTrackMute(TrackType type, int index);
+	bool getTrackSolo(TrackType type, int index);
+	bool getTrackEquivalentMute(TrackType type, int index);
+	bool getTrackInputMonitoring(TrackType type, int index);
+	RecordState getTrackRecording(TrackType type, int index);
+	const juce::Array<float> getTrackSeqOutputLevel(TrackType type, int index);
+	const juce::Array<float> getTrackMixerOutputLevel(TrackType type, int index);
+	const juce::String getTrackBusTypeName(TrackType type, int index);
+	int getTrackCurrentMIDITrack(TrackType type, int index);
+	bool isTrackAudioRef(TrackType type, int index, uint64_t ref);
+	bool isTrackMIDIRef(TrackType type, int index, uint64_t ref);
+	uint64_t getTrackAudioRef(TrackType type, int index);
+	uint64_t getTrackMIDIRef(TrackType type, int index);
 
 	int getLabelNum();
 	bool isLabelTempo(int index);
@@ -206,4 +182,5 @@ namespace quickAPI {
 	int getMIDISourceTrackNum(uint64_t ref);
 	bool isMIDISourceTrackEmpty(uint64_t ref, int track);
 	const NoteList getMIDISourceNotes(uint64_t ref, int track);
+	const std::tuple<double, juce::AudioSampleBuffer> getAudioSourceData(uint64_t ref);
 }

@@ -11,7 +11,7 @@ MixerTrack::MixerTrack(TrackType type,
 	/** Set Effects */
 	this->setGain(0);
 	this->setPan(0);
-	this->setSlider(1);
+	this->setFader(1);
 
 	/** Set Channel Layout */
 	juce::AudioProcessorGraph::BusesLayout layout;
@@ -178,16 +178,16 @@ float MixerTrack::getPan() const {
 	return this->panValue;
 }
 
-void MixerTrack::setSlider(float slider) {
-	auto& sliderDsp = this->slider.get<0>();
-	sliderDsp.setGainLinear(slider);
+void MixerTrack::setFader(float fader) {
+	auto& sliderDsp = this->fader.get<0>();
+	sliderDsp.setGainLinear(fader);
 
 	/** Callback */
 	UICallbackAPI<int>::invoke(UICallbackType::TrackFaderChanged, this->index);
 }
 
-float MixerTrack::getSlider() const {
-	auto& sliderDsp = this->slider.get<0>();
+float MixerTrack::getFader() const {
+	auto& sliderDsp = this->fader.get<0>();
 	return sliderDsp.getGainLinear();
 }
 
@@ -212,7 +212,7 @@ void MixerTrack::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerB
 		));
 
 		/** Prepare Slider */
-		this->slider.prepare(juce::dsp::ProcessSpec(
+		this->fader.prepare(juce::dsp::ProcessSpec(
 			sampleRate, maximumExpectedSamplesPerBlock,
 			this->audioChannels.size()
 		));
@@ -242,7 +242,7 @@ void MixerTrack::clearGraph() {
 
 	this->setGain(0);
 	this->setPan(0);
-	this->setSlider(1);
+	this->setFader(1);
 }
 
 bool MixerTrack::parse(
@@ -261,7 +261,7 @@ bool MixerTrack::parse(
 
 	this->setGain(mes->gain());
 	this->setPan(mes->panner());
-	this->setSlider(mes->slider());
+	this->setFader(mes->fader());
 
 	return true;
 }
@@ -276,7 +276,7 @@ std::unique_ptr<google::protobuf::Message> MixerTrack::serialize(
 
 	mes->set_gain(this->getGain());
 	mes->set_panner(this->getPan());
-	mes->set_slider(this->getSlider());
+	mes->set_fader(this->getFader());
 
 	return mes;
 }
@@ -303,6 +303,6 @@ void MixerTrack::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer
 	/** Process Current Graph */
 	this->AudioProcessorGraph::processBlock(buffer, midiMessages);
 
-	/** Process Slider */
-	this->slider.process(juce::dsp::ProcessContextReplacing<float>(block));
+	/** Process Fader */
+	this->fader.process(juce::dsp::ProcessContextReplacing<float>(block));
 }

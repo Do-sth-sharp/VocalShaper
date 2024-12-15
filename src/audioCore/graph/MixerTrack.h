@@ -31,8 +31,8 @@ public:
 	float getGain() const;
 	void setPan(float pan);
 	float getPan() const;
-	void setSlider(float slider);
-	float getSlider() const;
+	void setFader(float fader);
+	float getFader() const;
 
 	const juce::AudioChannelSet& getAudioChannelSet() const;
 
@@ -82,7 +82,7 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr pluginDockNode;
 
 	juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::Panner<float>> gainAndPanner;
-	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> slider;
+	juce::dsp::ProcessorChain<juce::dsp::Gain<float>> fader;
 
 	std::atomic<float> panValue = 0.0;
 

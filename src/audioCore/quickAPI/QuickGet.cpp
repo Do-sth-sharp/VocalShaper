@@ -97,28 +97,6 @@ namespace quickAPI {
 		return PlayPosition::getInstance()->toSecondQ(timeQuarterLimited);
 	}
 
-	const juce::Array<TrackInfo> getMixerTrackInfos() {
-		juce::Array<TrackInfo> result;
-
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			int size = graph->getTrackNum();
-			for (int i = 0; i < size; i++) {
-				auto track = graph->getTrackProcessor(i);
-				if (!track) {
-					result.add({ "", "" });
-					continue;
-				}
-
-				auto& trackType = track->getAudioChannelSet();
-				auto trackName = track->getTrackName();
-				if (trackName.isEmpty()) { trackName = "untitled"; }
-				result.add({ trackName, trackType.getDescription() });
-			}
-		}
-
-		return result;
-	}
-
 	const juce::StringArray getFormatQualityOptionsForExtension(const juce::String& extension) {
 		return utils::getQualityOptionsForExtension(extension);
 	}
@@ -239,10 +217,10 @@ namespace quickAPI {
 		return { result, listRes };
 	}
 
-	const juce::Array<TrackType> createAllTrackTypeWithName() {
-		auto list = utils::getAllTrackTypes();
+	const juce::Array<BusType> createAllBusTypeWithName() {
+		auto list = utils::getAllBusTypes();
 
-		juce::Array<TrackType> result;
+		juce::Array<BusType> result;
 		for (auto i : list) {
 			auto channelSet = utils::getChannelSet(i);
 			result.add({ (int)i, channelSet.getDescription() });
@@ -250,8 +228,8 @@ namespace quickAPI {
 		return result;
 	}
 
-	const juce::Array<TrackType> getAllTrackTypeWithName() {
-		static juce::Array<TrackType> list = createAllTrackTypeWithName();
+	const juce::Array<BusType> getAllBusTypeWithName() {
+		static juce::Array<BusType> list = createAllBusTypeWithName();
 		return list;
 	}
 
@@ -548,448 +526,305 @@ namespace quickAPI {
 		return 0;
 	}
 
-	int getSeqTrackNum() {
+	int getTrackNum(TrackType type) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getSourceNum();
+			return graph->getTrackNum(type);
 		}
 		return 0;
 	}
 
-	const juce::String getSeqTrackName(int index) {
+	const juce::String getTrackName(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto seqTrack = graph->getSourceProcessor(index)) {
-				return seqTrack->getTrackName();
-			}
-		}
-		return "";
-	}
-
-	const juce::Colour getSeqTrackColor(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto seqTrack = graph->getSourceProcessor(index)) {
-				return seqTrack->getTrackColor();
-			}
-		}
-		return utils::getDefaultColour();
-	}
-
-	const juce::StringArray getSeqTrackNameList() {
-		int size = getSeqTrackNum();
-
-		juce::StringArray result;
-		for (int i = 0; i < size; i++) {
-			result.add(getSeqTrackName(i));
-		}
-
-		return result;
-	}
-
-	const juce::AudioChannelSet getSeqTrackChannelSet(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getAudioChannelSet();
-			}
-		}
-		return juce::AudioChannelSet{};
-	}
-
-	int getSeqTrackInputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getTotalNumInputChannels();
-			}
-		}
-		return 0;
-	}
-
-	int getSeqTrackOutputChannelNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getTotalNumOutputChannels();
-			}
-		}
-		return 0;
-	}
-
-	bool getSeqTrackMIDIInputFromDevice(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getSourceMidiInputFromDeviceConnections(index).size() > 0;
-		}
-		return false;
-	}
-
-	const juce::Array<AudioLink> getSeqTrackAudioInputFromDevice(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getSourceInputFromDeviceConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<MIDILink> getSeqTrackMIDIOutputToMixer(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getSourceMidiOutputToTrackConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getSeqTrackAudioOutputToMixer(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getSourceOutputToTrackConnections(index);
-		}
-		return {};
-	}
-
-	bool getSeqTrackMute(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getMute();
-			}
-		}
-		return false;
-	}
-
-	bool getSeqTrackSolo(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getSolo();
-			}
-		}
-		return false;
-	}
-
-	bool getSeqTrackEquivalentMute(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getEquivalentMute();
-			}
-		}
-		return false;
-	}
-
-	bool getSeqTrackInputMonitoring(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getInputMonitoring();
-			}
-		}
-		return false;
-	}
-
-	RecordState getSeqTrackRecording(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getRecording();
-			}
-		}
-		return RecordState::NotRecording;
-	}
-
-	const juce::Array<float> getSeqTrackOutputLevel(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getOutputLevels();
-			}
-		}
-		return {};
-	}
-
-	const juce::String getSeqTrackType(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getAudioChannelSet().getDescription();
-			}
-		}
-		return "";
-	}
-
-	bool isSeqTrackHasAudioData(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				auto ref = track->getAudioRef();
-				return SourceManager::getInstance()->isValid(
-					ref, SourceManager::SourceType::Audio);
-			}
-		}
-		return false;
-	}
-
-	bool isSeqTrackHasMIDIData(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				auto ref = track->getMIDIRef();
-				return SourceManager::getInstance()->isValid(
-					ref, SourceManager::SourceType::MIDI);
-			}
-		}
-		return false;
-	}
-
-	const juce::String getSeqTrackDataRefAudio(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				auto ref = track->getAudioRef();
-				return SourceManager::getInstance()->getFileName(
-					ref, SourceManager::SourceType::Audio);
-			}
-		}
-		return "";
-	}
-
-	const juce::String getSeqTrackDataRefMIDI(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				auto ref = track->getMIDIRef();
-				return SourceManager::getInstance()->getFileName(
-					ref, SourceManager::SourceType::MIDI);
-			}
-		}
-		return "";
-	}
-
-	const std::tuple<double, juce::AudioSampleBuffer> getSeqTrackAudioData(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				auto ref = track->getAudioRef();
-				return SourceManager::getInstance()->getAudio(ref);
-			}
-		}
-		return {};
-	}
-
-	/*const juce::MidiMessageSequence getSeqTrackMIDIData(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				auto ref = track->getMIDIRef();
-				int midiTrack = track->getCurrentMIDITrack();
-				return SourceManager::getInstance()->makeMIDITrack(ref, midiTrack);
-			}
-		}
-		return {};
-	}*/
-
-	/*int getSeqTrackMIDITrackNum(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getTotalMIDITrackNum();
-			}
-		}
-		return 0;
-	}*/
-
-	int getSeqTrackCurrentMIDITrack(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getCurrentMIDITrack();
-			}
-		}
-		return 0;
-	}
-
-	bool isSeqTrackAudioRef(int index, uint64_t ref) {
-		return getSeqTrackAudioRef(index) == ref;
-	}
-
-	bool isSeqTrackMIDIRef(int index, uint64_t ref) {
-		return getSeqTrackMIDIRef(index) == ref;
-	}
-
-	uint64_t getSeqTrackAudioRef(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getAudioRef();
-			}
-		}
-		return 0;
-	}
-
-	uint64_t getSeqTrackMIDIRef(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(index)) {
-				return track->getMIDIRef();
-			}
-		}
-		return 0;
-	}
-
-	int getMixerTrackNum() {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackNum();
-		}
-		return 0;
-	}
-
-	const juce::String getMixerTrackName(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
 				return track->getTrackName();
 			}
 		}
 		return "";
 	}
 
-	const juce::StringArray getMixerTrackNameList() {
-		int size = getMixerTrackNum();
+	const juce::Colour getTrackColor(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				return track->getTrackColor();
+			}
+		}
+		return {};
+	}
+
+	const juce::StringArray getTrackNameList(TrackType type) {
+		int size = getTrackNum(type);
 
 		juce::StringArray result;
 		for (int i = 0; i < size; i++) {
-			result.add(getMixerTrackName(i));
+			result.add(getTrackName(type, i));
 		}
 
 		return result;
 	}
 
-	const juce::Colour getMixerTrackColor(int index) {
+	const juce::Array<TrackInfo> getTrackInfos(TrackType type) {
+		juce::Array<TrackInfo> result;
+
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getTrackColor();
+			int size = graph->getTrackNum(type);
+			for (int i = 0; i < size; i++) {
+				auto track = graph->getTrackProcessor(type, i);
+				if (!track) {
+					result.add({ "", "" });
+					continue;
+				}
+
+				auto& trackType = track->getAudioChannelSet();
+				auto trackName = track->getTrackName();
+				if (trackName.isEmpty()) { trackName = "untitled"; }
+				result.add({ trackName, trackType.getDescription() });
 			}
 		}
-		return utils::getDefaultColour();
+
+		return result;
 	}
 
-	const juce::AudioChannelSet getMixerTrackChannelSet(int index) {
+	const juce::AudioChannelSet getTrackChannelSet(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
 				return track->getAudioChannelSet();
 			}
 		}
-		return juce::AudioChannelSet{};
+		return {};
 	}
 
-	int getMixerTrackInputChannelNum(int index) {
+	int getTrackInputChannelNum(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
 				return track->getTotalNumInputChannels();
 			}
 		}
 		return 0;
 	}
 
-	int getMixerTrackOutputChannelNum(int index) {
-		return getMixerTrackChannelSet(index).size();
-	}
-
-	int getMixerTrackSideChainBusNum(int index) {
+	int getTrackOutputChannelNum(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getAdditionalAudioBusNum();
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				return track->getTotalNumOutputChannels();
 			}
 		}
 		return 0;
 	}
 
-	bool getMixerTrackMIDIInputFromDevice(int index) {
+	int getTrackSideChainBusNum(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackMidiInputFromDeviceConnections(index).size() > 0;
+			return graph->getTrackAdditionalAudioBusNum(type, index);
+		}
+		return 0;
+	}
+
+	bool isTrackMIDIInputConnected(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->isTrackMIDIInputConnected(type, index);
 		}
 		return false;
 	}
 
-	const juce::Array<MIDILink> getMixerTrackMIDIInputFromSource(int index) {
+	bool isTrackAudioInputConnected(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackMidiInputFromSrcConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromDevice(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackInputFromDeviceConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromSource(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackInputFromSrcConnections(index);
-		}
-		return {};
-	}
-
-	const juce::Array<AudioLink> getMixerTrackAudioInputFromSend(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackInputFromTrackConnections(index);
-		}
-		return {};
-	}
-
-	bool getMixerTrackMIDIOutputToDevice(int index) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackMidiOutputToDeviceConnections(index).size() > 0;
+			return graph->isTrackAudioInputConnected(type, index);
 		}
 		return false;
 	}
 
-	const juce::Array<AudioLink> getMixerTrackAudioOutputToDevice(int index) {
+	const AudioChannelLinkList getTrackAudioInputChannels(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackOutputToDeviceConnections(index);
+			return graph->getTrackAudioInputChannels(type, index);
 		}
 		return {};
 	}
 
-	const juce::Array<AudioLink> getMixerTrackAudioOutputToSend(int index) {
+	bool isTrackMIDISendConnected(TrackType type, int index, int slot) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			return graph->getTrackOutputToTrackConnections(index);
+			return graph->isTrackMIDISendConnected(type, index, slot);
+		}
+		return false;
+	}
+
+	const SendDst getTrackMIDISendDst(TrackType type, int index, int slot) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			return graph->getTrackMIDISendDst(type, index, slot);
 		}
 		return {};
 	}
 
-	float getMixerTrackGain(int index) {
+	bool isTrackAudioSendConnected(TrackType type, int index, int slot) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getGain();
-			}
+			return graph->isTrackAudioSendConnected(type, index, slot);
 		}
-		return 0;
+		return false;
 	}
 
-	float getMixerTrackPan(int index) {
+	const SendDst getTrackAudioSendDst(TrackType type, int index, int slot) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getPan();
-			}
+			return graph->getTrackAudioSendDst(type, index, slot);
 		}
-		return 0;
+		return {};
 	}
 
-	float getMixerTrackFader(int index) {
+	const AudioChannelLinkList getTrackAudioSendChannels(TrackType type, int index, int slot) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getSlider();
-			}
+			return graph->getTrackAudioSendChannels(type, index, slot);
 		}
-		return 1;
+		return {};
 	}
 
-	bool getMixerTrackMute(int index) {
+	float getTrackGain(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto mixer = track->getMixer()) {
+					return mixer->getGain();
+				}
+			}
+		}
+		return 0.f;
+	}
+
+	float getTrackPan(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto mixer = track->getMixer()) {
+					return mixer->getPan();
+				}
+			}
+		}
+		return 0.f;
+	}
+
+	float getTrackFader(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto mixer = track->getMixer()) {
+					return mixer->getFader();
+				}
+			}
+		}
+		return 0.f;
+	}
+
+	bool isTrackPanValid(TrackType type, int index) {
+		return getTrackChannelSet(type, index).size() == 2;
+	}
+
+	bool getTrackMute(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
 				return track->getMute();
 			}
 		}
 		return false;
 	}
 
-	bool isMixerTrackPanValid(int index) {
-		return getMixerTrackChannelSet(index).size() == 2;
+	bool getTrackSolo(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				return track->getSolo();
+			}
+		}
+		return false;
 	}
 
-	const juce::Array<float> getMixerTrackOutputLevel(int index) {
+	bool getTrackEquivalentMute(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getOutputLevels();
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				return track->getEquivalentMute();
+			}
+		}
+		return false;
+	}
+
+	bool getTrackInputMonitoring(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getInputMonitoring();
+				}
+			}
+		}
+		return false;
+	}
+
+	RecordState getTrackRecording(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getRecording();
+				}
+			}
+		}
+		return RecordState::NotRecording;
+	}
+
+	const juce::Array<float> getTrackSeqOutputLevel(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getOutputLevels();
+				}
 			}
 		}
 		return {};
 	}
 
-	const juce::String getMixerTrackType(int index) {
+	const juce::Array<float> getTrackMixerOutputLevel(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(index)) {
-				return track->getAudioChannelSet().getDescription();
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getOutputLevels();
+				}
 			}
 		}
-		return "";
+		return {};
+	}
+
+	const juce::String getTrackBusTypeName(TrackType type, int index) {
+		return getTrackChannelSet(type, index).getDescription();
+	}
+
+	int getTrackCurrentMIDITrack(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getCurrentMIDITrack();
+				}
+			}
+		}
+		return -1;
+	}
+
+	bool isTrackAudioRef(TrackType type, int index, uint64_t ref) {
+		return getTrackAudioRef(type, index) == ref;
+	}
+
+	bool isTrackMIDIRef(TrackType type, int index, uint64_t ref) {
+		return getTrackMIDIRef(type, index) == ref;
+	}
+
+	uint64_t getTrackAudioRef(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getAudioRef();
+				}
+			}
+		}
+		return 0;
+	}
+
+	uint64_t getTrackMIDIRef(TrackType type, int index) {
+		if (auto graph = AudioCore::getInstance()->getGraph()) {
+			if (auto track = graph->getTrackProcessor(type, index)) {
+				if (auto seq = track->getSequencer()) {
+					return seq->getMIDIRef();
+				}
+			}
+		}
+		return 0;
 	}
 
 	int getLabelNum() {
@@ -1126,5 +961,10 @@ namespace quickAPI {
 		if (ref == 0) { return {}; }
 		return SourceManager::getInstance()->getMIDINoteList(
 			ref, track);
+	}
+
+	const std::tuple<double, juce::AudioSampleBuffer> getAudioSourceData(uint64_t ref) {
+		if (ref == 0) { return {}; }
+		return SourceManager::getInstance()->getAudio(ref);
 	}
 }
