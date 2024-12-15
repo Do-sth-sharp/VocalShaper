@@ -73,6 +73,8 @@ namespace quickAPI {
 	/** Param Index，CC Channel  */
 	using PluginParamLink = std::tuple<int, int>;
 
+	using TrackType = Track::TrackType;
+
 	const juce::String getPluginIdentifier(PluginHolder pointer);
 
 	PluginHolder getInstrPointer(int index);
@@ -92,10 +94,10 @@ namespace quickAPI {
 	const juce::String getInstrParamName(PluginHolder pointer, int paramIndex);
 	const juce::StringArray getInstrParamList(PluginHolder pointer);
 
-	int getEffectNum(int trackIndex);
-	PluginHolder getEffectPointer(int trackIndex, int index);
-	const juce::String getEffectName(int trackIndex, int index);
-	bool getEffectBypass(int trackIndex, int index);
+	int getEffectNum(TrackType trackType, int trackIndex);
+	PluginHolder getEffectPointer(TrackType trackType, int trackIndex, int index);
+	const juce::String getEffectName(TrackType trackType, int trackIndex, int index);
+	bool getEffectBypass(TrackType trackType, int trackIndex, int index);
 	const juce::String getEffectName(PluginHolder pointer);
 	bool getEffectBypass(PluginHolder pointer);
 	EditorPointer getEffectEditor(PluginHolder pointer);
@@ -106,10 +108,9 @@ namespace quickAPI {
 	const juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer);
 	const juce::String getEffectParamName(PluginHolder pointer, int paramIndex);
 	const juce::StringArray getEffectParamList(PluginHolder pointer);
-	const juce::AudioChannelSet getEffectChannelSet(int trackIndex, int index);
-	int getEffectInputChannelNum(int trackIndex, int index);
+	const juce::AudioChannelSet getEffectChannelSet(TrackType trackType, int trackIndex, int index);
+	int getEffectInputChannelNum(TrackType trackType, int trackIndex, int index);
 
-	using TrackType = Track::TrackType;
 	using AudioChannelLinkList = MainGraph::AudioChannelLinkList;
 	using SendDst = MainGraph::SendDst;
 	using RecordState = SeqSourceProcessor::RecordState;
@@ -160,9 +161,9 @@ namespace quickAPI {
 
 	/** StartTime, EndTime, Offset */
 	using SeqBlock = std::tuple<double, double, double>;
-	int getBlockNum(int trackIndex);
-	const juce::Array<SeqBlock> getBlockList(int trackIndex);
-	const SeqBlock getBlock(int trackIndex, int index);
+	int getBlockNum(TrackType trackType, int trackIndex);
+	const juce::Array<SeqBlock> getBlockList(TrackType trackType, int trackIndex);
+	const SeqBlock getBlock(TrackType trackType, int trackIndex, int index);
 
 	const juce::String getAudioDeviceName(bool isInput);
 	int getAudioDeviceChannelNum(bool isInput);
