@@ -814,7 +814,7 @@ bool MainGraph::parse(
 
 	if (mes->has_mastertrack()) {
 		auto& masterTrack = mes->mastertrack();
-		this->initMasterTrack(utils::getChannelSet(static_cast<utils::TrackType>(masterTrack.bus())));
+		this->initMasterTrack(utils::getChannelSet(static_cast<utils::BusType>(masterTrack.bus())));
 		if (auto trackNode = this->getTrackProcessor(TrackType::MasterTrack, 0)) {
 			if (!trackNode->parse(&masterTrack, config)) { return false; }
 		}
@@ -848,7 +848,7 @@ bool MainGraph::parse(
 	for (auto& i : auxTracks) {
 		int trackIndex = this->getTrackNum(TrackType::AuxTrack);
 		this->insertTrack(TrackType::AuxTrack, trackIndex,
-			utils::getChannelSet(static_cast<utils::TrackType>(i.bus())));
+			utils::getChannelSet(static_cast<utils::BusType>(i.bus())));
 		if (auto trackNode = this->getTrackProcessor(TrackType::AuxTrack, trackIndex)) {
 			if (!trackNode->parse(&i, config)) { return false; }
 		}
@@ -883,7 +883,7 @@ bool MainGraph::parse(
 	for (auto& i : tracks) {
 		int trackIndex = this->getTrackNum(TrackType::Track);
 		this->insertTrack(TrackType::Track, trackIndex,
-			utils::getChannelSet(static_cast<utils::TrackType>(i.bus())));
+			utils::getChannelSet(static_cast<utils::BusType>(i.bus())));
 		if (auto trackNode = this->getTrackProcessor(TrackType::Track, trackIndex)) {
 			if (!trackNode->parse(&i, config)) { return false; }
 		}
@@ -1795,7 +1795,8 @@ void MainGraph::initMasterTrack(const juce::AudioChannelSet& bus) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackChanged, -1);
+	UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackAdded, static_cast<int>(TrackType::MasterTrack), - 1);
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {

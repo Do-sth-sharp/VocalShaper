@@ -47,7 +47,7 @@ namespace utils {
 	int getBestQualityOptionIndexForExtension(const juce::String& extension);
 	const AudioFormatInfo getAudioFormatData(const juce::File& file);
 
-	enum class TrackType {
+	enum class BusType {
 		DISABLED = 0,
 		MONO = 10,
 		STEREO = 20,
@@ -91,9 +91,9 @@ namespace utils {
 		AMBISONIC_6 = 106,
 		AMBISONIC_7 = 107
 	};
-	const juce::Array<TrackType> getAllTrackTypes();
-	const juce::AudioChannelSet getChannelSet(TrackType type);
-	TrackType getTrackType(const juce::AudioChannelSet& channels);
+	const juce::Array<BusType> getAllBusTypes();
+	const juce::AudioChannelSet getChannelSet(BusType type);
+	BusType getBusType(const juce::AudioChannelSet& channels);
 
 	using Version = std::tuple<uint32_t, uint32_t, uint32_t>;
 	int versionCompare(const Version& v1, const Version& v2);
