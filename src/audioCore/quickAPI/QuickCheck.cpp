@@ -31,18 +31,20 @@ namespace quickAPI {
 
 	bool checkSourcesSaved() {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			int size = graph->getSourceNum();
+			int size = graph->getTrackNum(MainGraph::TrackType::Track);
 			for (int i = 0; i < size; i++) {
-				if (auto ptr = graph->getSourceProcessor(i)) {
-					auto audioRef = ptr->getAudioRef();
-					auto midiRef = ptr->getMIDIRef();
-					bool audioSaved = SourceManager::getInstance()->isSaved(
-						audioRef, SourceManager::SourceType::Audio);
-					bool midiSaved = SourceManager::getInstance()->isSaved(
-						midiRef, SourceManager::SourceType::MIDI);
+				if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, i)) {
+					if (auto seq = track->getSequencer()) {
+						auto audioRef = seq->getAudioRef();
+						auto midiRef = seq->getMIDIRef();
+						bool audioSaved = SourceManager::getInstance()->isSaved(
+							audioRef, SourceManager::SourceType::Audio);
+						bool midiSaved = SourceManager::getInstance()->isSaved(
+							midiRef, SourceManager::SourceType::MIDI);
 
-					if ((!audioSaved) || (!midiSaved)) {
-						return false;
+						if ((!audioSaved) || (!midiSaved)) {
+							return false;
+						}
 					}
 				}
 			}
