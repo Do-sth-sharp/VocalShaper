@@ -395,17 +395,8 @@ namespace quickAPI {
 		return getPluginParamList(pointer);
 	}
 
-	int getEffectNum(TrackType trackType, int trackIndex) {
-		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(trackType, trackIndex)) {
-				if (auto mixer = track->getMixer()) {
-					if (auto pluginDock = mixer->getPluginDock()) {
-						return pluginDock->getPluginNum();
-					}
-				}
-			}
-		}
-		return 0;
+	int getEffectSlotNum() {
+		return PluginDock::getSlotNum();
 	}
 
 	PluginHolder getEffectPointer(TrackType trackType, int trackIndex, int index) {

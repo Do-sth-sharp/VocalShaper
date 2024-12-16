@@ -19,18 +19,19 @@ public:
 	 * @brief	Insert a plugin onto the plugin dock.
 	 */
 	PluginDecorator::SafePointer insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,
-		const juce::String& identifier, int index = -1);
+		const juce::String& identifier, int index);
 	/**
 	 * @brief	Insert a plugin onto the plugin dock without init.
 	 */
-	PluginDecorator::SafePointer insertPlugin(int index = -1);
+	PluginDecorator::SafePointer insertPlugin(int index);
 	/**
 	 * @brief	Remove a plugin from the plugin dock.
 	 */
-	void removePlugin(int index);
-	void setPluginIndex(int oldIndex, int newIndex);
+	bool removePlugin(int index);
+	bool setPluginIndex(int oldIndex, int newIndex);
 
-	int getPluginNum() const;
+	const static int getSlotNum();
+
 	PluginDecorator* getPluginProcessor(int index) const;
 	void setPluginBypass(int index, bool bypass);
 	bool getPluginBypass(int index) const;
@@ -90,12 +91,14 @@ private:
 	juce::AudioProcessorGraph::Node::Ptr midiInputNode;
 	const juce::AudioChannelSet audioChannels;
 
-	juce::Array<juce::AudioProcessorGraph::Node::Ptr> pluginNodeList;
+	const static int pluginSlotNum = 8;
+
+	std::array<juce::AudioProcessorGraph::Node::Ptr, pluginSlotNum> pluginNodeList;
 
 	int findPlugin(const PluginDecorator* ptr) const;
 
 	juce::AudioProcessorGraph::Node::Ptr removePluginInternal(int index);
-	void insertPluginInternal(int index, juce::AudioProcessorGraph::Node::Ptr ptr);
+	bool insertPluginInternal(int index, juce::AudioProcessorGraph::Node::Ptr ptr);
 
 	JUCE_DECLARE_WEAK_REFERENCEABLE(PluginDock)
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginDock)

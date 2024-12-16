@@ -728,7 +728,7 @@ bool PluginDecorator::parse(
 
 	auto& info = mes->info();
 	if (this->audioChannels != utils::getChannelSet(
-		static_cast<utils::TrackType>(info.decoratortype()))) {
+		static_cast<utils::BusType>(info.decoratortype()))) {
 		return false;
 	}
 
@@ -781,7 +781,7 @@ std::unique_ptr<google::protobuf::Message> PluginDecorator::serialize(
 		info->set_addara(this->isARAValid());
 	}
 	info->set_decoratortype(static_cast<vsp4::BusType>(
-		utils::getTrackType(this->getAudioChannelSet())));
+		utils::getBusType(this->getAudioChannelSet())));
 
 	/** Plugin State */
 	if (this->plugin) {

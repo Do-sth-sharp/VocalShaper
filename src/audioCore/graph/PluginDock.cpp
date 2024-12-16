@@ -56,10 +56,7 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::Audi
 		ptr->setPlugin(std::move(processor), identifier, {});
 		return ptr;
 	}
-	else {
-		jassertfalse;
-		return nullptr;
-	}
+	return nullptr;
 }
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
@@ -85,13 +82,17 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 			return nullptr;
 		}
 
-		/** Limit Index */
-		if (index < 0 || index > this->pluginNodeList.size()) {
-			index = this->pluginNodeList.size();
+		/** Check Index */
+		if (index < 0 || index >= PluginDock::pluginSlotNum) {
+			this->removeNode(ptrNode->nodeID);
+			return nullptr;
 		}
 
 		/** Insert Node */
-		this->insertPluginInternal(index, ptrNode);
+		if (!this->insertPluginInternal(index, ptrNode)) {
+			this->removeNode(ptrNode->nodeID);
+			return nullptr;
+		}
 
 		/** Prepare To Play */
 		ptrNode->getProcessor()->setPlayHead(this->getPlayHead());
@@ -108,9 +109,9 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 	}
 }
 
-void PluginDock::removePlugin(int index) {
+bool PluginDock::removePlugin(int index) {
 	/** Limit Index */
-	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
+	if (index < 0 || index >= this->pluginNodeList.size()) { return false; }
 
 	/** Get The Node Ptr Then Remove From The List */
 	auto ptrNode = this->removePluginInternal(index);
@@ -123,54 +124,55 @@ void PluginDock::removePlugin(int index) {
 	}
 
 	/** Remove Node From Graph */
-	this->removeNode(ptrNode->nodeID);
+	if (!this->removeNode(ptrNode->nodeID)) { return false; }
 
 	/** Callback */
 	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, index);
+
+	return true;
 }
 
-void PluginDock::setPluginIndex(int oldIndex, int newIndex) {
+bool PluginDock::setPluginIndex(int oldIndex, int newIndex) {
 	/** Limit Index */
-	int totalNum = this->getPluginNum();
-	if (oldIndex < 0 || oldIndex >= totalNum) { return; }
-	if (newIndex < 0 || newIndex >= totalNum) { return; }
-	if (oldIndex == newIndex) { return; }
+	if (oldIndex < 0 || oldIndex >= PluginDock::pluginSlotNum) { return false; }
+	if (newIndex < 0 || newIndex >= PluginDock::pluginSlotNum) { return false; }
+	if (oldIndex == newIndex) { return false; }
 
 	/** Remove Plugin From List */
 	auto ptr = this->removePluginInternal(oldIndex);
-	if (!ptr) { return; }
+	if (!ptr) { return false; }
 
 	/** Insert Plugin */
-	this->insertPluginInternal(newIndex, ptr);
+	if (!this->insertPluginInternal(newIndex, ptr)) { return false; }
 
 	/** Callback */
 	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, oldIndex);
 	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, newIndex);
+
+	return true;
 }
 
-int PluginDock::getPluginNum() const {
-	return this->pluginNodeList.size();
+const int PluginDock::getSlotNum() {
+	return PluginDock::pluginSlotNum;
 }
 
 PluginDecorator* PluginDock::getPluginProcessor(int index) const {
-	if (index < 0 || index >= this->pluginNodeList.size()) { return nullptr; }
-	return dynamic_cast<PluginDecorator*>(
-		this->pluginNodeList.getUnchecked(index)->getProcessor());
+	if (index < 0 || index >= PluginDock::pluginSlotNum) { return nullptr; }
+	return this->pluginNodeList[index] ? dynamic_cast<PluginDecorator*>(
+		this->pluginNodeList[index]->getProcessor()) : nullptr;
 }
 
 void PluginDock::setPluginBypass(int index, bool bypass) {
-	if (index < 0 || index >= this->pluginNodeList.size()) { return; }
-	if (auto node = this->pluginNodeList.getUnchecked(index)) {
-		PluginDock::setPluginBypass(PluginDecorator::SafePointer{
-			dynamic_cast<PluginDecorator*>(node->getProcessor()) }, bypass);
+	if (auto ptr = this->getPluginProcessor(index)) {
+		PluginDock::setPluginBypass(
+			PluginDecorator::SafePointer{ ptr }, bypass);
 	}
 }
 
 bool PluginDock::getPluginBypass(int index) const {
-	if (index < 0 || index >= this->pluginNodeList.size()) { return false; }
-	if (auto node = this->pluginNodeList.getUnchecked(index)) {
-		return PluginDock::getPluginBypass(PluginDecorator::SafePointer{
-			dynamic_cast<PluginDecorator*>(node->getProcessor()) });
+	if (auto ptr = this->getPluginProcessor(index)) {
+		return PluginDock::getPluginBypass(
+			PluginDecorator::SafePointer{ ptr });
 	}
 	return false;
 }
@@ -310,8 +312,8 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 void PluginDock::clearGraph() {
 	for (auto& i : this->pluginNodeList) {
 		this->removeNode(i->nodeID);
+		i = nullptr;
 	}
-	this->pluginNodeList.clear();
 
 	this->removeIllegalConnections();
 
@@ -335,12 +337,9 @@ bool PluginDock::parse(
 
 	auto& plugins = mes->plugins();
 	for (auto& i : plugins) {
-		this->insertPlugin(-1);
-		if (auto pluginNode = this->pluginNodeList.getLast()) {
-			if (auto plugin = dynamic_cast<PluginDecorator*>(pluginNode->getProcessor())) {
-				PluginDock::setPluginBypass(PluginDecorator::SafePointer{ plugin }, i.bypassed());
-				if (!plugin->parse(&i, config)) { return false; }
-			}
+		if (auto ptr = this->insertPlugin(i.first)) {
+			PluginDock::setPluginBypass(ptr, i.second.bypassed());
+			if (!ptr->parse(&(i.second), config)) { return false; }
 		}
 	}
 
@@ -352,14 +351,14 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize(
 	auto mes = std::make_unique<vsp4::PluginDock>();
 
 	auto plugins = mes->mutable_plugins();
-	for (auto& i : this->pluginNodeList) {
-		if (auto plugin = dynamic_cast<PluginDecorator*>(i->getProcessor())) {
+	for (int i = 0; i < PluginDock::pluginSlotNum; i++) {
+		if (auto plugin = this->getPluginProcessor(i)) {
 			if (auto item = plugin->serialize(config)) {
 				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
 					plu->set_bypassed(PluginDock::getPluginBypass(
 						PluginDecorator::SafePointer{ plugin }));
 
-					plugins->AddAllocated(dynamic_cast<vsp4::Plugin*>(item.release()));
+					(*plugins)[i] = std::move(*plu);
 				}
 			}
 			else {
@@ -372,9 +371,11 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize(
 }
 
 int PluginDock::findPlugin(const PluginDecorator* ptr) const {
-	for (int i = 0; i < this->pluginNodeList.size(); i++) {
-		if (this->pluginNodeList.getUnchecked(i)->getProcessor() == ptr) {
-			return i;
+	for (int i = 0; i < PluginDock::pluginSlotNum; i++) {
+		if (auto pSlot = this->pluginNodeList[i]) {
+			if (pSlot->getProcessor() == ptr) {
+				return i;
+			}
 		}
 	}
 	return -1;
@@ -382,7 +383,9 @@ int PluginDock::findPlugin(const PluginDecorator* ptr) const {
 
 juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index) {
 	/** Get The Node Ptr Then Remove From The List */
-	auto ptrNode = this->pluginNodeList.removeAndReturn(index);
+	auto ptrNode = this->pluginNodeList[index];
+	this->pluginNodeList[index] = nullptr;
+	if (!ptrNode) { return nullptr; }
 
 	/** Remove MIDI Connection */
 	this->removeConnection(
@@ -399,17 +402,21 @@ juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index)
 	{
 		/** Find Hot Spot Nodes */
 		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
-		if (index == 0) {
+		for (int i = index - 1; i >= 0; i--) {
+			if (lastNode = this->pluginNodeList[i]) {
+				break;
+			}
+		}
+		if (!lastNode) {
 			lastNode = this->audioInputNode;
 		}
-		else {
-			lastNode = this->pluginNodeList.getUnchecked(index - 1);
+		for (int i = index + 1; i < PluginDock::pluginSlotNum; i++) {
+			if (nextNode = this->pluginNodeList[i]) {
+				break;
+			}
 		}
-		if (index == this->pluginNodeList.size()) {
+		if (!nextNode) {
 			nextNode = this->audioOutputNode;
-		}
-		else {
-			nextNode = this->pluginNodeList.getUnchecked(index);
 		}
 
 		/** Get Main Bus */
@@ -434,11 +441,14 @@ juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index)
 	return ptrNode;
 }
 
-void PluginDock::insertPluginInternal(
+bool PluginDock::insertPluginInternal(
 	int index, juce::AudioProcessorGraph::Node::Ptr ptr) {
 	/** Limit Index */
-	if (index < 0 || index > this->pluginNodeList.size()) {
-		index = this->pluginNodeList.size();
+	if (index < 0 || index >= PluginDock::pluginSlotNum) {
+		return false;
+	}
+	if (this->pluginNodeList[index]) {
+		return false;
 	}
 
 	/** Get Main Bus */
@@ -452,17 +462,21 @@ void PluginDock::insertPluginInternal(
 	{
 		/** Find Hot Spot Nodes */
 		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
-		if (index == 0) {
+		for (int i = index - 1; i >= 0; i--) {
+			if (lastNode = this->pluginNodeList[i]) {
+				break;
+			}
+		}
+		if (!lastNode) {
 			lastNode = this->audioInputNode;
 		}
-		else {
-			lastNode = this->pluginNodeList.getUnchecked(index - 1);
+		for (int i = index + 1; i < PluginDock::pluginSlotNum; i++) {
+			if (nextNode = this->pluginNodeList[i]) {
+				break;
+			}
 		}
-		if (index == this->pluginNodeList.size()) {
+		if (!nextNode) {
 			nextNode = this->audioOutputNode;
-		}
-		else {
-			nextNode = this->pluginNodeList.getUnchecked(index);
 		}
 
 		/** Remove Connection Between Hot Spot Nodes */
@@ -492,5 +506,7 @@ void PluginDock::insertPluginInternal(
 		{ {this->midiInputNode->nodeID, this->midiChannelIndex}, {ptr->nodeID, this->midiChannelIndex} });
 
 	/** Add Node To The Plugin List */
-	this->pluginNodeList.insert(index, ptr);
+	this->pluginNodeList[index] = ptr;
+
+	return true;
 }

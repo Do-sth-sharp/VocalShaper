@@ -133,16 +133,20 @@ namespace quickAPI {
 
 	void sendDirectNoteOn(int trackIndex, int noteNum, uint8_t vel) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(trackIndex)) {
-				track->sendDirectMidiMessages(juce::MidiMessage::noteOn(1, noteNum, vel));
+			if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, trackIndex)) {
+				if (auto seq = track->getSequencer()) {
+					seq->sendDirectMidiMessages(juce::MidiMessage::noteOn(1, noteNum, vel));
+				}
 			}
 		}
 	}
 
 	void sendDirectNoteOff(int trackIndex, int noteNum) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getSourceProcessor(trackIndex)) {
-				track->sendDirectMidiMessages(juce::MidiMessage::noteOff(1, noteNum));
+			if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, trackIndex)) {
+				if (auto seq = track->getSequencer()) {
+					seq->sendDirectMidiMessages(juce::MidiMessage::noteOff(1, noteNum));
+				}
 			}
 		}
 	}
