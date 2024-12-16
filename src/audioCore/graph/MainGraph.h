@@ -29,6 +29,9 @@ public:
 		ToDevice = 0, ToMaster, ToAUX
 	};
 
+	const static int getMIDISendSlotNum();
+	const static int getAudioSendSlotNum();
+
 	bool connectTrackMIDIInput(TrackType type, int index);
 	bool connectTrackAudioInput(TrackType type, int index, int inputChannel, int trackChannel);
 	bool connectTrackMIDISend(TrackType type, int index, int slot, SendDstType dstType, int dstIndex);
