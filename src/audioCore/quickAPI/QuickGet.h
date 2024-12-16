@@ -121,6 +121,8 @@ namespace quickAPI {
 	using TrackInfo = std::tuple<juce::String, juce::String>;
 	const juce::Array<TrackInfo> getTrackInfos(TrackType type);
 	const juce::AudioChannelSet getTrackChannelSet(TrackType type, int index);
+	int getTrackMIDISendSlotNum();
+	int getTrackAudioSendSlotNum();
 	int getTrackInputChannelNum(TrackType type, int index);
 	int getTrackOutputChannelNum(TrackType type, int index);
 	int getTrackSideChainBusNum(TrackType type, int index);

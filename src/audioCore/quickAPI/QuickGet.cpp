@@ -561,6 +561,14 @@ namespace quickAPI {
 		return {};
 	}
 
+	int getTrackMIDISendSlotNum() {
+		return MainGraph::getMIDISendSlotNum();
+	}
+
+	int getTrackAudioSendSlotNum() {
+		return MainGraph::getAudioSendSlotNum();
+	}
+
 	int getTrackInputChannelNum(TrackType type, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getTrackProcessor(type, index)) {

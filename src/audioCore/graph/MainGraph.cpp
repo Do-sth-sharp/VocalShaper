@@ -219,6 +219,14 @@ int MainGraph::getTrackAdditionalAudioBusNum(TrackType type, int index) const {
 	return 0;
 }
 
+const int MainGraph::getMIDISendSlotNum() {
+	return MainGraph::midiSendSlotNum;
+}
+
+const int MainGraph::getAudioSendSlotNum() {
+	return MainGraph::audioSendSlotNum;
+}
+
 bool MainGraph::connectTrackMIDIInput(TrackType type, int index) {
 	/** Get Node ID */
 	auto trackNode = this->getTrackNodeIndex(type, index);
