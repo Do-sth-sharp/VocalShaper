@@ -94,7 +94,7 @@ namespace quickAPI {
 	const juce::String getInstrParamName(PluginHolder pointer, int paramIndex);
 	const juce::StringArray getInstrParamList(PluginHolder pointer);
 
-	int getEffectNum(TrackType trackType, int trackIndex);
+	int getEffectSlotNum();
 	PluginHolder getEffectPointer(TrackType trackType, int trackIndex, int index);
 	const juce::String getEffectName(TrackType trackType, int trackIndex, int index);
 	bool getEffectBypass(TrackType trackType, int trackIndex, int index);
