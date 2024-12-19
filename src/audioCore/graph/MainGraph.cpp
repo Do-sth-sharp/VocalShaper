@@ -43,10 +43,10 @@ MainGraph::~MainGraph() {
 	this->clearGraph();
 }
 
-void MainGraph::insertTrack(TrackType type, int index,
+int MainGraph::insertTrack(TrackType type, int index,
 	const juce::AudioChannelSet& bus) {
 	/** Check Track Type */
-	if (type == TrackType::MasterTrack) { return; }
+	if (type == TrackType::MasterTrack) { return -1; }
 
 	/** Lock */
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
@@ -93,7 +93,11 @@ void MainGraph::insertTrack(TrackType type, int index,
 		/** Callback */
 		UICallbackAPI<int, int>::invoke(
 			UICallbackType::TrackAdded, static_cast<int>(type), index);
+
+		return index;
 	}
+
+	return -1;
 }
 
 void MainGraph::removeTrack(TrackType type, int index) {
