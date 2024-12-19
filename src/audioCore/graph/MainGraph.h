@@ -14,7 +14,7 @@ public:
 	~MainGraph() override;
 
 	using TrackType = Track::TrackType;
-	void insertTrack(TrackType type, int index = -1,
+	int insertTrack(TrackType type, int index = -1,
 		const juce::AudioChannelSet& bus = juce::AudioChannelSet::stereo());
 	void removeTrack(TrackType type, int index);
 
