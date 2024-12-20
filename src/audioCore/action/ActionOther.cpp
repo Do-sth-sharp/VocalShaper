@@ -231,14 +231,16 @@ bool ActionInitAudioSource::doAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->applyAudio();
-			auto ref = track->getAudioRef();
-			SourceManager::getInstance()->initAudio(ref, this->name,
-				this->channels, this->sampleRate, this->length);
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				seq->applyAudio();
+				auto ref = seq->getAudioRef();
+				SourceManager::getInstance()->initAudio(ref, this->name,
+					this->channels, this->sampleRate, this->length);
 
-			this->output("Init audio source: [" + juce::String{ this->index } + ", " + this->name + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
-			return true;
+				this->output("Init audio source: [" + juce::String{ this->index } + ", " + this->name + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
+				return true;
+			}
 		}
 	}
 	this->error("Can't init audio source: [" + juce::String{ this->index } + ", " + this->name + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
@@ -256,13 +258,15 @@ bool ActionInitMidiSource::doAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->applyMIDI();
-			auto ref = track->getMIDIRef();
-			SourceManager::getInstance()->initMIDI(ref, this->name);
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				seq->applyMIDI();
+				auto ref = seq->getMIDIRef();
+				SourceManager::getInstance()->initMIDI(ref, this->name);
 
-			this->output("Init midi source: [" + juce::String{ this->index } + ", " + this->name + "]\n");
-			return true;
+				this->output("Init midi source: [" + juce::String{ this->index } + ", " + this->name + "]\n");
+				return true;
+			}
 		}
 	}
 	this->error("Can't init midi source: [" + juce::String{ this->index } + ", " + this->name + "]\n");
@@ -280,15 +284,17 @@ bool ActionLoadAudioSource::doAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->applyAudio();
-			auto ref = track->getAudioRef();
-			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Read, ref, this->path,
-				false, this->callback });
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				seq->applyAudio();
+				auto ref = seq->getAudioRef();
+				SourceIO::getInstance()->addTask(
+					{ SourceIO::TaskType::Read, ref, this->path,
+					false, this->callback });
 
-			this->output("Load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
-			return true;
+				this->output("Load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+				return true;
+			}
 		}
 	}
 	this->error("Can't load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
@@ -307,15 +313,17 @@ bool ActionLoadMidiSource::doAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			track->applyMIDI();
-			auto ref = track->getMIDIRef();
-			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Read, ref, this->path,
-				this->getTempo, this->callback });
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				seq->applyMIDI();
+				auto ref = seq->getMIDIRef();
+				SourceIO::getInstance()->addTask(
+					{ SourceIO::TaskType::Read, ref, this->path,
+					this->getTempo, this->callback });
 
-			this->output("Load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
-			return true;
+				this->output("Load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+				return true;
+			}
 		}
 	}
 	this->error("Can't load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
@@ -331,13 +339,15 @@ bool ActionSaveAudioSource::doAction() {
 		"Don't do this while rendering.");
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			auto ref = track->getAudioRef();
-			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Write, ref, this->path, false, {} });
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				auto ref = seq->getAudioRef();
+				SourceIO::getInstance()->addTask(
+					{ SourceIO::TaskType::Write, ref, this->path, false, {} });
 
-			this->output("Save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
-			return true;
+				this->output("Save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+				return true;
+			}
 		}
 	}
 	this->error("Can't save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
@@ -353,13 +363,15 @@ bool ActionSaveMidiSource::doAction() {
 		"Don't do this while rendering.");
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(this->index)) {
-			auto ref = track->getMIDIRef();
-			SourceIO::getInstance()->addTask(
-				{ SourceIO::TaskType::Write, ref, this->path, false, {} });
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				auto ref = seq->getMIDIRef();
+				SourceIO::getInstance()->addTask(
+					{ SourceIO::TaskType::Write, ref, this->path, false, {} });
 
-			this->output("Save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
-			return true;
+				this->output("Save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
+				return true;
+			}
 		}
 	}
 	this->error("Can't save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
@@ -380,10 +392,12 @@ bool ActionSplitSequencerBlock::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
-			if (track->splitSeq(ACTION_DATA(block), ACTION_DATA(time))) {
-				this->output("Split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
-				ACTION_RESULT(true);
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+			if (auto seq = track->getSequencer()) {
+				if (seq->splitSeq(ACTION_DATA(block), ACTION_DATA(time))) {
+					this->output("Split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+					ACTION_RESULT(true);
+				}
 			}
 		}
 	}
@@ -401,10 +415,12 @@ bool ActionSplitSequencerBlock::undo() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getSourceProcessor(ACTION_DATA(track))) {
-			if (track->stickSeqWithNext(ACTION_DATA(block))) {
-				this->output("Undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
-				ACTION_RESULT(true);
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+			if (auto seq = track->getSequencer()) {
+				if (seq->stickSeqWithNext(ACTION_DATA(block))) {
+					this->output("Undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
+					ACTION_RESULT(true);
+				}
 			}
 		}
 	}
