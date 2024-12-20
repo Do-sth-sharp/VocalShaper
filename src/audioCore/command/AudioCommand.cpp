@@ -12,7 +12,6 @@ AudioCommand::AudioCommand() {
 
 	regCommandAdd(this->cState.get());
 	regCommandOther(this->cState.get());
-	regCommandEcho(this->cState.get());
 	regCommandList(this->cState.get());
 	regCommandRemove(this->cState.get());
 	regCommandSet(this->cState.get());
