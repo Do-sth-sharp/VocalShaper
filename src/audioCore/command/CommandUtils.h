@@ -89,6 +89,5 @@ namespace audioCommand {
 
 void regCommandAdd(lua_State* L);
 void regCommandOther(lua_State* L);
-void regCommandList(lua_State* L);
 void regCommandRemove(lua_State* L);
 void regCommandSet(lua_State* L);
