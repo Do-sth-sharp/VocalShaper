@@ -2,6 +2,8 @@
 
 #include "ActionUndoableBase.h"
 #include "ActionUtils.h"
+#include "../graph/MainGraph.h"
+#include "../quickAPI/QuickGet.h"
 #include "../Utils.h"
 
 class ActionRemovePluginBlackList final : public ActionBase {
@@ -36,139 +38,196 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemovePluginSearchPath)
 };
 
-class ActionRemoveMixerTrack final : public ActionUndoableBase {
+class ActionRemoveTrack final : public ActionUndoableBase {
 public:
-	ActionRemoveMixerTrack() = delete;
-	ActionRemoveMixerTrack(int index);
+	ActionRemoveTrack() = delete;
+	ActionRemoveTrack(quickAPI::TrackIndex index);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Mixer Track";
+		return "Remove Track";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int index;
+		const quickAPI::TrackIndex index;
 
-		utils::AudioConnectionList audioT2Trk;
-		utils::AudioConnectionList audioSrc2Trk;
-		utils::AudioConnectionList audioI2Trk;
-		utils::AudioConnectionList audioTrk2T;
-		utils::AudioConnectionList audioTrk2O;
-		utils::MidiConnectionList midiSrc2Trk;
-		utils::MidiConnectionList midiI2Trk;
-		utils::MidiConnectionList midiTrk2O;
+		bool midiInput;
+		MainGraph::AudioChannelLinkList audioInput;
+		juce::Array<MainGraph::SendDst> midiSend;
+		juce::Array<std::pair<MainGraph::SendDst, MainGraph::AudioChannelLinkList>> audioSend;
 		juce::MemoryBlock data;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrack)
+	JUCE_LEAK_DETECTOR(ActionRemoveTrack)
 };
 
-class ActionRemoveMixerTrackSend final : public ActionUndoableBase {
+class ActionRemoveTrackAudioInput final : public ActionUndoableBase {
 public:
-	ActionRemoveMixerTrackSend() = delete;
-	ActionRemoveMixerTrackSend(
-		int src, int srcc, int dst, int dstc);
+	ActionRemoveTrackAudioInput() = delete;
+	ActionRemoveTrackAudioInput(
+		quickAPI::TrackIndex index, int srcc, int dstc);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Mixer Track Send";
+		return "Remove Track Audio Input";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int src, srcc, dst, dstc;
+		const quickAPI::TrackIndex index;
+		const int srcc, dstc;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackSend)
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackAudioInput)
 };
 
-class ActionRemoveMixerTrackInputFromDevice final : public ActionUndoableBase {
+class ActionRemoveTrackMIDIInput final : public ActionUndoableBase {
 public:
-	ActionRemoveMixerTrackInputFromDevice() = delete;
-	ActionRemoveMixerTrackInputFromDevice(
-		int srcc, int dst, int dstc);
+	ActionRemoveTrackMIDIInput() = delete;
+	ActionRemoveTrackMIDIInput(
+		quickAPI::TrackIndex index);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Mixer Track Input From Device";
+		return "Remove Track MIDI Input";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int srcc, dst, dstc;
+		const quickAPI::TrackIndex index;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackInputFromDevice)
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackMIDIInput)
 };
 
-class ActionRemoveSequencerTrackInputFromDevice final : public ActionUndoableBase {
+class ActionRemoveTrackAudioSend final : public ActionUndoableBase {
 public:
-	ActionRemoveSequencerTrackInputFromDevice() = delete;
-	ActionRemoveSequencerTrackInputFromDevice(
-		int srcc, int dst, int dstc);
+	ActionRemoveTrackAudioSend() = delete;
+	ActionRemoveTrackAudioSend(
+		quickAPI::TrackIndex index, int slot,
+		quickAPI::SendDst dst, int srcc, int dstc);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Sequencer Track Input From Device";
+		return "Remove Track Audio Send";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int srcc, dst, dstc;
+		const quickAPI::TrackIndex index;
+		const int slot;
+		const quickAPI::SendDst dst;
+		const int srcc, dstc;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackInputFromDevice)
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackAudioSend)
 };
 
-class ActionRemoveMixerTrackOutput final : public ActionUndoableBase {
+class ActionRemoveTrackMIDISend final : public ActionUndoableBase {
 public:
-	ActionRemoveMixerTrackOutput() = delete;
-	ActionRemoveMixerTrackOutput(
-		int src, int srcc, int dstc);
+	ActionRemoveTrackMIDISend() = delete;
+	ActionRemoveTrackMIDISend(
+		quickAPI::TrackIndex index, int slot,
+		quickAPI::SendDst dst);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Mixer Track Output";
+		return "Remove Track MIDI Send";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int src, srcc, dstc;
+		const quickAPI::TrackIndex index;
+		const int slot;
+		const quickAPI::SendDst dst;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackOutput)
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackMIDISend)
 };
 
-class ActionRemoveMixerTrackSideChainBus final : public ActionUndoableBase {
+class ActionRemoveTrackAudioSendAllChannel final : public ActionUndoableBase {
 public:
-	ActionRemoveMixerTrackSideChainBus() = delete;
-	ActionRemoveMixerTrackSideChainBus(int track);
+	ActionRemoveTrackAudioSendAllChannel() = delete;
+	ActionRemoveTrackAudioSendAllChannel(
+		quickAPI::TrackIndex index, int slot,
+		quickAPI::SendDst dst);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Remove Mixer Track Side Chain Bus";
+		return "Remove Track Audio Send All Channel";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
+		const quickAPI::TrackIndex index;
+		const int slot;
+		const quickAPI::SendDst dst;
+		
+		MainGraph::AudioChannelLinkList channels;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackSideChainBus)
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackAudioSendAllChannel)
+};
+
+class ActionRemoveTrackAudioSendOnSlot final : public ActionUndoableBase {
+public:
+	ActionRemoveTrackAudioSendOnSlot() = delete;
+	ActionRemoveTrackAudioSendOnSlot(
+		quickAPI::TrackIndex index, int slot);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Track Audio Send On Slot";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex index;
+		const int slot;
+
+		quickAPI::SendDst dst;
+		 MainGraph::AudioChannelLinkList channels;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackAudioSendOnSlot)
+};
+
+class ActionRemoveTrackMIDISendOnSlot final : public ActionUndoableBase {
+public:
+	ActionRemoveTrackMIDISendOnSlot() = delete;
+	ActionRemoveTrackMIDISendOnSlot(
+		quickAPI::TrackIndex index, int slot);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Track MIDI Send On Slot";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex index;
+		const int slot;
+
+		quickAPI::SendDst dst;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackMIDISendOnSlot)
 };
 
 class ActionRemoveEffect final : public ActionUndoableBase {
 public:
 	ActionRemoveEffect() = delete;
 	ActionRemoveEffect(
-		int track, int effect);
+		quickAPI::TrackIndex trackIndex, int effect);
 
 	bool doAction() override;
 	bool undo() override;
@@ -178,7 +237,9 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect;
+		const quickAPI::TrackIndex trackIndex;
+		const int effect;
+
 		juce::MemoryBlock data;
 	} ACTION_DB;
 
@@ -199,10 +260,30 @@ public:
 private:
 	ACTION_DATABLOCK{
 		const int index;
+
 		juce::MemoryBlock data;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveInstr)
+};
+
+class ActionRemoveTrackSideChainBus final : public ActionUndoableBase {
+public:
+	ActionRemoveTrackSideChainBus() = delete;
+	ActionRemoveTrackSideChainBus(quickAPI::TrackIndex index);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Remove Track Side Chain Bus";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex index;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionRemoveTrackSideChainBus)
 };
 
 class ActionRemoveInstrParamCCConnection final : public ActionUndoableBase {
@@ -230,7 +311,7 @@ class ActionRemoveEffectParamCCConnection final : public ActionUndoableBase {
 public:
 	ActionRemoveEffectParamCCConnection() = delete;
 	ActionRemoveEffectParamCCConnection(
-		int track, int effect, int cc);
+		quickAPI::TrackIndex track, int effect, int cc);
 
 	bool doAction() override;
 	bool undo() override;
@@ -240,131 +321,12 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect, cc;
+		const quickAPI::TrackIndex track;
+		const int effect, cc;
 		int param = -1;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionRemoveEffectParamCCConnection)
-};
-
-class ActionRemoveMixerTrackMidiInput final : public ActionUndoableBase {
-public:
-	ActionRemoveMixerTrackMidiInput() = delete;
-	ActionRemoveMixerTrackMidiInput(int index);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Mixer Track Midi Input";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiInput)
-};
-
-class ActionRemoveSequencerTrackMidiInput final : public ActionUndoableBase {
-public:
-	ActionRemoveSequencerTrackMidiInput() = delete;
-	ActionRemoveSequencerTrackMidiInput(int index);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Sequencer Track Midi Input";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiInput)
-};
-
-class ActionRemoveMixerTrackMidiOutput final : public ActionUndoableBase {
-public:
-	ActionRemoveMixerTrackMidiOutput() = delete;
-	ActionRemoveMixerTrackMidiOutput(int index);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Mixer Track Midi Output";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveMixerTrackMidiOutput)
-};
-
-class ActionRemoveSequencerTrack final : public ActionUndoableBase {
-public:
-	ActionRemoveSequencerTrack() = delete;
-	ActionRemoveSequencerTrack(int index);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Sequencer Track";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int index;
-
-		utils::AudioConnectionList audioSrc2Trk;
-		utils::MidiConnectionList midiSrc2Trk;
-		juce::MemoryBlock data;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrack)
-};
-
-class ActionRemoveSequencerTrackMidiOutputToMixer final : public ActionUndoableBase {
-public:
-	ActionRemoveSequencerTrackMidiOutputToMixer() = delete;
-	ActionRemoveSequencerTrackMidiOutputToMixer(
-		int src, int dst);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Sequencer Track Midi Output To Mixer";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int src, dst;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackMidiOutputToMixer)
-};
-
-class ActionRemoveSequencerTrackOutput final : public ActionUndoableBase {
-public:
-	ActionRemoveSequencerTrackOutput() = delete;
-	ActionRemoveSequencerTrackOutput(
-		int src, int srcc, int dst, int dstc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Remove Sequencer Track Output";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int src, srcc, dst, dstc;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionRemoveSequencerTrackOutput)
 };
 
 class ActionRemoveSequencerBlock final : public ActionUndoableBase {

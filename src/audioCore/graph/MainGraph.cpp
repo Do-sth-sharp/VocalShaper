@@ -551,7 +551,7 @@ const MainGraph::SendDst
 MainGraph::getTrackMIDISendDst(TrackType type, int index, int slot) const {
 	/** Get Node ID */
 	auto trackNode = this->getTrackNodeIndex(type, index);
-	if (trackNode == NodeIndex{}) { return {}; }
+	if (trackNode == NodeIndex{}) { return { SendDstType::ToDevice, -1 }; }
 
 	/** Get Dst */
 	auto dstNode = this->getMIDISendSlot(trackNode, slot);
@@ -572,7 +572,7 @@ const MainGraph::SendDst
 MainGraph::getTrackAudioSendDst(TrackType type, int index, int slot) const {
 	/** Get Node ID */
 	auto trackNode = this->getTrackNodeIndex(type, index);
-	if (trackNode == NodeIndex{}) { return {}; }
+	if (trackNode == NodeIndex{}) { return { SendDstType::ToDevice, -1 }; }
 
 	/** Get Dst */
 	auto dstGroup = this->getAudioSendSlot(trackNode, slot);
@@ -1692,7 +1692,7 @@ const MainGraph::SendDst MainGraph::findDst(NodeIndex dst) const {
 	}
 
 	/** Invalid */
-	return { SendDstType::ToAUX, -1 };
+	return { SendDstType::ToDevice, -1 };
 }
 
 void MainGraph::ensureMasterTrackOutputLink() {
