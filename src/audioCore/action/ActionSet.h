@@ -135,16 +135,16 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetMidiDebuggerMaxNum)
 };
 
-class ActionSetMixerTrackGain final : public ActionUndoableBase {
+class ActionSetTrackGain final : public ActionUndoableBase {
 public:
-	ActionSetMixerTrackGain() = delete;
-	ActionSetMixerTrackGain(
-		int track, float value);
+	ActionSetTrackGain() = delete;
+	ActionSetTrackGain(
+		quickAPI::TrackIndex track, float value);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Mixer Track Gain";
+		return "Set Track Gain";
 	};
 
 	juce::UndoableAction* createCoalescedAction(
@@ -152,25 +152,25 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
+		const quickAPI::TrackIndex track;
 		const float value;
 
 		float oldValue = 0;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetMixerTrackGain)
+	JUCE_LEAK_DETECTOR(ActionSetTrackGain)
 };
 
-class ActionSetMixerTrackPan final : public ActionUndoableBase {
+class ActionSetTrackPan final : public ActionUndoableBase {
 public:
-	ActionSetMixerTrackPan() = delete;
-	ActionSetMixerTrackPan(
-		int track, float value);
+	ActionSetTrackPan() = delete;
+	ActionSetTrackPan(
+		quickAPI::TrackIndex track, float value);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Mixer Track Pan";
+		return "Set Track Pan";
 	};
 
 	juce::UndoableAction* createCoalescedAction(
@@ -178,25 +178,25 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
+		const quickAPI::TrackIndex track;
 		const float value;
 
 		float oldValue = 0;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetMixerTrackPan)
+	JUCE_LEAK_DETECTOR(ActionSetTrackPan)
 };
 
-class ActionSetMixerTrackSlider final : public ActionUndoableBase {
+class ActionSetTrackFader final : public ActionUndoableBase {
 public:
-	ActionSetMixerTrackSlider() = delete;
-	ActionSetMixerTrackSlider(
-		int track, float value);
+	ActionSetTrackFader() = delete;
+	ActionSetTrackFader(
+		quickAPI::TrackIndex track, float value);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Mixer Track Slider";
+		return "Set Track Fader";
 	};
 
 	juce::UndoableAction* createCoalescedAction(
@@ -204,107 +204,20 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
+		const quickAPI::TrackIndex track;
 		const float value;
 
 		float oldValue = 0;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetMixerTrackSlider)
-};
-
-class ActionSetMixerTrackMute final : public ActionUndoableBase {
-public:
-	ActionSetMixerTrackMute() = delete;
-	ActionSetMixerTrackMute(
-		int track, bool mute);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Mixer Track Mute";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const bool mute;
-
-		bool oldMute = 0;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetMixerTrackMute)
-};
-
-class ActionSetMixerTrackName final : public ActionUndoableBase {
-public:
-	ActionSetMixerTrackName() = delete;
-	ActionSetMixerTrackName(
-		int track, const juce::String& name);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Mixer Track Name";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const juce::String name;
-
-		juce::String oldName;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetMixerTrackName)
-};
-
-class ActionSetMixerTrackColor final : public ActionUndoableBase {
-public:
-	ActionSetMixerTrackColor() = delete;
-	ActionSetMixerTrackColor(
-		int track, const juce::Colour& color);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Mixer Track Color";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const juce::Colour color;
-
-		juce::Colour oldColor;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetMixerTrackColor)
-};
-
-class ActionSetEffectWindow final : public ActionBase {
-public:
-	ActionSetEffectWindow() = delete;
-	ActionSetEffectWindow(
-		int track, int effect, bool visible);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Effect Window";
-	};
-
-private:
-	const int track, effect;
-	const bool visible;
-
-	JUCE_LEAK_DETECTOR(ActionSetEffectWindow)
+	JUCE_LEAK_DETECTOR(ActionSetTrackFader)
 };
 
 class ActionSetEffectBypass final : public ActionUndoableBase {
 public:
 	ActionSetEffectBypass() = delete;
 	ActionSetEffectBypass(
-		int track, int effect, bool bypass);
+		quickAPI::TrackIndex track, int effect, bool bypass);
 
 	bool doAction() override;
 	bool undo() override;
@@ -314,7 +227,8 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect;
+		const quickAPI::TrackIndex track;
+		const int effect;
 		const bool bypass;
 
 		bool oldBypass = false;
@@ -322,122 +236,6 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectBypass)
 };
-
-class ActionSetEffectBypassByPtr final : public ActionUndoableBase {
-public:
-	ActionSetEffectBypassByPtr() = delete;
-	ActionSetEffectBypassByPtr(
-		quickAPI::PluginHolder effect, bool bypass);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Effect Bypass";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const bool bypass;
-
-		bool oldBypass = false;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetEffectBypassByPtr)
-};
-
-class ActionSetSequencerTrackMute final : public ActionUndoableBase {
-public:
-	ActionSetSequencerTrackMute() = delete;
-	ActionSetSequencerTrackMute(
-		int track, bool mute);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Sequencer Track Mute";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const bool mute;
-
-		bool oldMute = 0;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackMute)
-};
-
-class ActionSetSequencerTrackSolo final : public ActionUndoableBase {
-public:
-	ActionSetSequencerTrackSolo() = delete;
-	ActionSetSequencerTrackSolo(
-		int track, bool solo);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Sequencer Track Solo";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const bool solo;
-
-		bool oldSolo = 0;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackSolo)
-};
-
-class ActionSetSequencerTrackName final : public ActionUndoableBase {
-public:
-	ActionSetSequencerTrackName() = delete;
-	ActionSetSequencerTrackName(
-		int track, const juce::String& name);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Sequencer Track Name";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const juce::String name;
-
-		juce::String oldName;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackName)
-};
-
-class ActionSetSequencerTrackColor final : public ActionUndoableBase {
-public:
-	ActionSetSequencerTrackColor() = delete;
-	ActionSetSequencerTrackColor(
-		int track, const juce::Colour& color);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Sequencer Track Color";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track;
-		const juce::Colour color;
-
-		juce::Colour oldColor;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackColor)
-};
-
 
 class ActionSetInstrBypass final : public ActionUndoableBase {
 public:
@@ -460,29 +258,6 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrBypass)
-};
-
-class ActionSetInstrBypassByPtr final : public ActionUndoableBase {
-public:
-	ActionSetInstrBypassByPtr() = delete;
-	ActionSetInstrBypassByPtr(
-		quickAPI::PluginHolder instr, bool bypass);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Instr Bypass";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const bool bypass;
-
-		bool oldBypass = false;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetInstrBypassByPtr)
 };
 
 class ActionSetInstrMidiChannel final : public ActionUndoableBase {
@@ -508,34 +283,11 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannel)
 };
 
-class ActionSetInstrMidiChannelByPtr final : public ActionUndoableBase {
-public:
-	ActionSetInstrMidiChannelByPtr() = delete;
-	ActionSetInstrMidiChannelByPtr(
-		quickAPI::PluginHolder instr, int channel);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Instr Midi Channel";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const int channel;
-
-		int oldChannel = -1;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannelByPtr)
-};
-
 class ActionSetEffectMidiChannel final : public ActionUndoableBase {
 public:
 	ActionSetEffectMidiChannel() = delete;
 	ActionSetEffectMidiChannel(
-		int track, int effect, int channel);
+		quickAPI::TrackIndex track, int effect, int channel);
 
 	bool doAction() override;
 	bool undo() override;
@@ -545,36 +297,14 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect;
+		const quickAPI::TrackIndex track;
+		const int effect;
 		const int channel;
 
 		int oldChannel = -1;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannel)
-};
-
-class ActionSetEffectMidiChannelByPtr final : public ActionUndoableBase {
-public:
-	ActionSetEffectMidiChannelByPtr() = delete;
-	ActionSetEffectMidiChannelByPtr(
-		quickAPI::PluginHolder effect, int channel);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Effect Midi Channel";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const int channel;
-
-		int oldChannel = -1;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannelByPtr)
 };
 
 class ActionSetInstrParamValue final : public ActionUndoableBase {
@@ -604,7 +334,7 @@ class ActionSetEffectParamValue final : public ActionUndoableBase {
 public:
 	ActionSetEffectParamValue() = delete;
 	ActionSetEffectParamValue(
-		int track, int effect, int param, float value);
+		quickAPI::TrackIndex track, int effect, int param, float value);
 
 	bool doAction() override;
 	bool undo() override;
@@ -614,33 +344,14 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect, param;
+		const quickAPI::TrackIndex track;
+		const int effect, param;
 		const float value;
 
 		float oldValue = 0;
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamValue)
-};
-
-class ActionSetEffectIndex final : public ActionUndoableBase {
-public:
-	ActionSetEffectIndex() = delete;
-	ActionSetEffectIndex(
-		int track, int oldIndex, int newIndex);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Effect Index";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track, oldIndex, newIndex;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetEffectIndex)
 };
 
 class ActionSetInstrParamConnectToCC final : public ActionUndoableBase {
@@ -671,7 +382,7 @@ class ActionSetEffectParamConnectToCC final : public ActionUndoableBase {
 public:
 	ActionSetEffectParamConnectToCC() = delete;
 	ActionSetEffectParamConnectToCC(
-		int track, int effect, int param, int cc);
+		quickAPI::TrackIndex track, int effect, int param, int cc);
 
 	bool doAction() override;
 	bool undo() override;
@@ -681,7 +392,8 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect, param;
+		const quickAPI::TrackIndex track;
+		const int effect, param;
 		const int cc;
 
 		int oldParam = -1;
@@ -689,56 +401,6 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCC)
-};
-
-class ActionSetInstrParamConnectToCCByPtr final : public ActionUndoableBase {
-public:
-	ActionSetInstrParamConnectToCCByPtr() = delete;
-	ActionSetInstrParamConnectToCCByPtr(
-		quickAPI::PluginHolder instr, int param, int cc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Instr Param Connect To CC";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const int param;
-		const int cc;
-
-		int oldParam = -1;
-		int oldCC = -1;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetInstrParamConnectToCCByPtr)
-};
-
-class ActionSetEffectParamConnectToCCByPtr final : public ActionUndoableBase {
-public:
-	ActionSetEffectParamConnectToCCByPtr() = delete;
-	ActionSetEffectParamConnectToCCByPtr(
-		quickAPI::PluginHolder effect, int param, int cc);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Effect Param Connect To CC";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const int param;
-		const int cc;
-
-		int oldParam = -1;
-		int oldCC = -1;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCCByPtr)
 };
 
 class ActionSetInstrMidiCCIntercept final : public ActionUndoableBase {
@@ -764,6 +426,122 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCIntercept)
 };
 
+class ActionSetEffectMidiCCIntercept final : public ActionUndoableBase {
+public:
+	ActionSetEffectMidiCCIntercept() = delete;
+	ActionSetEffectMidiCCIntercept(
+		quickAPI::TrackIndex track, int effect, bool intercept);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi CC Intercept";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex track;
+		const int effect;
+		const bool intercept;
+
+		bool oldIntercept = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
+};
+
+class ActionSetEffectBypassByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectBypassByPtr() = delete;
+	ActionSetEffectBypassByPtr(
+		quickAPI::PluginHolder effect, bool bypass);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Bypass";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const bool bypass;
+
+		bool oldBypass = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectBypassByPtr)
+};
+
+class ActionSetInstrBypassByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrBypassByPtr() = delete;
+	ActionSetInstrBypassByPtr(
+		quickAPI::PluginHolder instr, bool bypass);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Bypass";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const bool bypass;
+
+		bool oldBypass = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrBypassByPtr)
+};
+
+class ActionSetInstrMidiChannelByPtr final : public ActionUndoableBase {
+public:
+	ActionSetInstrMidiChannelByPtr() = delete;
+	ActionSetInstrMidiChannelByPtr(
+		quickAPI::PluginHolder instr, int channel);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Instr Midi Channel";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder instr;
+		const int channel;
+
+		int oldChannel = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannelByPtr)
+};
+
+class ActionSetEffectMidiChannelByPtr final : public ActionUndoableBase {
+public:
+	ActionSetEffectMidiChannelByPtr() = delete;
+	ActionSetEffectMidiChannelByPtr(
+		quickAPI::PluginHolder effect, int channel);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Midi Channel";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::PluginHolder effect;
+		const int channel;
+
+		int oldChannel = -1;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannelByPtr)
+};
+
 class ActionSetInstrMidiCCInterceptByPtr final : public ActionUndoableBase {
 public:
 	ActionSetInstrMidiCCInterceptByPtr() = delete;
@@ -787,28 +565,6 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCInterceptByPtr)
 };
 
-class ActionSetEffectMidiCCIntercept final : public ActionUndoableBase {
-public:
-	ActionSetEffectMidiCCIntercept() = delete;
-	ActionSetEffectMidiCCIntercept(
-		int track, int effect, bool intercept);
-
-	bool doAction() override;
-	bool undo() override;
-	const juce::String getName() override {
-		return "Set Effect Midi CC Intercept";
-	};
-
-private:
-	ACTION_DATABLOCK{
-		const int track, effect;
-		const bool intercept;
-
-		bool oldIntercept = 0;
-	} ACTION_DB;
-
-	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
-};
 
 class ActionSetEffectMidiCCInterceptByPtr final : public ActionUndoableBase {
 public:
@@ -879,159 +635,121 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiOutputByPtr)
 };
 
-class ActionSetSequencerTrackBypass final : public ActionUndoableBase {
+class ActionSetInstrParamConnectToCCByPtr final : public ActionUndoableBase {
 public:
-	ActionSetSequencerTrackBypass() = delete;
-	ActionSetSequencerTrackBypass(
-		int track, bool bypass);
+	ActionSetInstrParamConnectToCCByPtr() = delete;
+	ActionSetInstrParamConnectToCCByPtr(
+		quickAPI::PluginHolder instr, int param, int cc);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Sequencer Track Bypass";
+		return "Set Instr Param Connect To CC";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
-		const bool bypass;
+		const quickAPI::PluginHolder instr;
+		const int param;
+		const int cc;
 
-		bool oldBypass = false;
+		int oldParam = -1;
+		int oldCC = -1;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackBypass)
+	JUCE_LEAK_DETECTOR(ActionSetInstrParamConnectToCCByPtr)
 };
 
-class ActionSetPlayPosition final : public ActionBase {
+class ActionSetEffectParamConnectToCCByPtr final : public ActionUndoableBase {
 public:
-	ActionSetPlayPosition() = delete;
-	ActionSetPlayPosition(double pos);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Play Position";
-	};
-
-private:
-	const double pos;
-
-	JUCE_LEAK_DETECTOR(ActionSetPlayPosition)
-};
-
-class ActionSetReturnToStart final : public ActionBase {
-public:
-	ActionSetReturnToStart() = delete;
-	ActionSetReturnToStart(bool returnToStart);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Return To Start";
-	};
-
-private:
-	const bool returnToStart;
-
-	JUCE_LEAK_DETECTOR(ActionSetReturnToStart)
-};
-
-class ActionSetAudioSaveBitsPerSample final : public ActionBase {
-public:
-	ActionSetAudioSaveBitsPerSample() = delete;
-	ActionSetAudioSaveBitsPerSample(
-		const juce::String& format, int bitPerSample);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Audio Save Bits Per Sample";
-	};
-
-private:
-	const juce::String format;
-	const int bitPerSample;
-
-	JUCE_LEAK_DETECTOR(ActionSetAudioSaveBitsPerSample)
-};
-
-class ActionSetAudioSaveMetaData final : public ActionBase {
-public:
-	ActionSetAudioSaveMetaData() = delete;
-	ActionSetAudioSaveMetaData(
-		const juce::String& format, const juce::StringPairArray& metaData);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Audio Save Meta Data";
-	};
-
-private:
-	const juce::String format;
-	const juce::StringPairArray metaData;
-
-	JUCE_LEAK_DETECTOR(ActionSetAudioSaveMetaData)
-};
-
-class ActionSetAudioSaveQualityOptionIndex final : public ActionBase {
-public:
-	ActionSetAudioSaveQualityOptionIndex() = delete;
-	ActionSetAudioSaveQualityOptionIndex(
-		const juce::String& format, int quality);
-
-	bool doAction() override;
-	const juce::String getName() override {
-		return "Set Audio Save Quality Option Index";
-	};
-
-private:
-	const juce::String format;
-	const int quality;
-
-	JUCE_LEAK_DETECTOR(ActionSetAudioSaveQualityOptionIndex)
-};
-
-class ActionSetSequencerTrackRecording final : public ActionUndoableBase {
-public:
-	ActionSetSequencerTrackRecording() = delete;
-	ActionSetSequencerTrackRecording(
-		int track, quickAPI::RecordState recordState);
+	ActionSetEffectParamConnectToCCByPtr() = delete;
+	ActionSetEffectParamConnectToCCByPtr(
+		quickAPI::PluginHolder effect, int param, int cc);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Sequencer Track Recording";
+		return "Set Effect Param Connect To CC";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
-		const quickAPI::RecordState recordState;
+		const quickAPI::PluginHolder effect;
+		const int param;
+		const int cc;
 
-		quickAPI::RecordState oldRecordState = quickAPI::RecordState::NotRecording;
+		int oldParam = -1;
+		int oldCC = -1;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackRecording)
+	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCCByPtr)
 };
 
-class ActionSetSequencerTrackInputMonitoring final : public ActionUndoableBase {
+class ActionSetTrackName final : public ActionUndoableBase {
 public:
-	ActionSetSequencerTrackInputMonitoring() = delete;
-	ActionSetSequencerTrackInputMonitoring(
-		int track, bool inputMonitoring);
+	ActionSetTrackName() = delete;
+	ActionSetTrackName(
+		quickAPI::TrackIndex track, const juce::String& name);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Sequencer Track Input Monitoring";
+		return "Set Track Name";
 	};
 
 private:
 	ACTION_DATABLOCK{
-		const int track;
-		const bool inputMonitoring;
+		const quickAPI::TrackIndex track;
+		const juce::String name;
 
-		bool oldInputMonitoring = false;
+		juce::String oldName;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetSequencerTrackInputMonitoring)
+	JUCE_LEAK_DETECTOR(ActionSetTrackName)
+};
+
+class ActionSetTrackColor final : public ActionUndoableBase {
+public:
+	ActionSetTrackColor() = delete;
+	ActionSetTrackColor(
+		quickAPI::TrackIndex track, const juce::Colour& color);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Track Color";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex track;
+		const juce::Colour color;
+
+		juce::Colour oldColor;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTrackColor)
+};
+
+class ActionSetEffectIndex final : public ActionUndoableBase {
+public:
+	ActionSetEffectIndex() = delete;
+	ActionSetEffectIndex(
+		quickAPI::TrackIndex track, int oldIndex, int newIndex);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Effect Index";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex track;
+		const int oldIndex, newIndex;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectIndex)
 };
 
 class ActionSetInstrOffline final : public ActionUndoableBase {
@@ -1127,11 +845,103 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetTempoBeat)
 };
 
+class ActionSetTrackMute final : public ActionUndoableBase {
+public:
+	ActionSetTrackMute() = delete;
+	ActionSetTrackMute(
+		quickAPI::TrackIndex track, bool mute);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Track Mute";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex track;
+		const bool mute;
+
+		bool oldMute = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTrackMute)
+};
+
+class ActionSetTrackSolo final : public ActionUndoableBase {
+public:
+	ActionSetTrackSolo() = delete;
+	ActionSetTrackSolo(
+		quickAPI::TrackIndex track, bool solo);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Track Solo";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const quickAPI::TrackIndex track;
+		const bool solo;
+
+		bool oldSolo = 0;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTrackSolo)
+};
+
+class ActionSetTrackRecording final : public ActionUndoableBase {
+public:
+	ActionSetTrackRecording() = delete;
+	ActionSetTrackRecording(
+		int track, quickAPI::RecordState recordState);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Track Recording";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const quickAPI::RecordState recordState;
+
+		quickAPI::RecordState oldRecordState = quickAPI::RecordState::NotRecording;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTrackRecording)
+};
+
+class ActionSetTrackInputMonitoring final : public ActionUndoableBase {
+public:
+	ActionSetTrackInputMonitoring() = delete;
+	ActionSetTrackInputMonitoring(
+		int track, bool inputMonitoring);
+
+	bool doAction() override;
+	bool undo() override;
+	const juce::String getName() override {
+		return "Set Track Input Monitoring";
+	};
+
+private:
+	ACTION_DATABLOCK{
+		const int track;
+		const bool inputMonitoring;
+
+		bool oldInputMonitoring = false;
+	} ACTION_DB;
+
+	JUCE_LEAK_DETECTOR(ActionSetTrackInputMonitoring)
+};
+
 class ActionSetEffect final : public ActionUndoableBase {
 public:
 	ActionSetEffect() = delete;
 	ActionSetEffect(
-		int track, int effect, const juce::String& pid);
+		quickAPI::TrackIndex track, int effect, const juce::String& pid);
 
 	bool doAction() override;
 	bool undo() override;
@@ -1141,7 +951,8 @@ public:
 
 private:
 	ACTION_DATABLOCK{
-		const int track, effect;
+		const quickAPI::TrackIndex track;
+		const int effect;
 		const juce::String pid;
 
 		juce::MemoryBlock data;
@@ -1150,16 +961,16 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffect)
 };
 
-class ActionSetSequencerMIDITrack final : public ActionUndoableBase {
+class ActionSetCurrentMIDITrack final : public ActionUndoableBase {
 public:
-	ActionSetSequencerMIDITrack() = delete;
-	ActionSetSequencerMIDITrack(
+	ActionSetCurrentMIDITrack() = delete;
+	ActionSetCurrentMIDITrack(
 		int track, int midiTrack);
 
 	bool doAction() override;
 	bool undo() override;
 	const juce::String getName() override {
-		return "Set Sequencer MIDI Track";
+		return "Set Current MIDI Track";
 	};
 
 private:
@@ -1170,7 +981,7 @@ private:
 		int oldMIDITrack = 0;
 	} ACTION_DB;
 
-	JUCE_LEAK_DETECTOR(ActionSetSequencerMIDITrack)
+	JUCE_LEAK_DETECTOR(ActionSetCurrentMIDITrack)
 };
 
 class ActionSetSequencerBlockTime final : public ActionUndoableBase {
@@ -1196,4 +1007,90 @@ private:
 	} ACTION_DB;
 
 	JUCE_LEAK_DETECTOR(ActionSetSequencerBlockTime)
+};
+
+class ActionSetPlayPosition final : public ActionBase {
+public:
+	ActionSetPlayPosition() = delete;
+	ActionSetPlayPosition(double pos);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Play Position";
+	};
+
+private:
+	const double pos;
+
+	JUCE_LEAK_DETECTOR(ActionSetPlayPosition)
+};
+
+class ActionSetReturnToStart final : public ActionBase {
+public:
+	ActionSetReturnToStart() = delete;
+	ActionSetReturnToStart(bool returnToStart);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Return To Start";
+	};
+
+private:
+	const bool returnToStart;
+
+	JUCE_LEAK_DETECTOR(ActionSetReturnToStart)
+};
+
+class ActionSetAudioSaveBitsPerSample final : public ActionBase {
+public:
+	ActionSetAudioSaveBitsPerSample() = delete;
+	ActionSetAudioSaveBitsPerSample(
+		const juce::String& format, int bitPerSample);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Audio Save Bits Per Sample";
+	};
+
+private:
+	const juce::String format;
+	const int bitPerSample;
+
+	JUCE_LEAK_DETECTOR(ActionSetAudioSaveBitsPerSample)
+};
+
+class ActionSetAudioSaveMetaData final : public ActionBase {
+public:
+	ActionSetAudioSaveMetaData() = delete;
+	ActionSetAudioSaveMetaData(
+		const juce::String& format, const juce::StringPairArray& metaData);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Audio Save Meta Data";
+	};
+
+private:
+	const juce::String format;
+	const juce::StringPairArray metaData;
+
+	JUCE_LEAK_DETECTOR(ActionSetAudioSaveMetaData)
+};
+
+class ActionSetAudioSaveQualityOptionIndex final : public ActionBase {
+public:
+	ActionSetAudioSaveQualityOptionIndex() = delete;
+	ActionSetAudioSaveQualityOptionIndex(
+		const juce::String& format, int quality);
+
+	bool doAction() override;
+	const juce::String getName() override {
+		return "Set Audio Save Quality Option Index";
+	};
+
+private:
+	const juce::String format;
+	const int quality;
+
+	JUCE_LEAK_DETECTOR(ActionSetAudioSaveQualityOptionIndex)
 };

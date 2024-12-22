@@ -46,7 +46,6 @@ enum class ActionType : unsigned int {
 	ActionSetEffectParamConnectToCC,
 	ActionSetInstrMidiCCIntercept,
 	ActionSetEffectMidiCCIntercept,
-	ActionSetSourceName,
 	ActionSetEffectBypassByPtr,
 	ActionSetInstrBypassByPtr,
 	ActionSetInstrMidiChannelByPtr,
@@ -70,5 +69,5 @@ enum class ActionType : unsigned int {
 	ActionSetTrackInputMonitoring,
 	ActionSetEffect,
 	ActionSetCurrentMIDITrack,
-	ActionSetBlockTime
+	ActionSetSequencerBlockTime
 };
