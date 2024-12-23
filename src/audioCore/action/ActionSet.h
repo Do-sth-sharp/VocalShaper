@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "ActionUndoableBase.h"
-#include "ActionUtils.h"
+#include "ActionBase.h"
 #include "../quickAPI/QuickGet.h"
 #include "../Utils.h"
 
@@ -142,7 +141,7 @@ public:
 		quickAPI::TrackIndex track, float value);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Gain";
 	};
@@ -168,7 +167,7 @@ public:
 		quickAPI::TrackIndex track, float value);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Pan";
 	};
@@ -194,7 +193,7 @@ public:
 		quickAPI::TrackIndex track, float value);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Fader";
 	};
@@ -220,7 +219,7 @@ public:
 		quickAPI::TrackIndex track, int effect, bool bypass);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Bypass";
 	};
@@ -244,7 +243,7 @@ public:
 		int instr, bool bypass);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Bypass";
 	};
@@ -267,7 +266,7 @@ public:
 		int instr, int channel);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Midi Channel";
 	};
@@ -290,7 +289,7 @@ public:
 		quickAPI::TrackIndex track, int effect, int channel);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Midi Channel";
 	};
@@ -314,7 +313,7 @@ public:
 		int instr, int param, float value);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Param Value";
 	};
@@ -337,7 +336,7 @@ public:
 		quickAPI::TrackIndex track, int effect, int param, float value);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Param Value";
 	};
@@ -361,7 +360,7 @@ public:
 		int instr, int param, int cc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Param Connect To CC";
 	};
@@ -385,7 +384,7 @@ public:
 		quickAPI::TrackIndex track, int effect, int param, int cc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Param Connect To CC";
 	};
@@ -410,7 +409,7 @@ public:
 		int instr, bool intercept);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Midi CC Intercept";
 	};
@@ -433,7 +432,7 @@ public:
 		quickAPI::TrackIndex track, int effect, bool intercept);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Midi CC Intercept";
 	};
@@ -457,7 +456,7 @@ public:
 		quickAPI::PluginHolder effect, bool bypass);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Bypass";
 	};
@@ -480,7 +479,7 @@ public:
 		quickAPI::PluginHolder instr, bool bypass);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Bypass";
 	};
@@ -503,7 +502,7 @@ public:
 		quickAPI::PluginHolder instr, int channel);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Midi Channel";
 	};
@@ -526,7 +525,7 @@ public:
 		quickAPI::PluginHolder effect, int channel);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Midi Channel";
 	};
@@ -549,7 +548,7 @@ public:
 		quickAPI::PluginHolder instr, bool intercept);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Midi CC Intercept";
 	};
@@ -573,7 +572,7 @@ public:
 		quickAPI::PluginHolder effect, bool intercept);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Midi CC Intercept";
 	};
@@ -596,7 +595,7 @@ public:
 		quickAPI::PluginHolder instr, bool output);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Midi Output";
 	};
@@ -619,7 +618,7 @@ public:
 		quickAPI::PluginHolder effect, bool output);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Midi Output";
 	};
@@ -642,7 +641,7 @@ public:
 		quickAPI::PluginHolder instr, int param, int cc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instr Param Connect To CC";
 	};
@@ -667,7 +666,7 @@ public:
 		quickAPI::PluginHolder effect, int param, int cc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Param Connect To CC";
 	};
@@ -692,7 +691,7 @@ public:
 		quickAPI::TrackIndex track, const juce::String& name);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Name";
 	};
@@ -715,7 +714,7 @@ public:
 		quickAPI::TrackIndex track, const juce::Colour& color);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Color";
 	};
@@ -738,7 +737,7 @@ public:
 		quickAPI::TrackIndex track, int oldIndex, int newIndex);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect Index";
 	};
@@ -759,7 +758,7 @@ public:
 		int instr, bool offline);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Instrument Offline";
 	};
@@ -782,7 +781,7 @@ public:
 		int index, double time);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Tempo Label Time";
 	};
@@ -806,7 +805,7 @@ public:
 		int index, double tempo);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Tempo Label Tempo";
 	};
@@ -829,7 +828,7 @@ public:
 		int index, int numerator, int denominator);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Tempo Label Beat";
 	};
@@ -852,7 +851,7 @@ public:
 		quickAPI::TrackIndex track, bool mute);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Mute";
 	};
@@ -875,7 +874,7 @@ public:
 		quickAPI::TrackIndex track, bool solo);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Solo";
 	};
@@ -898,7 +897,7 @@ public:
 		int track, quickAPI::RecordState recordState);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Recording";
 	};
@@ -921,7 +920,7 @@ public:
 		int track, bool inputMonitoring);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Track Input Monitoring";
 	};
@@ -944,7 +943,7 @@ public:
 		quickAPI::TrackIndex track, int effect, const juce::String& pid);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Effect";
 	};
@@ -968,7 +967,7 @@ public:
 		int track, int midiTrack);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Current MIDI Track";
 	};
@@ -992,7 +991,7 @@ public:
 		int track, int index, const BlockTime& time);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Set Sequencer Block Time";
 	};

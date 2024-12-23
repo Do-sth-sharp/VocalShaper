@@ -405,7 +405,7 @@ bool ActionSplitSequencerBlock::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSplitSequencerBlock::undo() {
+bool ActionSplitSequencerBlock::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -458,7 +458,7 @@ bool ActionLoadPluginState::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionLoadPluginState::undo() {
+bool ActionLoadPluginState::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 

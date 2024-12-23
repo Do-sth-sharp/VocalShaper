@@ -183,7 +183,7 @@ bool ActionSetTrackGain::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackGain::undo() {
+bool ActionSetTrackGain::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -245,7 +245,7 @@ bool ActionSetTrackPan::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackPan::undo() {
+bool ActionSetTrackPan::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -306,7 +306,7 @@ bool ActionSetTrackFader::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackFader::undo() {
+bool ActionSetTrackFader::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -370,7 +370,7 @@ bool ActionSetEffectBypass::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectBypass::undo() {
+bool ActionSetEffectBypass::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -422,7 +422,7 @@ bool ActionSetInstrBypass::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrBypass::undo() {
+bool ActionSetInstrBypass::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -475,7 +475,7 @@ bool ActionSetInstrMidiChannel::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrMidiChannel::undo() {
+bool ActionSetInstrMidiChannel::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -532,7 +532,7 @@ bool ActionSetEffectMidiChannel::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectMidiChannel::undo() {
+bool ActionSetEffectMidiChannel::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -589,7 +589,7 @@ bool ActionSetInstrParamValue::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrParamValue::undo() {
+bool ActionSetInstrParamValue::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -646,7 +646,7 @@ bool ActionSetEffectParamValue::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectParamValue::undo() {
+bool ActionSetEffectParamValue::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -704,7 +704,7 @@ bool ActionSetInstrParamConnectToCC::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrParamConnectToCC::undo() {
+bool ActionSetInstrParamConnectToCC::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -765,7 +765,7 @@ bool ActionSetEffectParamConnectToCC::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectParamConnectToCC::undo() {
+bool ActionSetEffectParamConnectToCC::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -825,7 +825,7 @@ bool ActionSetInstrMidiCCIntercept::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrMidiCCIntercept::undo() {
+bool ActionSetInstrMidiCCIntercept::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -882,7 +882,7 @@ bool ActionSetEffectMidiCCIntercept::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectMidiCCIntercept::undo() {
+bool ActionSetEffectMidiCCIntercept::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -932,7 +932,7 @@ bool ActionSetEffectBypassByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectBypassByPtr::undo() {
+bool ActionSetEffectBypassByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -974,7 +974,7 @@ bool ActionSetInstrBypassByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrBypassByPtr::undo() {
+bool ActionSetInstrBypassByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1016,7 +1016,7 @@ bool ActionSetInstrMidiChannelByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrMidiChannelByPtr::undo() {
+bool ActionSetInstrMidiChannelByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1058,7 +1058,7 @@ bool ActionSetEffectMidiChannelByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectMidiChannelByPtr::undo() {
+bool ActionSetEffectMidiChannelByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1101,7 +1101,7 @@ bool ActionSetInstrMidiCCInterceptByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrMidiCCInterceptByPtr::undo() {
+bool ActionSetInstrMidiCCInterceptByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1144,7 +1144,7 @@ bool ActionSetEffectMidiCCInterceptByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectMidiCCInterceptByPtr::undo() {
+bool ActionSetEffectMidiCCInterceptByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1187,7 +1187,7 @@ bool ActionSetInstrMidiOutputByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrMidiOutputByPtr::undo() {
+bool ActionSetInstrMidiOutputByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1230,7 +1230,7 @@ bool ActionSetEffectMidiOutputByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectMidiOutputByPtr::undo() {
+bool ActionSetEffectMidiOutputByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1274,7 +1274,7 @@ bool ActionSetInstrParamConnectToCCByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrParamConnectToCCByPtr::undo() {
+bool ActionSetInstrParamConnectToCCByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1321,7 +1321,7 @@ bool ActionSetEffectParamConnectToCCByPtr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectParamConnectToCCByPtr::undo() {
+bool ActionSetEffectParamConnectToCCByPtr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1369,7 +1369,7 @@ bool ActionSetTrackName::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackName::undo() {
+bool ActionSetTrackName::undoAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSetTrackName);
@@ -1413,7 +1413,7 @@ bool ActionSetTrackColor::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackColor::undo() {
+bool ActionSetTrackColor::undoAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSetTrackColor);
@@ -1459,7 +1459,7 @@ bool ActionSetEffectIndex::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffectIndex::undo() {
+bool ActionSetEffectIndex::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1512,7 +1512,7 @@ bool ActionSetInstrOffline::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetInstrOffline::undo() {
+bool ActionSetInstrOffline::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1559,7 +1559,7 @@ bool ActionSetTempoTime::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTempoTime::undo() {
+bool ActionSetTempoTime::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1598,7 +1598,7 @@ bool ActionSetTempoTempo::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTempoTempo::undo() {
+bool ActionSetTempoTempo::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1636,7 +1636,7 @@ bool ActionSetTempoBeat::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTempoBeat::undo() {
+bool ActionSetTempoBeat::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1673,7 +1673,7 @@ bool ActionSetTrackMute::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackMute::undo() {
+bool ActionSetTrackMute::undoAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSetTrackMute);
@@ -1715,7 +1715,7 @@ bool ActionSetTrackSolo::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackSolo::undo() {
+bool ActionSetTrackSolo::undoAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSetTrackSolo);
@@ -1762,7 +1762,7 @@ bool ActionSetTrackRecording::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackRecording::undo() {
+bool ActionSetTrackRecording::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1813,7 +1813,7 @@ bool ActionSetTrackInputMonitoring::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetTrackInputMonitoring::undo() {
+bool ActionSetTrackInputMonitoring::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -1895,7 +1895,7 @@ bool ActionSetEffect::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetEffect::undo() {
+bool ActionSetEffect::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
@@ -1969,7 +1969,7 @@ bool ActionSetCurrentMIDITrack::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetCurrentMIDITrack::undo() {
+bool ActionSetCurrentMIDITrack::undoAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSetCurrentMIDITrack);
@@ -2017,7 +2017,7 @@ bool ActionSetSequencerBlockTime::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionSetSequencerBlockTime::undo() {
+bool ActionSetSequencerBlockTime::undoAction() {
 	ACTION_UNSAVE_PROJECT();
 
 	ACTION_WRITE_TYPE_UNDO(ActionSetSequencerBlockTime);

@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 enum class ActionType : unsigned int {
+	ActionNone = 0,
+
 	ActionAddTrack = 0x0001,
 	ActionAddTrackAudioInput,
 	ActionAddTrackMIDIInput,

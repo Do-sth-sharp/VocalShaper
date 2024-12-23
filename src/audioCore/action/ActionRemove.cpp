@@ -125,7 +125,7 @@ bool ActionRemoveTrack::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrack::undo() {
+bool ActionRemoveTrack::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -234,7 +234,7 @@ bool ActionRemoveTrackAudioInput::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackAudioInput::undo() {
+bool ActionRemoveTrackAudioInput::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -277,7 +277,7 @@ bool ActionRemoveTrackMIDIInput::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackMIDIInput::undo() {
+bool ActionRemoveTrackMIDIInput::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -322,7 +322,7 @@ bool ActionRemoveTrackAudioSend::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackAudioSend::undo() {
+bool ActionRemoveTrackAudioSend::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -368,7 +368,7 @@ bool ActionRemoveTrackMIDISend::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackMIDISend::undo() {
+bool ActionRemoveTrackMIDISend::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -421,7 +421,7 @@ bool ActionRemoveTrackAudioSendAllChannel::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackAudioSendAllChannel::undo() {
+bool ActionRemoveTrackAudioSendAllChannel::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -483,7 +483,7 @@ bool ActionRemoveTrackAudioSendOnSlot::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackAudioSendOnSlot::undo() {
+bool ActionRemoveTrackAudioSendOnSlot::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -538,7 +538,7 @@ bool ActionRemoveTrackMIDISendOnSlot::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackMIDISendOnSlot::undo() {
+bool ActionRemoveTrackMIDISendOnSlot::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -605,7 +605,7 @@ bool ActionRemoveEffect::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveEffect::undo() {
+bool ActionRemoveEffect::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
@@ -687,7 +687,7 @@ bool ActionRemoveInstr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveInstr::undo() {
+bool ActionRemoveInstr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 	ACTION_CHECK_PLUGIN_SEARCHING(
@@ -749,7 +749,7 @@ bool ActionRemoveTrackSideChainBus::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTrackSideChainBus::undo() {
+bool ActionRemoveTrackSideChainBus::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -798,7 +798,7 @@ bool ActionRemoveInstrParamCCConnection::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveInstrParamCCConnection::undo() {
+bool ActionRemoveInstrParamCCConnection::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -854,7 +854,7 @@ bool ActionRemoveEffectParamCCConnection::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveEffectParamCCConnection::undo() {
+bool ActionRemoveEffectParamCCConnection::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -910,7 +910,7 @@ bool ActionRemoveSequencerBlock::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveSequencerBlock::undo() {
+bool ActionRemoveSequencerBlock::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -966,7 +966,7 @@ bool ActionRemoveTempo::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionRemoveTempo::undo() {
+bool ActionRemoveTempo::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 

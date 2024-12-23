@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "ActionUndoableBase.h"
-#include "ActionUtils.h"
+#include "ActionBase.h"
 #include "../quickAPI/QuickGet.h"
 
 class ActionAddPluginBlackList final : public ActionBase {
@@ -43,7 +42,7 @@ public:
 		quickAPI::TrackIndex index, int bus = -1);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Track";
 	};
@@ -66,7 +65,7 @@ public:
 		int srcc, int dstc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Track Audio Input";
 	};
@@ -87,7 +86,7 @@ public:
 		quickAPI::TrackIndex index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Track MIDI Input";
 	};
@@ -108,7 +107,7 @@ public:
 		quickAPI::SendDst dst, int srcc, int dstc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Track Audio Send";
 	};
@@ -132,7 +131,7 @@ public:
 		quickAPI::SendDst dst);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Track MIDI Send";
 	};
@@ -155,7 +154,7 @@ public:
 		int effect, const juce::String& pid);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Effect";
 	};
@@ -177,7 +176,7 @@ public:
 		int index, const juce::String& pid, bool addARA);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Instr";
 	};
@@ -199,7 +198,7 @@ public:
 		quickAPI::TrackIndex index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Track Side Chain Bus";
 	};
@@ -219,7 +218,7 @@ public:
 		int trackIndex, double startTime, double endTime, double offset);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Sequencer Block";
 	};
@@ -241,7 +240,7 @@ public:
 		double time, double tempo);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Tempo Label";
 	};
@@ -262,7 +261,7 @@ public:
 		double time, int numerator, int denominator);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Add Beat Label";
 	};

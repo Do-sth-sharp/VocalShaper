@@ -10,7 +10,7 @@ public:
 	~ActionDispatcher();
 
 	const juce::UndoManager& getActionManager() const;
-	bool dispatch(std::unique_ptr<ActionBase> action);
+	bool dispatch(std::unique_ptr<ActionUndoableBase> action);
 	void clearUndoList();
 	bool performUndo();
 	bool performRedo();
@@ -21,7 +21,7 @@ public:
 	void removeOutput();
 
 private:
-	friend class ActionBase;
+	friend class ActionUndoableBase;
 	void outputInternal(const juce::String& mes);
 	void errorInternal(const juce::String& mes);
 

@@ -63,7 +63,7 @@ bool ActionAddTrack::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddTrack::undo() {
+bool ActionAddTrack::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -106,7 +106,7 @@ bool ActionAddTrackAudioInput::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddTrackAudioInput::undo() {
+bool ActionAddTrackAudioInput::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -148,7 +148,7 @@ bool ActionAddTrackMIDIInput::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddTrackMIDIInput::undo() {
+bool ActionAddTrackMIDIInput::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -192,7 +192,7 @@ bool ActionAddTrackAudioSend::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddTrackAudioSend::undo() {
+bool ActionAddTrackAudioSend::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -238,7 +238,7 @@ bool ActionAddTrackMIDISend::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddTrackMIDISend::undo() {
+bool ActionAddTrackMIDISend::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -296,7 +296,7 @@ bool ActionAddEffect::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddEffect::undo() {
+bool ActionAddEffect::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -358,7 +358,7 @@ bool ActionAddInstr::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddInstr::undo() {
+bool ActionAddInstr::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -406,7 +406,7 @@ bool ActionAddTrackSideChainBus::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddTrackSideChainBus::undo() {
+bool ActionAddTrackSideChainBus::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -455,7 +455,7 @@ bool ActionAddSequencerBlock::doAction() {
 	ACTION_RESULT(false);
 }
 
-bool ActionAddSequencerBlock::undo() {
+bool ActionAddSequencerBlock::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -497,7 +497,7 @@ bool ActionAddTempoTempo::doAction() {
 	ACTION_RESULT(true);
 }
 
-bool ActionAddTempoTempo::undo() {
+bool ActionAddTempoTempo::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
@@ -529,7 +529,7 @@ bool ActionAddTempoBeat::doAction() {
 	ACTION_RESULT(true);
 }
 
-bool ActionAddTempoBeat::undo() {
+bool ActionAddTempoBeat::undoAction() {
 	ACTION_CHECK_RENDERING(
 		"Don't do this while rendering.");
 
