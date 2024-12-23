@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "ActionUndoableBase.h"
-#include "ActionUtils.h"
+#include "ActionBase.h"
 #include "../graph/MainGraph.h"
 #include "../quickAPI/QuickGet.h"
 #include "../Utils.h"
@@ -44,7 +43,7 @@ public:
 	ActionRemoveTrack(quickAPI::TrackIndex index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track";
 	};
@@ -70,7 +69,7 @@ public:
 		quickAPI::TrackIndex index, int srcc, int dstc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track Audio Input";
 	};
@@ -91,7 +90,7 @@ public:
 		quickAPI::TrackIndex index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track MIDI Input";
 	};
@@ -112,7 +111,7 @@ public:
 		quickAPI::SendDst dst, int srcc, int dstc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track Audio Send";
 	};
@@ -136,7 +135,7 @@ public:
 		quickAPI::SendDst dst);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track MIDI Send";
 	};
@@ -159,7 +158,7 @@ public:
 		quickAPI::SendDst dst);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track Audio Send All Channel";
 	};
@@ -183,7 +182,7 @@ public:
 		quickAPI::TrackIndex index, int slot);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track Audio Send On Slot";
 	};
@@ -207,7 +206,7 @@ public:
 		quickAPI::TrackIndex index, int slot);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track MIDI Send On Slot";
 	};
@@ -230,7 +229,7 @@ public:
 		quickAPI::TrackIndex trackIndex, int effect);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Effect";
 	};
@@ -252,7 +251,7 @@ public:
 	ActionRemoveInstr(int index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Instr";
 	};
@@ -273,7 +272,7 @@ public:
 	ActionRemoveTrackSideChainBus(quickAPI::TrackIndex index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Track Side Chain Bus";
 	};
@@ -293,7 +292,7 @@ public:
 		int instr, int cc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Instr Param CC Connection";
 	};
@@ -314,7 +313,7 @@ public:
 		quickAPI::TrackIndex track, int effect, int cc);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Effect Param CC Connection";
 	};
@@ -336,7 +335,7 @@ public:
 		int seqIndex, int index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Sequencer Block";
 	};
@@ -356,7 +355,7 @@ public:
 	ActionRemoveTempo(int index);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Remove Tempo";
 	};

@@ -1,5 +1,4 @@
 ﻿#include "ActionDispatcher.h"
-#include "ActionUndoableBase.h"
 #include "../recovery/DataControl.hpp"
 
 ActionDispatcher::ActionDispatcher() {
@@ -19,16 +18,17 @@ const juce::UndoManager& ActionDispatcher::getActionManager() const {
 	return *(this->manager.get());
 }
 
-bool ActionDispatcher::dispatch(std::unique_ptr<ActionBase> action) {
+bool ActionDispatcher::dispatch(std::unique_ptr<ActionUndoableBase> action) {
 	if (!action) { return false; }
 
-	if (dynamic_cast<ActionUndoableBase*>(action.get())) {
-		juce::String name = action->getName();
-		//this->manager->beginNewTransaction(action->getName());
-		return this->manager->perform(
-			dynamic_cast<ActionUndoableBase*>(action.release()), name);
+	if (dynamic_cast<ActionBase*>(action.get())) {
+		return action->perform();
 	}
-	return action->doAction();
+	
+	juce::String name = action->getName();
+	//this->manager->beginNewTransaction(name);
+	return this->manager->perform(
+		dynamic_cast<ActionUndoableBase*>(action.release()), name);
 }
 
 void ActionDispatcher::clearUndoList() {

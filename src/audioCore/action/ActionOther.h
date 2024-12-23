@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "ActionUndoableBase.h"
-#include "ActionUtils.h"
+#include "ActionBase.h"
 #include "../quickAPI/QuickGet.h"
 
 class ActionClearPlugin final : public ActionBase {
@@ -306,7 +305,7 @@ public:
 		int track, int block, double time);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Split Sequencer Track Block";
 	};
@@ -327,7 +326,7 @@ public:
 		quickAPI::PluginHolder plugin, const juce::String& path);
 
 	bool doAction() override;
-	bool undo() override;
+	bool undoAction() override;
 	const juce::String getName() override {
 		return "Load Plugin State";
 	};
