@@ -9,9 +9,13 @@ public:
 	ActionAddPluginBlackList(const juce::String& plugin);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Plugin Black List";
 	};
+	int getShieldMask() const override {
+		return ShieldPluginLoad | ShieldPluginScan;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String plugin;
@@ -25,9 +29,13 @@ public:
 	ActionAddPluginSearchPath(const juce::String& path);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Plugin Search Path";
 	};
+	int getShieldMask() const override {
+		return ShieldPluginLoad | ShieldPluginScan;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String path;
@@ -43,16 +51,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Track";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTrack; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex index;
-		const int bus;
-		int newIndex = -1;
-	} ACTION_DB;
+	const quickAPI::TrackIndex index;
+	const int bus;
+
+	int newIndex = -1;
 
 	JUCE_LEAK_DETECTOR(ActionAddTrack)
 };
@@ -66,15 +76,16 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Track Audio Input";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTrackAudioInput; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex index;
-		const int srcc, dstc;
-	} ACTION_DB;
+	const quickAPI::TrackIndex index;
+	const int srcc, dstc;
 
 	JUCE_LEAK_DETECTOR(ActionAddTrackAudioInput)
 };
@@ -87,14 +98,15 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Track MIDI Input";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTrackMIDIInput; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex index;
-	} ACTION_DB;
+	const quickAPI::TrackIndex index;
 
 	JUCE_LEAK_DETECTOR(ActionAddTrackMIDIInput)
 };
@@ -108,17 +120,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Track Audio Send";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTrackAudioSend; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex index;
-		const int slot;
-		const quickAPI::SendDst dst;
-		const int srcc, dstc;
-	} ACTION_DB;
+	const quickAPI::TrackIndex index;
+	const int slot;
+	const quickAPI::SendDst dst;
+	const int srcc, dstc;
 
 	JUCE_LEAK_DETECTOR(ActionAddTrackAudioSend)
 };
@@ -132,16 +145,17 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Track MIDI Send";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTrackMIDISend; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex index;
-		const int slot;
-		const quickAPI::SendDst dst;
-	} ACTION_DB;
+	const quickAPI::TrackIndex index;
+	const int slot;
+	const quickAPI::SendDst dst;
 
 	JUCE_LEAK_DETECTOR(ActionAddTrackMIDISend)
 };
@@ -155,16 +169,20 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Effect";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldPluginScan;
+	};
+	ActionType getActionType() const override { return ActionType::ActionAddEffect; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex trackIndex;
-		const int effect;
-		const juce::String pid;
-	} ACTION_DB;
+	const quickAPI::TrackIndex trackIndex;
+	const int effect;
+	const juce::String pid;
 
 	JUCE_LEAK_DETECTOR(ActionAddEffect)
 };
@@ -177,16 +195,20 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Instr";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldPluginScan;
+	};
+	ActionType getActionType() const override { return ActionType::ActionAddInstr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int index;
-		const juce::String pid;
-		const bool addARA;
-	} ACTION_DB;
+	const int index;
+	const juce::String pid;
+	const bool addARA;
 
 	JUCE_LEAK_DETECTOR(ActionAddInstr)
 };
@@ -199,14 +221,15 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Track Side Chain Bus";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTrackSideChainBus; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex index;
-	} ACTION_DB;
+	const quickAPI::TrackIndex index;
 
 	JUCE_LEAK_DETECTOR(ActionAddTrackSideChainBus)
 };
@@ -219,16 +242,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Sequencer Block";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddSequencerBlock; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int trackIndex;
-		const double startTime, endTime, offset;
-		int index = -1;
-	} ACTION_DB;
+	const int trackIndex;
+	const double startTime, endTime, offset;
+
+	int index = -1;
 
 	JUCE_LEAK_DETECTOR(ActionAddSequencerBlock)
 };
@@ -241,15 +266,16 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Tempo Label";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTempoTempo; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const double time, tempo;
-		int index = -1;
-	} ACTION_DB;
+	const double time, tempo;
+	int index = -1;
 
 	JUCE_LEAK_DETECTOR(ActionAddTempoTempo)
 };
@@ -262,16 +288,17 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Add Beat Label";
 	};
+	ActionType getActionType() const override { return ActionType::ActionAddTempoBeat; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const double time;
-		const int numerator, denominator;
-		int index = -1;
-	} ACTION_DB;
+	const double time;
+	const int numerator, denominator;
+	int index = -1;
 
 	JUCE_LEAK_DETECTOR(ActionAddTempoBeat)
 };
