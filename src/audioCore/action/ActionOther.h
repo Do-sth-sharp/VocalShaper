@@ -8,9 +8,13 @@ public:
 	ActionClearPlugin();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Clear Plugin";
 	};
+	int getShieldMask() const override {
+		return ShieldPluginLoad | ShieldPluginScan;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionClearPlugin)
@@ -21,9 +25,13 @@ public:
 	ActionSearchPlugin();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Search Plugin";
 	};
+	int getShieldMask() const override {
+		return ShieldPluginLoad;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionSearchPlugin)
@@ -34,9 +42,13 @@ public:
 	ActionPlay();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Play";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionPlay)
@@ -47,9 +59,13 @@ public:
 	ActionPause();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Pause";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionPause)
@@ -60,9 +76,13 @@ public:
 	ActionStop();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Stop";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionStop)
@@ -73,9 +93,13 @@ public:
 	ActionRewind();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Rewind";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionRewind)
@@ -86,9 +110,13 @@ public:
 	ActionStartRecord();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Start Record";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionStartRecord)
@@ -99,9 +127,13 @@ public:
 	ActionStopRecord();
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Stop Record";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	JUCE_LEAK_DETECTOR(ActionStopRecord)
@@ -116,9 +148,13 @@ public:
 		const juce::StringPairArray& metaData, int bitDepth, int quality);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Render Now";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldSourceIO | ShieldPluginLoad | ShieldARAAnalysis;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String path, name, extension;
@@ -136,9 +172,13 @@ public:
 	ActionNewProject(const juce::String& path);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "New Project";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldSourceIO | ShieldPluginLoad;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String path;
@@ -152,14 +192,18 @@ public:
 	ActionSave(const juce::String& name);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Save";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldSourceIO | ShieldPluginLoad;
+	};
+	ActionType getActionType() const override { return ActionType::ActionSave; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const juce::String name;
-	} ACTION_DB;
+	const juce::String name;
 
 	JUCE_LEAK_DETECTOR(ActionSave)
 };
@@ -170,9 +214,13 @@ public:
 	ActionLoad(const juce::String& path);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Load";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldSourceIO | ShieldPluginLoad | ShieldPluginScan;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String path;
@@ -188,9 +236,14 @@ public:
 		double sampleRate, int channels, double length);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Init Audio Source";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	bool getProjectChange() const override { return true; };
+	const juce::String getStatusStr() const override;
 
 private:
 	const int index;
@@ -209,9 +262,14 @@ public:
 		const juce::String& name);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Init MIDI Source";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	bool getProjectChange() const override { return true; };
+	const juce::String getStatusStr() const override;
 
 private:
 	const int index;
@@ -228,9 +286,14 @@ public:
 		const juce::String& path, const SourceCallback& callback = {});
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Load Audio Source";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	bool getProjectChange() const override { return true; };
+	const juce::String getStatusStr() const override;
 
 private:
 	const int index;
@@ -249,9 +312,14 @@ public:
 		const SourceCallback& callback = {});
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Load MIDI Source";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	bool getProjectChange() const override { return true; };
+	const juce::String getStatusStr() const override;
 
 private:
 	const int index;
@@ -269,9 +337,13 @@ public:
 		const juce::String& path);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Save Audio Source";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const int index;
@@ -287,9 +359,13 @@ public:
 		const juce::String& path);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Save MIDI Source";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const int index;
@@ -306,15 +382,16 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Split Sequencer Track Block";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSplitSequencerBlock; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int track, block;
-		const double time;
-	} ACTION_DB;
+	const int track, block;
+	const double time;
 
 	JUCE_LEAK_DETECTOR(ActionSplitSequencerBlock)
 };
@@ -327,17 +404,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Load Plugin State";
 	};
+	ActionType getActionType() const override { return ActionType::ActionLoadPluginState; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder plugin;
-		const juce::String path;
+	const quickAPI::PluginHolder plugin;
+	const juce::String path;
 
-		juce::MemoryBlock oldState;
-	} ACTION_DB;
+	juce::MemoryBlock oldState;
 
 	JUCE_LEAK_DETECTOR(ActionLoadPluginState)
 };
@@ -349,9 +427,13 @@ public:
 		quickAPI::PluginHolder plugin, const juce::String& path);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Save Plugin State";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const quickAPI::PluginHolder plugin;
