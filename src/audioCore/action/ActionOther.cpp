@@ -5,112 +5,103 @@
 #include "../misc/PlayPosition.h"
 #include "../plugin/Plugin.h"
 #include "../source/SourceManager.h"
+#include "../source/SourceIO.h"
 #include "../recovery/DataControl.hpp"
 #include "../Utils.h"
 
 ActionClearPlugin::ActionClearPlugin() {}
 
 bool ActionClearPlugin::doAction() {
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin list while searching plugin.");
-
 	Plugin::getInstance()->clearPluginTemporary();
-
-	this->output("Clear plugin list.");
 	return true;
+}
+
+const juce::String ActionClearPlugin::getStatusStr() const {
+	return "";
 }
 
 ActionSearchPlugin::ActionSearchPlugin() {}
 
 bool ActionSearchPlugin::doAction() {
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
 	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return true; }
 
 	Plugin::getInstance()->clearPluginList();
 	Plugin::getInstance()->getPluginList();
 
-	this->output("Searching Audio Plugin...");
 	return true;
+}
+
+const juce::String ActionSearchPlugin::getStatusStr() const {
+	return "";
 }
 
 ActionPlay::ActionPlay() {}
 
 bool ActionPlay::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	auto pos = AudioCore::getInstance()->getPosition();
 	AudioCore::getInstance()->play();
-
-	this->output("Start play at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n");
 	return true;
+}
+
+const juce::String ActionPlay::getStatusStr() const {
+	auto pos = AudioCore::getInstance()->getPosition();
+	return juce::String{ pos->getTimeInSeconds().orFallback(0) } + "s";
 }
 
 ActionPause::ActionPause() {}
 
 bool ActionPause::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
 	AudioCore::getInstance()->pause();
-	auto pos = AudioCore::getInstance()->getPosition();
-
-	this->output("Pause play at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n");
 	return true;
+}
+
+const juce::String ActionPause::getStatusStr() const {
+	auto pos = AudioCore::getInstance()->getPosition();
+	return juce::String{ pos->getTimeInSeconds().orFallback(0) } + "s";
 }
 
 ActionStop::ActionStop() {}
 
 bool ActionStop::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	auto pos = AudioCore::getInstance()->getPosition();
 	AudioCore::getInstance()->stop();
-
-	this->output("Stop play at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n");
 	return true;
+}
+
+const juce::String ActionStop::getStatusStr() const {
+	auto pos = AudioCore::getInstance()->getPosition();
+	return juce::String{ pos->getTimeInSeconds().orFallback(0) } + "s";
 }
 
 ActionRewind::ActionRewind() {}
 
 bool ActionRewind::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
 	AudioCore::getInstance()->rewind();
-
-	this->output("Rewind play\n");
 	return true;
 }
+
+const juce::String ActionRewind::getStatusStr() const { return ""; }
 
 ActionStartRecord::ActionStartRecord() {}
 
 bool ActionStartRecord::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	auto pos = AudioCore::getInstance()->getPosition();
 	AudioCore::getInstance()->record(true);
-
-	this->output("Start record at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n");
 	return true;
+}
+
+const juce::String ActionStartRecord::getStatusStr() const {
+	auto pos = AudioCore::getInstance()->getPosition();
+	return juce::String{ pos->getTimeInSeconds().orFallback(0) } + "s";
 }
 
 ActionStopRecord::ActionStopRecord() {};
 
 bool ActionStopRecord::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	auto pos = AudioCore::getInstance()->getPosition();
 	AudioCore::getInstance()->record(false);
-
-	this->output("Stop record at " + juce::String(pos->getTimeInSeconds().orFallback(0)) + " seconds\n");
 	return true;
+}
+
+const juce::String ActionStopRecord::getStatusStr() const {
+	auto pos = AudioCore::getInstance()->getPosition();
+	return juce::String{ pos->getTimeInSeconds().orFallback(0) } + "s";
 }
 
 ActionRenderNow::ActionRenderNow(
@@ -121,101 +112,78 @@ ActionRenderNow::ActionRenderNow(
 	metaData(metaData), bitDepth(bitDepth), quality(quality) {}
 
 bool ActionRenderNow::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
-	ACTION_CHECK_ARA_ANALYSISING(
-		"Don't do this while ARA source analysising.");
-
 	if (AudioCore::getInstance()->renderNow(
 		this->tracks, this->path, this->name, this->extension,
 		this->metaData, this->bitDepth, this->quality)) {
-		juce::String result;
-
-		result += "Start rendering:\n";
-		result += "    Path: " + this->path + "\n";
-		result += "    Name: " + this->name + "\n";
-		result += "    Format: " + this->extension + "\n";
-		result += "    Tracks: ";
-		for (auto& i : this->tracks) {
-			result += juce::String(i) + " ";
-		}
-		result += "\n";
-
-		this->output(result);
 		return true;
 	}
-
-	this->error("Can't start to render. Maybe rendering is already started!\n");
 	return false;
+}
+
+const juce::String ActionRenderNow::getStatusStr() const {
+	juce::String result;
+
+	result += "Start rendering:\n";
+	result += "    Path: " + this->path + "\n";
+	result += "    Name: " + this->name + "\n";
+	result += "    Format: " + this->extension + "\n";
+	result += "    Tracks: ";
+	for (auto& i : this->tracks) {
+		result += juce::String(i) + " ";
+	}
+	result += "\n";
+
+	return result;
 }
 
 ActionNewProject::ActionNewProject(const juce::String& path)
 	: path(path) {}
 
 bool ActionNewProject::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
-
 	if (AudioCore::getInstance()->newProj(this->path)) {
 		ActionDispatcher::getInstance()->clearUndoList();
 		resetRecoveryMemoryBlock();
-
-		this->output("Create new project at: " + this->path + "\n");
 		return true;
 	}
-	this->error("Can't create new project at: " + this->path + "\n");
 	return false;
 }
 
+const juce::String ActionNewProject::getStatusStr() const {
+	return this->path;
+}
+
 ActionSave::ActionSave(const juce::String& name)
-	: ACTION_DB{ name } {}
+	: name(name) {}
 
 bool ActionSave::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
-	ACTION_CHECK_ARA_ANALYSISING(
-		"Don't do this while ARA source analysising.");
-
-	ACTION_WRITE_TYPE(ActionSave);
-	ACTION_WRITE_DB();
-	ACTION_WRITE_STRING(name);
-
-	if (AudioCore::getInstance()->save(ACTION_DATA(name))) {
-		this->output("Saved project data to: " + ACTION_DATA(name) + "\n");
-		ACTION_RESULT(true);
+	if (AudioCore::getInstance()->save(this->name)) {
+		return true;
 	}
-	this->error("Can't save project data to: " + ACTION_DATA(name) + "\n");
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSave::getStatusStr() const {
+	return this->name;
+}
+
+void ActionSave::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeString(this->name);
 }
 
 ActionLoad::ActionLoad(const juce::String& path)
 	: path(path) {}
 
 bool ActionLoad::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_SOURCE_IO_RUNNING(
-		"Don't do this while source IO running.");
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't load project while searching plugin.");
-
 	if (AudioCore::getInstance()->load(this->path)) {
 		ActionDispatcher::getInstance()->clearUndoList();
 		resetRecoveryMemoryBlock();
-
-		this->output("Load project data from: " + this->path + "\n");
 		return true;
 	}
-	this->error("Can't load project data from: " + this->path + "\n");
 	return false;
+}
+
+const juce::String ActionLoad::getStatusStr() const {
+	return this->path;
 }
 
 ActionInitAudioSource::ActionInitAudioSource(
@@ -225,11 +193,6 @@ ActionInitAudioSource::ActionInitAudioSource(
 	sampleRate(sampleRate), channels(channels), length(length) {};
 
 bool ActionInitAudioSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
@@ -238,13 +201,15 @@ bool ActionInitAudioSource::doAction() {
 				SourceManager::getInstance()->initAudio(ref, this->name,
 					this->channels, this->sampleRate, this->length);
 
-				this->output("Init audio source: [" + juce::String{ this->index } + ", " + this->name + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
 				return true;
 			}
 		}
 	}
-	this->error("Can't init audio source: [" + juce::String{ this->index } + ", " + this->name + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s\n");
 	return false;
+}
+
+const juce::String ActionInitAudioSource::getStatusStr() const {
+	return "[" + juce::String{ this->index } + ", " + this->name + "] " + juce::String{ this->sampleRate } + ", " + juce::String{ this->channels } + ", " + juce::String{ this->length } + "s";
 }
 
 ActionInitMidiSource::ActionInitMidiSource(
@@ -252,11 +217,6 @@ ActionInitMidiSource::ActionInitMidiSource(
 	: index(index), name(name) {}
 
 bool ActionInitMidiSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
@@ -264,13 +224,15 @@ bool ActionInitMidiSource::doAction() {
 				auto ref = seq->getMIDIRef();
 				SourceManager::getInstance()->initMIDI(ref, this->name);
 
-				this->output("Init midi source: [" + juce::String{ this->index } + ", " + this->name + "]\n");
 				return true;
 			}
 		}
 	}
-	this->error("Can't init midi source: [" + juce::String{ this->index } + ", " + this->name + "]\n");
 	return false;
+}
+
+const juce::String ActionInitMidiSource::getStatusStr() const {
+	return "[" + juce::String{ this->index } + ", " + this->name + "]";
 }
 
 ActionLoadAudioSource::ActionLoadAudioSource(int index,
@@ -278,11 +240,6 @@ ActionLoadAudioSource::ActionLoadAudioSource(int index,
 	: index(index), path(path), callback(callback) {};
 
 bool ActionLoadAudioSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
@@ -292,13 +249,15 @@ bool ActionLoadAudioSource::doAction() {
 					{ SourceIO::TaskType::Read, ref, this->path,
 					false, this->callback });
 
-				this->output("Load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 				return true;
 			}
 		}
 	}
-	this->error("Can't load audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 	return false;
+}
+
+const juce::String ActionLoadAudioSource::getStatusStr() const {
+	return "[" + juce::String{ this->index } + "]" + this->path;
 }
 
 ActionLoadMidiSource::ActionLoadMidiSource(int index,
@@ -307,11 +266,6 @@ ActionLoadMidiSource::ActionLoadMidiSource(int index,
 	: index(index), path(path), getTempo(getTempo), callback(callback) {}
 
 bool ActionLoadMidiSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
@@ -321,13 +275,15 @@ bool ActionLoadMidiSource::doAction() {
 					{ SourceIO::TaskType::Read, ref, this->path,
 					this->getTempo, this->callback });
 
-				this->output("Load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 				return true;
 			}
 		}
 	}
-	this->error("Can't load midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 	return false;
+}
+
+const juce::String ActionLoadMidiSource::getStatusStr() const {
+	return "[" + juce::String{ this->index } + "]" + this->path;
 }
 
 ActionSaveAudioSource::ActionSaveAudioSource(int index,
@@ -335,9 +291,6 @@ ActionSaveAudioSource::ActionSaveAudioSource(int index,
 	: index(index), path(path) {}
 
 bool ActionSaveAudioSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
@@ -345,13 +298,15 @@ bool ActionSaveAudioSource::doAction() {
 				SourceIO::getInstance()->addTask(
 					{ SourceIO::TaskType::Write, ref, this->path, false, {} });
 
-				this->output("Save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 				return true;
 			}
 		}
 	}
-	this->error("Can't save audio source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 	return false;
+}
+
+const juce::String ActionSaveAudioSource::getStatusStr() const {
+	return "[" + juce::String{ this->index } + "]" + this->path;
 }
 
 ActionSaveMidiSource::ActionSaveMidiSource(int index,
@@ -359,9 +314,6 @@ ActionSaveMidiSource::ActionSaveMidiSource(int index,
 	: index(index), path(path) {}
 
 bool ActionSaveMidiSource::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
@@ -369,112 +321,96 @@ bool ActionSaveMidiSource::doAction() {
 				SourceIO::getInstance()->addTask(
 					{ SourceIO::TaskType::Write, ref, this->path, false, {} });
 
-				this->output("Save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 				return true;
 			}
 		}
 	}
-	this->error("Can't save midi source: [" + juce::String{ this->index } + "]" + this->path + "\n");
 	return false;
+}
+
+const juce::String ActionSaveMidiSource::getStatusStr() const {
+	return "[" + juce::String{ this->index } + "]" + this->path;
 }
 
 ActionSplitSequencerBlock::ActionSplitSequencerBlock(
 	int track, int block, double time)
-	: ACTION_DB{ track, block, time } {}
+	: track(track), block(block), time(time) {}
 
 bool ActionSplitSequencerBlock::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSplitSequencerBlock);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				if (seq->splitSeq(ACTION_DATA(block), ACTION_DATA(time))) {
-					this->output("Split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
-					ACTION_RESULT(true);
+				if (seq->splitSeq(this->block, this->time)) {
+					return true;
 				}
 			}
 		}
 	}
-	this->output("Can't split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSplitSequencerBlock::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSplitSequencerBlock);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				if (seq->stickSeqWithNext(ACTION_DATA(block))) {
-					this->output("Undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
-					ACTION_RESULT(true);
+				if (seq->stickSeqWithNext(this->block)) {
+					return true;
 				}
 			}
 		}
 	}
-	this->output("Can't undo split seq block: [" + juce::String(ACTION_DATA(track)) + ", " + juce::String{ ACTION_DATA(block) } + "]\n");
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSplitSequencerBlock::getStatusStr() const {
+	return "[" + juce::String{ this->track } + ", " + juce::String{ this->block } + "]";
+}
+
+void ActionSplitSequencerBlock::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->track);
+	stream.writeInt(this->block);
+	stream.writeDouble(this->time);
 }
 
 ActionLoadPluginState::ActionLoadPluginState(
 	quickAPI::PluginHolder plugin, const juce::String& path)
-	: ACTION_DB{ plugin, path } {}
+	: plugin(plugin), path(path) {}
 
 bool ActionLoadPluginState::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionLoadPluginState);
-	ACTION_WRITE_DB();
-
-	if (ACTION_DATA(plugin)) {
+	if (this->plugin) {
 		juce::MemoryBlock state;
-		if (!utils::readFileToBlock(ACTION_DATA(path), state)) {
-			this->output("Can't load plugin state: [" + ACTION_DATA(plugin)->getName() + "] " + ACTION_DATA(path));
-			ACTION_RESULT(false);
+		if (!utils::readFileToBlock(this->path, state)) {
+			return false;
 		}
-		ACTION_DATA(plugin)->getStateInformation(ACTION_DATA(oldState));
+		this->plugin->getStateInformation(this->oldState);
 
-		ACTION_DATA(plugin)->setStateInformation(
+		this->plugin->setStateInformation(
 			state.getData(), state.getSize());
 
-		this->output("Load plugin state: [" + ACTION_DATA(plugin)->getName() + "] " + ACTION_DATA(path));
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionLoadPluginState::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionLoadPluginState);
-	ACTION_WRITE_DB();
-
-	if (ACTION_DATA(plugin)) {
-		ACTION_DATA(plugin)->setStateInformation(
-			ACTION_DATA(oldState).getData(), ACTION_DATA(oldState).getSize());
-
-		this->output("Undo load plugin state: [" + ACTION_DATA(plugin)->getName() + "] " + ACTION_DATA(path));
-		ACTION_RESULT(true);
+	if (this->plugin) {
+		this->plugin->setStateInformation(
+			this->oldState.getData(), this->oldState.getSize());
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionLoadPluginState::getStatusStr() const {
+	return "[" + this->plugin->getName() + "] " + this->path;
+}
+
+void ActionLoadPluginState::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeString(this->plugin ? this->plugin->getName() : "");
+	stream.writeString(this->path);
+
+	stream.writeInt64(this->oldState.getSize());
+	stream.write(this->oldState.getData(), this->oldState.getSize());
 }
 
 ActionSavePluginState::ActionSavePluginState(
@@ -482,18 +418,17 @@ ActionSavePluginState::ActionSavePluginState(
 	: plugin(plugin), path(path) {}
 
 bool ActionSavePluginState::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
 	if (this->plugin) {
 		juce::MemoryBlock state;
 		this->plugin->getStateInformation(state);
 
 		if (utils::writeBlockToFile(this->path, state)) {
-			this->output("Save plugin state: [" + this->plugin->getName() + "] " + this->path);
-			ACTION_RESULT(true);
+			return true;
 		}
 	}
-	this->output("Can't save plugin state: [" + this->plugin->getName() + "] " + this->path);
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSavePluginState::getStatusStr() const {
+	return "[" + this->plugin->getName() + "] " + this->path;
 }
