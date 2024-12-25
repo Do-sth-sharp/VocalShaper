@@ -12,15 +12,12 @@ ActionRemovePluginBlackList::ActionRemovePluginBlackList(
 	: path(path) {}
 
 bool ActionRemovePluginBlackList::doAction() {
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin black list while searching plugin.");
-
 	Plugin::getInstance()->removeFromPluginBlackList(this->path);
-	
-	this->output("Remove from plugin black list.");
-	ACTION_RESULT(true);
+	return true;
+}
+
+const juce::String ActionRemovePluginBlackList::getStatusStr() const {
+	return this->path;
 }
 
 ActionRemovePluginSearchPath::ActionRemovePluginSearchPath(
@@ -28,686 +25,544 @@ ActionRemovePluginSearchPath::ActionRemovePluginSearchPath(
 	: path(path) {}
 
 bool ActionRemovePluginSearchPath::doAction() {
-	ACTION_CHECK_PLUGIN_LOADING(
-		"Don't do this while loading plugin.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change plugin search path while searching plugin.");
-
 	Plugin::getInstance()->removeFromPluginSearchPath(this->path);
-	
-	this->output("Remove from plugin search path.");
-	ACTION_RESULT(true);
+	return true;
+}
+
+const juce::String ActionRemovePluginSearchPath::getStatusStr() const {
+	return this->path;
 }
 
 ActionRemoveTrack::ActionRemoveTrack(quickAPI::TrackIndex index)
-	: ACTION_DB{ index } {}
+	: index(index) {}
 
 bool ActionRemoveTrack::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrack);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(audioInput).size());
-	for (auto& i : ACTION_DATA(audioInput)) {
-		writeRecoveryIntValue(i.first);
-		writeRecoveryIntValue(i.second);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(midiSend).size());
-	for (auto i : ACTION_DATA(midiSend)) {
-		writeRecoveryIntValue((int)(i.first));
-		writeRecoveryIntValue(i.second);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(audioSend).size());
-	for (auto& i : ACTION_DATA(audioSend)) {
-		writeRecoveryIntValue((int)(i.first.first));
-		writeRecoveryIntValue(i.first.second);
-		
-		writeRecoverySizeValue(i.second.size());
-		for (auto& j : i.second) {
-			writeRecoveryIntValue(j.first);
-			writeRecoveryIntValue(j.second);
-		}
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Check Track */
-		if (ACTION_DATA(index).second < 0 || ACTION_DATA(index).second >= graph->getTrackNum(ACTION_DATA(index).first)) { ACTION_RESULT(false); }
+		if (this->index.second < 0 || this->index.second >= graph->getTrackNum(this->index.first)) { return false; }
 
 		/** Save Connections */
-		ACTION_DATA(midiInput) = graph->isTrackMIDIInputConnected(ACTION_DATA(index).first, ACTION_DATA(index).second);
-		ACTION_DATA(audioInput) = graph->getTrackAudioInputChannels(ACTION_DATA(index).first, ACTION_DATA(index).second);
+		this->midiInput = graph->isTrackMIDIInputConnected(this->index.first, this->index.second);
+		this->audioInput = graph->getTrackAudioInputChannels(this->index.first, this->index.second);
 
 		const int midiSendSlots = MainGraph::getMIDISendSlotNum();
 		const int audioSendSlots = MainGraph::getAudioSendSlotNum();
 
-		ACTION_DATA(midiSend).clearQuick();
+		this->midiSend.clearQuick();
 		for (int i = 0; i < midiSendSlots; i++) {
-			ACTION_DATA(midiSend).add(graph->getTrackMIDISendDst(ACTION_DATA(index).first, ACTION_DATA(index).second, i));
+			this->midiSend.add(graph->getTrackMIDISendDst(this->index.first, this->index.second, i));
 		}
 
-		ACTION_DATA(audioSend).clearQuick();
+		this->audioSend.clearQuick();
 		for (int i = 0; i < audioSendSlots; i++) {
-			ACTION_DATA(audioSend).add({
-				graph->getTrackAudioSendDst(ACTION_DATA(index).first, ACTION_DATA(index).second, i),
-				graph->getTrackAudioSendChannels(ACTION_DATA(index).first, ACTION_DATA(index).second, i)
+			this->audioSend.add({
+				graph->getTrackAudioSendDst(this->index.first, this->index.second, i),
+				graph->getTrackAudioSendChannels(this->index.first, this->index.second, i)
 				});
 		}
 
 		/** Save Track State */
-		auto track = graph->getTrackProcessor(ACTION_DATA(index).first, ACTION_DATA(index).second);
-		if (!track) { ACTION_RESULT(false); }
+		auto track = graph->getTrackProcessor(this->index.first, this->index.second);
+		if (!track) { return false; }
 		auto state = track->serialize(Serializable::createSerializeConfigQuickly());
 
 		auto statePtr = dynamic_cast<vsp4::Track*>(state.get());
-		if (!statePtr) { ACTION_RESULT(false); }
+		if (!statePtr) { return false; }
 
-		ACTION_DATA(data).setSize(state->ByteSizeLong());
-		state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
+		this->data.setSize(state->ByteSizeLong());
+		state->SerializeToArray(this->data.getData(), this->data.getSize());
 
 		/** Remove Track */
-		graph->removeTrack(ACTION_DATA(index).first, ACTION_DATA(index).second);
+		graph->removeTrack(this->index.first, this->index.second);
 
-		juce::String result;
-		result += "Remove Mixer Track: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "]" + "\n";
-		result += "Total Mixer Track Num: " + juce::String{ graph->getTrackNum(ACTION_DATA(index).first) } + "\n";
-		this->output(result);
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrack::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrack);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(audioInput).size());
-	for (auto& i : ACTION_DATA(audioInput)) {
-		writeRecoveryIntValue(i.first);
-		writeRecoveryIntValue(i.second);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(midiSend).size());
-	for (auto i : ACTION_DATA(midiSend)) {
-		writeRecoveryIntValue((int)(i.first));
-		writeRecoveryIntValue(i.second);
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(audioSend).size());
-	for (auto& i : ACTION_DATA(audioSend)) {
-		writeRecoveryIntValue((int)(i.first.first));
-		writeRecoveryIntValue(i.first.second);
-
-		writeRecoverySizeValue(i.second.size());
-		for (auto& j : i.second) {
-			writeRecoveryIntValue(j.first);
-			writeRecoveryIntValue(j.second);
-		}
-	}
-
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Prepare Track State */
 		auto state = std::make_unique<vsp4::Track>();
-		if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
-			ACTION_RESULT(false);
+		if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+			return false;
 		}
 
 		/** Add Track */
-		graph->insertTrack(ACTION_DATA(index).first, ACTION_DATA(index).second,
+		graph->insertTrack(this->index.first, this->index.second,
 			utils::getChannelSet(static_cast<utils::BusType>(state->bus())));
 		
 		/** Recover Track State */
-		auto track = graph->getTrackProcessor(ACTION_DATA(index).first, ACTION_DATA(index).second);
+		auto track = graph->getTrackProcessor(this->index.first, this->index.second);
 		track->parse(state.get(), Serializable::createParseConfigQuickly());
 
 		/** Recover Connections */
-		if (ACTION_DATA(midiInput)) {
-			graph->connectTrackMIDIInput(ACTION_DATA(index).first, ACTION_DATA(index).second);
+		if (this->midiInput) {
+			graph->connectTrackMIDIInput(this->index.first, this->index.second);
 		}
-		for (auto& i : ACTION_DATA(audioInput)) {
+		for (auto& i : this->audioInput) {
 			graph->connectTrackAudioInput(
-				ACTION_DATA(index).first, ACTION_DATA(index).second, i.first, i.second);
+				this->index.first, this->index.second, i.first, i.second);
 		}
-		for (int i = 0; i < ACTION_DATA(midiSend).size(); i++) {
-			auto& dst = ACTION_DATA(midiSend).getReference(i);
+		for (int i = 0; i < this->midiSend.size(); i++) {
+			auto& dst = this->midiSend.getReference(i);
 			if (dst.second >= 0) {
 				graph->connectTrackMIDISend(
-					ACTION_DATA(index).first, ACTION_DATA(index).second, i, dst.first, dst.second);
+					this->index.first, this->index.second, i, dst.first, dst.second);
 			}
 		}
-		for (int i = 0; i < ACTION_DATA(audioSend).size(); i++) {
-			auto& dst = ACTION_DATA(audioSend).getReference(i);
+		for (int i = 0; i < this->audioSend.size(); i++) {
+			auto& dst = this->audioSend.getReference(i);
 			if (dst.first.second >= 0) {
 				for (auto& j : dst.second) {
 					graph->connectTrackAudioSend(
-						ACTION_DATA(index).first, ACTION_DATA(index).second, i,
+						this->index.first, this->index.second, i,
 						dst.first.first, dst.first.second, j.first, j.second);
 				}
 			}
 		}
 
-		juce::String result;
-		result += "Undo Remove Mixer Track: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "]" + "\n";
-		result += "Total Mixer Track Num: " + juce::String{ graph->getTrackNum(ACTION_DATA(index).first) } + "\n";
-		this->output(result);
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrack::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + "]";
+}
+
+void ActionRemoveTrack::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+
+	stream.writeBool(this->midiInput);
+	
+	stream.writeInt(this->audioInput.size());
+	for (auto& i : this->audioInput) {
+		stream.writeInt(i.first);
+		stream.writeInt(i.second);
+	}
+
+	stream.writeInt(this->midiSend.size());
+	for (auto i : this->midiSend) {
+		stream.writeInt((int)(i.first));
+		stream.writeInt(i.second);
+	}
+
+	stream.writeInt(this->audioSend.size());
+	for (auto& i : this->audioSend) {
+		stream.writeInt((int)(i.first.first));
+		stream.writeInt(i.first.second);
+
+		stream.writeInt(i.second.size());
+		for (auto& j : i.second) {
+			stream.writeInt(j.first);
+			stream.writeInt(j.second);
+		}
+	}
+
+	stream.writeInt64(this->data.getSize());
+	stream.write(this->data.getData(), this->data.getSize());
 }
 
 ActionRemoveTrackAudioInput::ActionRemoveTrackAudioInput(
 	quickAPI::TrackIndex index, int srcc, int dstc)
-	: ACTION_DB{ index, srcc, dstc } {}
+	: index(index), srcc(srcc), dstc(dstc) {}
 
 bool ActionRemoveTrackAudioInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackAudioInput);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (graph->disconnectTrackAudioInput(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(srcc), ACTION_DATA(dstc))) {
-			this->output("Disonnect Audio Input: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "] " + juce::String{ ACTION_DATA(srcc) } + " - " + juce::String{ ACTION_DATA(dstc) } + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second, this->srcc, this->dstc)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackAudioInput::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackAudioInput);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->connectTrackAudioInput(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(srcc), ACTION_DATA(dstc));
+			this->index.first, this->index.second, this->srcc, this->dstc);
 
-		this->output("Undo Disonnect Audio Input: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "] " + juce::String{ ACTION_DATA(srcc) } + " - " + juce::String{ ACTION_DATA(dstc) } + "\n");
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackAudioInput::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + "] " + juce::String{ this->srcc } + " - " + juce::String{ this->dstc };
+}
+
+void ActionRemoveTrackAudioInput::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+	stream.writeInt(this->srcc);
+	stream.writeInt(this->dstc);
 }
 
 ActionRemoveTrackMIDIInput::ActionRemoveTrackMIDIInput(
 	quickAPI::TrackIndex index)
-	: ACTION_DB{ index } {
+	: index(index) {
 }
 
 bool ActionRemoveTrackMIDIInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackMIDIInput);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (graph->disconnectTrackMIDIInput(
-			ACTION_DATA(index).first, ACTION_DATA(index).second)) {
-			this->output("Disonnect MIDI Input: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "] " + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackMIDIInput::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackMIDIInput);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->connectTrackMIDIInput(
-			ACTION_DATA(index).first, ACTION_DATA(index).second);
-
-		this->output("Undo Disonnect MIDI Input: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "] " + "\n");
-		ACTION_RESULT(true);
+			this->index.first, this->index.second);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackMIDIInput::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + "]";
+}
+
+void ActionRemoveTrackMIDIInput::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
 }
 
 ActionRemoveTrackAudioSend::ActionRemoveTrackAudioSend(
 	quickAPI::TrackIndex index, int slot,
 	quickAPI::SendDst dst, int srcc, int dstc)
-	: ACTION_DB{ index, slot, dst, srcc, dstc } {
+	: index(index), slot(slot), dst(dst), srcc(srcc), dstc(dstc) {
 }
 
 bool ActionRemoveTrackAudioSend::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackAudioSend);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (graph->disconnectTrackAudioSend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-			ACTION_DATA(dst).first, ACTION_DATA(dst).second, ACTION_DATA(srcc), ACTION_DATA(dstc))) {
-			this->output("Disconnect Audio Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + juce::String{ ACTION_DATA(srcc) } + " - " + juce::String{ ACTION_DATA(dstc) } + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot,
+			this->dst.first, this->dst.second, this->srcc, this->dstc)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackAudioSend::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackAudioSend);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->connectTrackAudioSend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-			ACTION_DATA(dst).first, ACTION_DATA(dst).second, ACTION_DATA(srcc), ACTION_DATA(dstc));
-
-		this->output("Undo Disconnect Audio Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + juce::String{ ACTION_DATA(srcc) } + " - " + juce::String{ ACTION_DATA(dstc) } + "\n");
-		ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot,
+			this->dst.first, this->dst.second, this->srcc, this->dstc);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackAudioSend::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + " : " + juce::String{ this->slot } + "] " + juce::String{ this->srcc } + " - " + juce::String{ this->dstc };
+}
+
+void ActionRemoveTrackAudioSend::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+	stream.writeInt(this->slot);
+	stream.writeInt((int)this->dst.first);
+	stream.writeInt(this->dst.second);
+	stream.writeInt(this->srcc);
+	stream.writeInt(this->dstc);
 }
 
 ActionRemoveTrackMIDISend::ActionRemoveTrackMIDISend(
 	quickAPI::TrackIndex index, int slot,
 	quickAPI::SendDst dst)
-	: ACTION_DB{ index, slot, dst } {
+	: index(index), slot(slot), dst(dst) {
 }
 
 bool ActionRemoveTrackMIDISend::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackMIDISend);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		if (graph->disconnectTrackMIDISend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-			ACTION_DATA(dst).first, ACTION_DATA(dst).second)) {
-			this->output("Disconnect MIDI Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot,
+			this->dst.first, this->dst.second)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackMIDISend::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackMIDISend);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->connectTrackMIDISend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-			ACTION_DATA(dst).first, ACTION_DATA(dst).second);
-
-		this->output("Undo Disconnect MIDI Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-		ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot,
+			this->dst.first, this->dst.second);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackMIDISend::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + " : " + juce::String{ this->slot } + "]";
+}
+
+void ActionRemoveTrackMIDISend::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+	stream.writeInt(this->slot);
+	stream.writeInt((int)this->dst.first);
+	stream.writeInt(this->dst.second);
 }
 
 ActionRemoveTrackAudioSendAllChannel::ActionRemoveTrackAudioSendAllChannel(
 	quickAPI::TrackIndex index, int slot, quickAPI::SendDst dst)
-	: ACTION_DB{ index, slot, dst } {}
+	: index(index), slot(slot), dst(dst) {}
 
 bool ActionRemoveTrackAudioSendAllChannel::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackAudioSendAllChannel);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(channels).size());
-	for (auto& i : ACTION_DATA(channels)) {
-		writeRecoveryIntValue(i.first);
-		writeRecoveryIntValue(i.second);
-	}
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		ACTION_DATA(channels) = graph->getTrackAudioSendChannels(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot));
+		this->channels = graph->getTrackAudioSendChannels(
+			this->index.first, this->index.second, this->slot);
 
 		if (graph->disconnectTrackAudioSend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-			ACTION_DATA(dst).first, ACTION_DATA(dst).second)) {
-			this->output("Disconnect Audio Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot,
+			this->dst.first, this->dst.second)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackAudioSendAllChannel::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackAudioSendAllChannel);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(channels).size());
-	for (auto& i : ACTION_DATA(channels)) {
-		writeRecoveryIntValue(i.first);
-		writeRecoveryIntValue(i.second);
-	}
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		for (auto& i : ACTION_DATA(channels)) {
+		for (auto& i : this->channels) {
 			graph->connectTrackAudioSend(
-				ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-				ACTION_DATA(dst).first, ACTION_DATA(dst).second, i.first, i.second);
+				this->index.first, this->index.second, this->slot,
+				this->dst.first, this->dst.second, i.first, i.second);
 		}
-
-		this->output("Undo Disconnect Audio Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackAudioSendAllChannel::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + " : " + juce::String{ this->slot } + "]";
+}
+
+void ActionRemoveTrackAudioSendAllChannel::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+	stream.writeInt(this->slot);
+	stream.writeInt((int)this->dst.first);
+	stream.writeInt(this->dst.second);
+
+	stream.writeInt(this->channels.size());
+	for (auto& i : this->channels) {
+		stream.writeInt(i.first);
+		stream.writeInt(i.second);
+	}
 }
 
 ActionRemoveTrackAudioSendOnSlot::ActionRemoveTrackAudioSendOnSlot(
 	quickAPI::TrackIndex index, int slot)
-	: ACTION_DB{ index, slot } {}
+	: index(index), slot(slot) {}
 
 bool ActionRemoveTrackAudioSendOnSlot::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackAudioSendOnSlot);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(channels).size());
-	for (auto& i : ACTION_DATA(channels)) {
-		writeRecoveryIntValue(i.first);
-		writeRecoveryIntValue(i.second);
-	}
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		ACTION_DATA(channels) = graph->getTrackAudioSendChannels(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot));
-		ACTION_DATA(dst) = graph->getTrackAudioSendDst(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot));
+		this->channels = graph->getTrackAudioSendChannels(
+			this->index.first, this->index.second, this->slot);
+		this->dst = graph->getTrackAudioSendDst(
+			this->index.first, this->index.second, this->slot);
 
 		if (graph->disconnectTrackAudioSend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot))) {
-			this->output("Disconnect Audio Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackAudioSendOnSlot::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackAudioSendOnSlot);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(channels).size());
-	for (auto& i : ACTION_DATA(channels)) {
-		writeRecoveryIntValue(i.first);
-		writeRecoveryIntValue(i.second);
-	}
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		for (auto& i : ACTION_DATA(channels)) {
+		for (auto& i : this->channels) {
 			graph->connectTrackAudioSend(
-				ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-				ACTION_DATA(dst).first, ACTION_DATA(dst).second, i.first, i.second);
+				this->index.first, this->index.second, this->slot,
+				this->dst.first, this->dst.second, i.first, i.second);
 		}
-
-		this->output("Undo Disconnect Audio Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackAudioSendOnSlot::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + " : " + juce::String{ this->slot } + "]";
+}
+
+void ActionRemoveTrackAudioSendOnSlot::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+	stream.writeInt(this->slot);
+
+	stream.writeInt((int)this->dst.first);
+	stream.writeInt(this->dst.second);
+
+	stream.writeInt(this->channels.size());
+	for (auto& i : this->channels) {
+		stream.writeInt(i.first);
+		stream.writeInt(i.second);
+	}
 }
 
 ActionRemoveTrackMIDISendOnSlot::ActionRemoveTrackMIDISendOnSlot(
 	quickAPI::TrackIndex index, int slot)
-	: ACTION_DB{ index, slot } {
-}
+	: index(index), slot(slot) {}
 
 bool ActionRemoveTrackMIDISendOnSlot::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackMIDISendOnSlot);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		ACTION_DATA(dst) = graph->getTrackMIDISendDst(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot));
+		this->dst = graph->getTrackMIDISendDst(
+			this->index.first, this->index.second, this->slot);
 
 		if (graph->disconnectTrackMIDISend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot))) {
-			this->output("Disconnect MIDI Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-			ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackMIDISendOnSlot::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackMIDISendOnSlot);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		graph->connectTrackMIDISend(
-			ACTION_DATA(index).first, ACTION_DATA(index).second, ACTION_DATA(slot),
-			ACTION_DATA(dst).first, ACTION_DATA(dst).second);
-
-		this->output("Undo Disconnect MIDI Send: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + " : " + juce::String{ ACTION_DATA(slot) } + "] " + "\n");
-		ACTION_RESULT(true);
+			this->index.first, this->index.second, this->slot,
+			this->dst.first, this->dst.second);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackMIDISendOnSlot::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + " : " + juce::String{ this->slot } + "]";
+}
+
+void ActionRemoveTrackMIDISendOnSlot::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
+	stream.writeInt(this->slot);
+
+	stream.writeInt((int)this->dst.first);
+	stream.writeInt(this->dst.second);
 }
 
 ActionRemoveEffect::ActionRemoveEffect(
 	quickAPI::TrackIndex trackIndex, int effect)
-	: ACTION_DB{ trackIndex, effect } {}
+	: trackIndex(trackIndex), effect(effect) {}
 
 bool ActionRemoveEffect::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveEffect);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(trackIndex).first, ACTION_DATA(trackIndex).second)) {
+		if (auto track = graph->getTrackProcessor(this->trackIndex.first, this->trackIndex.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto dock = mixer->getPluginDock()) {
 					/** Check Effect */
-					if (ACTION_DATA(effect) < 0 || ACTION_DATA(effect) >= dock->getSlotNum()) { ACTION_RESULT(false); }
+					if (this->effect < 0 || this->effect >= dock->getSlotNum()) { return false; }
 
 					/** Save Effect State */
-					auto effect = dock->getPluginProcessor(ACTION_DATA(effect));
-					if (!effect) { ACTION_RESULT(false); }
+					auto effect = dock->getPluginProcessor(this->effect);
+					if (!effect) { return false; }
 					auto state = effect->serialize(Serializable::createSerializeConfigQuickly());
 
 					auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
-					if (!statePtr) { ACTION_RESULT(false); }
-					statePtr->set_bypassed(dock->getPluginBypass(ACTION_DATA(effect)));
+					if (!statePtr) { return false; }
+					statePtr->set_bypassed(dock->getPluginBypass(this->effect));
 
-					ACTION_DATA(data).setSize(state->ByteSizeLong());
-					state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
+					this->data.setSize(state->ByteSizeLong());
+					state->SerializeToArray(this->data.getData(), this->data.getSize());
 
 					/** Remove Effect */
-					dock->removePlugin(ACTION_DATA(effect));
+					dock->removePlugin(this->effect);
 
-					this->output("Remove Plugin: [" + juce::String{ (int)(ACTION_DATA(trackIndex).first) } + ", " + juce::String{ ACTION_DATA(trackIndex).second } + ", " + juce::String{ ACTION_DATA(effect) } + "]" + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveEffect::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change effect while searching plugin.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveEffect);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(trackIndex).first, ACTION_DATA(trackIndex).second)) {
+		if (auto track = graph->getTrackProcessor(this->trackIndex.first, this->trackIndex.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto dock = mixer->getPluginDock()) {
 					/** Prepare Effect State */
 					auto state = std::make_unique<vsp4::Plugin>();
-					if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
-						ACTION_RESULT(false);
+					if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+						return false;
 					}
 
 					/** Add Effect */
-					dock->insertPlugin(ACTION_DATA(effect));
+					dock->insertPlugin(this->effect);
 
 					/** Recover Effect State */
-					auto effect = dock->getPluginProcessor(ACTION_DATA(effect));
-					dock->setPluginBypass(ACTION_DATA(effect), state->bypassed());
+					auto effect = dock->getPluginProcessor(this->effect);
+					dock->setPluginBypass(this->effect, state->bypassed());
 					effect->parse(state.get(), Serializable::createParseConfigQuickly());
 
-					this->output("Undo Remove Plugin: [" + juce::String{ (int)(ACTION_DATA(trackIndex).first) } + ", " + juce::String{ ACTION_DATA(trackIndex).second } + ", " + juce::String{ ACTION_DATA(effect) } + "]" + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveEffect::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->trackIndex.first) } + ", " + juce::String{ this->trackIndex.second } + ", " + juce::String{ this->effect } + "]";
+}
+
+void ActionRemoveEffect::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->trackIndex.first);
+	stream.writeInt(this->trackIndex.second);
+	stream.writeInt(this->effect);
+
+	stream.writeInt64(this->data.getSize());
+	stream.write(this->data.getData(), this->data.getSize());
 }
 
 ActionRemoveInstr::ActionRemoveInstr(int index)
-	: ACTION_DB{ index } {}
+	: index(index) {}
 
 bool ActionRemoveInstr::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveInstr);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(index))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
 				/** Save Instr State */
 				auto instr = seq->getInstrProcessor();
-				if (!instr) { ACTION_RESULT(false); }
+				if (!instr) { return false; }
 				auto state = instr->serialize(Serializable::createSerializeConfigQuickly());
 
 				auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
-				if (!statePtr) { ACTION_RESULT(false); }
+				if (!statePtr) { return false; }
 				statePtr->set_bypassed(seq->getInstrumentBypass());
 
-				ACTION_DATA(data).setSize(state->ByteSizeLong());
-				state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
+				this->data.setSize(state->ByteSizeLong());
+				state->SerializeToArray(this->data.getData(), this->data.getSize());
 
 				/** Remove Instr */
 				seq->removeInstr();
 
-				this->output("Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
-				ACTION_RESULT(true);
+				return true;
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveInstr::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-	ACTION_CHECK_PLUGIN_SEARCHING(
-		"Don't change instrument while searching plugin.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveInstr);
-	ACTION_WRITE_DB();
-
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(index))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->index)) {
 			if (auto seq = track->getSequencer()) {
 				/** Prepare Instr State */
 				auto state = std::make_unique<vsp4::Plugin>();
-				if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
-					ACTION_RESULT(false);
+				if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
+					return false;
 				}
 
 				/** Add Instr */
@@ -718,270 +573,245 @@ bool ActionRemoveInstr::undoAction() {
 				seq->setInstrumentBypass(state->bypassed());
 				instr->parse(state.get(), Serializable::createParseConfigQuickly());
 
-				this->output("Undo Remove Instrument: [" + juce::String(ACTION_DATA(index)) + "]" + "\n");
-				ACTION_RESULT(true);
+				return true;
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveInstr::getStatusStr() const {
+	return "[" + juce::String(this->index) + "]";
+}
+
+void ActionRemoveInstr::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->index);
+
+	stream.writeInt64(this->data.getSize());
+	stream.write(this->data.getData(), this->data.getSize());
 }
 
 ActionRemoveTrackSideChainBus::ActionRemoveTrackSideChainBus(
-	quickAPI::TrackIndex index) : ACTION_DB{ index } {
+	quickAPI::TrackIndex index) : index(index) {
 }
 
 bool ActionRemoveTrackSideChainBus::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTrackSideChainBus);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Remove Bus */
-		if (graph->removeTrackAdditionalAudioBus(ACTION_DATA(index).first, ACTION_DATA(index).second)) {
-			this->output("Remove mixer track side chain bus: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "]\n");
-			ACTION_RESULT(true);
+		if (graph->removeTrackAdditionalAudioBus(this->index.first, this->index.second)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTrackSideChainBus::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTrackSideChainBus);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
 		/** Add Bus */
-		if (graph->addTrackAdditionalAudioBus(ACTION_DATA(index).first, ACTION_DATA(index).second)) {
-			this->output("Undo remove mixer track side chain bus: [" + juce::String{ (int)(ACTION_DATA(index).first) } + ", " + juce::String{ ACTION_DATA(index).second } + "]\n");
-			ACTION_RESULT(true);
+		if (graph->addTrackAdditionalAudioBus(this->index.first, this->index.second)) {
+			return true;
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveTrackSideChainBus::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->index.first) } + ", " + juce::String{ this->index.second } + "]";
+}
+
+void ActionRemoveTrackSideChainBus::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->index.first);
+	stream.writeInt(this->index.second);
 }
 
 ActionRemoveInstrParamCCConnection::ActionRemoveInstrParamCCConnection(
 	int instr, int cc)
-	: ACTION_DB{ instr, cc } {}
+	: instr(instr), cc(cc) {}
 
 bool ActionRemoveInstrParamCCConnection::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveInstrParamCCConnection);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					ACTION_DATA(param) = instr->getCCParamConnection(ACTION_DATA(cc));
+					this->param = instr->getCCParamConnection(this->cc);
 
-					instr->removeCCParamConnection(ACTION_DATA(cc));
+					instr->removeCCParamConnection(this->cc);
 
-					this->output("Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveInstrParamCCConnection::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveInstrParamCCConnection);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					instr->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+					instr->connectParamCC(this->param, this->cc);
 
-					this->output("Undo Remove Instr Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveInstrParamCCConnection::getStatusStr() const {
+	return "MIDI CC " + juce::String{ this->cc };
+}
+
+void ActionRemoveInstrParamCCConnection::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->instr);
+	stream.writeInt(this->cc);
+	stream.writeInt(this->param);
 }
 
 ActionRemoveEffectParamCCConnection::ActionRemoveEffectParamCCConnection(
 	quickAPI::TrackIndex track, int effect, int cc)
-	: ACTION_DB{ track, effect, cc } {}
+	: track(track), effect(effect), cc(cc) {}
 
 bool ActionRemoveEffectParamCCConnection::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveEffectParamCCConnection);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						ACTION_DATA(param) = effect->getCCParamConnection(ACTION_DATA(cc));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						this->param = effect->getCCParamConnection(this->cc);
 
-						effect->removeCCParamConnection(ACTION_DATA(cc));
+						effect->removeCCParamConnection(this->cc);
 
-						this->output("Remove Effect Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
-						ACTION_RESULT(true);
+						return true;
 					}
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveEffectParamCCConnection::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveEffectParamCCConnection);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						effect->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						effect->connectParamCC(this->param, this->cc);
 
-						this->output("Undo Remove Effect Param MIDI CC Connection: " "MIDI CC " + juce::String(ACTION_DATA(cc)) + "\n");
-						ACTION_RESULT(true);
+						return true;
 					}
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveEffectParamCCConnection::getStatusStr() const {
+	return "MIDI CC " + juce::String{ this->cc };
+}
+
+void ActionRemoveEffectParamCCConnection::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeInt(this->effect);
+	stream.writeInt(this->cc);
+	stream.writeInt(this->param);
 }
 
 ActionRemoveSequencerBlock::ActionRemoveSequencerBlock(
 	int seqIndex, int index)
-	: ACTION_DB{ seqIndex, index } {}
+	: seqIndex(seqIndex), index(index) {}
 
 bool ActionRemoveSequencerBlock::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveSequencerBlock);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(seqIndex))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->seqIndex)) {
 			if (auto seq = track->getSequencer()) {
-				std::tie(ACTION_DATA(startTime), ACTION_DATA(endTime), ACTION_DATA(offset))
-					= seq->getSeq(ACTION_DATA(index));
-				seq->removeSeq(ACTION_DATA(index));
+				std::tie(this->startTime, this->endTime, this->offset)
+					= seq->getSeq(this->index);
+				seq->removeSeq(this->index);
 
-				this->output("Remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
-					+ "Total sequencer blocks: " + juce::String(seq->getSeqNum()) + "\n");
-				ACTION_RESULT(true);
+				return true;
 			}
 		}
 	}
-	this->output("Can't remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveSequencerBlock::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveSequencerBlock);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(seqIndex))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->seqIndex)) {
 			if (auto seq = track->getSequencer()) {
 				seq->addSeq(
-					{ ACTION_DATA(startTime), ACTION_DATA(endTime), ACTION_DATA(offset) });
+					{ this->startTime, this->endTime, this->offset });
 
-				this->output("Undo remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n"
-					+ "Total sequencer blocks: " + juce::String(seq->getSeqNum()) + "\n");
-				ACTION_RESULT(true);
+				return true;
 			}
 		}
 	}
-	this->output("Can't undo remove sequencer block [" + juce::String(ACTION_DATA(seqIndex)) + "]\n");
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionRemoveSequencerBlock::getStatusStr() const {
+	return "[" + juce::String(this->seqIndex) + "]";
+}
+
+void ActionRemoveSequencerBlock::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->seqIndex);
+	stream.writeInt(this->index);
+	stream.writeDouble(this->startTime);
+	stream.writeDouble(this->endTime);
+	stream.writeDouble(this->offset);
 }
 
 ActionRemoveTempo::ActionRemoveTempo(int index)
-	: ACTION_DB{ index } {}
+	: index(index) {}
 
 bool ActionRemoveTempo::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
+	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
+		this->isTempo = PlayPosition::getInstance()->isTempoLabelTempoEvent(this->index);
+		this->time = PlayPosition::getInstance()->getTempoLabelTime(this->index);
 
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionRemoveTempo);
-	ACTION_WRITE_DB();
-
-	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
-		ACTION_DATA(isTempo) = PlayPosition::getInstance()->isTempoLabelTempoEvent(ACTION_DATA(index));
-		ACTION_DATA(time) = PlayPosition::getInstance()->getTempoLabelTime(ACTION_DATA(index));
-
-		if (ACTION_DATA(isTempo)) {
-			ACTION_DATA(tempo) = PlayPosition::getInstance()->getTempoLabelTempo(ACTION_DATA(index));
+		if (this->isTempo) {
+			this->tempo = PlayPosition::getInstance()->getTempoLabelTempo(this->index);
 		}
 		else {
-			std::tie(ACTION_DATA(numerator), ACTION_DATA(denominator)) =
-				PlayPosition::getInstance()->getTempoLabelBeat(ACTION_DATA(index));
+			std::tie(this->numerator, this->denominator) =
+				PlayPosition::getInstance()->getTempoLabelBeat(this->index);
 		}
 
-		PlayPosition::getInstance()->removeTempoLabel(ACTION_DATA(index));
+		PlayPosition::getInstance()->removeTempoLabel(this->index);
 
-		ACTION_RESULT(true);
+		return true;
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionRemoveTempo::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionRemoveTempo);
-	ACTION_WRITE_DB();
-
-	if (ACTION_DATA(isTempo)) {
+	if (this->isTempo) {
 		PlayPosition::getInstance()->addTempoLabelTempo(
-			ACTION_DATA(time), ACTION_DATA(tempo), ACTION_DATA(index));
+			this->time, this->tempo, this->index);
 	}
 	else {
 		PlayPosition::getInstance()->addTempoLabelBeat(
-			ACTION_DATA(time), ACTION_DATA(numerator), ACTION_DATA(denominator), ACTION_DATA(index));
+			this->time, this->numerator, this->denominator, this->index);
 	}
-	ACTION_RESULT(true);
+	return true;
+}
+
+const juce::String ActionRemoveTempo::getStatusStr() const {
+	return "Index: " + juce::String{ this->index } + ", Time: " + juce::String{ this->time } + "s, Is Tempo: " + juce::String{ this->isTempo ? "Yes" : "No" }
+	+ ", Tempo: " + juce::String{ this->tempo } + ", Beat: " + juce::String{ this->numerator } + " / " + juce::String{ this->denominator };
+}
+
+void ActionRemoveTempo::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->index);
+	stream.writeDouble(this->time);
+	stream.writeDouble(this->tempo);
+	stream.writeInt(this->numerator);
+	stream.writeInt(this->denominator);
+	stream.writeBool(this->isTempo);
 }
