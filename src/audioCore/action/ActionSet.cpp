@@ -10,105 +10,72 @@ ActionSetDeviceAudioType::ActionSetDeviceAudioType(const juce::String& type)
 	: type(type) {}
 
 bool ActionSetDeviceAudioType::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
 	Device::getInstance()->setCurrentAudioDeviceType(this->type);
-
-	juce::String result;
-	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceAudioType::getStatusStr() const {
+	return this->type;
 }
 
 ActionSetDeviceAudioInput::ActionSetDeviceAudioInput(const juce::String& name)
 	: name(name) {}
 
 bool ActionSetDeviceAudioInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	juce::String result;
 	auto err = Device::getInstance()->setAudioInputDevice(this->name);
 	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
+		this->output(err);
 	}
-
-	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceAudioInput::getStatusStr() const {
+	return this->name;
 }
 
 ActionSetDeviceAudioOutput::ActionSetDeviceAudioOutput(const juce::String& name)
 	: name(name) {}
 
 bool ActionSetDeviceAudioOutput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	juce::String result;
 	auto err = Device::getInstance()->setAudioOutputDevice(this->name);
 	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
+		this->output(err);
 	}
-
-	result += "Current Audio Device Type: " + Device::getInstance()->getCurrentAudioDeviceType() + "\n";
-	result += "Current Audio Input Device: " + Device::getInstance()->getAudioInputDeviceName() + "\n";
-	result += "Current Audio Output Device: " + Device::getInstance()->getAudioOutputDeviceName() + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceAudioOutput::getStatusStr() const {
+	return this->name;
 }
 
 ActionSetDeviceAudioSampleRate::ActionSetDeviceAudioSampleRate(double sampleRate)
 	: sampleRate(sampleRate) {}
 
 bool ActionSetDeviceAudioSampleRate::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	juce::String result;
 	auto err = Device::getInstance()->setAudioSampleRate(this->sampleRate);
 	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
+		this->output(err);
 	}
-
-	result += "Current Audio Sample Rate: " + juce::String(Device::getInstance()->getAudioSampleRate()) + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceAudioSampleRate::getStatusStr() const {
+	return juce::String{ this->sampleRate, 2 };
 }
 
 ActionSetDeviceAudioBufferSize::ActionSetDeviceAudioBufferSize(int bufferSize)
 	: bufferSize(bufferSize) {}
 
 bool ActionSetDeviceAudioBufferSize::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	juce::String result;
 	auto err = Device::getInstance()->setAudioBufferSize(this->bufferSize);
 	if (err.isNotEmpty()) {
-		result += err;
-		if (result.isNotEmpty() && result.getLastCharacter() != '\n') {
-			result += "\n";
-		}
+		this->output(err);
 	}
-
-	result += "Current Audio Buffer Size: " + juce::String(Device::getInstance()->getAudioBufferSize()) + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceAudioBufferSize::getStatusStr() const {
+	return juce::String{ this->bufferSize };
 }
 
 ActionSetDeviceMidiInput::ActionSetDeviceMidiInput(
@@ -116,102 +83,88 @@ ActionSetDeviceMidiInput::ActionSetDeviceMidiInput(
 	: name(name), enabled(enabled) {}
 
 bool ActionSetDeviceMidiInput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	juce::String result;
-
 	Device::getInstance()->setMIDIInputDeviceEnabled(
 		this->name,	this->enabled);
-
-	result += "MIDI Input Device: " + this->name + " - " + (Device::getInstance()->getMIDIInputDeviceEnabled(this->name) ? "ON" : "OFF") + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceMidiInput::getStatusStr() const {
+	return this->name + " - " + juce::String{ this->enabled ? "ON" : "OFF" };
 }
 
 ActionSetDeviceMidiOutput::ActionSetDeviceMidiOutput(const juce::String& name)
 	: name(name) {}
 
 bool ActionSetDeviceMidiOutput::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	juce::String result;
-
 	Device::getInstance()->setMIDIOutputDevice(this->name);
-	result += "MIDI Output Device: " + this->name + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetDeviceMidiOutput::getStatusStr() const {
+	return this->name;
 }
 
 ActionSetMidiDebuggerMaxNum::ActionSetMidiDebuggerMaxNum(int num)
 	: num(num) {}
 
 bool ActionSetMidiDebuggerMaxNum::doAction() {
-	juce::String result;
-
 	AudioCore::getInstance()->setMIDIDebuggerMaxNum(this->num);
-	result += "MIDI Debugger Max Num: " + juce::String(AudioCore::getInstance()->getMIDIDebuggerMaxNum()) + "\n";
-	this->output(result);
 	return true;
+}
+
+const juce::String ActionSetMidiDebuggerMaxNum::getStatusStr() const {
+	return juce::String{ this->num };
 }
 
 ActionSetTrackGain::ActionSetTrackGain(
 	quickAPI::TrackIndex track, float value)
-	: ACTION_DB{ track, value } {}
+	: track(track), value(value) {}
 
 bool ActionSetTrackGain::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetTrackGain);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
-				ACTION_DATA(oldValue) = mixer->getGain();
+				this->oldValue = mixer->getGain();
 
-				mixer->setGain(ACTION_DATA(value));
-				ACTION_RESULT(true);
+				mixer->setGain(this->value);
+				return true;
 			}
 		}
 	}
-
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetTrackGain::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetTrackGain);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
-				mixer->setGain(ACTION_DATA(oldValue));
-				ACTION_RESULT(true);
+				mixer->setGain(this->oldValue);
+				return true;
 			}
 			
 		}
 	}
+	return false;
+}
 
-	ACTION_RESULT(false);
+const juce::String ActionSetTrackGain::getStatusStr() const {
+	return juce::String{ this->value, 2 };
+}
+
+void ActionSetTrackGain::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeDouble(this->value);
+	stream.writeDouble(this->oldValue);
 }
 
 juce::UndoableAction* ActionSetTrackGain::createCoalescedAction(
 	juce::UndoableAction* nextAction) {
 	if (auto action = dynamic_cast<ActionSetTrackGain*>(nextAction)) {
-		if (this->_data.track == action->_data.track) {
+		if (this->track == action->track) {
 			auto newAction = std::make_unique<ActionSetTrackGain>(
-				action->_data.track, action->_data.value);
-			newAction->_data.oldValue = this->_data.oldValue;
+				action->track, action->value);
+			newAction->oldValue = this->oldValue;
 			return newAction.release();
 		}
 	}
@@ -220,59 +173,52 @@ juce::UndoableAction* ActionSetTrackGain::createCoalescedAction(
 
 ActionSetTrackPan::ActionSetTrackPan(
 	quickAPI::TrackIndex track, float value)
-	: ACTION_DB{ track, value } {}
+	: track(track), value(value) {}
 
 bool ActionSetTrackPan::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetTrackPan);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
-				ACTION_DATA(oldValue) = mixer->getPan();
+				this->oldValue = mixer->getPan();
 
-				mixer->setPan(ACTION_DATA(value));
-				ACTION_RESULT(true);
+				mixer->setPan(this->value);
+				return true;
 			}
 		}
 	}
-
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetTrackPan::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetTrackPan);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
-				mixer->setPan(ACTION_DATA(oldValue));
-				ACTION_RESULT(true);
+				mixer->setPan(this->oldValue);
+				return true;
 			}
 		}
 	}
+	return false;
+}
 
-	ACTION_RESULT(false);
+const juce::String ActionSetTrackPan::getStatusStr() const {
+	return juce::String{ this->value, 2 };
+}
+
+void ActionSetTrackPan::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeDouble(this->value);
+	stream.writeDouble(this->oldValue);
 }
 
 juce::UndoableAction* ActionSetTrackPan::createCoalescedAction(
 	juce::UndoableAction* nextAction) {
 	if (auto action = dynamic_cast<ActionSetTrackPan*>(nextAction)) {
-		if (this->_data.track == action->_data.track) {
+		if (this->track == action->track) {
 			auto newAction = std::make_unique<ActionSetTrackPan>(
-				action->_data.track, action->_data.value);
-			newAction->_data.oldValue = this->_data.oldValue;
+				action->track, action->value);
+			newAction->oldValue = this->oldValue;
 			return newAction.release();
 		}
 	}
@@ -281,59 +227,52 @@ juce::UndoableAction* ActionSetTrackPan::createCoalescedAction(
 
 ActionSetTrackFader::ActionSetTrackFader(
 	quickAPI::TrackIndex track, float value)
-	: ACTION_DB{ track, value } {}
+	: track(track), value(value) {}
 
 bool ActionSetTrackFader::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetTrackFader);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
-				ACTION_DATA(oldValue) = mixer->getFader();
+				this->oldValue = mixer->getFader();
 
-				mixer->setFader(ACTION_DATA(value));
-				ACTION_RESULT(true);
+				mixer->setFader(this->value);
+				return true;
 			}
 		}
 	}
-
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetTrackFader::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetTrackFader);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
-				mixer->setFader(ACTION_DATA(oldValue));
-				ACTION_RESULT(true);
+				mixer->setFader(this->oldValue);
+				return true;
 			}
 		}
 	}
+	return false;
+}
 
-	ACTION_RESULT(false);
+const juce::String ActionSetTrackFader::getStatusStr() const {
+	return juce::String{ this->value, 2 };
+}
+
+void ActionSetTrackFader::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeDouble(this->value);
+	stream.writeDouble(this->oldValue);
 }
 
 juce::UndoableAction* ActionSetTrackFader::createCoalescedAction(
 	juce::UndoableAction* nextAction) {
 	if (auto action = dynamic_cast<ActionSetTrackFader*>(nextAction)) {
-		if (this->_data.track == action->_data.track) {
+		if (this->track == action->track) {
 			auto newAction = std::make_unique<ActionSetTrackFader>(
-				action->_data.track, action->_data.value);
-			newAction->_data.oldValue = this->_data.oldValue;
+				action->track, action->value);
+			newAction->oldValue = this->oldValue;
 			return newAction.release();
 		}
 	}
@@ -342,220 +281,192 @@ juce::UndoableAction* ActionSetTrackFader::createCoalescedAction(
 
 ActionSetEffectBypass::ActionSetEffectBypass(
 	quickAPI::TrackIndex track, int effect, bool bypass)
-	: ACTION_DB{ track, effect, bypass } {}
+	: track(track), effect(effect), bypass(bypass) {}
 
 bool ActionSetEffectBypass::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetEffectBypass);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					ACTION_DATA(oldBypass) = pluginDock->getPluginBypass(ACTION_DATA(effect));
+					this->oldBypass = pluginDock->getPluginBypass(this->effect);
 
-					pluginDock->setPluginBypass(ACTION_DATA(effect), ACTION_DATA(bypass));
+					pluginDock->setPluginBypass(this->effect, this->bypass);
 
-					this->output("Plugin Bypass: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + juce::String{ ACTION_DATA(bypass) ? "ON" : "OFF" } + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetEffectBypass::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetEffectBypass);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					pluginDock->setPluginBypass(ACTION_DATA(effect), ACTION_DATA(oldBypass));
+					pluginDock->setPluginBypass(this->effect, this->oldBypass);
 
-					this->output("Undo Plugin Bypass: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + juce::String{ ACTION_DATA(bypass) ? "ON" : "OFF" } + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSetEffectBypass::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + juce::String{ this->bypass ? "ON" : "OFF" };
+}
+
+void ActionSetEffectBypass::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeInt(this->effect);
+	stream.writeBool(this->bypass);
+	stream.writeBool(this->oldBypass);
 }
 
 ActionSetInstrBypass::ActionSetInstrBypass(
 	int instr, bool bypass)
-	: ACTION_DB{ instr, bypass } {}
+	: instr(instr), bypass(bypass) {}
 
 bool ActionSetInstrBypass::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetInstrBypass);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
-				ACTION_DATA(oldBypass) = seq->getInstrumentBypass();
+				this->oldBypass = seq->getInstrumentBypass();
 
-				seq->setInstrumentBypass(ACTION_DATA(bypass));
+				seq->setInstrumentBypass(this->bypass);
 
-				this->output("Plugin Bypass: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
-				ACTION_RESULT(true);
+				return true;
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetInstrBypass::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetInstrBypass);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
-				seq->setInstrumentBypass(ACTION_DATA(oldBypass));
+				seq->setInstrumentBypass(this->oldBypass);
 
-				this->output("Undo Plugin Bypass: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
-				ACTION_RESULT(true);
+				return true;
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSetInstrBypass::getStatusStr() const {
+	return "[" + juce::String{ this->instr } + "] " + juce::String{ this->bypass ? "ON" : "OFF" };
+}
+
+void ActionSetInstrBypass::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->instr);
+	stream.writeBool(this->bypass);
+	stream.writeBool(this->oldBypass);
 }
 
 ActionSetInstrMidiChannel::ActionSetInstrMidiChannel(
 	int instr, int channel)
-	: ACTION_DB{ instr, channel } {
+	: instr(instr), channel(channel) {
 }
 
 bool ActionSetInstrMidiChannel::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetInstrMidiChannel);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					ACTION_DATA(oldChannel) = instr->getMIDIChannel();
+					this->oldChannel = instr->getMIDIChannel();
 
-					instr->setMIDIChannel(ACTION_DATA(channel));
+					instr->setMIDIChannel(this->channel);
 
-					this->output("Plugin MIDI Channel: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(instr->getMIDIChannel()) + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetInstrMidiChannel::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiChannel);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					instr->setMIDIChannel(ACTION_DATA(oldChannel));
+					instr->setMIDIChannel(this->oldChannel);
 
-					this->output("Undo Plugin MIDI Channel: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(instr->getMIDIChannel()) + "\n");
-					ACTION_RESULT(true);
+					return true;
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSetInstrMidiChannel::getStatusStr() const {
+	return "[" + juce::String{ this->instr } + "] " + juce::String{ this->channel };
+}
+
+void ActionSetInstrMidiChannel::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->instr);
+	stream.writeInt(this->channel);
+	stream.writeInt(this->oldChannel);
 }
 
 ActionSetEffectMidiChannel::ActionSetEffectMidiChannel(
 	quickAPI::TrackIndex track, int effect, int channel)
-	: ACTION_DB{ track, effect, channel } {
+	: track(track), effect(effect), channel(channel) {
 }
 
 bool ActionSetEffectMidiChannel::doAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE(ActionSetEffectMidiChannel);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						ACTION_DATA(oldChannel) = effect->getMIDIChannel();
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						this->oldChannel = effect->getMIDIChannel();
 
-						effect->setMIDIChannel(ACTION_DATA(channel));
+						effect->setMIDIChannel(this->channel);
 
-						this->output("Plugin MIDI Channel: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + juce::String{ effect->getMIDIChannel() } + "\n");
-						ACTION_RESULT(true);
+						return true;
 					}
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
 }
 
 bool ActionSetEffectMidiChannel::undoAction() {
-	ACTION_CHECK_RENDERING(
-		"Don't do this while rendering.");
-
-	ACTION_UNSAVE_PROJECT();
-
-	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiChannel);
-	ACTION_WRITE_DB();
-
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						effect->setMIDIChannel(ACTION_DATA(oldChannel));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						effect->setMIDIChannel(this->oldChannel);
 
-						this->output("Undo Plugin MIDI Channel: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + juce::String{ effect->getMIDIChannel() } + "\n");
-						ACTION_RESULT(true);
+						return true;
 					}
 				}
 			}
 		}
 	}
-	ACTION_RESULT(false);
+	return false;
+}
+
+const juce::String ActionSetEffectMidiChannel::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + juce::String{ this->channel };
+}
+
+void ActionSetEffectMidiChannel::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeInt(this->effect);
+	stream.writeInt(this->channel);
+	stream.writeInt(this->oldChannel);
 }
 
 ActionSetInstrParamValue::ActionSetInstrParamValue(
@@ -573,14 +484,14 @@ bool ActionSetInstrParamValue::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					ACTION_DATA(oldValue) = instr->getParamValue(ACTION_DATA(param));
+					this->oldValue = instr->getParamValue(this->param);
 
-					instr->setParamValue(ACTION_DATA(param), ACTION_DATA(value));
+					instr->setParamValue(this->param, this->value);
 
-					this->output("Set Instr Param Value: [" + juce::String(ACTION_DATA(param)) + "] " + instr->getParamName(ACTION_DATA(param)) + " - " + juce::String(instr->getParamValue(ACTION_DATA(param))) + "\n");
+					this->output("Set Instr Param Value: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - " + juce::String(instr->getParamValue(this->param)) + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -599,12 +510,12 @@ bool ActionSetInstrParamValue::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					instr->setParamValue(ACTION_DATA(param), ACTION_DATA(oldValue));
+					instr->setParamValue(this->param, this->oldValue);
 
-					this->output("Undo Set Instr Param Value: [" + juce::String(ACTION_DATA(param)) + "] " + instr->getParamName(ACTION_DATA(param)) + " - " + juce::String(instr->getParamValue(ACTION_DATA(param))) + "\n");
+					this->output("Undo Set Instr Param Value: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - " + juce::String(instr->getParamValue(this->param)) + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -628,15 +539,15 @@ bool ActionSetEffectParamValue::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						ACTION_DATA(oldValue) = effect->getParamValue(ACTION_DATA(param));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						this->oldValue = effect->getParamValue(this->param);
 
-						effect->setParamValue(ACTION_DATA(param), ACTION_DATA(value));
+						effect->setParamValue(this->param, this->value);
 
-						this->output("Effect Param Value: [" + juce::String(ACTION_DATA(param)) + "] " + effect->getParamName(ACTION_DATA(param)) + " - " + juce::String(effect->getParamValue(ACTION_DATA(param))) + "\n");
+						this->output("Effect Param Value: [" + juce::String(this->param) + "] " + effect->getParamName(this->param) + " - " + juce::String(effect->getParamValue(this->param)) + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -656,13 +567,13 @@ bool ActionSetEffectParamValue::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						effect->setParamValue(ACTION_DATA(param), ACTION_DATA(oldValue));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						effect->setParamValue(this->param, this->oldValue);
 
-						this->output("Undo Effect Param Value: [" + juce::String(ACTION_DATA(param)) + "] " + effect->getParamName(ACTION_DATA(param)) + " - " + juce::String(effect->getParamValue(ACTION_DATA(param))) + "\n");
+						this->output("Undo Effect Param Value: [" + juce::String(this->param) + "] " + effect->getParamName(this->param) + " - " + juce::String(effect->getParamValue(this->param)) + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -687,15 +598,15 @@ bool ActionSetInstrParamConnectToCC::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					ACTION_DATA(oldCC) = instr->getParamCCConnection(ACTION_DATA(param));
-					ACTION_DATA(oldParam) = instr->getCCParamConnection(ACTION_DATA(cc));
+					this->oldCC = instr->getParamCCConnection(this->param);
+					this->oldParam = instr->getCCParamConnection(this->cc);
 
-					instr->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+					instr->connectParamCC(this->param, this->cc);
 
-					this->output("Connect Instr Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + instr->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(instr->getParamCCConnection(ACTION_DATA(param))) + "\n");
+					this->output("Connect Instr Param To MIDI CC: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - MIDI CC " + juce::String(instr->getParamCCConnection(this->param)) + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -714,15 +625,15 @@ bool ActionSetInstrParamConnectToCC::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					instr->connectParamCC(ACTION_DATA(oldParam), ACTION_DATA(cc));
-					if (ACTION_DATA(oldCC) > -1) {
-						instr->connectParamCC(ACTION_DATA(param), ACTION_DATA(oldCC));
+					instr->connectParamCC(this->oldParam, this->cc);
+					if (this->oldCC > -1) {
+						instr->connectParamCC(this->param, this->oldCC);
 					}
 
-					this->output("Undo Connect Instr Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + instr->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(instr->getParamCCConnection(ACTION_DATA(param))) + "\n");
+					this->output("Undo Connect Instr Param To MIDI CC: [" + juce::String(this->param) + "] " + instr->getParamName(this->param) + " - MIDI CC " + juce::String(instr->getParamCCConnection(this->param)) + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -746,16 +657,16 @@ bool ActionSetEffectParamConnectToCC::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						ACTION_DATA(oldCC) = effect->getParamCCConnection(ACTION_DATA(param));
-						ACTION_DATA(oldParam) = effect->getCCParamConnection(ACTION_DATA(cc));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						this->oldCC = effect->getParamCCConnection(this->param);
+						this->oldParam = effect->getCCParamConnection(this->cc);
 
-						effect->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+						effect->connectParamCC(this->param, this->cc);
 
-						this->output("Connect Effect Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + effect->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(effect->getParamCCConnection(ACTION_DATA(param))) + "\n");
+						this->output("Connect Effect Param To MIDI CC: [" + juce::String(this->param) + "] " + effect->getParamName(this->param) + " - MIDI CC " + juce::String(effect->getParamCCConnection(this->param)) + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -775,16 +686,16 @@ bool ActionSetEffectParamConnectToCC::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						effect->connectParamCC(ACTION_DATA(oldParam), ACTION_DATA(cc));
-						if (ACTION_DATA(oldCC) > -1) {
-							effect->connectParamCC(ACTION_DATA(param), ACTION_DATA(oldCC));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						effect->connectParamCC(this->oldParam, this->cc);
+						if (this->oldCC > -1) {
+							effect->connectParamCC(this->param, this->oldCC);
 						}
 
-						this->output("Undo Connect Effect Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + effect->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(effect->getParamCCConnection(ACTION_DATA(param))) + "\n");
+						this->output("Undo Connect Effect Param To MIDI CC: [" + juce::String(this->param) + "] " + effect->getParamName(this->param) + " - MIDI CC " + juce::String(effect->getParamCCConnection(this->param)) + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -809,14 +720,14 @@ bool ActionSetInstrMidiCCIntercept::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					ACTION_DATA(oldIntercept) = instr->getMIDICCIntercept();
+					this->oldIntercept = instr->getMIDICCIntercept();
 
-					instr->setMIDICCIntercept(ACTION_DATA(intercept));
+					instr->setMIDICCIntercept(this->intercept);
 
-					this->output("Set Instr MIDI CC Intercept: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+					this->output("Set Instr MIDI CC Intercept: [" + juce::String(this->instr) + "] " + juce::String(instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -835,12 +746,12 @@ bool ActionSetInstrMidiCCIntercept::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
 				if (auto instr = seq->getInstrProcessor()) {
-					instr->setMIDICCIntercept(ACTION_DATA(oldIntercept));
+					instr->setMIDICCIntercept(this->oldIntercept);
 
-					this->output("Undo Set Instr MIDI CC Intercept: [" + juce::String(ACTION_DATA(instr)) + "] " + juce::String(instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+					this->output("Undo Set Instr MIDI CC Intercept: [" + juce::String(this->instr) + "] " + juce::String(instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -864,15 +775,15 @@ bool ActionSetEffectMidiCCIntercept::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						ACTION_DATA(oldIntercept) = effect->getMIDICCIntercept();
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						this->oldIntercept = effect->getMIDICCIntercept();
 
-						effect->setMIDICCIntercept(ACTION_DATA(intercept));
+						effect->setMIDICCIntercept(this->intercept);
 
-						this->output("Set Effect MIDI CC Intercept: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + juce::String{ effect->getMIDICCIntercept() ? "ON" : "OFF" } + "\n");
+						this->output("Set Effect MIDI CC Intercept: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + juce::String{ effect->getMIDICCIntercept() ? "ON" : "OFF" } + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -892,13 +803,13 @@ bool ActionSetEffectMidiCCIntercept::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect))) {
-						effect->setMIDICCIntercept(ACTION_DATA(oldIntercept));
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						effect->setMIDICCIntercept(this->oldIntercept);
 
-						this->output("Undo Set Effect MIDI CC Intercept: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + juce::String{ effect->getMIDICCIntercept() ? "ON" : "OFF" } + "\n");
+						this->output("Undo Set Effect MIDI CC Intercept: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + juce::String{ effect->getMIDICCIntercept() ? "ON" : "OFF" } + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -921,12 +832,12 @@ bool ActionSetEffectBypassByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetEffectBypassByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(oldBypass) = PluginDock::getPluginBypass(ACTION_DATA(effect));
+	if (this->effect) {
+		this->oldBypass = PluginDock::getPluginBypass(this->effect);
 
-		PluginDock::setPluginBypass(ACTION_DATA(effect), ACTION_DATA(bypass));
+		PluginDock::setPluginBypass(this->effect, this->bypass);
 
-		this->output("Plugin Bypass: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		this->output("Plugin Bypass: [" + this->effect->getName() + "] " + juce::String(this->bypass ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -941,10 +852,10 @@ bool ActionSetEffectBypassByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetEffectBypassByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		PluginDock::setPluginBypass(ACTION_DATA(effect), ACTION_DATA(oldBypass));
+	if (this->effect) {
+		PluginDock::setPluginBypass(this->effect, this->oldBypass);
 
-		this->output("Undo Plugin Bypass: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		this->output("Undo Plugin Bypass: [" + this->effect->getName() + "] " + juce::String(this->bypass ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -963,12 +874,12 @@ bool ActionSetInstrBypassByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetInstrBypassByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(oldBypass) = SeqSourceProcessor::getInstrumentBypass(ACTION_DATA(instr));
+	if (this->instr) {
+		this->oldBypass = SeqSourceProcessor::getInstrumentBypass(this->instr);
 
-		SeqSourceProcessor::setInstrumentBypass(ACTION_DATA(instr), ACTION_DATA(bypass));
+		SeqSourceProcessor::setInstrumentBypass(this->instr, this->bypass);
 
-		this->output("Plugin Bypass: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		this->output("Plugin Bypass: [" + this->instr->getName() + "] " + juce::String(this->bypass ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -983,10 +894,10 @@ bool ActionSetInstrBypassByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetInstrBypassByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		SeqSourceProcessor::setInstrumentBypass(ACTION_DATA(instr), ACTION_DATA(oldBypass));
+	if (this->instr) {
+		SeqSourceProcessor::setInstrumentBypass(this->instr, this->oldBypass);
 
-		this->output("Undo Plugin Bypass: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(bypass) ? "ON" : "OFF") + "\n");
+		this->output("Undo Plugin Bypass: [" + this->instr->getName() + "] " + juce::String(this->bypass ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1005,12 +916,12 @@ bool ActionSetInstrMidiChannelByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetInstrMidiChannelByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(oldChannel) = ACTION_DATA(instr)->getMIDIChannel();
+	if (this->instr) {
+		this->oldChannel = this->instr->getMIDIChannel();
 
-		ACTION_DATA(instr)->setMIDIChannel(ACTION_DATA(channel));
+		this->instr->setMIDIChannel(this->channel);
 
-		this->output("Plugin MIDI Channel: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIChannel()) + "\n");
+		this->output("Plugin MIDI Channel: [" + this->instr->getName() + "] " + juce::String(this->instr->getMIDIChannel()) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1025,10 +936,10 @@ bool ActionSetInstrMidiChannelByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiChannelByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(instr)->setMIDIChannel(ACTION_DATA(oldChannel));
+	if (this->instr) {
+		this->instr->setMIDIChannel(this->oldChannel);
 
-		this->output("Undo Plugin MIDI Channel: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIChannel()) + "\n");
+		this->output("Undo Plugin MIDI Channel: [" + this->instr->getName() + "] " + juce::String(this->instr->getMIDIChannel()) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1047,12 +958,12 @@ bool ActionSetEffectMidiChannelByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetEffectMidiChannelByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(oldChannel) = ACTION_DATA(effect)->getMIDIChannel();
+	if (this->effect) {
+		this->oldChannel = this->effect->getMIDIChannel();
 
-		ACTION_DATA(effect)->setMIDIChannel(ACTION_DATA(channel));
+		this->effect->setMIDIChannel(this->channel);
 
-		this->output("Plugin MIDI Channel: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIChannel()) + "\n");
+		this->output("Plugin MIDI Channel: [" + this->effect->getName() + "] " + juce::String(this->effect->getMIDIChannel()) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1067,10 +978,10 @@ bool ActionSetEffectMidiChannelByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiChannelByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(effect)->setMIDIChannel(ACTION_DATA(oldChannel));
+	if (this->effect) {
+		this->effect->setMIDIChannel(this->oldChannel);
 
-		this->output("Undo Plugin MIDI Channel: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIChannel()) + "\n");
+		this->output("Undo Plugin MIDI Channel: [" + this->effect->getName() + "] " + juce::String(this->effect->getMIDIChannel()) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1090,12 +1001,12 @@ bool ActionSetInstrMidiCCInterceptByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetInstrMidiCCInterceptByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(oldIntercept) = ACTION_DATA(instr)->getMIDICCIntercept();
+	if (this->instr) {
+		this->oldIntercept = this->instr->getMIDICCIntercept();
 
-		ACTION_DATA(instr)->setMIDICCIntercept(ACTION_DATA(intercept));
+		this->instr->setMIDICCIntercept(this->intercept);
 
-		this->output("Set Instr MIDI CC Intercept: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		this->output("Set Instr MIDI CC Intercept: [" + this->instr->getName() + "] " + juce::String(this->instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1110,10 +1021,10 @@ bool ActionSetInstrMidiCCInterceptByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiCCInterceptByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(instr)->setMIDICCIntercept(ACTION_DATA(oldIntercept));
+	if (this->instr) {
+		this->instr->setMIDICCIntercept(this->oldIntercept);
 
-		this->output("Undo Set Instr MIDI CC Intercept: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		this->output("Undo Set Instr MIDI CC Intercept: [" + this->instr->getName() + "] " + juce::String(this->instr->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1133,12 +1044,12 @@ bool ActionSetEffectMidiCCInterceptByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetEffectMidiCCInterceptByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(oldIntercept) = ACTION_DATA(effect)->getMIDICCIntercept();
+	if (this->effect) {
+		this->oldIntercept = this->effect->getMIDICCIntercept();
 
-		ACTION_DATA(effect)->setMIDICCIntercept(ACTION_DATA(intercept));
+		this->effect->setMIDICCIntercept(this->intercept);
 
-		this->output("Set Effect MIDI CC Intercept: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		this->output("Set Effect MIDI CC Intercept: [" + this->effect->getName() + "] " + juce::String(this->effect->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1153,10 +1064,10 @@ bool ActionSetEffectMidiCCInterceptByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiCCInterceptByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(effect)->setMIDICCIntercept(ACTION_DATA(oldIntercept));
+	if (this->effect) {
+		this->effect->setMIDICCIntercept(this->oldIntercept);
 
-		this->output("Undo Set Effect MIDI CC Intercept: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
+		this->output("Undo Set Effect MIDI CC Intercept: [" + this->effect->getName() + "] " + juce::String(this->effect->getMIDICCIntercept() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1176,12 +1087,12 @@ bool ActionSetInstrMidiOutputByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetInstrMidiOutputByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(oldOutput) = ACTION_DATA(instr)->getMIDIOutput();
+	if (this->instr) {
+		this->oldOutput = this->instr->getMIDIOutput();
 
-		ACTION_DATA(instr)->setMIDIOutput(ACTION_DATA(output));
+		this->instr->setMIDIOutput(this->output);
 
-		this->output("Set Instr MIDI Output: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		this->output("Set Instr MIDI Output: [" + this->instr->getName() + "] " + juce::String(this->instr->getMIDIOutput() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1196,10 +1107,10 @@ bool ActionSetInstrMidiOutputByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetInstrMidiOutputByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(instr)->setMIDIOutput(ACTION_DATA(oldOutput));
+	if (this->instr) {
+		this->instr->setMIDIOutput(this->oldOutput);
 
-		this->output("Undo Set Instr MIDI Output: [" + ACTION_DATA(instr)->getName() + "] " + juce::String(ACTION_DATA(instr)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		this->output("Undo Set Instr MIDI Output: [" + this->instr->getName() + "] " + juce::String(this->instr->getMIDIOutput() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1219,12 +1130,12 @@ bool ActionSetEffectMidiOutputByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetEffectMidiOutputByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(oldOutput) = ACTION_DATA(effect)->getMIDIOutput();
+	if (this->effect) {
+		this->oldOutput = this->effect->getMIDIOutput();
 
-		ACTION_DATA(effect)->setMIDIOutput(ACTION_DATA(output));
+		this->effect->setMIDIOutput(this->output);
 
-		this->output("Set Effect MIDI Output: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		this->output("Set Effect MIDI Output: [" + this->effect->getName() + "] " + juce::String(this->effect->getMIDIOutput() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1239,10 +1150,10 @@ bool ActionSetEffectMidiOutputByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetEffectMidiOutputByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(effect)->setMIDIOutput(ACTION_DATA(oldOutput));
+	if (this->effect) {
+		this->effect->setMIDIOutput(this->oldOutput);
 
-		this->output("Set Effect MIDI Output: [" + ACTION_DATA(effect)->getName() + "] " + juce::String(ACTION_DATA(effect)->getMIDIOutput() ? "ON" : "OFF") + "\n");
+		this->output("Set Effect MIDI Output: [" + this->effect->getName() + "] " + juce::String(this->effect->getMIDIOutput() ? "ON" : "OFF") + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1262,13 +1173,13 @@ bool ActionSetInstrParamConnectToCCByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetInstrParamConnectToCCByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(oldCC) = ACTION_DATA(instr)->getParamCCConnection(ACTION_DATA(param));
-		ACTION_DATA(oldParam) = ACTION_DATA(instr)->getCCParamConnection(ACTION_DATA(cc));
+	if (this->instr) {
+		this->oldCC = this->instr->getParamCCConnection(this->param);
+		this->oldParam = this->instr->getCCParamConnection(this->cc);
 
-		ACTION_DATA(instr)->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+		this->instr->connectParamCC(this->param, this->cc);
 
-		this->output("Connect Instr Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(instr)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(instr)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		this->output("Connect Instr Param To MIDI CC: [" + juce::String(this->param) + "] " + this->instr->getParamName(this->param) + " - MIDI CC " + juce::String(this->instr->getParamCCConnection(this->param)) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1283,13 +1194,13 @@ bool ActionSetInstrParamConnectToCCByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetInstrParamConnectToCCByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(instr)) {
-		ACTION_DATA(instr)->connectParamCC(ACTION_DATA(oldParam), ACTION_DATA(cc));
-		if (ACTION_DATA(oldCC) > -1) {
-			ACTION_DATA(instr)->connectParamCC(ACTION_DATA(param), ACTION_DATA(oldCC));
+	if (this->instr) {
+		this->instr->connectParamCC(this->oldParam, this->cc);
+		if (this->oldCC > -1) {
+			this->instr->connectParamCC(this->param, this->oldCC);
 		}
 
-		this->output("Undo Connect Instr Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(instr)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(instr)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		this->output("Undo Connect Instr Param To MIDI CC: [" + juce::String(this->param) + "] " + this->instr->getParamName(this->param) + " - MIDI CC " + juce::String(this->instr->getParamCCConnection(this->param)) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1309,13 +1220,13 @@ bool ActionSetEffectParamConnectToCCByPtr::doAction() {
 	ACTION_WRITE_TYPE(ActionSetEffectParamConnectToCCByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(oldCC) = ACTION_DATA(effect)->getParamCCConnection(ACTION_DATA(param));
-		ACTION_DATA(oldParam) = ACTION_DATA(effect)->getCCParamConnection(ACTION_DATA(cc));
+	if (this->effect) {
+		this->oldCC = this->effect->getParamCCConnection(this->param);
+		this->oldParam = this->effect->getCCParamConnection(this->cc);
 
-		ACTION_DATA(effect)->connectParamCC(ACTION_DATA(param), ACTION_DATA(cc));
+		this->effect->connectParamCC(this->param, this->cc);
 
-		this->output("Connect Effect Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(effect)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(effect)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		this->output("Connect Effect Param To MIDI CC: [" + juce::String(this->param) + "] " + this->effect->getParamName(this->param) + " - MIDI CC " + juce::String(this->effect->getParamCCConnection(this->param)) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1330,13 +1241,13 @@ bool ActionSetEffectParamConnectToCCByPtr::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetEffectParamConnectToCCByPtr);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(effect)) {
-		ACTION_DATA(effect)->connectParamCC(ACTION_DATA(oldParam), ACTION_DATA(cc));
-		if (ACTION_DATA(oldCC) > -1) {
-			ACTION_DATA(effect)->connectParamCC(ACTION_DATA(param), ACTION_DATA(oldCC));
+	if (this->effect) {
+		this->effect->connectParamCC(this->oldParam, this->cc);
+		if (this->oldCC > -1) {
+			this->effect->connectParamCC(this->param, this->oldCC);
 		}
 
-		this->output("Undo Connect Effect Param To MIDI CC: [" + juce::String(ACTION_DATA(param)) + "] " + ACTION_DATA(effect)->getParamName(ACTION_DATA(param)) + " - MIDI CC " + juce::String(ACTION_DATA(effect)->getParamCCConnection(ACTION_DATA(param))) + "\n");
+		this->output("Undo Connect Effect Param To MIDI CC: [" + juce::String(this->param) + "] " + this->effect->getParamName(this->param) + " - MIDI CC " + juce::String(this->effect->getParamCCConnection(this->param)) + "\n");
 		ACTION_RESULT(true);
 	}
 	ACTION_RESULT(false);
@@ -1356,16 +1267,16 @@ bool ActionSetTrackName::doAction() {
 	ACTION_WRITE_STRING(oldName);
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 
-			ACTION_DATA(oldName) = track->getTrackName();
-			track->setTrackName(ACTION_DATA(name));
+			this->oldName = track->getTrackName();
+			track->setTrackName(this->name);
 
-			this->output("Set track name: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(name) + "\n");
+			this->output("Set track name: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->name + "\n");
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't set track name: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(name) + "\n");
+	this->output("Can't set track name: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->name + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1378,14 +1289,14 @@ bool ActionSetTrackName::undoAction() {
 	ACTION_WRITE_STRING(oldName);
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			track->setTrackName(ACTION_DATA(oldName));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			track->setTrackName(this->oldName);
 
-			this->output("Undo set track name: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(name) + "\n");
+			this->output("Undo set track name: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->name + "\n");
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't undo set track name: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(name) + "\n");
+	this->output("Can't undo set track name: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->name + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1401,15 +1312,15 @@ bool ActionSetTrackColor::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			ACTION_DATA(oldColor) = track->getTrackColor();
-			track->setTrackColor(ACTION_DATA(color));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			this->oldColor = track->getTrackColor();
+			track->setTrackColor(this->color);
 
-			this->output("Set track color: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+			this->output("Set track color: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->color.toDisplayString(false) + "\n");
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't set track color: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+	this->output("Can't set track color: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->color.toDisplayString(false) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1420,14 +1331,14 @@ bool ActionSetTrackColor::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			track->setTrackColor(ACTION_DATA(oldColor));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			track->setTrackColor(this->oldColor);
 
-			this->output("Undo set track color: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+			this->output("Undo set track color: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->color.toDisplayString(false) + "\n");
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't undo set track color: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + ACTION_DATA(color).toDisplayString(false) + "\n");
+	this->output("Can't undo set track color: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + this->color.toDisplayString(false) + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1445,11 +1356,11 @@ bool ActionSetEffectIndex::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (pluginDock->setPluginIndex(ACTION_DATA(oldIndex), ACTION_DATA(newIndex))) {
-						this->output("Set Effect Index: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(oldIndex) } + "] " + juce::String{ ACTION_DATA(newIndex) } + "\n");
+					if (pluginDock->setPluginIndex(this->oldIndex, this->newIndex)) {
+						this->output("Set Effect Index: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->oldIndex } + "] " + juce::String{ this->newIndex } + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -1469,11 +1380,11 @@ bool ActionSetEffectIndex::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
-					if (pluginDock->setPluginIndex(ACTION_DATA(newIndex), ACTION_DATA(oldIndex))) {
-						this->output("Undo Set Effect Index: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(oldIndex) } + "] " + juce::String{ ACTION_DATA(newIndex) } + "\n");
+					if (pluginDock->setPluginIndex(this->newIndex, this->oldIndex)) {
+						this->output("Undo Set Effect Index: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->oldIndex } + "] " + juce::String{ this->newIndex } + "\n");
 						ACTION_RESULT(true);
 					}
 				}
@@ -1498,13 +1409,13 @@ bool ActionSetInstrOffline::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
-				ACTION_DATA(oldOffline) = seq->getInstrOffline();
+				this->oldOffline = seq->getInstrOffline();
 
-				seq->setInstrOffline(ACTION_DATA(offline));
+				seq->setInstrOffline(this->offline);
 
-				this->output("Instr Offline: [" + juce::String{ ACTION_DATA(instr) } + "] " + juce::String{ seq->getInstrOffline() ? "ON" : "OFF" } + "\n");
+				this->output("Instr Offline: [" + juce::String{ this->instr } + "] " + juce::String{ seq->getInstrOffline() ? "ON" : "OFF" } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
@@ -1522,11 +1433,11 @@ bool ActionSetInstrOffline::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(instr))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
 			if (auto seq = track->getSequencer()) {
-				seq->setInstrOffline(ACTION_DATA(oldOffline));
+				seq->setInstrOffline(this->oldOffline);
 
-				this->output("Undo Instr Offline: [" + juce::String{ ACTION_DATA(instr) } + "] " + juce::String{ seq->getInstrOffline() ? "ON" : "OFF" } + "\n");
+				this->output("Undo Instr Offline: [" + juce::String{ this->instr } + "] " + juce::String{ seq->getInstrOffline() ? "ON" : "OFF" } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
@@ -1548,11 +1459,11 @@ bool ActionSetTempoTime::doAction() {
 	ACTION_WRITE_TYPE(ActionSetTempoTime);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
-		ACTION_DATA(oldTime) = PlayPosition::getInstance()->getTempoLabelTime(ACTION_DATA(index));
+	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
+		this->oldTime = PlayPosition::getInstance()->getTempoLabelTime(this->index);
 
-		ACTION_DATA(newIndex) = PlayPosition::getInstance()->setTempoLabelTime(
-			ACTION_DATA(index), ACTION_DATA(time));
+		this->newIndex = PlayPosition::getInstance()->setTempoLabelTime(
+			this->index, this->time);
 
 		ACTION_RESULT(true);
 	}
@@ -1569,7 +1480,7 @@ bool ActionSetTempoTime::undoAction() {
 	ACTION_WRITE_DB();
 
 	PlayPosition::getInstance()->setTempoLabelTime(
-		ACTION_DATA(newIndex), ACTION_DATA(oldTime), ACTION_DATA(index));
+		this->newIndex, this->oldTime, this->index);
 
 	ACTION_RESULT(true);
 }
@@ -1588,10 +1499,10 @@ bool ActionSetTempoTempo::doAction() {
 	ACTION_WRITE_TYPE(ActionSetTempoTempo);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
-		ACTION_DATA(oldTempo) = PlayPosition::getInstance()->getTempoLabelTempo(ACTION_DATA(index));
+	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
+		this->oldTempo = PlayPosition::getInstance()->getTempoLabelTempo(this->index);
 
-		PlayPosition::getInstance()->setTempoLabelTempo(ACTION_DATA(index), ACTION_DATA(tempo));
+		PlayPosition::getInstance()->setTempoLabelTempo(this->index, this->tempo);
 
 		ACTION_RESULT(true);
 	}
@@ -1607,7 +1518,7 @@ bool ActionSetTempoTempo::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetTempoTempo);
 	ACTION_WRITE_DB();
 
-	PlayPosition::getInstance()->setTempoLabelTempo(ACTION_DATA(index), ACTION_DATA(oldTempo));
+	PlayPosition::getInstance()->setTempoLabelTempo(this->index, this->oldTempo);
 
 	ACTION_RESULT(true);
 }
@@ -1626,10 +1537,10 @@ bool ActionSetTempoBeat::doAction() {
 	ACTION_WRITE_TYPE(ActionSetTempoBeat);
 	ACTION_WRITE_DB();
 
-	if (ACTION_DATA(index) >= 0 && ACTION_DATA(index) < PlayPosition::getInstance()->getTempoLabelNum()) {
-		std::tie(ACTION_DATA(oldNumerator), ACTION_DATA(oldDenominator)) = PlayPosition::getInstance()->getTempoLabelBeat(ACTION_DATA(index));
+	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
+		std::tie(this->oldNumerator, this->oldDenominator) = PlayPosition::getInstance()->getTempoLabelBeat(this->index);
 
-		PlayPosition::getInstance()->setTempoLabelBeat(ACTION_DATA(index), ACTION_DATA(numerator), ACTION_DATA(denominator));
+		PlayPosition::getInstance()->setTempoLabelBeat(this->index, this->numerator, this->denominator);
 
 		ACTION_RESULT(true);
 	}
@@ -1645,7 +1556,7 @@ bool ActionSetTempoBeat::undoAction() {
 	ACTION_WRITE_TYPE_UNDO(ActionSetTempoBeat);
 	ACTION_WRITE_DB();
 
-	PlayPosition::getInstance()->setTempoLabelBeat(ACTION_DATA(index), ACTION_DATA(numerator), ACTION_DATA(denominator));
+	PlayPosition::getInstance()->setTempoLabelBeat(this->index, this->numerator, this->denominator);
 
 	ACTION_RESULT(true);
 }
@@ -1661,15 +1572,15 @@ bool ActionSetTrackMute::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			ACTION_DATA(oldMute) = track->getMute();
-			track->setMute(ACTION_DATA(mute));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			this->oldMute = track->getMute();
+			track->setMute(this->mute);
 
-			this->output("Set track mute: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");;
+			this->output("Set track mute: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->mute ? "ON" : "OFF" } + "\n");;
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't set track mute: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");
+	this->output("Can't set track mute: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->mute ? "ON" : "OFF" } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1680,14 +1591,14 @@ bool ActionSetTrackMute::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			track->setMute(ACTION_DATA(oldMute));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			track->setMute(this->oldMute);
 
-			this->output("Undo set track mute: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");;
+			this->output("Undo set track mute: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->mute ? "ON" : "OFF" } + "\n");;
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't undo set track mute: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(mute) ? "ON" : "OFF" } + "\n");
+	this->output("Can't undo set track mute: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->mute ? "ON" : "OFF" } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1703,15 +1614,15 @@ bool ActionSetTrackSolo::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			ACTION_DATA(oldSolo) = track->getSolo();
-			track->setSolo(ACTION_DATA(solo));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			this->oldSolo = track->getSolo();
+			track->setSolo(this->solo);
 
-			this->output("Set track solo: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");;
+			this->output("Set track solo: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->solo ? "ON" : "OFF" } + "\n");;
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't set track solo: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");
+	this->output("Can't set track solo: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->solo ? "ON" : "OFF" } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1722,14 +1633,14 @@ bool ActionSetTrackSolo::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
-			track->setSolo(ACTION_DATA(oldSolo));
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			track->setSolo(this->oldSolo);
 
-			this->output("Undo set track solo: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");;
+			this->output("Undo set track solo: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->solo ? "ON" : "OFF" } + "\n");;
 			ACTION_RESULT(true);
 		}
 	}
-	this->output("Can't undo set track solo: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + "] " + juce::String{ ACTION_DATA(solo) ? "ON" : "OFF" } + "\n");
+	this->output("Can't undo set track solo: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + "] " + juce::String{ this->solo ? "ON" : "OFF" } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1748,13 +1659,13 @@ bool ActionSetTrackRecording::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				ACTION_DATA(oldRecordState) = seq->getRecording();
+				this->oldRecordState = seq->getRecording();
 
-				seq->setRecording(ACTION_DATA(recordState));
+				seq->setRecording(this->recordState);
 
-				this->output("Set Track Recording: [" + juce::String{ ACTION_DATA(track) } + "] " + juce::String{ seq->getRecording() } + "\n");
+				this->output("Set Track Recording: [" + juce::String{ this->track } + "] " + juce::String{ seq->getRecording() } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
@@ -1772,11 +1683,11 @@ bool ActionSetTrackRecording::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				seq->setRecording(ACTION_DATA(oldRecordState));
+				seq->setRecording(this->oldRecordState);
 
-				this->output("Undo Set Track Recording: [" + juce::String{ ACTION_DATA(track) } + "] " + juce::String{ seq->getRecording() } + "\n");
+				this->output("Undo Set Track Recording: [" + juce::String{ this->track } + "] " + juce::String{ seq->getRecording() } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
@@ -1799,13 +1710,13 @@ bool ActionSetTrackInputMonitoring::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				ACTION_DATA(oldInputMonitoring) = seq->getInputMonitoring();
+				this->oldInputMonitoring = seq->getInputMonitoring();
 
-				seq->setInputMonitoring(ACTION_DATA(inputMonitoring));
+				seq->setInputMonitoring(this->inputMonitoring);
 
-				this->output("Set Track Input Monitoring: [" + juce::String{ ACTION_DATA(track) } + "] " + juce::String{ seq->getInputMonitoring() ? "ON" : "OFF" } + "\n");
+				this->output("Set Track Input Monitoring: [" + juce::String{ this->track } + "] " + juce::String{ seq->getInputMonitoring() ? "ON" : "OFF" } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
@@ -1823,11 +1734,11 @@ bool ActionSetTrackInputMonitoring::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				seq->setInputMonitoring(ACTION_DATA(oldInputMonitoring));
+				seq->setInputMonitoring(this->oldInputMonitoring);
 
-				this->output("Undo Set Track Input Monitoring: [" + juce::String{ ACTION_DATA(track) } + "] " + juce::String{ seq->getInputMonitoring() ? "ON" : "OFF" } + "\n");
+				this->output("Undo Set Track Input Monitoring: [" + juce::String{ this->track } + "] " + juce::String{ seq->getInputMonitoring() ? "ON" : "OFF" } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
@@ -1852,37 +1763,37 @@ bool ActionSetEffect::doAction() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
+	writeRecoverySizeValue(this->data.getSize());
+	writeRecoveryDataBlockValue((const char*)(this->data.getData()), this->data.getSize());
 
-	if (auto des = Plugin::getInstance()->findPlugin(ACTION_DATA(pid), false)) {
+	if (auto des = Plugin::getInstance()->findPlugin(this->pid, false)) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
-			if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+			if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 				if (auto mixer = track->getMixer()) {
 					if (auto pluginDock = mixer->getPluginDock()) {
 						/** Check Effect */
-						if (ACTION_DATA(effect) < 0 || ACTION_DATA(effect) >= pluginDock->getSlotNum()) { ACTION_RESULT(false); }
+						if (this->effect < 0 || this->effect >= pluginDock->getSlotNum()) { ACTION_RESULT(false); }
 
 						/** Save Effect State */
-						auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect));
+						auto effect = pluginDock->getPluginProcessor(this->effect);
 						if (!effect) { ACTION_RESULT(false); }
 						auto state = effect->serialize(Serializable::createSerializeConfigQuickly());
 
 						auto statePtr = dynamic_cast<vsp4::Plugin*>(state.get());
 						if (!statePtr) { ACTION_RESULT(false); }
-						statePtr->set_bypassed(pluginDock->getPluginBypass(ACTION_DATA(effect)));
+						statePtr->set_bypassed(pluginDock->getPluginBypass(this->effect));
 
-						ACTION_DATA(data).setSize(state->ByteSizeLong());
-						state->SerializeToArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize());
+						this->data.setSize(state->ByteSizeLong());
+						state->SerializeToArray(this->data.getData(), this->data.getSize());
 
 						/** Remove Effect */
-						pluginDock->removePlugin(ACTION_DATA(effect));
+						pluginDock->removePlugin(this->effect);
 
 						/** Add */
-						if (auto ptr = pluginDock->insertPlugin(ACTION_DATA(effect))) {
+						if (auto ptr = pluginDock->insertPlugin(this->effect)) {
 							PluginLoader::getInstance()->loadPlugin(*(des.get()), false, ptr);
 
-							this->output("Set Plugin: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + ACTION_DATA(pid) + "\n");
+							this->output("Set Plugin: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + this->pid + "\n");
 							ACTION_RESULT(true);
 						}
 					}
@@ -1891,7 +1802,7 @@ bool ActionSetEffect::doAction() {
 		}
 	}
 
-	this->error("Can't Set Plugin: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "] " + ACTION_DATA(pid) + "\n");
+	this->error("Can't Set Plugin: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + this->pid + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1907,34 +1818,34 @@ bool ActionSetEffect::undoAction() {
 	ACTION_WRITE_DB();
 	ACTION_WRITE_STRING(pid);
 
-	writeRecoverySizeValue(ACTION_DATA(data).getSize());
-	writeRecoveryDataBlockValue((const char*)(ACTION_DATA(data).getData()), ACTION_DATA(data).getSize());
+	writeRecoverySizeValue(this->data.getSize());
+	writeRecoveryDataBlockValue((const char*)(this->data.getData()), this->data.getSize());
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(ACTION_DATA(track).first, ACTION_DATA(track).second)) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
 			if (auto mixer = track->getMixer()) {
 				if (auto pluginDock = mixer->getPluginDock()) {
 					/** Check Effect */
-					if (ACTION_DATA(effect) < 0 || ACTION_DATA(effect) >= pluginDock->getSlotNum()) { ACTION_RESULT(false); }
+					if (this->effect < 0 || this->effect >= pluginDock->getSlotNum()) { ACTION_RESULT(false); }
 
 					/** Remove Effect */
-					pluginDock->removePlugin(ACTION_DATA(effect));
+					pluginDock->removePlugin(this->effect);
 
 					/** Prepare Effect State */
 					auto state = std::make_unique<vsp4::Plugin>();
-					if (!state->ParseFromArray(ACTION_DATA(data).getData(), ACTION_DATA(data).getSize())) {
+					if (!state->ParseFromArray(this->data.getData(), this->data.getSize())) {
 						ACTION_RESULT(false);
 					}
 
 					/** Add Effect */
-					pluginDock->insertPlugin(ACTION_DATA(effect));
+					pluginDock->insertPlugin(this->effect);
 
 					/** Recover Effect State */
-					auto effect = pluginDock->getPluginProcessor(ACTION_DATA(effect));
-					pluginDock->setPluginBypass(ACTION_DATA(effect), state->bypassed());
+					auto effect = pluginDock->getPluginProcessor(this->effect);
+					pluginDock->setPluginBypass(this->effect, state->bypassed());
 					effect->parse(state.get(), Serializable::createParseConfigQuickly());
 
-					this->output("Undo Set Plugin: [" + juce::String{ (int)(ACTION_DATA(track).first) } + ", " + juce::String{ ACTION_DATA(track).second } + ", " + juce::String{ ACTION_DATA(effect) } + "]" + "\n");
+					this->output("Undo Set Plugin: [" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "]" + "\n");
 					ACTION_RESULT(true);
 				}
 			}
@@ -1955,17 +1866,17 @@ bool ActionSetCurrentMIDITrack::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				ACTION_DATA(oldMIDITrack) = seq->getCurrentMIDITrack();
-				seq->setCurrentMIDITrack(ACTION_DATA(midiTrack));
+				this->oldMIDITrack = seq->getCurrentMIDITrack();
+				seq->setCurrentMIDITrack(this->midiTrack);
 
-				this->output("Set current MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+				this->output("Set current MIDI track: [" + juce::String(this->track) + "] " + juce::String{ this->midiTrack } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
 	}
-	this->output("Can't set current MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+	this->output("Can't set current MIDI track: [" + juce::String(this->track) + "] " + juce::String{ this->midiTrack } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -1976,16 +1887,16 @@ bool ActionSetCurrentMIDITrack::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				seq->setCurrentMIDITrack(ACTION_DATA(oldMIDITrack));
+				seq->setCurrentMIDITrack(this->oldMIDITrack);
 
-				this->output("Undo set current MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+				this->output("Undo set current MIDI track: [" + juce::String(this->track) + "] " + juce::String{ this->midiTrack } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
 	}
-	this->output("Can't undo set current MIDI track: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(midiTrack) } + "\n");
+	this->output("Can't undo set current MIDI track: [" + juce::String(this->track) + "] " + juce::String{ this->midiTrack } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -2001,19 +1912,19 @@ bool ActionSetSequencerBlockTime::doAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				ACTION_DATA(oldTime) = seq->getSeq(ACTION_DATA(index));
-				ACTION_DATA(newIndex) = seq->resetSeqTime(ACTION_DATA(index), ACTION_DATA(time));
-				if (ACTION_DATA(newIndex) >= 0) {
-					this->output("Set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+				this->oldTime = seq->getSeq(this->index);
+				this->newIndex = seq->resetSeqTime(this->index, this->time);
+				if (this->newIndex >= 0) {
+					this->output("Set seq block time: [" + juce::String(this->track) + "] " + juce::String{ this->index } + "\n");
 					ACTION_RESULT(true);
 				}
 			}
 			
 		}
 	}
-	this->output("Can't set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+	this->output("Can't set seq block time: [" + juce::String(this->track) + "] " + juce::String{ this->index } + "\n");
 	ACTION_RESULT(false);
 }
 
@@ -2024,16 +1935,16 @@ bool ActionSetSequencerBlockTime::undoAction() {
 	ACTION_WRITE_DB();
 
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, ACTION_DATA(track))) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->track)) {
 			if (auto seq = track->getSequencer()) {
-				seq->resetSeqTime(ACTION_DATA(newIndex), ACTION_DATA(oldTime));
+				seq->resetSeqTime(this->newIndex, this->oldTime);
 
-				this->output("Undo set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+				this->output("Undo set seq block time: [" + juce::String(this->track) + "] " + juce::String{ this->index } + "\n");
 				ACTION_RESULT(true);
 			}
 		}
 	}
-	this->output("Can't undo set seq block time: [" + juce::String(ACTION_DATA(track)) + "] " + juce::String{ ACTION_DATA(index) } + "\n");
+	this->output("Can't undo set seq block time: [" + juce::String(this->track) + "] " + juce::String{ this->index } + "\n");
 	ACTION_RESULT(false);
 }
 
