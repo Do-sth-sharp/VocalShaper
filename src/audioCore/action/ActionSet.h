@@ -350,17 +350,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Param Value";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrParamValue; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int instr, param;
-		const float value;
+	const int instr, param;
+	const float value;
 
-		float oldValue = 0;
-	} ACTION_DB;
+	float oldValue = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrParamValue)
 };
@@ -373,18 +374,19 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Param Value";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectParamValue; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const int effect, param;
-		const float value;
+	const quickAPI::TrackIndex track;
+	const int effect, param;
+	const float value;
 
-		float oldValue = 0;
-	} ACTION_DB;
+	float oldValue = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamValue)
 };
@@ -397,18 +399,19 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Param Connect To CC";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrParamConnectToCC; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int instr, param;
-		const int cc;
+	const int instr, param;
+	const int cc;
 
-		int oldParam = -1;
-		int oldCC = -1;
-	} ACTION_DB;
+	int oldParam = -1;
+	int oldCC = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrParamConnectToCC)
 };
@@ -421,19 +424,20 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Param Connect To CC";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectParamConnectToCC; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const int effect, param;
-		const int cc;
+	const quickAPI::TrackIndex track;
+	const int effect, param;
+	const int cc;
 
-		int oldParam = -1;
-		int oldCC = -1;
-	} ACTION_DB;
+	int oldParam = -1;
+	int oldCC = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCC)
 };
@@ -446,17 +450,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Midi CC Intercept";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrMidiCCIntercept; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int instr;
-		const bool intercept;
+	const int instr;
+	const bool intercept;
 
-		bool oldIntercept = 0;
-	} ACTION_DB;
+	bool oldIntercept = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCIntercept)
 };
@@ -469,18 +474,19 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Midi CC Intercept";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectMidiCCIntercept; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const int effect;
-		const bool intercept;
+	const quickAPI::TrackIndex track;
+	const int effect;
+	const bool intercept;
 
-		bool oldIntercept = 0;
-	} ACTION_DB;
+	bool oldIntercept = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
 };
