@@ -402,7 +402,7 @@ bool ActionLoadPluginState::undoAction() {
 }
 
 const juce::String ActionLoadPluginState::getStatusStr() const {
-	return "[" + this->plugin->getName() + "] " + this->path;
+	return "[" + juce::String{ this->plugin ? this->plugin->getName() : "" } + "] " + this->path;
 }
 
 void ActionLoadPluginState::getRecoveryData(juce::MemoryOutputStream& stream) {
@@ -430,5 +430,5 @@ bool ActionSavePluginState::doAction() {
 }
 
 const juce::String ActionSavePluginState::getStatusStr() const {
-	return "[" + this->plugin->getName() + "] " + this->path;
+	return "[" + juce::String{ this->plugin ? this->plugin->getName() : "" } + "] " + this->path;
 }
