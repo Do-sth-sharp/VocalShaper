@@ -499,17 +499,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Bypass";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectBypassByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const bool bypass;
+	const quickAPI::PluginHolder effect;
+	const bool bypass;
 
-		bool oldBypass = false;
-	} ACTION_DB;
+	bool oldBypass = false;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectBypassByPtr)
 };
@@ -522,17 +523,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Bypass";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrBypassByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const bool bypass;
+	const quickAPI::PluginHolder instr;
+	const bool bypass;
 
-		bool oldBypass = false;
-	} ACTION_DB;
+	bool oldBypass = false;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrBypassByPtr)
 };
@@ -545,17 +547,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Midi Channel";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrMidiChannelByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const int channel;
+	const quickAPI::PluginHolder instr;
+	const int channel;
 
-		int oldChannel = -1;
-	} ACTION_DB;
+	int oldChannel = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiChannelByPtr)
 };
@@ -568,17 +571,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Midi Channel";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectMidiChannelByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const int channel;
+	const quickAPI::PluginHolder effect;
+	const int channel;
 
-		int oldChannel = -1;
-	} ACTION_DB;
+	int oldChannel = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiChannelByPtr)
 };
@@ -591,17 +595,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Midi CC Intercept";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrMidiCCInterceptByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const bool intercept;
+	const quickAPI::PluginHolder instr;
+	const bool intercept;
 
-		bool oldIntercept = 0;
-	} ACTION_DB;
+	bool oldIntercept = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiCCInterceptByPtr)
 };
@@ -615,17 +620,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Midi CC Intercept";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectMidiCCInterceptByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const bool intercept;
+	const quickAPI::PluginHolder effect;
+	const bool intercept;
 
-		bool oldIntercept = 0;
-	} ACTION_DB;
+	bool oldIntercept = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCInterceptByPtr)
 };
@@ -638,17 +644,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Midi Output";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrMidiOutputByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const bool output;
+	const quickAPI::PluginHolder instr;
+	const bool output;
 
-		bool oldOutput = 0;
-	} ACTION_DB;
+	bool oldOutput = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrMidiOutputByPtr)
 };
@@ -661,17 +668,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Midi Output";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectMidiOutputByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const bool output;
+	const quickAPI::PluginHolder effect;
+	const bool output;
 
-		bool oldOutput = 0;
-	} ACTION_DB;
+	bool oldOutput = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiOutputByPtr)
 };
@@ -684,19 +692,20 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instr Param Connect To CC";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrParamConnectToCCByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder instr;
-		const int param;
-		const int cc;
+	const quickAPI::PluginHolder instr;
+	const int param;
+	const int cc;
 
-		int oldParam = -1;
-		int oldCC = -1;
-	} ACTION_DB;
+	int oldParam = -1;
+	int oldCC = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrParamConnectToCCByPtr)
 };
@@ -709,19 +718,20 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Param Connect To CC";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectParamConnectToCCByPtr; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::PluginHolder effect;
-		const int param;
-		const int cc;
+	const quickAPI::PluginHolder effect;
+	const int param;
+	const int cc;
 
-		int oldParam = -1;
-		int oldCC = -1;
-	} ACTION_DB;
+	int oldParam = -1;
+	int oldCC = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectParamConnectToCCByPtr)
 };
@@ -734,17 +744,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Track Name";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTrackName; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const juce::String name;
+	const quickAPI::TrackIndex track;
+	const juce::String name;
 
-		juce::String oldName;
-	} ACTION_DB;
+	juce::String oldName;
 
 	JUCE_LEAK_DETECTOR(ActionSetTrackName)
 };
@@ -757,17 +768,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Track Color";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTrackColor; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const juce::Colour color;
+	const quickAPI::TrackIndex track;
+	const juce::Colour color;
 
-		juce::Colour oldColor;
-	} ACTION_DB;
+	juce::Colour oldColor;
 
 	JUCE_LEAK_DETECTOR(ActionSetTrackColor)
 };
@@ -780,15 +792,16 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect Index";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectIndex; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const int oldIndex, newIndex;
-	} ACTION_DB;
+	const quickAPI::TrackIndex track;
+	const int oldIndex, newIndex;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffectIndex)
 };
@@ -801,17 +814,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Instrument Offline";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrOffline; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int instr;
-		const bool offline;
+	const int instr;
+	const bool offline;
 
-		bool oldOffline = false;
-	} ACTION_DB;
+	bool oldOffline = false;
 
 	JUCE_LEAK_DETECTOR(ActionSetInstrOffline)
 };
@@ -824,18 +838,19 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Tempo Label Time";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTempoTime; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int index;
-		const double time;
+	const int index;
+	const double time;
 
-		double oldTime = 0;
-		int newIndex = -1;
-	} ACTION_DB;
+	double oldTime = 0;
+	int newIndex = -1;
 
 	JUCE_LEAK_DETECTOR(ActionSetTempoTime)
 };
@@ -848,17 +863,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Tempo Label Tempo";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTempoTempo; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int index;
-		const double tempo;
+	const int index;
+	const double tempo;
 
-		double oldTempo = 0;
-	} ACTION_DB;
+	double oldTempo = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetTempoTempo)
 };
@@ -871,17 +887,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Tempo Label Beat";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTempoBeat; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int index;
-		const int numerator, denominator;
+	const int index;
+	const int numerator, denominator;
 
-		int oldNumerator = 4, oldDenominator = 4;
-	} ACTION_DB;
+	int oldNumerator = 4, oldDenominator = 4;
 
 	JUCE_LEAK_DETECTOR(ActionSetTempoBeat)
 };
@@ -894,17 +911,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Track Mute";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTrackMute; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const bool mute;
+	const quickAPI::TrackIndex track;
+	const bool mute;
 
-		bool oldMute = 0;
-	} ACTION_DB;
+	bool oldMute = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetTrackMute)
 };
@@ -917,17 +935,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Track Solo";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTrackSolo; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const bool solo;
+	const quickAPI::TrackIndex track;
+	const bool solo;
 
-		bool oldSolo = 0;
-	} ACTION_DB;
+	bool oldSolo = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetTrackSolo)
 };
@@ -940,17 +959,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Track Recording";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTrackRecording; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int track;
-		const quickAPI::RecordState recordState;
+	const int track;
+	const quickAPI::RecordState recordState;
 
-		quickAPI::RecordState oldRecordState = quickAPI::RecordState::NotRecording;
-	} ACTION_DB;
+	quickAPI::RecordState oldRecordState = quickAPI::RecordState::NotRecording;
 
 	JUCE_LEAK_DETECTOR(ActionSetTrackRecording)
 };
@@ -963,17 +983,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Track Input Monitoring";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetTrackInputMonitoring; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int track;
-		const bool inputMonitoring;
+	const int track;
+	const bool inputMonitoring;
 
-		bool oldInputMonitoring = false;
-	} ACTION_DB;
+	bool oldInputMonitoring = false;
 
 	JUCE_LEAK_DETECTOR(ActionSetTrackInputMonitoring)
 };
@@ -986,18 +1007,22 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Effect";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering | ShieldPluginScan;
+	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffect; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const quickAPI::TrackIndex track;
-		const int effect;
-		const juce::String pid;
+	const quickAPI::TrackIndex track;
+	const int effect;
+	const juce::String pid;
 
-		juce::MemoryBlock data;
-	} ACTION_DB;
+	juce::MemoryBlock data;
 
 	JUCE_LEAK_DETECTOR(ActionSetEffect)
 };
@@ -1010,17 +1035,18 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Current MIDI Track";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetCurrentMIDITrack; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int track;
-		const int midiTrack;
+	const int track;
+	const int midiTrack;
 
-		int oldMIDITrack = 0;
-	} ACTION_DB;
+	int oldMIDITrack = 0;
 
 	JUCE_LEAK_DETECTOR(ActionSetCurrentMIDITrack)
 };
@@ -1034,18 +1060,19 @@ public:
 
 	bool doAction() override;
 	bool undoAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Sequencer Block Time";
 	};
+	ActionType getActionType() const override { return ActionType::ActionSetSequencerBlockTime; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	ACTION_DATABLOCK{
-		const int track, index;
-		const BlockTime time;
+	const int track, index;
+	const BlockTime time;
 
-		int newIndex = -1;
-		BlockTime oldTime{};
-	} ACTION_DB;
+	int newIndex = -1;
+	BlockTime oldTime{};
 
 	JUCE_LEAK_DETECTOR(ActionSetSequencerBlockTime)
 };
@@ -1056,9 +1083,13 @@ public:
 	ActionSetPlayPosition(double pos);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Play Position";
 	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const double pos;
@@ -1072,9 +1103,10 @@ public:
 	ActionSetReturnToStart(bool returnToStart);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Return To Start";
 	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const bool returnToStart;
@@ -1089,9 +1121,13 @@ public:
 		const juce::String& format, int bitPerSample);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Audio Save Bits Per Sample";
 	};
+	int getShieldMask() const override {
+		return ShieldSourceIO;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String format;
@@ -1107,9 +1143,13 @@ public:
 		const juce::String& format, const juce::StringPairArray& metaData);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Audio Save Meta Data";
 	};
+	int getShieldMask() const override {
+		return ShieldSourceIO;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String format;
@@ -1125,9 +1165,13 @@ public:
 		const juce::String& format, int quality);
 
 	bool doAction() override;
-	const juce::String getName() override {
+	const juce::String getName() const override {
 		return "Set Audio Save Quality Option Index";
 	};
+	int getShieldMask() const override {
+		return ShieldSourceIO;
+	};
+	const juce::String getStatusStr() const override;
 
 private:
 	const juce::String format;
