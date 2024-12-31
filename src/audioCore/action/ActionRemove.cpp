@@ -767,10 +767,10 @@ void ActionRemoveSequencerBlock::getRecoveryData(juce::MemoryOutputStream& strea
 	stream.writeDouble(this->offset);
 }
 
-ActionRemoveTempo::ActionRemoveTempo(int index)
+ActionRemoveLabel::ActionRemoveLabel(int index)
 	: index(index) {}
 
-bool ActionRemoveTempo::doAction() {
+bool ActionRemoveLabel::doAction() {
 	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
 		this->isTempo = PlayPosition::getInstance()->isTempoLabelTempoEvent(this->index);
 		this->time = PlayPosition::getInstance()->getTempoLabelTime(this->index);
@@ -790,7 +790,7 @@ bool ActionRemoveTempo::doAction() {
 	return false;
 }
 
-bool ActionRemoveTempo::undoAction() {
+bool ActionRemoveLabel::undoAction() {
 	if (this->isTempo) {
 		PlayPosition::getInstance()->addTempoLabelTempo(
 			this->time, this->tempo, this->index);
@@ -802,12 +802,12 @@ bool ActionRemoveTempo::undoAction() {
 	return true;
 }
 
-const juce::String ActionRemoveTempo::getStatusStr() const {
+const juce::String ActionRemoveLabel::getStatusStr() const {
 	return "Index: " + juce::String{ this->index } + ", Time: " + juce::String{ this->time } + "s, Is Tempo: " + juce::String{ this->isTempo ? "Yes" : "No" }
 	+ ", Tempo: " + juce::String{ this->tempo } + ", Beat: " + juce::String{ this->numerator } + " / " + juce::String{ this->denominator };
 }
 
-void ActionRemoveTempo::getRecoveryData(juce::MemoryOutputStream& stream) {
+void ActionRemoveLabel::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeInt(this->index);
 	stream.writeDouble(this->time);
 	stream.writeDouble(this->tempo);

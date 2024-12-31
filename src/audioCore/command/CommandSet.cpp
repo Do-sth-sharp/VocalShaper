@@ -193,22 +193,22 @@ AUDIOCORE_FUNC(setInstrOffline) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setTempoTime) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoTime{
+AUDIOCORE_FUNC(setLabelTime) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetLabelTime{
 		(int)luaL_checkinteger(L, 1), (double)luaL_checknumber(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setTempoTempo) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoTempo{
+AUDIOCORE_FUNC(setLabelTempo) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetLabelTempo{
 		(int)luaL_checkinteger(L, 1), (double)luaL_checknumber(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setTempoBeat) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoBeat{
+AUDIOCORE_FUNC(setLabelBeat) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetLabelBeat{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
 		(int)luaL_checkinteger(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -343,9 +343,9 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackColor);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectIndex);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrOffline);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTempoTime);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTempoTempo);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTempoBeat);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setLabelTime);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setLabelTempo);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setLabelBeat);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackMute);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackSolo);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackRecording);

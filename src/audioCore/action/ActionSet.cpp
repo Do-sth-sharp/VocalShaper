@@ -1282,12 +1282,12 @@ void ActionSetInstrOffline::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeBool(this->oldOffline);
 }
 
-ActionSetTempoTime::ActionSetTempoTime(
+ActionSetLabelTime::ActionSetLabelTime(
 	int index, double time)
 	: index(index), time(time) {
 }
 
-bool ActionSetTempoTime::doAction() {
+bool ActionSetLabelTime::doAction() {
 	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
 		this->oldTime = PlayPosition::getInstance()->getTempoLabelTime(this->index);
 
@@ -1299,29 +1299,29 @@ bool ActionSetTempoTime::doAction() {
 	return false;
 }
 
-bool ActionSetTempoTime::undoAction() {
+bool ActionSetLabelTime::undoAction() {
 	PlayPosition::getInstance()->setTempoLabelTime(
 		this->newIndex, this->oldTime, this->index);
 	return true;
 }
 
-const juce::String ActionSetTempoTime::getStatusStr() const {
+const juce::String ActionSetLabelTime::getStatusStr() const {
 	return "[" + juce::String{ this->index } + "] " + juce::String{ this->time, 2 };
 }
 
-void ActionSetTempoTime::getRecoveryData(juce::MemoryOutputStream& stream) {
+void ActionSetLabelTime::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeInt(this->index);
 	stream.writeDouble(this->time);
 	stream.writeDouble(this->oldTime);
 	stream.writeInt(this->newIndex);
 }
 
-ActionSetTempoTempo::ActionSetTempoTempo(
+ActionSetLabelTempo::ActionSetLabelTempo(
 	int index, double tempo)
 	: index(index), tempo(tempo) {
 }
 
-bool ActionSetTempoTempo::doAction() {
+bool ActionSetLabelTempo::doAction() {
 	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
 		this->oldTempo = PlayPosition::getInstance()->getTempoLabelTempo(this->index);
 
@@ -1332,26 +1332,26 @@ bool ActionSetTempoTempo::doAction() {
 	return false;
 }
 
-bool ActionSetTempoTempo::undoAction() {
+bool ActionSetLabelTempo::undoAction() {
 	PlayPosition::getInstance()->setTempoLabelTempo(this->index, this->oldTempo);
 	return true;
 }
 
-const juce::String ActionSetTempoTempo::getStatusStr() const {
+const juce::String ActionSetLabelTempo::getStatusStr() const {
 	return "[" + juce::String{ this->index } + "] " + juce::String{ this->tempo, 2 };
 }
 
-void ActionSetTempoTempo::getRecoveryData(juce::MemoryOutputStream& stream) {
+void ActionSetLabelTempo::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeInt(this->index);
 	stream.writeDouble(this->tempo);
 	stream.writeDouble(this->oldTempo);
 }
 
-ActionSetTempoBeat::ActionSetTempoBeat(
+ActionSetLabelBeat::ActionSetLabelBeat(
 	int index, int numerator, int denominator)
 	: index(index), numerator(numerator), denominator(denominator) {}
 
-bool ActionSetTempoBeat::doAction() {
+bool ActionSetLabelBeat::doAction() {
 	if (this->index >= 0 && this->index < PlayPosition::getInstance()->getTempoLabelNum()) {
 		std::tie(this->oldNumerator, this->oldDenominator) = PlayPosition::getInstance()->getTempoLabelBeat(this->index);
 
@@ -1362,16 +1362,16 @@ bool ActionSetTempoBeat::doAction() {
 	return false;
 }
 
-bool ActionSetTempoBeat::undoAction() {
+bool ActionSetLabelBeat::undoAction() {
 	PlayPosition::getInstance()->setTempoLabelBeat(this->index, this->numerator, this->denominator);
 	return true;
 }
 
-const juce::String ActionSetTempoBeat::getStatusStr() const {
+const juce::String ActionSetLabelBeat::getStatusStr() const {
 	return "[" + juce::String{ this->index } + "] " + juce::String{ this->numerator } + " / " + juce::String{ this->denominator };
 }
 
-void ActionSetTempoBeat::getRecoveryData(juce::MemoryOutputStream& stream) {
+void ActionSetLabelBeat::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeInt(this->index);
 	stream.writeInt(this->numerator);
 	stream.writeInt(this->denominator);

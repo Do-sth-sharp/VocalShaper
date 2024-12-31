@@ -830,10 +830,10 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetInstrOffline)
 };
 
-class ActionSetTempoTime final : public ActionUndoableBase {
+class ActionSetLabelTime final : public ActionUndoableBase {
 public:
-	ActionSetTempoTime() = delete;
-	ActionSetTempoTime(
+	ActionSetLabelTime() = delete;
+	ActionSetLabelTime(
 		int index, double time);
 
 	bool doAction() override;
@@ -841,7 +841,7 @@ public:
 	const juce::String getName() const override {
 		return "Set Tempo Label Time";
 	};
-	ActionType getActionType() const override { return ActionType::ActionSetTempoTime; };
+	ActionType getActionType() const override { return ActionType::ActionSetLabelTime; };
 	const juce::String getStatusStr() const override;
 	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
@@ -852,13 +852,13 @@ private:
 	double oldTime = 0;
 	int newIndex = -1;
 
-	JUCE_LEAK_DETECTOR(ActionSetTempoTime)
+	JUCE_LEAK_DETECTOR(ActionSetLabelTime)
 };
 
-class ActionSetTempoTempo final : public ActionUndoableBase {
+class ActionSetLabelTempo final : public ActionUndoableBase {
 public:
-	ActionSetTempoTempo() = delete;
-	ActionSetTempoTempo(
+	ActionSetLabelTempo() = delete;
+	ActionSetLabelTempo(
 		int index, double tempo);
 
 	bool doAction() override;
@@ -866,7 +866,7 @@ public:
 	const juce::String getName() const override {
 		return "Set Tempo Label Tempo";
 	};
-	ActionType getActionType() const override { return ActionType::ActionSetTempoTempo; };
+	ActionType getActionType() const override { return ActionType::ActionSetLabelTempo; };
 	const juce::String getStatusStr() const override;
 	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
@@ -876,13 +876,13 @@ private:
 
 	double oldTempo = 0;
 
-	JUCE_LEAK_DETECTOR(ActionSetTempoTempo)
+	JUCE_LEAK_DETECTOR(ActionSetLabelTempo)
 };
 
-class ActionSetTempoBeat final : public ActionUndoableBase {
+class ActionSetLabelBeat final : public ActionUndoableBase {
 public:
-	ActionSetTempoBeat() = delete;
-	ActionSetTempoBeat(
+	ActionSetLabelBeat() = delete;
+	ActionSetLabelBeat(
 		int index, int numerator, int denominator);
 
 	bool doAction() override;
@@ -890,7 +890,7 @@ public:
 	const juce::String getName() const override {
 		return "Set Tempo Label Beat";
 	};
-	ActionType getActionType() const override { return ActionType::ActionSetTempoBeat; };
+	ActionType getActionType() const override { return ActionType::ActionSetLabelBeat; };
 	const juce::String getStatusStr() const override;
 	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
@@ -900,7 +900,7 @@ private:
 
 	int oldNumerator = 4, oldDenominator = 4;
 
-	JUCE_LEAK_DETECTOR(ActionSetTempoBeat)
+	JUCE_LEAK_DETECTOR(ActionSetLabelBeat)
 };
 
 class ActionSetTrackMute final : public ActionUndoableBase {
