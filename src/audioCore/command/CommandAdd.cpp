@@ -88,15 +88,15 @@ AUDIOCORE_FUNC(addSequencerBlock) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(addTempoTempo) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionAddTempoTempo{
+AUDIOCORE_FUNC(addLabelTempo) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionAddLabelTempo{
 		(double)luaL_checknumber(L, 1), (double)luaL_checknumber(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(addTempoBeat) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionAddTempoBeat{
+AUDIOCORE_FUNC(addLabelBeat) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionAddLabelBeat{
 		(double)luaL_checknumber(L, 1), 
 		(int)luaL_checkinteger(L, 2), (int)luaL_checkinteger(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -115,6 +115,6 @@ void regCommandAdd(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addInstr);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addTrackSideChainBus);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addSequencerBlock);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addTempoTempo);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addTempoBeat);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addLabelTempo);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, addLabelBeat);
 }

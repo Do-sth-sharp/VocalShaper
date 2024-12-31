@@ -377,17 +377,17 @@ private:
 	JUCE_LEAK_DETECTOR(ActionRemoveSequencerBlock)
 };
 
-class ActionRemoveTempo final : public ActionUndoableBase {
+class ActionRemoveLabel final : public ActionUndoableBase {
 public:
-	ActionRemoveTempo() = delete;
-	ActionRemoveTempo(int index);
+	ActionRemoveLabel() = delete;
+	ActionRemoveLabel(int index);
 
 	bool doAction() override;
 	bool undoAction() override;
 	const juce::String getName() const override {
 		return "Remove Tempo";
 	};
-	ActionType getActionType() const override { return ActionType::ActionRemoveTempo; };
+	ActionType getActionType() const override { return ActionType::ActionRemoveLabel; };
 	const juce::String getStatusStr() const override;
 	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
@@ -398,5 +398,5 @@ private:
 	int numerator = 4, denominator = 4;
 	bool isTempo = false;
 
-	JUCE_LEAK_DETECTOR(ActionRemoveTempo)
+	JUCE_LEAK_DETECTOR(ActionRemoveLabel)
 };

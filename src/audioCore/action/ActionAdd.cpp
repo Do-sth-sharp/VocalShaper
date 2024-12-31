@@ -379,52 +379,52 @@ void ActionAddSequencerBlock::getRecoveryData(juce::MemoryOutputStream& stream) 
 	stream.writeInt(this->index);
 }
 
-ActionAddTempoTempo::ActionAddTempoTempo(
+ActionAddLabelTempo::ActionAddLabelTempo(
 	double time, double tempo)
 	: time(time), tempo(tempo) {}
 
-bool ActionAddTempoTempo::doAction() {
+bool ActionAddLabelTempo::doAction() {
 	this->index = PlayPosition::getInstance()
 		->addTempoLabelTempo(this->time, this->tempo, this->index);
 	return true;
 }
 
-bool ActionAddTempoTempo::undoAction() {
+bool ActionAddLabelTempo::undoAction() {
 	PlayPosition::getInstance()->removeTempoLabel(this->index);
 	return true;
 }
 
-const juce::String  ActionAddTempoTempo::getStatusStr() const {
+const juce::String  ActionAddLabelTempo::getStatusStr() const {
 	return "[" + juce::String{ this->time } + "] " + juce::String{ this->tempo, 2 };
 }
 
-void  ActionAddTempoTempo::getRecoveryData(juce::MemoryOutputStream& stream) {
+void ActionAddLabelTempo::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeDouble(this->time);
 	stream.writeDouble(this->tempo);
 	stream.writeInt(this->index);
 }
 
-ActionAddTempoBeat::ActionAddTempoBeat(
+ActionAddLabelBeat::ActionAddLabelBeat(
 	double time, int numerator, int denominator)
 	: time(time), numerator(numerator), denominator(denominator) {}
 
-bool ActionAddTempoBeat::doAction() {
+bool ActionAddLabelBeat::doAction() {
 	this->index = PlayPosition::getInstance()
 		->addTempoLabelBeat(this->time,
 			this->numerator, this->denominator, this->index);
 	return true;
 }
 
-bool ActionAddTempoBeat::undoAction() {
+bool ActionAddLabelBeat::undoAction() {
 	PlayPosition::getInstance()->removeTempoLabel(this->index);
 	return true;
 }
 
-const juce::String ActionAddTempoBeat::getStatusStr() const {
+const juce::String ActionAddLabelBeat::getStatusStr() const {
 	return "[" + juce::String{ this->time } + "] " + juce::String{ this->numerator } + " / " + juce::String{ this->denominator };
 }
 
-void ActionAddTempoBeat::getRecoveryData(juce::MemoryOutputStream& stream) {
+void ActionAddLabelBeat::getRecoveryData(juce::MemoryOutputStream& stream) {
 	stream.writeDouble(this->time);
 	stream.writeInt(this->numerator);
 	stream.writeInt(this->denominator);

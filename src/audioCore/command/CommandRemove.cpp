@@ -124,8 +124,8 @@ AUDIOCORE_FUNC(removeSequencerBlock) {
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(removeTempo) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRemoveTempo{
+AUDIOCORE_FUNC(removeLabel) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRemoveLabel{
 		(int)luaL_checkinteger(L, 1) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
@@ -148,5 +148,5 @@ void regCommandRemove(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeInstrParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeEffectParamCCConnection);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeSequencerBlock);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeTempo);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, removeLabel);
 }
