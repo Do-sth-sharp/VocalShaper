@@ -4,122 +4,117 @@
 #include "../Utils.h"
 
 AUDIOCORE_FUNC(setDeviceAudioType) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioType{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceAudioType{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioInput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioInput{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceAudioInput{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioOutput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioOutput{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceAudioOutput{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioSampleRate) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioSampleRate{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceAudioSampleRate{
 		luaL_checknumber(L, 1)});
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceAudioBufferSize) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceAudioBufferSize{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceAudioBufferSize{
 		(int)luaL_checkinteger(L, 1) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceMIDIInput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceMidiInput{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceMidiInput{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)), (bool)lua_toboolean(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setDeviceMIDIOutput) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetDeviceMidiOutput{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetDeviceMidiOutput{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setMIDIDebuggerMaxNum) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetMidiDebuggerMaxNum{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetMidiDebuggerMaxNum{
 		(int)luaL_checkinteger(L, 1) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setMixerTrackGain) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackGain{
-		(int)luaL_checkinteger(L, 1), (float)luaL_checknumber(L, 2) });
+AUDIOCORE_FUNC(setTrackGain) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackGain{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(float)luaL_checknumber(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setMixerTrackPan) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackPan{
-		(int)luaL_checkinteger(L, 1), (float)luaL_checknumber(L, 2) });
+AUDIOCORE_FUNC(setTrackPan) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackPan{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(float)luaL_checknumber(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setMixerTrackSlider) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetMixerTrackSlider{
-		(int)luaL_checkinteger(L, 1), (float)luaL_checknumber(L, 2) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(setEffectWindow) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetEffectWindow{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(bool)lua_toboolean(L, 3) });
+AUDIOCORE_FUNC(setTrackFader) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackFader{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(float)luaL_checknumber(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setEffectBypass) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetEffectBypass{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(bool)lua_toboolean(L, 3) });
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffectBypass{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), (bool)lua_toboolean(L, 4) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setInstrBypass) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrBypass{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetInstrBypass{
 		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setInstrMIDIChannel) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrMidiChannel{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetInstrMidiChannel{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setEffectMIDIChannel) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetEffectMidiChannel{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(int)luaL_checkinteger(L, 3) });
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffectMidiChannel{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setInstrParamValue) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrParamValue{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetInstrParamValue{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
 		(float)luaL_checknumber(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -127,15 +122,16 @@ AUDIOCORE_FUNC(setInstrParamValue) {
 }
 
 AUDIOCORE_FUNC(setEffectParamValue) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetEffectParamValue{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(int)luaL_checkinteger(L, 3), (float)luaL_checknumber(L, 4) });
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffectParamValue{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4),
+		(float)luaL_checknumber(L, 5) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setInstrParamConnectToCC) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrParamConnectToCC{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetInstrParamConnectToCC{
 		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
 		(int)luaL_checkinteger(L, 3) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -143,51 +139,152 @@ AUDIOCORE_FUNC(setInstrParamConnectToCC) {
 }
 
 AUDIOCORE_FUNC(setEffectParamConnectToCC) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetEffectParamConnectToCC{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffectParamConnectToCC{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4),
+		(int)luaL_checkinteger(L, 5) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setInstrMIDICCIntercept) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrMidiCCIntercept{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetInstrMidiCCIntercept{
 		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setEffectMIDICCIntercept) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetEffectMidiCCIntercept{
-		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
-		(bool)lua_toboolean(L, 3) });
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffectMidiCCIntercept{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), (bool)lua_toboolean(L, 4) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
-AUDIOCORE_FUNC(setSequencerTrackBypass) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackBypass{
+AUDIOCORE_FUNC(setTrackName) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackName{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		juce::String::fromUTF8(luaL_checkstring(L, 3)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTrackColor) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackColor{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		juce::Colour::fromString(luaL_checkstring(L, 3)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setEffectIndex) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffectIndex{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setInstrOffline) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetInstrOffline{
 		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
+AUDIOCORE_FUNC(setTempoTime) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoTime{
+		(int)luaL_checkinteger(L, 1), (double)luaL_checknumber(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTempoTempo) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoTempo{
+		(int)luaL_checkinteger(L, 1), (double)luaL_checknumber(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTempoBeat) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoBeat{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		(int)luaL_checkinteger(L, 3) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTrackMute) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackMute{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(bool)lua_toboolean(L, 3) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTrackSolo) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackSolo{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(bool)lua_toboolean(L, 3) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTrackRecording) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackRecording{
+		(int)luaL_checkinteger(L, 1), (quickAPI::RecordState)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setTrackInputMonitoring) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTrackInputMonitoring{
+		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setEffect) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetEffect{
+		{ (quickAPI::TrackType)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) },
+		(int)luaL_checkinteger(L, 3), juce::String::fromUTF8(luaL_checkstring(L, 4)) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setCurrentMIDITrack) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetCurrentMIDITrack{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2) });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
+AUDIOCORE_FUNC(setSequencerBlockTime) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetSequencerBlockTime{
+		(int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+		{ (double)luaL_checknumber(L, 3), (double)luaL_checknumber(L, 4),
+		(double)luaL_checknumber(L, 5) } });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
 AUDIOCORE_FUNC(setPlayPosition) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetPlayPosition{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetPlayPosition{
 		luaL_checknumber(L, 1) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setReturnToStart) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetReturnToStart{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetReturnToStart{
 		(bool)lua_toboolean(L, 1) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setAudioSaveBitsPerSample) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveBitsPerSample{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetAudioSaveBitsPerSample{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)), (int)luaL_checkinteger(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
@@ -207,29 +304,15 @@ AUDIOCORE_FUNC(setAudioSaveMetaData) {
 	}
 	lua_pop(L, 1);
 
-	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveMetaData{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetAudioSaveMetaData{
 		format, metaData });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
 
 AUDIOCORE_FUNC(setAudioSaveQualityOptionIndex) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetAudioSaveQualityOptionIndex{
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetAudioSaveQualityOptionIndex{
 		juce::String::fromUTF8(luaL_checkstring(L, 1)), (int)luaL_checkinteger(L, 2) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(setSequencerTrackRecording) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetSequencerTrackRecording{
-		(int)luaL_checkinteger(L, 1), (quickAPI::RecordState)luaL_checkinteger(L, 2) });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-	return CommandFuncResult{ true, "" };
-}
-
-AUDIOCORE_FUNC(setInstrOffline) {
-	auto action = std::unique_ptr<ActionBase>(new ActionSetInstrOffline{
-		(int)luaL_checkinteger(L, 1), (bool)lua_toboolean(L, 2) });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 	return CommandFuncResult{ true, "" };
 }
@@ -242,10 +325,10 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceAudioBufferSize);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceMIDIInput);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setDeviceMIDIOutput);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackGain);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackPan);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMixerTrackSlider);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectWindow);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setMIDIDebuggerMaxNum);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackGain);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackPan);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackFader);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrBypass);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDIChannel);
@@ -256,12 +339,22 @@ void regCommandSet(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectParamConnectToCC);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrMIDICCIntercept);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectMIDICCIntercept);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackBypass);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackName);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackColor);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffectIndex);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrOffline);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTempoTime);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTempoTempo);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTempoBeat);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackMute);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackSolo);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackRecording);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setTrackInputMonitoring);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setEffect);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setCurrentMIDITrack);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setPlayPosition);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setReturnToStart);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveBitsPerSample);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveMetaData);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setAudioSaveQualityOptionIndex);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setSequencerTrackRecording);
-	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, setInstrOffline);
 }
