@@ -20,13 +20,26 @@ AC.setInstrOffline(0, false);
 AC.setInstrMIDIChannel(0, 0);
 
 -- Instrument Plugin Param
-AC.listInstrParam(0);
-AC.echoInstrParamValue(0, 2);
-AC.echoInstrParamDefaultValue(0, 2);
 AC.setInstrParamValue(0, 2, 0.5);
 
 -- Instrument Plugin Param MIDI CC
 AC.setInstrMIDICCIntercept(0, true);
-AC.echoInstrParamCC(0, 2);
-AC.echoInstrCCParam(0, 85);
-AC.removeInstrParamCCConnection(0, 85);
+AC.setInstrParamConnectToCC(0, 0, 85);
+
+-- Init Source
+AC.initAudio(0, "New Audio", 48000, 2, 2);
+AC.initMIDI(0, "New MIDI");
+
+-- Load And Save Source
+AC.loadAudio(0, "test.wav");
+AC.saveAudio(0, "test.wav");
+AC.loadMIDI(0, "test.mid", true);
+AC.saveMIDI(0, "test.mid");
+
+-- Seq Block
+AC.addSequencerBlock(0, 0, 300, 0);
+AC.setSequencerBlockTime(0, 0, 0, 301, 0);
+AC.removeSequencerBlock(0, 0);
+
+-- Current MIDI Track
+AC.setCurrentMIDITrack(1, 1);
