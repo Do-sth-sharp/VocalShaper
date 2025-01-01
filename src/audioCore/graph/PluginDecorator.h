@@ -29,6 +29,9 @@ public:
 		const juce::String& pluginIdentifier,
 		SetPluginCallback callback);
 
+	void updateIndex(int trackType, int trackIndex, int index);
+	void sendChangeMessage();
+
 	bool isARAValid() const;
 
 	void createARADataID();
@@ -161,6 +164,8 @@ public:
 
 private:
 	SeqSourceProcessor* const seq;
+
+	int trackType = -1, trackIndex = -1, index = -1;
 
 	std::unique_ptr<juce::AudioPluginInstance> plugin = nullptr;
 	juce::String pluginIdentifier;

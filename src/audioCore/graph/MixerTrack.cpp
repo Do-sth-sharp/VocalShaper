@@ -65,6 +65,10 @@ MixerTrack::MixerTrack(TrackType type,
 
 void MixerTrack::updateIndex(int index) {
 	this->index = index;
+
+	if (auto dock = this->getPluginDock()) {
+		dock->updateIndex((int)this->type, index);
+	}
 }
 
 bool MixerTrack::addAdditionalAudioBus() {
@@ -155,7 +159,7 @@ void MixerTrack::setGain(float gain) {
 	gainDsp.setGainDecibels(gain);
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackGainChanged, this->index);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackGainChanged, (int)this->type, this->index);
 }
 
 float MixerTrack::getGain() const {
@@ -171,7 +175,7 @@ void MixerTrack::setPan(float pan) {
 	panDsp.setPan(pan);
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackPanChanged, this->index);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackPanChanged, (int)this->type, this->index);
 }
 
 float MixerTrack::getPan() const {
@@ -183,7 +187,7 @@ void MixerTrack::setFader(float fader) {
 	sliderDsp.setGainLinear(fader);
 
 	/** Callback */
-	UICallbackAPI<int>::invoke(UICallbackType::TrackFaderChanged, this->index);
+	UICallbackAPI<int, int>::invoke(UICallbackType::TrackFaderChanged, (int)this->type, this->index);
 }
 
 float MixerTrack::getFader() const {
