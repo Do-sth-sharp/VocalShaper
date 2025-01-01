@@ -10,14 +10,17 @@ public:
 
 protected:
 	UICallbackWrapperBase(const std::type_info& type)
-		: typeName(type.name()) {};
+		: type(type) {};
 
 	bool isType(const std::type_info& type) const {
-		return std::strcmp(this->typeName, type.name()) == 0;
+		return this->type == type;
 	};
 
 private:
-	const char* typeName = nullptr;
+	const std::type_info& type;
+
+	JUCE_DECLARE_NON_COPYABLE(UICallbackWrapperBase)
+	JUCE_LEAK_DETECTOR(UICallbackWrapperBase)
 };
 
 template<typename... T>
@@ -41,6 +44,9 @@ public:
 
 private:
 	const Func func;
+
+	JUCE_DECLARE_NON_COPYABLE(UICallbackWrapper)
+	JUCE_LEAK_DETECTOR(UICallbackWrapper<T...>)
 };
 
 template<>
@@ -64,6 +70,9 @@ public:
 
 private:
 	const Func func;
+
+	JUCE_DECLARE_NON_COPYABLE(UICallbackWrapper)
+	JUCE_LEAK_DETECTOR(UICallbackWrapper<void>)
 };
 
 class UICallback final : private juce::DeletedAtShutdown {
