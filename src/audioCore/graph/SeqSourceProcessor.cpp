@@ -63,6 +63,10 @@ SeqSourceProcessor::~SeqSourceProcessor() {
 void SeqSourceProcessor::updateIndex(int index) {
 	this->index = index;
 	this->srcs.updateIndex(index);
+
+	if (auto instr = this->getInstrProcessor()) {
+		instr->updateIndex(0, index, 0);
+	}
 }
 
 const juce::String SeqSourceProcessor::getTrackName() const {
@@ -178,6 +182,9 @@ PluginDecorator::SafePointer SeqSourceProcessor::prepareInstr() {
 		/** Get Decorator */
 		auto decorator = dynamic_cast<PluginDecorator*>(ptrNode->getProcessor());
 
+		/** Set Plugin Index */
+		decorator->updateIndex(0, this->index, 0);
+
 		/** Prepare To Play */
 		decorator->setPlayHead(this->getPlayHead());
 		decorator->prepareToPlay(this->getSampleRate(), this->getBlockSize());
@@ -251,7 +258,7 @@ void SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer instr,
 			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
 
 			/** Callback */
-			UICallbackAPI<int>::invoke(UICallbackType::TrackInstrChanged, -1);
+			instr->sendChangeMessage();
 		}
 	}
 }

@@ -46,8 +46,15 @@ PluginDock::~PluginDock() {
 	/** Nothing To Do */
 }
 
-void PluginDock::updateIndex(int index) {
+void PluginDock::updateIndex(int type, int index) {
+	this->type = type;
 	this->index = index;
+
+	for (int i = 0; i < this->pluginNodeList.size(); i++) {
+		if (auto plugin = this->getPluginProcessor(i)) {
+			plugin->updateIndex(type, index, i);
+		}
+	}
 }
 
 PluginDecorator::SafePointer PluginDock::insertPlugin(std::unique_ptr<juce::AudioPluginInstance> processor,
@@ -88,6 +95,9 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 			return nullptr;
 		}
 
+		/** Set Plugin Index */
+		dynamic_cast<PluginDecorator*>(ptrNode->getProcessor())->updateIndex(this->type, this->index, index);
+
 		/** Insert Node */
 		if (!this->insertPluginInternal(index, ptrNode)) {
 			this->removeNode(ptrNode->nodeID);
@@ -99,7 +109,8 @@ PluginDecorator::SafePointer PluginDock::insertPlugin(int index) {
 		ptrNode->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());
 
 		/** Callback */
-		UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, index);
+		UICallbackAPI<int, int, int>::invoke(
+			UICallbackType::TrackEffectChanged, this->type, this->index, index);
 
 		return PluginDecorator::SafePointer{ dynamic_cast<PluginDecorator*>(ptrNode->getProcessor()) };
 	}
@@ -127,7 +138,8 @@ bool PluginDock::removePlugin(int index) {
 	if (!this->removeNode(ptrNode->nodeID)) { return false; }
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, index);
+	UICallbackAPI<int, int, int>::invoke(
+		UICallbackType::TrackEffectChanged, this->type, this->index, index);
 
 	return true;
 }
@@ -142,12 +154,17 @@ bool PluginDock::setPluginIndex(int oldIndex, int newIndex) {
 	auto ptr = this->removePluginInternal(oldIndex);
 	if (!ptr) { return false; }
 
+	/** Set Plugin Index */
+	dynamic_cast<PluginDecorator*>(ptr->getProcessor())->updateIndex(this->type, this->index, newIndex);
+
 	/** Insert Plugin */
 	if (!this->insertPluginInternal(newIndex, ptr)) { return false; }
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, oldIndex);
-	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, newIndex);
+	UICallbackAPI<int, int, int>::invoke(
+		UICallbackType::TrackEffectChanged, this->type, this->index, oldIndex);
+	UICallbackAPI<int, int, int>::invoke(
+		UICallbackType::TrackEffectChanged, this->type, this->index, newIndex);
 
 	return true;
 }
@@ -183,7 +200,7 @@ void PluginDock::setPluginBypass(PluginDecorator::SafePointer plugin, bool bypas
 			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
 
 			/** Callback */
-			UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, -1, -1);
+			plugin->sendChangeMessage();
 		}
 	}
 }
@@ -311,8 +328,10 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 
 void PluginDock::clearGraph() {
 	for (auto& i : this->pluginNodeList) {
-		this->removeNode(i->nodeID);
-		i = nullptr;
+		if (i) {
+			this->removeNode(i->nodeID);
+			i = nullptr;
+		}
 	}
 
 	this->removeIllegalConnections();
@@ -324,7 +343,8 @@ void PluginDock::clearGraph() {
 	}
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(UICallbackType::TrackEffectChanged, this->index, -1);
+	UICallbackAPI<int, int, int>::invoke(
+		UICallbackType::TrackEffectChanged, this->type, this->index, -1);
 }
 
 bool PluginDock::parse(
