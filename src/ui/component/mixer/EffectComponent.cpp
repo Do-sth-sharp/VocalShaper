@@ -55,6 +55,7 @@ void EffectComponent::resized() {
 void EffectComponent::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
+	float dropLineThickness = screenSize.getHeight() * 0.0025;
 	int textPaddingWidth = screenSize.getWidth() * 0.0025;
 	float textHeight = this->getHeight() * 0.8;
 
@@ -66,12 +67,14 @@ void EffectComponent::paint(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(this->editorOpened
+	juce::Colour backgroundColor = laf.findColour(this->valid && this->editorOpened
 		? juce::Label::ColourIds::backgroundWhenEditingColourId
 		: juce::Label::ColourIds::backgroundColourId);
-	juce::Colour textColor = laf.findColour(this->editorOpened
+	juce::Colour textColor = laf.findColour(this->valid && this->editorOpened
 		? juce::Label::ColourIds::textWhenEditingColourId
 		: juce::Label::ColourIds::textColourId);
+	juce::Colour dropLineColor = laf.findColour(
+		juce::Label::ColourIds::outlineWhenEditingColourId);
 
 	/** Font */
 	juce::Font textFont(juce::FontOptions{ textHeight });
@@ -81,25 +84,40 @@ void EffectComponent::paint(juce::Graphics& g) {
 	g.fillAll();
 
 	/** Text */
-	juce::Rectangle<int> textRect(
-		textPaddingWidth, 0,
-		right - textPaddingWidth * 2, this->getHeight());
-	g.setColour(textColor);
-	g.setFont(textFont);
-	g.drawFittedText(this->name, textRect,
-		juce::Justification::centredLeft, 1, 0.75f);
+	if (this->valid) {
+		juce::Rectangle<int> textRect(
+			textPaddingWidth, 0,
+			right - textPaddingWidth * 2, this->getHeight());
+		g.setColour(textColor);
+		g.setFont(textFont);
+		g.drawFittedText(this->name, textRect,
+			juce::Justification::centredLeft, 1, 0.75f);
+	}
+	else {
+		if (this->drop) {
+			g.setColour(dropLineColor);
+			g.drawRect(this->getLocalBounds(), dropLineThickness);
+		}
+	}
 }
 
-void EffectComponent::update(int track, int index) {
+void EffectComponent::update(int type, int track, int index) {
+	this->type = type;
 	this->track = track;
 	this->index = index;
-	if (this->track > -1 && this->index > -1) {
-		this->name = quickAPI::getEffectName(track, index);
-		this->editorOpened = PluginEditorHub::getInstance()->checkEffect(track, index);
+	if (this->type > -1 && this->track > -1 && this->index > -1) {
+		this->valid = quickAPI::isEffectValid({ (quickAPI::TrackType)type, track }, index);
 
-		this->bypassButton->setToggleState(
-			!quickAPI::getEffectBypass(track, index),
-			juce::NotificationType::dontSendNotification);
+		this->bypassButton->setEnabled(this->valid);
+
+		if (this->valid) {
+			this->name = quickAPI::getEffectName({ (quickAPI::TrackType)type, track }, index);
+			this->editorOpened = PluginEditorHub::getInstance()->checkEffect(type, track, index);
+
+			this->bypassButton->setToggleState(
+				!quickAPI::getEffectBypass({ (quickAPI::TrackType)type, track }, index),
+				juce::NotificationType::dontSendNotification);
+		}
 
 		this->repaint();
 
@@ -108,34 +126,101 @@ void EffectComponent::update(int track, int index) {
 }
 
 void EffectComponent::mouseUp(const juce::MouseEvent& event) {
-	if (event.mods.isLeftButtonDown()) {
-		if (!event.mouseWasDraggedSinceMouseDown()) {
-			this->editorShow();
+	if (this->valid) {
+		if (event.mods.isLeftButtonDown()) {
+			if (!event.mouseWasDraggedSinceMouseDown()) {
+				this->editorShow();
+			}
 		}
-	}
-	else if (event.mods.isRightButtonDown()) {
-		this->showMenu();
+		else if (event.mods.isRightButtonDown()) {
+			this->showMenu();
+		}
 	}
 }
 
 void EffectComponent::mouseDrag(const juce::MouseEvent& event) {
-	/** Start Drag */
-	if (event.mods.isLeftButtonDown()) {
-		this->startDrag();
+	if (this->valid) {
+		/** Start Drag */
+		if (event.mods.isLeftButtonDown()) {
+			this->startDrag();
+		}
+	}
+}
+
+bool EffectComponent::isInterestedInDragSource(
+	const SourceDetails& dragSourceDetails) {
+	/** Don't Insterest in Any Source When Valid */
+	if (this->valid) { return false; }
+
+	auto& des = dragSourceDetails.description;
+
+	/** From Plugins */
+	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		if (des["instrument"] || des["ara"]) { return false; }
+		return true;
+	}
+
+	/** From Effect */
+	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
+		int trackType = des["trackType"];
+		int trackIndex = des["track"];
+		int index = des["index"];
+		if (trackType != this->type || trackIndex != this->track) { return false; }
+		if (index == this->index) { return false; }
+		return true;
+	}
+
+	return false;
+}
+
+void EffectComponent::itemDragEnter(const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->preDrop();
+}
+
+void EffectComponent::itemDragExit(const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	this->endDrop();
+}
+
+void EffectComponent::itemDropped(const SourceDetails& dragSourceDetails) {
+	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
+
+	auto& des = dragSourceDetails.description;
+	this->endDrop();
+
+	/** From Plugins */
+	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
+		juce::String pid = des["id"].toString();
+
+		CoreActions::insertEffect(this->type, this->track, this->index, pid);
+
+		return;
+	}
+
+	/** From Effect */
+	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
+		int oldIndex = des["index"];
+
+		CoreActions::setEffectIndex(this->type, this->track, oldIndex, this->index);
+
+		return;
 	}
 }
 
 void EffectComponent::bypass() {
-	CoreActions::bypassEffect(this->track, this->index,
+	CoreActions::bypassEffect(this->type, this->track, this->index,
 		this->bypassButton->getToggleState());
 }
 
 void EffectComponent::editorShow() {
 	if (this->editorOpened) {
-		PluginEditorHub::getInstance()->closeEffect(this->track, this->index);
+		PluginEditorHub::getInstance()->closeEffect(this->type, this->track, this->index);
 	}
 	else {
-		PluginEditorHub::getInstance()->openEffect(this->track, this->index);
+		PluginEditorHub::getInstance()->openEffect(this->type, this->track, this->index);
 	}
 }
 
@@ -191,11 +276,22 @@ void EffectComponent::replaceEffect(
 		pluginDes.createIdentifierString());
 }
 
+void EffectComponent::preDrop() {
+	this->drop = true;
+	this->repaint();
+}
+
+void EffectComponent::endDrop() {
+	this->drop = false;
+	this->repaint();
+}
+
 juce::var EffectComponent::getDragSourceDescription() const {
 	auto object = std::make_unique<juce::DynamicObject>();
 
 	object->setProperty("type", (int)DragSourceType::Effect);
 	object->setProperty("name", this->name);
+	object->setProperty("trackType", this->type);
 	object->setProperty("track", this->track);
 	object->setProperty("index", this->index);
 
@@ -203,10 +299,13 @@ juce::var EffectComponent::getDragSourceDescription() const {
 }
 
 juce::String EffectComponent::createToolTip() const {
-	juce::String result =
-		"#" + juce::String{ this->index } + "\n"
-		+ TRANS("Name:") + " " + this->name + "\n"
-		+ TRANS("Bypassed:") + " " + TRANS(this->bypassButton->getToggleState() ? "No" : "Yes") + "\n";
+	juce::String result;
+
+	if (this->valid) {
+		result = "#" + juce::String{ this->index } + "\n"
+			+ TRANS("Name:") + " " + this->name + "\n"
+			+ TRANS("Bypassed:") + " " + TRANS(this->bypassButton->getToggleState() ? "No" : "Yes") + "\n";
+	}
 
 	return result;
 }

@@ -4,22 +4,31 @@
 
 class EffectComponent final
 	: public juce::Component,
-	public juce::SettableTooltipClient {
+	public juce::SettableTooltipClient,
+	public juce::DragAndDropTarget {
 public:
 	EffectComponent();
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
-	void update(int track, int index);
+	void update(int type, int track, int index);
 
 	void mouseUp(const juce::MouseEvent& event) override;
 	void mouseDrag(const juce::MouseEvent& event) override;
 
+	bool isInterestedInDragSource(
+		const SourceDetails& dragSourceDetails) override;
+	void itemDragEnter(const SourceDetails& dragSourceDetails) override;
+	void itemDragExit(const SourceDetails& dragSourceDetails) override;
+	void itemDropped(const SourceDetails& dragSourceDetails) override;
+
 private:
-	int track = -1, index = -1;
+	int type = -1, track = -1, index = -1;
 	juce::String name;
+	bool valid = false;
 	bool editorOpened = false;
+	bool drop = false;
 
 	std::unique_ptr<juce::Drawable> bypassIcon = nullptr;
 	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;
@@ -32,6 +41,9 @@ private:
 
 	void addEffect(const juce::PluginDescription& plugin);
 	void replaceEffect(const juce::PluginDescription& plugin);
+
+	void preDrop();
+	void endDrop();
 
 	juce::var getDragSourceDescription() const;
 	juce::String createToolTip() const;

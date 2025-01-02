@@ -161,6 +161,8 @@ bool PluginDock::setPluginIndex(int oldIndex, int newIndex) {
 	if (!this->insertPluginInternal(newIndex, ptr)) { return false; }
 
 	/** Callback */
+	UICallbackAPI<int, int, int, int>::invoke(
+		UICallbackType::TrackEffectIndexChanged, this->type, this->index, oldIndex, newIndex);
 	UICallbackAPI<int, int, int>::invoke(
 		UICallbackType::TrackEffectChanged, this->type, this->index, oldIndex);
 	UICallbackAPI<int, int, int>::invoke(

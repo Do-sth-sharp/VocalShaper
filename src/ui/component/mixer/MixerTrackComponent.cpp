@@ -244,8 +244,6 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	float outlineThickness = screenSize.getHeight() * 0.00125;
-	int dropLinePaddingWidth = screenSize.getWidth() * 0.001;
-	float dropLineThickness = screenSize.getHeight() * 0.0025;
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
@@ -255,8 +253,6 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 		this->dragHovered || this->hasKeyboardFocus(true)
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
-	juce::Colour dropLineColor = laf.findColour(
-		juce::Label::ColourIds::outlineWhenEditingColourId);
 
 	/** Effect Rect */
 	auto effectRect = this->effectList->getBounds();
@@ -267,19 +263,6 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	auto totalRect = this->getLocalBounds();
 	g.setColour(outlineColor);
 	g.drawRect(totalRect, outlineThickness);
-
-	/** Drop Line */
-	auto& [dropIndex, dropYPos] = this->dropItemState;
-	if (dropIndex > -1) {
-		int dropYPosLocal = dropYPos + this->effectList->getY();
-		juce::Rectangle<float> lineRect(
-			this->effectList->getX() + dropLinePaddingWidth,
-			dropYPosLocal - dropLineThickness / 2,
-			this->effectList->getWidth() - dropLinePaddingWidth * 2,
-			dropLineThickness);
-		g.setColour(dropLineColor);
-		g.fillRect(lineRect);
-	}
 }
 
 void MixerTrackComponent::update(int index) {
@@ -395,19 +378,6 @@ bool MixerTrackComponent::isInterestedInDragSource(
 		return (trackIndex >= 0) && (trackIndex != this->index);
 	}
 
-	/** From Plugins */
-	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		if (des["instrument"] || des["ara"]) { return false; }
-		return true;
-	}
-
-	/** From Effect */
-	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
-		int trackIndex = des["track"];
-		if (trackIndex != this->index) { return false; }
-		return true;
-	}
-
 	/** From Seq Midi Output */
 	if ((int)(des["type"]) == (int)(DragSourceType::SourceMidiOutput)) {
 		int seqIndex = des["track"];
@@ -427,44 +397,14 @@ void MixerTrackComponent::itemDragEnter(
 	const SourceDetails& dragSourceDetails) {
 	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
 
-	auto& des = dragSourceDetails.description;
-	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		this->preEffectDrop(dragSourceDetails.localPosition);
-	}
-	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
-		this->preEffectDrop(dragSourceDetails.localPosition);
-	}
-	else {
-		this->preDrop();
-	}
-}
-
-void MixerTrackComponent::itemDragMove(const SourceDetails& dragSourceDetails) {
-	auto& des = dragSourceDetails.description;
-	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		this->endEffectDrop();
-		this->preEffectDrop(dragSourceDetails.localPosition);
-	}
-	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
-		this->endEffectDrop();
-		this->preEffectDrop(dragSourceDetails.localPosition);
-	}
+	this->preDrop();
 }
 
 void MixerTrackComponent::itemDragExit(
 	const SourceDetails& dragSourceDetails) {
 	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
 
-	auto& des = dragSourceDetails.description;
-	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		this->endEffectDrop();
-	}
-	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
-		this->endEffectDrop();
-	}
-	else {
-		this->endDrop();
-	}
+	this->endDrop();
 }
 
 void MixerTrackComponent::itemDropped(
@@ -472,15 +412,7 @@ void MixerTrackComponent::itemDropped(
 	if (!this->isInterestedInDragSource(dragSourceDetails)) { return; }
 
 	auto& des = dragSourceDetails.description;
-	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		this->endEffectDrop();
-	}
-	else if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
-		this->endEffectDrop();
-	}
-	else {
-		this->endDrop();
-	}
+	this->endDrop();
 
 	/** From Track Audio Input */
 	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
@@ -495,35 +427,6 @@ void MixerTrackComponent::itemDropped(
 		int trackIndex = des["track"];
 
 		this->audioInput->setAudioInputFromSend(trackIndex, true);
-		return;
-	}
-
-	/** From Plugins */
-	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
-		juce::String pid = des["id"].toString();
-
-		int index = this->getInsertIndex(dragSourceDetails.localPosition);
-		if (index > -1) {
-			CoreActions::insertEffect(this->index, index, pid);
-		}
-
-		return;
-	}
-
-	/** From Effect */
-	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
-		int trackIndex = des["track"];
-		int oldIndex = des["index"];
-
-		int newIndex = this->getInsertIndex(dragSourceDetails.localPosition);
-		if (newIndex > oldIndex) {
-			newIndex--;
-		}
-
-		if (newIndex > -1) {
-			CoreActions::setEffectIndex(trackIndex, oldIndex, newIndex);
-		}
-
 		return;
 	}
 
@@ -559,31 +462,6 @@ void MixerTrackComponent::preDrop() {
 
 void MixerTrackComponent::endDrop() {
 	this->dragHovered = false;
-	this->repaint();
-}
-
-void MixerTrackComponent::preEffectDrop(const juce::Point<int>& pos) {
-	int index = this->getInsertIndex(pos);
-	if (index > -1) {
-		int yPos = 0;
-		int rowNum = this->effectListModel->getNumRows();
-		if (index < rowNum) {
-			auto rowPos = this->effectList->getRowPosition(index, true);
-			yPos = rowPos.getY();
-		}
-		else {
-			auto rowPos = this->effectList->getRowPosition(
-				rowNum - 1, true);
-			yPos = rowPos.getBottom();
-		}
-
-		this->dropItemState = { index, yPos };
-		this->repaint();
-	}
-}
-
-void MixerTrackComponent::endEffectDrop() {
-	this->dropItemState = { -1, 0 };
 	this->repaint();
 }
 
