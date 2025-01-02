@@ -106,6 +106,11 @@ CoreCallbacks::CoreCallbacks() {
 			CoreCallbackAPI<int, int, int>::invoke(
 				UICallbackType::TrackEffectChanged, trackType, trackIndex, index);
 		});
+	UICallbackAPI<int, int, int, int>::set(UICallbackType::TrackEffectIndexChanged,
+		[](int trackType, int trackIndex, int oldIndex, int newIndex) {
+			CoreCallbackAPI<int, int, int, int>::invoke(
+				UICallbackType::TrackEffectIndexChanged, trackType, trackIndex, oldIndex, newIndex);
+		});
 }
 
 void CoreCallbacks::addCallback(CallbackType type,

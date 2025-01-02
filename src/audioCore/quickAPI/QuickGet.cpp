@@ -399,6 +399,10 @@ namespace quickAPI {
 		return PluginDock::getSlotNum();
 	}
 
+	bool isEffectValid(TrackIndex trackIndex, int index) {
+		return getEffectPointer(trackIndex, index);
+	}
+
 	PluginHolder getEffectPointer(TrackIndex trackIndex, int index) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			if (auto track = graph->getTrackProcessor(trackIndex.first, trackIndex.second)) {

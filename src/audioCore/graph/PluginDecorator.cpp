@@ -215,6 +215,8 @@ void PluginDecorator::updateIndex(int trackType, int trackIndex, int index) {
 	this->trackType = trackType;
 	this->trackIndex = trackIndex;
 	this->index = index;
+
+	this->sendChangeMessage();
 }
 
 void PluginDecorator::sendChangeMessage() {

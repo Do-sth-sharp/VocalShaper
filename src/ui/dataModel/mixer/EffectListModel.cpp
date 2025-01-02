@@ -5,7 +5,7 @@
 #include "../../../audioCore/AC_API.h"
 
 int EffectListModel::getNumRows() {
-	return quickAPI::getEffectNum(this->index);
+	return quickAPI::getEffectSlotNum();
 }
 
 void EffectListModel::paintListBoxItem(
@@ -24,36 +24,16 @@ juce::Component* EffectListModel::refreshComponentForRow(int rowNumber, bool isR
 	}
 	if (!comp) { comp = new EffectComponent; }
 
-	comp->update(this->index, rowNumber);
+	comp->update(this->type, this->index, rowNumber);
 
 	return comp;
 }
 
 juce::String EffectListModel::getNameForRow(int rowNumber) {
-	return quickAPI::getEffectName(this->index, rowNumber);
+	return quickAPI::getEffectName({ (quickAPI::TrackType)this->type, this->index }, rowNumber);
 }
 
-void EffectListModel::backgroundClicked(const juce::MouseEvent& event) {
-	if (event.mods.isRightButtonDown()) {
-		auto callback = [this](const juce::PluginDescription& plugin) {
-			CoreActions::insertEffect(this->index,
-				this->getNumRows(), plugin.createIdentifierString());
-			};
-
-		auto menu = this->createBackgroundMenu(callback);
-		menu.show();
-	}
-}
-
-void EffectListModel::update(int index) {
+void EffectListModel::update(int type, int index) {
+	this->type = type;
 	this->index = index;
-}
-
-juce::PopupMenu EffectListModel::createBackgroundMenu(
-	const std::function<void(const juce::PluginDescription&)>& callback) {
-	/** Create Menu */
-	auto [valid, list] = quickAPI::getPluginList(true, false);
-	if (!valid) { return juce::PopupMenu{}; }
-	auto groups = utils::groupPlugin(list, utils::PluginGroupType::Category);
-	return utils::createPluginMenu(groups, callback);
 }

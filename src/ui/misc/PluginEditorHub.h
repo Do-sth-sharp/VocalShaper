@@ -12,9 +12,9 @@ public:
 	void closeInstr(int index);
 	bool checkInstr(int index) const;
 
-	void openEffect(int track, int index);
-	void closeEffect(int track, int index);
-	bool checkEffect(int track, int index) const;
+	void openEffect(int type, int track, int index);
+	void closeEffect(int type, int track, int index);
+	bool checkEffect(int type, int track, int index) const;
 
 	void setOpenGL(bool openGLOn);
 	void setIcon(const juce::String& path);
@@ -22,19 +22,20 @@ public:
 	void closeAll();
 
 private:
-	juce::OwnedArray<PluginEditor> instrEditors;
-	juce::OwnedArray<PluginEditor> effectEditors;
+	using RefType = uint64_t;
+	std::map<RefType, std::shared_ptr<PluginEditor>> instrEditors;
+	std::map<RefType, std::shared_ptr<PluginEditor>> effectEditors;
 	bool openGLOn = true;
 	juce::Image iconTemp;
 
-	friend class PluginEditorContent;
-	void deleteInstrEditor(PluginEditor* ptr);
-	void deleteEffectEditor(PluginEditor* ptr);
 	void closeEditor(PluginEditor* ptr);
 	void openEditor(PluginEditor* ptr);
 
-	void updateInstr();
-	void updateEffect();
+	void updateInstr(int index);
+	void updateEffect(int type, int track, int index);
+
+	RefType getInstrRef(int index) const;
+	RefType getEffectRef(int type, int track, int index) const;
 
 public:
 	static PluginEditorHub* getInstance();

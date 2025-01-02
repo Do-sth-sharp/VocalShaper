@@ -12,15 +12,11 @@ public:
 	juce::Component* refreshComponentForRow(int rowNumber, bool isRowSelected,
 		juce::Component* existingComponentToUpdate) override;
 	juce::String getNameForRow(int rowNumber) override;
-	void backgroundClicked(const juce::MouseEvent& event) override;
 
-	void update(int index);
+	void update(int type, int index);
 
 private:
-	int index = -1;
-
-	juce::PopupMenu createBackgroundMenu(
-		const std::function<void(const juce::PluginDescription&)>& callback);
+	int type = -1, index = -1;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EffectListModel)
 };
