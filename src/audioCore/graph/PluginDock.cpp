@@ -183,33 +183,18 @@ PluginDecorator* PluginDock::getPluginProcessor(int index) const {
 
 void PluginDock::setPluginBypass(int index, bool bypass) {
 	if (auto ptr = this->getPluginProcessor(index)) {
-		PluginDock::setPluginBypass(
-			PluginDecorator::SafePointer{ ptr }, bypass);
+		if (auto bypassParam = ptr->getBypassParameter()) {
+			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
+
+			/** Callback */
+			ptr->sendChangeMessage();
+		}
 	}
 }
 
 bool PluginDock::getPluginBypass(int index) const {
 	if (auto ptr = this->getPluginProcessor(index)) {
-		return PluginDock::getPluginBypass(
-			PluginDecorator::SafePointer{ ptr });
-	}
-	return false;
-}
-
-void PluginDock::setPluginBypass(PluginDecorator::SafePointer plugin, bool bypass) {
-	if (plugin) {
-		if (auto bypassParam = plugin->getBypassParameter()) {
-			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
-
-			/** Callback */
-			plugin->sendChangeMessage();
-		}
-	}
-}
-
-bool PluginDock::getPluginBypass(PluginDecorator::SafePointer plugin) {
-	if (plugin) {
-		if (auto bypassParam = plugin->getBypassParameter()) {
+		if (auto bypassParam = ptr->getBypassParameter()) {
 			return !juce::approximatelyEqual(bypassParam->getValue(), 0.0f);
 		}
 	}
@@ -360,7 +345,7 @@ bool PluginDock::parse(
 	auto& plugins = mes->plugins();
 	for (auto& i : plugins) {
 		if (auto ptr = this->insertPlugin(i.first)) {
-			PluginDock::setPluginBypass(ptr, i.second.bypassed());
+			this->setPluginBypass(i.first, i.second.bypassed());
 			if (!ptr->parse(&(i.second), config)) { return false; }
 		}
 	}
@@ -377,8 +362,7 @@ std::unique_ptr<google::protobuf::Message> PluginDock::serialize(
 		if (auto plugin = this->getPluginProcessor(i)) {
 			if (auto item = plugin->serialize(config)) {
 				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
-					plu->set_bypassed(PluginDock::getPluginBypass(
-						PluginDecorator::SafePointer{ plugin }));
+					plu->set_bypassed(this->getPluginBypass(i));
 
 					(*plugins)[i] = std::move(*plu);
 				}

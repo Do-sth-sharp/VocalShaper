@@ -5,10 +5,8 @@
 #include "../../Utils.h"
 
 PluginEditorContent::PluginEditorContent(PluginEditor* parent, 
-	const juce::String& name, PluginType type,
-	quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor)
-	: Component(name), parent(parent), plugin(plugin),
-	editor(editor), type(type) {
+	const juce::String& name, PluginType type, quickAPI::EditorPointer editor)
+	: Component(name), parent(parent), editor(editor), type(type) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::PluginEditor));
@@ -22,20 +20,17 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	}
 
 	/** Tool Bar */
-	this->toolBar = std::make_unique<PluginToolBar>(this, plugin, type);
+	this->toolBar = std::make_unique<PluginToolBar>(this, type);
 	this->addAndMakeVisible(this->toolBar.get());
 
 	/** Config Viewport */
-	this->pluginProp = std::make_unique<PluginPropComponent>(type, plugin);
+	this->pluginProp = std::make_unique<PluginPropComponent>(type);
 	this->configViewport = std::make_unique<juce::Viewport>(TRANS("Plugin Config"));
 	this->configViewport->setViewedComponent(this->pluginProp.get(), false);
 	this->configViewport->setScrollBarsShown(true, false);
 	this->configViewport->setScrollOnDragMode(
 		juce::Viewport::ScrollOnDragMode::nonHover);
 	this->addChildComponent(this->configViewport.get());
-
-	/** Update Now */
-	this->update();
 
 	/** Update Size */
 	auto size = this->getPerferedSize();
@@ -114,15 +109,16 @@ void PluginEditorContent::paint(juce::Graphics& g) {
 	g.fillAll();
 }
 
-void PluginEditorContent::update() {
-	this->toolBar->update();
-	this->pluginProp->update();
+void PluginEditorContent::update(int type, int track, int index) {
+	this->trackType = type;
+	this->track = track;
+	this->index = index;
+
+	this->toolBar->update(type, track, index);
+	this->pluginProp->update(type, track, index);
 }
 
 void PluginEditorContent::componentBeingDeleted(juce::Component&) {
-	/** Update Plugin */
-	this->update();
-
 	/** Delete From Hub */
 	this->deleteEditor();
 }
@@ -166,12 +162,12 @@ void PluginEditorContent::deleteEditor() {
 	switch (this->type) {
 	case PluginType::Instr: {
 		PluginEditorHub::getInstance()->
-			deleteInstrEditor(this->parent);
+			closeInstr(this->track);
 		break;
 	}
 	case PluginType::Effect: {
 		PluginEditorHub::getInstance()->
-			deleteEffectEditor(this->parent);
+			closeEffect(this->trackType, this->track, this->index);
 		break;
 	}
 	}
@@ -182,15 +178,15 @@ int PluginEditorContent::getToolBarHeight() const {
 	return screenSize.getHeight() * 0.03;
 }
 
-PluginEditor::PluginEditor(const juce::String& name, PluginType type,
-	quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor)
+PluginEditor::PluginEditor(const juce::String& name,
+	PluginType type, quickAPI::EditorPointer editor)
 	: DocumentWindow(name, juce::LookAndFeel::getDefaultLookAndFeel().findColour(
 		juce::ResizableWindow::ColourIds::backgroundColourId), 
 		juce::DocumentWindow::allButtons, true) {
 	this->setUsingNativeTitleBar(true);
 
 	auto content = new PluginEditorContent{
-			this, name, type, plugin, editor };
+			this, name, type, editor };
 	this->setContentOwned(content, true);
 
 	bool resizable = content->isResizable();
@@ -210,9 +206,9 @@ quickAPI::EditorPointer PluginEditor::getEditor() const {
 	return nullptr;
 }
 
-void PluginEditor::update() {
+void PluginEditor::update(int type, int track, int index) {
 	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
-		return ptr->update();
+		return ptr->update(type, track, index);
 	}
 }
 

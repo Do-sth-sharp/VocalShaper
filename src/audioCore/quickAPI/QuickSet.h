@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-#include "QuickGet.h"
 #include "../misc/Device.h"
 
 namespace quickAPI {
@@ -26,10 +25,6 @@ namespace quickAPI {
 	void setSIMDLevel(int level);
 
 	using MIDICCListener = std::function<void(int)>;
-	void setInstrMIDICCListener(PluginHolder pointer, const MIDICCListener& listener);
-	void setEffectMIDICCListener(PluginHolder pointer, const MIDICCListener& listener);
-	void clearInstrMIDICCListener(PluginHolder pointer);
-	void clearEffectMIDICCListener(PluginHolder pointer);
 	void setMainMIDICCListener(const MIDICCListener& listener);
 	void clearMainMIDICCListener();
 

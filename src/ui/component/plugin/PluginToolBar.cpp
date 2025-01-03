@@ -5,9 +5,8 @@
 #include "../../Utils.h"
 #include <IconManager.h>
 
-PluginToolBar::PluginToolBar(PluginEditorContent* parent,
-	quickAPI::PluginHolder plugin, PluginType type)
-	: parent(parent), plugin(plugin), type(type) {
+PluginToolBar::PluginToolBar(PluginEditorContent* parent, PluginType type)
+	: parent(parent), type(type) {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::PluginEditor));
@@ -225,44 +224,41 @@ void PluginToolBar::resized() {
 	this->moreButton->setVisible(showMoreButton);
 }
 
-void PluginToolBar::update() {
-	if (this->plugin) {
-		this->bypassButton->setEnabled(true);
+void PluginToolBar::update(int type, int track, int index) {
+	this->trackType = type;
+	this->track = track;
+	this->index = index;
 
-		switch (this->type) {
-		case PluginType::Instr: {
-			this->bypassButton->setToggleState(
-				!quickAPI::getInstrBypass(this->plugin),
-				juce::NotificationType::dontSendNotification);
-			break;
-		}
-		case PluginType::Effect: {
-			this->bypassButton->setToggleState(
-				!quickAPI::getEffectBypass(this->plugin),
-				juce::NotificationType::dontSendNotification);
-			break;
-		}
-		}
+	this->bypassButton->setEnabled(true);
+
+	switch (this->type) {
+	case PluginType::Instr: {
+		this->bypassButton->setToggleState(
+			!quickAPI::getInstrBypass(track),
+			juce::NotificationType::dontSendNotification);
+		break;
 	}
-	else {
-		this->bypassButton->setEnabled(false);
+	case PluginType::Effect: {
+		this->bypassButton->setToggleState(
+			!quickAPI::getEffectBypass({ (quickAPI::TrackType)type, track }, index),
+			juce::NotificationType::dontSendNotification);
+		break;
+	}
 	}
 }
 
 void PluginToolBar::bypass() {
-	if (this->plugin) {
-		switch (this->type) {
-		case PluginType::Instr: {
-			CoreActions::bypassInstr(this->plugin,
-				this->bypassButton->getToggleState());
-			break;
-		}
-		case PluginType::Effect: {
-			CoreActions::bypassEffect(this->plugin,
-				this->bypassButton->getToggleState());
-			break;
-		}
-		}
+	switch (this->type) {
+	case PluginType::Instr: {
+		CoreActions::bypassInstr(this->track,
+			this->bypassButton->getToggleState());
+		break;
+	}
+	case PluginType::Effect: {
+		CoreActions::bypassEffect(this->trackType, this->track, this->index,
+			this->bypassButton->getToggleState());
+		break;
+	}
 	}
 }
 
@@ -281,14 +277,32 @@ void PluginToolBar::pin() {
 }
 
 void PluginToolBar::load() {
-	if (this->plugin) {
-		CoreActions::loadPluginPresetGUI(this->plugin);
+	switch (this->type) {
+	case PluginType::Instr: {
+		CoreActions::loadInstrPresetGUI(this->track,
+			this->bypassButton->getToggleState());
+		break;
+	}
+	case PluginType::Effect: {
+		CoreActions::loadEffectPresetGUI(this->trackType, this->track, this->index,
+			this->bypassButton->getToggleState());
+		break;
+	}
 	}
 }
 
 void PluginToolBar::save() {
-	if (this->plugin) {
-		CoreActions::savePluginPresetGUI(this->plugin);
+	switch (this->type) {
+	case PluginType::Instr: {
+		CoreActions::saveInstrPresetGUI(this->track,
+			this->bypassButton->getToggleState());
+		break;
+	}
+	case PluginType::Effect: {
+		CoreActions::saveEffectPresetGUI(this->trackType, this->track, this->index,
+			this->bypassButton->getToggleState());
+		break;
+	}
 	}
 }
 

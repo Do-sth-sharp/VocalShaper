@@ -1,10 +1,9 @@
 ﻿#include "PluginAutomationModel.h"
 #include "../../misc/CoreActions.h"
+#include "../../../audioCore/AC_API.h"
 
-PluginAutomationModel::PluginAutomationModel(
-	quickAPI::PluginHolder plugin, PluginType type)
-	: lookAndFeel(juce::LookAndFeel::getDefaultLookAndFeel()),
-	plugin(plugin), type(type) {}
+PluginAutomationModel::PluginAutomationModel(PluginType type)
+	: lookAndFeel(juce::LookAndFeel::getDefaultLookAndFeel()), type(type) {}
 
 int PluginAutomationModel::getNumRows() {
 	return this->listTemp.size();
@@ -88,29 +87,30 @@ void PluginAutomationModel::deleteKeyPressed(int lastRowSelected) {
 	this->removeItem(lastRowSelected);
 }
 
-void PluginAutomationModel::update() {
+void PluginAutomationModel::update(int type, int track, int index) {
+	this->trackType = type;
+	this->track = track;
+	this->index = index;
+
 	/** Clear Current */
 	this->listTemp.clear();
-	
-	/** Check Plugin Valid */
-	if (!this->plugin) { return; }
 
 	/** Get Temp List */
 	switch (this->type) {
 	case PluginType::Instr: {
-		auto links = quickAPI::getInstrParamCCLink(this->plugin);
+		auto links = quickAPI::getInstrParamCCLinks(track);
 		for (auto& [param, cc] : links) {
 			this->listTemp.add({ param,
-				quickAPI::getInstrParamName(this->plugin, param),
+				quickAPI::getInstrParamName(track, param),
 				cc, quickAPI::getMIDICCChannelName(cc) });
 		}
 		break;
 	}
 	case PluginType::Effect: {
-		auto links = quickAPI::getEffectParamCCLink(this->plugin);
+		auto links = quickAPI::getEffectParamCCLinks({ (quickAPI::TrackType)type, track }, index);
 		for (auto& [param, cc] : links) {
 			this->listTemp.add({ param,
-				quickAPI::getEffectParamName(this->plugin, param),
+				quickAPI::getEffectParamName({ (quickAPI::TrackType)type, track }, index, param),
 				cc, quickAPI::getMIDICCChannelName(cc) });
 		}
 		break;
@@ -125,47 +125,45 @@ void PluginAutomationModel::update() {
 }
 
 void PluginAutomationModel::addItem() {
-	if (!this->plugin) { return; }
-
 	switch (this->type) {
 	case PluginType::Instr: {
-		CoreActions::addInstrParamCCLinkGUI(this->plugin);
+		CoreActions::addInstrParamCCLinkGUI(this->track);
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::addEffectParamCCLinkGUI(this->plugin);
+		CoreActions::addEffectParamCCLinkGUI(this->trackType, this->track, this->index);
 		break;
 	}
 	}
 }
 
 void PluginAutomationModel::editItem(int itemIndex) {
-	if (!this->plugin) { return; }
 	auto& [param, paramName, cc, ccName] = this->listTemp.getReference(itemIndex);
 
 	switch (this->type) {
 	case PluginType::Instr: {
-		CoreActions::editInstrParamCCLinkGUI(this->plugin, param, cc);
+		CoreActions::editInstrParamCCLinkGUI(this->track, param, cc);
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::editEffectParamCCLinkGUI(this->plugin, param, cc);
+		CoreActions::editEffectParamCCLinkGUI(
+			this->trackType, this->track, this->index, param, cc);
 		break;
 	}
 	}
 }
 
 void PluginAutomationModel::removeItem(int itemIndex) {
-	if (!this->plugin) { return; }
 	auto& [param, paramName, cc, ccName] = this->listTemp.getReference(itemIndex);
 
 	switch (this->type) {
 	case PluginType::Instr: {
-		CoreActions::removeInstrParamCCLink(this->plugin, cc);
+		CoreActions::removeInstrParamCCLink(this->track, cc);
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::removeEffectParamCCLink(this->plugin, cc);
+		CoreActions::removeEffectParamCCLink(
+			this->trackType, this->track, this->index, cc);
 		break;
 	}
 	}

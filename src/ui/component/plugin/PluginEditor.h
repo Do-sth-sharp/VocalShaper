@@ -13,8 +13,8 @@ class PluginEditorContent final
 	: public juce::Component,
 	public juce::ComponentListener {
 public:
-	PluginEditorContent(PluginEditor* parent, const juce::String& name, PluginType type,
-		quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor);
+	PluginEditorContent(PluginEditor* parent, const juce::String& name,
+		PluginType type, quickAPI::EditorPointer editor);
 	~PluginEditorContent();
 
 	quickAPI::EditorPointer getEditor() const;
@@ -24,13 +24,14 @@ public:
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
-	void update();
+	void update(int type, int track, int index);
 
 private:
 	PluginEditor* const parent;
-	const quickAPI::PluginHolder plugin;
 	const quickAPI::EditorPointer editor;
 	const PluginType type;
+
+	int trackType = -1, track = -1, index = -1;
 
 	std::unique_ptr<PluginToolBar> toolBar = nullptr;
 	std::unique_ptr<juce::Viewport> configViewport = nullptr;
@@ -58,13 +59,13 @@ private:
 class PluginEditor final : public juce::DocumentWindow {
 public:
 	PluginEditor() = delete;
-	PluginEditor(const juce::String& name, PluginType type,
-		quickAPI::PluginHolder plugin, quickAPI::EditorPointer editor);
+	PluginEditor(const juce::String& name,
+		PluginType type, quickAPI::EditorPointer editor);
 	~PluginEditor();
 
 	quickAPI::EditorPointer getEditor() const;
 
-	void update();
+	void update(int type, int track, int index);
 	void sizeChanged();
 
 	void setOpenGL(bool openGLOn);

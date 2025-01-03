@@ -26,59 +26,53 @@ PluginEditorHub::~PluginEditorHub() {
 void PluginEditorHub::openInstr(int index) {
 	if (this->checkInstr(index)) { return; }
 
-	if (auto plugin = quickAPI::getInstrPointer(index)) {
-		if (auto editor = quickAPI::getInstrEditor(plugin)) {
-			/** Create */
-			auto container = std::make_shared<PluginEditor>(
-				quickAPI::getInstrName(plugin),
-				PluginType::Instr, plugin, editor);
-			container->setOpenGL(this->openGLOn);
-			container->setWindowIcon(this->iconTemp);
+	if (auto editor = quickAPI::getInstrEditor(index)) {
+		/** Create */
+		auto container = std::make_shared<PluginEditor>(
+			quickAPI::getInstrName(index),
+			PluginType::Instr, editor);
+		container->setOpenGL(this->openGLOn);
+		container->setWindowIcon(this->iconTemp);
 
-			container->update(index);
+		container->update(0, index, 0);
 
-			/** Show */
-			this->openEditor(container.get());
+		/** Show */
+		this->openEditor(container.get());
 
-			/** Add To List */
-			this->instrEditors.insert({ this->getInstrRef(index), container });
+		/** Add To List */
+		this->instrEditors.insert({ this->getInstrRef(index), container });
 
-			/** Callback */
-			CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
-		}
+		/** Callback */
+		CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
 	}
 }
 
 void PluginEditorHub::closeInstr(int index) {
-	if (auto plugin = quickAPI::getInstrPointer(index)) {
-		if (auto editor = quickAPI::getInstrEditor(plugin)) {
-			auto it = this->instrEditors.find(this->getInstrRef(index));
-			if (it != this->instrEditors.end()) {
-				auto container = it->second;
-				if (container->getEditor() == editor) {
-					/** Close */
-					this->closeEditor(container.get());
+	if (auto editor = quickAPI::getInstrEditor(index)) {
+		auto it = this->instrEditors.find(this->getInstrRef(index));
+		if (it != this->instrEditors.end()) {
+			auto container = it->second;
+			if (container->getEditor() == editor) {
+				/** Close */
+				this->closeEditor(container.get());
 
-					/** Remove From List */
-					this->instrEditors.erase(it);
+				/** Remove From List */
+				this->instrEditors.erase(it);
 
-					/** Callback */
-					CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
-				}
+				/** Callback */
+				CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
 			}
 		}
 	}
 }
 
 bool PluginEditorHub::checkInstr(int index) const {
-	if (auto plugin = quickAPI::getInstrPointer(index)) {
-		if (auto editor = quickAPI::getInstrEditorExists(plugin)) {
-			auto it = this->instrEditors.find(this->getInstrRef(index));
-			if (it != this->instrEditors.end()) {
-				auto container = it->second;
-				if (container->getEditor() == editor) {
-					return true;
-				}
+	if (auto editor = quickAPI::getInstrEditorExists(index)) {
+		auto it = this->instrEditors.find(this->getInstrRef(index));
+		if (it != this->instrEditors.end()) {
+			auto container = it->second;
+			if (container->getEditor() == editor) {
+				return true;
 			}
 		}
 	}
@@ -88,61 +82,55 @@ bool PluginEditorHub::checkInstr(int index) const {
 void PluginEditorHub::openEffect(int type, int track, int index) {
 	if (this->checkEffect(type, track, index)) { return; }
 
-	if (auto plugin = quickAPI::getEffectPointer({ (quickAPI::TrackType)type, track }, index)) {
-		if (auto editor = quickAPI::getEffectEditor(plugin)) {
-			/** Create */
-			auto container = std::make_shared<PluginEditor>(
-				quickAPI::getEffectName(plugin),
-				PluginType::Effect, plugin, editor);
-			container->setOpenGL(this->openGLOn);
-			container->setWindowIcon(this->iconTemp);
+	if (auto editor = quickAPI::getEffectEditor({ (quickAPI::TrackType)type, track }, index)) {
+		/** Create */
+		auto container = std::make_shared<PluginEditor>(
+			quickAPI::getEffectName({ (quickAPI::TrackType)type, track }, index),
+			PluginType::Effect, editor);
+		container->setOpenGL(this->openGLOn);
+		container->setWindowIcon(this->iconTemp);
 
-			container->update(type, track, index);
+		container->update(type, track, index);
 
-			/** Show */
-			this->openEditor(container.get());
+		/** Show */
+		this->openEditor(container.get());
 
-			/** Add To List */
-			this->effectEditors.insert({ this->getEffectRef(type, track, index), container });
+		/** Add To List */
+		this->effectEditors.insert({ this->getEffectRef(type, track, index), container });
 
-			/** Callback */
-			CoreCallbackAPI<int, int, int>::invoke(
-				CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
-		}
+		/** Callback */
+		CoreCallbackAPI<int, int, int>::invoke(
+			CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
 	}
 }
 
 void PluginEditorHub::closeEffect(int type, int track, int index) {
-	if (auto plugin = quickAPI::getEffectPointer({ (quickAPI::TrackType)type, track }, index)) {
-		if (auto editor = quickAPI::getEffectEditor(plugin)) {
-			auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
-			if (it != this->effectEditors.end()) {
-				auto container = it->second;
-				if (container->getEditor() == editor) {
-					/** Close */
-					this->closeEditor(container.get());
+	if (auto editor = quickAPI::getEffectEditor({ (quickAPI::TrackType)type, track }, index)) {
+		auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
+		if (it != this->effectEditors.end()) {
+			auto container = it->second;
+			if (container->getEditor() == editor) {
+				/** Close */
+				this->closeEditor(container.get());
 
-					/** Remove From List */
-					this->effectEditors.erase(it);
+				/** Remove From List */
+				this->effectEditors.erase(it);
 
-					/** Callback */
-					CoreCallbackAPI<int, int, int>::invoke(
-						CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
-				}
+				/** Callback */
+				CoreCallbackAPI<int, int, int>::invoke(
+					CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
 			}
 		}
 	}
 }
 
 bool PluginEditorHub::checkEffect(int type, int track, int index) const {
-	if (auto plugin = quickAPI::getEffectPointer({ (quickAPI::TrackType)type, track }, index)) {
-		if (auto editor = quickAPI::getEffectEditorExists(plugin)) {
-			auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
-			if (it != this->effectEditors.end()) {
-				auto container = it->second;
-				if (container->getEditor() == editor) {
-					return true;
-				}
+	if (auto editor = quickAPI::getEffectEditorExists({ (quickAPI::TrackType)type, track }, index)) {
+		auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
+		if (it != this->effectEditors.end()) {
+			auto container = it->second;
+			if (container->getEditor() == editor) {
+				return true;
 			}
 		}
 	}
@@ -202,7 +190,7 @@ void PluginEditorHub::updateInstr(int index) {
 	if (auto ref = this->getInstrRef(index)) {
 		auto it = this->instrEditors.find(ref);
 		if (it != this->instrEditors.end()) {
-			it->second->update(index);
+			it->second->update(0, index, 0);
 		}
 	}
 }
@@ -217,13 +205,12 @@ void PluginEditorHub::updateEffect(int type, int track, int index) {
 }
 
 PluginEditorHub::RefType PluginEditorHub::getInstrRef(int index) const {
-	auto ptr = quickAPI::getInstrPointer(index);
-	return reinterpret_cast<RefType>(ptr.getPlugin());
+	return static_cast<RefType>(quickAPI::getInstrRef(index));
 }
 
 PluginEditorHub::RefType PluginEditorHub::getEffectRef(int type, int track, int index) const {
-	auto ptr = quickAPI::getEffectPointer({ (quickAPI::TrackType)type, track }, index);
-	return reinterpret_cast<RefType>(ptr.getPlugin());
+	return static_cast<RefType>(
+		quickAPI::getEffectRef({ (quickAPI::TrackType)type, track }, index));
 }
 
 PluginEditorHub* PluginEditorHub::getInstance() {

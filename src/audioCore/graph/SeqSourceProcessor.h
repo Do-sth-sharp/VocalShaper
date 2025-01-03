@@ -42,8 +42,6 @@ public:
 	PluginDecorator* getInstrProcessor() const;
 	void setInstrumentBypass(bool bypass);
 	bool getInstrumentBypass() const;
-	static void setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass);
-	static bool getInstrumentBypass(PluginDecorator::SafePointer instr);
 	void setInstrOffline(bool offline);
 	bool getInstrOffline() const;
 

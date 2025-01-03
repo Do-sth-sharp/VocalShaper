@@ -75,34 +75,6 @@ namespace quickAPI {
 		vMath::setInsType((vMath::InsType)(level));
 	}
 
-	static void setPluginMIDICCListener(PluginHolder pointer, const MIDICCListener& listener) {
-		if (pointer) {
-			pointer->setMIDICCListener(listener);
-		}
-	}
-
-	static void clearPluginMIDICCListener(PluginHolder pointer) {
-		if (pointer) {
-			pointer->clearMIDICCListener();
-		}
-	}
-
-	void setInstrMIDICCListener(PluginHolder pointer, const MIDICCListener& listener) {
-		setPluginMIDICCListener(pointer, listener);
-	}
-
-	void setEffectMIDICCListener(PluginHolder pointer, const MIDICCListener& listener) {
-		setPluginMIDICCListener(pointer, listener);
-	}
-
-	void clearInstrMIDICCListener(PluginHolder pointer) {
-		clearPluginMIDICCListener(pointer);
-	}
-
-	void clearEffectMIDICCListener(PluginHolder pointer) {
-		clearPluginMIDICCListener(pointer);
-	}
-
 	void setMainMIDICCListener(const MIDICCListener& listener) {
 		if (auto graph = AudioCore::getInstance()->getGraph()) {
 			graph->setMIDICCListener(listener);

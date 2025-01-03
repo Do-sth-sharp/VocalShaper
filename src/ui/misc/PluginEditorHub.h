@@ -23,8 +23,8 @@ public:
 
 private:
 	using RefType = uint64_t;
-	std::map<RefType, std::shared_ptr<PluginEditor>> instrEditors;
-	std::map<RefType, std::shared_ptr<PluginEditor>> effectEditors;
+	std::unordered_map<RefType, std::shared_ptr<PluginEditor>> instrEditors;
+	std::unordered_map<RefType, std::shared_ptr<PluginEditor>> effectEditors;
 	bool openGLOn = true;
 	juce::Image iconTemp;
 

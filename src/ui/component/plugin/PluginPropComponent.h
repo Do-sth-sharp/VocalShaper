@@ -3,24 +3,22 @@
 #include <JuceHeader.h>
 #include "../../dataModel/plugin/PluginAutomationModel.h"
 #include "../../misc/PluginType.h"
-#include "../../../audioCore/AC_API.h"
 
 class PluginPropComponent final : public juce::Component {
 public:
 	PluginPropComponent() = delete;
-	PluginPropComponent(
-		PluginType type, quickAPI::PluginHolder plugin);
+	PluginPropComponent(PluginType type);
 
 	int getPreferedHeight() const;
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
-	void update();
+	void update(int type, int track, int index);
 
 private:
 	const PluginType type;
-	const quickAPI::PluginHolder plugin;
+	int trackType = -1, track = -1, index = -1;
 
 	juce::String midiTitle, automaticTitle, channelLabel;
 	std::unique_ptr<juce::ComboBox> midiChannel = nullptr;
