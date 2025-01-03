@@ -8,17 +8,17 @@ class PluginEditorContent;
 
 class PluginToolBar final : public juce::Component {
 public:
-	PluginToolBar(PluginEditorContent* parent,
-		quickAPI::PluginHolder plugin, PluginType type);
+	PluginToolBar(PluginEditorContent* parent, PluginType type);
 
 	void resized() override;
 
-	void update();
+	void update(int type, int track, int index);
 
 private:
 	PluginEditorContent* const parent = nullptr;
-	const quickAPI::PluginHolder plugin;
 	const PluginType type;
+
+	int trackType = -1, track = -1, index = -1;
 
 	std::unique_ptr<juce::Drawable> bypassIcon = nullptr;
 	std::unique_ptr<juce::Drawable> bypassIconOn = nullptr;

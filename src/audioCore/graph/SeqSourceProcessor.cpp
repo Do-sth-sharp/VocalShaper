@@ -237,36 +237,23 @@ void SeqSourceProcessor::setInstrumentBypass(bool bypass) {
 	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
 
 	if (this->instr) {
-		SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{
-			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) }, bypass);
+		if (auto processor = dynamic_cast<PluginDecorator*>(this->instr->getProcessor())) {
+			if (auto bypassParam = processor->getBypassParameter()) {
+				bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
+
+				/** Callback */
+				processor->sendChangeMessage();
+			}
+		}
 	}
 }
 
 bool SeqSourceProcessor::getInstrumentBypass() const {
 	if (this->instr) {
-		return SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer{
-			dynamic_cast<PluginDecorator*>(this->instr->getProcessor()) });
-	}
-	return false;
-}
-
-void SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer instr, bool bypass) {
-	juce::ScopedWriteLock pluginLocker(audioLock::getPluginLock());
-
-	if (instr) {
-		if (auto bypassParam = instr->getBypassParameter()) {
-			bypassParam->setValueNotifyingHost(bypass ? 1.0f : 0.0f);
-
-			/** Callback */
-			instr->sendChangeMessage();
-		}
-	}
-}
-
-bool SeqSourceProcessor::getInstrumentBypass(PluginDecorator::SafePointer instr) {
-	if (instr) {
-		if (auto bypassParam = instr->getBypassParameter()) {
-			return !juce::approximatelyEqual(bypassParam->getValue(), 0.0f);
+		if (auto processor = dynamic_cast<PluginDecorator*>(this->instr->getProcessor())) {
+			if (auto bypassParam = processor->getBypassParameter()) {
+				return !juce::approximatelyEqual(bypassParam->getValue(), 0.0f);
+			}
 		}
 	}
 	return false;
@@ -710,7 +697,7 @@ bool SeqSourceProcessor::parse(
 		auto& instr = mes->instr();
 
 		if (auto plugin = this->prepareInstr()) {
-			SeqSourceProcessor::setInstrumentBypass(PluginDecorator::SafePointer{ plugin }, instr.bypassed());
+			this->setInstrumentBypass(instr.bypassed());
 			if (!plugin->parse(&instr, config)) { return false; }
 		}
 	}
@@ -748,8 +735,7 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
 		if (auto plugin = dynamic_cast<PluginDecorator*>(this->instr->getProcessor())) {
 			if (auto item = plugin->serialize(config)) {
 				if (auto plu = dynamic_cast<vsp4::Plugin*>(item.get())) {
-					plu->set_bypassed(SeqSourceProcessor::getInstrumentBypass(
-						PluginDecorator::SafePointer{ plugin }));
+					plu->set_bypassed(this->getInstrumentBypass());
 
 					mes->set_allocated_instr(dynamic_cast<vsp4::Plugin*>(item.release()));
 				}

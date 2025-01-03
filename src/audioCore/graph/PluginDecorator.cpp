@@ -398,6 +398,19 @@ void PluginDecorator::removeCCParamConnection(int CCIndex) {
 //	this->paramListenningCC = paramIndex;
 //}
 
+const juce::Array<PluginDecorator::PluginParamLink>
+PluginDecorator::getParamCCLinks() const {
+	juce::Array<PluginParamLink> result;
+
+	for (int i = 0; i < this->paramCCList.size(); i++) {
+		if (this->paramCCList[i] > -1) {
+			result.add({ this->paramCCList[i], i });
+		}
+	}
+
+	return result;
+}
+
 void PluginDecorator::setMIDICCIntercept(bool midiCCShouldIntercept) {
 	this->midiCCShouldIntercept = midiCCShouldIntercept;
 

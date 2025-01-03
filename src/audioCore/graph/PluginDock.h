@@ -35,8 +35,6 @@ public:
 	PluginDecorator* getPluginProcessor(int index) const;
 	void setPluginBypass(int index, bool bypass);
 	bool getPluginBypass(int index) const;
-	static void setPluginBypass(PluginDecorator::SafePointer plugin, bool bypass);
-	static bool getPluginBypass(PluginDecorator::SafePointer plugin);
 
 	/**
 	 * @brief	Add an audio input bus onto the plugin dock.

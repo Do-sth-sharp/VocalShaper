@@ -60,6 +60,9 @@ public:
 	int getParamCCConnection(int paramIndex) const;
 	void removeCCParamConnection(int CCIndex);
 	//void setParamCCListenning(int paramIndex);
+	/** Param Index，CC Channel */
+	using PluginParamLink = std::tuple<int, int>;
+	const juce::Array<PluginParamLink> getParamCCLinks() const;
 
 	void setMIDICCIntercept(bool midiCCShouldIntercept);
 	bool getMIDICCIntercept() const;

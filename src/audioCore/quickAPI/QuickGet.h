@@ -67,51 +67,48 @@ namespace quickAPI {
 	const juce::Array<BusType> createAllBusTypeWithName();
 	const juce::Array<BusType> getAllBusTypeWithName();
 
-	using PluginHolder = PluginDecorator::SafePointer;
+	using PluginRef = uint64_t;
 	using EditorPointer = juce::Component::SafePointer<juce::AudioProcessorEditor>;
 
-	/** Param Index，CC Channel  */
+	/** Param Index，CC Channel */
 	using PluginParamLink = std::tuple<int, int>;
 
 	using TrackType = Track::TrackType;
 	using TrackIndex = MainGraph::TrackIndex;
 
-	const juce::String getPluginIdentifier(PluginHolder pointer);
+	/*const juce::String getPluginIdentifier(PluginHolder pointer);*/
 
-	PluginHolder getInstrPointer(int index);
+	PluginRef getInstrRef(int index);
 	bool isInstrValid(int index);
 	const juce::String getInstrName(int index);
 	bool getInstrBypass(int index);
 	bool getInstrOffline(int index);
 	EditorPointer getInstrEditor(int index);
-	const juce::String getInstrName(PluginHolder pointer);
-	bool getInstrBypass(PluginHolder pointer);
-	EditorPointer getInstrEditor(PluginHolder pointer);
-	EditorPointer getInstrEditorExists(PluginHolder pointer);
-	int getInstrMIDIChannel(PluginHolder pointer);
-	bool getInstrMIDICCIntercept(PluginHolder pointer);
-	bool getInstrMIDIOutput(PluginHolder pointer);
-	const juce::Array<PluginParamLink> getInstrParamCCLink(PluginHolder pointer);
-	const juce::String getInstrParamName(PluginHolder pointer, int paramIndex);
-	const juce::StringArray getInstrParamList(PluginHolder pointer);
+	EditorPointer getInstrEditorExists(int index);
+	int getInstrMIDIChannel(int index);
+	bool getInstrMIDICCIntercept(int index);
+	bool getInstrMIDIOutput(int index);
+	const juce::Array<PluginParamLink> getInstrParamCCLinks(int index);
+	const juce::String getInstrParamName(int index, int paramIndex);
+	const juce::StringArray getInstrParamList(int index);
+	const juce::String getInstrIdentifier(int index);
 
 	int getEffectSlotNum();
 	bool isEffectValid(TrackIndex trackIndex, int index);
-	PluginHolder getEffectPointer(TrackIndex trackIndex, int index);
+	PluginRef getEffectRef(TrackIndex trackIndex, int index);
 	const juce::String getEffectName(TrackIndex trackIndex, int index);
 	bool getEffectBypass(TrackIndex trackIndex, int index);
-	const juce::String getEffectName(PluginHolder pointer);
-	bool getEffectBypass(PluginHolder pointer);
-	EditorPointer getEffectEditor(PluginHolder pointer);
-	EditorPointer getEffectEditorExists(PluginHolder pointer);
-	int getEffectMIDIChannel(PluginHolder pointer);
-	bool getEffectMIDICCIntercept(PluginHolder pointer);
-	bool getEffectMIDIOutput(PluginHolder pointer);
-	const juce::Array<PluginParamLink> getEffectParamCCLink(PluginHolder pointer);
-	const juce::String getEffectParamName(PluginHolder pointer, int paramIndex);
-	const juce::StringArray getEffectParamList(PluginHolder pointer);
+	EditorPointer getEffectEditor(TrackIndex trackIndex, int index);
+	EditorPointer getEffectEditorExists(TrackIndex trackIndex, int index);
+	int getEffectMIDIChannel(TrackIndex trackIndex, int index);
+	bool getEffectMIDICCIntercept(TrackIndex trackIndex, int index);
+	bool getEffectMIDIOutput(TrackIndex trackIndex, int index);
+	const juce::Array<PluginParamLink> getEffectParamCCLinks(TrackIndex trackIndex, int index);
+	const juce::String getEffectParamName(TrackIndex trackIndex, int index, int paramIndex);
+	const juce::StringArray getEffectParamList(TrackIndex trackIndex, int index);
 	const juce::AudioChannelSet getEffectChannelSet(TrackIndex trackIndex, int index);
 	int getEffectInputChannelNum(TrackIndex trackIndex, int index);
+	const juce::String getEffectIdentifier(TrackIndex trackIndex, int index);
 
 	using AudioChannelLinkList = MainGraph::AudioChannelLinkList;
 	using SendDst = MainGraph::SendDst;

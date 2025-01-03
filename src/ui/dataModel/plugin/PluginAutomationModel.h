@@ -2,13 +2,11 @@
 
 #include <JuceHeader.h>
 #include "../../misc/PluginType.h"
-#include "../../../audioCore/AC_API.h"
 
 class PluginAutomationModel final : public juce::TableListBoxModel {
 public:
 	PluginAutomationModel() = delete;
-	PluginAutomationModel(
-		quickAPI::PluginHolder plugin, PluginType type);
+	PluginAutomationModel(PluginType type);
 
 	int getNumRows() override;
 	void paintRowBackground(juce::Graphics&, int rowNumber,
@@ -21,12 +19,13 @@ public:
 	void sortOrderChanged(int newSortColumnId, bool isForwards) override;
 	void deleteKeyPressed(int lastRowSelected) override;
 
-	void update();
+	void update(int type, int track, int index);
 
 private:
 	juce::LookAndFeel& lookAndFeel;
-	const quickAPI::PluginHolder plugin;
 	const PluginType type;
+
+	int trackType = -1, track = -1, index = -1;
 
 	/** Param Index, Param Name, CC Channel, CC Channel Name */
 	using TempItem = std::tuple<int, juce::String, int, juce::String>;
