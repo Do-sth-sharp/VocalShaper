@@ -491,6 +491,56 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSetEffectMidiCCIntercept)
 };
 
+class ActionSetInstrMidiOutput final : public ActionUndoableBase {
+public:
+	ActionSetInstrMidiOutput() = delete;
+	ActionSetInstrMidiOutput(
+		int instr, bool output);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "Set Instr Midi Output";
+	};
+	ActionType getActionType() const override { return ActionType::ActionSetInstrMidiOutput; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const int instr;
+	const bool output;
+
+	bool oldOutput = 0;
+
+	JUCE_LEAK_DETECTOR(ActionSetInstrMidiOutput)
+};
+
+class ActionSetEffectMidiOutput final : public ActionUndoableBase {
+public:
+	ActionSetEffectMidiOutput() = delete;
+	ActionSetEffectMidiOutput(
+		quickAPI::TrackIndex track, int effect, bool intercept);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "Set Effect Midi Output";
+	};
+	ActionType getActionType() const override { return ActionType::ActionSetEffectMidiOutput; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const quickAPI::TrackIndex track;
+	const int effect;
+	const bool output;
+
+	bool oldOutput = 0;
+
+	JUCE_LEAK_DETECTOR(ActionSetEffectMidiOutput)
+};
+
+
 class ActionSetTrackName final : public ActionUndoableBase {
 public:
 	ActionSetTrackName() = delete;

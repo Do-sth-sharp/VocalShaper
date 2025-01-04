@@ -780,6 +780,106 @@ void ActionSetEffectMidiCCIntercept::getRecoveryData(juce::MemoryOutputStream& s
 	stream.writeBool(this->oldIntercept);
 }
 
+ActionSetInstrMidiOutput::ActionSetInstrMidiOutput(
+	int instr, bool output)
+	: instr(instr), output(output) {
+}
+
+bool ActionSetInstrMidiOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
+			if (auto seq = track->getSequencer()) {
+				if (auto instr = seq->getInstrProcessor()) {
+					this->oldOutput = instr->getMIDIOutput();
+
+					instr->setMIDIOutput(this->output);
+
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionSetInstrMidiOutput::undoAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(MainGraph::TrackType::Track, this->instr)) {
+			if (auto seq = track->getSequencer()) {
+				if (auto instr = seq->getInstrProcessor()) {
+					instr->setMIDIOutput(this->oldOutput);
+
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+const juce::String ActionSetInstrMidiOutput::getStatusStr() const {
+	return "[" + juce::String{ this->instr } + "] " + juce::String{ this->output ? "ON" : "OFF" };
+}
+
+void ActionSetInstrMidiOutput::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->instr);
+	stream.writeBool(this->output);
+	stream.writeBool(this->oldOutput);
+}
+
+ActionSetEffectMidiOutput::ActionSetEffectMidiOutput(
+	quickAPI::TrackIndex track, int effect, bool output)
+	: track(track), effect(effect), output(output) {
+}
+
+bool ActionSetEffectMidiOutput::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			if (auto mixer = track->getMixer()) {
+				if (auto pluginDock = mixer->getPluginDock()) {
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						this->oldOutput = effect->getMIDIOutput();
+
+						effect->setMIDIOutput(this->output);
+
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionSetEffectMidiOutput::undoAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			if (auto mixer = track->getMixer()) {
+				if (auto pluginDock = mixer->getPluginDock()) {
+					if (auto effect = pluginDock->getPluginProcessor(this->effect)) {
+						effect->setMIDIOutput(this->oldOutput);
+
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+const juce::String ActionSetEffectMidiOutput::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->effect } + "] " + juce::String{ this->output ? "ON" : "OFF" };
+}
+
+void ActionSetEffectMidiOutput::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeInt(this->effect);
+	stream.writeBool(this->output);
+	stream.writeBool(this->oldOutput);
+}
+
 ActionSetTrackName::ActionSetTrackName(
 	quickAPI::TrackIndex track, const juce::String& name)
 	: track(track), name(name) {

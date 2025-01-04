@@ -252,7 +252,7 @@ bool ActionAddEffect::undoAction() {
 }
 
 const juce::String ActionAddEffect::getStatusStr() const {
-	return "[" + juce::String{ (int)(this->trackIndex.first) } + ", " + juce::String{ this->trackIndex.second } + ", " + juce::String(this->effect) + "] " + this->pid;
+	return "[" + juce::String{ (int)(this->trackIndex.first) } + ", " + juce::String{ this->trackIndex.second } + ", " + juce::String{ this->effect } + "] " + this->pid;
 }
 
 void ActionAddEffect::getRecoveryData(juce::MemoryOutputStream& stream) {
