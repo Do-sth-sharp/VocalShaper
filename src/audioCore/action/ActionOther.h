@@ -396,39 +396,39 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSplitSequencerBlock)
 };
 
-class ActionLoadPluginState final : public ActionUndoableBase {
+class ActionLoadInstrState final : public ActionUndoableBase {
 public:
-	ActionLoadPluginState() = delete;
-	ActionLoadPluginState(
-		quickAPI::PluginHolder plugin, const juce::String& path);
+	ActionLoadInstrState() = delete;
+	ActionLoadInstrState(
+		int index, const juce::String& path);
 
 	bool doAction() override;
 	bool undoAction() override;
 	const juce::String getName() const override {
-		return "Load Plugin State";
+		return "Load Instr State";
 	};
-	ActionType getActionType() const override { return ActionType::ActionLoadPluginState; };
+	ActionType getActionType() const override { return ActionType::ActionLoadInstrState; };
 	const juce::String getStatusStr() const override;
 	void getRecoveryData(juce::MemoryOutputStream& stream) override;
 
 private:
-	const quickAPI::PluginHolder plugin;
+	const int index;
 	const juce::String path;
 
 	juce::MemoryBlock oldState;
 
-	JUCE_LEAK_DETECTOR(ActionLoadPluginState)
+	JUCE_LEAK_DETECTOR(ActionLoadInstrState)
 };
 
-class ActionSavePluginState final : public ActionBase {
+class ActionSaveInstrState final : public ActionBase {
 public:
-	ActionSavePluginState() = delete;
-	ActionSavePluginState(
-		quickAPI::PluginHolder plugin, const juce::String& path);
+	ActionSaveInstrState() = delete;
+	ActionSaveInstrState(
+		int index, const juce::String& path);
 
 	bool doAction() override;
 	const juce::String getName() const override {
-		return "Save Plugin State";
+		return "Save Instr State";
 	};
 	int getShieldMask() const override {
 		return ShieldRendering;
@@ -436,8 +436,56 @@ public:
 	const juce::String getStatusStr() const override;
 
 private:
-	const quickAPI::PluginHolder plugin;
+	const int index;
 	const juce::String path;
 
-	JUCE_LEAK_DETECTOR(ActionSavePluginState)
+	JUCE_LEAK_DETECTOR(ActionSaveInstrState)
+};
+
+class ActionLoadEffectState final : public ActionUndoableBase {
+public:
+	ActionLoadEffectState() = delete;
+	ActionLoadEffectState(
+		quickAPI::TrackIndex track, int index, const juce::String& path);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "Load Effect State";
+	};
+	ActionType getActionType() const override { return ActionType::ActionLoadEffectState; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const quickAPI::TrackIndex track;
+	const int index;
+	const juce::String path;
+
+	juce::MemoryBlock oldState;
+
+	JUCE_LEAK_DETECTOR(ActionLoadEffectState)
+};
+
+class ActionSaveEffectState final : public ActionBase {
+public:
+	ActionSaveEffectState() = delete;
+	ActionSaveEffectState(
+		quickAPI::TrackIndex track, int index, const juce::String& path);
+
+	bool doAction() override;
+	const juce::String getName() const override {
+		return "Save Effect State";
+	};
+	int getShieldMask() const override {
+		return ShieldRendering;
+	};
+	const juce::String getStatusStr() const override;
+
+private:
+	const quickAPI::TrackIndex track;
+	const int index;
+	const juce::String path;
+
+	JUCE_LEAK_DETECTOR(ActionSaveEffectState)
 };

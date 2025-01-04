@@ -38,28 +38,27 @@ public:
 	static void insertInstr(int index, const juce::String& pid, bool addARA);
 	static void bypassInstr(int index, bool bypass);
 	static void offlineInstr(int index, bool offline);
-	static void bypassInstr(quickAPI::PluginHolder instr, bool bypass);
-	static void setInstrMIDIChannel(quickAPI::PluginHolder instr, int channel);
-	static void setInstrMIDICCIntercept(quickAPI::PluginHolder instr, bool intercept);
-	static void setInstrMIDIOutput(quickAPI::PluginHolder instr, bool output);
-	static void setInstrParamCCLink(quickAPI::PluginHolder instr, int paramIndex, int ccChannel);
-	static void removeInstrParamCCLink(quickAPI::PluginHolder instr, int ccChannel);
+	static void setInstrMIDIChannel(int index, int channel);
+	static void setInstrMIDICCIntercept(int index, bool intercept);
+	static void setInstrMIDIOutput(int index, bool output);
+	static void setInstrParamCCLink(int index, int paramIndex, int ccChannel);
+	static void removeInstrParamCCLink(int index, int ccChannel);
+	static void loadInstrPreset(int index, const juce::String& path);
+	static void saveInstrPreset(int index, const juce::String& path);
 	static void removeInstr(int index);
 
-	static void insertEffect(int track, int index, const juce::String& pid);
-	static void bypassEffect(int track, int index, bool bypass);
-	static void bypassEffect(quickAPI::PluginHolder effect, bool bypass);
-	static void setEffectMIDIChannel(quickAPI::PluginHolder effect, int channel);
-	static void setEffectMIDICCIntercept(quickAPI::PluginHolder effect, bool intercept);
-	static void setEffectMIDIOutput(quickAPI::PluginHolder effect, bool output);
-	static void setEffectParamCCLink(quickAPI::PluginHolder effect, int paramIndex, int ccChannel);
-	static void removeEffectParamCCLink(quickAPI::PluginHolder effect, int ccChannel);
-	static void removeEffect(int track, int index);
-	static void setEffectIndex(int track, int oldIndex, int newIndex);
-	static void replaceEffect(int track, int index, const juce::String& pid);
-
-	static void loadPluginPreset(quickAPI::PluginHolder plugin, const juce::String& path);
-	static void savePluginPreset(quickAPI::PluginHolder plugin, const juce::String& path);
+	static void insertEffect(quickAPI::TrackType type, int track, int index, const juce::String& pid);
+	static void bypassEffect(quickAPI::TrackType type, int track, int index, bool bypass);
+	static void setEffectMIDIChannel(quickAPI::TrackType type, int track, int index, int channel);
+	static void setEffectMIDICCIntercept(quickAPI::TrackType type, int track, int index, bool intercept);
+	static void setEffectMIDIOutput(quickAPI::TrackType type, int track, int index, bool output);
+	static void setEffectParamCCLink(quickAPI::TrackType type, int track, int index, int paramIndex, int ccChannel);
+	static void removeEffectParamCCLink(quickAPI::TrackType type, int track, int index, int ccChannel);
+	static void loadEffectPreset(quickAPI::TrackType type, int track, int index, const juce::String& path);
+	static void saveEffectPreset(quickAPI::TrackType type, int track, int index, const juce::String& path);
+	static void removeEffect(quickAPI::TrackType type, int track, int index);
+	static void setEffectIndex(quickAPI::TrackType type, int track, int oldIndex, int newIndex);
+	static void replaceEffect(quickAPI::TrackType type, int track, int index, const juce::String& pid);
 
 	static void insertTrack(int index, int type);
 	static void setTrackColor(int index, const juce::Colour& color);

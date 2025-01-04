@@ -372,63 +372,170 @@ void ActionSplitSequencerBlock::getRecoveryData(juce::MemoryOutputStream& stream
 	stream.writeDouble(this->time);
 }
 
-ActionLoadPluginState::ActionLoadPluginState(
-	quickAPI::PluginHolder plugin, const juce::String& path)
-	: plugin(plugin), path(path) {}
+ActionLoadInstrState::ActionLoadInstrState(
+	int index, const juce::String& path)
+	: index(index), path(path) {}
 
-bool ActionLoadPluginState::doAction() {
-	if (this->plugin) {
-		juce::MemoryBlock state;
-		if (!utils::readFileToBlock(this->path, state)) {
-			return false;
+bool ActionLoadInstrState::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(quickAPI::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				if (auto instr = seq->getInstrProcessor()) {
+					juce::MemoryBlock state;
+					if (!utils::readFileToBlock(this->path, state)) {
+						return false;
+					}
+					instr->getStateInformation(this->oldState);
+
+					instr->setStateInformation(
+						state.getData(), state.getSize());
+
+					return true;
+				}
+			}
 		}
-		this->plugin->getStateInformation(this->oldState);
-
-		this->plugin->setStateInformation(
-			state.getData(), state.getSize());
-
-		return true;
 	}
 	return false;
 }
 
-bool ActionLoadPluginState::undoAction() {
-	if (this->plugin) {
-		this->plugin->setStateInformation(
-			this->oldState.getData(), this->oldState.getSize());
-		return true;
+bool ActionLoadInstrState::undoAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(quickAPI::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				if (auto instr = seq->getInstrProcessor()) {
+					instr->setStateInformation(
+						this->oldState.getData(), this->oldState.getSize());
+					return true;
+				}
+			}
+		}
 	}
 	return false;
 }
 
-const juce::String ActionLoadPluginState::getStatusStr() const {
-	return "[" + juce::String{ this->plugin ? this->plugin->getName() : "" } + "] " + this->path;
+const juce::String ActionLoadInstrState::getStatusStr() const {
+	return "[" + juce::String{ this->index } + "] " + this->path;
 }
 
-void ActionLoadPluginState::getRecoveryData(juce::MemoryOutputStream& stream) {
-	stream.writeString(this->plugin ? this->plugin->getName() : "");
+void ActionLoadInstrState::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt(this->index);
 	stream.writeString(this->path);
 
 	stream.writeInt64(this->oldState.getSize());
 	stream.write(this->oldState.getData(), this->oldState.getSize());
 }
 
-ActionSavePluginState::ActionSavePluginState(
-	quickAPI::PluginHolder plugin, const juce::String& path)
-	: plugin(plugin), path(path) {}
+ActionSaveInstrState::ActionSaveInstrState(
+	int index, const juce::String& path)
+	: index(index), path(path) {}
 
-bool ActionSavePluginState::doAction() {
-	if (this->plugin) {
-		juce::MemoryBlock state;
-		this->plugin->getStateInformation(state);
+bool ActionSaveInstrState::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(quickAPI::TrackType::Track, this->index)) {
+			if (auto seq = track->getSequencer()) {
+				if (auto instr = seq->getInstrProcessor()) {
+					juce::MemoryBlock state;
+					instr->getStateInformation(state);
 
-		if (utils::writeBlockToFile(this->path, state)) {
-			return true;
+					if (utils::writeBlockToFile(this->path, state)) {
+						return true;
+					}
+				}
+			}
 		}
 	}
 	return false;
 }
 
-const juce::String ActionSavePluginState::getStatusStr() const {
-	return "[" + juce::String{ this->plugin ? this->plugin->getName() : "" } + "] " + this->path;
+const juce::String ActionSaveInstrState::getStatusStr() const {
+	return "[" + juce::String{ this->index } + "] " + this->path;
+}
+
+ActionLoadEffectState::ActionLoadEffectState(
+	quickAPI::TrackIndex track, int index, const juce::String& path)
+	: track(track), index(index), path(path) {
+}
+
+bool ActionLoadEffectState::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			if (auto mixer = track->getMixer()) {
+				if (auto dock = mixer->getPluginDock()) {
+					if (auto effect = dock->getPluginProcessor(this->index)) {
+						juce::MemoryBlock state;
+						if (!utils::readFileToBlock(this->path, state)) {
+							return false;
+						}
+						effect->getStateInformation(this->oldState);
+
+						effect->setStateInformation(
+							state.getData(), state.getSize());
+
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool ActionLoadEffectState::undoAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			if (auto mixer = track->getMixer()) {
+				if (auto dock = mixer->getPluginDock()) {
+					if (auto effect = dock->getPluginProcessor(this->index)) {
+						effect->setStateInformation(
+							this->oldState.getData(), this->oldState.getSize());
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+const juce::String ActionLoadEffectState::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->index } + "] " + this->path;
+}
+
+void ActionLoadEffectState::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt((int)this->track.first);
+	stream.writeInt(this->track.second);
+	stream.writeInt(this->index);
+	stream.writeString(this->path);
+
+	stream.writeInt64(this->oldState.getSize());
+	stream.write(this->oldState.getData(), this->oldState.getSize());
+}
+
+ActionSaveEffectState::ActionSaveEffectState(
+	quickAPI::TrackIndex track, int index, const juce::String& path)
+	: track(track), index(index), path(path) {
+}
+
+bool ActionSaveEffectState::doAction() {
+	if (auto graph = AudioCore::getInstance()->getGraph()) {
+		if (auto track = graph->getTrackProcessor(this->track.first, this->track.second)) {
+			if (auto mixer = track->getMixer()) {
+				if (auto dock = mixer->getPluginDock()) {
+					if (auto effect = dock->getPluginProcessor(this->index)) {
+						juce::MemoryBlock state;
+						effect->getStateInformation(state);
+
+						if (utils::writeBlockToFile(this->path, state)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+const juce::String ActionSaveEffectState::getStatusStr() const {
+	return "[" + juce::String{ (int)(this->track.first) } + ", " + juce::String{ this->track.second } + ", " + juce::String{ this->index } + "] " + this->path;
 }

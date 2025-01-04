@@ -17,7 +17,8 @@ enum class ActionType : unsigned int {
 
 	ActionSave = 0x0101,
 	ActionSplitSequencerBlock,
-	ActionLoadPluginState,
+	ActionLoadInstrState,
+	ActionLoadEffectState,
 
 	ActionRemoveTrack = 0x0201,
 	ActionRemoveTrackAudioInput,
@@ -48,6 +49,8 @@ enum class ActionType : unsigned int {
 	ActionSetEffectParamConnectToCC,
 	ActionSetInstrMidiCCIntercept,
 	ActionSetEffectMidiCCIntercept,
+	ActionSetInstrMidiOutput,
+	ActionSetEffectMidiOutput,
 	ActionSetTrackName,
 	ActionSetTrackColor,
 	ActionSetEffectIndex,
