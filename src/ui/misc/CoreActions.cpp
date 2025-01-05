@@ -701,15 +701,36 @@ void CoreActions::insertInstrGUI(int index) {
 	CoreActions::askForPluginGUIAsync(callback, true, true);
 }
 
-void CoreActions::editInstrParamCCLinkGUI(quickAPI::PluginHolder instr,
-	int paramIndex, int defaultCC) {
-	auto callback = [instr, paramIndex](int cc) { CoreActions::setInstrParamCCLink(instr, paramIndex, cc); };
-	CoreActions::askForPluginMIDICCGUIAsync(callback, instr, PluginType::Instr, defaultCC);
+void CoreActions::editInstrParamCCLinkGUI(int index, int paramIndex, int defaultCC) {
+	auto callback = [index, paramIndex](int cc) { CoreActions::setInstrParamCCLink(index, paramIndex, cc); };
+	CoreActions::askForPluginMIDICCGUIAsync(
+		callback, quickAPI::TrackType::Track, index, 0, PluginType::Instr, defaultCC);
 }
 
-void CoreActions::addInstrParamCCLinkGUI(quickAPI::PluginHolder instr) {
-	auto callback = [instr](int param) { CoreActions::editInstrParamCCLinkGUI(instr, param); };
-	CoreActions::askForPluginParamGUIAsync(callback, instr, PluginType::Instr);
+void CoreActions::addInstrParamCCLinkGUI(int index) {
+	auto callback = [index](int param) { CoreActions::editInstrParamCCLinkGUI(index, param); };
+	CoreActions::askForPluginParamGUIAsync(
+		callback, quickAPI::TrackType::Track, index, 0, PluginType::Instr);
+}
+
+void CoreActions::loadInstrPresetGUI(int index) {
+	auto callback = [index](const juce::String& path) {
+		CoreActions::loadInstrPreset(index, path);
+		};
+
+	auto identifier = quickAPI::getInstrIdentifier(index);
+
+	CoreActions::askForPluginPresetAsync(callback, identifier, false);
+}
+
+void CoreActions::saveInstrPresetGUI(int index) {
+	auto callback = [index](const juce::String& path) {
+		CoreActions::saveInstrPreset(index, path);
+		};
+
+	auto identifier = quickAPI::getInstrIdentifier(index);
+
+	CoreActions::askForPluginPresetAsync(callback, identifier, true);
 }
 
 void CoreActions::removeInstrGUI(int index) {
@@ -724,28 +745,52 @@ void CoreActions::removeInstrGUI(int index) {
 	CoreActions::removeInstr(index);
 }
 
-void CoreActions::insertEffectGUI(int track, int index) {
-	auto callback = [track, index](const juce::String& id, bool) {
-		CoreActions::insertEffect(track, index, id); };
+void CoreActions::insertEffectGUI(
+	quickAPI::TrackType type, int track, int index) {
+	auto callback = [type, track, index](const juce::String& id, bool) {
+		CoreActions::insertEffect(type, track, index, id); };
 	CoreActions::askForPluginGUIAsync(callback, true, false);
 }
 
-void CoreActions::insertEffectGUI(int track) {
-	CoreActions::insertEffectGUI(track, quickAPI::getEffectNum(track));
-}
-
-void CoreActions::editEffectParamCCLinkGUI(quickAPI::PluginHolder effect,
+void CoreActions::editEffectParamCCLinkGUI(
+	quickAPI::TrackType type, int track, int index,
 	int paramIndex, int defaultCC) {
-	auto callback = [effect, paramIndex](int cc) { CoreActions::setEffectParamCCLink(effect, paramIndex, cc); };
-	CoreActions::askForPluginMIDICCGUIAsync(callback, effect, PluginType::Effect, defaultCC);
+	auto callback = [type, track, index, paramIndex](int cc) {
+		CoreActions::setEffectParamCCLink(type, track, index, paramIndex, cc); };
+	CoreActions::askForPluginMIDICCGUIAsync(
+		callback, type, track, index, PluginType::Effect, defaultCC);
 }
 
-void CoreActions::addEffectParamCCLinkGUI(quickAPI::PluginHolder effect) {
-	auto callback = [effect](int param) { CoreActions::editEffectParamCCLinkGUI(effect, param); };
-	CoreActions::askForPluginParamGUIAsync(callback, effect, PluginType::Effect);
+void CoreActions::addEffectParamCCLinkGUI(
+	quickAPI::TrackType type, int track, int index) {
+	auto callback = [type, track, index](int param) {
+		CoreActions::editEffectParamCCLinkGUI(type, track, index, param); };
+	CoreActions::askForPluginParamGUIAsync(
+		callback, type, track, index, PluginType::Effect);
 }
 
-void CoreActions::removeEffectGUI(int track, int index) {
+void CoreActions::loadPluginPresetGUI(quickAPI::TrackType type, int track, int index) {
+	auto callback = [type, track, index](const juce::String& path) {
+		CoreActions::loadEffectPreset(type, track, index, path);
+		};
+
+	auto identifier = quickAPI::getEffectIdentifier({ type, track }, index);
+
+	CoreActions::askForPluginPresetAsync(callback, identifier, false);
+}
+
+void CoreActions::savePluginPresetGUI(quickAPI::TrackType type, int track, int index) {
+	auto callback = [type, track, index](const juce::String& path) {
+		CoreActions::saveEffectPreset(type, track, index, path);
+		};
+
+	auto identifier = quickAPI::getEffectIdentifier({ type, track }, index);
+
+	CoreActions::askForPluginPresetAsync(callback, identifier, true);
+}
+
+void CoreActions::removeEffectGUI(
+	quickAPI::TrackType type, int track, int index) {
 	if (track <= -1 || index <= -1) { return; }
 
 	if (!juce::AlertWindow::showOkCancelBox(
@@ -754,27 +799,7 @@ void CoreActions::removeEffectGUI(int track, int index) {
 		return;
 	}
 
-	CoreActions::removeEffect(track, index);
-}
-
-void CoreActions::loadPluginPresetGUI(quickAPI::PluginHolder plugin) {
-	auto callback = [plugin](const juce::String& path) {
-		CoreActions::loadPluginPreset(plugin, path);
-		};
-
-	auto identifier = quickAPI::getPluginIdentifier(plugin);
-
-	CoreActions::askForPluginPresetAsync(callback, identifier, false);
-}
-
-void CoreActions::savePluginPresetGUI(quickAPI::PluginHolder plugin) {
-	auto callback = [plugin](const juce::String& path) {
-		CoreActions::savePluginPreset(plugin, path);
-		};
-
-	auto identifier = quickAPI::getPluginIdentifier(plugin);
-
-	CoreActions::askForPluginPresetAsync(callback, identifier, true);
+	CoreActions::removeEffect(type, track, index);
 }
 
 void CoreActions::insertTrackGUI(int index) {
@@ -1607,16 +1632,16 @@ void CoreActions::askForBusTypeGUIAsync(
 
 void CoreActions::askForPluginParamGUIAsync(
 	const std::function<void(int)>& callback,
-	quickAPI::PluginHolder plugin, PluginType type,
+	quickAPI::TrackType trackType, int track, int index, PluginType type,
 	const CancelCallback& cancelCallback) {
 	/** Get Param List */
 	juce::StringArray paramList;
 	switch (type) {
 	case PluginType::Instr:
-		paramList = quickAPI::getInstrParamList(plugin);
+		paramList = quickAPI::getInstrParamList(track);
 		break;
 	case PluginType::Effect:
-		paramList = quickAPI::getEffectParamList(plugin);
+		paramList = quickAPI::getEffectParamList({ trackType, track }, index);
 		break;
 	}
 
@@ -1653,9 +1678,8 @@ void CoreActions::askForPluginParamGUIAsync(
 class ListenableMIDICCCombo final : public juce::ComboBox {
 public:
 	ListenableMIDICCCombo() = delete;
-	ListenableMIDICCCombo(const juce::String& name,
-		quickAPI::PluginHolder plugin, PluginType type)
-		: ComboBox(name), plugin(plugin), type(type) {
+	ListenableMIDICCCombo(const juce::String& name)
+		: ComboBox(name) {
 		/** Add Listener */
 		auto listener = [comp = juce::Component::SafePointer(this)](int index) {
 			if (comp) {
@@ -1663,38 +1687,19 @@ public:
 			}
 			};
 		quickAPI::setMainMIDICCListener(listener);
-		/*switch (type) {
-		case PluginType::Instr:
-			quickAPI::setInstrMIDICCListener(plugin, listener);
-			break;
-		case PluginType::Effect:
-			quickAPI::setEffectMIDICCListener(plugin, listener);
-			break;
-		}*/
 	};
 	~ListenableMIDICCCombo() {
 		/** Remove Listener */
 		quickAPI::clearMainMIDICCListener();
-		/*switch (this->type) {
-		case PluginType::Instr:
-			quickAPI::clearInstrMIDICCListener(this->plugin);
-			break;
-		case PluginType::Effect:
-			quickAPI::clearEffectMIDICCListener(this->plugin);
-			break;
-		}*/
 	};
 
 private:
-	const quickAPI::PluginHolder plugin;
-	const PluginType type;
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ListenableMIDICCCombo)
 };
 
 void CoreActions::askForPluginMIDICCGUIAsync(
 	const std::function<void(int)>& callback,
-	quickAPI::PluginHolder plugin, PluginType type,
+	quickAPI::TrackType trackType, int track, int index, PluginType type,
 	int defaultCCChannel, const CancelCallback& cancelCallback) {
 	/** Get MIDI CC List */
 	auto ccList = quickAPI::getMIDICCChannelNameList();
@@ -1718,7 +1723,7 @@ void CoreActions::askForPluginMIDICCGUIAsync(
 
 	/** Create Combo */
 	auto combo = std::make_unique<ListenableMIDICCCombo>(
-		TRANS("CC Controller"), plugin, type);
+		TRANS("CC Controller"), trackType, track, index, type);
 	combo->addItemList(ccItemList, 1);
 	if (defaultCCChannel > -1) {
 		combo->setSelectedItemIndex(defaultCCChannel);

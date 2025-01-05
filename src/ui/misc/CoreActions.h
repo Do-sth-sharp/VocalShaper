@@ -47,18 +47,30 @@ public:
 	static void saveInstrPreset(int index, const juce::String& path);
 	static void removeInstr(int index);
 
-	static void insertEffect(quickAPI::TrackType type, int track, int index, const juce::String& pid);
-	static void bypassEffect(quickAPI::TrackType type, int track, int index, bool bypass);
-	static void setEffectMIDIChannel(quickAPI::TrackType type, int track, int index, int channel);
-	static void setEffectMIDICCIntercept(quickAPI::TrackType type, int track, int index, bool intercept);
-	static void setEffectMIDIOutput(quickAPI::TrackType type, int track, int index, bool output);
-	static void setEffectParamCCLink(quickAPI::TrackType type, int track, int index, int paramIndex, int ccChannel);
-	static void removeEffectParamCCLink(quickAPI::TrackType type, int track, int index, int ccChannel);
-	static void loadEffectPreset(quickAPI::TrackType type, int track, int index, const juce::String& path);
-	static void saveEffectPreset(quickAPI::TrackType type, int track, int index, const juce::String& path);
-	static void removeEffect(quickAPI::TrackType type, int track, int index);
-	static void setEffectIndex(quickAPI::TrackType type, int track, int oldIndex, int newIndex);
-	static void replaceEffect(quickAPI::TrackType type, int track, int index, const juce::String& pid);
+	static void insertEffect(
+		quickAPI::TrackType type, int track, int index, const juce::String& pid);
+	static void bypassEffect(
+		quickAPI::TrackType type, int track, int index, bool bypass);
+	static void setEffectMIDIChannel(
+		quickAPI::TrackType type, int track, int index, int channel);
+	static void setEffectMIDICCIntercept(
+		quickAPI::TrackType type, int track, int index, bool intercept);
+	static void setEffectMIDIOutput(
+		quickAPI::TrackType type, int track, int index, bool output);
+	static void setEffectParamCCLink(
+		quickAPI::TrackType type, int track, int index, int paramIndex, int ccChannel);
+	static void removeEffectParamCCLink(
+		quickAPI::TrackType type, int track, int index, int ccChannel);
+	static void loadEffectPreset(
+		quickAPI::TrackType type, int track, int index, const juce::String& path);
+	static void saveEffectPreset(
+		quickAPI::TrackType type, int track, int index, const juce::String& path);
+	static void removeEffect(
+		quickAPI::TrackType type, int track, int index);
+	static void setEffectIndex(
+		quickAPI::TrackType type, int track, int oldIndex, int newIndex);
+	static void replaceEffect(
+		quickAPI::TrackType type, int track, int index, const juce::String& pid);
 
 	static void insertTrack(int index, int type);
 	static void setTrackColor(int index, const juce::Colour& color);
@@ -134,18 +146,19 @@ public:
 	static void renderGUI();
 
 	static void insertInstrGUI(int index);
-	static void editInstrParamCCLinkGUI(quickAPI::PluginHolder instr, int paramIndex, int defaultCC = -1);
-	static void addInstrParamCCLinkGUI(quickAPI::PluginHolder instr);
+	static void editInstrParamCCLinkGUI(int index, int paramIndex, int defaultCC = -1);
+	static void addInstrParamCCLinkGUI(int index);
+	static void loadInstrPresetGUI(int index);
+	static void saveInstrPresetGUI(int index);
 	static void removeInstrGUI(int index);
 
-	static void insertEffectGUI(int track, int index);
-	static void insertEffectGUI(int track);
-	static void editEffectParamCCLinkGUI(quickAPI::PluginHolder effect, int paramIndex, int defaultCC = -1);
-	static void addEffectParamCCLinkGUI(quickAPI::PluginHolder effect);
-	static void removeEffectGUI(int track, int index);
-
-	static void loadPluginPresetGUI(quickAPI::PluginHolder plugin);
-	static void savePluginPresetGUI(quickAPI::PluginHolder plugin);
+	static void insertEffectGUI(quickAPI::TrackType type, int track, int index);
+	static void editEffectParamCCLinkGUI(
+		quickAPI::TrackType type, int track, int index, int paramIndex, int defaultCC = -1);
+	static void addEffectParamCCLinkGUI(quickAPI::TrackType type, int track, int index);
+	static void loadPluginPresetGUI(quickAPI::TrackType type, int track, int index);
+	static void savePluginPresetGUI(quickAPI::TrackType type, int track, int index);
+	static void removeEffectGUI(quickAPI::TrackType type, int track, int index);
 
 	static void insertTrackGUI(int index);
 	static void insertTrackGUI();
@@ -216,11 +229,11 @@ public:
 		const CancelCallback& cancelCallback = {});
 	static void askForPluginParamGUIAsync(
 		const std::function<void(int)>& callback,
-		quickAPI::PluginHolder plugin, PluginType type,
+		quickAPI::TrackType trackType, int track, int index, PluginType type,
 		const CancelCallback& cancelCallback = {});
 	static void askForPluginMIDICCGUIAsync(
 		const std::function<void(int)>& callback,
-		quickAPI::PluginHolder plugin, PluginType type,
+		quickAPI::TrackType trackType, int track, int index, PluginType type,
 		int defaultCCChannel = -1,
 		const CancelCallback& cancelCallback = {});
 	static void askForAudioChannelLinkGUIAsync(
