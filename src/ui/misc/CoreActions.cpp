@@ -437,32 +437,38 @@ void CoreActions::removeTrack(quickAPI::TrackType type, int index) {
 }
 
 void CoreActions::addTempoLabel(double time, double tempo) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionAddTempoTempo{ time, tempo });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionAddLabelTempo{ time, tempo });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::addBeatLabel(double time, int numerator, int denominator) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionAddTempoBeat{ time, numerator, denominator });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionAddLabelBeat{ time, numerator, denominator });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::removeLabel(int index) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRemoveTempo{ index });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveLabel{ index });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setLabelTime(int index, double time) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoTime{ index, time });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetLabelTime{ index, time });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setLabelTempo(int index, double tempo) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoTempo{ index, tempo });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetLabelTempo{ index, tempo });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
 void CoreActions::setLabelBeat(int index, int numerator, int denominator) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetTempoBeat{ index, numerator, denominator });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetLabelBeat{ index, numerator, denominator });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
