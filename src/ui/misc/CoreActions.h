@@ -72,47 +72,43 @@ public:
 	static void replaceEffect(
 		quickAPI::TrackType type, int track, int index, const juce::String& pid);
 
-	static void insertTrack(int index, int type);
-	static void setTrackColor(int index, const juce::Colour& color);
-	static void setTrackName(int index, const juce::String& name);
-	static void addTrackSideChain(int index);
-	static void removeTrackSideChain(int index);
-	static void setTrackMIDIInputFromDevice(int index, bool input);
-	static void setTrackMIDIInputFromSeqTrack(int index, int seqIndex, bool input);
-	static void setTrackAudioInputFromDevice(int index, int channel, int srcChannel, bool input);
-	static void setTrackAudioInputFromSource(int index, int channel, int seqIndex, int srcChannel, bool input);
-	static void setTrackAudioInputFromSend(int index, int channel, int trackIndex, int srcChannel, bool input);
-	static void setTrackMIDIOutputToDevice(int index, bool output);
-	static void setTrackAudioOutputToDevice(int index, int channel, int dstChannel, bool output);
-	static void setTrackAudioOutputToSend(int index, int channel, int trackIndex, int dstChannel, bool output);
-	static void setTrackGain(int index, float value);
-	static void setTrackPan(int index, float value);
-	static void setTrackFader(int index, float value);
-	static void setTrackMute(int index, bool mute);
-	static void setTrackSolo(int index);
-	static void setTrackMuteAll(bool mute);
-	static void removeTrack(int index);
-
-	static void insertSeq(int index, int type);
-	static void setSeqColor(int index, const juce::Colour& color);
-	static void setSeqName(int index, const juce::String& name);
-	static void setSeqMIDIInputFromDevice(int index, bool input);
-	static void setSeqAudioInputFromDevice(int index, int channel, int srcChannel, bool input);
-	static void setSeqMIDIOutputToMixer(int index, int mixerIndex, bool output);
-	static void setSeqAudioOutputToMixer(int index, int channel, int mixerIndex, int dstChannel, bool output);
-	static void setSeqMute(int index, bool mute);
-	static void setSeqSolo(int index, bool solo);
-	static void setSeqInputMonitoring(int index, bool inputMonitoring);
-	static void setSeqRec(int index, quickAPI::RecordState rec);
-	static void setSeqMIDITrack(int index, int midiTrack);
-	static void setSeqAudioRef(int index, const juce::String& path,
+	static void insertTrack(quickAPI::TrackType type, int index, int bus);
+	static void setTrackColor(quickAPI::TrackType type, int index, const juce::Colour& color);
+	static void setTrackName(quickAPI::TrackType type, int index, const juce::String& name);
+	static void addTrackSideChain(quickAPI::TrackType type, int index);
+	static void removeTrackSideChain(quickAPI::TrackType type, int index);
+	static void addTrackMIDIInput(quickAPI::TrackType type, int index);
+	static void addTrackAudioInput(quickAPI::TrackType type, int index, int srcc, int dstc);
+	static void addTrackMIDISend(quickAPI::TrackType type, int index, int slot,
+		quickAPI::SendDst dst);
+	static void addTrackAudioSend(quickAPI::TrackType type, int index, int slot,
+		quickAPI::SendDst dst, int srcc, int dstc);
+	static void removeTrackMIDIInput(quickAPI::TrackType type, int index);
+	static void removeTrackAudioInput(quickAPI::TrackType type, int index, int srcc, int dstc);
+	static void removeTrackMIDISend(quickAPI::TrackType type, int index, int slot,
+		quickAPI::SendDst dst);
+	static void removeTrackMIDISendOnSlot(quickAPI::TrackType type, int index, int slot);
+	static void removeTrackAudioSend(quickAPI::TrackType type, int index, int slot,
+		quickAPI::SendDst dst, int srcc, int dstc);
+	static void removeTrackAudioSendAllChannel(quickAPI::TrackType type, int index, int slot,
+		quickAPI::SendDst dst);
+	static void removeTrackAudioSendOnSlot(quickAPI::TrackType type, int index, int slot);
+	static void setTrackGain(quickAPI::TrackType type, int index, float value);
+	static void setTrackPan(quickAPI::TrackType type, int index, float value);
+	static void setTrackFader(quickAPI::TrackType type, int index, float value);
+	static void setTrackMute(quickAPI::TrackType type, int index, bool mute);
+	static void setTrackSolo(quickAPI::TrackType type, int index, bool solo);
+	static void setTrackInputMonitoring(int index, bool inputMonitoring);
+	static void setTrackRecording(int index, quickAPI::RecordState rec);
+	static void setTrackMIDITrack(int index, int midiTrack);
+	static void setTrackAudioRef(int index, const juce::String& path,
 		const std::function<void(uint64_t)>& callback = {});
-	static void setSeqMIDIRef(int index, const juce::String& path,
+	static void setTrackMIDIRef(int index, const juce::String& path,
 		bool getTempo, const std::function<void(uint64_t)>& callback = {});
-	static void createSeqAudioSource(int index, const juce::String& name,
+	static void createTrackAudioSource(int index, const juce::String& name,
 		double sampleRate, int channels, double length);
-	static void createSeqMIDISource(int index, const juce::String& name);
-	static void removeSeq(int index);
+	static void createTrackMIDISource(int index, const juce::String& name);
+	static void removeTrack(quickAPI::TrackType type, int index);
 
 	static void addTempoLabel(double time, double tempo);
 	static void addBeatLabel(double time, int numerator, int denominator);
