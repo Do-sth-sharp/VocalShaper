@@ -254,235 +254,185 @@ void CoreActions::replaceEffect(
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::insertTrack(int index, int type) {
+void CoreActions::insertTrack(quickAPI::TrackType type, int index, int bus) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionAddMixerTrack{ index, type });
+		new ActionAddTrack{ { type, index }, bus });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setTrackColor(int index, const juce::Colour& color) {
+void CoreActions::setTrackColor(quickAPI::TrackType type, int index, const juce::Colour& color) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionSetMixerTrackColor{ index, color });
+		new ActionSetTrackColor{ { type, index }, color });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setTrackName(int index, const juce::String& name) {
+void CoreActions::setTrackName(quickAPI::TrackType type, int index, const juce::String& name) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionSetMixerTrackName{ index, name });
+		new ActionSetTrackName{ { type, index }, name });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::addTrackSideChain(int index) {
+void CoreActions::addTrackSideChain(quickAPI::TrackType type, int index) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionAddMixerTrackSideChainBus{ index });
+		new ActionAddTrackSideChainBus{ { type, index } });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::removeTrackSideChain(int index) {
+void CoreActions::removeTrackSideChain(quickAPI::TrackType type, int index) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionRemoveMixerTrackSideChainBus{ index });
+		new ActionRemoveTrackSideChainBus{ { type, index } });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setTrackMIDIInputFromDevice(int index, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddMixerTrackMidiInput{ index })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrackMidiInput{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackMIDIInputFromSeqTrack(
-	int index, int seqIndex, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddSequencerTrackMidiOutputToMixer{ seqIndex, index })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrackMidiOutputToMixer{ seqIndex, index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioInputFromDevice(
-	int index, int channel, int srcChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddMixerTrackInputFromDevice{ srcChannel, index, channel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrackInputFromDevice{ srcChannel, index, channel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioInputFromSource(
-	int index, int channel, int seqIndex, int srcChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddSequencerTrackOutput{ seqIndex, srcChannel, index, channel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrackOutput{ seqIndex, srcChannel, index, channel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioInputFromSend(
-	int index, int channel, int trackIndex, int srcChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddMixerTrackSend{ trackIndex, srcChannel, index, channel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrackSend{ trackIndex, srcChannel, index, channel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackMIDIOutputToDevice(int index, bool output) {
-	auto action = output
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddMixerTrackMidiOutput{ index })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrackMidiOutput{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioOutputToDevice(
-	int index, int channel, int dstChannel, bool output) {
-	auto action = output
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddMixerTrackOutput{ index, channel, dstChannel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrackOutput{ index, channel, dstChannel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackAudioOutputToSend(
-	int index, int channel, int trackIndex, int dstChannel, bool output) {
-	auto action = output
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddMixerTrackSend{ index, channel, trackIndex, dstChannel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrackSend{ index, channel, trackIndex, dstChannel });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackGain(int index, float value) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetMixerTrackGain{ index, value });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackPan(int index, float value) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetMixerTrackPan{ index, value });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackFader(int index, float value) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetMixerTrackSlider{ index, value });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackMute(int index, bool mute) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetMixerTrackMute{ index, mute });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::setTrackSolo(int index) {
-	int trackNum = quickAPI::getMixerTrackNum();
-	for (int i = 0; i < trackNum; i++) {
-		CoreActions::setTrackMute(i, i != index);
-	}
-}
-
-void CoreActions::setTrackMuteAll(bool mute) {
-	int trackNum = quickAPI::getMixerTrackNum();
-	for (int i = 0; i < trackNum; i++) {
-		CoreActions::setTrackMute(i, mute);
-	}
-}
-
-void CoreActions::removeTrack(int index) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRemoveMixerTrack{ index });
-	ActionDispatcher::getInstance()->dispatch(std::move(action));
-}
-
-void CoreActions::insertSeq(int index, int type) {
+void CoreActions::addTrackMIDIInput(quickAPI::TrackType type, int index) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionAddSequencerTrack{ index, type });
+		new ActionAddTrackMIDIInput{ { type, index } });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqColor(int index, const juce::Colour& color) {
+void CoreActions::addTrackAudioInput(quickAPI::TrackType type, int index, int srcc, int dstc) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionSetSequencerTrackColor{ index, color });
+		new ActionAddTrackAudioInput{ { type, index }, srcc, dstc });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqName(int index, const juce::String& name) {
+void CoreActions::addTrackMIDISend(quickAPI::TrackType type, int index, int slot,
+	quickAPI::SendDst dst) {
 	auto action = std::unique_ptr<ActionUndoableBase>(
-		new ActionSetSequencerTrackName{ index, name });
+		new ActionAddTrackMIDISend{ { type, index }, slot, dst });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqMIDIInputFromDevice(int index, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddSequencerTrackMidiInput{ index })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrackMidiInput{ index });
+void CoreActions::addTrackAudioSend(quickAPI::TrackType type, int index, int slot,
+	quickAPI::SendDst dst, int srcc, int dstc) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionAddTrackAudioSend{ { type, index }, slot, dst, srcc, dstc });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqAudioInputFromDevice(int index, int channel, int srcChannel, bool input) {
-	auto action = input
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddSequencerTrackInputFromDevice{ srcChannel, index, channel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrackInputFromDevice{ srcChannel, index, channel });
+void CoreActions::removeTrackMIDIInput(quickAPI::TrackType type, int index) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackMIDIInput{ { type, index } });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqMIDIOutputToMixer(
-	int index, int mixerIndex, bool output) {
-	auto action = output
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddSequencerTrackMidiOutputToMixer{ index, mixerIndex })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrackMidiOutputToMixer{ index, mixerIndex });
+void CoreActions::removeTrackAudioInput(quickAPI::TrackType type, int index, int srcc, int dstc) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackAudioInput{ { type, index }, srcc, dstc });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqAudioOutputToMixer(
-	int index, int channel, int mixerIndex, int dstChannel, bool output) {
-	auto action = output
-		? std::unique_ptr<ActionUndoableBase>(new ActionAddSequencerTrackOutput{ index, channel, mixerIndex, dstChannel })
-		: std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrackOutput{ index, channel, mixerIndex, dstChannel });
+void CoreActions::removeTrackMIDISend(quickAPI::TrackType type, int index, int slot,
+	quickAPI::SendDst dst) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackMIDISend{ { type, index }, slot, dst });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqMute(int index, bool mute) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetSequencerTrackMute{ index, mute });
+void CoreActions::removeTrackMIDISendOnSlot(quickAPI::TrackType type, int index, int slot) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackMIDISendOnSlot{ { type, index }, slot });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqSolo(int index, bool solo) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetSequencerTrackSolo{ index, solo });
+void CoreActions::removeTrackAudioSend(quickAPI::TrackType type, int index, int slot,
+	quickAPI::SendDst dst, int srcc, int dstc) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackAudioSend{ { type, index }, slot, dst, srcc, dstc });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqInputMonitoring(int index, bool inputMonitoring) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetSequencerTrackInputMonitoring{ index, inputMonitoring });
+void CoreActions::removeTrackAudioSendAllChannel(quickAPI::TrackType type, int index, int slot,
+	quickAPI::SendDst dst) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackAudioSendAllChannel{ { type, index }, slot, dst });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqRec(int index, quickAPI::RecordState rec) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetSequencerTrackRecording{ index, rec });
+void CoreActions::removeTrackAudioSendOnSlot(quickAPI::TrackType type, int index, int slot) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrackAudioSendOnSlot{ { type, index }, slot });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqMIDITrack(int index, int midiTrack) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionSetSequencerMIDITrack{ index, midiTrack });
+void CoreActions::setTrackGain(quickAPI::TrackType type, int index, float value) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackGain{ { type, index }, value });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqAudioRef(int index, const juce::String& path,
+void CoreActions::setTrackPan(quickAPI::TrackType type, int index, float value) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackPan{ { type, index }, value });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackFader(quickAPI::TrackType type, int index, float value) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackFader{ { type, index }, value });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackMute(quickAPI::TrackType type, int index, bool mute) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackMute{ { type, index }, mute });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackSolo(quickAPI::TrackType type, int index, bool solo) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackSolo{ { type, index }, solo });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackInputMonitoring(int index, bool inputMonitoring) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackInputMonitoring{ index, inputMonitoring });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackRecording(int index, quickAPI::RecordState rec) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetTrackRecording{ index, rec });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackMIDITrack(int index, int midiTrack) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionSetCurrentMIDITrack{ index, midiTrack });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::setTrackAudioRef(int index, const juce::String& path,
 	const std::function<void(uint64_t)>& callback) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionLoadAudioSource{ index, path, callback });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionLoadAudioSource{ index, path, callback });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::setSeqMIDIRef(int index, const juce::String& path,
+void CoreActions::setTrackMIDIRef(int index, const juce::String& path,
 	bool getTempo, const std::function<void(uint64_t)>& callback) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionLoadMidiSource{ index, path, getTempo, callback });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionLoadMidiSource{ index, path, getTempo, callback });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::createSeqAudioSource(int index, const juce::String& name,
+void CoreActions::createTrackAudioSource(int index, const juce::String& name,
 	double sampleRate, int channels, double length) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionInitAudioSource{ index, name, sampleRate, channels, length });
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionInitAudioSource{ index, name, sampleRate, channels, length });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::createSeqMIDISource(int index, const juce::String& name) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionInitMidiSource{ index, name });
+void CoreActions::createTrackMIDISource(int index, const juce::String& name) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionInitMidiSource{ index, name });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
-void CoreActions::removeSeq(int index) {
-	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRemoveSequencerTrack{ index });
+void CoreActions::removeTrack(quickAPI::TrackType type, int index) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionRemoveTrack{ { type, index } });
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
