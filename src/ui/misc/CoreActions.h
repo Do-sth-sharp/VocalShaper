@@ -156,20 +156,15 @@ public:
 	static void savePluginPresetGUI(quickAPI::TrackType type, int track, int index);
 	static void removeEffectGUI(quickAPI::TrackType type, int track, int index);
 
-	static void insertTrackGUI(int index);
+	static void insertTrackGUI(quickAPI::TrackType type, int index);
+	static void insertTrackGUI(quickAPI::TrackType type);
 	static void insertTrackGUI();
-	static void setTrackColorGUI(int index);
-	static void setTrackNameGUI(int index);
-	static void setTrackAudioInputFromDeviceGUI(int index, bool input,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setTrackAudioInputFromSourceGUI(int index, int seqIndex, bool input,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setTrackAudioInputFromSendGUI(int index, int trackIndex, bool input,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setTrackAudioOutputToDeviceGUI(int index, bool output,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setTrackAudioOutputToSendGUI(int index, int trackIndex, bool output,
-		const juce::Array<std::tuple<int, int>>& links);
+	static void setTrackColorGUI(quickAPI::TrackType type, int index);
+	static void setTrackNameGUI(quickAPI::TrackType type, int index);
+	static void setTrackAudioInputGUI(quickAPI::TrackType type, int index);
+	static void setTrackMIDIInputGUI(quickAPI::TrackType type, int index);
+	static void setTrackAudioSendGUI(quickAPI::TrackType type, int index, int slot);
+	static void setTrackMIDISendGUI(quickAPI::TrackType type, int index, int slot);
 	static void removeTrackGUI(int index);
 
 	static void insertSeqGUI(int index);
@@ -222,6 +217,11 @@ public:
 	static void askForBusTypeGUIAsync(
 		const std::function<void(int)>& callback,
 		int defaultType = 20,
+		const CancelCallback& cancelCallback = {});
+	static void askForTrackTypeGUIAsync(
+		const std::function<void(quickAPI::TrackType)>& callback,
+		bool allowMasterTrack = true,
+		quickAPI::TrackType defaultType = quickAPI::TrackType::Track,
 		const CancelCallback& cancelCallback = {});
 	static void askForPluginParamGUIAsync(
 		const std::function<void(int)>& callback,

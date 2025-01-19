@@ -123,6 +123,9 @@ countries: cn
 "Bypass Effect" = "旁路效果器"
 "Replace" = "替换"
 
+"AUX Track" = "发送轨道"
+"Master Track" = "主轨道"
+
 "Adsorb" = "吸附"
 "Tempo" = "曲速"
 "Beat" = "节拍"

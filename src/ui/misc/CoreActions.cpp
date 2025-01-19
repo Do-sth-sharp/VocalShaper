@@ -758,41 +758,67 @@ void CoreActions::removeEffectGUI(
 	CoreActions::removeEffect(type, track, index);
 }
 
-void CoreActions::insertTrackGUI(int index) {
-	auto callback = [index](int type) {
-		CoreActions::insertTrack(index, type); };
+void CoreActions::insertTrackGUI(quickAPI::TrackType type, int index) {
+	auto callback = [type, index](int bus) {
+		CoreActions::insertTrack(type, index, bus); };
 	CoreActions::askForBusTypeGUIAsync(callback);
 }
 
-void CoreActions::insertTrackGUI() {
-	int num = quickAPI::getMixerTrackNum();
-	CoreActions::insertTrackGUI(num);
+void CoreActions::insertTrackGUI(quickAPI::TrackType type) {
+	int num = quickAPI::getTrackNum(type);
+	CoreActions::insertTrackGUI(type, num);
 }
 
-void CoreActions::setTrackColorGUI(int index) {
+void CoreActions::insertTrackGUI() {
+	auto callback = [](quickAPI::TrackType type) {
+		CoreActions::insertTrackGUI(type); };
+	CoreActions::askForTrackTypeGUIAsync(callback, false);
+}
+
+void CoreActions::setTrackColorGUI(quickAPI::TrackType type, int index) {
 	/** Callback */
-	auto callback = [index](const juce::Colour& color) {
-		CoreActions::setTrackColor(index, color);
+	auto callback = [type, index](const juce::Colour& color) {
+		CoreActions::setTrackColor(type, index, color);
 		};
 
 	/** Get Default Color */
-	juce::Colour defaultColor = quickAPI::getMixerTrackColor(index);
+	juce::Colour defaultColor = quickAPI::getTrackColor({ type, index });
 
 	/** Ask For Color */
 	CoreActions::askForColorGUIAsync(callback, defaultColor);
 }
 
-void CoreActions::setTrackNameGUI(int index) {
+void CoreActions::setTrackNameGUI(quickAPI::TrackType type, int index) {
 	/** Callback */
-	auto callback = [index](const juce::String& name) {
-		CoreActions::setTrackName(index, name);
+	auto callback = [type, index](const juce::String& name) {
+		CoreActions::setTrackName(type, index, name);
 		};
 
 	/** Get Default Name */
-	juce::String defaultName = quickAPI::getMixerTrackName(index);
+	juce::String defaultName = quickAPI::getTrackName(type, index);
 
 	/** Ask For Name */
 	CoreActions::askForNameGUIAsync(callback, defaultName);
+}
+
+void CoreActions::setTrackAudioInputGUI(
+	quickAPI::TrackType type, int index) {
+	/** TODO */
+}
+
+void CoreActions::setTrackMIDIInputGUI(
+	quickAPI::TrackType type, int index) {
+	/** TODO */
+}
+
+void CoreActions::setTrackAudioSendGUI(
+	quickAPI::TrackType type, int index, int slot) {
+	/** TODO */
+}
+
+void CoreActions::setTrackMIDISendGUI(
+	quickAPI::TrackType type, int index, int slot) {
+	/** TODO */
 }
 
 void CoreActions::setTrackAudioInputFromDeviceGUI(int index, bool input,
@@ -1547,8 +1573,8 @@ void CoreActions::askForPluginGUIAsync(
 void CoreActions::askForBusTypeGUIAsync(
 	const std::function<void(int)>& callback, int defaultType,
 	const CancelCallback& cancelCallback) {
-	/** Get Track Type List */
-	auto list = quickAPI::getAllTrackTypeWithName();
+	/** Get Bus Type List */
+	auto list = quickAPI::getAllBusTypeWithName();
 	juce::StringArray typeNames;
 	int defaultIndex = 0;
 	for (int i = 0; i < list.size(); i++) {
@@ -1582,6 +1608,48 @@ void CoreActions::askForBusTypeGUIAsync(
 			auto& [id, name] = list.getReference(index);
 
 			callback(id);
+		}
+	), true);
+}
+
+void CoreActions::askForTrackTypeGUIAsync(
+	const std::function<void(quickAPI::TrackType)>& callback,
+	bool allowMasterTrack, quickAPI::TrackType defaultType,
+	const CancelCallback& cancelCallback) {
+	/** Get Track Type List */
+	juce::StringArray typeNames;
+	typeNames.add(TRANS("Track"));
+	typeNames.add(TRANS("AUX Track"));
+	typeNames.add(TRANS("Master Track"));
+
+	/** Create Selector */
+	auto selectorWindow = new juce::AlertWindow{
+		TRANS("Track Type Selector"), TRANS("Select a track type in the list:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	selectorWindow->addButton(TRANS("OK"), 1);
+	selectorWindow->addButton(TRANS("Cancel"), 0);
+	selectorWindow->addComboBox(TRANS("Type"), typeNames, TRANS("Type"));
+
+	/** Set Default Type */
+	auto combo = selectorWindow->getComboBoxComponent(TRANS("Type"));
+	combo->setSelectedItemIndex((int)defaultType);
+	combo->setItemEnabled((int)quickAPI::TrackType::MasterTrack, allowMasterTrack);
+
+	/** Show Selector Async */
+	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[combo, callback, cancelCallback, typeNames](int result) {
+			if (result != 1) {
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
+
+			int index = combo->getSelectedItemIndex();
+			if (index < 0 || index >= typeNames.size()) {
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
+
+			callback((quickAPI::TrackType)index);
 		}
 	), true);
 }
