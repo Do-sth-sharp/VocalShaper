@@ -75,6 +75,7 @@ namespace quickAPI {
 
 	using TrackType = Track::TrackType;
 	using TrackIndex = MainGraph::TrackIndex;
+	const juce::String getTrackTypeName(TrackType type);
 
 	/*const juce::String getPluginIdentifier(PluginHolder pointer);*/
 

@@ -6,7 +6,7 @@ class ChannelLinkViewContent final : public juce::Component {
 public:
 	ChannelLinkViewContent() = delete;
 	ChannelLinkViewContent(const std::function<void(int, int, bool)>& callback,
-		const juce::Array<std::tuple<int, int>>& initList,
+		const std::set<std::pair<int, int>>& initList,
 		const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
 		int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
 		bool initIfEmpty);
@@ -39,7 +39,7 @@ class ChannelLinkView final : public juce::DocumentWindow {
 public:
 	ChannelLinkView() = delete;
 	ChannelLinkView(const std::function<void(int, int, bool)>& callback,
-		const juce::Array<std::tuple<int, int>>& initList,
+		const std::set<std::pair<int, int>>& initList,
 		const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
 		int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
 		bool initIfEmpty);

@@ -162,10 +162,9 @@ public:
 	static void setTrackColorGUI(quickAPI::TrackType type, int index);
 	static void setTrackNameGUI(quickAPI::TrackType type, int index);
 	static void setTrackAudioInputGUI(quickAPI::TrackType type, int index);
-	static void setTrackMIDIInputGUI(quickAPI::TrackType type, int index);
-	static void setTrackAudioSendGUI(quickAPI::TrackType type, int index, int slot);
-	static void setTrackMIDISendGUI(quickAPI::TrackType type, int index, int slot);
-	static void removeTrackGUI(int index);
+	static void setTrackAudioSendGUI(quickAPI::TrackType type, int index, int slot, quickAPI::SendDst dst);
+	static void setTrackMIDISendGUI(quickAPI::TrackType type, int index, int slot, quickAPI::SendDst dst);
+	static void removeTrackGUI(quickAPI::TrackType type, int index);
 
 	static void insertSeqGUI(int index);
 	static void insertSeqGUI();
@@ -234,7 +233,7 @@ public:
 		const CancelCallback& cancelCallback = {});
 	static void askForAudioChannelLinkGUIAsync(
 		const std::function<void(int, int, bool)>& callback,
-		const juce::Array<std::tuple<int, int>>& initList,
+		const std::set<std::pair<int, int>>& initList,
 		const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
 		int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
 		bool initIfEmpty, const CancelCallback& cancelCallback = {});

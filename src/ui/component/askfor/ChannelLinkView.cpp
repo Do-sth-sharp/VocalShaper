@@ -5,7 +5,7 @@
 
 ChannelLinkViewContent::ChannelLinkViewContent(
 	const std::function<void(int, int, bool)>& callback,
-	const juce::Array<std::tuple<int, int>>& initList,
+	const std::set<std::pair<int, int>>& initList,
 	const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
 	int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
 	bool initIfEmpty) : callback(callback), srcChannels(srcChannels), dstChannels(dstChannels),
@@ -18,7 +18,7 @@ ChannelLinkViewContent::ChannelLinkViewContent(
 	}
 
 	/** Init If Empty */
-	if (initIfEmpty && initList.isEmpty()) {
+	if (initIfEmpty && initList.empty()) {
 		int channelNum = std::min(srcChannelNum, dstChannelNum);
 		for (int i = 0; i < channelNum; i++) {
 			this->setLink(i, i, true);
@@ -351,7 +351,7 @@ void ChannelLinkViewContent::setLink(int srcc, int dstc, bool link) {
 
 ChannelLinkView::ChannelLinkView(
 	const std::function<void(int, int, bool)>& callback,
-	const juce::Array<std::tuple<int, int>>& initList,
+	const std::set<std::pair<int, int>>& initList,
 	const juce::AudioChannelSet& srcChannels, const juce::AudioChannelSet& dstChannels,
 	int srcChannelNum, int dstChannelNum, const juce::String& srcName, const juce::String& dstName,
 	bool initIfEmpty) 
