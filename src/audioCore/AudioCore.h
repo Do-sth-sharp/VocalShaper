@@ -49,7 +49,7 @@ public:
 	 */
 	void setIsolation(bool isolation);
 
-	bool renderNow(const juce::Array<int>& tracks, const juce::String& path,
+	bool renderNow(const juce::Array<MainGraph::TrackIndex>& tracks, const juce::String& path,
 		const juce::String& name, const juce::String& extension,
 		const juce::StringPairArray& metaData, int bitDepth, int quality);
 	bool isRendering() const;

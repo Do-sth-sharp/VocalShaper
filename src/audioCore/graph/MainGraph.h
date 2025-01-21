@@ -25,9 +25,7 @@ public:
 	bool removeTrackAdditionalAudioBus(TrackType type, int index);
 	int getTrackAdditionalAudioBusNum(TrackType type, int index) const;
 
-	enum class SendDstType {
-		ToDevice = 0, ToMaster, ToAUX
-	};
+	using SendDstType = utils::SendDstType;
 
 	const static int getMIDISendSlotNum();
 	const static int getAudioSendSlotNum();
@@ -47,10 +45,10 @@ public:
 		SendDstType dstType, int dstIndex);
 	bool disconnectTrackAudioSend(TrackType type, int index, int slot);
 
-	using AudioChannelLink = std::pair<int, int>;
-	using AudioChannelLinkList = std::set<AudioChannelLink>;
-	using SendDst = std::pair<SendDstType, int>;
-	using TrackIndex = std::pair<TrackType, int>;
+	using AudioChannelLink = utils::AudioChannelLink;
+	using AudioChannelLinkList = utils::AudioChannelLinkList;
+	using SendDst = utils::SendDst;
+	using TrackIndex = utils::TrackIndex;
 	bool isTrackMIDIInputConnected(TrackType type, int index) const;
 	bool isTrackAudioInputConnected(TrackType type, int index) const;
 	const AudioChannelLinkList getTrackAudioInputChannels(TrackType type, int index) const;
@@ -131,8 +129,6 @@ private:
 	const static int audioSendSlotNum = 4;
 	const static int midiSendSlotNum = 2;
 
-	using AudioChannelLink = std::pair<int, int>;
-	using AudioChannelLinkList = std::set<AudioChannelLink>;
 	using NodeIndex = juce::AudioProcessorGraph::NodeID;
 	using AudioSendDstGroup = std::pair<NodeIndex, AudioChannelLinkList>;
 	std::set<NodeIndex> midiInputLinks;

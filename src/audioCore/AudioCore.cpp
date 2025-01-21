@@ -243,7 +243,7 @@ void AudioCore::setIsolation(bool isolation) {
 		isolation ? nullptr : this->mainAudioGraph.get());
 }
 
-bool AudioCore::renderNow(const juce::Array<int>& tracks, const juce::String& path,
+bool AudioCore::renderNow(const juce::Array<MainGraph::TrackIndex>& tracks, const juce::String& path,
 	const juce::String& name, const juce::String& extension,
 	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	return Renderer::getInstance()->start(

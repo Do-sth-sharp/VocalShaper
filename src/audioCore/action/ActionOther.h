@@ -144,7 +144,7 @@ public:
 	ActionRenderNow() = delete;
 	ActionRenderNow(
 		const juce::String& path, const juce::String& name,
-		const juce::String& extension, const juce::Array<int>& tracks,
+		const juce::String& extension, const juce::Array<quickAPI::TrackIndex>& tracks,
 		const juce::StringPairArray& metaData, int bitDepth, int quality);
 
 	bool doAction() override;
@@ -158,7 +158,7 @@ public:
 
 private:
 	const juce::String path, name, extension;
-	const juce::Array<int> tracks;
+	const juce::Array<quickAPI::TrackIndex> tracks;
 	const juce::StringPairArray metaData;
 	const int bitDepth;
 	const int quality;

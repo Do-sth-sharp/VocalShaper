@@ -280,11 +280,7 @@ namespace quickAPI {
 	}
 
 	const juce::String getTrackTypeName(TrackType type) {
-		juce::StringArray typeNames{
-			"Track", "AUX Track", "Master Track"
-		};
-
-		return typeNames[(int)type];
+		return utils::getTrackTypeName(type);
 	}
 
 	PluginRef getInstrRef(int index) {
