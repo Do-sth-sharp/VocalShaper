@@ -106,7 +106,7 @@ const juce::String ActionStopRecord::getStatusStr() const {
 
 ActionRenderNow::ActionRenderNow(
 	const juce::String& path, const juce::String& name,
-	const juce::String& extension, const juce::Array<int>& tracks,
+	const juce::String& extension, const juce::Array<quickAPI::TrackIndex>& tracks,
 	const juce::StringPairArray& metaData, int bitDepth, int quality)
 	: path(path), name(name), extension(extension), tracks(tracks),
 	metaData(metaData), bitDepth(bitDepth), quality(quality) {}

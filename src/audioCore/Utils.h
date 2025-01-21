@@ -166,6 +166,20 @@ namespace utils {
 	void decreaseSoloCount();
 	bool shouldSolo();
 	void resetSoloCount();
+
+	enum class TrackType {
+		Track = 0, AuxTrack, MasterTrack
+	};
+	using TrackIndex = std::pair<TrackType, int>;
+	const juce::String getTrackTypeName(TrackType type);
+
+	enum class SendDstType {
+		ToDevice = 0, ToMaster, ToAUX
+	};
+	using SendDst = std::pair<SendDstType, int>;
+
+	using AudioChannelLink = std::pair<int, int>;
+	using AudioChannelLinkList = std::set<AudioChannelLink>;
 }
 
 #define UNUSED(var) (void)var

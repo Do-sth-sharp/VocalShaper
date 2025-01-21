@@ -3,13 +3,12 @@
 #include <JuceHeader.h>
 #include "PluginDock.h"
 #include "../project/Serializable.h"
+#include "../Utils.h"
 
 class MixerTrack final : public juce::AudioProcessorGraph,
 	public Serializable {
 public:
-	enum class TrackType {
-		Track = 0, AuxTrack, MasterTrack
-	};
+	using TrackType = utils::TrackType;
 
 	MixerTrack() = delete;
 	MixerTrack(TrackType type,

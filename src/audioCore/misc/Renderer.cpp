@@ -136,7 +136,7 @@ Renderer::~Renderer() {
 	}
 }
 
-bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
+bool Renderer::start(const juce::Array<utils::TrackIndex>& tracks, const juce::String& path,
 	const juce::String& name, const juce::String& extension,
 	const juce::StringPairArray& metaData, int bitDepth, int quality) {
 	/** Async Protection */
@@ -153,8 +153,8 @@ bool Renderer::start(const juce::Array<int>& tracks, const juce::String& path,
 
 	Renderer::RenderTaskList tasks;
 	for (auto& i : tracks) {
-		if (i >= 0 && i < graph->getTrackNum()) {
-			if (auto track = graph->getTrackProcessor(i)) {
+		if (i.second >= 0 && i.second < graph->getTrackNum(i.first)) {
+			if (auto track = graph->getTrackProcessor(i.first, i.second)) {
 				tasks.add({ track, i, track->getAudioChannelSet() });
 			}
 		}
@@ -271,7 +271,7 @@ void Renderer::saveFile(const juce::File& dir,
 		auto& [id, channels, buffer] = i.second;
 		
 		/** Create File */
-		auto file = dir.getChildFile(name + "_" + juce::String(id) + extension);
+		auto file = dir.getChildFile(name + "_" + utils::getTrackTypeName(id.first) + "-" + juce::String{ id.second } + extension);
 		if (file.exists()) {
 			file.deleteFile();
 		}

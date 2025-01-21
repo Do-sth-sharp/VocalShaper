@@ -1101,4 +1101,12 @@ namespace utils {
 	void resetSoloCount() {
 		soloCount = 0;
 	}
+
+	const juce::String getTrackTypeName(TrackType type) {
+		juce::StringArray typeNames{
+			"Track", "AUX Track", "Master Track"
+		};
+
+		return typeNames[(int)type];
+	}
 }

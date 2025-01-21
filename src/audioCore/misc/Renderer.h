@@ -1,18 +1,17 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
-
-class Track;
+#include "../Utils.h"
 
 class Renderer final : private juce::DeletedAtShutdown {
 public:
 	Renderer();
 	~Renderer() override;
 
-	using RenderTask = std::tuple<const Track*, int, juce::AudioChannelSet>;
+	using RenderTask = std::tuple<const Track*, utils::TrackIndex, juce::AudioChannelSet>;
 	using RenderTaskList = juce::Array<RenderTask>;
 
-	bool start(const juce::Array<int>& tracks, const juce::String& path,
+	bool start(const juce::Array<utils::TrackIndex>& tracks, const juce::String& path,
 		const juce::String& name, const juce::String& extension,
 		const juce::StringPairArray& metaData, int bitDepth, int quality);
 	/**
@@ -47,7 +46,7 @@ private:
 	double sampleRate = 0;
 	int bufferSize = 0;
 	std::map<const Track*, std::tuple<
-		int, juce::AudioChannelSet, juce::AudioBuffer<float>>> buffers;
+		utils::TrackIndex, juce::AudioChannelSet, juce::AudioBuffer<float>>> buffers;
 	std::unique_ptr<juce::Thread> renderThread = nullptr;
 
 public:

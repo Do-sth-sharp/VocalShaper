@@ -2,7 +2,6 @@
 
 #include <JuceHeader.h>
 #include "../graph/PluginDecorator.h"
-#include "../graph/MainGraph.h"
 #include "../source/SourceMIDITemp.h"
 #include "../Utils.h"
 
@@ -73,8 +72,8 @@ namespace quickAPI {
 	/** Param Index，CC Channel */
 	using PluginParamLink = std::tuple<int, int>;
 
-	using TrackType = Track::TrackType;
-	using TrackIndex = MainGraph::TrackIndex;
+	using TrackType = utils::TrackType;
+	using TrackIndex = utils::TrackIndex;
 	const juce::String getTrackTypeName(TrackType type);
 
 	/*const juce::String getPluginIdentifier(PluginHolder pointer);*/
@@ -111,8 +110,9 @@ namespace quickAPI {
 	int getEffectInputChannelNum(TrackIndex trackIndex, int index);
 	const juce::String getEffectIdentifier(TrackIndex trackIndex, int index);
 
-	using AudioChannelLinkList = MainGraph::AudioChannelLinkList;
-	using SendDst = MainGraph::SendDst;
+	using AudioChannelLinkList = utils::AudioChannelLinkList;
+	using SendDstType = utils::SendDstType;
+	using SendDst = utils::SendDst;
 	using RecordState = SeqSourceProcessor::RecordState;
 	int getTrackNum(TrackType type);
 	const juce::String getTrackName(TrackIndex index);

@@ -19,7 +19,7 @@ public:
 	static bool removePluginSearchPath(const juce::String& path);
 
 	static void render(const juce::String& dirPath, const juce::String& fileName,
-		const juce::String& fileExtension, const juce::Array<int>& tracks,
+		const juce::String& fileExtension, const juce::Array<quickAPI::TrackIndex>& tracks,
 		const juce::StringPairArray& metaData, int bitDepth, int quality);
 
 	static void undo();
@@ -164,32 +164,22 @@ public:
 	static void setTrackAudioInputGUI(quickAPI::TrackType type, int index);
 	static void setTrackAudioSendGUI(quickAPI::TrackType type, int index, int slot, quickAPI::SendDst dst);
 	static void setTrackMIDISendGUI(quickAPI::TrackType type, int index, int slot, quickAPI::SendDst dst);
-	static void removeTrackGUI(quickAPI::TrackType type, int index);
-
-	static void insertSeqGUI(int index);
-	static void insertSeqGUI();
-	static void setSeqColorGUI(int index);
-	static void setSeqNameGUI(int index);
-	static void setSeqAudioInputFromDeviceGUI(int index, bool input,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setSeqAudioOutputToMixerGUI(int index, int mixerIndex, bool output,
-		const juce::Array<std::tuple<int, int>>& links);
-	static void setSeqMIDITrackGUI(int index);
-	static void setSeqAudioRefGUIThenAddBlock(int index, const juce::String& path);
-	static void setSeqAudioRefGUI(int index, const juce::String& path);
-	static void setSeqMIDIRefGUIThenAddBlock(int index, const juce::String& path, bool getTempo);
-	static void setSeqMIDIRefGUI(int index, const juce::String& path);
-	static void createSeqAudioSourceGUI(
+	static void setTrackMIDITrackGUI(int index);
+	static void setTrackAudioRefGUIThenAddBlock(int index, const juce::String& path);
+	static void setTrackAudioRefGUI(int index, const juce::String& path);
+	static void setTrackMIDIRefGUIThenAddBlock(int index, const juce::String& path, bool getTempo);
+	static void setTrackMIDIRefGUI(int index, const juce::String& path);
+	static void createTrackAudioSourceGUI(
 		int index, const juce::String& name,
 		const CreateAudioSourceCancelCallback& cancelCallback);
-	static void createSeqMIDISourceGUI(
+	static void createTrackMIDISourceGUI(
 		int index, const juce::String& name,
 		const CreateMIDISourceCancelCallback& cancelCallback);
-	static void createSeqAudioSourceGUI(
+	static void createTrackAudioSourceGUI(
 		int index, const CreateAudioSourceCancelCallback& cancelCallback);
-	static void createSeqMIDISourceGUI(
+	static void createTrackMIDISourceGUI(
 		int index, const CreateMIDISourceCancelCallback& cancelCallback);
-	static void removeSeqGUI(int index);
+	static void removeTrackGUI(quickAPI::TrackType type, int index);
 
 	static void addLabelGUI(double time);
 	static void setLabelTimeGUI(int index, double time);
@@ -203,7 +193,7 @@ public:
 		const std::function<void(double, int, double)>& callback,
 		const CancelCallback& cancelCallback = {});
 	static void askForMixerTracksListGUIAsync(
-		const std::function<void(const juce::Array<int>&)>& callback,
+		const std::function<void(const juce::Array<quickAPI::TrackIndex>&)>& callback,
 		const CancelCallback& cancelCallback = {});
 	static void askForNameGUIAsync(
 		const std::function<void(const juce::String&)>& callback,
