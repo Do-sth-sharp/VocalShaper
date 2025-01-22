@@ -14,13 +14,18 @@ public:
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
-	void update(int index);
-	void updateGain(int index);
-	void updatePan(int index);
-	void updateFader(int index);
-	void updateMute(int index);
-	void updateEffect(int track, int index);
-	void updateSeqTrack(int index);
+	void updateAdd(int type, int index);
+	void updateRemove(int type, int index);
+	void updateInfo(int type, int index);
+	void updateSideChain(int type, int index);
+	void updateInput(int type, int index);
+	void updateSend(int type, int index);
+	void updateGain(int type, int index);
+	void updatePan(int type, int index);
+	void updateFader(int type, int index);
+	void updateMute(int type, int index);
+	void updateEffect(int type, int track, int index);
+	void updateEffectIndex(int type, int track, int oldIndex, int newIndex);
 
 	void mouseUp(const juce::MouseEvent& event) override;
 
@@ -32,6 +37,9 @@ private:
 	juce::String emptyNoticeStr;
 
 	void add();
+
+	int getViewIndexByType(int type, int index) const;
+	std::pair<int, int> getTypeByViewIndex(int index) const;
 
 	int getViewWidth() const;
 	int getTrackNum() const;

@@ -27,55 +27,78 @@ MixerView::MixerView()
 	this->emptyNoticeStr = TRANS("Right click on the blank space to create a new track.");
 
 	/** Update Callback */
-	CoreCallbacks::getInstance()->addTrackChanged(
-		[comp = MixerView::SafePointer(this)](int index) {
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackAdded,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->update(index);
+				comp->updateAdd(type, index);
 			}
-		}
-	);
-	CoreCallbacks::getInstance()->addTrackGainChanged(
-		[comp = MixerView::SafePointer(this)](int index) {
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackRemoved,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->updateGain(index);
+				comp->updateRemove(type, index);
 			}
-		}
-	);
-	CoreCallbacks::getInstance()->addTrackPanChanged(
-		[comp = MixerView::SafePointer(this)](int index) {
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackInfoChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->updatePan(index);
+				comp->updateInfo(type, index);
 			}
-		}
-	);
-	CoreCallbacks::getInstance()->addTrackFaderChanged(
-		[comp = MixerView::SafePointer(this)](int index) {
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackSideChainChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->updateFader(index);
+				comp->updateSideChain(type, index);
 			}
-		}
-	);
-	CoreCallbacks::getInstance()->addTrackMuteChanged(
-		[comp = MixerView::SafePointer(this)](int index) {
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackInputConnectionChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->updateMute(index);
+				comp->updateInput(type, index);
 			}
-		}
-	);
-	CoreCallbacks::getInstance()->addEffectChanged(
-		[comp = MixerView::SafePointer(this)](int track, int index) {
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackSendConnectionChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->updateEffect(track, index);
+				comp->updateSend(type, index);
 			}
-		}
-	);
-	CoreCallbacks::getInstance()->addSeqChanged(
-		[comp = MixerView::SafePointer(this)](int index) {
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackGainChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
 			if (comp) {
-				comp->updateSeqTrack(index);
+				comp->updateGain(type, index);
 			}
-		}
-	);
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackPanChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
+			if (comp) {
+				comp->updatePan(type, index);
+			}
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackFaderChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
+			if (comp) {
+				comp->updateFader(type, index);
+			}
+		});
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackMuteSoloChanged,
+		[comp = MixerView::SafePointer(this)](int type, int index) {
+			if (comp) {
+				comp->updateMute(type, index);
+			}
+		});
+	CoreCallbackAPI<int, int, int>::add(CoreCallbacks::CallbackType::TrackEffectChanged,
+		[comp = MixerView::SafePointer(this)](int type, int track, int index) {
+			if (comp) {
+				comp->updateEffect(type, track, index);
+			}
+		});
+	CoreCallbackAPI<int, int, int, int>::add(CoreCallbacks::CallbackType::TrackEffectIndexChanged,
+		[comp = MixerView::SafePointer(this)](int type, int track, int oldIndex, int newIndex) {
+			if (comp) {
+				comp->updateEffectIndex(type, track, oldIndex, newIndex);
+			}
+		});
 }
 
 void MixerView::resized() {
@@ -131,48 +154,23 @@ void MixerView::paint(juce::Graphics& g) {
 	}
 }
 
-void MixerView::update(int index) {
-	/** Create Or Remove Track */
-	int currentSize = this->trackList.size();
-	int newSize = quickAPI::getMixerTrackNum();
-	if (currentSize > newSize) {
-		for (int i = currentSize - 1; i >= newSize; i--) {
-			this->trackList.remove(i, true);
-		}
-	}
-	else {
-		for (int i = currentSize; i < newSize; i++) {
-			auto track = std::make_unique<MixerTrackComponent>();
-			this->addAndMakeVisible(track.get());
-			this->trackList.add(std::move(track));
-		}
-	}
+void MixerView::updateAdd(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Add Track */
+	auto track = std::make_unique<MixerTrackComponent>();
+	this->addAndMakeVisible(track.get());
+	this->trackList.insert(viewIndex, std::move(track));
 
 	/** Update Tracks */
-	if (index >= 0 && index < this->trackList.size()) {
-		this->trackList[index]->update(index);
-	}
-	else {
-		for (int i = 0; i < this->trackList.size(); i++) {
-			this->trackList[i]->update(i);
-		}
+	for (int i = viewIndex; i < this->trackList.size(); i++) {
+		auto trackIndex = this->getTypeByViewIndex(i);
+		this->trackList[i]->updateIndex(trackIndex.first, trackIndex.second);
 	}
 
 	/** Update Color Temp */
-	if (index >= 0 && index < this->colorTemp.size()) {
-		if (index < newSize) {
-			this->colorTemp.getReference(index) = quickAPI::getMixerTrackColor(index);
-		}
-		if (this->colorTemp.size() > newSize) {
-			this->colorTemp.resize(newSize);
-		}
-	}
-	else {
-		this->colorTemp.clear();
-		for (int i = 0; i < this->trackList.size(); i++) {
-			this->colorTemp.add(quickAPI::getMixerTrackColor(i));
-		}
-	}
+	this->colorTemp.insert(viewIndex, quickAPI::getTrackColor({ (quickAPI::TrackType)type, index }));
 
 	/** Update View Pos */
 	this->hScroller->update();
@@ -181,45 +179,107 @@ void MixerView::update(int index) {
 	this->repaint();
 }
 
-void MixerView::updateGain(int index) {
-	if (index >= 0 && index < this->trackList.size()) {
-		this->trackList[index]->updateGain();
+void MixerView::updateRemove(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Remove Track */
+	this->trackList.remove(viewIndex);
+
+	/** Update Tracks */
+	for (int i = viewIndex; i < this->trackList.size(); i++) {
+		auto trackIndex = this->getTypeByViewIndex(i);
+		this->trackList[i]->updateIndex(trackIndex.first, trackIndex.second);
 	}
+
+	/** Update Color Temp */
+	this->colorTemp.remove(viewIndex);
+
+	/** Update View Pos */
+	this->hScroller->update();
+
+	/** Repaint */
+	this->repaint();
 }
 
-void MixerView::updatePan(int index) {
-	if (index >= 0 && index < this->trackList.size()) {
-		this->trackList[index]->updatePan();
-	}
+void MixerView::updateInfo(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateInfo();
 }
 
-void MixerView::updateFader(int index) {
-	if (index >= 0 && index < this->trackList.size()) {
-		this->trackList[index]->updateFader();
-	}
+void MixerView::updateSideChain(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateSideChain();
 }
 
-void MixerView::updateMute(int index) {
-	if (index >= 0 && index < this->trackList.size()) {
-		this->trackList[index]->updateMute();
-	}
+void MixerView::updateInput(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateInput();
 }
 
-void MixerView::updateEffect(int track, int index) {
-	if (track >= 0 && track < this->trackList.size()) {
-		this->trackList[track]->updateEffect(index);
-	}
-	else {
-		for (auto i : this->trackList) {
-			i->updateEffect(index);
-		}
-	}
+void MixerView::updateSend(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateSend();
 }
 
-void MixerView::updateSeqTrack(int /*index*/) {
-	for (auto i : this->trackList) {
-		i->updateSeqTrack();
-	}
+void MixerView::updateGain(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateGain();
+}
+
+void MixerView::updatePan(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updatePan();
+}
+
+void MixerView::updateFader(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateFader();
+}
+
+void MixerView::updateMute(int type, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, index);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateMute();
+}
+
+void MixerView::updateEffect(int type, int track, int index) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, track);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateEffect(index);
+}
+
+void MixerView::updateEffectIndex(int type, int track, int oldIndex, int newIndex) {
+	/** Get View Index */
+	int viewIndex = this->getViewIndexByType(type, track);
+
+	/** Update Track */
+	this->trackList[viewIndex]->updateEffectIndex(oldIndex, newIndex);
 }
 
 void MixerView::mouseUp(const juce::MouseEvent& event) {
@@ -230,6 +290,34 @@ void MixerView::mouseUp(const juce::MouseEvent& event) {
 
 void MixerView::add() {
 	CoreActions::insertTrackGUI();
+}
+
+int MixerView::getViewIndexByType(int type, int index) const {
+	int masterNum = quickAPI::getTrackNum(quickAPI::TrackType::MasterTrack);
+	int auxNum = quickAPI::getTrackNum(quickAPI::TrackType::AuxTrack);
+
+	if (type == (int)quickAPI::TrackType::MasterTrack) {
+		return index;
+	}
+	else if (type == (int)quickAPI::TrackType::AuxTrack) {
+		return masterNum + index;
+	}
+
+	return masterNum + auxNum + index;
+}
+
+std::pair<int, int> MixerView::getTypeByViewIndex(int index) const {
+	int masterNum = quickAPI::getTrackNum(quickAPI::TrackType::MasterTrack);
+	int auxNum = quickAPI::getTrackNum(quickAPI::TrackType::AuxTrack);
+
+	if (index >= masterNum + auxNum) {
+		return { (int)quickAPI::TrackType::Track, index - (masterNum + auxNum) };
+	}
+	else if (index >= masterNum) {
+		return { (int)quickAPI::TrackType::AuxTrack, index - masterNum };
+	}
+
+	return { (int)quickAPI::TrackType::MasterTrack, index };
 }
 
 int MixerView::getViewWidth() const {
