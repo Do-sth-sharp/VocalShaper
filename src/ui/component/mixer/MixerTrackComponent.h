@@ -19,13 +19,17 @@ public:
 	void paint(juce::Graphics& g) override;
 	void paintOverChildren(juce::Graphics& g) override;
 
-	void update(int index);
+	void updateIndex(int type, int index);
+	void updateInfo();
+	void updateSideChain();
+	void updateInput();
+	void updateSend();
 	void updateGain();
 	void updatePan();
 	void updateFader();
 	void updateMute();
 	void updateEffect(int index);
-	void updateSeqTrack();
+	void updateEffectIndex(int oldIndex, int newIndex);
 
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
@@ -40,7 +44,7 @@ public:
 	void focusLost(FocusChangeType cause) override;
 
 private:
-	int index = -1;
+	int type = -1, index = -1;
 	juce::Colour trackColor, nameColor;
 	juce::String name;
 	bool dragHovered = false;
