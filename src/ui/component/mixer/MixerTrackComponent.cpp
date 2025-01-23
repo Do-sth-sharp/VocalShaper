@@ -26,14 +26,16 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->gainKnob = std::make_unique<KnobBase>(
 		TRANS("Gain"), 0, -10, 10, 1);
 	this->gainKnob->onChange = [this](double value) {
-		CoreActions::setTrackGain(this->index, (float)value);
+		CoreActions::setTrackGain(
+			(quickAPI::TrackType)this->type, this->index, (float)value);
 		};
 	this->addAndMakeVisible(this->gainKnob.get());
 
 	this->panKnob = std::make_unique<KnobBase>(
 		TRANS("Pan"), 0, -1, 1, 2);
 	this->panKnob->onChange = [this](double value) {
-		CoreActions::setTrackPan(this->index, (float)value);
+		CoreActions::setTrackPan(
+			(quickAPI::TrackType)this->type, this->index, (float)value);
 		};
 	this->addAndMakeVisible(this->panKnob.get());
 
@@ -42,7 +44,8 @@ MixerTrackComponent::MixerTrackComponent() {
 		1.0, juce::Array<double>{ 6.0, 0.0, -5.0, -10.0, -15.0, -20.0, -30.0, -40.0, -60.0, -100.0 },
 		0.0, 2.0, 0);
 	this->fader->onChange = [this](double value) {
-		CoreActions::setTrackFader(this->index, (float)value);
+		CoreActions::setTrackFader(
+			(quickAPI::TrackType)this->type, this->index, (float)value);
 		};
 	this->addAndMakeVisible(this->fader.get());
 
@@ -265,68 +268,87 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	g.drawRect(totalRect, outlineThickness);
 }
 
-void MixerTrackComponent::update(int index) {
+void MixerTrackComponent::updateIndex(int type, int index) {
+	this->type = type;
 	this->index = index;
-	if (index > -1) {
-		this->name = quickAPI::getMixerTrackName(index);
-		this->trackColor = quickAPI::getMixerTrackColor(index);
 
-		auto& laf = this->getLookAndFeel();
-		auto textColorLight = laf.findColour(
-			juce::Label::ColourIds::textWhenEditingColourId);
-		auto textColorDark = laf.findColour(
-			juce::Label::ColourIds::textColourId);
-		this->nameColor = utils::chooseTextColor(this->trackColor, textColorLight, textColorDark);
+	this->sideChain->updateIndex(type, index);
 
-		this->sideChain->update(index);
+	this->midiInput->updateIndex(type, index);
+	this->audioInput->updateIndex(type, index);
+	this->midiSend->updateIndex(type, index);
+	this->audioSend->updateIndex(type, index);
 
-		this->midiInput->update(index);
-		this->audioInput->update(index);
-		this->midiOutput->update(index);
-		this->audioOutput->update(index);
+	this->muteButton->updateIndex(type, index);
+	this->soloButton->updateIndex(type, index);
 
-		this->gainKnob->setValue(quickAPI::getMixerTrackGain(index));
-		this->panKnob->setValue(quickAPI::getMixerTrackPan(index));
-		this->panValid = quickAPI::isMixerTrackPanValid(index);
+	this->levelMeter->updateIndex(type, index);
 
-		this->muteButton->update(index);
-
-		this->levelMeter->update(index);
-
-		this->effectListModel->update(index);
-		this->effectList->updateContent();
-
-		this->resized();
-		this->repaint();
-	}
-}
-
-void MixerTrackComponent::updateGain() {
-	this->gainKnob->setValue(quickAPI::getMixerTrackGain(this->index));
-}
-
-void MixerTrackComponent::updatePan() {
-	this->panKnob->setValue(quickAPI::getMixerTrackPan(this->index));
-}
-
-void MixerTrackComponent::updateFader() {
-	this->fader->setValue(quickAPI::getMixerTrackFader(this->index));
-}
-
-void MixerTrackComponent::updateMute() {
-	this->muteButton->update(this->index);
-}
-
-void MixerTrackComponent::updateEffect(int /*index*/) {
-	this->effectListModel->update(this->index);
+	this->effectListModel->updateIndex(type, index);
 	this->effectList->updateContent();
 }
 
-void MixerTrackComponent::updateSeqTrack() {
-	this->midiInput->update(this->index);
-	this->audioInput->update(this->index);
-	this->midiOutput->update(this->index);
-	this->audioOutput->update(this->index);
+void MixerTrackComponent::updateInfo() {
+	this->name = quickAPI::getTrackName({ (quickAPI::TrackType)this->type, index });
+	this->trackColor = quickAPI::getTrackColor({ (quickAPI::TrackType)this->type, index });
+
+	auto& laf = this->getLookAndFeel();
+	auto textColorLight = laf.findColour(
+		juce::Label::ColourIds::textWhenEditingColourId);
+	auto textColorDark = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+	this->nameColor = utils::chooseTextColor(this->trackColor, textColorLight, textColorDark);
+
+	this->repaint();
+}
+
+void MixerTrackComponent::updateSideChain() {
+	this->sideChain->update();
+}
+
+void MixerTrackComponent::updateInput() {
+	this->midiInput->update();
+	this->audioInput->update();
+}
+
+void MixerTrackComponent::updateSend() {
+	this->midiSend->update();
+	this->audioSend->update();
+}
+
+void MixerTrackComponent::updateGain() {
+	this->gainKnob->setValue(
+		quickAPI::getTrackGain({ (quickAPI::TrackType)this->type, index }));
+}
+
+void MixerTrackComponent::updatePan() {
+	this->panKnob->setValue(
+		quickAPI::getTrackPan({ (quickAPI::TrackType)this->type, index }));
+	this->panValid = quickAPI::isTrackPanValid({ (quickAPI::TrackType)this->type, index });
+
+	/** Update Panner State */
+	this->resized();
+}
+
+void MixerTrackComponent::updateFader() {
+	this->fader->setValue(
+		quickAPI::getTrackFader({ (quickAPI::TrackType)this->type, index }));
+}
+
+void MixerTrackComponent::updateMute() {
+	this->muteButton->update();
+	this->soloButton->update();
+}
+
+void MixerTrackComponent::updateEffect(int index) {
+	this->effectListModel->update(index);
+	this->effectList->updateContent();
+}
+
+void MixerTrackComponent::updateEffectIndex(int oldIndex, int newIndex) {
+	this->effectListModel->update(oldIndex);
+	this->effectListModel->update(newIndex);
+	this->effectList->updateContent();
 }
 
 void MixerTrackComponent::mouseMove(const juce::MouseEvent& event) {
@@ -349,7 +371,8 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 
 	if (event.mods.isRightButtonDown()) {
 		if (y >= 0 && y < colorHeight) {
-			CoreActions::setTrackColorGUI(this->index);
+			CoreActions::setTrackColorGUI(
+				(quickAPI::TrackType)this->type, this->index);
 		}
 		else {
 			this->showMenu();
@@ -357,7 +380,8 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 	else if (event.mods.isLeftButtonDown()) {
 		if (y >= 0 && y < colorHeight) {
-			CoreActions::setTrackNameGUI(this->index);
+			CoreActions::setTrackNameGUI(
+				(quickAPI::TrackType)this->type, this->index);
 		}
 	}
 }
@@ -486,11 +510,13 @@ void MixerTrackComponent::showMenu() {
 }
 
 void MixerTrackComponent::add() {
-	CoreActions::insertTrackGUI(this->index + 1);
+	CoreActions::insertTrackGUI(
+		(quickAPI::TrackType)this->type, this->index + 1);
 }
 
 void MixerTrackComponent::remove() {
-	CoreActions::removeTrackGUI(this->index);
+	CoreActions::removeTrackGUI(
+		(quickAPI::TrackType)this->type, this->index);
 }
 
 int MixerTrackComponent::getInsertIndex(const juce::Point<int>& pos) {
