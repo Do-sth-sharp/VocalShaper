@@ -1,12 +1,12 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
 
-class MixerTrackMuteComponent final
+class MixerTrackSoloComponent final
 	: public juce::Component,
 	public juce::SettableTooltipClient {
 public:
-	MixerTrackMuteComponent();
+	MixerTrackSoloComponent();
 
 	void paint(juce::Graphics& g) override;
 
@@ -16,10 +16,10 @@ public:
 	void update();
 
 private:
-	int type = - 1, index = -1;
-	bool mute = false;
+	int type = -1, index = -1;
+	bool solo = false;
 
-	void changeMute();
+	void changeSolo();
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerTrackMuteComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerTrackSoloComponent)
 };

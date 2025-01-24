@@ -117,8 +117,6 @@ countries: cn
 "Pan" = "声像"
 "Mute" = "静音"
 "Solo" = "独奏"
-"Mute All" = "全部静音"
-"Unmute All" = "全部取消静音"
 "Fx List" = "效果器列表"
 "Bypass Effect" = "旁路效果器"
 "Replace" = "替换"
