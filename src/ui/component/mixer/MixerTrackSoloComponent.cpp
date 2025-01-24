@@ -1,16 +1,16 @@
-﻿#include "MixerTrackMuteComponent.h"
+#include "MixerTrackSoloComponent.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreActions.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
-MixerTrackMuteComponent::MixerTrackMuteComponent() {
+MixerTrackSoloComponent::MixerTrackSoloComponent() {
 	this->setLookAndFeel(
-		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::MuteButton));
+		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::SoloButton));
 	this->setMouseCursor(juce::MouseCursor::PointingHandCursor);
 }
 
-void MixerTrackMuteComponent::paint(juce::Graphics& g) {
+void MixerTrackSoloComponent::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 
@@ -19,10 +19,10 @@ void MixerTrackMuteComponent::paint(juce::Graphics& g) {
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
-	juce::Colour backgroundColor = laf.findColour(this->mute
+	juce::Colour backgroundColor = laf.findColour(this->solo
 		? juce::TextButton::ColourIds::buttonOnColourId
 		: juce::TextButton::ColourIds::buttonColourId);
-	juce::Colour textColor = laf.findColour(this->mute
+	juce::Colour textColor = laf.findColour(this->solo
 		? juce::TextButton::ColourIds::textColourOnId
 		: juce::TextButton::ColourIds::textColourOffId);
 
@@ -38,34 +38,34 @@ void MixerTrackMuteComponent::paint(juce::Graphics& g) {
 	g.drawRect(buttonRect, lineThickness);
 
 	g.setFont(textFont);
-	g.drawFittedText("M", buttonRect.toNearestInt(),
+	g.drawFittedText("S", buttonRect.toNearestInt(),
 		juce::Justification::centred, 1, 0.f);
 }
 
-void MixerTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
+void MixerTrackSoloComponent::mouseUp(const juce::MouseEvent& event) {
 	if (event.mods.isLeftButtonDown()) {
-		this->changeMute();
+		this->changeSolo();
 	}
 	else if (event.mods.isRightButtonDown()) {
-		this->changeMute();
+		this->changeSolo();
 	}
 }
 
-void MixerTrackMuteComponent::updateIndex(int type, int index) {
+void MixerTrackSoloComponent::updateIndex(int type, int index) {
 	this->type = type;
 	this->index = index;
 }
 
-void MixerTrackMuteComponent::update() {
-	this->mute = quickAPI::getTrackEquivalentMute(
+void MixerTrackSoloComponent::update() {
+	this->solo = quickAPI::getTrackSolo(
 		{ (quickAPI::TrackType)this->type, this->index });
 
 	this->repaint();
 }
 
-void MixerTrackMuteComponent::changeMute() {
-	bool mute = quickAPI::getTrackMute(
+void MixerTrackSoloComponent::changeSolo() {
+	bool solo = quickAPI::getTrackSolo(
 		{ (quickAPI::TrackType)this->type, this->index });
-	CoreActions::setTrackMute(
-		(quickAPI::TrackType)this->type, this->index, !mute);
+	CoreActions::setTrackSolo(
+		(quickAPI::TrackType)this->type, this->index, !solo);
 }
