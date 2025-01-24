@@ -17,10 +17,10 @@ public:
 	void mouseDrag(const juce::MouseEvent& event) override;
 	void mouseExit(const juce::MouseEvent& event) override;
 
-	void update(int index);
+	void updateIndex(int type, int index);
 
 private:
-	int index = -1;
+	int type = -1, index = -1;
 	juce::Array<float> values;
 	bool mouseHovered = false;
 	juce::Point<int> mousePos;
