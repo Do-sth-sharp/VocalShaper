@@ -94,21 +94,26 @@ void SideChainComponent::paint(juce::Graphics& g) {
 		juce::Justification::centredLeft, 1, 0.f);
 }
 
-void SideChainComponent::update(int index) {
+void SideChainComponent::updateIndex(int type, int index) {
+	this->type = type;
 	this->index = index;
-	if (index > -1) {
-		this->sideChainNum = quickAPI::getMixerTrackSideChainBusNum(index);
+}
 
-		this->subButton->setEnabled(this->sideChainNum > 0);
+void SideChainComponent::update() {
+	this->sideChainNum = quickAPI::getTrackSideChainBusNum(
+		{ (quickAPI::TrackType)this->type, this->index });
 
-		this->repaint();
-	}
+	this->subButton->setEnabled(this->sideChainNum > 0);
+
+	this->repaint();
 }
 
 void SideChainComponent::add() {
-	CoreActions::addTrackSideChain(this->index);
+	CoreActions::addTrackSideChain(
+		(quickAPI::TrackType)this->type, this->index);
 }
 
 void SideChainComponent::sub() {
-	CoreActions::removeTrackSideChain(this->index);
+	CoreActions::removeTrackSideChain(
+		(quickAPI::TrackType)this->type, this->index);
 }

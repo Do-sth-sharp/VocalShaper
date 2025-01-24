@@ -9,7 +9,8 @@ public:
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
-	void update(int index);
+	void updateIndex(int type, int index);
+	void update();
 
 private:
 	std::unique_ptr<juce::Drawable> addIcon = nullptr;
@@ -17,7 +18,7 @@ private:
 	std::unique_ptr<juce::DrawableButton> addButton = nullptr;
 	std::unique_ptr<juce::DrawableButton> subButton = nullptr;
 
-	int index = -1;
+	int type = -1, index = -1;
 	int sideChainNum = 0;
 
 	void add();
