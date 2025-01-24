@@ -785,6 +785,10 @@ namespace quickAPI {
 		return {};
 	}
 
+	const juce::String getMIDIOutputDeviceName() {
+		return Device::getInstance()->getMIDIOutputDevice();
+	}
+
 	const juce::String getAudioDeviceName(bool isInput) {
 		return isInput
 			? Device::getInstance()->getAudioInputDeviceName()

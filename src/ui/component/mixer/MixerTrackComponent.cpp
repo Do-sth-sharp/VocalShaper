@@ -341,13 +341,10 @@ void MixerTrackComponent::updateMute() {
 }
 
 void MixerTrackComponent::updateEffect(int index) {
-	this->effectListModel->update(index);
 	this->effectList->updateContent();
 }
 
 void MixerTrackComponent::updateEffectIndex(int oldIndex, int newIndex) {
-	this->effectListModel->update(oldIndex);
-	this->effectListModel->update(newIndex);
 	this->effectList->updateContent();
 }
 
