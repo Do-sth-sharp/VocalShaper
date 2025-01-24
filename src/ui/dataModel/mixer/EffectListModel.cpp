@@ -1,7 +1,5 @@
 ﻿#include "EffectListModel.h"
 #include "../../component/mixer/EffectComponent.h"
-#include "../../misc/CoreActions.h"
-#include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
 
 int EffectListModel::getNumRows() {
@@ -33,7 +31,7 @@ juce::String EffectListModel::getNameForRow(int rowNumber) {
 	return quickAPI::getEffectName({ (quickAPI::TrackType)this->type, this->index }, rowNumber);
 }
 
-void EffectListModel::update(int type, int index) {
+void EffectListModel::updateIndex(int type, int index) {
 	this->type = type;
 	this->index = index;
 }

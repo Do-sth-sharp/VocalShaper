@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <JuceHeader.h>
+#include "../graph/SeqSourceProcessor.h"
 #include "../graph/PluginDecorator.h"
 #include "../source/SourceMIDITemp.h"
 #include "../Utils.h"
@@ -167,6 +168,7 @@ namespace quickAPI {
 	const juce::Array<SeqBlock> getBlockList(TrackIndex trackIndex);
 	const SeqBlock getBlock(TrackIndex trackIndex, int index);
 
+	const juce::String getMIDIOutputDeviceName();
 	const juce::String getAudioDeviceName(bool isInput);
 	int getAudioDeviceChannelNum(bool isInput);
 

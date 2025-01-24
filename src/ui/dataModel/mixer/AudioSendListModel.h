@@ -1,10 +1,10 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
 
-class EffectListModel final : public juce::ListBoxModel {
+class AudioSendListModel final : public juce::ListBoxModel {
 public:
-	EffectListModel() = default;
+	AudioSendListModel() = default;
 
 	int getNumRows() override;
 	void paintListBoxItem(int rowNumber, juce::Graphics& g,
@@ -18,5 +18,5 @@ public:
 private:
 	int type = -1, index = -1;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EffectListModel)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioSendListModel)
 };
