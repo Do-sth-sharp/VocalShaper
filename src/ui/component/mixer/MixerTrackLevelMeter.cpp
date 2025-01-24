@@ -11,7 +11,8 @@ MixerTrackLevelMeter::MixerTrackLevelMeter() {
 
 void MixerTrackLevelMeter::updateLevelMeter() {
 	/** Get Value */
-	auto valuesTemp = quickAPI::getMixerTrackOutputLevel(this->index);
+	auto valuesTemp = quickAPI::getTrackMixerOutputLevel(
+		{ (quickAPI::TrackType)this->type, this->index });
 	if (this->values.size() == valuesTemp.size()) {
 		this->values.clearQuick();
 	}
@@ -175,6 +176,7 @@ void MixerTrackLevelMeter::mouseExit(
 	this->mouseHovered = false;
 }
 
-void MixerTrackLevelMeter::update(int index) {
+void MixerTrackLevelMeter::updateIndex(int type, int index) {
+	this->type = type;
 	this->index = index;
 }
