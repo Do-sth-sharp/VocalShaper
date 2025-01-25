@@ -20,6 +20,7 @@
 #include "base/SoloButtonLookAndFeel.h"
 #include "base/RecButtonLookAndFeel.h"
 #include "mixer/EffectLookAndFeel.h"
+#include "mixer/SendLookAndFeel.h"
 #include "sequencer/SeqLookAndFeel.h"
 #include "sequencer/TimeRulerLookAndFeel.h"
 #include "sequencer/SeqTrackLookAndFeel.h"
@@ -89,6 +90,7 @@ void LookAndFeelFactory::initialise() {
 		new SoloButtonLookAndFeel{},
 		new RecButtonLookAndFeel{},
 		new EffectLookAndFeel{},
+		new SendLookAndFeel{},
 		new SeqLookAndFeel{},
 		new TimeRulerLookAndFeel{},
 		new SeqTrackLookAndFeel{},

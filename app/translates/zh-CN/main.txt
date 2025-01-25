@@ -120,9 +120,15 @@ countries: cn
 "Fx List" = "效果器列表"
 "Bypass Effect" = "旁路效果器"
 "Replace" = "替换"
+"Channel Send" = "通道发送"
+"Unlink" = "取消链接"
+"Destination" = "目标"
+"Channels:" = "通道："
 
+"Track" = "轨道"
 "AUX Track" = "发送轨道"
 "Master Track" = "主轨道"
+"Output" = "输出"
 
 "Adsorb" = "吸附"
 "Tempo" = "曲速"

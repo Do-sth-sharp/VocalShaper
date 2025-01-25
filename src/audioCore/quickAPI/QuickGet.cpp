@@ -478,6 +478,10 @@ namespace quickAPI {
 		return "";
 	}
 
+	const juce::String getSendTypeName(SendDstType type) {
+		return utils::getSendTypeName(type);
+	}
+
 	int getTrackNum(TrackType type) {
 		if (auto graph = getGraphProcessor()) {
 			return graph->getTrackNum(type);
