@@ -195,7 +195,8 @@ void EffectComponent::itemDropped(const SourceDetails& dragSourceDetails) {
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
 		juce::String pid = des["id"].toString();
 
-		CoreActions::insertEffect(this->type, this->track, this->index, pid);
+		CoreActions::insertEffect(
+			(quickAPI::TrackType)this->type, this->track, this->index, pid);
 
 		return;
 	}
@@ -204,14 +205,16 @@ void EffectComponent::itemDropped(const SourceDetails& dragSourceDetails) {
 	if ((int)(des["type"]) == (int)(DragSourceType::Effect)) {
 		int oldIndex = des["index"];
 
-		CoreActions::setEffectIndex(this->type, this->track, oldIndex, this->index);
+		CoreActions::setEffectIndex(
+			(quickAPI::TrackType)this->type, this->track, oldIndex, this->index);
 
 		return;
 	}
 }
 
 void EffectComponent::bypass() {
-	CoreActions::bypassEffect(this->type, this->track, this->index,
+	CoreActions::bypassEffect(
+		(quickAPI::TrackType)this->type, this->track, this->index,
 		this->bypassButton->getToggleState());
 }
 
@@ -251,7 +254,8 @@ void EffectComponent::showMenu() {
 		break;
 	}
 	case EffectMenuActionType::Remove: {
-		CoreActions::removeEffectGUI(this->track, this->index);
+		CoreActions::removeEffectGUI(
+			(quickAPI::TrackType)this->type, this->track, this->index);
 		break;
 	}
 	}
@@ -266,13 +270,15 @@ void EffectComponent::startDrag() {
 
 void EffectComponent::addEffect(
 	const juce::PluginDescription& pluginDes) {
-	CoreActions::insertEffect(this->track, this->index + 1,
+	CoreActions::insertEffect(
+		(quickAPI::TrackType)this->type, this->track, this->index + 1,
 		pluginDes.createIdentifierString());
 }
 
 void EffectComponent::replaceEffect(
 	const juce::PluginDescription& pluginDes) {
-	CoreActions::replaceEffect(this->track, this->index,
+	CoreActions::replaceEffect(
+		(quickAPI::TrackType)this->type, this->track, this->index,
 		pluginDes.createIdentifierString());
 }
 

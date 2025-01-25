@@ -1109,4 +1109,12 @@ namespace utils {
 
 		return typeNames[(int)type];
 	}
+
+	const juce::String getSendTypeName(SendDstType type) {
+		juce::StringArray typeNames{
+			"Output", "Master Track", "AUX Track"
+		};
+
+		return typeNames[(int)type];
+	}
 }
