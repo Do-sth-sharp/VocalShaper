@@ -115,6 +115,7 @@ namespace quickAPI {
 	using SendDstType = utils::SendDstType;
 	using SendDst = utils::SendDst;
 	const juce::String getSendTypeName(SendDstType type);
+	const juce::String getSendDstName(SendDst dst);
 	using RecordState = SeqSourceProcessor::RecordState;
 	int getTrackNum(TrackType type);
 	const juce::String getTrackName(TrackIndex index);
@@ -136,6 +137,8 @@ namespace quickAPI {
 	bool isTrackAudioSendConnected(TrackIndex index, int slot);
 	const SendDst getTrackAudioSendDst(TrackIndex index, int slot);
 	const AudioChannelLinkList getTrackAudioSendChannels(TrackIndex index, int slot);
+	const juce::String getTrackMIDISendDstName(TrackIndex index, int slot);
+	const juce::String getTrackAudioSendDstName(TrackIndex index, int slot);
 	float getTrackGain(TrackIndex index);
 	float getTrackPan(TrackIndex index);
 	float getTrackFader(TrackIndex index);

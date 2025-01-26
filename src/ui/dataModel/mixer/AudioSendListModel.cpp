@@ -1,4 +1,5 @@
 #include "AudioSendListModel.h"
+#include "../../component/mixer/AudioSendComponent.h"
 #include "../../../audioCore/AC_API.h"
 
 int AudioSendListModel::getNumRows() {
@@ -12,29 +13,23 @@ void AudioSendListModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 
 juce::Component* AudioSendListModel::refreshComponentForRow(int rowNumber, bool isRowSelected,
 	juce::Component* existingComponentToUpdate) {
-	/** TODO */
+	if (rowNumber >= this->getNumRows()) { return existingComponentToUpdate; }
+
+	AudioSendComponent* comp = nullptr;
+	if (existingComponentToUpdate) {
+		comp = dynamic_cast<AudioSendComponent*>(existingComponentToUpdate);
+		if (!comp) { delete existingComponentToUpdate; }
+	}
+	if (!comp) { comp = new AudioSendComponent; }
+
+	comp->update(this->type, this->index, rowNumber);
+
+	return comp;
 }
 
 juce::String AudioSendListModel::getNameForRow(int rowNumber) {
-	/** Get Dst */
-	auto dst = quickAPI::getTrackAudioSendDst(
+	return quickAPI::getTrackAudioSendDstName(
 		{ (quickAPI::TrackType)this->type, this->index }, rowNumber);
-	if (dst.second < 0) { return ""; }
-
-	/** Device */
-	if (dst.first == quickAPI::SendDstType::ToDevice) {
-		return quickAPI::getAudioDeviceName(false);
-	}
-
-	/** Master Track */
-	if (dst.first == quickAPI::SendDstType::ToMaster) {
-		return quickAPI::getTrackName(
-			{ quickAPI::TrackType::MasterTrack, dst.second });
-	}
-
-	/** Aux Track */
-	return quickAPI::getTrackName(
-		{ quickAPI::TrackType::AuxTrack, dst.second });
 }
 
 void AudioSendListModel::updateIndex(int type, int index) {

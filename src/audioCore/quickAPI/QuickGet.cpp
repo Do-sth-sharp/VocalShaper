@@ -482,6 +482,34 @@ namespace quickAPI {
 		return utils::getSendTypeName(type);
 	}
 
+	const juce::String getSendDstName(SendDst dst) {
+		/** Device */
+		if (dst.first == quickAPI::SendDstType::ToDevice) {
+			return quickAPI::getAudioDeviceName(false);
+		}
+
+		/** Master Track */
+		if (dst.first == quickAPI::SendDstType::ToMaster) {
+			auto name = quickAPI::getTrackName(
+				{ quickAPI::TrackType::MasterTrack, dst.second });
+			if (name.isNotEmpty()) {
+				return name;
+			}
+		}
+
+		/** Aux Track */
+		if (dst.first == quickAPI::SendDstType::ToAUX) {
+			auto name = quickAPI::getTrackName(
+				{ quickAPI::TrackType::AuxTrack, dst.second });
+			if (name.isNotEmpty()) {
+				return name;
+			}
+		}
+
+		/** Default Name */
+		return quickAPI::getSendTypeName(dst.first) + " #" + juce::String{ dst.second };
+	}
+
 	int getTrackNum(TrackType type) {
 		if (auto graph = getGraphProcessor()) {
 			return graph->getTrackNum(type);
@@ -626,6 +654,24 @@ namespace quickAPI {
 			return graph->getTrackAudioSendChannels(index.first, index.second, slot);
 		}
 		return {};
+	}
+
+	const juce::String getTrackMIDISendDstName(TrackIndex index, int slot) {
+		/** Get Dst */
+		auto dst = quickAPI::getTrackMIDISendDst(index, slot);
+		if (dst.second < 0) { return ""; }
+
+		/** Get Name */
+		return quickAPI::getSendDstName(dst);
+	}
+
+	const juce::String getTrackAudioSendDstName(TrackIndex index, int slot) {
+		/** Get Dst */
+		auto dst = quickAPI::getTrackAudioSendDst(index, slot);
+		if (dst.second < 0) { return ""; }
+
+		/** Get Name */
+		return quickAPI::getSendDstName(dst);
 	}
 
 	float getTrackGain(TrackIndex index) {

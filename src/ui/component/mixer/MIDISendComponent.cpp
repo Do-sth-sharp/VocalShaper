@@ -93,39 +93,8 @@ void MIDISendComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 const juce::String MIDISendComponent::getSendName() const {
-	/** Get Dst */
-	auto dst = quickAPI::getTrackMIDISendDst(
+	return quickAPI::getTrackMIDISendDstName(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
-	if (dst.second < 0) { return ""; }
-
-	/** Device */
-	if (dst.first == quickAPI::SendDstType::ToDevice) {
-		auto name = quickAPI::getMIDIOutputDeviceName();
-		if (name.isNotEmpty()) {
-			return name;
-		}
-	}
-
-	/** Master Track */
-	if (dst.first == quickAPI::SendDstType::ToMaster) {
-		auto name = quickAPI::getTrackName(
-			{ quickAPI::TrackType::MasterTrack, dst.second });
-		if (name.isNotEmpty()) {
-			return name;
-		}
-	}
-
-	/** Aux Track */
-	if (dst.first == quickAPI::SendDstType::ToAUX) {
-		auto name = quickAPI::getTrackName(
-			{ quickAPI::TrackType::AuxTrack, dst.second });
-		if (name.isNotEmpty()) {
-			return name;
-		}
-	}
-
-	/** Other */
-	return TRANS(quickAPI::getSendTypeName(dst.first)) + " #" + juce::String{ dst.second };
 }
 
 void MIDISendComponent::showAddMenu() {
