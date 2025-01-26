@@ -1,60 +1,27 @@
-#include "AudioSendComponent.h"
+#include "MIDISendComponent.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreActions.h"
 #include "../../misc/DragSourceType.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
-#include <IconManager.h>
 
-AudioSendComponent::AudioSendComponent() {
+MIDISendComponent::MIDISendComponent() {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::Send));
-
-	/** Channel Icon */
-	this->channelIcon = flowUI::IconManager::getSVG(
-		utils::getIconFile("Editor", "node-tree").getFullPathName());
-	this->channelIcon->replaceColour(juce::Colours::black,
-		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
-
-	/** Channel Button */
-	this->channelButton = std::make_unique<juce::DrawableButton>(
-		TRANS("Channel Send"), juce::DrawableButton::ImageOnButtonBackground);
-	this->channelButton->setImages(this->channelIcon.get());
-	this->channelButton->setWantsKeyboardFocus(false);
-	this->channelButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-	this->channelButton->setConnectedEdges(
-		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
-	this->channelButton->onClick = [this] { this->editSend(); };
-	this->addAndMakeVisible(this->channelButton.get());
 }
 
-void AudioSendComponent::resized() {
-	/** Size */
-	int buttonHeight = this->getHeight();
-	int buttonWidth = buttonHeight;
-
-	int right = this->getWidth();
-
-	/** Channel Button */
-	juce::Rectangle<int> channelRect(
-		right - buttonWidth, 0,
-		buttonWidth, buttonHeight);
-	this->channelButton->setBounds(channelRect);
-	right -= buttonWidth;
+void MIDISendComponent::resized() {
+	/** Nothing To Do */
 }
 
-void AudioSendComponent::paint(juce::Graphics& g) {
+void MIDISendComponent::paint(juce::Graphics& g) {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
 	int textPaddingWidth = screenSize.getWidth() * 0.0025;
 	float textHeight = this->getHeight() * 0.8;
 
-	int buttonHeight = this->getHeight();
-	int buttonWidth = buttonHeight;
-
 	int right = this->getWidth();
-	right -= buttonWidth;
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();
@@ -82,15 +49,13 @@ void AudioSendComponent::paint(juce::Graphics& g) {
 	}
 }
 
-void AudioSendComponent::update(int type, int track, int slot) {
+void MIDISendComponent::update(int type, int track, int slot) {
 	this->type = type;
 	this->track = track;
 	this->slot = slot;
 
-	this->valid = quickAPI::getTrackAudioSendDst(
+	this->valid = quickAPI::getTrackMIDISendDst(
 		{ (quickAPI::TrackType)type, track }, slot).second >= 0;
-
-	this->channelButton->setEnabled(this->valid);
 
 	this->name = this->getSendName();
 
@@ -99,11 +64,11 @@ void AudioSendComponent::update(int type, int track, int slot) {
 	this->setTooltip(this->createToolTip());
 }
 
-void AudioSendComponent::mouseUp(const juce::MouseEvent& event) {
+void MIDISendComponent::mouseUp(const juce::MouseEvent& event) {
 	if (this->valid) {
 		if (event.mods.isLeftButtonDown()) {
 			if (!event.mouseWasDraggedSinceMouseDown()) {
-				this->editSend();
+				this->showMenu();
 			}
 		}
 		else if (event.mods.isRightButtonDown()) {
@@ -120,22 +85,22 @@ void AudioSendComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
-void AudioSendComponent::mouseDrag(const juce::MouseEvent& event) {
+void MIDISendComponent::mouseDrag(const juce::MouseEvent& event) {
 	/** Start Drag */
 	if (event.mods.isLeftButtonDown()) {
 		this->startDrag();
 	}
 }
 
-const juce::String AudioSendComponent::getSendName() const {
+const juce::String MIDISendComponent::getSendName() const {
 	/** Get Dst */
-	auto dst = quickAPI::getTrackAudioSendDst(
+	auto dst = quickAPI::getTrackMIDISendDst(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
 	if (dst.second < 0) { return ""; }
 
 	/** Device */
 	if (dst.first == quickAPI::SendDstType::ToDevice) {
-		auto name = quickAPI::getAudioDeviceName(false);
+		auto name = quickAPI::getMIDIOutputDeviceName();
 		if (name.isNotEmpty()) {
 			return name;
 		}
@@ -152,18 +117,18 @@ const juce::String AudioSendComponent::getSendName() const {
 
 	/** Aux Track */
 	if (dst.first == quickAPI::SendDstType::ToAUX) {
-		auto name =  quickAPI::getTrackName(
+		auto name = quickAPI::getTrackName(
 			{ quickAPI::TrackType::AuxTrack, dst.second });
 		if (name.isNotEmpty()) {
 			return name;
 		}
 	}
-	
+
 	/** Other */
 	return TRANS(quickAPI::getSendTypeName(dst.first)) + " #" + juce::String{ dst.second };
 }
 
-void AudioSendComponent::showAddMenu() {
+void MIDISendComponent::showAddMenu() {
 	/** Callback */
 	auto addCallback = [comp = juce::Component::SafePointer{ this }](int type, int index) {
 		if (comp) {
@@ -176,16 +141,11 @@ void AudioSendComponent::showAddMenu() {
 	[[maybe_unused]] int result = menu.show();
 }
 
-void AudioSendComponent::showMenu() {
+void MIDISendComponent::showMenu() {
 	/** Callback */
 	auto addCallback = [comp = juce::Component::SafePointer{ this }](int type, int index) {
 		if (comp) {
 			comp->addSend(type, index);
-		}
-		};
-	auto editCallback = [comp = juce::Component::SafePointer{ this }]() {
-		if (comp) {
-			comp->editSend();
 		}
 		};
 	auto removeCallback = [comp = juce::Component::SafePointer{ this }]() {
@@ -195,40 +155,32 @@ void AudioSendComponent::showMenu() {
 		};
 
 	/** Create Menu */
-	auto menu = this->createMenu(
-		addCallback, editCallback, removeCallback);
+	auto menu = this->createMenu(addCallback, removeCallback);
 	[[maybe_unused]] int result = menu.show();
 }
 
-void AudioSendComponent::startDrag() {
+void MIDISendComponent::startDrag() {
 	if (auto container = juce::DragAndDropContainer::findParentDragContainerFor(this)) {
 		container->startDragging(this->getDragSourceDescription(),
 			this, juce::ScaledImage{}, true);
 	}
 }
 
-void AudioSendComponent::addSend(int type, int index) {
-	CoreActions::setTrackAudioSendGUI(
+void MIDISendComponent::addSend(int type, int index) {
+	CoreActions::setTrackMIDISendGUI(
 		(quickAPI::TrackType)this->type, this->track, this->slot,
 		{ (quickAPI::SendDstType)type, index });
 }
 
-void AudioSendComponent::editSend() {
-	auto dst = quickAPI::getTrackAudioSendDst(
-		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
-	CoreActions::setTrackAudioSendGUI(
-		(quickAPI::TrackType)this->type, this->track, this->slot, dst);
-}
-
-void AudioSendComponent::removeSend() {
-	CoreActions::removeTrackAudioSendOnSlot(
+void MIDISendComponent::removeSend() {
+	CoreActions::removeTrackMIDISendOnSlot(
 		(quickAPI::TrackType)this->type, this->track, this->slot);
 }
 
-juce::var AudioSendComponent::getDragSourceDescription() const {
+juce::var MIDISendComponent::getDragSourceDescription() const {
 	auto object = std::make_unique<juce::DynamicObject>();
 
-	object->setProperty("type", (int)DragSourceType::TrackAudioSend);
+	object->setProperty("type", (int)DragSourceType::TrackMidiSend);
 	object->setProperty("trackType", this->type);
 	object->setProperty("track", this->track);
 	object->setProperty("slot", this->slot);
@@ -236,33 +188,25 @@ juce::var AudioSendComponent::getDragSourceDescription() const {
 	return juce::var{ object.release() };
 }
 
-juce::String AudioSendComponent::createToolTip() const {
+juce::String MIDISendComponent::createToolTip() const {
 	juce::String result;
 
 	if (this->valid) {
-		auto dst = quickAPI::getTrackAudioSendDst(
+		auto dst = quickAPI::getTrackMIDISendDst(
 			{ (quickAPI::TrackType)this->type, this->track }, this->slot);
 
 		result = TRANS(quickAPI::getSendTypeName(dst.first)) + " #" + juce::String{ dst.second } + "\n"
-			+ this->name + "\n"
-			+ TRANS("Channels:") + "\n";
-
-		auto channels = quickAPI::getTrackAudioSendChannels(
-			{ (quickAPI::TrackType)this->type, this->track }, this->slot);
-		for (auto& i : channels) {
-			result += "  " + juce::String{ i.first } + " - " + juce::String{ i.second } + "\n";
-		}
+			+ this->name + "\n";
 	}
 
 	return result;
 }
 
-juce::PopupMenu AudioSendComponent::createMenu(
+juce::PopupMenu MIDISendComponent::createMenu(
 	const std::function<void(int, int)>& addCallback,
-	const std::function<void()>& editCallback,
 	const std::function<void()>& removeCallback) const {
 	/** Current Dst */
-	auto dst = quickAPI::getTrackAudioSendDst(
+	auto dst = quickAPI::getTrackMIDISendDst(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
 
 	/** Menu */
@@ -270,18 +214,16 @@ juce::PopupMenu AudioSendComponent::createMenu(
 
 	menu.addSubMenu(TRANS("Destination"),
 		this->createAddMenu(addCallback), true);
-	menu.addItem(TRANS("Channel Send"),
-		dst.second >= 0, false, editCallback);
 	menu.addItem(TRANS("Unlink"),
 		dst.second >= 0, false, removeCallback);
 
 	return menu;
 }
 
-juce::PopupMenu AudioSendComponent::createAddMenu(
+juce::PopupMenu MIDISendComponent::createAddMenu(
 	const std::function<void(int, int)>& addCallback) const {
 	/** Current Dst */
-	auto dst = quickAPI::getTrackAudioSendDst(
+	auto dst = quickAPI::getTrackMIDISendDst(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
 
 	/** Menu */
