@@ -16,11 +16,18 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->audioInput = std::make_unique<MixerTrackIOComponent>(true, false);
 	this->addAndMakeVisible(this->audioInput.get());
 
-	this->midiOutput = std::make_unique<MixerTrackIOComponent>(false, true);
-	this->addAndMakeVisible(this->midiOutput.get());
+	/** Send */
+	this->midiSendListModel = std::make_unique<MIDISendListModel>();
+	this->midiSendList = std::make_unique<juce::ListBox>(
+		TRANS("MIDI Send List"), this->midiSendListModel.get());
+	this->midiSendList->setWantsKeyboardFocus(false);
+	this->addAndMakeVisible(this->midiSendList.get());
 
-	this->audioOutput = std::make_unique<MixerTrackIOComponent>(false, false);
-	this->addAndMakeVisible(this->audioOutput.get());
+	this->audioSendListModel = std::make_unique<AudioSendListModel>();
+	this->audioSendList = std::make_unique<juce::ListBox>(
+		TRANS("Audio Send List"), this->audioSendListModel.get());
+	this->audioSendList->setWantsKeyboardFocus(false);
+	this->addAndMakeVisible(this->audioSendList.get());
 
 	/** Knob */
 	this->gainKnob = std::make_unique<KnobBase>(
@@ -276,8 +283,11 @@ void MixerTrackComponent::updateIndex(int type, int index) {
 
 	this->midiInput->updateIndex(type, index);
 	this->audioInput->updateIndex(type, index);
-	this->midiSend->updateIndex(type, index);
-	this->audioSend->updateIndex(type, index);
+
+	this->midiSendListModel->updateIndex(type, index);
+	this->midiSendList->updateContent();
+	this->audioSendListModel->updateIndex(type, index);
+	this->audioSendList->updateContent();
 
 	this->muteButton->updateIndex(type, index);
 	this->soloButton->updateIndex(type, index);
@@ -312,8 +322,8 @@ void MixerTrackComponent::updateInput() {
 }
 
 void MixerTrackComponent::updateSend() {
-	this->midiSend->update();
-	this->audioSend->update();
+	this->midiSendList->updateContent();
+	this->audioSendList->updateContent();
 }
 
 void MixerTrackComponent::updateGain() {
@@ -387,28 +397,36 @@ bool MixerTrackComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
 	auto& des = dragSourceDetails.description;
 
-	/** From Track Audio Input */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+	/** From Track Audio Send */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioSend)) {
+		if (this->type == (int)quickAPI::TrackType::Track) {
+			return false;
+		}
+
+		int trackType = des["trackType"];
+		if (trackType == (int)quickAPI::TrackType::MasterTrack) {
+			return false;
+		}
+
 		int trackIndex = des["track"];
-		return (trackIndex >= 0) && (trackIndex != this->index);
+		return (trackIndex >= 0) &&
+			(!(trackIndex == this->index && trackType == this->type));
 	}
 
-	/** From Track Audio Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioOutput)) {
+	/** From Track MIDI Send */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackMidiSend)) {
+		if (this->type == (int)quickAPI::TrackType::Track) {
+			return false;
+		}
+
+		int trackType = des["trackType"];
+		if (trackType == (int)quickAPI::TrackType::MasterTrack) {
+			return false;
+		}
+
 		int trackIndex = des["track"];
-		return (trackIndex >= 0) && (trackIndex != this->index);
-	}
-
-	/** From Seq Midi Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::SourceMidiOutput)) {
-		int seqIndex = des["track"];
-		return seqIndex >= 0;
-	}
-
-	/** From Seq Audio Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::SourceAudioOutput)) {
-		int seqIndex = des["track"];
-		return seqIndex >= 0;
+		return (trackIndex >= 0) &&
+			(!(trackIndex == this->index && trackType == this->type));
 	}
 
 	return false;
@@ -435,35 +453,29 @@ void MixerTrackComponent::itemDropped(
 	auto& des = dragSourceDetails.description;
 	this->endDrop();
 
-	/** From Track Audio Input */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
+	/** From Track Audio Send */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioSend)) {
+		int trackType = des["trackType"];
 		int trackIndex = des["track"];
+		int slot = des["slot"];
 
-		this->audioOutput->setAudioOutputToSend(trackIndex, true);
+		CoreActions::setTrackAudioSendGUI(
+			(quickAPI::TrackType)trackType, trackIndex, slot,
+			{ (this->type == (int)quickAPI::TrackType::MasterTrack)
+			? quickAPI::SendDstType::ToMaster : quickAPI::SendDstType::ToAUX, this->index });
 		return;
 	}
 
-	/** From Track Audio Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioOutput)) {
+	/** From Track MIDI Send */
+	if ((int)(des["type"]) == (int)(DragSourceType::TrackMidiSend)) {
+		int trackType = des["trackType"];
 		int trackIndex = des["track"];
+		int slot = des["slot"];
 
-		this->audioInput->setAudioInputFromSend(trackIndex, true);
-		return;
-	}
-
-	/** From Seq Midi Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::SourceMidiOutput)) {
-		int seqIndex = des["track"];
-
-		this->midiInput->setMidiInputFromSeq(seqIndex, true);
-		return;
-	}
-
-	/** From Seq Audio Output */
-	if ((int)(des["type"]) == (int)(DragSourceType::SourceAudioOutput)) {
-		int seqIndex = des["track"];
-
-		this->audioInput->setAudioInputFromSeq(seqIndex, true);
+		CoreActions::setTrackMIDISendGUI(
+			(quickAPI::TrackType)trackType, trackIndex, slot,
+			{ (this->type == (int)quickAPI::TrackType::MasterTrack)
+			? quickAPI::SendDstType::ToMaster : quickAPI::SendDstType::ToAUX, this->index });
 		return;
 	}
 }
