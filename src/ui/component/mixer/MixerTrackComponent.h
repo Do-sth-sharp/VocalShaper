@@ -7,7 +7,10 @@
 #include "../base/FaderBase.h"
 #include "MixerTrackLevelMeter.h"
 #include "MixerTrackMuteComponent.h"
+#include "MixerTrackSoloComponent.h"
 #include "../../dataModel/mixer/EffectListModel.h"
+#include "../../dataModel/mixer/AudioSendListModel.h"
+#include "../../dataModel/mixer/MIDISendListModel.h"
 
 class MixerTrackComponent final
 	: public juce::Component,
@@ -53,13 +56,16 @@ private:
 	std::unique_ptr<SideChainComponent> sideChain = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> midiInput = nullptr;
 	std::unique_ptr<MixerTrackIOComponent> audioInput = nullptr;
-	std::unique_ptr<MixerTrackIOComponent> midiOutput = nullptr;
-	std::unique_ptr<MixerTrackIOComponent> audioOutput = nullptr;
+	std::unique_ptr<juce::ListBox> midiSendList = nullptr;
+	std::unique_ptr<juce::ListBox> audioSendList = nullptr;
+	std::unique_ptr<MIDISendListModel> midiSendListModel = nullptr;
+	std::unique_ptr<AudioSendListModel> audioSendListModel = nullptr;
 	std::unique_ptr<KnobBase> gainKnob = nullptr;
 	std::unique_ptr<KnobBase> panKnob = nullptr;
 	std::unique_ptr<FaderBase> fader = nullptr;
 	std::unique_ptr<MixerTrackLevelMeter> levelMeter = nullptr;
 	std::unique_ptr<MixerTrackMuteComponent> muteButton = nullptr;
+	std::unique_ptr<MixerTrackSoloComponent> soloButton = nullptr;
 	std::unique_ptr<juce::ListBox> effectList = nullptr;
 	std::unique_ptr<EffectListModel> effectListModel = nullptr;
 
