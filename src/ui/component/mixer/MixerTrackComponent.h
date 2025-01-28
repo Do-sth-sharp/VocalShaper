@@ -54,8 +54,8 @@ private:
 	bool panValid = true;
 
 	std::unique_ptr<SideChainComponent> sideChain = nullptr;
-	std::unique_ptr<MixerTrackIOComponent> midiInput = nullptr;
-	std::unique_ptr<MixerTrackIOComponent> audioInput = nullptr;
+	std::unique_ptr<juce::DrawableButton> midiInputButton = nullptr;
+	std::unique_ptr<juce::DrawableButton> audioInputButton = nullptr;
 	std::unique_ptr<juce::ListBox> midiSendList = nullptr;
 	std::unique_ptr<juce::ListBox> audioSendList = nullptr;
 	std::unique_ptr<MIDISendListModel> midiSendListModel = nullptr;
@@ -68,6 +68,12 @@ private:
 	std::unique_ptr<MixerTrackSoloComponent> soloButton = nullptr;
 	std::unique_ptr<juce::ListBox> effectList = nullptr;
 	std::unique_ptr<EffectListModel> effectListModel = nullptr;
+
+	std::unique_ptr<juce::Drawable> audioInputIcon = nullptr, audioInputIconOn = nullptr;
+	std::unique_ptr<juce::Drawable> midiInputIcon = nullptr, midiInputIconOn = nullptr;
+
+	void changeAudioInput();
+	void changeMIDIInput();
 
 	void preDrop();
 	void endDrop();

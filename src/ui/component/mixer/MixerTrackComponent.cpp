@@ -3,18 +3,54 @@
 #include "../../misc/DragSourceType.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
+#include <IconManager.h>
 
 MixerTrackComponent::MixerTrackComponent() {
 	/** Side Chain */
 	this->sideChain = std::make_unique<SideChainComponent>();
 	this->addAndMakeVisible(this->sideChain.get());
+	
+	/** Input Icon */
+	this->audioInputIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("System", "login-circle-line").getFullPathName());
+	this->audioInputIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
 
-	/** IO */
-	this->midiInput = std::make_unique<MixerTrackIOComponent>(true, true);
-	this->addAndMakeVisible(this->midiInput.get());
+	this->audioInputIconOn = flowUI::IconManager::getSVG(
+		utils::getIconFile("System", "login-circle-line").getFullPathName());
+	this->audioInputIconOn->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
 
-	this->audioInput = std::make_unique<MixerTrackIOComponent>(true, false);
-	this->addAndMakeVisible(this->audioInput.get());
+	this->midiInputIcon = flowUI::IconManager::getSVG(
+		utils::getIconFile("System", "login-box-line").getFullPathName());
+	this->midiInputIcon->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOffId));
+
+	this->midiInputIconOn = flowUI::IconManager::getSVG(
+		utils::getIconFile("System", "login-box-line").getFullPathName());
+	this->midiInputIconOn->replaceColour(juce::Colours::black,
+		this->getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+
+	/** Input Button */
+	this->audioInputButton = std::make_unique<juce::DrawableButton>(
+		TRANS("Audio Input"), juce::DrawableButton::ImageOnButtonBackground);
+	this->audioInputButton->setImages(
+		this->audioInputIcon.get(), nullptr, nullptr, nullptr,
+		this->audioInputIconOn.get(), nullptr, nullptr, nullptr);
+	this->audioInputButton->setWantsKeyboardFocus(false);
+	this->audioInputButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->audioInputButton->onClick = [this] { this->changeMIDIInput(); };
+	this->addAndMakeVisible(this->audioInputButton.get());
+
+	this->midiInputButton = std::make_unique<juce::DrawableButton>(
+		TRANS("MIDI Input"), juce::DrawableButton::ImageOnButtonBackground);
+	this->midiInputButton->setImages(
+		this->midiInputIcon.get(), nullptr, nullptr, nullptr,
+		this->midiInputIconOn.get(), nullptr, nullptr, nullptr);
+	this->midiInputButton->setWantsKeyboardFocus(false);
+	this->midiInputButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	this->midiInputButton->onClick = [this] { this->changeAudioInput(); };
+	this->addAndMakeVisible(this->midiInputButton.get());
 
 	/** Send */
 	this->midiSendListModel = std::make_unique<MIDISendListModel>();
@@ -281,9 +317,6 @@ void MixerTrackComponent::updateIndex(int type, int index) {
 
 	this->sideChain->updateIndex(type, index);
 
-	this->midiInput->updateIndex(type, index);
-	this->audioInput->updateIndex(type, index);
-
 	this->midiSendListModel->updateIndex(type, index);
 	this->midiSendList->updateContent();
 	this->audioSendListModel->updateIndex(type, index);
@@ -317,8 +350,14 @@ void MixerTrackComponent::updateSideChain() {
 }
 
 void MixerTrackComponent::updateInput() {
-	this->midiInput->update();
-	this->audioInput->update();
+	this->audioInputButton->setToggleState(
+		!(quickAPI::getTrackAudioInputChannels(
+			{ (quickAPI::TrackType)this->type, this->index }).empty()),
+		juce::NotificationType::dontSendNotification);
+	this->midiInputButton->setToggleState(
+		quickAPI::isTrackMIDIInputConnected(
+			{ (quickAPI::TrackType)this->type, this->index }),
+		juce::NotificationType::dontSendNotification);
 }
 
 void MixerTrackComponent::updateSend() {
@@ -486,6 +525,22 @@ void MixerTrackComponent::focusGained(FocusChangeType cause) {
 
 void MixerTrackComponent::focusLost(FocusChangeType cause) {
 	this->repaint();
+}
+
+void MixerTrackComponent::changeAudioInput() {
+	CoreActions::setTrackAudioInputGUI(
+		(quickAPI::TrackType)this->type, this->index);
+}
+
+void MixerTrackComponent::changeMIDIInput() {
+	if (this->midiInputButton->getToggleState()) {
+		CoreActions::removeTrackMIDIInput(
+			(quickAPI::TrackType)this->type, this->index);
+	}
+	else {
+		CoreActions::addTrackMIDIInput(
+			(quickAPI::TrackType)this->type, this->index);
+	}
 }
 
 void MixerTrackComponent::preDrop() {
