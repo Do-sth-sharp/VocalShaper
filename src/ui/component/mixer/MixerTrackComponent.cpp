@@ -116,69 +116,112 @@ MixerTrackComponent::MixerTrackComponent() {
 void MixerTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
+	int splitHeight = screenSize.getHeight() * 0.01;
+
 	int colorHeight = screenSize.getHeight() * 0.015;
-
 	int sideChainHeight = screenSize.getHeight() * 0.02;
-	int sideChainHideHeight = screenSize.getHeight() * 0.45;
-	bool sideChainShown = this->getHeight() >= sideChainHideHeight;
-
-	int ioHeight = screenSize.getHeight() * 0.02;
-	int ioWidth = ioHeight;
-	int ioHideHeight = screenSize.getHeight() * 0.45;
-	bool ioShown = this->getHeight() >= ioHideHeight;
-
+	int inputButtonHeight = screenSize.getHeight() * 0.02;
+	int inputButtonWidth = inputButtonHeight;
 	int knobPaddingWidth = screenSize.getWidth() * 0.0025;
 	int knobHeight = screenSize.getHeight() * 0.075;
-	int knobWidth = (this->getWidth()- knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
-	int knobHideHeight = screenSize.getHeight() * 0.4;
-	bool knobShown = this->getHeight() >= knobHideHeight;
-
+	int knobWidth = (this->getWidth() - knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
 	int faderPaddingWidth = screenSize.getWidth() * 0.0025;
-	int faderHeight = screenSize.getHeight() * 0.25;
+	int faderMinHeight = screenSize.getHeight() * 0.25;
 	int faderWidth = (this->getWidth() - faderPaddingWidth * 2) / 2;
-	int faderHideHeight = screenSize.getHeight() * 0.4;
-	bool faderShown = this->getHeight() >= faderHideHeight;
-
-	int muteHeight = screenSize.getHeight() * 0.035;
-	int muteHideHeight = screenSize.getHeight() * 0.25;
-	bool muteShown = this->getHeight() >= muteHideHeight;
+	int muteSoloHeight = screenSize.getHeight() * 0.03;
+	int muteSoloWidth = muteSoloHeight;
 
 	int listItemHeight = screenSize.getHeight() * 0.02;
+	int effectListMaxHeight = listItemHeight * quickAPI::getEffectSlotNum();
+	int effectListMinHeight = listItemHeight * 2;
+	int midiSendListMaxHeight = listItemHeight * quickAPI::getTrackMIDISendSlotNum();
+	int midiSendListMinHeight = listItemHeight * 1;
+	int audioSendListMaxHeight = listItemHeight * quickAPI::getTrackAudioSendSlotNum();
+	int audioSendListMinHeight = listItemHeight * 1;
+
+	int ioHideHeight = colorHeight + sideChainHeight + splitHeight
+		+ inputButtonHeight + splitHeight + knobHeight + splitHeight
+		+ effectListMinHeight + splitHeight + muteSoloHeight + splitHeight
+		+ midiSendListMinHeight + splitHeight + audioSendListMinHeight + splitHeight
+		+ faderMinHeight;
+	int controlHideHeight = colorHeight + splitHeight
+		+ knobHeight + splitHeight
+		+ effectListMinHeight + splitHeight + muteSoloHeight + splitHeight
+		+ faderMinHeight;
+	int effectListHideHeight = colorHeight + splitHeight
+		+ effectListMinHeight + splitHeight
+		+ faderMinHeight;
+	int faderHideHeight = colorHeight + splitHeight
+		+ faderMinHeight;
+
+	bool ioShown = this->getHeight() >= ioHideHeight;
+	bool controlShown = this->getHeight() >= controlHideHeight;
+	bool effectShown = this->getHeight() >= effectListHideHeight;
+	bool faderShown = this->getHeight() >= faderHideHeight;
+
+	int expandBaseHeight = colorHeight + sideChainHeight + splitHeight
+		+ inputButtonHeight + splitHeight + knobHeight + splitHeight
+		+ splitHeight + muteSoloHeight + splitHeight
+		+ splitHeight + splitHeight
+		+ faderMinHeight;
+
+	int expandStartHeight = ioHideHeight;
+	int effectExpandMaxHeight = expandBaseHeight + midiSendListMinHeight + audioSendListMinHeight + effectListMaxHeight;
+	int midiSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight * 2;
+	int audioSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight + audioSendExpandMaxHeight;
+
+	int expandLevel = 0;
+	if (this->getHeight() > expandStartHeight) {
+		expandLevel++;
+	}
+	if (this->getHeight() > effectExpandMaxHeight) {
+		expandLevel++;
+	}
+	if (this->getHeight() > midiSendExpandMaxHeight) {
+		expandLevel++;
+	}
+	if (this->getHeight() > audioSendExpandMaxHeight) {
+		expandLevel++;
+	}
 
 	float outlineThickness = screenSize.getHeight() * 0.00125;
 
-	int top = 0, bottom = this->getHeight();
+	int top = 0;
 	top += colorHeight;
 
 	/** Side Chain */
-	if (sideChainShown) {
+	if (ioShown) {
 		juce::Rectangle<int> sideChainRect(
 			0, top, this->getWidth(), sideChainHeight);
 		this->sideChain->setBounds(sideChainRect);
 
 		top += sideChainHeight;
 	}
-	this->sideChain->setVisible(sideChainShown);
+	this->sideChain->setVisible(ioShown);
+
+	top += splitHeight;
 
 	/** Input */
 	if (ioShown) {
+		int splitWidth = (this->getWidth() - inputButtonWidth * 2) / 3;
 		juce::Rectangle<int> midiRect(
-			this->getWidth() * 3 / 10 - ioWidth / 2,
-			top, ioWidth, ioHeight);
-		this->midiInput->setBounds(midiRect);
+			splitWidth, top,
+			inputButtonWidth, inputButtonHeight);
+		this->midiInputButton->setBounds(midiRect);
 
 		juce::Rectangle<int> audioRect(
-			this->getWidth() * 7 / 10 - ioWidth / 2,
-			top, ioWidth, ioHeight);
-		this->audioInput->setBounds(audioRect);
+			midiRect.getRight() + splitWidth, top,
+			inputButtonWidth, inputButtonHeight);
+		this->audioInputButton->setBounds(audioRect);
 
-		top += ioHeight;
+		top += inputButtonHeight;
+		top += splitHeight;
 	}
-	this->midiInput->setVisible(ioShown);
-	this->audioInput->setVisible(ioShown);
+	this->midiInputButton->setVisible(ioShown);
+	this->audioInputButton->setVisible(ioShown);
 
 	/** Knob */
-	if (knobShown) {
+	if (controlShown) {
 		juce::Rectangle<int> gainRect(
 			knobPaddingWidth, top,
 			knobWidth, knobHeight);
@@ -192,60 +235,110 @@ void MixerTrackComponent::resized() {
 		}
 
 		top += knobHeight;
+		top += splitHeight;
 	}
-	this->gainKnob->setVisible(knobShown);
-	this->panKnob->setVisible(knobShown && this->panValid);
+	this->gainKnob->setVisible(controlShown);
+	this->panKnob->setVisible(controlShown && this->panValid);
 
-	/** Output */
+	/** Effect */
+	if (effectShown) {
+		int effectHeight = effectListMinHeight;
+		if (expandLevel > 1) {
+			effectHeight = effectListMaxHeight;
+		}
+		else if (expandLevel == 1) {
+			effectHeight = this->getHeight() - expandBaseHeight
+				- midiSendListMinHeight - audioSendListMinHeight;
+		}
+
+		juce::Rectangle<int> effectRect(
+			outlineThickness, top,
+			this->getWidth() - outlineThickness * 2, effectHeight);
+		this->effectList->setBounds(effectRect);
+		this->effectList->setRowHeight(listItemHeight);
+
+		top += effectHeight;
+		top += splitHeight;
+	}
+	this->effectList->setVisible(effectShown);
+
+	/** Mute Solo */
+	bool hasSoloButton = this->type == (int)quickAPI::TrackType::Track;
+	if (controlShown) {
+		int splitWidth = (this->getWidth() - muteSoloWidth * 2) / 3;
+		juce::Rectangle<int> muteRect(
+			hasSoloButton ? splitWidth
+			: (this->getWidth() - muteSoloWidth) / 2, top,
+			muteSoloWidth, muteSoloHeight);
+		this->muteButton->setBounds(muteRect);
+
+		juce::Rectangle<int> soloRect(
+			muteRect.getRight() + splitWidth, top,
+			muteSoloWidth, muteSoloHeight);
+		this->soloButton->setBounds(soloRect);
+
+		top += muteSoloHeight;
+		top += splitHeight;
+	}
+	this->muteButton->setVisible(controlShown);
+	this->soloButton->setVisible(controlShown && hasSoloButton);
+
+	/** MIDI Send */
 	if (ioShown) {
-		juce::Rectangle<int> midiRect(
-			this->getWidth() * 3 / 10 - ioWidth / 2,
-			bottom - ioHeight, ioWidth, ioHeight);
-		this->midiOutput->setBounds(midiRect);
+		int midiSendHeight = midiSendListMinHeight;
+		if (expandLevel > 2) {
+			midiSendHeight = midiSendListMaxHeight;
+		}
+		else if (expandLevel == 2) {
+			midiSendHeight = (this->getHeight() - expandBaseHeight
+				- effectListMaxHeight) / 2;
+		}
 
-		juce::Rectangle<int> audioRect(
-			this->getWidth() * 7 / 10 - ioWidth / 2,
-			bottom - ioHeight, ioWidth, ioHeight);
-		this->audioOutput->setBounds(audioRect);
+		juce::Rectangle<int> midiSendRect(
+			0, top, this->getWidth(), midiSendHeight);
+		this->midiSendList->setBounds(midiSendRect);
+		this->midiSendList->setRowHeight(listItemHeight);
 
-		bottom -= ioHeight;
+		top += midiSendHeight;
+		top += splitHeight;
 	}
-	this->midiOutput->setVisible(ioShown);
-	this->audioOutput->setVisible(ioShown);
+	this->midiSendList->setVisible(ioShown);
+
+	/** Audio Send */
+	if (ioShown) {
+		int audioSendHeight = audioSendListMinHeight;
+		if (expandLevel > 3) {
+			audioSendHeight = audioSendListMaxHeight;
+		}
+		else if (expandLevel == 3) {
+			audioSendHeight = this->getHeight() - expandBaseHeight
+				- effectListMaxHeight - midiSendListMaxHeight;
+		}
+
+		juce::Rectangle<int> audioSendRect(
+			0, top, this->getWidth(), audioSendHeight);
+		this->audioSendList->setBounds(audioSendRect);
+		this->audioSendList->setRowHeight(listItemHeight);
+
+		top += audioSendHeight;
+		top += splitHeight;
+	}
+	this->audioSendList->setVisible(ioShown);
 
 	/** Fader And Level Meter */
 	if (faderShown) {
 		juce::Rectangle<int> faderRect(
-			faderPaddingWidth, bottom - faderHeight,
-			faderWidth, faderHeight);
+			faderPaddingWidth, top,
+			faderWidth, this->getHeight() - top);
 		this->fader->setBounds(faderRect);
 
 		juce::Rectangle<int> levelRect(
-			this->getWidth() - faderPaddingWidth - faderWidth, bottom - faderHeight,
-			faderWidth, faderHeight);
+			this->getWidth() - faderPaddingWidth - faderWidth, top,
+			faderWidth, this->getHeight() - top);
 		this->levelMeter->setBounds(levelRect);
-
-		bottom -= faderHeight;
 	}
 	this->fader->setVisible(faderShown);
 	this->levelMeter->setVisible(faderShown);
-
-	/** Mute */
-	if (muteShown) {
-		juce::Rectangle<int> muteRect(
-			0, bottom - muteHeight,
-			this->getWidth(), muteHeight);
-		this->muteButton->setBounds(muteRect);
-
-		bottom -= muteHeight;
-	}
-	this->muteButton->setVisible(muteShown);
-
-	/** Effects */
-	juce::Rectangle<int> effectRect(
-		outlineThickness, top, this->getWidth() - outlineThickness * 2, bottom - top);
-	this->effectList->setBounds(effectRect);
-	this->effectList->setRowHeight(listItemHeight);
 }
 
 void MixerTrackComponent::paint(juce::Graphics& g) {
