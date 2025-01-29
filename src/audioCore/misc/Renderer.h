@@ -3,6 +3,8 @@
 #include <JuceHeader.h>
 #include "../Utils.h"
 
+class Track;
+
 class Renderer final : private juce::DeletedAtShutdown {
 public:
 	Renderer();

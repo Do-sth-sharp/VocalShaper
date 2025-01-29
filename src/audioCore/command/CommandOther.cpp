@@ -55,11 +55,19 @@ AUDIOCORE_FUNC(renderNow) {
 	juce::String name = juce::String::fromUTF8(luaL_checkstring(L, 2));
 	juce::String extension = juce::String::fromUTF8(luaL_checkstring(L, 3));
 	
-	juce::Array<int> tracks;
+	juce::Array<quickAPI::TrackIndex> tracks;
 	lua_pushvalue(L, 4);
 	lua_pushnil(L);
 	while (lua_next(L, -2)) {
-		tracks.add(luaL_checkinteger(L, -1));
+		lua_getfield(L, -1, "type");
+		int type = luaL_checkinteger(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "index");
+		int index = luaL_checkinteger(L, -1);
+		lua_pop(L, 1);
+
+		tracks.add({ (quickAPI::TrackType)type, index });
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
