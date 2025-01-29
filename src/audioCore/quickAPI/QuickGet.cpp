@@ -745,8 +745,8 @@ namespace quickAPI {
 	}
 
 	const juce::Array<float> getTrackMixerOutputLevel(TrackIndex index) {
-		if (auto seq = getSeqProcessor(index.second)) {
-			return seq->getOutputLevels();
+		if (auto track = getTrackProcessor(index)) {
+			return track->getOutputLevels();
 		}
 		return {};
 	}
