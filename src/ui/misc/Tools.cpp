@@ -39,6 +39,19 @@ void Tools::addMIDIChannelChangedListener(juce::ChangeListener* listener) {
 	this->midiChannelBroadcaster.addChangeListener(listener);
 }
 
+void Tools::setEditingTrack(int index) {
+	this->editingTrack = index;
+	this->editingTrackBroadcaster.sendChangeMessage();
+}
+
+int Tools::getEditingTrack() const {
+	return this->editingTrack;
+}
+
+void Tools::addEditingTrackChangedListener(juce::ChangeListener* listener) {
+	this->editingTrackBroadcaster.addChangeListener(listener);
+}
+
 Tools* Tools::getInstance() {
 	return Tools::instance ? Tools::instance
 		: (Tools::instance = new Tools{});

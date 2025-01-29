@@ -151,6 +151,7 @@ countries: cn
 "Audio Cover Mode" = "音频覆盖模式"
 
 "Type:" = "类型："
+"Bus:" = "总线："
 "Instrument:" = "乐器："
 "Instrument Offline:" = "乐器离线："
 "Instrument Bypass:" = "乐器旁路："

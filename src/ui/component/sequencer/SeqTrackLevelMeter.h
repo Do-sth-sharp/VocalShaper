@@ -14,7 +14,8 @@ public:
 
 	void paint(juce::Graphics& g) override;
 
-	void update(int index);
+	void updateIndex(int index);
+	void update();
 
 private:
 	int index = -1;

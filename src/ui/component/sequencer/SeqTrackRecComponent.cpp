@@ -89,13 +89,15 @@ void SeqTrackRecComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
-void SeqTrackRecComponent::update(int index) {
+void SeqTrackRecComponent::updateIndex(int index) {
 	this->index = index;
-	if (index > -1) {
-		this->rec = quickAPI::getSeqTrackRecording(index);
+}
 
-		this->repaint();
-	}
+void SeqTrackRecComponent::update() {
+	this->rec = quickAPI::getTrackRecording(
+		{ quickAPI::TrackType::Track, this->index });
+
+	this->repaint();
 }
 
 enum SeqRecordMenuActionType {
@@ -104,7 +106,7 @@ enum SeqRecordMenuActionType {
 };
 
 void SeqTrackRecComponent::changeRecQuick() {
-	CoreActions::setSeqRec(this->index, static_cast<quickAPI::RecordState>(
+	CoreActions::setTrackRecording(this->index, static_cast<quickAPI::RecordState>(
 		(this->rec == quickAPI::RecordState::NotRecording)
 		? quickAPI::RecordState::MIDICoverMode | quickAPI::RecordState::AudioCoverMode
 		: quickAPI::RecordState::NotRecording));
@@ -142,7 +144,8 @@ void SeqTrackRecComponent::changeRec() {
 	}
 
 	if (state != this->rec) {
-		CoreActions::setSeqRec(this->index, static_cast<quickAPI::RecordState>(state));
+		CoreActions::setTrackRecording(
+			this->index, static_cast<quickAPI::RecordState>(state));
 	}
 }
 

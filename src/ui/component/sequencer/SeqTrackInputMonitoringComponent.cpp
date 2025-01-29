@@ -89,23 +89,27 @@ void SeqTrackInputMonitoringComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
-void SeqTrackInputMonitoringComponent::update(int index) {
+void SeqTrackInputMonitoringComponent::updateIndex(int index) {
 	this->index = index;
-	if (index > -1) {
-		/** Get Input Monitoring State */
-		this->inputMonitoring = quickAPI::getSeqTrackInputMonitoring(index);
+}
 
-		/** Get Input Connections */
-		this->midiInput = quickAPI::getSeqTrackMIDIInputFromDevice(index);
-		this->audioInput = quickAPI::getSeqTrackAudioInputFromDevice(index);
+void SeqTrackInputMonitoringComponent::update() {
+	/** Get Input Monitoring State */
+	this->inputMonitoring = quickAPI::getTrackInputMonitoring(
+		{ quickAPI::TrackType::Track, this->index });
 
-		/** Repaint */
-		this->repaint();
-	}
+	/** Get Input Connections */
+	this->midiInput = quickAPI::isTrackMIDIInputConnected(
+		{ quickAPI::TrackType::Track, this->index });
+	this->audioInput = quickAPI::getTrackAudioInputChannels(
+		{ quickAPI::TrackType::Track, this->index });
+
+	/** Repaint */
+	this->repaint();
 }
 
 void SeqTrackInputMonitoringComponent::changeInputMonitoring() {
-	CoreActions::setSeqInputMonitoring(this->index, !(this->inputMonitoring));
+	CoreActions::setTrackInputMonitoring(this->index, !(this->inputMonitoring));
 }
 
 enum SeqInputMonitoringButtonActionType {
@@ -127,16 +131,19 @@ void SeqTrackInputMonitoringComponent::showMenu() {
 }
 
 void SeqTrackInputMonitoringComponent::changeMIDIInput() {
-	CoreActions::setSeqMIDIInputFromDevice(this->index, !this->midiInput);
+	if (this->midiInput) {
+		CoreActions::removeTrackMIDIInput(
+			quickAPI::TrackType::Track, this->index);
+	}
+	else {
+		CoreActions::addTrackMIDIInput(
+			quickAPI::TrackType::Track, this->index);
+	}
 }
 
 void SeqTrackInputMonitoringComponent::changeAudioInput() {
-	juce::Array<std::tuple<int, int>> links;
-	for (auto& [src, srcc, dst, dstc] : this->audioInput) {
-		links.add({ srcc, dstc });
-	}
-
-	CoreActions::setSeqAudioInputFromDeviceGUI(this->index, true, links);
+	CoreActions::setTrackAudioInputGUI(
+		quickAPI::TrackType::Track, this->index);
 }
 
 juce::PopupMenu SeqTrackInputMonitoringComponent::createMenu() {

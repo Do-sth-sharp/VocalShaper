@@ -110,13 +110,6 @@ SeqTrackComponent::SeqTrackComponent(
 	this->instrOfflineButton->onClick = [this] { this->instrOffline(); };
 	this->addChildComponent(this->instrOfflineButton.get());
 
-	/** IO */
-	this->midiOutput = std::make_unique<SeqTrackIOComponent>(true);
-	this->addChildComponent(this->midiOutput.get());
-
-	this->audioOutput = std::make_unique<SeqTrackIOComponent>(false);
-	this->addChildComponent(this->audioOutput.get());
-
 	/** Level Meter */
 	this->levelMeter = std::make_unique<SeqTrackLevelMeter>();
 	this->addAndMakeVisible(this->levelMeter.get());
@@ -132,41 +125,39 @@ SeqTrackComponent::SeqTrackComponent(
 	this->setMouseClickGrabsKeyboardFocus(true);
 }
 
-void SeqTrackComponent::update(int index) {
+void SeqTrackComponent::updateIndex(int index) {
 	this->index = index;
 	if (index > -1) {
-		this->trackColor = quickAPI::getSeqTrackColor(index);
+		this->muteButton->updateIndex(index);
+		this->soloButton->updateIndex(index);
+		this->inputMonitoringButton->updateIndex(index);
+		this->recButton->updateIndex(index);
 
-		auto& laf = this->getLookAndFeel();
-		auto textColorLight = laf.findColour(
-			juce::Label::ColourIds::textWhenEditingColourId);
-		auto textColorDark = laf.findColour(
-			juce::Label::ColourIds::textColourId);
-		this->idColor = utils::chooseTextColor(this->trackColor, textColorLight, textColorDark);
+		this->levelMeter->updateIndex(index);
 
-		auto name = quickAPI::getSeqTrackName(index);
-		if (name.isEmpty()) {
-			name = TRANS("Untitled");
-		}
-		this->trackName->setButtonText(juce::String{ index } + " - " + name);
-
-		this->updateMuteSolo();
-		this->updateInputMonitoring();
-		this->updateRec();
-
-		this->updateInstr();
-
-		this->midiOutput->update(index);
-		this->audioOutput->update(index);
-
-		this->levelMeter->update(index);
-
-		this->content->update(index);
-
-		this->setTooltip(this->createToolTipString());
-
-		this->repaint();
+		this->content->updateIndex(index);
 	}
+}
+
+void SeqTrackComponent::updateInfo() {
+	this->trackColor = quickAPI::getTrackColor(
+		{ quickAPI::TrackType::Track, this->index });
+
+	auto& laf = this->getLookAndFeel();
+	auto textColorLight = laf.findColour(
+		juce::Label::ColourIds::textWhenEditingColourId);
+	auto textColorDark = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+	this->idColor = utils::chooseTextColor(this->trackColor, textColorLight, textColorDark);
+
+	auto name = quickAPI::getTrackName(
+		{ quickAPI::TrackType::Track, this->index });
+	if (name.isEmpty()) {
+		name = TRANS("Untitled");
+	}
+	this->trackName->setButtonText(juce::String{ index } + " - " + name);
+
+	this->repaint();
 }
 
 void SeqTrackComponent::updateBlock(int blockIndex) {
@@ -174,16 +165,16 @@ void SeqTrackComponent::updateBlock(int blockIndex) {
 }
 
 void SeqTrackComponent::updateMuteSolo() {
-	this->muteButton->update(this->index);
-	this->soloButton->update(this->index);
+	this->muteButton->update();
+	this->soloButton->update();
 }
 
 void SeqTrackComponent::updateInputMonitoring() {
-	this->inputMonitoringButton->update(this->index);
+	this->inputMonitoringButton->update();
 }
 
 void SeqTrackComponent::updateRec() {
-	this->recButton->update(this->index);
+	this->recButton->update();
 }
 
 void SeqTrackComponent::updateInstr() {
@@ -213,21 +204,12 @@ void SeqTrackComponent::updateHPos(double pos, double itemSize) {
 	this->content->updateHPos(pos, itemSize);
 }
 
-void SeqTrackComponent::updateMixerTrack() {
-	this->midiOutput->update(this->index);
-	this->audioOutput->update(this->index);
-}
-
 void SeqTrackComponent::updateDataRef() {
 	this->content->updateDataRef();
 }
 
 void SeqTrackComponent::updateData() {
 	this->content->updateData();
-}
-
-void SeqTrackComponent::updateSynthState(bool state) {
-	this->updateDataRef();
 }
 
 void SeqTrackComponent::resized() {
@@ -339,22 +321,8 @@ void SeqTrackComponent::resized() {
 	this->soloButton->setBounds(soloRect);
 	this->soloButton->setVisible(isIOLineShown);
 
-	/** MIDI Output */
-	juce::Rectangle<int> midiOutputRect(
-		soloRect.getRight() + buttonSplitWidth, inputMonitoringRect.getY(),
-		ioLineHeight, ioLineHeight);
-	this->midiOutput->setBounds(midiOutputRect);
-	this->midiOutput->setVisible(isIOLineShown);
-
-	/** Audio Output */
-	juce::Rectangle<int> audioOutputRect(
-		midiOutputRect.getRight() + ioLineSplitWidth, inputMonitoringRect.getY(),
-		ioLineHeight, ioLineHeight);
-	this->audioOutput->setBounds(audioOutputRect);
-	this->audioOutput->setVisible(isIOLineShown);
-
 	if (isIOLineShown) {
-		topY = midiOutputRect.getBottom();
+		topY = soloRect.getBottom();
 	}
 
 	/** Content */
@@ -420,7 +388,8 @@ void SeqTrackComponent::mouseUp(const juce::MouseEvent& event) {
 
 	if (event.mods.isLeftButtonDown()) {
 		if (x >= 0 && x < trackColorWidth) {
-			CoreActions::setSeqColorGUI(this->index);
+			CoreActions::setTrackColorGUI(
+				quickAPI::TrackType::Track, this->index);
 		}
 	}
 	else if (event.mods.isRightButtonDown()) {
@@ -456,18 +425,6 @@ bool SeqTrackComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
 	auto& des = dragSourceDetails.description;
 
-	/** From Mixer Track Midi Input */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackMidiInput)) {
-		int trackIndex = des["track"];
-		return trackIndex >= 0;
-	}
-
-	/** From Mixer Track Audio Input */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
-		int trackIndex = des["track"];
-		return trackIndex >= 0;
-	}
-
 	/** From Plugins */
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
 		return des["instrument"] || des["ara"];
@@ -491,22 +448,6 @@ void SeqTrackComponent::itemDropped(const SourceDetails& dragSourceDetails) {
 
 	auto& des = dragSourceDetails.description;
 	this->endDrop();
-
-	/** From Mixer Track Midi Input */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackMidiInput)) {
-		int trackIndex = des["track"];
-
-		this->midiOutput->setMidiOutputToMixer(trackIndex, true);
-		return;
-	}
-
-	/** From Mixer Track Audio Input */
-	if ((int)(des["type"]) == (int)(DragSourceType::TrackAudioInput)) {
-		int trackIndex = des["track"];
-
-		this->audioOutput->setAudioOutputToMixer(trackIndex, true);
-		return;
-	}
 
 	/** From Plugins */
 	if ((int)(des["type"]) == (int)(DragSourceType::Plugin)) {
@@ -585,7 +526,8 @@ void SeqTrackComponent::focusLost(FocusChangeType cause) {
 }
 
 void SeqTrackComponent::editTrackName() {
-	CoreActions::setSeqNameGUI(this->index);
+	CoreActions::setTrackNameGUI(
+		quickAPI::TrackType::Track, this->index);
 }
 
 void SeqTrackComponent::instrEditorShow() {
@@ -664,7 +606,7 @@ void SeqTrackComponent::menuShow() {
 		break;
 	}
 	case SeqMenuActionType::MIDITrack: {
-		CoreActions::setSeqMIDITrackGUI(this->index);
+		CoreActions::setTrackMIDITrackGUI(this->index);
 		break;
 	}
 	}
@@ -675,19 +617,21 @@ void SeqTrackComponent::setInstr(const juce::String& pid, bool addARA) {
 }
 
 void SeqTrackComponent::add() {
-	CoreActions::insertSeqGUI(this->index + 1);
+	CoreActions::insertTrackGUI(
+		quickAPI::TrackType::Track, this->index + 1);
 }
 
 void SeqTrackComponent::remove() {
-	CoreActions::removeSeqGUI(this->index);
+	CoreActions::removeTrackGUI(
+		quickAPI::TrackType::Track, this->index);
 }
 
 void SeqTrackComponent::setContentAudioRef(const juce::String& path) {
-	CoreActions::setSeqAudioRefGUI(this->index, path);
+	CoreActions::setTrackAudioRefGUI(this->index, path);
 }
 
 void SeqTrackComponent::setContentMIDIRef(const juce::String& path) {
-	CoreActions::setSeqMIDIRefGUI(this->index, path);
+	CoreActions::setTrackMIDIRefGUI(this->index, path);
 }
 
 void SeqTrackComponent::preDrop() {
@@ -741,8 +685,8 @@ juce::PopupMenu SeqTrackComponent::createMenu() const {
 juce::String SeqTrackComponent::createToolTipString() const {
 	juce::String result;
 
-	result += "#" + juce::String{ this->index } + " " + quickAPI::getSeqTrackName(this->index) + "\n";
-	result += TRANS("Type:") + " " + quickAPI::getSeqTrackType(this->index) + "\n";
+	result += "#" + juce::String{ this->index } + " " + quickAPI::getTrackName({ quickAPI::TrackType::Track, this->index }) + "\n";
+	result += TRANS("Bus:") + " " + quickAPI::getTrackBusTypeName({ quickAPI::TrackType::Track, this->index }) + "\n";
 
 	if (quickAPI::isInstrValid(this->index)) {
 		result += TRANS("Instrument:") + " " + quickAPI::getInstrName(this->index) + "\n";

@@ -61,35 +61,30 @@ void SeqTrackContentViewer::setCompressed(bool isCompressed) {
 	this->repaint();
 }
 
-void SeqTrackContentViewer::update(int index) {
-	bool changeData = true;//this->index != index;
-
+void SeqTrackContentViewer::updateIndex(int index) {
 	this->index = index;
-	if (index > -1) {
-		this->updateBlock(-1);
-		
-		this->trackColor = quickAPI::getSeqTrackColor(index);
+}
 
-		auto& laf = this->getLookAndFeel();
-		auto textColorLight = laf.findColour(
-			juce::Label::ColourIds::textWhenEditingColourId);
-		auto textColorDark = laf.findColour(
-			juce::Label::ColourIds::textColourId);
-		this->nameColor = utils::chooseTextColor(this->trackColor, textColorLight, textColorDark);
+void SeqTrackContentViewer::updateInfo() {
+	this->trackColor = quickAPI::getTrackColor(
+		{ quickAPI::TrackType::Track, this->index });
 
-		if (changeData) {
-			this->updateDataRef();
-			this->updateData();
-		}
+	auto& laf = this->getLookAndFeel();
+	auto textColorLight = laf.findColour(
+		juce::Label::ColourIds::textWhenEditingColourId);
+	auto textColorDark = laf.findColour(
+		juce::Label::ColourIds::textColourId);
+	this->nameColor = utils::chooseTextColor(
+		this->trackColor, textColorLight, textColorDark);
 
-		this->repaint();
-	}
+	this->repaint();
 }
 
 void SeqTrackContentViewer::updateBlock(int /*blockIndex*/) {
 	/** Create Or Remove Block */
 	int currentSize = this->blockTemp.size();
-	int newSize = quickAPI::getBlockNum(this->index);
+	int newSize = quickAPI::getBlockNum(
+		{ quickAPI::TrackType::Track, this->index });
 	if (currentSize > newSize) {
 		for (int i = currentSize - 1; i >= newSize; i--) {
 			this->blockTemp.remove(i);
@@ -129,11 +124,16 @@ void SeqTrackContentViewer::updateHPos(double pos, double itemSize) {
 }
 
 void SeqTrackContentViewer::updateDataRef() {
-	this->audioValid = quickAPI::isSeqTrackHasAudioData(this->index);
-	this->midiValid = quickAPI::isSeqTrackHasMIDIData(this->index);
+	auto audioRef = quickAPI::getTrackAudioRef(
+		{ quickAPI::TrackType::Track, this->index });
+	auto midiRef = quickAPI::getTrackMIDIRef(
+		{ quickAPI::TrackType::Track, this->index });
 
-	this->audioName = this->audioValid ? quickAPI::getSeqTrackDataRefAudio(this->index) : juce::String{};
-	this->midiName = this->midiValid ? quickAPI::getSeqTrackDataRefMIDI(this->index) : juce::String{};
+	this->audioValid = quickAPI::isAudioSourceValid(audioRef);
+	this->midiValid = quickAPI::isMIDISourceValid(midiRef);
+
+	this->audioName = this->audioValid ? quickAPI::getAudioSourceName(audioRef) : juce::String{};
+	this->midiName = this->midiValid ? quickAPI::getMIDISourceName(midiRef) : juce::String{};
 
 	this->blockNameCombined = this->audioName
 		+ ((this->audioValid&& this->midiValid) ? " / " : "")
@@ -153,14 +153,19 @@ void SeqTrackContentViewer::updateData() {
 
 	/** Get Audio Data */
 	if (this->audioValid) {
-		this->audioDataTemp = quickAPI::getSeqTrackAudioData(this->index);
+		auto audioRef = quickAPI::getTrackAudioRef(
+			{ quickAPI::TrackType::Track, this->index });
+		this->audioDataTemp = quickAPI::getAudioSourceData(audioRef);
 	}
 
 	/** Get MIDI Data */
 	if (this->midiValid) {
-		int currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(this->index);
-		auto midiDataRef = quickAPI::getSeqTrackMIDIRef(this->index);
-		auto midiNoteList = quickAPI::getMIDISourceNotes(midiDataRef, currentMIDITrack);
+		auto midiRef = quickAPI::getTrackMIDIRef(
+			{ quickAPI::TrackType::Track, this->index });
+
+		int currentMIDITrack = quickAPI::getTrackCurrentMIDITrack(
+			{ quickAPI::TrackType::Track, this->index });
+		auto midiNoteList = quickAPI::getMIDISourceNotes(midiRef, currentMIDITrack);
 
 		/** Add Each Note */
 		this->midiDataTemp.ensureStorageAllocated(midiNoteList.size());
@@ -804,7 +809,8 @@ void SeqTrackContentViewer::mouseWheelMove(const juce::MouseEvent& event,
 void SeqTrackContentViewer::updateBlockInternal(int blockIndex) {
 	if (auto temp = this->blockTemp[blockIndex]) {
 		std::tie(temp->startTime, temp->endTime, temp->offset)
-			= quickAPI::getBlock(this->index, blockIndex);
+			= quickAPI::getBlock(
+				{ quickAPI::TrackType::Track, this->index }, blockIndex);
 	}
 }
 
