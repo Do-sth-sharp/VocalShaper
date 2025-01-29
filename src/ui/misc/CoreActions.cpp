@@ -725,7 +725,7 @@ void CoreActions::addEffectParamCCLinkGUI(
 		callback, type, track, index, PluginType::Effect);
 }
 
-void CoreActions::loadPluginPresetGUI(quickAPI::TrackType type, int track, int index) {
+void CoreActions::loadEffectPresetGUI(quickAPI::TrackType type, int track, int index) {
 	auto callback = [type, track, index](const juce::String& path) {
 		CoreActions::loadEffectPreset(type, track, index, path);
 		};
@@ -735,7 +735,7 @@ void CoreActions::loadPluginPresetGUI(quickAPI::TrackType type, int track, int i
 	CoreActions::askForPluginPresetAsync(callback, identifier, false);
 }
 
-void CoreActions::savePluginPresetGUI(quickAPI::TrackType type, int track, int index) {
+void CoreActions::saveEffectPresetGUI(quickAPI::TrackType type, int track, int index) {
 	auto callback = [type, track, index](const juce::String& path) {
 		CoreActions::saveEffectPreset(type, track, index, path);
 		};

@@ -152,8 +152,8 @@ public:
 	static void editEffectParamCCLinkGUI(
 		quickAPI::TrackType type, int track, int index, int paramIndex, int defaultCC = -1);
 	static void addEffectParamCCLinkGUI(quickAPI::TrackType type, int track, int index);
-	static void loadPluginPresetGUI(quickAPI::TrackType type, int track, int index);
-	static void savePluginPresetGUI(quickAPI::TrackType type, int track, int index);
+	static void loadEffectPresetGUI(quickAPI::TrackType type, int track, int index);
+	static void saveEffectPresetGUI(quickAPI::TrackType type, int track, int index);
 	static void removeEffectGUI(quickAPI::TrackType type, int track, int index);
 
 	static void insertTrackGUI(quickAPI::TrackType type, int index);
