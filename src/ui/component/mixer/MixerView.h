@@ -26,6 +26,7 @@ public:
 	void updateMute(int type, int index);
 	void updateEffect(int type, int track, int index);
 	void updateEffectIndex(int type, int track, int oldIndex, int newIndex);
+	void updateAll();
 
 	void mouseUp(const juce::MouseEvent& event) override;
 

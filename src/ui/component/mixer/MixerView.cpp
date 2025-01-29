@@ -99,6 +99,9 @@ MixerView::MixerView()
 				comp->updateEffectIndex(type, track, oldIndex, newIndex);
 			}
 		});
+
+	/** Update All */
+	this->updateAll();
 }
 
 void MixerView::resized() {
@@ -292,6 +295,74 @@ void MixerView::updateEffectIndex(int type, int track, int oldIndex, int newInde
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateEffectIndex(oldIndex, newIndex);
+}
+
+void MixerView::updateAll() {
+	/** Clear Track List */
+	this->trackList.clear();
+
+	/** Clear Color Temp */
+	this->colorTemp.clear();
+
+	/** Add Master Track */
+	int masterTrackNum = quickAPI::getTrackNum(
+		quickAPI::TrackType::MasterTrack);
+	for (int i = 0; i < masterTrackNum; i++) {
+		/** Track Component */
+		auto track = std::make_unique<MixerTrackComponent>();
+		this->addAndMakeVisible(track.get());
+
+		track->updateIndex(
+			(int)quickAPI::TrackType::MasterTrack, i);
+
+		this->trackList.add(std::move(track));
+
+		/** Color Temp */
+		this->colorTemp.add(quickAPI::getTrackColor(
+			{ quickAPI::TrackType::MasterTrack, i }));
+	}
+
+	/** Add AUX Track */
+	int auxTrackNum = quickAPI::getTrackNum(
+		quickAPI::TrackType::AuxTrack);
+	for (int i = 0; i < auxTrackNum; i++) {
+		/** Track Component */
+		auto track = std::make_unique<MixerTrackComponent>();
+		this->addAndMakeVisible(track.get());
+
+		track->updateIndex(
+			(int)quickAPI::TrackType::AuxTrack, i);
+
+		this->trackList.add(std::move(track));
+
+		/** Color Temp */
+		this->colorTemp.add(quickAPI::getTrackColor(
+			{ quickAPI::TrackType::AuxTrack, i }));
+	}
+
+	/** Add Track */
+	int trackNum = quickAPI::getTrackNum(
+		quickAPI::TrackType::Track);
+	for (int i = 0; i < trackNum; i++) {
+		/** Track Component */
+		auto track = std::make_unique<MixerTrackComponent>();
+		this->addAndMakeVisible(track.get());
+
+		track->updateIndex(
+			(int)quickAPI::TrackType::Track, i);
+
+		this->trackList.add(std::move(track));
+
+		/** Color Temp */
+		this->colorTemp.add(quickAPI::getTrackColor(
+			{ quickAPI::TrackType::Track, i }));
+	}
+
+	/** Update View Pos */
+	this->hScroller->update();
+
+	/** Repaint */
+	this->repaint();
 }
 
 void MixerView::mouseUp(const juce::MouseEvent& event) {
