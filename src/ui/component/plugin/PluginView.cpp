@@ -44,7 +44,7 @@ PluginView::PluginView()
 	this->updateSearchTextTemp();
 
 	/** Add Callback */
-	CoreCallbacks::getInstance()->addSearchPlugin(
+	CoreCallbackAPI<bool>::add(CoreCallbacks::CallbackType::PluginSearchStateChanged,
 		[comp = PluginView::SafePointer(this)](bool status) {
 			if (comp) {
 				if (status) { comp->searchStart(); }
@@ -52,7 +52,7 @@ PluginView::PluginView()
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addPluginSearchMes(
+	CoreCallbackAPI<const juce::String&>::add(CoreCallbacks::CallbackType::PluginSearchMessage,
 		[comp = PluginView::SafePointer(this)](const juce::String& mes) {
 			if (comp) {
 				comp->searchMessage(mes);

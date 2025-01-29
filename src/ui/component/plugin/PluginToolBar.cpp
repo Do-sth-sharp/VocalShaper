@@ -255,7 +255,8 @@ void PluginToolBar::bypass() {
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::bypassEffect(this->trackType, this->track, this->index,
+		CoreActions::bypassEffect(
+			(quickAPI::TrackType)this->trackType, this->track, this->index,
 			this->bypassButton->getToggleState());
 		break;
 	}
@@ -279,13 +280,12 @@ void PluginToolBar::pin() {
 void PluginToolBar::load() {
 	switch (this->type) {
 	case PluginType::Instr: {
-		CoreActions::loadInstrPresetGUI(this->track,
-			this->bypassButton->getToggleState());
+		CoreActions::loadInstrPresetGUI(this->track);
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::loadEffectPresetGUI(this->trackType, this->track, this->index,
-			this->bypassButton->getToggleState());
+		CoreActions::loadEffectPresetGUI(
+			(quickAPI::TrackType)this->trackType, this->track, this->index);
 		break;
 	}
 	}
@@ -294,13 +294,12 @@ void PluginToolBar::load() {
 void PluginToolBar::save() {
 	switch (this->type) {
 	case PluginType::Instr: {
-		CoreActions::saveInstrPresetGUI(this->track,
-			this->bypassButton->getToggleState());
+		CoreActions::saveInstrPresetGUI(this->track);
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::saveEffectPresetGUI(this->trackType, this->track, this->index,
-			this->bypassButton->getToggleState());
+		CoreActions::saveEffectPresetGUI(
+			(quickAPI::TrackType)this->trackType, this->track, this->index);
 		break;
 	}
 	}

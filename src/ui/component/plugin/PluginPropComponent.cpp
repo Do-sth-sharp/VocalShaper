@@ -217,7 +217,8 @@ void PluginPropComponent::changeMIDIChannel() {
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::setEffectMIDIChannel(this->trackType, this->track, this->index, channel);
+		CoreActions::setEffectMIDIChannel(
+			(quickAPI::TrackType)this->trackType, this->track, this->index, channel);
 		break;
 	}
 	}
@@ -231,7 +232,8 @@ void PluginPropComponent::changeMIDICCIntercept() {
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::setEffectMIDICCIntercept(this->trackType, this->track, this->index, intercept);
+		CoreActions::setEffectMIDICCIntercept(
+			(quickAPI::TrackType)this->trackType, this->track, this->index, intercept);
 		break;
 	}
 	}
@@ -245,7 +247,8 @@ void PluginPropComponent::changeMIDIOutput() {
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::setEffectMIDIOutput(this->trackType, this->track, this->index, output);
+		CoreActions::setEffectMIDIOutput(
+			(quickAPI::TrackType)this->trackType, this->track, this->index, output);
 		break;
 	}
 	}
