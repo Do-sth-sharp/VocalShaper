@@ -2,8 +2,27 @@
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreCallbacks.h"
 #include "../../misc/CoreActions.h"
+#include "../../misc/Tools.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
+
+class EditingTrackListener final : public juce::ChangeListener {
+public:
+	EditingTrackListener() = delete;
+	EditingTrackListener(SourceEditor* parent)
+		: parent(parent) {
+	};
+
+	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
+		int track = Tools::getInstance()->getEditingTrack();
+		this->parent->setTrack(track);
+	}
+
+private:
+	SourceEditor* const parent;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditingTrackListener)
+};
 
 SourceEditor::SourceEditor()
 	: FlowComponent(TRANS("Resource Editor")) {
@@ -24,53 +43,43 @@ SourceEditor::SourceEditor()
 	this->audioEditor = std::make_unique<AudioSourceEditor>();
 	this->addChildComponent(this->audioEditor.get());
 
+	/** Track Listener */
+	this->editingTrackListener = std::make_unique<EditingTrackListener>(this);
+	Tools::getInstance()->addEditingTrackChangedListener(this->editingTrackListener.get());
+
 	/** Empty Str */
 	this->emptyStr = TRANS("Please select a data source for editing.");
 
 	/** Callback */
-	CoreCallbacks::getInstance()->addSeqDataRefChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackDataRefChanged,
 		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
 			if (comp) {
 				comp->update(trackIndex);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSourceRecord(
-		[comp = SourceEditor::SafePointer(this)](const std::set<int>& trackList) {
-			if (comp) {
-				comp->updateRecorded(trackList);
-			}
-		}
-	);
-	CoreCallbacks::getInstance()->addSourceChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackSourceChanged,
 		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
 			if (comp) {
 				comp->updateData(trackIndex);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSeqBlockChanged(
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackBlockChanged,
 		[comp = SourceEditor::SafePointer(this)](int track, int /*index*/) {
 			if (comp) {
 				comp->updateBlocks(track);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSeqChanged(
-		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
-			if (comp) {
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackInfoChanged,
+		[comp = SourceEditor::SafePointer(this)](int type, int trackIndex) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
 				comp->update(trackIndex);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addEditingSeqChanged(
-		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
-			if (comp) {
-				comp->setTrack(trackIndex);
-			}
-		}
-	);
-	CoreCallbacks::getInstance()->addTempoChanged(
+	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::TempoChanged,
 		[comp = SourceEditor::SafePointer(this)] {
 			if (comp) {
 				comp->updateTempo();
@@ -129,8 +138,10 @@ void SourceEditor::update() {
 
 void SourceEditor::setTrack(int trackIndex) {
 	this->trackIndex = trackIndex;
-	auto audioRef = quickAPI::getSeqTrackAudioRef(trackIndex);
-	auto midiRef = quickAPI::getSeqTrackMIDIRef(trackIndex);
+	auto audioRef = quickAPI::getTrackAudioRef(
+		{ quickAPI::TrackType::Track, trackIndex });
+	auto midiRef = quickAPI::getTrackMIDIRef(
+		{ quickAPI::TrackType::Track, trackIndex });
 	this->update(audioRef, midiRef);
 }
 
@@ -177,12 +188,6 @@ void SourceEditor::updateData(int trackIndex) {
 	}
 }
 
-void SourceEditor::updateRecorded(const std::set<int>& trackList) {
-	if (trackList.contains(this->trackIndex)) {
-		this->updateData(this->trackIndex);
-	}
-}
-
 void SourceEditor::switchEditor(SourceSwitchBar::SwitchState state) {
 	/** Update Switch State */
 	this->switchState = state;
@@ -196,10 +201,10 @@ void SourceEditor::switchEditor(SourceSwitchBar::SwitchState state) {
 
 	/** Create Source */
 	if ((this->audioRef == 0) && (state == SourceSwitchBar::SwitchState::Audio)) {
-		CoreActions::createSeqAudioSourceGUI(this->trackIndex, cancelCallback);
+		CoreActions::createTrackAudioSourceGUI(this->trackIndex, cancelCallback);
 	}
 	if ((this->midiRef == 0) && (state == SourceSwitchBar::SwitchState::MIDI)) {
-		CoreActions::createSeqMIDISourceGUI(this->trackIndex, cancelCallback);
+		CoreActions::createTrackMIDISourceGUI(this->trackIndex, cancelCallback);
 	}
 
 	/** Change Editor Visible */

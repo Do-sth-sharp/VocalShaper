@@ -20,7 +20,6 @@ public:
 	void updateTempo();
 	void updateBlocks(int trackIndex);
 	void updateData(int trackIndex);
-	void updateRecorded(const std::set<int>& trackList);
 
 private:
 	std::unique_ptr<SourceSwitchBar> switchBar = nullptr;
@@ -33,6 +32,8 @@ private:
 	uint64_t audioRef = 0, midiRef = 0;
 
 	juce::String emptyStr;
+
+	std::unique_ptr<juce::ChangeListener> editingTrackListener = nullptr;
 
 	void switchEditor(SourceSwitchBar::SwitchState state);
 

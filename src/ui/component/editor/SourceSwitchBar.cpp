@@ -160,7 +160,8 @@ void SourceSwitchBar::update(int index, uint64_t audioRef, uint64_t midiRef) {
 	/** Set Source Info Temp */
 	this->index = index;
 	if (index >= 0) {
-		auto name = quickAPI::getSeqTrackName(index);
+		auto name = quickAPI::getTrackName(
+			{ quickAPI::TrackType::Track, this->index });
 		this->trackName = juce::String{ index } + " - " + (name.isEmpty() ? this->trackEmptyName : name);
 	}
 	else {

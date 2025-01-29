@@ -56,7 +56,8 @@ void MIDIContentViewer::update(int index, uint64_t ref) {
 	this->ref = ref;
 
 	if (index >= 0) {
-		this->trackColor = quickAPI::getSeqTrackColor(index);
+		this->trackColor = quickAPI::getTrackColor(
+			{ quickAPI::TrackType::Track, index });
 		//this->trackColorIsLight = utils::isLightColor(this->trackColor);
 
 		/** Note Color Gradient */
@@ -93,7 +94,8 @@ void MIDIContentViewer::updateBlocks() {
 	this->blockItemTemp.clear();
 
 	/** Update Block Temp */
-	auto list = quickAPI::getBlockList(this->index);
+	auto list = quickAPI::getBlockList(
+		{ quickAPI::TrackType::Track, this->index });
 	for (auto [startTime, endTime, offset] : list) {
 		this->blockItemTemp.add({ startTime, endTime, startTime - offset });
 	}
@@ -121,7 +123,8 @@ void MIDIContentViewer::updateData() {
 
 	/** Update Note Temp */
 	if (this->index >= 0 && this->ref != 0) {
-		this->currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(this->index);
+		this->currentMIDITrack = quickAPI::getTrackCurrentMIDITrack(
+			{ quickAPI::TrackType::Track, this->index });
 		auto midiNoteList = quickAPI::getMIDISourceNotes(this->ref, this->currentMIDITrack);
 
 		/** Add Each Note */
