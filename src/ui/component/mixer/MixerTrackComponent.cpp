@@ -96,9 +96,12 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->levelMeter = std::make_unique<MixerTrackLevelMeter>();
 	this->addAndMakeVisible(this->levelMeter.get());
 
-	/** Mute */
+	/** Solo Mute */
 	this->muteButton = std::make_unique<MixerTrackMuteComponent>();
 	this->addAndMakeVisible(this->muteButton.get());
+
+	this->soloButton = std::make_unique<MixerTrackSoloComponent>();
+	this->addAndMakeVisible(this->soloButton.get());
 
 	/** Effect List */
 	this->effectListModel = std::make_unique<EffectListModel>();
