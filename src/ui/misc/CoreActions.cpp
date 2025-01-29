@@ -806,10 +806,10 @@ void CoreActions::setTrackAudioInputGUI(
 	/** Callback */
 	auto callback = [type, index](int srcc, int dstc, bool input) {
 		if (input) {
-			CoreActions::addTrackAudioInput(type, index, dstc, srcc);
+			CoreActions::addTrackAudioInput(type, index, srcc, dstc);
 		}
 		else {
-			CoreActions::removeTrackAudioInput(type, index, dstc, srcc);
+			CoreActions::removeTrackAudioInput(type, index, srcc, dstc);
 		}
 		};
 
@@ -842,10 +842,10 @@ void CoreActions::setTrackAudioSendGUI(quickAPI::TrackType type, int index, int 
 	/** Callback */
 	auto callback = [type, index, slot, dst](int srcc, int dstc, bool input) {
 		if (input) {
-			CoreActions::addTrackAudioSend(type, index, slot, dst, dstc, srcc);
+			CoreActions::addTrackAudioSend(type, index, slot, dst, srcc, dstc);
 		}
 		else {
-			CoreActions::removeTrackAudioSend(type, index, slot, dst, dstc, srcc);
+			CoreActions::removeTrackAudioSend(type, index, slot, dst, srcc, dstc);
 		}
 		};
 
