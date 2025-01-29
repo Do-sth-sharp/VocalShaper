@@ -835,10 +835,7 @@ void CoreActions::setTrackAudioInputGUI(
 void CoreActions::setTrackAudioSendGUI(quickAPI::TrackType type, int index, int slot, quickAPI::SendDst dst) {
 	/** Check Current */
 	auto currentSend = quickAPI::getTrackAudioSendDst({ type, index }, slot);
-	if (currentSend == dst) {
-		return;
-	}
-	if (currentSend.second >= 0) {
+	if (currentSend != dst && currentSend.second >= 0) {
 		CoreActions::removeTrackAudioSendOnSlot(type, index, slot);
 	}
 
