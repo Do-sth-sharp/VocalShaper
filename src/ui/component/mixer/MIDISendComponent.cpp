@@ -29,7 +29,7 @@ void MIDISendComponent::paint(juce::Graphics& g) {
 		juce::Label::ColourIds::backgroundColourId);
 	juce::Colour textColor = laf.findColour(
 		juce::Label::ColourIds::textColourId);
-
+	
 	/** Font */
 	juce::Font textFont(juce::FontOptions{ textHeight });
 
@@ -47,6 +47,29 @@ void MIDISendComponent::paint(juce::Graphics& g) {
 		g.drawFittedText(this->name, textRect,
 			juce::Justification::centredLeft, 1, 0.75f);
 	}
+}
+
+void MIDISendComponent::paintOverChildren(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float splitLineThickness = screenSize.getHeight() * 0.0015;
+	float splitLineLength = this->getWidth() * 0.8;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour splitLineColor = laf.findColour(
+		juce::Label::ColourIds::backgroundWhenEditingColourId);
+
+	/** Split */
+	juce::Rectangle<float> topSplit(
+		this->getWidth() / 2.0 - splitLineLength / 2,
+		-splitLineThickness / 2, splitLineLength, splitLineThickness);
+	juce::Rectangle<float> bottomSplit(
+		this->getWidth() / 2.0 - splitLineLength / 2,
+		this->getHeight() - splitLineThickness / 2, splitLineLength, splitLineThickness);
+	g.setColour(splitLineColor);
+	g.fillRect(topSplit);
+	g.fillRect(bottomSplit);
 }
 
 void MIDISendComponent::update(int type, int track, int slot) {
