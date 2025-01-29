@@ -38,6 +38,7 @@ private:
 	void bypass();
 	void editorShow();
 	void showMenu();
+	void showAddMenu();
 	void startDrag();
 
 	void addEffect(const juce::PluginDescription& plugin);
