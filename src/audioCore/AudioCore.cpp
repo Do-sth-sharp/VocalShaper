@@ -569,34 +569,37 @@ void AudioCore::saveSource(const google::protobuf::Message* data) const {
 
 	auto& graph = ptrProj->graph();
 	auto mainGraph = this->mainAudioGraph.get();
-	for (int i = 0; i < graph.seqtracks_size(); i++) {
-		if (auto track = mainGraph->getSourceProcessor(i)) {
-			auto& seqData = graph.seqtracks(i);
+	for (int i = 0; i < mainGraph->getTrackNum(MainGraph::TrackType::Track); i++) {
+		if (auto track = mainGraph->getTrackProcessor(MainGraph::TrackType::Track, i)) {
+			if (auto seq = track->getSequencer()) {
+				auto& trackData = graph.tracks(i);
+				auto& seqData = trackData.seqtrack();
 
-			if (!seqData.midisrc().empty()) {
-				if (auto ref = track->getMIDIRef()) {
-					auto& name = seqData.midisrc();
-					if (!savedSet.contains(name)) {
-						savedSet.insert(name);
+				if (!seqData.midisrc().empty()) {
+					if (auto ref = seq->getMIDIRef()) {
+						auto& name = seqData.midisrc();
+						if (!savedSet.contains(name)) {
+							savedSet.insert(name);
 
-						juce::String path = utils::getProjectDir()
-							.getChildFile(name).getFullPathName();
-						SourceIO::getInstance()->addTask(
-							{ SourceIO::TaskType::Write, ref, path, false, {} });
+							juce::String path = utils::getProjectDir()
+								.getChildFile(name).getFullPathName();
+							SourceIO::getInstance()->addTask(
+								{ SourceIO::TaskType::Write, ref, path, false, {} });
+						}
 					}
 				}
-			}
 
-			if (!seqData.audiosrc().empty()) {
-				if (auto ref = track->getAudioRef()) {
-					auto& name = seqData.audiosrc();
-					if (!savedSet.contains(name)) {
-						savedSet.insert(name);
+				if (!seqData.audiosrc().empty()) {
+					if (auto ref = seq->getAudioRef()) {
+						auto& name = seqData.audiosrc();
+						if (!savedSet.contains(name)) {
+							savedSet.insert(name);
 
-						juce::String path = utils::getProjectDir()
-							.getChildFile(name).getFullPathName();
-						SourceIO::getInstance()->addTask(
-							{ SourceIO::TaskType::Write, ref, path, false, {} });
+							juce::String path = utils::getProjectDir()
+								.getChildFile(name).getFullPathName();
+							SourceIO::getInstance()->addTask(
+								{ SourceIO::TaskType::Write, ref, path, false, {} });
+						}
 					}
 				}
 			}
@@ -610,25 +613,28 @@ void AudioCore::loadSource(const google::protobuf::Message* data) const {
 
 	auto& graph = ptrProj->graph();
 	auto mainGraph = this->mainAudioGraph.get();
-	for (int i = 0; i < graph.seqtracks_size(); i++) {
-		if (auto track = mainGraph->getSourceProcessor(i)) {
-			auto& seqData = graph.seqtracks(i);
+	for (int i = 0; i < mainGraph->getTrackNum(MainGraph::TrackType::Track); i++) {
+		if (auto track = mainGraph->getTrackProcessor(MainGraph::TrackType::Track, i)) {
+			if (auto seq = track->getSequencer()) {
+				auto& trackData = graph.tracks(i);
+				auto& seqData = trackData.seqtrack();
 
-			if (!seqData.midisrc().empty()) {
-				if (auto ref = track->getMIDIRef()) {
-					juce::String path = utils::getProjectDir()
-						.getChildFile(seqData.midisrc()).getFullPathName();
-					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Read, ref, path, false, {} });
+				if (!seqData.midisrc().empty()) {
+					if (auto ref = seq->getMIDIRef()) {
+						juce::String path = utils::getProjectDir()
+							.getChildFile(seqData.midisrc()).getFullPathName();
+						SourceIO::getInstance()->addTask(
+							{ SourceIO::TaskType::Read, ref, path, false, {} });
+					}
 				}
-			}
 
-			if (!seqData.audiosrc().empty()) {
-				if (auto ref = track->getAudioRef()) {
-					juce::String path = utils::getProjectDir()
-						.getChildFile(seqData.audiosrc()).getFullPathName();
-					SourceIO::getInstance()->addTask(
-						{ SourceIO::TaskType::Read, ref, path, false, {} });
+				if (!seqData.audiosrc().empty()) {
+					if (auto ref = seq->getAudioRef()) {
+						juce::String path = utils::getProjectDir()
+							.getChildFile(seqData.audiosrc()).getFullPathName();
+						SourceIO::getInstance()->addTask(
+							{ SourceIO::TaskType::Read, ref, path, false, {} });
+					}
 				}
 			}
 		}

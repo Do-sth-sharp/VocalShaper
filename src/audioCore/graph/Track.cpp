@@ -49,7 +49,7 @@ Track::Track(TrackType type,
 
 	/** Add Mixer Processor If Need */
 	this->mixerNode = this->addNode(
-		std::make_unique<MixerTrack>(bus));
+		std::make_unique<MixerTrack>(type, bus));
 
 	/** Link Input Channel */
 	int channels = this->audioChannels.size();
@@ -118,11 +118,13 @@ void Track::updateIndex(int index) {
 }
 
 SeqSourceProcessor* Track::getSequencer() const {
+	if (!this->sequencerNode) { return nullptr; }
 	return dynamic_cast<SeqSourceProcessor*>(
 		this->sequencerNode->getProcessor());
 }
 
 MixerTrack* Track::getMixer() const {
+	if (!this->mixerNode) { return nullptr; }
 	return dynamic_cast<MixerTrack*>(
 		this->mixerNode->getProcessor());
 }
@@ -372,6 +374,8 @@ bool Track::parse(
 
 	this->setMute(mes->mute());
 	this->setSolo(mes->solo());
+
+	return true;
 }
 
 std::unique_ptr<google::protobuf::Message> Track::serialize(
@@ -379,7 +383,7 @@ std::unique_ptr<google::protobuf::Message> Track::serialize(
 	auto mes = std::make_unique<vsp4::Track>();
 
 	mes->set_type(static_cast<vsp4::TrackType>(this->type));
-	mes->set_bus(static_cast<vsp4::BusType>(utils::getTrackType(this->audioChannels)));
+	mes->set_bus(static_cast<vsp4::BusType>(utils::getBusType(this->audioChannels)));
 	auto info = mes->mutable_info();
 	info->set_name(this->getTrackName().toStdString());
 	info->set_color(this->getTrackColor().getARGB());

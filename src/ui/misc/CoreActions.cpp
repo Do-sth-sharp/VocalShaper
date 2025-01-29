@@ -1496,7 +1496,7 @@ void CoreActions::askForTrackTypeGUIAsync(
 	/** Set Default Type */
 	auto combo = selectorWindow->getComboBoxComponent(TRANS("Type"));
 	combo->setSelectedItemIndex((int)defaultType);
-	combo->setItemEnabled((int)quickAPI::TrackType::MasterTrack, allowMasterTrack);
+	combo->setItemEnabled((int)quickAPI::TrackType::MasterTrack + 1, allowMasterTrack);
 
 	/** Show Selector Async */
 	selectorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
@@ -1609,8 +1609,7 @@ void CoreActions::askForPluginMIDICCGUIAsync(
 	selectorWindow->addButton(TRANS("Cancel"), 0);
 
 	/** Create Combo */
-	auto combo = std::make_unique<ListenableMIDICCCombo>(
-		TRANS("CC Controller"), trackType, track, index, type);
+	auto combo = std::make_unique<ListenableMIDICCCombo>(TRANS("CC Controller"));
 	combo->addItemList(ccItemList, 1);
 	if (defaultCCChannel > -1) {
 		combo->setSelectedItemIndex(defaultCCChannel);

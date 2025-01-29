@@ -129,7 +129,7 @@ const juce::String ActionRenderNow::getStatusStr() const {
 	result += "    Format: " + this->extension + "\n";
 	result += "    Tracks: ";
 	for (auto& i : this->tracks) {
-		result += juce::String(i) + " ";
+		result += juce::String{ (int)i.first } + "-" + juce::String{ i.second } + " ";
 	}
 	result += "\n";
 
