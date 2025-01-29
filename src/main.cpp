@@ -387,14 +387,14 @@ private:
 		);
 		InitTaskList::getInstance()->add(
 			[] {
-				CoreCallbacks::getInstance()->addError(
+				CoreCallbackAPI<const juce::String&, const juce::String&>::add(CoreCallbacks::CallbackType::ErrorAlert,
 					[](const juce::String& title, const juce::String& mes) {
 						MessageModel::getInstance()->addNow("AudioCore: " + mes, MessageModel::Callback{});
 						juce::AlertWindow::showMessageBox(
 							juce::MessageBoxIconType::WarningIcon, title, mes);
 					}
 				);
-				CoreCallbacks::getInstance()->addErrorMes(
+				CoreCallbackAPI<const juce::String&>::add(CoreCallbacks::CallbackType::ErrorMessage,
 					[](const juce::String& mes) {
 						MessageModel::getInstance()->addNow("AudioCore: " + mes, MessageModel::Callback{});
 					}

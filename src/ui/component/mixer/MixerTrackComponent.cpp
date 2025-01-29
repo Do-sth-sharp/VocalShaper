@@ -97,8 +97,7 @@ MixerTrackComponent::MixerTrackComponent() {
 	this->addAndMakeVisible(this->levelMeter.get());
 
 	/** Mute */
-	this->muteButton = std::make_unique<MixerTrackMuteComponent>(
-		[this] { this->showMenu(); });
+	this->muteButton = std::make_unique<MixerTrackMuteComponent>();
 	this->addAndMakeVisible(this->muteButton.get());
 
 	/** Effect List */
@@ -168,7 +167,7 @@ void MixerTrackComponent::resized() {
 	int expandStartHeight = ioHideHeight;
 	int effectExpandMaxHeight = expandBaseHeight + midiSendListMinHeight + audioSendListMinHeight + effectListMaxHeight;
 	int midiSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight * 2;
-	int audioSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight + audioSendExpandMaxHeight;
+	int audioSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight + audioSendListMaxHeight;
 
 	int expandLevel = 0;
 	if (this->getHeight() > expandStartHeight) {

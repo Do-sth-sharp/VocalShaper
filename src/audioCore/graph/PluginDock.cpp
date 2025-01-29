@@ -229,15 +229,19 @@ bool PluginDock::addAdditionalAudioBus() {
 
 	/** Set Bus Num Of Plugins */
 	for (auto& p : this->pluginNodeList) {
-		p->getProcessor()->setBusesLayout(layout);
+		if (p) {
+			p->getProcessor()->setBusesLayout(layout);
+		}
 	}
 
 	/** Connect Additional Bus */
 	for (auto& p : this->pluginNodeList) {
-		for (int i = oldNum; i < newNum; i++) {
-			juce::AudioProcessorGraph::Connection connection =
-			{ {this->audioInputNode->nodeID, i}, {p->nodeID, i} };
-			this->addConnection(connection);
+		if (p) {
+			for (int i = oldNum; i < newNum; i++) {
+				juce::AudioProcessorGraph::Connection connection =
+				{ {this->audioInputNode->nodeID, i}, {p->nodeID, i} };
+				this->addConnection(connection);
+			}
 		}
 	}
 	for (int i = oldNum; i < newNum; i++) {
@@ -278,7 +282,9 @@ bool PluginDock::removeAdditionalAudioBus() {
 
 	/** Set Bus Num Of Plugins */
 	for (auto& p : this->pluginNodeList) {
-		p->getProcessor()->setBusesLayout(layout);
+		if (p) {
+			p->getProcessor()->setBusesLayout(layout);
+		}
 	}
 
 	/** Remove Additional Connection */
@@ -291,8 +297,10 @@ PluginDock::PluginStateList PluginDock::getPluginList() const {
 	PluginDock::PluginStateList result;
 
 	for (auto& plugin : this->pluginNodeList) {
-		result.add(std::make_tuple(
-			plugin->getProcessor()->getName(), !plugin->isBypassed()));
+		if (plugin) {
+			result.add(std::make_tuple(
+				plugin->getProcessor()->getName(), !plugin->isBypassed()));
+		}
 	}
 
 	return result;
@@ -308,8 +316,10 @@ void PluginDock::setPlayHead(juce::AudioPlayHead* newPlayHead) {
 
 	/** Plugins */
 	for (auto& i : this->pluginNodeList) {
-		auto plugin = i->getProcessor();
-		plugin->setPlayHead(newPlayHead);
+		if (i) {
+			auto plugin = i->getProcessor();
+			plugin->setPlayHead(newPlayHead);
+		}
 	}
 }
 

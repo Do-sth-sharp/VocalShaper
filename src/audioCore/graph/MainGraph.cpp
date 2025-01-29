@@ -1772,6 +1772,10 @@ void MainGraph::initMasterTrack(const juce::AudioChannelSet& bus) {
 		/** Remove Old Master Track */
 		this->removeNode(nodeID);
 		this->masterTrack = nullptr;
+
+		/** Callback */
+		UICallbackAPI<int, int>::invoke(
+			UICallbackType::TrackRemoved, static_cast<int>(TrackType::MasterTrack), 0);
 	}
 	
 	/** Init Master Track */
@@ -1808,7 +1812,7 @@ void MainGraph::initMasterTrack(const juce::AudioChannelSet& bus) {
 
 	/** Callback */
 	UICallbackAPI<int, int>::invoke(
-		UICallbackType::TrackAdded, static_cast<int>(TrackType::MasterTrack), - 1);
+		UICallbackType::TrackAdded, static_cast<int>(TrackType::MasterTrack), 0);
 }
 
 void MainGraph::processBlock(juce::AudioBuffer<float>& audio, juce::MidiBuffer& midi) {

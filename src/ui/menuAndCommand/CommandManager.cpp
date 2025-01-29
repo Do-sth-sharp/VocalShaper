@@ -5,11 +5,11 @@
 #include "../Utils.h"
 
 CommandManager::CommandManager() {
-	CoreCallbacks::getInstance()->addPlayingStatus(
+	CoreCallbackAPI<bool>::add(CoreCallbacks::CallbackType::PlayStateChanged,
 		[this](bool) {
 			this->commandStatusChanged();
 		});
-	CoreCallbacks::getInstance()->addRecordingStatus(
+	CoreCallbackAPI<bool>::add(CoreCallbacks::CallbackType::RecordStateChanged,
 		[this](bool) {
 			this->commandStatusChanged();
 		});

@@ -131,7 +131,8 @@ void PluginAutomationModel::addItem() {
 		break;
 	}
 	case PluginType::Effect: {
-		CoreActions::addEffectParamCCLinkGUI(this->trackType, this->track, this->index);
+		CoreActions::addEffectParamCCLinkGUI(
+			(quickAPI::TrackType)this->trackType, this->track, this->index);
 		break;
 	}
 	}
@@ -147,7 +148,7 @@ void PluginAutomationModel::editItem(int itemIndex) {
 	}
 	case PluginType::Effect: {
 		CoreActions::editEffectParamCCLinkGUI(
-			this->trackType, this->track, this->index, param, cc);
+			(quickAPI::TrackType)this->trackType, this->track, this->index, param, cc);
 		break;
 	}
 	}
@@ -163,7 +164,7 @@ void PluginAutomationModel::removeItem(int itemIndex) {
 	}
 	case PluginType::Effect: {
 		CoreActions::removeEffectParamCCLink(
-			this->trackType, this->track, this->index, cc);
+			(quickAPI::TrackType)this->trackType, this->track, this->index, cc);
 		break;
 	}
 	}
