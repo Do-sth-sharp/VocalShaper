@@ -22,7 +22,12 @@ AC.setLabelBeat(1, 4, 4);
 AC.removeLabel(0);
 
 -- Render
-AC.renderNow("./", "test", ".wav", { 0, 1, 2 }, {}, 24, 0);
+local tracks = {
+	{type = 2, index = 0},
+	{type = 0, index = 0},
+	{type = 0, index = 1}
+};-- 0: Track, 1: AuxTrack, 2: MasterTrack
+AC.renderNow("./", "test", ".wav", tracks, {}, 24, 0);
 
 -- Project
 AC.newProject("C:/Music/vsp4/test/");
