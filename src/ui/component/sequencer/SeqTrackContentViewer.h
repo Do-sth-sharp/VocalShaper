@@ -21,7 +21,8 @@ public:
 
 	void setCompressed(bool isCompressed);
 
-	void update(int index);
+	void updateIndex(int index);
+	void updateInfo();
 	void updateBlock(int blockIndex);
 	void updateHPos(double pos, double itemSize);
 	void updateDataRef();

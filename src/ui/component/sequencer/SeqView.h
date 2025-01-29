@@ -18,7 +18,9 @@ public:
 	void paint(juce::Graphics& g) override;
 	void paintOverChildren(juce::Graphics& g) override;
 
-	void update(int index);
+	void updateAdd(int index);
+	void updateRemove(int index);
+	void updateInfo(int index);
 	void updateBlock(int track, int index);
 	void updateTempo();
 	void updateMuteSolo(int index);
@@ -26,11 +28,8 @@ public:
 	void updateRec(int index);
 	void updateInstr(int index);
 	void updateLevelMeter() override;
-	void updateMixerTrack(int index);
 	void updateDataRef(int index);
 	void updateData(int index);
-	void updateSynthState(int index, bool state);
-	void updateSourceRecord(const std::set<int>& trackList);
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
@@ -59,19 +58,17 @@ private:
 
 		int size() const;
 		void remove(int index);
-		void add(std::unique_ptr<SeqTrackComponent> newComp);
+		void insert(int index, std::unique_ptr<SeqTrackComponent> newComp);
 
-		void update(int index);
+		void updateIndex(int index);
+		void updateInfo(int index);
 		void updateBlock(int track, int index);
 		void updateMuteSolo(int index);
 		void updateInputMonitoring(int index);
 		void updateRec(int index);
 		void updateInstr(int index);
-		void updateMixerTrack();
 		void updateDataRef(int index);
 		void updateData(int index);
-		void updateSynthState(int index, bool state);
-		void updateSourceRecord(const std::set<int>& trackList);
 
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);

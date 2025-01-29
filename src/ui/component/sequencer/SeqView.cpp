@@ -34,14 +34,22 @@ void SeqView::TrackList::remove(int index) {
 	this->list.remove(index, true);
 }
 
-void SeqView::TrackList::add(
+void SeqView::TrackList::insert(int index,
 	std::unique_ptr<SeqTrackComponent> newComp) {
 	this->addAndMakeVisible(newComp.get());
-	this->list.add(std::move(newComp));
+	this->list.insert(index, std::move(newComp));
 }
 
-void SeqView::TrackList::update(int index) {
-	this->list[index]->update(index);
+void SeqView::TrackList::updateIndex(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateIndex(index);
+	}
+}
+
+void SeqView::TrackList::updateInfo(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateInfo();
+	}
 }
 
 void SeqView::TrackList::updateBlock(int track, int index) {
@@ -50,9 +58,9 @@ void SeqView::TrackList::updateBlock(int track, int index) {
 	}
 }
 
-void SeqView::TrackList::updateMuteSolo(int /*index*/) {
-	for (auto i : this->list) {
-		i->updateMuteSolo();
+void SeqView::TrackList::updateMuteSolo(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateMuteSolo();
 	}
 }
 
@@ -72,17 +80,6 @@ void SeqView::TrackList::updateInstr(int index) {
 	if (index >= 0 && index < this->list.size()) {
 		this->list[index]->updateInstr();
 	}
-	else {
-		for (auto i : this->list) {
-			i->updateInstr();
-		}
-	}
-}
-
-void SeqView::TrackList::updateMixerTrack() {
-	for (auto i : this->list) {
-		i->updateMixerTrack();
-	}
 }
 
 void SeqView::TrackList::updateDataRef(int index) {
@@ -94,26 +91,6 @@ void SeqView::TrackList::updateDataRef(int index) {
 void SeqView::TrackList::updateData(int index) {
 	if (index >= 0 && index < this->list.size()) {
 		this->list[index]->updateData();
-	}
-	else {
-		for (auto i : this->list) {
-			i->updateData();
-		}
-	}
-}
-
-void SeqView::TrackList::updateSynthState(int index, bool state) {
-	if (index >= 0 && index < this->list.size()) {
-		this->list[index]->updateSynthState(state);
-	}
-}
-
-void SeqView::TrackList::updateSourceRecord(
-	const std::set<int>& trackList) {
-	for (auto i : trackList) {
-		if (i >= 0 && i < this->list.size()) {
-			this->list[i]->updateData();
-		}
 	}
 }
 
@@ -254,7 +231,7 @@ void SeqView::TrackList::mouseExit(const juce::MouseEvent& event) {
 }
 
 void SeqView::TrackList::add() {
-	CoreActions::insertSeqGUI();
+	CoreActions::insertTrackGUI(quickAPI::TrackType::Track);
 }
 
 SeqView::SeqView()
@@ -409,87 +386,73 @@ SeqView::SeqView()
 	this->addAndMakeVisible(this->ruler.get());
 
 	/** Update Callback */
-	CoreCallbacks::getInstance()->addSeqChanged(
-		[comp = SeqView::SafePointer(this)](int index) {
-			if (comp) {
-				comp->update(index);
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackAdded,
+		[comp = SeqView::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
+				comp->updateAdd(index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSeqBlockChanged(
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackRemoved,
+		[comp = SeqView::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
+				comp->updateRemove(index);
+			}
+		}
+	);
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackBlockChanged,
 		[comp = SeqView::SafePointer(this)](int track, int index) {
 			if (comp) {
 				comp->updateBlock(track, index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addTempoChanged(
+	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::TempoChanged,
 		[comp = SeqView::SafePointer(this)] {
 			if (comp) {
 				comp->updateTempo();
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSeqMuteSoloChanged(
-		[comp = SeqView::SafePointer(this)](int index) {
-			if (comp) {
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackMuteSoloChanged,
+		[comp = SeqView::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
 				comp->updateMuteSolo(index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSeqInputMonitoringChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackInputMonitoringChanged,
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateInputMonitoring(index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSeqRecChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackRecordingChanged,
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateRec(index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addInstrChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackInstrChanged,
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateInstr(index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addTrackChanged(
-		[comp = SeqView::SafePointer(this)](int index) {
-			if (comp) {
-				comp->updateMixerTrack(index);
-			}
-		}
-	);
-	CoreCallbacks::getInstance()->addSeqDataRefChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackDataRefChanged,
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateDataRef(index);
 			}
 		}
 	);
-	CoreCallbacks::getInstance()->addSourceChanged(
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackSourceChanged,
 		[comp = SeqView::SafePointer(this)](int index) {
 			if (comp) {
 				comp->updateData(index);
-			}
-		}
-	);
-	CoreCallbacks::getInstance()->addSynthStatus(
-		[comp = SeqView::SafePointer(this)](int index, bool state) {
-			if (comp) {
-				comp->updateSynthState(index, state);
-			}
-		}
-	);
-	CoreCallbacks::getInstance()->addSourceRecord(
-		[comp = SeqView::SafePointer(this)](const std::set<int>& trackList) {
-			if (comp) {
-				comp->updateSourceRecord(trackList);
 			}
 		}
 	);
@@ -693,108 +656,103 @@ void SeqView::paintOverChildren(juce::Graphics& g) {
 	}
 }
 
-void SeqView::update(int index) {
-	/** Create Or Remove Track */
-	int currentSize = this->trackList->size();
-	int newSize = quickAPI::getSeqTrackNum();
-	if (currentSize > newSize) {
-		for (int i = currentSize - 1; i >= newSize; i--) {
-			this->trackList->remove(i);
-		}
-	}
-	else {
-		for (int i = currentSize; i < newSize; i++) {
-			auto track = std::make_unique<SeqTrackComponent>(
-				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-				(double delta) {
-					if (comp) {
-						comp->scroll(delta);
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-				(float deltaY, bool reversed) {
-					if (comp) {
-						comp->mouseWheelOutside(deltaY, reversed);
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-				(double centerNum, double thumbPer, float deltaY, bool reversed) {
-					if (comp) {
-						comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this->vScroller.get())]
-				(float deltaY, bool reversed) {
-					if (comp) {
-						comp->mouseWheelOutside(deltaY, reversed);
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this->vScroller.get())]
-				(double centerNum, double thumbPer, float deltaY, bool reversed) {
-					if (comp) {
-						comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this)] {
-					if (comp) {
-						comp->processAreaDragStart();
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this)]
-				(int distanceX, int distanceY, bool moveX, bool moveY) {
-					if (comp) {
-						comp->processAreaDragTo(
-							distanceX, distanceY, moveX, moveY);
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this)] {
-					if (comp) {
-						comp->processAreaDragEnd();
-					}
-				},
-				[comp = ScrollerBase::SafePointer(this)]
-				(int index) {
-					if (comp) {
-						comp->editing(index);
-					}
-				});
-			this->trackList->add(std::move(track));
-		}
-	}
+void SeqView::updateAdd(int index) {
+	/** Create Track */
+	auto track = std::make_unique<SeqTrackComponent>(
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double delta) {
+			if (comp) {
+				comp->scroll(delta);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragStart();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int distanceX, int distanceY, bool moveX, bool moveY) {
+			if (comp) {
+				comp->processAreaDragTo(
+					distanceX, distanceY, moveX, moveY);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragEnd();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int index) {
+			if (comp) {
+				comp->editing(index);
+			}
+		});
+	this->trackList->insert(index, std::move(track));
 
 	/** Update Tracks */
-	if (index >= 0 && index < this->trackList->size()) {
-		this->trackList->update(index);
-	}
-	else {
-		for (int i = 0; i < this->trackList->size(); i++) {
-			this->trackList->update(i);
-		}
+	for (int i = index; i < this->trackList->size(); i++) {
+		this->trackList->updateIndex(i);
 	}
 
 	/** Update Color Temp */
-	if (this->colorTemp.size() > newSize) {
-		this->colorTemp.resize(newSize);
-	}
-	else {
-		for (int i = this->colorTemp.size(); i < newSize; i++) {
-			this->colorTemp.add(quickAPI::getSeqTrackColor(i));
-		}
-	}
-	if (index >= 0 && index < this->colorTemp.size()) {
-		this->colorTemp.getReference(index) = quickAPI::getSeqTrackColor(index);
-	}
-	else {
-		for (int i = 0; i < this->trackList->size(); i++) {
-			this->colorTemp.getReference(i) = quickAPI::getSeqTrackColor(i);
-		}
-	}
+	this->colorTemp.insert(
+		index, quickAPI::getTrackColor({ quickAPI::TrackType::Track, index }));
 
 	/** Update Block Temp */
-	this->updateBlock(index, -1);
+	this->updateBlockTemp();
 
 	/** Update View Pos */
+	this->hScroller->update();
 	this->vScroller->update();
+}
+
+void SeqView::updateRemove(int index) {
+	/** Remove Track */
+	this->trackList->remove(index);
+
+	/** Update Tracks */
+	for (int i = index; i < this->trackList->size(); i++) {
+		this->trackList->updateIndex(i);
+	}
+
+	/** Update Color Temp */
+	this->colorTemp.remove(index);
+
+	/** Update Block Temp */
+	this->updateBlockTemp();
+
+	/** Update View Pos */
+	this->hScroller->update();
+	this->vScroller->update();
+}
+
+void SeqView::updateInfo(int index) {
+	this->trackList->updateInfo(index);
 }
 
 void SeqView::updateBlock(int track, int index) {
@@ -857,24 +815,12 @@ void SeqView::updateLevelMeter() {
 	this->repaint();
 }
 
-void SeqView::updateMixerTrack(int /*index*/) {
-	this->trackList->updateMixerTrack();
-}
-
 void SeqView::updateDataRef(int index) {
 	this->trackList->updateDataRef(index);
 }
 
 void SeqView::updateData(int index) {
 	this->trackList->updateData(index);
-}
-
-void SeqView::updateSynthState(int index, bool state) {
-	this->trackList->updateSynthState(index, state);
-}
-
-void SeqView::updateSourceRecord(const std::set<int>& trackList) {
-	this->trackList->updateSourceRecord(trackList);
 }
 
 std::tuple<double, double> SeqView::getViewArea(
@@ -1060,9 +1006,9 @@ void SeqView::updateBlockTemp() {
 	this->blockTemp.clear();
 
 	/** Get Blocks */
-	int trackNum = quickAPI::getSeqTrackNum();
+	int trackNum = quickAPI::getTrackNum(quickAPI::TrackType::Track);
 	for (int i = 0; i < trackNum; i++) {
-		auto list = quickAPI::getBlockList(i);
+		auto list = quickAPI::getBlockList({ quickAPI::TrackType::Track, i });
 		for (auto [startTime, endTime, offset] : list) {
 			this->blockTemp.add({ i, startTime, endTime });
 		}
@@ -1093,5 +1039,5 @@ void SeqView::processAreaDragEnd() {
 }
 
 void SeqView::editing(int index) {
-	CoreCallbacks::getInstance()->invokeEditingSeqChanged(index);
+	Tools::getInstance()->setEditingTrack(index);
 }

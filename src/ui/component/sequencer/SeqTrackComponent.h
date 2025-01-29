@@ -5,7 +5,6 @@
 #include "SeqTrackSoloComponent.h"
 #include "SeqTrackInputMonitoringComponent.h"
 #include "SeqTrackRecComponent.h"
-#include "SeqTrackIOComponent.h"
 #include "SeqTrackLevelMeter.h"
 #include "../base/RightClickableTextButton.h"
 #include "SeqTrackContentViewer.h"
@@ -33,17 +32,16 @@ public:
 		const DragEndFunc& dragEndFunc,
 		const SeqTrackSelectFunc& trackSelectFunc);
 
-	void update(int index);
+	void updateIndex(int index);
+	void updateInfo();
 	void updateBlock(int blockIndex);
 	void updateMuteSolo();
 	void updateInputMonitoring();
 	void updateRec();
 	void updateInstr();
 	void updateHPos(double pos, double itemSize);
-	void updateMixerTrack();
 	void updateDataRef();
 	void updateData();
-	void updateSynthState(bool state);
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
@@ -89,8 +87,6 @@ private:
 	std::unique_ptr<juce::Drawable> instrBypassIcon = nullptr, instrBypassIconOn = nullptr;
 	std::unique_ptr<juce::Drawable> instrOfflineIcon = nullptr, instrOfflineIconOn = nullptr;
 
-	std::unique_ptr<SeqTrackIOComponent> midiOutput = nullptr;
-	std::unique_ptr<SeqTrackIOComponent> audioOutput = nullptr;
 	std::unique_ptr<SeqTrackLevelMeter> levelMeter = nullptr;
 
 	std::unique_ptr<SeqTrackContentViewer> content = nullptr;

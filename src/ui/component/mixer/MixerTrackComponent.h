@@ -2,7 +2,6 @@
 
 #include <JuceHeader.h>
 #include "SideChainComponent.h"
-#include "MixerTrackIOComponent.h"
 #include "../base/KnobBase.h"
 #include "../base/FaderBase.h"
 #include "MixerTrackLevelMeter.h"

@@ -89,15 +89,18 @@ void SeqTrackSoloComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
-void SeqTrackSoloComponent::update(int index) {
+void SeqTrackSoloComponent::updateIndex(int index) {
 	this->index = index;
-	if (index > -1) {
-		this->solo = quickAPI::getSeqTrackSolo(index);
+}
 
-		this->repaint();
-	}
+void SeqTrackSoloComponent::update() {
+	this->solo = quickAPI::getTrackSolo(
+		{ quickAPI::TrackType::Track, this->index });
+
+	this->repaint();
 }
 
 void SeqTrackSoloComponent::changeSolo() {
-	CoreActions::setSeqSolo(this->index, !(this->solo));
+	CoreActions::setTrackSolo(
+		quickAPI::TrackType::Track, this->index, !(this->solo));
 }

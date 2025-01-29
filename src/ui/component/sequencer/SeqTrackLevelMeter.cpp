@@ -10,7 +10,8 @@ SeqTrackLevelMeter::SeqTrackLevelMeter() {
 
 void SeqTrackLevelMeter::updateLevelMeter() {
 	/** Get Value */
-	auto valuesTemp = quickAPI::getSeqTrackOutputLevel(this->index);
+	auto valuesTemp = quickAPI::getTrackSeqOutputLevel(
+		{ quickAPI::TrackType::Track, this->index });
 	if (this->values.size() == valuesTemp.size()) {
 		this->values.clearQuick();
 	}
@@ -104,6 +105,10 @@ void SeqTrackLevelMeter::paint(juce::Graphics& g) {
 	}
 }
 
-void SeqTrackLevelMeter::update(int index) {
+void SeqTrackLevelMeter::updateIndex(int index) {
 	this->index = index;
+}
+
+void SeqTrackLevelMeter::update() {
+	/** Nothing To Do */
 }

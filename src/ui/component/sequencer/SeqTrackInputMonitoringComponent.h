@@ -14,17 +14,17 @@ public:
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 
-	void update(int index);
+	void updateIndex(int index);
+	void update();
 
 private:
 	int index = -1;
 	bool inputMonitoring = false;
 
-	using MIDILink = std::tuple<int, int>;
-	using AudioLink = std::tuple<int, int, int, int>;
+	using AudioLink = std::pair<int, int>;
 
 	bool midiInput = false;
-	juce::Array<AudioLink> audioInput;
+	std::set<AudioLink> audioInput;
 
 	void changeInputMonitoring();
 	void showMenu();

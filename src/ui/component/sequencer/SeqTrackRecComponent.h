@@ -14,7 +14,8 @@ public:
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
 
-	void update(int index);
+	void updateIndex(int index);
+	void update();
 
 private:
 	int index = -1;

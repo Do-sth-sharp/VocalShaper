@@ -89,16 +89,20 @@ void SeqTrackMuteComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
-void SeqTrackMuteComponent::update(int index) {
+void SeqTrackMuteComponent::updateIndex(int index) {
 	this->index = index;
-	if (index > -1) {
-		this->mute = quickAPI::getSeqTrackMute(index);
-		this->equivalentMute = quickAPI::getSeqTrackEquivalentMute(index);
+}
 
-		this->repaint();
-	}
+void SeqTrackMuteComponent::update() {
+	this->mute = quickAPI::getTrackMute(
+		{ quickAPI::TrackType::Track, this->index });
+	this->equivalentMute = quickAPI::getTrackEquivalentMute(
+		{ quickAPI::TrackType::Track, this->index });
+
+	this->repaint();
 }
 
 void SeqTrackMuteComponent::changeMute() {
-	CoreActions::setSeqMute(this->index, !(this->mute));
+	CoreActions::setTrackMute(
+		quickAPI::TrackType::Track, this->index, !(this->mute));
 }
