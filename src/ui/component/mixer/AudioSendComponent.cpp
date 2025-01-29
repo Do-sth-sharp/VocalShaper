@@ -134,11 +134,8 @@ void AudioSendComponent::mouseUp(const juce::MouseEvent& event) {
 		}
 	}
 	else {
-		if (event.mods.isLeftButtonDown()) {
+		if (!event.mouseWasDraggedSinceMouseDown()) {
 			this->showAddMenu();
-		}
-		else if (event.mods.isRightButtonDown()) {
-			this->showMenu();
 		}
 	}
 }

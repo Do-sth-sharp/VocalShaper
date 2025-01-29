@@ -160,6 +160,11 @@ void EffectComponent::mouseUp(const juce::MouseEvent& event) {
 			this->showMenu();
 		}
 	}
+	else {
+		if (!event.mouseWasDraggedSinceMouseDown()) {
+			this->showAddMenu();
+		}
+	}
 }
 
 void EffectComponent::mouseDrag(const juce::MouseEvent& event) {
@@ -283,6 +288,19 @@ void EffectComponent::showMenu() {
 		break;
 	}
 	}
+}
+
+void EffectComponent::showAddMenu() {
+	/** Callback */
+	auto addCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
+		if (comp) {
+			comp->addEffect(pluginDes);
+		}
+		};
+
+	/** Create Menu */
+	auto menu = this->createAddMenu(addCallback);
+	[[maybe_unused]] int result = menu.show();
 }
 
 void EffectComponent::startDrag() {
