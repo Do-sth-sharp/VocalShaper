@@ -39,7 +39,8 @@ MixerTrackComponent::MixerTrackComponent() {
 		this->audioInputIconOn.get(), nullptr, nullptr, nullptr);
 	this->audioInputButton->setWantsKeyboardFocus(false);
 	this->audioInputButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-	this->audioInputButton->onClick = [this] { this->changeMIDIInput(); };
+	this->audioInputButton->setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnLeft);
+	this->audioInputButton->onClick = [this] { this->changeAudioInput(); };
 	this->addAndMakeVisible(this->audioInputButton.get());
 
 	this->midiInputButton = std::make_unique<juce::DrawableButton>(
@@ -49,7 +50,8 @@ MixerTrackComponent::MixerTrackComponent() {
 		this->midiInputIconOn.get(), nullptr, nullptr, nullptr);
 	this->midiInputButton->setWantsKeyboardFocus(false);
 	this->midiInputButton->setMouseCursor(juce::MouseCursor::PointingHandCursor);
-	this->midiInputButton->onClick = [this] { this->changeAudioInput(); };
+	this->midiInputButton->setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnRight);
+	this->midiInputButton->onClick = [this] { this->changeMIDIInput(); };
 	this->addAndMakeVisible(this->midiInputButton.get());
 
 	/** Send */
@@ -118,19 +120,19 @@ MixerTrackComponent::MixerTrackComponent() {
 void MixerTrackComponent::resized() {
 	/** Size */
 	auto screenSize = utils::getScreenSize(this);
-	int splitHeight = screenSize.getHeight() * 0.01;
+	int splitHeight = screenSize.getHeight() * 0.0075;
 
 	int colorHeight = screenSize.getHeight() * 0.015;
 	int sideChainHeight = screenSize.getHeight() * 0.02;
-	int inputButtonHeight = screenSize.getHeight() * 0.02;
-	int inputButtonWidth = inputButtonHeight;
+	int inputButtonHeight = screenSize.getHeight() * 0.025;
+	int inputButtonWidth = inputButtonHeight * 1.25;
 	int knobPaddingWidth = screenSize.getWidth() * 0.0025;
 	int knobHeight = screenSize.getHeight() * 0.075;
 	int knobWidth = (this->getWidth() - knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
 	int faderPaddingWidth = screenSize.getWidth() * 0.0025;
 	int faderMinHeight = screenSize.getHeight() * 0.25;
 	int faderWidth = (this->getWidth() - faderPaddingWidth * 2) / 2;
-	int muteSoloHeight = screenSize.getHeight() * 0.03;
+	int muteSoloHeight = screenSize.getHeight() * 0.0225;
 	int muteSoloWidth = muteSoloHeight;
 
 	int listItemHeight = screenSize.getHeight() * 0.02;
@@ -205,14 +207,13 @@ void MixerTrackComponent::resized() {
 
 	/** Input */
 	if (ioShown) {
-		int splitWidth = (this->getWidth() - inputButtonWidth * 2) / 3;
 		juce::Rectangle<int> midiRect(
-			splitWidth, top,
+			this->getWidth() / 2 - inputButtonWidth, top,
 			inputButtonWidth, inputButtonHeight);
 		this->midiInputButton->setBounds(midiRect);
 
 		juce::Rectangle<int> audioRect(
-			midiRect.getRight() + splitWidth, top,
+			midiRect.getRight(), top,
 			inputButtonWidth, inputButtonHeight);
 		this->audioInputButton->setBounds(audioRect);
 
@@ -394,11 +395,23 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 		this->dragHovered || this->hasKeyboardFocus(true)
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
+	juce::Colour listOutlineColor = laf.findColour(
+		juce::Label::ColourIds::outlineColourId);
 
 	/** Effect Rect */
 	auto effectRect = this->effectList->getBounds();
-	g.setColour(backgroundColor);
+	g.setColour(listOutlineColor);
 	g.drawRect(effectRect, outlineThickness);
+
+	/** MIDI Send Rect */
+	auto midiSendRect = this->midiSendList->getBounds();
+	g.setColour(listOutlineColor);
+	g.drawRect(midiSendRect, outlineThickness);
+
+	/** Audio Send Rect */
+	auto audioSendRect = this->audioSendList->getBounds();
+	g.setColour(listOutlineColor);
+	g.drawRect(audioSendRect, outlineThickness);
 
 	/** Outline */
 	auto totalRect = this->getLocalBounds();

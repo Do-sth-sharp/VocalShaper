@@ -94,11 +94,35 @@ void EffectComponent::paint(juce::Graphics& g) {
 			juce::Justification::centredLeft, 1, 0.75f);
 	}
 	else {
+		/** Outline */
 		if (this->drop) {
 			g.setColour(dropLineColor);
 			g.drawRect(this->getLocalBounds(), dropLineThickness);
 		}
 	}
+}
+
+void EffectComponent::paintOverChildren(juce::Graphics& g) {
+	/** Size */
+	auto screenSize = utils::getScreenSize(this);
+	float splitLineThickness = screenSize.getHeight() * 0.0015;
+	float splitLineLength = this->getWidth() * 0.8;
+
+	/** Color */
+	auto& laf = this->getLookAndFeel();
+	juce::Colour splitLineColor = laf.findColour(
+		juce::Label::ColourIds::backgroundWhenEditingColourId);
+
+	/** Split */
+	juce::Rectangle<float> topSplit(
+		this->getWidth() / 2.0 - splitLineLength / 2,
+		-splitLineThickness / 2, splitLineLength, splitLineThickness);
+	juce::Rectangle<float> bottomSplit(
+		this->getWidth() / 2.0 - splitLineLength / 2,
+		this->getHeight() - splitLineThickness / 2, splitLineLength, splitLineThickness);
+	g.setColour(splitLineColor);
+	g.fillRect(topSplit);
+	g.fillRect(bottomSplit);
 }
 
 void EffectComponent::update(int type, int track, int index) {

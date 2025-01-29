@@ -115,7 +115,7 @@ namespace quickAPI {
 	using SendDstType = utils::SendDstType;
 	using SendDst = utils::SendDst;
 	const juce::String getSendTypeName(SendDstType type);
-	const juce::String getSendDstName(SendDst dst);
+	const juce::String getSendDstName(SendDst dst, bool isAudio);
 	using RecordState = SeqSourceProcessor::RecordState;
 	int getTrackNum(TrackType type);
 	const juce::String getTrackName(TrackIndex index);

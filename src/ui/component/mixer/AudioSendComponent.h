@@ -10,6 +10,7 @@ public:
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
+	void paintOverChildren(juce::Graphics& g) override;
 
 	void update(int type, int track, int slot);
 

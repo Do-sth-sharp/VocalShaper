@@ -15,7 +15,7 @@ void MixerTrackMuteComponent::paint(juce::Graphics& g) {
 	auto screenSize = utils::getScreenSize(this);
 
 	float lineThickness = screenSize.getHeight() * 0.001;
-	float textFontHeight = screenSize.getHeight() * 0.011;
+	float textFontHeight = this->getHeight() * 0.7;
 
 	/** Color */
 	auto& laf = this->getLookAndFeel();

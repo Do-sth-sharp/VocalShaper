@@ -11,7 +11,7 @@ SendLookAndFeel::SendLookAndFeel()
 	this->setColour(juce::Label::ColourIds::outlineColourId,
 		ColorMap::getInstance()->get("ThemeColorB4"));
 	this->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId,
-		ColorMap::getInstance()->get("ThemeColorB1"));
+		ColorMap::getInstance()->get("ThemeColorB1"));/** Split Line */
 	this->setColour(juce::Label::ColourIds::textWhenEditingColourId,
 		ColorMap::getInstance()->get("ThemeColorB10"));
 	this->setColour(juce::Label::ColourIds::outlineWhenEditingColourId,

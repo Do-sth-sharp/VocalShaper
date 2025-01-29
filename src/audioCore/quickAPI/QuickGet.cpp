@@ -482,10 +482,13 @@ namespace quickAPI {
 		return utils::getSendTypeName(type);
 	}
 
-	const juce::String getSendDstName(SendDst dst) {
+	const juce::String getSendDstName(SendDst dst, bool isAudio) {
 		/** Device */
 		if (dst.first == quickAPI::SendDstType::ToDevice) {
-			return quickAPI::getAudioDeviceName(false);
+			if (isAudio) {
+				return quickAPI::getAudioDeviceName(false);
+			}
+			return quickAPI::getMIDIOutputDeviceName();
 		}
 
 		/** Master Track */
@@ -662,7 +665,7 @@ namespace quickAPI {
 		if (dst.second < 0) { return ""; }
 
 		/** Get Name */
-		return quickAPI::getSendDstName(dst);
+		return quickAPI::getSendDstName(dst, false);
 	}
 
 	const juce::String getTrackAudioSendDstName(TrackIndex index, int slot) {
@@ -671,7 +674,7 @@ namespace quickAPI {
 		if (dst.second < 0) { return ""; }
 
 		/** Get Name */
-		return quickAPI::getSendDstName(dst);
+		return quickAPI::getSendDstName(dst, true);
 	}
 
 	float getTrackGain(TrackIndex index) {
