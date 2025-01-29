@@ -298,13 +298,15 @@ void MIDISourceEditor::update(int index, uint64_t ref) {
 	this->ref = ref;
 
 	/** Color */
-	this->trackColor = quickAPI::getSeqTrackColor(index);
+	this->trackColor = quickAPI::getTrackColor(
+		{ quickAPI::TrackType::Track, this->index });
 
 	/** Content */
 	this->content->update(index, ref);
 
 	/** Current MIDI Track */
-	this->currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(index);
+	this->currentMIDITrack = quickAPI::getTrackCurrentMIDITrack(
+		{ quickAPI::TrackType::Track, this->index });
 
 	/** Blocks */
 	this->updateBlocks();
@@ -477,7 +479,8 @@ void MIDISourceEditor::updateBlockTemp() {
 	this->blockItemTemp.clear();
 
 	/** Update Block Temp */
-	auto list = quickAPI::getBlockList(this->index);
+	auto list = quickAPI::getBlockList(
+		{ quickAPI::TrackType::Track, this->index });
 	for (auto [startTime, endTime, offset] : list) {
 		this->blockItemTemp.add({ startTime, endTime, startTime - offset });
 	}
@@ -504,7 +507,8 @@ void MIDISourceEditor::updateNoteTemp() {
 
 	/** Update Note Temp */
 	if (this->index >= 0 && this->ref != 0) {
-		int currentMIDITrack = quickAPI::getSeqTrackCurrentMIDITrack(this->index);
+		int currentMIDITrack = quickAPI::getTrackCurrentMIDITrack(
+			{ quickAPI::TrackType::Track, this->index });
 		auto midiNoteList = quickAPI::getMIDISourceNotes(this->ref, currentMIDITrack);
 
 		/** Add Each Note */
@@ -670,10 +674,11 @@ juce::PopupMenu MIDISourceEditor::createMIDIChannelMenu() {
 
 juce::PopupMenu MIDISourceEditor::createMIDITrackMenu() {
 	int totalTracks = quickAPI::getMIDISourceTrackNum(
-		quickAPI::getSeqTrackMIDIRef(this->index));
+		quickAPI::getTrackMIDIRef(
+			{ quickAPI::TrackType::Track, this->index }));
 
 	auto setMIDITrackFunc = [index = this->index](int midiTrack) {
-		CoreActions::setSeqMIDITrack(index, midiTrack);
+		CoreActions::setTrackMIDITrack(index, midiTrack);
 		};
 	auto addMIDITrackFunc = [index = this->index] {
 		/** TODO */
