@@ -309,22 +309,14 @@ ActionAddTrackSideChainBus::ActionAddTrackSideChainBus(
 
 bool ActionAddTrackSideChainBus::doAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(this->index.first, this->index.second)) {
-			if (track->addAdditionalAudioBus()) {
-				return true;
-			}
-		}
+		return graph->addTrackAdditionalAudioBus(this->index.first, this->index.second);
 	}
 	return false;
 }
 
 bool ActionAddTrackSideChainBus::undoAction() {
 	if (auto graph = AudioCore::getInstance()->getGraph()) {
-		if (auto track = graph->getTrackProcessor(this->index.first, this->index.second)) {
-			if (track->removeAdditionalAudioBus()) {
-				return true;
-			}
-		}
+		return graph->removeTrackAdditionalAudioBus(this->index.first, this->index.second);
 	}
 	return false;
 }
