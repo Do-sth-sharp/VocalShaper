@@ -9,6 +9,9 @@ MIDISendComponent::MIDISendComponent() {
 	/** Look And Feel */
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::Send));
+
+	/** Mouse Cursor */
+	this->setMouseCursor(juce::MouseCursor::CopyingCursor);
 }
 
 void MIDISendComponent::resized() {
@@ -81,6 +84,10 @@ void MIDISendComponent::update(int type, int track, int slot) {
 		{ (quickAPI::TrackType)type, track }, slot).second >= 0;
 
 	this->name = this->getSendName();
+
+	this->setMouseCursor(this->valid
+		? juce::MouseCursor::PointingHandCursor
+		: juce::MouseCursor::CopyingCursor);
 
 	this->repaint();
 

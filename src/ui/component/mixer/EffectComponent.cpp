@@ -35,6 +35,9 @@ EffectComponent::EffectComponent() {
 		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
 	this->bypassButton->onClick = [this] { this->bypass(); };
 	this->addAndMakeVisible(this->bypassButton.get());
+
+	/** Mouse Cursor */
+	this->setMouseCursor(juce::MouseCursor::CopyingCursor);
 }
 
 void EffectComponent::resized() {
@@ -146,6 +149,10 @@ void EffectComponent::update(int type, int track, int index) {
 				!quickAPI::getEffectBypass({ (quickAPI::TrackType)type, track }, index),
 				juce::NotificationType::dontSendNotification);
 		}
+
+		this->setMouseCursor(this->valid
+			? juce::MouseCursor::PointingHandCursor
+			: juce::MouseCursor::CopyingCursor);
 
 		this->repaint();
 
