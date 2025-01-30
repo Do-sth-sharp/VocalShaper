@@ -590,10 +590,7 @@ namespace quickAPI {
 	}
 
 	int getTrackOutputChannelNum(TrackIndex index) {
-		if (auto track = getTrackProcessor(index)) {
-			return track->getTotalNumOutputChannels();
-		}
-		return 0;
+		return getTrackChannelSet(index).size();
 	}
 
 	int getTrackSideChainBusNum(TrackIndex index) {
