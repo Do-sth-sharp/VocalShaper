@@ -132,6 +132,10 @@ void EffectComponent::update(int type, int track, int index) {
 	if (this->type > -1 && this->track > -1 && this->index > -1) {
 		this->valid = quickAPI::isEffectValid({ (quickAPI::TrackType)type, track }, index);
 
+		if (!this->valid) {
+			this->bypassButton->setToggleState(false,
+				juce::NotificationType::dontSendNotification);
+		}
 		this->bypassButton->setEnabled(this->valid);
 
 		if (this->valid) {
