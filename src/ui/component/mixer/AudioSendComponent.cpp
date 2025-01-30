@@ -304,7 +304,8 @@ juce::PopupMenu AudioSendComponent::createAddMenu(
 			name = TRANS("AUX Track") + " #" + juce::String{ i };
 		}
 		menu.addItem(name,
-			this->type != (int)quickAPI::TrackType::MasterTrack,
+			this->type != (int)quickAPI::TrackType::MasterTrack
+			&& !(this->type == (int)quickAPI::TrackType::AuxTrack && this->track == i),
 			dst.second == i && dst.first == quickAPI::SendDstType::ToAUX,
 			std::bind(addCallback, (int)quickAPI::SendDstType::ToAUX, i));
 	}
