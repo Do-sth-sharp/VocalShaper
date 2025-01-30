@@ -374,7 +374,14 @@ void MixerTrackComponent::paint(juce::Graphics& g) {
 	g.fillRect(colorRect);
 
 	/** Title */
-	juce::String title = juce::String{ this->index };
+	juce::String prefix;
+	if (this->type == (int)quickAPI::TrackType::MasterTrack) {
+		prefix = "M";
+	}
+	else if (this->type == (int)quickAPI::TrackType::AuxTrack) {
+		prefix = "A";
+	}
+	juce::String title = prefix + juce::String{ this->index };
 	if (this->name.isNotEmpty()) {
 		title += (" - " + this->name);
 	}
