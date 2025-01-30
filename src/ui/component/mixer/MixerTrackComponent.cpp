@@ -688,7 +688,7 @@ void MixerTrackComponent::endDrop() {
 }
 
 enum MixerTrackActionType {
-	Add = 1, Remove
+	Add = 1, AddOther, Remove
 };
 
 void MixerTrackComponent::showMenu() {
@@ -698,6 +698,10 @@ void MixerTrackComponent::showMenu() {
 	switch (result) {
 	case MixerTrackActionType::Add: {
 		this->add();
+		break;
+	}
+	case MixerTrackActionType::AddOther: {
+		this->addOther();
 		break;
 	}
 	case MixerTrackActionType::Remove: {
@@ -710,6 +714,10 @@ void MixerTrackComponent::showMenu() {
 void MixerTrackComponent::add() {
 	CoreActions::insertTrackGUI(
 		(quickAPI::TrackType)this->type, this->index + 1);
+}
+
+void MixerTrackComponent::addOther() {
+	CoreActions::insertTrackGUI();
 }
 
 void MixerTrackComponent::remove() {
@@ -732,8 +740,11 @@ int MixerTrackComponent::getInsertIndex(const juce::Point<int>& pos) {
 juce::PopupMenu MixerTrackComponent::createMenu() const {
 	juce::PopupMenu menu;
 
-	menu.addItem(MixerTrackActionType::Add, TRANS("Add"));
-	menu.addItem(MixerTrackActionType::Remove, TRANS("Remove"));
+	menu.addItem(MixerTrackActionType::Add, TRANS("Add"),
+		(this->type != (int)quickAPI::TrackType::MasterTrack));
+	menu.addItem(MixerTrackActionType::AddOther, TRANS("Add More"));
+	menu.addItem(MixerTrackActionType::Remove, TRANS("Remove"),
+		(this->type != (int)quickAPI::TrackType::MasterTrack));
 
 	return menu;
 }

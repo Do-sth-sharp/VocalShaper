@@ -26,6 +26,7 @@ countries: cn
 "Process RAM" = "进程内存"
 
 "Add" = "添加"
+"Add More" = "更多添加"
 "Remove" = "移除"
 
 "Enabled" = "已开启"
