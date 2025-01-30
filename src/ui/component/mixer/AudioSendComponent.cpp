@@ -155,7 +155,7 @@ void AudioSendComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 const juce::String AudioSendComponent::getSendName() const {
-	return quickAPI::getTrackAudioSendDstName(
+	return quickAPI::getTrackAudioSendDstShortName(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
 }
 

@@ -178,6 +178,7 @@ namespace utils {
 	};
 	using SendDst = std::pair<SendDstType, int>;
 	const juce::String getSendTypeName(SendDstType type);
+	const juce::String getSendTypeShortName(SendDstType type);
 
 	using AudioChannelLink = std::pair<int, int>;
 	using AudioChannelLinkList = std::set<AudioChannelLink>;

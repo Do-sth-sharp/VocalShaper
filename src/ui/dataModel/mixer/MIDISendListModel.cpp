@@ -28,7 +28,7 @@ juce::Component* MIDISendListModel::refreshComponentForRow(int rowNumber, bool i
 }
 
 juce::String MIDISendListModel::getNameForRow(int rowNumber) {
-	return quickAPI::getTrackMIDISendDstName(
+	return quickAPI::getTrackMIDISendDstShortName(
 		{ (quickAPI::TrackType)this->type, this->index }, rowNumber);
 }
 

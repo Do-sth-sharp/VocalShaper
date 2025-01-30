@@ -482,6 +482,10 @@ namespace quickAPI {
 		return utils::getSendTypeName(type);
 	}
 
+	const juce::String getSendTypeShortName(SendDstType type) {
+		return utils::getSendTypeShortName(type);
+	}
+
 	const juce::String getSendDstName(SendDst dst, bool isAudio) {
 		/** Device */
 		if (dst.first == quickAPI::SendDstType::ToDevice) {
@@ -511,6 +515,38 @@ namespace quickAPI {
 
 		/** Default Name */
 		return quickAPI::getSendTypeName(dst.first) + " #" + juce::String{ dst.second };
+	}
+
+	const juce::String getSendDstShortName(SendDst dst, bool isAudio) {
+		/** Device */
+		if (dst.first == quickAPI::SendDstType::ToDevice) {
+			/*if (isAudio) {
+				return quickAPI::getAudioDeviceName(false);
+			}
+			return quickAPI::getMIDIOutputDeviceName();*/
+			return "Output";
+		}
+
+		/** Master Track */
+		if (dst.first == quickAPI::SendDstType::ToMaster) {
+			auto name = quickAPI::getTrackName(
+				{ quickAPI::TrackType::MasterTrack, dst.second });
+			if (name.isNotEmpty()) {
+				return name;
+			}
+		}
+
+		/** Aux Track */
+		if (dst.first == quickAPI::SendDstType::ToAUX) {
+			auto name = quickAPI::getTrackName(
+				{ quickAPI::TrackType::AuxTrack, dst.second });
+			if (name.isNotEmpty()) {
+				return name;
+			}
+		}
+
+		/** Default Name */
+		return quickAPI::getSendTypeShortName(dst.first) + juce::String{ dst.second };
 	}
 
 	int getTrackNum(TrackType type) {
@@ -672,6 +708,24 @@ namespace quickAPI {
 
 		/** Get Name */
 		return quickAPI::getSendDstName(dst, true);
+	}
+
+	const juce::String getTrackMIDISendDstShortName(TrackIndex index, int slot) {
+		/** Get Dst */
+		auto dst = quickAPI::getTrackMIDISendDst(index, slot);
+		if (dst.second < 0) { return ""; }
+
+		/** Get Name */
+		return quickAPI::getSendDstShortName(dst, false);
+	}
+
+	const juce::String getTrackAudioSendDstShortName(TrackIndex index, int slot) {
+		/** Get Dst */
+		auto dst = quickAPI::getTrackAudioSendDst(index, slot);
+		if (dst.second < 0) { return ""; }
+
+		/** Get Name */
+		return quickAPI::getSendDstShortName(dst, true);
 	}
 
 	float getTrackGain(TrackIndex index) {
