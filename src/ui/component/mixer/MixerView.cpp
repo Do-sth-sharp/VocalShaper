@@ -173,6 +173,11 @@ void MixerView::updateAdd(int type, int index) {
 		this->trackList[i]->updateIndex(trackIndex.first, trackIndex.second);
 	}
 
+	/** Update Send */
+	for (int i = 0; i < this->trackList.size(); i++) {
+		this->trackList[i]->updateSend();
+	}
+
 	/** Init Track */
 	this->trackList[viewIndex]->updateAll();
 
@@ -200,6 +205,11 @@ void MixerView::updateRemove(int type, int index) {
 		this->trackList[i]->updateIndex(trackIndex.first, trackIndex.second);
 	}
 
+	/** Update Send */
+	for (int i = 0; i < this->trackList.size(); i++) {
+		this->trackList[i]->updateSend();
+	}
+
 	/** Update Color Temp */
 	this->colorTemp.remove(viewIndex);
 
@@ -217,6 +227,11 @@ void MixerView::updateInfo(int type, int index) {
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateInfo();
+
+	/** Update Send */
+	for (int i = 0; i < this->trackList.size(); i++) {
+		this->trackList[i]->updateSend();
+	}
 }
 
 void MixerView::updateSideChain(int type, int index) {

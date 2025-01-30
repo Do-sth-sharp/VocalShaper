@@ -120,7 +120,7 @@ void MIDISendComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 const juce::String MIDISendComponent::getSendName() const {
-	return quickAPI::getTrackMIDISendDstName(
+	return quickAPI::getTrackMIDISendDstShortName(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
 }
 

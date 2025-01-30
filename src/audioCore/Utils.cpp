@@ -1117,4 +1117,12 @@ namespace utils {
 
 		return typeNames[(int)type];
 	}
+
+	const juce::String getSendTypeShortName(SendDstType type) {
+		juce::StringArray typeNames{
+			"O", "M", "A"
+		};
+
+		return typeNames[(int)type];
+	}
 }

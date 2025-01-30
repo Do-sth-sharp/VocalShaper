@@ -28,7 +28,7 @@ juce::Component* AudioSendListModel::refreshComponentForRow(int rowNumber, bool 
 }
 
 juce::String AudioSendListModel::getNameForRow(int rowNumber) {
-	return quickAPI::getTrackAudioSendDstName(
+	return quickAPI::getTrackAudioSendDstShortName(
 		{ (quickAPI::TrackType)this->type, this->index }, rowNumber);
 }
 
