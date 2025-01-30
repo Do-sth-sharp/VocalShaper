@@ -173,6 +173,9 @@ void MixerView::updateAdd(int type, int index) {
 		this->trackList[i]->updateIndex(trackIndex.first, trackIndex.second);
 	}
 
+	/** Init Track */
+	this->trackList[viewIndex]->updateAll();
+
 	/** Update Color Temp */
 	this->colorTemp.insert(viewIndex, quickAPI::getTrackColor({ (quickAPI::TrackType)type, index }));
 
@@ -314,6 +317,7 @@ void MixerView::updateAll() {
 
 		track->updateIndex(
 			(int)quickAPI::TrackType::MasterTrack, i);
+		track->updateAll();
 
 		this->trackList.add(std::move(track));
 
@@ -332,6 +336,7 @@ void MixerView::updateAll() {
 
 		track->updateIndex(
 			(int)quickAPI::TrackType::AuxTrack, i);
+		track->updateAll();
 
 		this->trackList.add(std::move(track));
 
@@ -350,6 +355,7 @@ void MixerView::updateAll() {
 
 		track->updateIndex(
 			(int)quickAPI::TrackType::Track, i);
+		track->updateAll();
 
 		this->trackList.add(std::move(track));
 
