@@ -27,6 +27,9 @@ AudioSendComponent::AudioSendComponent() {
 		juce::Button::ConnectedOnLeft | juce::Button::ConnectedOnRight);
 	this->channelButton->onClick = [this] { this->editSend(); };
 	this->addAndMakeVisible(this->channelButton.get());
+
+	/** Mouse Cursor */
+	this->setMouseCursor(juce::MouseCursor::CopyingCursor);
 }
 
 void AudioSendComponent::resized() {
@@ -116,6 +119,10 @@ void AudioSendComponent::update(int type, int track, int slot) {
 	this->channelButton->setEnabled(this->valid);
 
 	this->name = this->getSendName();
+
+	this->setMouseCursor(this->valid
+		? juce::MouseCursor::PointingHandCursor
+		: juce::MouseCursor::CopyingCursor);
 
 	this->repaint();
 
