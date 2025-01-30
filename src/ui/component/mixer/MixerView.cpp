@@ -213,7 +213,7 @@ void MixerView::updateRemove(int type, int index) {
 void MixerView::updateInfo(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateInfo();
@@ -222,7 +222,7 @@ void MixerView::updateInfo(int type, int index) {
 void MixerView::updateSideChain(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateSideChain();
@@ -231,7 +231,7 @@ void MixerView::updateSideChain(int type, int index) {
 void MixerView::updateInput(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateInput();
@@ -240,7 +240,7 @@ void MixerView::updateInput(int type, int index) {
 void MixerView::updateSend(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateSend();
@@ -249,7 +249,7 @@ void MixerView::updateSend(int type, int index) {
 void MixerView::updateGain(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateGain();
@@ -258,7 +258,7 @@ void MixerView::updateGain(int type, int index) {
 void MixerView::updatePan(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updatePan();
@@ -267,7 +267,7 @@ void MixerView::updatePan(int type, int index) {
 void MixerView::updateFader(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateFader();
@@ -276,7 +276,7 @@ void MixerView::updateFader(int type, int index) {
 void MixerView::updateMute(int type, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateMute();
@@ -285,7 +285,7 @@ void MixerView::updateMute(int type, int index) {
 void MixerView::updateEffect(int type, int track, int index) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, track);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateEffect(index);
@@ -294,7 +294,7 @@ void MixerView::updateEffect(int type, int track, int index) {
 void MixerView::updateEffectIndex(int type, int track, int oldIndex, int newIndex) {
 	/** Get View Index */
 	int viewIndex = this->getViewIndexByType(type, track);
-	if (viewIndex < 0) { return; }
+	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateEffectIndex(oldIndex, newIndex);
