@@ -80,6 +80,7 @@ private:
 
 	void showMenu();
 	void add();
+	void addOther();
 	void remove();
 
 	int getInsertIndex(const juce::Point<int>& pos);
