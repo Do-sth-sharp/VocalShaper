@@ -21,6 +21,7 @@ public:
 	void paint(juce::Graphics& g) override;
 	void paintOverChildren(juce::Graphics& g) override;
 
+	void updateAll();
 	void updateIndex(int type, int index);
 	void updateInfo();
 	void updateSideChain();

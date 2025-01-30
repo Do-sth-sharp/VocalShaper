@@ -115,6 +115,9 @@ MixerTrackComponent::MixerTrackComponent() {
 	/** Focus */
 	this->setWantsKeyboardFocus(true);
 	this->setMouseClickGrabsKeyboardFocus(true);
+
+	/** Update */
+	this->updateAll();
 }
 
 void MixerTrackComponent::resized() {
@@ -417,6 +420,22 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	auto totalRect = this->getLocalBounds();
 	g.setColour(outlineColor);
 	g.drawRect(totalRect, outlineThickness);
+}
+
+void MixerTrackComponent::updateAll() {
+	this->updateInfo();
+	this->updateSideChain();
+	this->updateInput();
+	this->updateSend();
+	this->updateGain();
+	this->updatePan();
+	this->updateFader();
+	this->updateMute();
+
+	int effectNum = quickAPI::getEffectSlotNum();
+	for (int i = 0; i < effectNum; i++) {
+		this->updateEffect(i);
+	}
 }
 
 void MixerTrackComponent::updateIndex(int type, int index) {
