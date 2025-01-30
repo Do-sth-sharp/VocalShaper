@@ -274,12 +274,31 @@ void MixerView::updateFader(int type, int index) {
 }
 
 void MixerView::updateMute(int type, int index) {
-	/** Get View Index */
-	int viewIndex = this->getViewIndexByType(type, index);
-	if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
+	if (type == (int)quickAPI::TrackType::Track) {
+		/** Get Track Num */
+		int trackNum = quickAPI::getTrackNum(
+			quickAPI::TrackType::Track);
 
-	/** Update Track */
-	this->trackList[viewIndex]->updateMute();
+		/** For Each Track */
+		for (int i = 0; i < trackNum; i++) {
+			/** Get View Index */
+			int viewIndex = this->getViewIndexByType(
+				(int)quickAPI::TrackType::Track, i);
+			if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
+
+			/** Update Track */
+			this->trackList[viewIndex]->updateMute();
+		}
+	}
+	else {
+		/** Get View Index */
+		int viewIndex = this->getViewIndexByType(type, index);
+		if (viewIndex < 0 || viewIndex >= this->trackList.size()) { return; }
+
+		/** Update Track */
+		this->trackList[viewIndex]->updateMute();
+	}
+	
 }
 
 void MixerView::updateEffect(int type, int track, int index) {
