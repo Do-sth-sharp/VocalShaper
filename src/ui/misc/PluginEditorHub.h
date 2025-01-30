@@ -31,11 +31,17 @@ private:
 	void closeEditor(PluginEditor* ptr);
 	void openEditor(PluginEditor* ptr);
 
-	void updateInstr(int index);
-	void updateEffect(int type, int track, int index);
+	void trackAdded(int type, int track);
+	void trackRemoved(int type, int track);
+	void effectIndexChanged(int type, int track, int oldIndex, int newIndex);
 
 	RefType getInstrRef(int index) const;
 	RefType getEffectRef(int type, int track, int index) const;
+
+private:
+	friend class PluginEditorContent;
+	void closeInstr(PluginEditor* ptr);
+	void closeEffect(PluginEditor* ptr);
 
 public:
 	static PluginEditorHub* getInstance();

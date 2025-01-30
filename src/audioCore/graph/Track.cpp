@@ -113,8 +113,8 @@ void Track::updateIndex(int index) {
 	}
 
 	/** Callback */
-	UICallbackAPI<int, int>::invoke(
-		UICallbackType::TrackInfoChanged, static_cast<int>(this->type), index);
+	/*UICallbackAPI<int, int>::invoke(
+		UICallbackType::TrackInfoChanged, static_cast<int>(this->type), index);*/
 }
 
 SeqSourceProcessor* Track::getSequencer() const {

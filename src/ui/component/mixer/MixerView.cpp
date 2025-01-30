@@ -228,10 +228,19 @@ void MixerView::updateInfo(int type, int index) {
 	/** Update Track */
 	this->trackList[viewIndex]->updateInfo();
 
+	/** Update Color Temp */
+	if (viewIndex < this->colorTemp.size()) {
+		this->colorTemp.getReference(viewIndex) =
+			quickAPI::getTrackColor({ (quickAPI::TrackType)type, index });
+	}
+
 	/** Update Send */
 	for (int i = 0; i < this->trackList.size(); i++) {
 		this->trackList[i]->updateSend();
 	}
+
+	/** Update Scroller Color */
+	this->hScroller->update();
 }
 
 void MixerView::updateSideChain(int type, int index) {
