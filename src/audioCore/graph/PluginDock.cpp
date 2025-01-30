@@ -163,10 +163,10 @@ bool PluginDock::setPluginIndex(int oldIndex, int newIndex) {
 	/** Callback */
 	UICallbackAPI<int, int, int, int>::invoke(
 		UICallbackType::TrackEffectIndexChanged, this->type, this->index, oldIndex, newIndex);
-	UICallbackAPI<int, int, int>::invoke(
+	/*UICallbackAPI<int, int, int>::invoke(
 		UICallbackType::TrackEffectChanged, this->type, this->index, oldIndex);
 	UICallbackAPI<int, int, int>::invoke(
-		UICallbackType::TrackEffectChanged, this->type, this->index, newIndex);
+		UICallbackType::TrackEffectChanged, this->type, this->index, newIndex);*/
 
 	return true;
 }

@@ -109,6 +109,10 @@ void PluginEditorContent::paint(juce::Graphics& g) {
 	g.fillAll();
 }
 
+const PluginEditorContent::Index PluginEditorContent::getIndex() const {
+	return { this->trackType, this->track, this->index };
+}
+
 void PluginEditorContent::update(int type, int track, int index) {
 	this->trackType = type;
 	this->track = track;
@@ -162,12 +166,12 @@ void PluginEditorContent::deleteEditor() {
 	switch (this->type) {
 	case PluginType::Instr: {
 		PluginEditorHub::getInstance()->
-			closeInstr(this->track);
+			closeInstr(this->parent);
 		break;
 	}
 	case PluginType::Effect: {
 		PluginEditorHub::getInstance()->
-			closeEffect(this->trackType, this->track, this->index);
+			closeEffect(this->parent);
 		break;
 	}
 	}
@@ -204,6 +208,13 @@ quickAPI::EditorPointer PluginEditor::getEditor() const {
 		return ptr->getEditor();
 	}
 	return nullptr;
+}
+
+const PluginEditor::Index PluginEditor::getIndex() const {
+	if (auto ptr = dynamic_cast<PluginEditorContent*>(this->getContentComponent())) {
+		return ptr->getIndex();
+	}
+	return { -1, -1, -1 };
 }
 
 void PluginEditor::update(int type, int track, int index) {

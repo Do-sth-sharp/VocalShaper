@@ -4,17 +4,20 @@
 #include "../../audioCore/AC_API.h"
 
 PluginEditorHub::PluginEditorHub() {
-	/** Instr Update Callback */
-	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackInstrChanged,
-		[](int index) {
-			PluginEditorHub::getInstance()->updateInstr(index);
+	/** Update Callback */
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackAdded,
+		[](int type, int index) {
+			PluginEditorHub::getInstance()->trackAdded(type, index);
 		}
 	);
-
-	/** Effect Update Callback */
-	CoreCallbackAPI<int, int, int>::add(CoreCallbacks::CallbackType::TrackEffectChanged,
-		[](int type, int track, int index) {
-			PluginEditorHub::getInstance()->updateEffect(type, track, index);
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackRemoved,
+		[](int type, int index) {
+			PluginEditorHub::getInstance()->trackRemoved(type, index);
+		}
+	);
+	CoreCallbackAPI<int, int, int, int>::add(CoreCallbacks::CallbackType::TrackEffectIndexChanged,
+		[](int type, int track, int oldIndex, int newIndex) {
+			PluginEditorHub::getInstance()->effectIndexChanged(type, track, oldIndex, newIndex);
 		}
 	);
 }
@@ -48,21 +51,16 @@ void PluginEditorHub::openInstr(int index) {
 }
 
 void PluginEditorHub::closeInstr(int index) {
-	if (auto editor = quickAPI::getInstrEditor(index)) {
-		auto it = this->instrEditors.find(this->getInstrRef(index));
-		if (it != this->instrEditors.end()) {
-			auto container = it->second;
-			if (container->getEditor() == editor) {
-				/** Close */
-				this->closeEditor(container.get());
+	auto it = this->instrEditors.find(this->getInstrRef(index));
+	if (it != this->instrEditors.end()) {
+		/** Close */
+		this->closeEditor(it->second.get());
 
-				/** Remove From List */
-				this->instrEditors.erase(it);
+		/** Remove From List */
+		this->instrEditors.erase(it);
 
-				/** Callback */
-				CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
-			}
-		}
+		/** Callback */
+		CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
 	}
 }
 
@@ -105,22 +103,17 @@ void PluginEditorHub::openEffect(int type, int track, int index) {
 }
 
 void PluginEditorHub::closeEffect(int type, int track, int index) {
-	if (auto editor = quickAPI::getEffectEditor({ (quickAPI::TrackType)type, track }, index)) {
-		auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
-		if (it != this->effectEditors.end()) {
-			auto container = it->second;
-			if (container->getEditor() == editor) {
-				/** Close */
-				this->closeEditor(container.get());
+	auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
+	if (it != this->effectEditors.end()) {
+		/** Close */
+		this->closeEditor(it->second.get());
 
-				/** Remove From List */
-				this->effectEditors.erase(it);
+		/** Remove From List */
+		this->effectEditors.erase(it);
 
-				/** Callback */
-				CoreCallbackAPI<int, int, int>::invoke(
-					CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
-			}
-		}
+		/** Callback */
+		CoreCallbackAPI<int, int, int>::invoke(
+			CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
 	}
 }
 
@@ -186,20 +179,47 @@ void PluginEditorHub::openEditor(PluginEditor* ptr) {
 	ptr->setVisible(true);
 }
 
-void PluginEditorHub::updateInstr(int index) {
-	if (auto ref = this->getInstrRef(index)) {
-		auto it = this->instrEditors.find(ref);
-		if (it != this->instrEditors.end()) {
-			it->second->update(0, index, 0);
+void PluginEditorHub::trackAdded(int type, int track) {
+	/** Instr */
+	for (auto it = this->instrEditors.begin(); it != this->instrEditors.end(); it++) {
+		auto [currentType, currentTrack, currentIndex] = it->second->getIndex();
+		if (currentType == type && currentTrack >= track) {
+			it->second->update(type, currentTrack + 1, currentIndex);
+		}
+	}
+
+	/** Effect */
+	for (auto it = this->effectEditors.begin(); it != this->effectEditors.end(); it++) {
+		auto [currentType, currentTrack, currentIndex] = it->second->getIndex();
+		if (currentType == type && currentTrack >= track) {
+			it->second->update(type, currentTrack + 1, currentIndex);
 		}
 	}
 }
 
-void PluginEditorHub::updateEffect(int type, int track, int index) {
-	if (auto ref = this->getEffectRef(type, track, index)) {
-		auto it = this->effectEditors.find(ref);
-		if (it != this->effectEditors.end()) {
-			it->second->update(type, track, index);
+void PluginEditorHub::trackRemoved(int type, int track) {
+	/** Instr */
+	for (auto it = this->instrEditors.begin(); it != this->instrEditors.end(); it++) {
+		auto [currentType, currentTrack, currentIndex] = it->second->getIndex();
+		if (currentType == type && currentTrack > track) {
+			it->second->update(type, currentTrack - 1, currentIndex);
+		}
+	}
+
+	/** Effect */
+	for (auto it = this->effectEditors.begin(); it != this->effectEditors.end(); it++) {
+		auto [currentType, currentTrack, currentIndex] = it->second->getIndex();
+		if (currentType == type && currentTrack > track) {
+			it->second->update(type, currentTrack - 1, currentIndex);
+		}
+	}
+}
+
+void PluginEditorHub::effectIndexChanged(int type, int track, int oldIndex, int newIndex) {
+	for (auto it = this->effectEditors.begin(); it != this->effectEditors.end(); it++) {
+		auto [currentType, currentTrack, currentIndex] = it->second->getIndex();
+		if (currentType == type && currentTrack == track && currentIndex == oldIndex) {
+			it->second->update(type, track, newIndex);
 		}
 	}
 }
@@ -211,6 +231,45 @@ PluginEditorHub::RefType PluginEditorHub::getInstrRef(int index) const {
 PluginEditorHub::RefType PluginEditorHub::getEffectRef(int type, int track, int index) const {
 	return static_cast<RefType>(
 		quickAPI::getEffectRef({ (quickAPI::TrackType)type, track }, index));
+}
+
+void PluginEditorHub::closeInstr(PluginEditor* ptr) {
+	for (auto it = this->instrEditors.begin(); it != this->instrEditors.end(); it++) {
+		if (it->second.get() == ptr) {
+			auto [type, track, index] = it->second->getIndex();
+
+			/** Close */
+			this->closeEditor(it->second.get());
+
+			/** Remove From List */
+			this->instrEditors.erase(it);
+
+			/** Callback */
+			CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
+
+			break;
+		}
+	}
+}
+
+void PluginEditorHub::closeEffect(PluginEditor* ptr) {
+	for (auto it = this->effectEditors.begin(); it != this->effectEditors.end(); it++) {
+		if (it->second.get() == ptr) {
+			auto [type, track, index] = it->second->getIndex();
+
+			/** Close */
+			this->closeEditor(it->second.get());
+
+			/** Remove From List */
+			this->effectEditors.erase(it);
+
+			/** Callback */
+			CoreCallbackAPI<int, int, int>::invoke(
+				CoreCallbacks::CallbackType::TrackEffectChanged, type, track, index);
+
+			break;
+		}
+	}
 }
 
 PluginEditorHub* PluginEditorHub::getInstance() {

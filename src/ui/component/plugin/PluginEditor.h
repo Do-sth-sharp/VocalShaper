@@ -24,6 +24,9 @@ public:
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 
+	/** Type, Track, Index */
+	using Index = std::tuple<int, int, int>;
+	const Index getIndex() const;
 	void update(int type, int track, int index);
 
 private:
@@ -65,6 +68,9 @@ public:
 
 	quickAPI::EditorPointer getEditor() const;
 
+	/** Type, Track, Index */
+	using Index = PluginEditorContent::Index;
+	const Index getIndex() const;
 	void update(int type, int track, int index);
 	void sizeChanged();
 
