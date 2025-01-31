@@ -410,6 +410,13 @@ SeqView::SeqView()
 			}
 		}
 	);
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackInfoChanged,
+		[comp = SeqView::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
+				comp->updateInfo(index);
+			}
+		}
+	);
 	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackBlockChanged,
 		[comp = SeqView::SafePointer(this)](int track, int index) {
 			if (comp) {
@@ -716,6 +723,16 @@ void SeqView::updateRemove(int index) {
 
 void SeqView::updateInfo(int index) {
 	this->trackList->updateInfo(index);
+
+	/** Update Color Temp */
+	if (index < this->colorTemp.size()) {
+		this->colorTemp.getReference(index) =
+			quickAPI::getTrackColor({ quickAPI::TrackType::Track, index });
+	}
+
+	/** Update Scroller Color */
+	this->hScroller->update();
+	this->vScroller->update();
 }
 
 void SeqView::updateBlock(int track, int index) {

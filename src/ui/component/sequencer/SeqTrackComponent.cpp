@@ -161,6 +161,8 @@ void SeqTrackComponent::updateInfo() {
 	}
 	this->trackName->setButtonText(juce::String{ index } + " - " + name);
 
+	this->content->updateInfo();
+
 	this->repaint();
 }
 
