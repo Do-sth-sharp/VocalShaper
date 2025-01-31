@@ -10,7 +10,8 @@ public:
 	void paintListBoxItem(int rowNumber, juce::Graphics& g,
 		int width, int height, bool rowIsSelected) override;
 
-	using TrackInfo = std::tuple<juce::String, juce::String>;
+	/** Type, Index, Name, Bus */
+	using TrackInfo = std::tuple<int, int, juce::String, juce::String>;
 	void setItems(const juce::Array<TrackInfo>& items);
 
 private:

@@ -48,7 +48,7 @@ private:
 	double sampleRate = 0;
 	int bufferSize = 0;
 	std::map<const Track*, std::tuple<
-		utils::TrackIndex, juce::AudioChannelSet, juce::AudioBuffer<float>>> buffers;
+		utils::TrackIndex, juce::String, juce::AudioChannelSet, juce::AudioBuffer<float>>> buffers;
 	std::unique_ptr<juce::Thread> renderThread = nullptr;
 
 public:

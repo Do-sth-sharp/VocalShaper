@@ -172,6 +172,7 @@ namespace utils {
 	};
 	using TrackIndex = std::pair<TrackType, int>;
 	const juce::String getTrackTypeName(TrackType type);
+	const juce::String getTrackTypeShortName(TrackType type);
 
 	enum class SendDstType {
 		ToDevice = 0, ToMaster, ToAUX
