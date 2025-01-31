@@ -1,4 +1,13 @@
 ﻿#include "Tools.h"
+#include "CoreCallbacks.h"
+
+Tools::Tools() {
+	/** Clear Current Track */
+	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::GraphUpdated,
+		[this] {
+			this->setEditingTrack(-1);
+		});
+}
 
 void Tools::setType(Type type) {
 	this->type = type;

@@ -173,18 +173,29 @@ void SourceSwitchBar::update(int index, uint64_t audioRef, uint64_t midiRef) {
 	this->audioName = quickAPI::getAudioSourceName(audioRef);
 	this->midiName = quickAPI::getMIDISourceName(midiRef);
 
+	/** Check Don't Switch */
+	bool shouldSwitch = true;
+	if ((this->current == SwitchState::MIDI) && (midiRef != 0)) {
+		shouldSwitch = false;
+	}
+	if ((this->current == SwitchState::Audio) && (audioRef != 0)) {
+		shouldSwitch = false;
+	}
+
 	/** Auto Switch Editors */
-	if ((midiRef != 0) && (this->current != SwitchState::MIDI)) {
-		this->switchTo(SwitchState::MIDI, true);
-		return;
-	}
-	if ((audioRef != 0) && (this->current != SwitchState::Audio)) {
-		this->switchTo(SwitchState::Audio, true);
-		return;
-	}
-	if ((audioRef == 0) && (midiRef == 0) && (this->current != SwitchState::Off)) {
-		this->switchTo(SwitchState::Off, true);
-		return;
+	if (shouldSwitch) {
+		if ((midiRef != 0) && (this->current != SwitchState::MIDI)) {
+			this->switchTo(SwitchState::MIDI, true);
+			return;
+		}
+		if ((audioRef != 0) && (this->current != SwitchState::Audio)) {
+			this->switchTo(SwitchState::Audio, true);
+			return;
+		}
+		if ((audioRef == 0) && (midiRef == 0) && (this->current != SwitchState::Off)) {
+			this->switchTo(SwitchState::Off, true);
+			return;
+		}
 	}
 
 	/** Update Name */

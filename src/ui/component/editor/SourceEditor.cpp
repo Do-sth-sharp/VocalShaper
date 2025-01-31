@@ -51,6 +51,31 @@ SourceEditor::SourceEditor()
 	this->emptyStr = TRANS("Please select a data source for editing.");
 
 	/** Callback */
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackAdded,
+		[comp = SourceEditor::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
+				int currentIndex = comp->getCurrentIndex();
+				if (currentIndex >= 0 && index <= currentIndex) {
+					comp->setTrack(currentIndex + 1);
+				}
+			}
+		}
+	);
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackRemoved,
+		[comp = SourceEditor::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
+				int currentIndex = comp->getCurrentIndex();
+				if (currentIndex >= 0) {
+					if (index < currentIndex) {
+						comp->setTrack(currentIndex - 1);
+					}
+					else if (index == currentIndex) {
+						comp->setTrack(-1);
+					}
+				}
+			}
+		}
+	);
 	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackDataRefChanged,
 		[comp = SourceEditor::SafePointer(this)](int trackIndex) {
 			if (comp) {
@@ -86,6 +111,12 @@ SourceEditor::SourceEditor()
 			}
 		}
 	);
+	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::GraphUpdated,
+		[comp = SourceEditor::SafePointer(this)]() {
+			if (comp) {
+				comp->setTrack(-1);
+			}
+		});
 }
 
 void SourceEditor::resized() {
@@ -186,6 +217,10 @@ void SourceEditor::updateData(int trackIndex) {
 		this->midiEditor->updateData();
 		//this->audioEditor->updateData();
 	}
+}
+
+int SourceEditor::getCurrentIndex() const {
+	return this->trackIndex;
 }
 
 void SourceEditor::switchEditor(SourceSwitchBar::SwitchState state) {
