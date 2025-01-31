@@ -21,6 +21,8 @@ public:
 	void updateBlocks(int trackIndex);
 	void updateData(int trackIndex);
 
+	int getCurrentIndex() const;
+
 private:
 	std::unique_ptr<SourceSwitchBar> switchBar = nullptr;
 	SourceSwitchBar::SwitchState switchState = SourceSwitchBar::SwitchState::Off;

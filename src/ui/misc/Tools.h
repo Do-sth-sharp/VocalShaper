@@ -4,7 +4,7 @@
 
 class Tools final : private juce::DeletedAtShutdown {
 public:
-	Tools() = default;
+	Tools();
 
 	enum class Type {
 		Arrow, Pencil
