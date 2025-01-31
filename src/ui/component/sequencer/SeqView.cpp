@@ -473,6 +473,12 @@ SeqView::SeqView()
 			}
 		}
 	);
+	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::GraphUpdated,
+		[comp = SeqView::SafePointer(this)]() {
+			if (comp) {
+				comp->updateAll();
+			}
+		});
 
 	/** Init Temp */
 	this->gridTemp = std::make_unique<juce::Image>(

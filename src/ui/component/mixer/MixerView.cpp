@@ -99,6 +99,12 @@ MixerView::MixerView()
 				comp->updateEffectIndex(type, track, oldIndex, newIndex);
 			}
 		});
+	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::GraphUpdated,
+		[comp = MixerView::SafePointer(this)]() {
+			if (comp) {
+				comp->updateAll();
+			}
+		});
 
 	/** Update All */
 	this->updateAll();
