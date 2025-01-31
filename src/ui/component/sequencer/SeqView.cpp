@@ -118,6 +118,13 @@ void SeqView::TrackList::updateHPos(double pos, double itemSize) {
 
 	/** Tracks */
 	for (auto i : this->list) {
+		if (i->getWidth() != this->getWidth()) {
+			juce::Rectangle<int> trackRect(
+				0, i->getY(),
+				this->getWidth(), i->getHeight());
+			i->setBounds(trackRect);
+		}
+
 		i->updateHPos(pos, itemSize);
 	}
 }
