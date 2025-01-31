@@ -42,6 +42,7 @@ public:
 	void updateHPos(double pos, double itemSize);
 	void updateDataRef();
 	void updateData();
+	void updateAll();
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
