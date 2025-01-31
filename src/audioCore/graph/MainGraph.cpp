@@ -948,22 +948,26 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 		for (int slot = 0; slot < MainGraph::midiSendSlotNum; slot++) {
 			auto dst = this->getTrackMIDISendDst(TrackType::MasterTrack, 0, slot);
 
-			auto connection = tmes->add_midisend();
-			connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
-			connection->set_dst(dst.second);
-			connection->set_slot(slot);
+			if (dst.second >= 0) {
+				auto connection = tmes->add_midisend();
+				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
+				connection->set_dst(dst.second);
+				connection->set_slot(slot);
+			}
 		}
 		for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
 			auto dst = this->getTrackAudioSendDst(TrackType::MasterTrack, 0, slot);
 			auto channels = this->getTrackAudioSendChannels(TrackType::MasterTrack, 0, slot);
 
-			for (auto& i : channels) {
-				auto connection = tmes->add_audiosend();
-				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
-				connection->set_dst(dst.second);
-				connection->set_slot(slot);
-				connection->set_srcchannel(i.first);
-				connection->set_dstchannel(i.second);
+			if (dst.second >= 0) {
+				for (auto& i : channels) {
+					auto connection = tmes->add_audiosend();
+					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
+					connection->set_dst(dst.second);
+					connection->set_slot(slot);
+					connection->set_srcchannel(i.first);
+					connection->set_dstchannel(i.second);
+				}
 			}
 		}
 
@@ -988,22 +992,26 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 			for (int slot = 0; slot < MainGraph::midiSendSlotNum; slot++) {
 				auto dst = this->getTrackMIDISendDst(TrackType::AuxTrack, i, slot);
 
-				auto connection = tmes->add_midisend();
-				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
-				connection->set_dst(dst.second);
-				connection->set_slot(slot);
+				if (dst.second >= 0) {
+					auto connection = tmes->add_midisend();
+					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
+					connection->set_dst(dst.second);
+					connection->set_slot(slot);
+				}
 			}
 			for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
 				auto dst = this->getTrackAudioSendDst(TrackType::AuxTrack, i, slot);
 				auto channels = this->getTrackAudioSendChannels(TrackType::AuxTrack, i, slot);
 
-				for (auto& i : channels) {
-					auto connection = tmes->add_audiosend();
-					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
-					connection->set_dst(dst.second);
-					connection->set_slot(slot);
-					connection->set_srcchannel(i.first);
-					connection->set_dstchannel(i.second);
+				if (dst.second >= 0) {
+					for (auto& i : channels) {
+						auto connection = tmes->add_audiosend();
+						connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
+						connection->set_dst(dst.second);
+						connection->set_slot(slot);
+						connection->set_srcchannel(i.first);
+						connection->set_dstchannel(i.second);
+					}
 				}
 			}
 
@@ -1029,22 +1037,26 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 			for (int slot = 0; slot < MainGraph::midiSendSlotNum; slot++) {
 				auto dst = this->getTrackMIDISendDst(TrackType::Track, i, slot);
 
-				auto connection = tmes->add_midisend();
-				connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
-				connection->set_dst(dst.second);
-				connection->set_slot(slot);
+				if (dst.second >= 0) {
+					auto connection = tmes->add_midisend();
+					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
+					connection->set_dst(dst.second);
+					connection->set_slot(slot);
+				}
 			}
 			for (int slot = 0; slot < MainGraph::audioSendSlotNum; slot++) {
 				auto dst = this->getTrackAudioSendDst(TrackType::Track, i, slot);
 				auto channels = this->getTrackAudioSendChannels(TrackType::Track, i, slot);
 
-				for (auto& i : channels) {
-					auto connection = tmes->add_audiosend();
-					connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
-					connection->set_dst(dst.second);
-					connection->set_slot(slot);
-					connection->set_srcchannel(i.first);
-					connection->set_dstchannel(i.second);
+				if (dst.second >= 0) {
+					for (auto& i : channels) {
+						auto connection = tmes->add_audiosend();
+						connection->set_type(static_cast<vsp4::SendDstType>(dst.first));
+						connection->set_dst(dst.second);
+						connection->set_slot(slot);
+						connection->set_srcchannel(i.first);
+						connection->set_dstchannel(i.second);
+					}
 				}
 			}
 
