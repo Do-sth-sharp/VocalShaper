@@ -1,4 +1,5 @@
 ﻿#include "TrackListBoxModel.h"
+#include "../../../audioCore/AC_API.h"
 
 TrackListBoxModel::TrackListBoxModel() 
 	: lookAndFeel(juce::LookAndFeel::getDefaultLookAndFeel()) {}
@@ -12,9 +13,16 @@ void TrackListBoxModel::paintListBoxItem(int rowNumber, juce::Graphics& g,
 	if (rowNumber < 0 || rowNumber >= this->trackItemList.size()) { return; }
 
 	/** Data */
-	auto& [name, type] = this->trackItemList.getReference(rowNumber);
-	juce::String text = "[" + juce::String(rowNumber) + "] "
-		+ name + " - " + type;
+	auto& [type, index, name, bus] = this->trackItemList.getReference(rowNumber);
+	juce::String prefix;
+	if (type == (int)quickAPI::TrackType::MasterTrack) {
+		prefix = "M";
+	}
+	else if (type == (int)quickAPI::TrackType::AuxTrack) {
+		prefix = "A";
+	}
+	juce::String text = "[" + prefix + juce::String{ index } + "] "
+		+ name + " - " + bus;
 
 	/** Size */
 	juce::Colour backgroundColor = rowIsSelected

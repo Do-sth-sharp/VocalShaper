@@ -1295,12 +1295,26 @@ void CoreActions::askForMixerTracksListGUIAsync(
 	const std::function<void(const juce::Array<quickAPI::TrackIndex>&)>& callback,
 	const CancelCallback& cancelCallback) {
 	/** Get Track List */
-	juce::Array<quickAPI::TrackInfo> trackList;
-	trackList.addArray(quickAPI::getTrackInfos(quickAPI::TrackType::MasterTrack));
-	int masterTrackIndexCount = trackList.size();
-	trackList.addArray(quickAPI::getTrackInfos(quickAPI::TrackType::AuxTrack));
-	int auxTrackIndexCount = trackList.size();
-	trackList.addArray(quickAPI::getTrackInfos(quickAPI::TrackType::Track));
+	juce::Array<TrackListBoxModel::TrackInfo> trackList;
+
+	auto masterListTemp = quickAPI::getTrackInfos(quickAPI::TrackType::MasterTrack);
+	for (int i = 0; i < masterListTemp.size(); i++) {
+		auto [name, bus] = masterListTemp[i];
+		trackList.add({ (int)quickAPI::TrackType::MasterTrack, i, name, bus });
+	}
+	
+	auto auxListTemp = quickAPI::getTrackInfos(quickAPI::TrackType::AuxTrack);
+	for (int i = 0; i < auxListTemp.size(); i++) {
+		auto [name, bus] = auxListTemp[i];
+		trackList.add({ (int)quickAPI::TrackType::AuxTrack, i, name, bus });
+	}
+
+	auto trackListTemp = quickAPI::getTrackInfos(quickAPI::TrackType::Track);
+	for (int i = 0; i < trackListTemp.size(); i++) {
+		auto [name, bus] = trackListTemp[i];
+		trackList.add({ (int)quickAPI::TrackType::Track, i, name, bus });
+	}
+
 	if (trackList.isEmpty()) {
 		juce::AlertWindow::showMessageBox(
 			juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
@@ -1322,6 +1336,8 @@ void CoreActions::askForMixerTracksListGUIAsync(
 	TrackListHelper::getInstance()->setBounds(chooserSize);
 	chooserWindow->addCustomComponent(TrackListHelper::getInstance()->getListBox());
 
+	int masterTrackIndexCount = masterListTemp.size();
+	int auxTrackIndexCount = auxListTemp.size();
 	chooserWindow->enterModalState(true, juce::ModalCallbackFunction::create(
 		[callback, cancelCallback,
 		masterTrackIndexCount, auxTrackIndexCount,
@@ -1339,11 +1355,11 @@ void CoreActions::askForMixerTracksListGUIAsync(
 					if (j < masterTrackIndexCount) {
 						resList.add({ quickAPI::TrackType::MasterTrack, j });
 					}
-					else if (j < auxTrackIndexCount) {
+					else if (j < masterTrackIndexCount + auxTrackIndexCount) {
 						resList.add({ quickAPI::TrackType::AuxTrack, j - masterTrackIndexCount });
 					}
 					else {
-						resList.add({ quickAPI::TrackType::Track, j - auxTrackIndexCount });
+						resList.add({ quickAPI::TrackType::Track, j - masterTrackIndexCount - auxTrackIndexCount });
 					}
 				}
 			}

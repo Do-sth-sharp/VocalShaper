@@ -221,7 +221,7 @@ void Renderer::updateSampleRateAndBufferSize(
 	if (this->sampleRate != sampleRate) {
 		/** Clear Buffer */
 		for (auto& i : this->buffers) {
-			auto& [id, channels, buffer] = i.second;
+			auto& [id, name,  channels, buffer] = i.second;
 
 			int newSize =
 				std::ceil(buffer.getNumSamples() * (sampleRate / this->sampleRate));
@@ -243,14 +243,27 @@ void Renderer::prepareToRender(const RenderTaskList& tasks) {
 	this->releaseBuffer();
 
 	auto graph = AudioCore::getInstance()->getGraph();
-	double totalLength = graph ? graph->getTailLengthSeconds() : 0;
+	if (!graph) { return; }
+	double totalLength = graph->getTailLengthSeconds();
 	int bufferSize = std::ceil(totalLength * this->sampleRate);
 
 	for (auto& [ptr, id, channels] : tasks) {
+		/** Get Track */
+		auto track = graph->getTrackProcessor(id.first, id.second);
+		if (!track) { continue; }
+
+		/** Init Buffer */
 		juce::AudioBuffer<float> buffer;
 		buffer.setSize(channels.size(), bufferSize, false, true, true);
+
+		/** Get Track Name */
+		auto name = track->getTrackName();
+		if (name.isEmpty()) {
+			name = "untitled";
+		}
+
 		this->buffers.insert(std::make_pair(
-			ptr, std::make_tuple(id, channels, buffer)));
+			ptr, std::make_tuple(id, name, channels, buffer)));
 	}
 }
 
@@ -268,10 +281,10 @@ void Renderer::saveFile(const juce::File& dir,
 		}
 
 		/** Get Buffer */
-		auto& [id, channels, buffer] = i.second;
+		auto& [id, trackName, channels, buffer] = i.second;
 		
 		/** Create File */
-		auto file = dir.getChildFile(name + "_" + utils::getTrackTypeName(id.first) + "-" + juce::String{ id.second } + extension);
+		auto file = dir.getChildFile(name + "_" + utils::getTrackTypeShortName(id.first) + juce::String{ id.second } + "_" + trackName + extension);
 		if (file.exists()) {
 			file.deleteFile();
 		}
@@ -303,7 +316,7 @@ void Renderer::writeData(const Track* trackPtr,
 	/** Find Buffer */
 	auto bufferIt = this->buffers.find(trackPtr);
 	if (bufferIt == this->buffers.end()) { return; }
-	auto& dstBuffer = std::get<2>(bufferIt->second);
+	auto& dstBuffer = std::get<3>(bufferIt->second);
 
 	/** Increase Buffer Size */
 	if (dstBuffer.getNumSamples() - buffer.getNumSamples() < offset) {
