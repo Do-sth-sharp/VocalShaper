@@ -123,20 +123,24 @@ SeqTrackComponent::SeqTrackComponent(
 	/** Focus */
 	this->setWantsKeyboardFocus(true);
 	this->setMouseClickGrabsKeyboardFocus(true);
+
+	/** Update */
+	this->updateAll();
 }
 
 void SeqTrackComponent::updateIndex(int index) {
 	this->index = index;
-	if (index > -1) {
-		this->muteButton->updateIndex(index);
-		this->soloButton->updateIndex(index);
-		this->inputMonitoringButton->updateIndex(index);
-		this->recButton->updateIndex(index);
+	
+	this->muteButton->updateIndex(index);
+	this->soloButton->updateIndex(index);
+	this->inputMonitoringButton->updateIndex(index);
+	this->recButton->updateIndex(index);
 
-		this->levelMeter->updateIndex(index);
+	this->levelMeter->updateIndex(index);
 
-		this->content->updateIndex(index);
-	}
+	this->content->updateIndex(index);
+
+	this->updateInfo();
 }
 
 void SeqTrackComponent::updateInfo() {
@@ -210,6 +214,23 @@ void SeqTrackComponent::updateDataRef() {
 
 void SeqTrackComponent::updateData() {
 	this->content->updateData();
+}
+
+void SeqTrackComponent::updateAll() {
+	this->updateInfo();
+
+	int blockNum = quickAPI::getBlockNum({
+		quickAPI::TrackType::Track, this->index });
+	for (int i = 0; i < blockNum; i++) {
+		this->updateBlock(i);
+	}
+
+	this->updateMuteSolo();
+	this->updateInputMonitoring();
+	this->updateRec();
+	this->updateInstr();
+	this->updateDataRef();
+	this->updateData();
 }
 
 void SeqTrackComponent::resized() {

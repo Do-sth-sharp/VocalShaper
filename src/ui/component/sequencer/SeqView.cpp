@@ -40,6 +40,10 @@ void SeqView::TrackList::insert(int index,
 	this->list.insert(index, std::move(newComp));
 }
 
+void  SeqView::TrackList::clear() {
+	this->list.clear();
+}
+
 void SeqView::TrackList::updateIndex(int index) {
 	if (index >= 0 && index < this->list.size()) {
 		this->list[index]->updateIndex(index);
@@ -91,6 +95,12 @@ void SeqView::TrackList::updateDataRef(int index) {
 void SeqView::TrackList::updateData(int index) {
 	if (index >= 0 && index < this->list.size()) {
 		this->list[index]->updateData();
+	}
+}
+
+void SeqView::TrackList::updateAll(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateAll();
 	}
 }
 
@@ -460,6 +470,9 @@ SeqView::SeqView()
 	/** Init Temp */
 	this->gridTemp = std::make_unique<juce::Image>(
 		juce::Image::ARGB, 1, 1, true);
+
+	/** Update All */
+	this->updateAll();
 }
 
 void SeqView::resized() {
@@ -658,66 +671,16 @@ void SeqView::paintOverChildren(juce::Graphics& g) {
 
 void SeqView::updateAdd(int index) {
 	/** Create Track */
-	auto track = std::make_unique<SeqTrackComponent>(
-		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-		(double delta) {
-			if (comp) {
-				comp->scroll(delta);
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-		(float deltaY, bool reversed) {
-			if (comp) {
-				comp->mouseWheelOutside(deltaY, reversed);
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
-		(double centerNum, double thumbPer, float deltaY, bool reversed) {
-			if (comp) {
-				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
-		(float deltaY, bool reversed) {
-			if (comp) {
-				comp->mouseWheelOutside(deltaY, reversed);
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
-		(double centerNum, double thumbPer, float deltaY, bool reversed) {
-			if (comp) {
-				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this)] {
-			if (comp) {
-				comp->processAreaDragStart();
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this)]
-		(int distanceX, int distanceY, bool moveX, bool moveY) {
-			if (comp) {
-				comp->processAreaDragTo(
-					distanceX, distanceY, moveX, moveY);
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this)] {
-			if (comp) {
-				comp->processAreaDragEnd();
-			}
-		},
-		[comp = ScrollerBase::SafePointer(this)]
-		(int index) {
-			if (comp) {
-				comp->editing(index);
-			}
-		});
+	auto track = this->createTrackComp();
 	this->trackList->insert(index, std::move(track));
 
 	/** Update Tracks */
 	for (int i = index; i < this->trackList->size(); i++) {
 		this->trackList->updateIndex(i);
 	}
+
+	/** Init Track */
+	this->trackList->updateAll(index);
 
 	/** Update Color Temp */
 	this->colorTemp.insert(
@@ -821,6 +784,41 @@ void SeqView::updateDataRef(int index) {
 
 void SeqView::updateData(int index) {
 	this->trackList->updateData(index);
+}
+
+void SeqView::updateAll() {
+	/** Clear Track List */
+	this->trackList->clear();
+
+	/** Clear Color Temp */
+	this->colorTemp.clear();
+
+	/** Add Track */
+	int trackNum = quickAPI::getTrackNum(
+		quickAPI::TrackType::Track);
+	for (int i = 0; i < trackNum; i++) {
+		/** Create Track */
+		auto track = this->createTrackComp();
+
+		track->updateIndex(i);
+		track->updateAll();
+
+		this->trackList->insert(i, std::move(track));
+
+		/** Color Temp */
+		this->colorTemp.add(quickAPI::getTrackColor(
+			{ quickAPI::TrackType::Track, i }));
+	}
+
+	/** Update Block Temp */
+	this->updateBlockTemp();
+
+	/** Update View Pos */
+	this->hScroller->update();
+	this->vScroller->update();
+
+	/** Repaint */
+	this->repaint();
 }
 
 std::tuple<double, double> SeqView::getViewArea(
@@ -1040,4 +1038,61 @@ void SeqView::processAreaDragEnd() {
 
 void SeqView::editing(int index) {
 	Tools::getInstance()->setEditingTrack(index);
+}
+
+std::unique_ptr<SeqTrackComponent> SeqView::createTrackComp() {
+	return std::make_unique<SeqTrackComponent>(
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double delta) {
+			if (comp) {
+				comp->scroll(delta);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->hScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
+		(float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutside(deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this->vScroller.get())]
+		(double centerNum, double thumbPer, float deltaY, bool reversed) {
+			if (comp) {
+				comp->mouseWheelOutsideWithAlt(centerNum, thumbPer, deltaY, reversed);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragStart();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int distanceX, int distanceY, bool moveX, bool moveY) {
+			if (comp) {
+				comp->processAreaDragTo(
+					distanceX, distanceY, moveX, moveY);
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)] {
+			if (comp) {
+				comp->processAreaDragEnd();
+			}
+		},
+		[comp = ScrollerBase::SafePointer(this)]
+		(int index) {
+			if (comp) {
+				comp->editing(index);
+			}
+		});
 }

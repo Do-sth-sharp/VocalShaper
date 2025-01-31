@@ -30,6 +30,7 @@ public:
 	void updateLevelMeter() override;
 	void updateDataRef(int index);
 	void updateData(int index);
+	void updateAll();
 
 	std::tuple<double, double> getViewArea(double pos, double itemSize) const;
 
@@ -59,6 +60,7 @@ private:
 		int size() const;
 		void remove(int index);
 		void insert(int index, std::unique_ptr<SeqTrackComponent> newComp);
+		void clear();
 
 		void updateIndex(int index);
 		void updateInfo(int index);
@@ -69,6 +71,7 @@ private:
 		void updateInstr(int index);
 		void updateDataRef(int index);
 		void updateData(int index);
+		void updateAll(int index);
 
 		void updateHPos(double pos, double itemSize);
 		void updateVPos(double pos, double itemSize);
@@ -158,6 +161,8 @@ private:
 	void processAreaDragEnd();
 
 	void editing(int index);
+
+	std::unique_ptr<SeqTrackComponent> createTrackComp();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqView)
 };
