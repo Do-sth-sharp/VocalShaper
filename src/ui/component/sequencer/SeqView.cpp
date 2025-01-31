@@ -759,7 +759,14 @@ void SeqView::updateTempo() {
 }
 
 void SeqView::updateMuteSolo(int index) {
-	this->trackList->updateMuteSolo(index);
+	/** Get Track Num */
+	int trackNum = this->trackList->size();
+
+	/** For Each Track */
+	for (int i = 0; i < trackNum; i++) {
+		/** Update Track */
+		this->trackList->updateMuteSolo(i);
+	}
 }
 
 void SeqView::updateInputMonitoring(int index) {
