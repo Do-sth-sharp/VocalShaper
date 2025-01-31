@@ -271,100 +271,102 @@ void SeqTrackContentViewer::paint(juce::Graphics& g) {
 		float startPos = (blockStartSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 		float endPos = (blockEndSec - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
 
-		/** Rect */
-		juce::Rectangle<float> blockRect(
-			startPos, paddingHeight,
-			endPos - startPos, this->getHeight() - paddingHeight * 2);
-		g.setColour(this->trackColor.withAlpha(0.5f).withMultipliedAlpha(blockAlpha));
-		g.fillRoundedRectangle(blockRect, blockRadius);
-		g.setColour(outlineColor.withMultipliedAlpha(blockAlpha));
-		g.drawRoundedRectangle(blockRect, blockRadius, outlineThickness);
+		if (endPos > startPos) {
+			/** Rect */
+			juce::Rectangle<float> blockRect(
+				startPos, paddingHeight,
+				endPos - startPos, this->getHeight() - paddingHeight * 2);
+			g.setColour(this->trackColor.withAlpha(0.5f).withMultipliedAlpha(blockAlpha));
+			g.fillRoundedRectangle(blockRect, blockRadius);
+			g.setColour(outlineColor.withMultipliedAlpha(blockAlpha));
+			g.drawRoundedRectangle(blockRect, blockRadius, outlineThickness);
 
-		/** Name */
-		float nameStartPos = std::max(startPos, 0.f) + blockPaddingWidth;
-		float nameEndPos = std::min(endPos, (float)this->getWidth()) - blockPaddingWidth;
-		juce::Rectangle<float> nameRect(
-			nameStartPos, this->compressed ? 0 : blockPaddingHeight,
-			nameEndPos - nameStartPos, this->compressed ? this->getHeight() : blockNameFontHeight);
-		g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
-		g.setFont(blockNameFont);
-		g.drawFittedText(this->blockNameCombined, nameRect.toNearestInt(),
-			juce::Justification::centredLeft, 1, 1.f);
-
-		/** Wave */
-		if (!this->compressed) {
-			/** Select Time */
-			double startSec = std::max(blockStartSec, this->secStart) + blockOffset;
-			double endSec = std::min(blockEndSec, this->secEnd) + blockOffset;
-			int startPixel = startSec * dstPointPerSec / imgScaleRatio;
-			int endPixel = endSec * dstPointPerSec / imgScaleRatio;
-
-			/** Paint Each Channel */
+			/** Name */
+			float nameStartPos = std::max(startPos, 0.f) + blockPaddingWidth;
+			float nameEndPos = std::min(endPos, (float)this->getWidth()) - blockPaddingWidth;
+			juce::Rectangle<float> nameRect(
+				nameStartPos, this->compressed ? 0 : blockPaddingHeight,
+				nameEndPos - nameStartPos, this->compressed ? this->getHeight() : blockNameFontHeight);
 			g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
-			float wavePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
-			float channelHeight = (this->getHeight() - blockPaddingHeight - wavePosY) / (float)this->audioPointTemp.size();
-			for (int i = 0; i < this->audioPointTemp.size(); i++) {
-				float channelPosY = wavePosY + channelHeight * i;
-				auto& data = this->audioPointTemp.getReference(i);
-				int dataSize = data.getSize() / 2 / sizeof(float);
+			g.setFont(blockNameFont);
+			g.drawFittedText(this->blockNameCombined, nameRect.toNearestInt(),
+				juce::Justification::centredLeft, 1, 1.f);
 
-				/** Paint Each Point */
-				for (int j = std::max(startPixel, 0); j <= endPixel && j < dataSize; j++) {
-					/** Get Value */
-					float minVal = 0, maxVal = 0;
-					data.copyTo(&minVal, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
-					data.copyTo(&maxVal, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
+			/** Wave */
+			if (!this->compressed) {
+				/** Select Time */
+				double startSec = std::max(blockStartSec, this->secStart) + blockOffset;
+				double endSec = std::min(blockEndSec, this->secEnd) + blockOffset;
+				int startPixel = startSec * dstPointPerSec / imgScaleRatio;
+				int endPixel = endSec * dstPointPerSec / imgScaleRatio;
 
-					/** Paint Point */
-					double pixelSec = j * imgScaleRatio / dstPointPerSec;
-					float pixelPosX = (pixelSec - blockOffset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
-					juce::Rectangle<float> pointRect(
-						pixelPosX,
-						channelPosY + channelHeight / 2.f - (maxVal / 1.f) * channelHeight / 2.f,
-						imgScaleRatio,
-						channelHeight * ((maxVal - minVal) / 2.f));
-					g.fillRect(pointRect);
+				/** Paint Each Channel */
+				g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
+				float wavePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+				float channelHeight = (this->getHeight() - blockPaddingHeight - wavePosY) / (float)this->audioPointTemp.size();
+				for (int i = 0; i < this->audioPointTemp.size(); i++) {
+					float channelPosY = wavePosY + channelHeight * i;
+					auto& data = this->audioPointTemp.getReference(i);
+					int dataSize = data.getSize() / 2 / sizeof(float);
+
+					/** Paint Each Point */
+					for (int j = std::max(startPixel, 0); j <= endPixel && j < dataSize; j++) {
+						/** Get Value */
+						float minVal = 0, maxVal = 0;
+						data.copyTo(&minVal, (j * 2 + 0) * (int)sizeof(float), sizeof(float));
+						data.copyTo(&maxVal, (j * 2 + 1) * (int)sizeof(float), sizeof(float));
+
+						/** Paint Point */
+						double pixelSec = j * imgScaleRatio / dstPointPerSec;
+						float pixelPosX = (pixelSec - blockOffset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth();
+						juce::Rectangle<float> pointRect(
+							pixelPosX,
+							channelPosY + channelHeight / 2.f - (maxVal / 1.f) * channelHeight / 2.f,
+							imgScaleRatio,
+							channelHeight * ((maxVal - minVal) / 2.f));
+						g.fillRect(pointRect);
+					}
 				}
 			}
-		}
 
-		/** Note */
-		if (!this->compressed) {
-			/** Select Time */
-			double startSec = std::max(blockStartSec, this->secStart) + blockOffset;
-			double endSec = std::min(blockEndSec, this->secEnd) + blockOffset;
+			/** Note */
+			if (!this->compressed) {
+				/** Select Time */
+				double startSec = std::max(blockStartSec, this->secStart) + blockOffset;
+				double endSec = std::min(blockEndSec, this->secEnd) + blockOffset;
 
-			/** Content Area */
-			float notePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
-			float noteAreaHeight = this->getHeight() - blockPaddingHeight - notePosY;
-			juce::Rectangle<float> noteContentRect(0, notePosY, this->getWidth(), noteAreaHeight);
+				/** Content Area */
+				float notePosY = blockPaddingHeight + blockNameFontHeight + blockPaddingHeight;
+				float noteAreaHeight = this->getHeight() - blockPaddingHeight - notePosY;
+				juce::Rectangle<float> noteContentRect(0, notePosY, this->getWidth(), noteAreaHeight);
 
-			/** Limit Note Height */
-			double minNoteID = this->midiMinNote, maxNoteID = this->midiMaxNote;
-			float noteHeight = noteAreaHeight / (maxNoteID - minNoteID + 1);
-			if (noteHeight > noteMaxHeight) {
-				noteHeight = noteMaxHeight;
+				/** Limit Note Height */
+				double minNoteID = this->midiMinNote, maxNoteID = this->midiMaxNote;
+				float noteHeight = noteAreaHeight / (maxNoteID - minNoteID + 1);
+				if (noteHeight > noteMaxHeight) {
+					noteHeight = noteMaxHeight;
 
-				double centerNoteID = minNoteID + (maxNoteID - minNoteID) / 2;
-				minNoteID = centerNoteID - ((noteAreaHeight / noteHeight + 1) / 2 - 1);
-				maxNoteID = centerNoteID + ((noteAreaHeight / noteHeight + 1) / 2 - 1);
-			}
+					double centerNoteID = minNoteID + (maxNoteID - minNoteID) / 2;
+					minNoteID = centerNoteID - ((noteAreaHeight / noteHeight + 1) / 2 - 1);
+					maxNoteID = centerNoteID + ((noteAreaHeight / noteHeight + 1) / 2 - 1);
+				}
 
-			/** Paint Each Note */
-			g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
+				/** Paint Each Note */
+				g.setColour(this->nameColor.withMultipliedAlpha(blockAlpha));
 
-			std::array<double, 128> noteStartTime{};
-			std::fill(noteStartTime.begin(), noteStartTime.end(), -1.0);
+				std::array<double, 128> noteStartTime{};
+				std::fill(noteStartTime.begin(), noteStartTime.end(), -1.0);
 
-			for (auto& [noteStartSec, noteEndSec, noteNum] : this->midiDataTemp) {
-				double noteStart = std::max(noteStartSec, startSec);
-				double noteEnd = std::min(noteEndSec, endSec);
-				juce::Rectangle<float> noteRect(
-					(noteStart - blockOffset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
-					notePosY + (maxNoteID - noteNum) * noteHeight,
-					(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
-					noteHeight);
-				g.fillRect(noteRect);
+				for (auto& [noteStartSec, noteEndSec, noteNum] : this->midiDataTemp) {
+					double noteStart = std::max(noteStartSec, startSec);
+					double noteEnd = std::min(noteEndSec, endSec);
+					juce::Rectangle<float> noteRect(
+						(noteStart - blockOffset - this->secStart) / (this->secEnd - this->secStart) * this->getWidth(),
+						notePosY + (maxNoteID - noteNum) * noteHeight,
+						(noteEnd - noteStart) / (this->secEnd - this->secStart) * this->getWidth(),
+						noteHeight);
+					g.fillRect(noteRect);
+				}
 			}
 		}
 		};
