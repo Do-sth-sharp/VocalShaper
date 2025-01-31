@@ -139,6 +139,7 @@ public:
 		const juce::String& fileExtension, const juce::StringPairArray& metaData, int bitDepth, int quality);
 	static void renderGUI(const juce::String& dirPath, const juce::String& fileName,
 		const juce::String& fileExtension);
+	static void renderGUI(const juce::String& dirPath);
 	static void renderGUI();
 
 	static void insertInstrGUI(int index);
@@ -194,6 +195,9 @@ public:
 		const CancelCallback& cancelCallback = {});
 	static void askForMixerTracksListGUIAsync(
 		const std::function<void(const juce::Array<quickAPI::TrackIndex>&)>& callback,
+		const CancelCallback& cancelCallback = {});
+	static void askForAudioSaveNameGUIAsync(
+		const std::function<void(const juce::String&, const juce::String&)>& callback,
 		const CancelCallback& cancelCallback = {});
 	static void askForNameGUIAsync(
 		const std::function<void(const juce::String&)>& callback,

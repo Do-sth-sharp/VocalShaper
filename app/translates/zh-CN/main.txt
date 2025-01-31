@@ -127,7 +127,6 @@ countries: cn
 "Destination" = "目标"
 "Channels:" = "通道："
 
-"Track" = "轨道"
 "AUX Track" = "发送轨道"
 "Master Track" = "主轨道"
 "Output" = "输出"
@@ -171,3 +170,10 @@ countries: cn
 "Menu" = "菜单"
 "MIDI Track" = "MIDI 轨道"
 "New Track" = "新轨道"
+
+"Type" = "类型"
+"Bus" = "总线"
+"Name" = "名称"
+"Sample Rate" = "采样率"
+"Channels" = "通道"
+"Length" = "长度"

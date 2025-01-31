@@ -605,6 +605,9 @@ void CoreActions::renderGUI(const juce::String& dirPath, const juce::String& fil
 
 void CoreActions::renderGUI(const juce::String& dirPath, const juce::String& fileName,
 	const juce::String& fileExtension) {
+	/** Check Input */
+	if (fileName.isEmpty() || fileExtension.isEmpty()) { return; }
+
 	/** Callback */
 	auto callback = [dirPath, fileName, fileExtension]
 	(bool addMetaData, int bitDepth, int quality) {
@@ -622,21 +625,25 @@ void CoreActions::renderGUI(const juce::String& dirPath, const juce::String& fil
 	CoreActions::askForAudioSaveFormatsAsync(callback, fileExtension);
 }
 
+void CoreActions::renderGUI(const juce::String& dirPath) {
+	/** Check Input */
+	if (dirPath.isEmpty()) { return; }
+	
+	/** Callback */
+	auto callback = [dirPath](const juce::String& name, const juce::String& format) {
+		CoreActions::renderGUI(dirPath, name, format);
+		};
+
+	/** Ask For Audio Save Format */
+	CoreActions::askForAudioSaveNameGUIAsync(callback);
+}
+
 void CoreActions::renderGUI() {
-	/** Supported Formats */
-	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
-
-	/** Choose File */
+	/** Choose Dir */
 	juce::File defaultPath = quickAPI::getProjectDir();
-	juce::FileChooser chooser(TRANS("Render"), defaultPath,
-		audioFormats.joinIntoString(","));
-	if (chooser.browseForFileToSave(false)) {
-		auto file = chooser.getResult();
-		if (file.getFileExtension().isEmpty()) {
-			file = file.withFileExtension(audioFormats[0].trimCharactersAtStart("*."));
-		}
-
-		auto dir = file.getParentDirectory();
+	juce::FileChooser chooser(TRANS("Render"), defaultPath);
+	if (chooser.browseForDirectory()) {
+		auto dir = chooser.getResult();
 		if (!dir.findChildFiles(juce::File::TypesOfFileToFind::findFilesAndDirectories, false).isEmpty()) {
 			if (!juce::AlertWindow::showOkCancelBox(
 				juce::MessageBoxIconType::QuestionIcon, TRANS("Render"),
@@ -646,8 +653,7 @@ void CoreActions::renderGUI() {
 		}
 
 		/** Render */
-		CoreActions::renderGUI(dir.getFullPathName(),
-			file.getFileNameWithoutExtension(), file.getFileExtension());
+		CoreActions::renderGUI(dir.getFullPathName());
 	}
 }
 
@@ -1319,6 +1325,7 @@ void CoreActions::askForMixerTracksListGUIAsync(
 		juce::AlertWindow::showMessageBox(
 			juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
 			TRANS("The track list is empty!"));
+		if (cancelCallback) { cancelCallback(); }
 		return;
 	}
 
@@ -1368,10 +1375,57 @@ void CoreActions::askForMixerTracksListGUIAsync(
 				juce::AlertWindow::showMessageBox(
 					juce::MessageBoxIconType::WarningIcon, TRANS("Mixer Track Selector"),
 					TRANS("No track selected!"));
+				if (cancelCallback) { cancelCallback(); }
 				return;
 			}
 
 			callback(resList);
+		}
+	), true);
+}
+
+void CoreActions::askForAudioSaveNameGUIAsync(
+	const std::function<void(const juce::String&, const juce::String&)>& callback,
+	const CancelCallback& cancelCallback) {
+	/** Supported Formats */
+	juce::StringArray audioFormats = quickAPI::getAudioFormatsSupported(true);
+	for (auto& i : audioFormats) {
+		i = i.trimCharactersAtStart("*");
+	}
+
+	/** Create Editor */
+	auto editorWindow = new juce::AlertWindow{
+		TRANS("Save Audio"), TRANS("Select audio saving format and input the file name in the editor:"),
+		juce::MessageBoxIconType::QuestionIcon };
+	editorWindow->addButton(TRANS("OK"), 1);
+	editorWindow->addButton(TRANS("Cancel"), 0);
+	editorWindow->addComboBox(TRANS("Audio Format"), audioFormats, TRANS("Audio Format"));
+	editorWindow->addTextEditor(TRANS("Name"), "", TRANS("Name"));
+
+	/** Get Editor */
+	auto formatEditor = editorWindow->getComboBoxComponent(TRANS("Audio Format"));
+	auto nameEditor = editorWindow->getTextEditor(TRANS("Name"));
+
+	/** Show Async */
+	editorWindow->enterModalState(true, juce::ModalCallbackFunction::create(
+		[formatEditor, nameEditor, callback, cancelCallback](int result) {
+			if (result != 1) {
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
+
+			juce::String format = formatEditor->getText();
+			juce::String name = nameEditor->getText();
+
+			if (name.isEmpty()) {
+				juce::AlertWindow::showMessageBox(
+					juce::MessageBoxIconType::WarningIcon, TRANS("Save Audio"),
+					TRANS("The name must not be empty!"));
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
+
+			callback(name, format);
 		}
 	), true);
 }
@@ -1439,7 +1493,10 @@ void CoreActions::askForPluginGUIAsync(
 			juce::String name = combo->getText();
 
 			auto& pluginDes = list.getReference(index);
-			if(pluginDes.name != name){ return; }
+			if(pluginDes.name != name){
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
 
 			callback(pluginDes.createIdentifierString(), pluginDes.hasARAExtension);
 		}
@@ -1466,10 +1523,10 @@ void CoreActions::askForBusTypeGUIAsync(
 		juce::MessageBoxIconType::QuestionIcon };
 	selectorWindow->addButton(TRANS("OK"), 1);
 	selectorWindow->addButton(TRANS("Cancel"), 0);
-	selectorWindow->addComboBox(TRANS("Type"), typeNames, TRANS("Type"));
+	selectorWindow->addComboBox(TRANS("Bus"), typeNames, TRANS("Bus"));
 
 	/** Set Default Type */
-	auto combo = selectorWindow->getComboBoxComponent(TRANS("Type"));
+	auto combo = selectorWindow->getComboBoxComponent(TRANS("Bus"));
 	combo->setSelectedItemIndex(defaultIndex);
 
 	/** Show Selector Async */
@@ -1568,7 +1625,10 @@ void CoreActions::askForPluginParamGUIAsync(
 			}
 
 			int index = combo->getSelectedItemIndex();
-			if (index < 0 || index >= size) { return; }
+			if (index < 0 || index >= size) {
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
 
 			callback(index);
 		}
@@ -1641,7 +1701,10 @@ void CoreActions::askForPluginMIDICCGUIAsync(
 			}
 
 			int index = combo->getSelectedItemIndex();
-			if (index < 0 || index >= size) { return; }
+			if (index < 0 || index >= size) {
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
 
 			callback(index);
 		}
@@ -1720,7 +1783,10 @@ void CoreActions::askForMIDITrackAsync(
 			}
 
 			int index = combo->getSelectedItemIndex();
-			if (index < 0 || index >= totalNum) { return; }
+			if (index < 0 || index >= totalNum) {
+				if (cancelCallback) { cancelCallback(); }
+				return;
+			}
 
 			callback(index);
 		}
@@ -1790,7 +1856,10 @@ void CoreActions::askForPluginPresetAsync(
 	const std::function<void(const juce::String&)>& callback,
 	const juce::String& identifier, bool saveMode,
 	const CancelCallback& cancelCallback) {
-	if (identifier.isEmpty()) { return; }
+	if (identifier.isEmpty()) {
+		if (cancelCallback) { cancelCallback(); }
+		return;
+	}
 
 	auto presetDir = utils::getPluginPresetDir();
 	if (!presetDir.exists()) {
