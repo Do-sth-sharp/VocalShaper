@@ -8,6 +8,7 @@ countries: cn
 
 "Project Warning" = "项目警告"
 "Mixer Track Selector" = "混音器轨道选择器"
+"Save Audio" = "保存音频"
 "Crash Dump File" = "崩溃转储文件"
 "Audio Properties" = "音频属性"
 "Name Editor" = "名称编辑器"
@@ -31,6 +32,8 @@ countries: cn
 "The project file must be in the root of working directory!" = "项目文件必须在工作目录根内！"
 "The track list is empty!" = "轨道列表为空！"
 "Select tracks in the list: (Use Ctrl and Shift keys to select multiple items)" = "在列表中选择轨道：（使用Ctrl和Shift键多选）"
+"Select audio saving format and input the file name in the editor:" = "选择音频保存格式并在编辑器中输入文件名："
+"The name must not be empty!" = "名称不得为空！"
 "No track selected!" = "未选择轨道！"
 "The selected directory is not empty, which may cause existing files to be overwritten. Continue?" = "选择的目录不是空的，这可能会导致已有文件被覆盖。继续？"
 "The project file has been registered in the system!" = "项目文件已经注册到系统！"
