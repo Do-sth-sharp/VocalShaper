@@ -2,7 +2,7 @@
 project (VocalShaper VERSION 0.0.2 LANGUAGES CXX C)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
-    set (CMAKE_BUILD_TYPE "Release"  CACHE STRING "Choose the type of build." FORCE)
+	set (CMAKE_BUILD_TYPE "Release"  CACHE STRING "Choose the type of build." FORCE)
 endif (NOT DEFINED CMAKE_BUILD_TYPE)
 
 set(CMAKE_CXX_STANDARD 20)# Using C++20
@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)# For Clang-Tidy
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")# Using /MD and /MDd on MSVC
 if (WIN32)
-    add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
+	add_compile_definitions ("_CRT_SECURE_NO_WARNINGS")
 endif (WIN32)
 
 if (WIN32)
@@ -48,13 +48,13 @@ set (ENGINES_DIR "${OUTPUT_DIR}/synth-engines")
 file (GLOB_RECURSE APP_CONFIG_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/app/*")
 set (APP_CONFIG_OUTPUT "")
 foreach (ITEM ${APP_CONFIG_SRC})
-    string (REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/app" "${OUTPUT_DIR}" ITEM_TARGET ${ITEM})
+	string (REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/app" "${OUTPUT_DIR}" ITEM_TARGET ${ITEM})
 	list (APPEND APP_CONFIG_OUTPUT ${ITEM_TARGET})
 
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-    add_custom_command (
+	add_custom_command (
 		OUTPUT ${ITEM_TARGET}
 		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
 		DEPENDS ${ITEM}
@@ -70,13 +70,13 @@ add_custom_target (app_config_copy
 file (GLOB_RECURSE REMIXICON_SRC CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/RemixIcon/icons/*.svg")
 set (REMIXICON_OUTPUT "")
 foreach (ITEM ${REMIXICON_SRC})
-    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/RemixIcon/icons" "${OUTPUT_DIR}/RemixIcon" ITEM_TARGET ${ITEM})
+	string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/RemixIcon/icons" "${OUTPUT_DIR}/RemixIcon" ITEM_TARGET ${ITEM})
 	list (APPEND REMIXICON_OUTPUT ${ITEM_TARGET})
 
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-    add_custom_command (
+	add_custom_command (
 		OUTPUT ${ITEM_TARGET}
 		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
 		DEPENDS ${ITEM}
@@ -116,7 +116,7 @@ foreach (ITEM ${ENGINE_LIST})
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-    add_custom_command (
+	add_custom_command (
 		OUTPUT ${ITEM_TARGET}
 		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
 		DEPENDS ${ITEM}
@@ -159,7 +159,7 @@ foreach (ITEM ${LAME_LIST})
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-    add_custom_command (
+	add_custom_command (
 		OUTPUT ${ITEM_TARGET}
 		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
 		DEPENDS ${ITEM}
@@ -263,7 +263,7 @@ if (NOT MSVC)
 endif (NOT MSVC)
 if (WIN32)
 	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
-  target_link_libraries (VocalShaper PRIVATE Dbghelp ntdll)
+	target_link_libraries (VocalShaper PRIVATE Dbghelp ntdll)
 else ()
 	target_link_libraries (VocalShaper PRIVATE juce-host-dev-kit::juce-full)
 	target_link_libraries (VocalShaper PRIVATE Fontconfig::Fontconfig)
