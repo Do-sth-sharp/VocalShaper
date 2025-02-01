@@ -77,6 +77,25 @@ vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./ins
 cd ..
 ```
 
+### Linux (Clang-LLVM)
+#### Requirements:
+- alsa
+- freetype2
+- libcurl
+- webkit2gtk-4.0
+- gtk+-x11-3.0
+
+```
+git clone https://github.com/Do-sth-sharp/VocalShaper.git
+cd VocalShaper
+git checkout develop
+git submodule update --init --recursive
+cd vcpkg
+bash bootstrap-vcpkg.sh
+./vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=x64-linux-llvm
+cd ..
+```
+
 ## Compile
 ### Windows Debug (MSVC)
 ```
@@ -102,4 +121,16 @@ cmake --build build/ninja-debug-win64-llvm --target VocalShaper
 ```
 cmake --preset "Ninja Release Win64 LLVM"
 cmake --build build/ninja-release-win64-llvm --target VocalShaper
+```
+
+### Linux Debug (Clang-LLVM)
+```
+cmake --preset "Ninja Debug Linux LLVM"
+cmake --build build/ninja-debug-linux-llvm --target VocalShaper
+```
+
+### Linux Release (Clang-LLVM)
+```
+cmake --preset "Ninja Release Linux LLVM"
+cmake --build build/ninja-release-linux-llvm --target VocalShaper
 ```
