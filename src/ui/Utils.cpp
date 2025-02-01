@@ -335,6 +335,8 @@ namespace utils {
 	}
 
 	static const std::vector<int> preKMP(const juce::String& strLong) {
+		if (strLong.isEmpty()) { return {}; }
+
 		std::vector<int> next;
 		next.resize(strLong.length());
 
