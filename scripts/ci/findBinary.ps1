@@ -21,7 +21,7 @@ if ($IsWindows) {
 }
 else {
     # Get all ELF Mach-O and universal binary files recursively from the specified directory
-    $joinedOutput = & ./findBinary-unix.sh $DirectoryPath
+    $joinedOutput = & bash ./findBinary-unix.sh $DirectoryPath
 }
 
 # Print the output
