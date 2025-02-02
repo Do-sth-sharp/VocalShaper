@@ -12,7 +12,7 @@ env:
   clang-version: '18.1.8'
   sha-length: 7
   apt-source: 'echo -e "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: jammy\nComponents: main restricted universe multiverse\nArchitectures: amd64 i386" | sudo tee /etc/apt/sources.list.d/jammy.sources'
-  linux-requirements: 'sudo apt install libasound2-dev libfreetype-dev libcurl4-openssl-dev libwebkit2gtk-4.0-dev libgtk-3-dev'
+  linux-requirements: 'sudo apt install libasound2-dev libfreetype-dev libcurl4-openssl-dev libwebkit2gtk-4.0-dev libgtk-3-dev libtinfo5'
 
 jobs:
   prepare-package:
