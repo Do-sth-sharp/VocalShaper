@@ -14,14 +14,17 @@ if ($IsWindows) {
     # Format the output
     $output = $files | ForEach-Object {
         '"' + $_.FullName + '"'
-    } 
+    }
 
     # Join the file names with a comma separator
     $joinedOutput = $output -join ","
 }
 else {
+    # Get script Path
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "findBinary-unix.sh"
+
     # Get all ELF Mach-O and universal binary files recursively from the specified directory
-    $joinedOutput = & bash ./findBinary-unix.sh $DirectoryPath
+    $joinedOutput = & bash $scriptPath $DirectoryPath
 }
 
 # Print the output
