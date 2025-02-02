@@ -1,0 +1,2 @@
+#!/bin/bash
+./PluginSearcher "./data/audio/pluginPaths.txt" "./data/audio/plugins.xml" "./data/audio/blackPlugins.txt" "./data/audio/deadPlugins"
