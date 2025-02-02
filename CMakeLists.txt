@@ -123,17 +123,21 @@ foreach (ITEM ${ENGINE_LIST})
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-	if (UNIX AND NOT APPLE)
-		set (PATCH_ENGINE_COMMAND "${PATCHELF} --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' ${ITEM_OUTPUT}")
-	endif ()
-
 	add_custom_command (
 		OUTPUT ${ITEM_TARGET}
 		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
-		COMMAND ${PATCH_ENGINE_COMMAND}
 		DEPENDS ${ITEM}
 		COMMENT "Copying engine file: ${ITEM}"
 		VERBATIM)
+
+	if (UNIX AND NOT APPLE)
+		add_custom_command (
+			OUTPUT ${ITEM_TARGET}
+			COMMAND ${PATCHELF} --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' ${ITEM_OUTPUT}
+			DEPENDS ${ITEM_TARGET}
+			COMMENT "Patch engine file ELF RPATH: ${ITEM}"
+			VERBATIM)
+	endif ()
 endforeach (ITEM ${ENGINE_LIST})
 add_custom_target (engines_copy
 	DEPENDS ${ENGINE_OUTPUT}
