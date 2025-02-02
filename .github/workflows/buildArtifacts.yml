@@ -7,6 +7,10 @@ on:
     branches: [ "develop", "main" ]
   workflow_call:
 
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
 env:
   ninja-version: '1.11.1'
   clang-version: '18.1.8'
