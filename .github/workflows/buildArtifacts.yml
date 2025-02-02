@@ -268,7 +268,7 @@ jobs:
       if: runner.os == 'Linux'
       working-directory: ${{github.workspace}}
       shell: pwsh
-      run: ./scripts/ci/copySoLib.ps1 "./vcpkg/installed/${{matrix.vcpkg_triplet}}/lib"./build/${{matrix.build_path}}/bin"
+      run: ./scripts/ci/copySoLib.ps1 "./vcpkg/installed/${{matrix.vcpkg_triplet}}/lib" "./build/${{matrix.build_path}}/bin"
 
     - name: Pre Packing
       working-directory: ${{github.workspace}}
