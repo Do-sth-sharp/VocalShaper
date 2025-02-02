@@ -1,5 +1,5 @@
 param (
-    [string]$DirectoryPath
+    [string]$DirectoryPath,
     [string]$RPath
 )
 
