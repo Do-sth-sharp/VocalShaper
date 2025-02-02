@@ -31,6 +31,14 @@ foreach ($file in $allFiles) {
         $destination = Join-Path -Path $targetDir -ChildPath $file.Name
         Copy-Item -Path $file.FullName -Destination $destination -Force
     }
+    # Check if it's a symbolic link
+    elseif ($file.LinkType -eq 'SymbolicLink') {
+        Write-Host "Creating symbolic link for: $($file.FullName)"
+        
+        # Create the symbolic link in the target directory
+        $linkDestination = Join-Path -Path $targetDir -ChildPath $file.Name
+        New-Item -ItemType SymbolicLink -Path $linkDestination -Target $file.FullName
+    }
 }
 
 Write-Host "Copy operation completed!"
