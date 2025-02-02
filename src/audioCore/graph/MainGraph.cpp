@@ -1791,7 +1791,7 @@ void MainGraph::initMasterTrack(const juce::AudioChannelSet& bus) {
 	}
 	
 	/** Init Master Track */
-	if (this->masterTrack = this->addNode(std::make_unique<Track>(TrackType::MasterTrack, bus))) {
+	if ((this->masterTrack = this->addNode(std::make_unique<Track>(TrackType::MasterTrack, bus)))) {
 		/** Prepare To Play */
 		this->masterTrack->getProcessor()->setPlayHead(this->getPlayHead());
 		this->masterTrack->getProcessor()->prepareToPlay(this->getSampleRate(), this->getBlockSize());

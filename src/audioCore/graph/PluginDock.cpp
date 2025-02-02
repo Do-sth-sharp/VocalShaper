@@ -419,7 +419,7 @@ juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index)
 		/** Find Hot Spot Nodes */
 		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
 		for (int i = index - 1; i >= 0; i--) {
-			if (lastNode = this->pluginNodeList[i]) {
+			if ((lastNode = this->pluginNodeList[i])) {
 				break;
 			}
 		}
@@ -427,7 +427,7 @@ juce::AudioProcessorGraph::Node::Ptr PluginDock::removePluginInternal(int index)
 			lastNode = this->audioInputNode;
 		}
 		for (int i = index + 1; i < PluginDock::pluginSlotNum; i++) {
-			if (nextNode = this->pluginNodeList[i]) {
+			if ((nextNode = this->pluginNodeList[i])) {
 				break;
 			}
 		}
@@ -479,7 +479,7 @@ bool PluginDock::insertPluginInternal(
 		/** Find Hot Spot Nodes */
 		juce::AudioProcessorGraph::Node::Ptr lastNode, nextNode;
 		for (int i = index - 1; i >= 0; i--) {
-			if (lastNode = this->pluginNodeList[i]) {
+			if ((lastNode = this->pluginNodeList[i])) {
 				break;
 			}
 		}
@@ -487,7 +487,7 @@ bool PluginDock::insertPluginInternal(
 			lastNode = this->audioInputNode;
 		}
 		for (int i = index + 1; i < PluginDock::pluginSlotNum; i++) {
-			if (nextNode = this->pluginNodeList[i]) {
+			if ((nextNode = this->pluginNodeList[i])) {
 				break;
 			}
 		}
