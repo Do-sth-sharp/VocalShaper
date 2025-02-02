@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.15)
+﻿cmake_minimum_required (VERSION 3.18)
 project (VocalShaper VERSION 0.1.0 LANGUAGES CXX C)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
@@ -31,10 +31,7 @@ elseif (APPLE)
 endif ()
 
 if (UNIX AND NOT APPLE)
-	find_program(PATCHELF patchelf)
-	if(NOT PATCHELF)
-		message(FATAL_ERROR "patchelf not found. Please install patchelf.")
-	endif()
+	find_program (PATCHELF patchelf REQUIRED)
 endif ()
 
 # Packages
@@ -105,11 +102,9 @@ endfunction (engine_get_pdb var vst3_path)
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	get_target_property (ENGINE_PATH SynthEngineDemo::SynthEngineDemo IMPORTED_LOCATION_DEBUG)
 	engine_get_pdb (ENGINE_PDB_PATH ${ENGINE_PATH})
-	set (ENGINE_RPATH_BASE "../../debug/lib")
 else (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	get_target_property (ENGINE_PATH SynthEngineDemo::SynthEngineDemo IMPORTED_LOCATION_RELEASE)
 	set (ENGINE_PDB_PATH "")
-	set (ENGINE_RPATH_BASE "../../lib")
 endif (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 set (ENGINE_LIST ${ENGINE_LIST} "${ENGINE_PATH}")
 if (MSVC)
@@ -117,7 +112,7 @@ if (MSVC)
 endif (MSVC)
 
 get_filename_component (ENGINE_BUILD_DIR ${ENGINE_PATH} DIRECTORY)
-file (RELATIVE_PATH RPATH_REL_PATH "${ENGINES_DIR}" "${ENGINE_BUILD_DIR}/${ENGINE_RPATH_BASE}")
+file (RELATIVE_PATH RPATH_REL_PATH "${ENGINES_DIR}" "${ENGINE_BUILD_DIR}/../lib")
 
 set (ENGINE_OUTPUT "")
 foreach (ITEM ${ENGINE_LIST})
@@ -129,7 +124,7 @@ foreach (ITEM ${ENGINE_LIST})
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
 	if (UNIX AND NOT APPLE)
-		set (PATCH_ENGINE_COMMAND "patchelf --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' ${ITEM_OUTPUT}")
+		set (PATCH_ENGINE_COMMAND "${PATCHELF} --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' ${ITEM_OUTPUT}")
 	endif ()
 
 	add_custom_command (
