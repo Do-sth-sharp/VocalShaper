@@ -171,11 +171,13 @@ jobs:
             compiler: Clang
             cmake_config: 'Ninja Debug Linux LLVM'
             build_path: 'ninja-debug-linux-llvm'
+            lib_path: 'debug/lib'
           - os: ubuntu-latest
             build_type: Release
             compiler: Clang
             cmake_config: 'Ninja Release Linux LLVM'
             build_path: 'ninja-release-linux-llvm'
+            lib_path: 'lib'
 
         exclude:
           - os: ubuntu-latest
@@ -278,7 +280,7 @@ jobs:
       if: runner.os == 'Linux'
       working-directory: ${{github.workspace}}
       shell: pwsh
-      run: ./scripts/ci/copySoLib.ps1 "./vcpkg/installed/${{matrix.vcpkg_triplet}}/lib" "./build/${{matrix.build_path}}/bin"
+      run: ./scripts/ci/copySoLib.ps1 "./vcpkg/installed/${{matrix.vcpkg_triplet}}/${{matrix.lib_path}}" "./build/${{matrix.build_path}}/bin"
 
     - name: Pre Packing
       working-directory: ${{github.workspace}}
