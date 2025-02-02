@@ -123,19 +123,27 @@ foreach (ITEM ${ENGINE_LIST})
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
-	add_custom_command (
-		OUTPUT ${ITEM_TARGET}
-		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
-		DEPENDS ${ITEM}
-		COMMENT "Copying engine file: ${ITEM}"
-		VERBATIM)
-
 	if (UNIX AND NOT APPLE)
 		add_custom_command (
+			OUTPUT "${ITEM_TARGET}.temp"
+			COMMAND ${COPY_COMMAND} "${ITEM_INPUT}" "${ITEM_OUTPUT}.temp"
+			DEPENDS ${ITEM}
+			COMMENT "Copying engine file: ${ITEM_TARGET}"
+			VERBATIM)
+
+		add_custom_command (
 			OUTPUT ${ITEM_TARGET}
-			COMMAND ${PATCHELF} --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' ${ITEM_OUTPUT}
-			DEPENDS ${ITEM_TARGET}
-			COMMENT "Patch engine file ELF RPATH: ${ITEM}"
+			COMMAND ${PATCHELF} --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' "${ITEM_OUTPUT}.temp"
+			COMMAND mv "${ITEM_TARGET}.temp" "${ITEM_TARGET}"
+			DEPENDS "${ITEM_TARGET}.temp"
+			COMMENT "Patch engine file ELF RPATH: ${ITEM_TARGET}"
+			VERBATIM)
+	else ()
+		add_custom_command (
+			OUTPUT ${ITEM_TARGET}
+			COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
+			DEPENDS ${ITEM}
+			COMMENT "Copying engine file: ${ITEM_TARGET}"
 			VERBATIM)
 	endif ()
 endforeach (ITEM ${ENGINE_LIST})
