@@ -18,8 +18,28 @@ if (-Not (Test-Path -Path $targetDir)) {
 # Get all files from the source directory (recursively)
 $allFiles = Get-ChildItem -Path $sourceDir -Recurse -File -Exclude "*.vst3"
 
+# Symbol link
+function Resolve-Symlink {
+    param (
+        [string]$Path
+    )
+
+    $currentPath = $Path
+    while ($true) {
+        $item = Get-Item -Path $currentPath -Force
+        if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            $currentPath = $item.Target
+        } else {
+            return $currentPath
+        }
+    }
+}
+
 # Process each file
 foreach ($file in $allFiles) {
+    # Copy destination
+    $destination = Join-Path -Path $targetDir -ChildPath $file.Name
+
     # Use the 'file' command to check the file type
     $fileType = & file $file.FullName
 
@@ -28,16 +48,21 @@ foreach ($file in $allFiles) {
         Write-Host "Copying dynamic library: $($file.FullName)"
         
         # Copy the file to the target directory
-        $destination = Join-Path -Path $targetDir -ChildPath $file.Name
         Copy-Item -Path $file.FullName -Destination $destination -Force
     }
     # Check if it's a symbolic link
     elseif ($file.LinkType -eq 'SymbolicLink') {
-        Write-Host "Creating symbolic link for: $($file.FullName)"
+        $linkTarget = Resolve-Symlink -Path $file.FullName
+        $linkTargetFullPath = Join-Path -Path $file.DirectoryName -ChildPath $linkTarget
+
+        $targetType = & file $linkTargetFullPath
+
+        if ($targetType -match "shared object") {
+            Write-Host "Copying symbolic link target for: $($file.FullName)->$($linkTargetFullPath)"
         
-        # Create the symbolic link in the target directory
-        $linkDestination = Join-Path -Path $targetDir -ChildPath $file.Name
-        New-Item -ItemType SymbolicLink -Path $linkDestination -Target $file.FullName
+            # Copy the symbolic link target to the target directory
+            Copy-Item -Path $linkTargetFullPath -Destination $destination -Force
+        }
     }
 }
 
