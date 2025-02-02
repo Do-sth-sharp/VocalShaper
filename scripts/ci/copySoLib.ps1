@@ -16,7 +16,7 @@ if (-Not (Test-Path -Path $targetDir)) {
 }
 
 # Get all files from the source directory (recursively)
-$allFiles = Get-ChildItem -Path $sourceDir -Recurse -File
+$allFiles = Get-ChildItem -Path $sourceDir -Recurse -File -Exclude "*.vst3"
 
 # Process each file
 foreach ($file in $allFiles) {
