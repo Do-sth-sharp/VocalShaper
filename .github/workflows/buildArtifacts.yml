@@ -12,7 +12,7 @@ env:
   clang-version: '18.1.8'
   sha-length: 7
   apt-source: 'echo -e "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: jammy\nComponents: main restricted universe multiverse\nArchitectures: amd64" | sudo tee /etc/apt/sources.list.d/jammy.sources'
-  linux-requirements: 'sudo apt install libasound2-dev libfreetype-dev libcurl4-openssl-dev libwebkit2gtk-4.0-dev libgtk-3-dev libtinfo5'
+  linux-requirements: 'sudo apt install libasound2-dev libfreetype-dev libcurl4-openssl-dev libwebkit2gtk-4.0-dev libgtk-3-dev libtinfo5 patchelf'
 
 jobs:
   prepare-package:
@@ -257,6 +257,18 @@ jobs:
       working-directory: ${{github.workspace}}
       shell: pwsh
       run: cmake --build "build/${{matrix.build_path}}" --target VocalShaper
+
+    - name: Patch ELF RPATH on Linux
+      if: runner.os == 'Linux'
+      working-directory: ${{github.workspace}}
+      shell: pwsh
+      run: ./scripts/ci/patchELF.ps1 -DirectoryPath "./build/${{matrix.build_path}}/bin"
+
+    - name: Copy Dynamic Library on Linux
+      if: runner.os == 'Linux'
+      working-directory: ${{github.workspace}}
+      shell: pwsh
+      run: ./scripts/ci/copySoLib.ps1 "./vcpkg/installed/${{matrix.vcpkg_triplet}}/lib"./build/${{matrix.build_path}}/bin"
 
     - name: Pre Packing
       working-directory: ${{github.workspace}}
