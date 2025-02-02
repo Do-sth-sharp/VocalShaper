@@ -84,6 +84,7 @@ cd ..
 - libcurl
 - webkit2gtk-4.0
 - gtk+-x11-3.0
+- patchelf
 
 ```
 git clone https://github.com/Do-sth-sharp/VocalShaper.git

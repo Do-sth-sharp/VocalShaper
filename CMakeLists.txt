@@ -30,6 +30,13 @@ elseif (APPLE)
 	set (COPY_COMMAND "cp")
 endif ()
 
+if (UNIX AND NOT APPLE)
+	find_program(PATCHELF patchelf)
+	if(NOT PATCHELF)
+		message(FATAL_ERROR "patchelf not found. Please install patchelf.")
+	endif()
+endif ()
+
 # Packages
 find_package (juce-host-dev-kit CONFIG REQUIRED)
 find_package (SynthEngineDemo CONFIG REQUIRED)
@@ -116,9 +123,16 @@ foreach (ITEM ${ENGINE_LIST})
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)
 	cmake_path (CONVERT ${ITEM_TARGET} TO_NATIVE_PATH_LIST ITEM_OUTPUT)
 
+	get_filename_component (ENGINE_BUILD_DIR ${ENGINE_PATH} DIRECTORY)
+	file (RELATIVE_PATH RPATH_REL_PATH "${ENGINES_DIR}" "${ENGINE_BUILD_DIR}/../../lib")
+	if (UNIX AND NOT APPLE)
+		set (PATCH_ENGINE_COMMAND "patchelf --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}'")
+	endif ()
+
 	add_custom_command (
 		OUTPUT ${ITEM_TARGET}
 		COMMAND ${COPY_COMMAND} ${ITEM_INPUT} ${ITEM_OUTPUT}
+		COMMAND ${PATCH_ENGINE_COMMAND} ${ITEM_OUTPUT}
 		DEPENDS ${ITEM}
 		COMMENT "Copying engine file: ${ITEM}"
 		VERBATIM)
