@@ -1,5 +1,6 @@
 param (
     [string]$DirectoryPath
+    [string]$RPath
 )
 
 # Get all files in the directory (recursively)
@@ -14,7 +15,8 @@ foreach ($file in $allFiles) {
         Write-Host "Patching ELF file: $file"
         
         # Use patchelf to set the rpath to $ORIGIN
-        patchelf --set-rpath '$ORIGIN' $file.FullName
+        $RPathStr = "'" + $RPath + "'"
+        patchelf --set-rpath $RPathStr $file.FullName
     }
 }
 
