@@ -418,19 +418,25 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 		juce::Label::ColourIds::outlineColourId);
 
 	/** Effect Rect */
-	auto effectRect = this->effectList->getBounds();
-	g.setColour(listOutlineColor);
-	g.drawRect(effectRect, outlineThickness);
+	if (this->effectList->isVisible()) {
+		auto effectRect = this->effectList->getBounds();
+		g.setColour(listOutlineColor);
+		g.drawRect(effectRect, outlineThickness);
+	}
 
 	/** MIDI Send Rect */
-	auto midiSendRect = this->midiSendList->getBounds();
-	g.setColour(listOutlineColor);
-	g.drawRect(midiSendRect, outlineThickness);
+	if (this->midiSendList->isVisible()) {
+		auto midiSendRect = this->midiSendList->getBounds();
+		g.setColour(listOutlineColor);
+		g.drawRect(midiSendRect, outlineThickness);
+	}
 
 	/** Audio Send Rect */
-	auto audioSendRect = this->audioSendList->getBounds();
-	g.setColour(listOutlineColor);
-	g.drawRect(audioSendRect, outlineThickness);
+	if (this->audioSendList->isVisible()) {
+		auto audioSendRect = this->audioSendList->getBounds();
+		g.setColour(listOutlineColor);
+		g.drawRect(audioSendRect, outlineThickness);
+	}
 
 	/** Outline */
 	auto totalRect = this->getLocalBounds();
