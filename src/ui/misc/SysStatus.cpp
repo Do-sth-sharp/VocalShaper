@@ -83,7 +83,7 @@ double SysStatus::getCPUUsage(CPUPercTemp& temp) {
 		long totalDiff = total - temp.cpuTemp[0];
 		long idleDiff = idle - temp.cpuTemp[1];
 
-		float cpuUsage = 100.0 * (totalDiff - idleDiff) / totalDiff;
+		float cpuUsage = (totalDiff - idleDiff) / (float)totalDiff;
 
 		temp.cpuTemp[0] = total;
 		temp.cpuTemp[1] = idle;
