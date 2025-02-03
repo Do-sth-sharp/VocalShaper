@@ -133,7 +133,7 @@ foreach (ITEM ${ENGINE_LIST})
 
 		add_custom_command (
 			OUTPUT ${ITEM_TARGET}
-			COMMAND ${PATCHELF} --set-rpath '$ORIGIN:$ORIGIN/${RPATH_REL_PATH}' "${ITEM_OUTPUT}.temp"
+			COMMAND ${PATCHELF} --set-rpath "$ORIGIN:$ORIGIN/${RPATH_REL_PATH}" "${ITEM_OUTPUT}.temp"
 			COMMAND mv "${ITEM_TARGET}.temp" "${ITEM_TARGET}"
 			DEPENDS "${ITEM_TARGET}.temp"
 			COMMENT "Patch engine file ELF RPATH: ${ITEM_TARGET}"

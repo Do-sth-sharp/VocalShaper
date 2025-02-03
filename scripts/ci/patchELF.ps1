@@ -15,8 +15,7 @@ foreach ($file in $allFiles) {
         Write-Host "Patching ELF file: $file"
         
         # Use patchelf to set the rpath to $ORIGIN
-        $RPathStr = "'" + $RPath + "'"
-        patchelf --set-rpath $RPathStr $file.FullName
+        patchelf --set-rpath $RPath $file.FullName
     }
 }
 
