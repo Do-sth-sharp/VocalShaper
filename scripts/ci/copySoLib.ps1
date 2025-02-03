@@ -28,7 +28,7 @@ function Resolve-Symlink {
     while ($true) {
         $item = Get-Item -Path $currentPath -Force
         if ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
-            $currentPath = $item.Target
+            $currentPath = Join-Path -Path $item.DirectoryName -ChildPath $item.Target
         } else {
             return $currentPath
         }
@@ -53,15 +53,14 @@ foreach ($file in $allFiles) {
     # Check if it's a symbolic link
     elseif ($file.LinkType -eq 'SymbolicLink') {
         $linkTarget = Resolve-Symlink -Path $file.FullName
-        $linkTargetFullPath = Join-Path -Path $file.DirectoryName -ChildPath $linkTarget
 
-        $targetType = & file $linkTargetFullPath
+        $targetType = & file $linkTarget
 
         if ($targetType -match "shared object") {
-            Write-Host "Copying symbolic link target for: $($file.FullName)->$($linkTargetFullPath)"
+            Write-Host "Copying symbolic link target for: $($file.FullName)->$($linkTarget)"
         
             # Copy the symbolic link target to the target directory
-            Copy-Item -Path $linkTargetFullPath -Destination $destination -Force
+            Copy-Item -Path $linkTarget -Destination $destination -Force
         }
     }
 }
