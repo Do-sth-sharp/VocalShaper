@@ -134,6 +134,7 @@ void MixerTrackComponent::resized() {
 	int knobWidth = (this->getWidth() - knobPaddingWidth * 2) / (this->panValid ? 2 : 1);
 	int faderPaddingWidth = screenSize.getWidth() * 0.0025;
 	int faderMinHeight = screenSize.getHeight() * 0.25;
+	int faderMaxHeight = screenSize.getHeight() * 0.45;
 	int faderWidth = (this->getWidth() - faderPaddingWidth * 2) / 2;
 	int muteSoloHeight = screenSize.getHeight() * 0.0225;
 	int muteSoloWidth = muteSoloHeight;
@@ -176,6 +177,7 @@ void MixerTrackComponent::resized() {
 	int effectExpandMaxHeight = expandBaseHeight + midiSendListMinHeight + audioSendListMinHeight + effectListMaxHeight;
 	int midiSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight * 2;
 	int audioSendExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight + audioSendListMaxHeight;
+	int faderExpandMaxHeight = expandBaseHeight + effectListMaxHeight + midiSendListMaxHeight + audioSendListMaxHeight - faderMinHeight + faderMaxHeight;
 
 	int expandLevel = 0;
 	if (this->getHeight() > expandStartHeight) {
@@ -188,6 +190,9 @@ void MixerTrackComponent::resized() {
 		expandLevel++;
 	}
 	if (this->getHeight() > audioSendExpandMaxHeight) {
+		expandLevel++;
+	}
+	if (this->getHeight() > faderExpandMaxHeight) {
 		expandLevel++;
 	}
 
@@ -292,6 +297,10 @@ void MixerTrackComponent::resized() {
 	/** MIDI Send */
 	if (ioShown) {
 		int midiSendHeight = midiSendListMinHeight;
+		int posY = top;
+		if (expandLevel >= 5) {
+			posY = this->getHeight() - faderMaxHeight - splitHeight - audioSendListMaxHeight - splitHeight - midiSendListMaxHeight;
+		}
 		if (expandLevel > 2) {
 			midiSendHeight = midiSendListMaxHeight;
 		}
@@ -301,11 +310,11 @@ void MixerTrackComponent::resized() {
 		}
 
 		juce::Rectangle<int> midiSendRect(
-			0, top, this->getWidth(), midiSendHeight);
+			0, posY, this->getWidth(), midiSendHeight);
 		this->midiSendList->setBounds(midiSendRect);
 		this->midiSendList->setRowHeight(listItemHeight);
 
-		top += midiSendHeight;
+		top = midiSendRect.getBottom();
 		top += splitHeight;
 	}
 	this->midiSendList->setVisible(ioShown);
