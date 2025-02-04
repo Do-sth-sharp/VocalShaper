@@ -41,3 +41,5 @@ Remove-Item $ENGINE_REMOVE_PATH -Include "*.exp"
 Remove-Item $ENGINE_REMOVE_PATH -Include "*.ilk"
 Remove-Item $ENGINE_REMOVE_PATH -Include "*.lib"
 Remove-Item $ENGINE_REMOVE_PATH -Include "*.a"
+
+Remove-Item $ENGINE_REMOVE_PATH -Include "*.temp"

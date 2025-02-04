@@ -1,15 +1,16 @@
 param (
     [string]$DirectoryPath,
-    [string]$RPath
+    [string]$RPath,
+    [switch]$Recurse
 )
 
 # Get all files in the directory (recursively)
-$allFiles = Get-ChildItem -Path $DirectoryPath -Recurse
+$allFiles = Get-ChildItem -Path $DirectoryPath -Recurse:($Recurse.IsPresent)
 
 # Loop through each file and check if it is an ELF file
 foreach ($file in $allFiles) {
     # Check if the file is an ELF file using the 'file' command
-    $fileType = & file $file.FullName
+    $fileType = & file -b $file.FullName
     
     if ($fileType -match "ELF") {
         Write-Host "Patching ELF file: $file"

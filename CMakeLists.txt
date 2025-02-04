@@ -32,6 +32,14 @@ endif ()
 
 if (UNIX AND NOT APPLE)
 	find_program (PATCHELF patchelf REQUIRED)
+
+	# Check the machine name
+	execute_process (
+		COMMAND uname -m
+		OUTPUT_VARIABLE MACHINE_NAME
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	message(STATUS "Machine name: ${MACHINE_NAME}")
 endif ()
 
 # Packages
@@ -111,13 +119,29 @@ if (MSVC)
 	set (ENGINE_LIST ${ENGINE_LIST} "${ENGINE_PDB_PATH}")
 endif (MSVC)
 
-get_filename_component (ENGINE_BUILD_DIR ${ENGINE_PATH} DIRECTORY)
-file (RELATIVE_PATH RPATH_REL_PATH "${ENGINES_DIR}" "${ENGINE_BUILD_DIR}/../lib")
-
 set (ENGINE_OUTPUT "")
 foreach (ITEM ${ENGINE_LIST})
 	get_filename_component (ITEM_NAME ${ITEM} NAME)
-	set (ITEM_TARGET "${ENGINES_DIR}/${ITEM_NAME}")
+
+	if (UNIX AND NOT APPLE)
+		get_filename_component (ITEME_NAME_WE ${ITEM} NAME_WE)
+		set (ITEM_TARGET_NAME "${ITEME_NAME_WE}.so")
+
+		set (ITEM_PACK_PATH "${ITEM_NAME}/Contents/${MACHINE_NAME}-linux")
+
+		get_filename_component (ENGINE_BUILD_DIR ${ENGINE_PATH} DIRECTORY)
+		file (RELATIVE_PATH RPATH_REL_PATH "${ENGINES_DIR}/${ITEM_PACK_PATH}" "${ENGINE_BUILD_DIR}/../lib")
+
+		set (ITEM_TARGET "${ENGINES_DIR}/${ITEM_PACK_PATH}/${ITEM_TARGET_NAME}")
+	else ()
+		set (ITEM_TARGET_NAME "${ITEM_NAME}")
+
+		get_filename_component (ENGINE_BUILD_DIR ${ENGINE_PATH} DIRECTORY)
+		file (RELATIVE_PATH RPATH_REL_PATH "${ENGINES_DIR}" "${ENGINE_BUILD_DIR}/../lib")
+
+		set (ITEM_TARGET "${ENGINES_DIR}/${ITEM_TARGET_NAME}")
+	endif ()
+
 	list (APPEND ENGINE_OUTPUT ${ITEM_TARGET})
 
 	cmake_path (CONVERT ${ITEM} TO_NATIVE_PATH_LIST ITEM_INPUT)

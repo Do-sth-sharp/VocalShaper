@@ -41,7 +41,7 @@ foreach ($file in $allFiles) {
     $destination = Join-Path -Path $targetDir -ChildPath $file.Name
 
     # Use the 'file' command to check the file type
-    $fileType = & file $file.FullName
+    $fileType = & file -b $file.FullName
 
     # If the file type contains "shared object", consider it a dynamic library
     if ($fileType -match "shared object") {
@@ -54,7 +54,7 @@ foreach ($file in $allFiles) {
     elseif ($file.LinkType -eq 'SymbolicLink') {
         $linkTarget = Resolve-Symlink -Path $file.FullName
 
-        $targetType = & file $linkTarget
+        $targetType = & file -b $linkTarget
 
         if ($targetType -match "shared object") {
             Write-Host "Copying symbolic link target for: $($file.FullName)->$($linkTarget)"

@@ -268,13 +268,13 @@ jobs:
       if: runner.os == 'Linux'
       working-directory: ${{github.workspace}}
       shell: pwsh
-      run: ./scripts/ci/patchELF.ps1 -DirectoryPath "./build/${{matrix.build_path}}/bin" -RPath '$ORIGIN'
+      run: ./scripts/ci/patchELF.ps1 -DirectoryPath "./build/${{matrix.build_path}}/bin" -RPath '$ORIGIN' -Recurse
 
     - name: Patch Engine ELF RPATH on Linux
       if: runner.os == 'Linux'
       working-directory: ${{github.workspace}}
       shell: pwsh
-      run: ./scripts/ci/patchELF.ps1 -DirectoryPath "./build/${{matrix.build_path}}/bin/synth-engines" -RPath '$ORIGIN:$ORIGIN/..'
+      run: ./scripts/ci/patchELF.ps1 -DirectoryPath "./build/${{matrix.build_path}}/bin/synth-engines/*.vst3/Contents/*-linux/*.so" -RPath '$ORIGIN:$ORIGIN/../../../..'
 
     - name: Copy Dynamic Library on Linux
       if: runner.os == 'Linux'
