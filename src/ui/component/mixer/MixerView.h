@@ -35,6 +35,8 @@ private:
 	juce::OwnedArray<MixerTrackComponent> trackList;
 	juce::Array<juce::Colour> colorTemp;
 
+	std::unique_ptr<juce::ChangeListener> currentTrackListener = nullptr;
+
 	juce::String emptyNoticeStr;
 
 	void add();
@@ -48,8 +50,15 @@ private:
 
 	void updatePos(double pos, double itemSize);
 
+	void editing(int type, int index);
+
+	friend class MixerCurrentTrackListener;
+	void setCurrentTrack(int type, int index);
+
 	void paintTrackPreview(juce::Graphics& g, int itemIndex,
 		int width, int height, bool vertical);
+
+	std::unique_ptr<MixerTrackComponent> createTrackComp();
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerView)
 };

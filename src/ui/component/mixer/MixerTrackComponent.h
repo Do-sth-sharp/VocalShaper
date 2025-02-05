@@ -15,7 +15,8 @@ class MixerTrackComponent final
 	: public juce::Component,
 	public juce::DragAndDropTarget {
 public:
-	MixerTrackComponent();
+	using MixerTrackSelectFunc = std::function<void(int, int)>;
+	MixerTrackComponent(const MixerTrackSelectFunc& trackSelectFunc);
 
 	void resized() override;
 	void paint(juce::Graphics& g) override;
@@ -36,6 +37,7 @@ public:
 
 	void mouseMove(const juce::MouseEvent& event) override;
 	void mouseUp(const juce::MouseEvent& event) override;
+	void mouseDoubleClick(const juce::MouseEvent& event) override;
 
 	bool isInterestedInDragSource(
 		const SourceDetails& dragSourceDetails) override;
@@ -43,15 +45,17 @@ public:
 	void itemDragExit(const SourceDetails& dragSourceDetails) override;
 	void itemDropped(const SourceDetails& dragSourceDetails) override;
 
-	void focusGained(FocusChangeType cause) override;
-	void focusLost(FocusChangeType cause) override;
+	void setCurrentTrack(int type, int index);
 
 private:
+	const MixerTrackSelectFunc trackSelectFunc;
+
 	int type = -1, index = -1;
 	juce::Colour trackColor, nameColor;
 	juce::String name;
 	bool dragHovered = false;
 	bool panValid = true;
+	bool editing = false;
 
 	std::unique_ptr<SideChainComponent> sideChain = nullptr;
 	std::unique_ptr<juce::DrawableButton> midiInputButton = nullptr;

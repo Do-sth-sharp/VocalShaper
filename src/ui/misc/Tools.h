@@ -22,8 +22,8 @@ public:
 	uint8_t getMIDIChannel() const;
 	void addMIDIChannelChangedListener(juce::ChangeListener* listener);
 
-	void setEditingTrack(int index);
-	int getEditingTrack() const;
+	void setEditingTrack(int type, int index);
+	std::pair<int, int> getEditingTrack() const;
 	void addEditingTrackChangedListener(juce::ChangeListener* listener);
 
 private:
@@ -31,7 +31,7 @@ private:
 	double adsorbLevel = 1;
 	bool editorFollow = false;
 	uint8_t midiChannel = 1;
-	int editingTrack = -1;
+	int editingTrackType = -1, editingTrackIndex = -1;
 
 	juce::ChangeBroadcaster midiChannelBroadcaster;
 	juce::ChangeBroadcaster editingTrackBroadcaster;

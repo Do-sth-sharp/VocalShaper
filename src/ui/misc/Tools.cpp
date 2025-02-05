@@ -5,7 +5,7 @@ Tools::Tools() {
 	/** Clear Current Track */
 	CoreCallbackAPI<void>::add(CoreCallbacks::CallbackType::GraphUpdated,
 		[this] {
-			this->setEditingTrack(-1);
+			this->setEditingTrack(-1, -1);
 		});
 }
 
@@ -48,13 +48,14 @@ void Tools::addMIDIChannelChangedListener(juce::ChangeListener* listener) {
 	this->midiChannelBroadcaster.addChangeListener(listener);
 }
 
-void Tools::setEditingTrack(int index) {
-	this->editingTrack = index;
+void Tools::setEditingTrack(int type, int index) {
+	this->editingTrackType = type;
+	this->editingTrackIndex = index;
 	this->editingTrackBroadcaster.sendChangeMessage();
 }
 
-int Tools::getEditingTrack() const {
-	return this->editingTrack;
+std::pair<int, int> Tools::getEditingTrack() const {
+	return { this->editingTrackType, this->editingTrackIndex };
 }
 
 void Tools::addEditingTrackChangedListener(juce::ChangeListener* listener) {

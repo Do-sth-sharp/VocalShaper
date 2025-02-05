@@ -2,8 +2,28 @@
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreCallbacks.h"
 #include "../../misc/CoreActions.h"
+#include "../../misc/Tools.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
+
+class MixerCurrentTrackListener final : public juce::ChangeListener {
+public:
+	MixerCurrentTrackListener() = delete;
+	MixerCurrentTrackListener(MixerView* parent)
+		: parent(parent) {
+	};
+
+	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
+		auto [type, track] = Tools::getInstance()->getEditingTrack();
+
+		this->parent->setCurrentTrack(type, track);
+	}
+
+private:
+	MixerView* const parent;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MixerCurrentTrackListener)
+};
 
 MixerView::MixerView()
 	: FlowComponent(TRANS("Mixer")) {
@@ -25,6 +45,10 @@ MixerView::MixerView()
 
 	/** Notice */
 	this->emptyNoticeStr = TRANS("Right click on the blank space to create a new track.");
+
+	/** Current Track Listener */
+	this->currentTrackListener = std::make_unique<MixerCurrentTrackListener>(this);
+	Tools::getInstance()->addEditingTrackChangedListener(this->currentTrackListener.get());
 
 	/** Update Callback */
 	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackAdded,
@@ -169,7 +193,7 @@ void MixerView::updateAdd(int type, int index) {
 	if (viewIndex < 0) { return; }
 
 	/** Add Track */
-	auto track = std::make_unique<MixerTrackComponent>();
+	auto track = this->createTrackComp();
 	this->addAndMakeVisible(track.get());
 	this->trackList.insert(viewIndex, std::move(track));
 
@@ -361,7 +385,7 @@ void MixerView::updateAll() {
 		quickAPI::TrackType::MasterTrack);
 	for (int i = 0; i < masterTrackNum; i++) {
 		/** Track Component */
-		auto track = std::make_unique<MixerTrackComponent>();
+		auto track = this->createTrackComp();
 		this->addAndMakeVisible(track.get());
 
 		track->updateIndex(
@@ -380,7 +404,7 @@ void MixerView::updateAll() {
 		quickAPI::TrackType::AuxTrack);
 	for (int i = 0; i < auxTrackNum; i++) {
 		/** Track Component */
-		auto track = std::make_unique<MixerTrackComponent>();
+		auto track = this->createTrackComp();
 		this->addAndMakeVisible(track.get());
 
 		track->updateIndex(
@@ -399,7 +423,7 @@ void MixerView::updateAll() {
 		quickAPI::TrackType::Track);
 	for (int i = 0; i < trackNum; i++) {
 		/** Track Component */
-		auto track = std::make_unique<MixerTrackComponent>();
+		auto track = this->createTrackComp();
 		this->addAndMakeVisible(track.get());
 
 		track->updateIndex(
@@ -484,6 +508,16 @@ void MixerView::updatePos(double pos, double itemSize) {
 	}
 }
 
+void MixerView::editing(int type, int index) {
+	Tools::getInstance()->setEditingTrack(type, index);
+}
+
+void MixerView::setCurrentTrack(int type, int index) {
+	for (auto i : this->trackList) {
+		i->setCurrentTrack(type, index);
+	}
+}
+
 void MixerView::paintTrackPreview(juce::Graphics& g, int itemIndex,
 	int width, int height, bool /*vertical*/) {
 	/** Limit Size */
@@ -502,4 +536,15 @@ void MixerView::paintTrackPreview(juce::Graphics& g, int itemIndex,
 		0, paddingHeight, width, colorHeight);
 	g.setColour(color);
 	g.fillRect(colorRect);
+}
+
+std::unique_ptr<MixerTrackComponent> MixerView::createTrackComp() {
+	return std::make_unique<MixerTrackComponent>(
+		[comp = ScrollerBase::SafePointer(this)]
+		(int type, int index) {
+			if (comp) {
+				comp->editing(type, index);
+			}
+		}
+	);
 }

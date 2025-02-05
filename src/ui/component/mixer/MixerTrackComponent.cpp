@@ -5,7 +5,9 @@
 #include "../../../audioCore/AC_API.h"
 #include <IconManager.h>
 
-MixerTrackComponent::MixerTrackComponent() {
+MixerTrackComponent::MixerTrackComponent(
+	const MixerTrackSelectFunc& trackSelectFunc)
+	: trackSelectFunc(trackSelectFunc) {
 	/** Side Chain */
 	this->sideChain = std::make_unique<SideChainComponent>();
 	this->addAndMakeVisible(this->sideChain.get());
@@ -411,7 +413,7 @@ void MixerTrackComponent::paintOverChildren(juce::Graphics& g) {
 	juce::Colour backgroundColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
 	juce::Colour outlineColor = laf.findColour(
-		this->dragHovered || this->hasKeyboardFocus(true)
+		this->dragHovered || this->editing
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
 	juce::Colour listOutlineColor = laf.findColour(
@@ -581,6 +583,12 @@ void MixerTrackComponent::mouseUp(const juce::MouseEvent& event) {
 	}
 }
 
+void MixerTrackComponent::mouseDoubleClick(const juce::MouseEvent& event) {
+	if (event.mods.isLeftButtonDown()) {
+		this->trackSelectFunc(this->type, this->index);
+	}
+}
+
 bool MixerTrackComponent::isInterestedInDragSource(
 	const SourceDetails& dragSourceDetails) {
 	auto& des = dragSourceDetails.description;
@@ -668,11 +676,8 @@ void MixerTrackComponent::itemDropped(
 	}
 }
 
-void MixerTrackComponent::focusGained(FocusChangeType cause) {
-	this->repaint();
-}
-
-void MixerTrackComponent::focusLost(FocusChangeType cause) {
+void MixerTrackComponent::setCurrentTrack(int type, int index) {
+	this->editing = (type == this->type) && (index == this->index);
 	this->repaint();
 }
 

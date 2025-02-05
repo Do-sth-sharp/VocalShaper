@@ -14,8 +14,10 @@ public:
 	};
 
 	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
-		int track = Tools::getInstance()->getEditingTrack();
-		this->parent->setTrack(track);
+		auto [type, track] = Tools::getInstance()->getEditingTrack();
+
+		this->parent->setTrack(
+			(type == (int)quickAPI::TrackType::Track) ? track : -1);
 	}
 
 private:

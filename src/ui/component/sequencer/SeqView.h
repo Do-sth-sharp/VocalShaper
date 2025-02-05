@@ -83,6 +83,8 @@ private:
 			const juce::MouseWheelDetails& wheel) override;
 		void mouseExit(const juce::MouseEvent& event) override;
 
+		void setCurrentTrack(int index);
+
 	private:
 		juce::OwnedArray<SeqTrackComponent> list;
 
@@ -128,6 +130,8 @@ private:
 	LineItemList lineTemp;
 	std::unique_ptr<juce::Image> gridTemp = nullptr;
 
+	std::unique_ptr<juce::ChangeListener> currentTrackListener = nullptr;
+
 	juce::String emptyNoticeStr;
 
 	bool viewMoving = false;
@@ -161,6 +165,9 @@ private:
 	void processAreaDragEnd();
 
 	void editing(int index);
+
+	friend class SeqCurrentTrackListener;
+	void setCurrentTrack(int index);
 
 	std::unique_ptr<SeqTrackComponent> createTrackComp();
 

@@ -247,9 +247,35 @@ void SeqView::TrackList::mouseExit(const juce::MouseEvent& event) {
 	}
 }
 
+void SeqView::TrackList::setCurrentTrack(int index) {
+	for (auto i : this->list) {
+		i->setCurrentTrack(index);
+	}
+}
+
 void SeqView::TrackList::add() {
 	CoreActions::insertTrackGUI(quickAPI::TrackType::Track);
 }
+
+class SeqCurrentTrackListener final : public juce::ChangeListener {
+public:
+	SeqCurrentTrackListener() = delete;
+	SeqCurrentTrackListener(SeqView* parent)
+		: parent(parent) {
+	};
+
+	void changeListenerCallback(juce::ChangeBroadcaster* /*source*/) override {
+		auto [type, track] = Tools::getInstance()->getEditingTrack();
+
+		this->parent->setCurrentTrack(
+			(type == (int)quickAPI::TrackType::Track) ? track : -1);
+	}
+
+private:
+	SeqView* const parent;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SeqCurrentTrackListener)
+};
 
 SeqView::SeqView()
 	: FlowComponent(TRANS("Track")) {
@@ -401,6 +427,10 @@ SeqView::SeqView()
 			}
 		});
 	this->addAndMakeVisible(this->ruler.get());
+
+	/** Current Track Listener */
+	this->currentTrackListener = std::make_unique<SeqCurrentTrackListener>(this);
+	Tools::getInstance()->addEditingTrackChangedListener(this->currentTrackListener.get());
 
 	/** Update Callback */
 	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackAdded,
@@ -1074,7 +1104,12 @@ void SeqView::processAreaDragEnd() {
 }
 
 void SeqView::editing(int index) {
-	Tools::getInstance()->setEditingTrack(index);
+	Tools::getInstance()->setEditingTrack(
+		(int)quickAPI::TrackType::Track, index);
+}
+
+void SeqView::setCurrentTrack(int index) {
+	this->trackList->setCurrentTrack(index);
 }
 
 std::unique_ptr<SeqTrackComponent> SeqView::createTrackComp() {

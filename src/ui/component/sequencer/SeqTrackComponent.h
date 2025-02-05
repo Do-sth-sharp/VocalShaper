@@ -64,8 +64,7 @@ public:
 	void fileDragExit(const juce::StringArray& files) override;
 	void filesDropped(const juce::StringArray& files, int x, int y) override;
 
-	void focusGained(FocusChangeType cause) override;
-	void focusLost(FocusChangeType cause) override;
+	void setCurrentTrack(int index);
 
 private:
 	const WheelFunc wheelVFunc;
@@ -75,6 +74,8 @@ private:
 	int index = -1;
 	juce::Colour trackColor, idColor;
 	bool dragHovered = false;
+
+	bool editing = false;
 
 	std::unique_ptr<juce::TextButton> trackName = nullptr;
 	std::unique_ptr<SeqTrackMuteComponent> muteButton = nullptr;

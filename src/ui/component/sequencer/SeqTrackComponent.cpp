@@ -380,7 +380,7 @@ void SeqTrackComponent::paintOverChildren(juce::Graphics& g) {
 	/** Color */
 	auto& laf = this->getLookAndFeel();
 	juce::Colour outlineColor = laf.findColour(
-		this->dragHovered || this->hasKeyboardFocus(true)
+		this->dragHovered || this->editing
 		? juce::Label::ColourIds::outlineWhenEditingColourId
 		: juce::Label::ColourIds::outlineColourId);
 
@@ -540,11 +540,8 @@ void SeqTrackComponent::filesDropped(const juce::StringArray& files, int /*x*/, 
 	}
 }
 
-void SeqTrackComponent::focusGained(FocusChangeType cause) {
-	this->repaint();
-}
-
-void SeqTrackComponent::focusLost(FocusChangeType cause) {
+void SeqTrackComponent::setCurrentTrack(int index) {
+	this->editing = (index == this->index);
 	this->repaint();
 }
 
