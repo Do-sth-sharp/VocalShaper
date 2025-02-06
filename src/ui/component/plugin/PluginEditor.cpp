@@ -11,6 +11,9 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->setLookAndFeel(
 		LookAndFeelFactory::getInstance()->getLAFFor(LookAndFeelFactory::PluginEditor));
 
+	/** Get Init Size */
+	auto size = this->getPerferedSize();
+
 	if (editor) {
 		/** Add Listener To Comp */
 		editor->addComponentListener(this);
@@ -33,7 +36,6 @@ PluginEditorContent::PluginEditorContent(PluginEditor* parent,
 	this->addChildComponent(this->configViewport.get());
 
 	/** Update Size */
-	auto size = this->getPerferedSize();
 	this->setSize(size.getX(), size.getY());
 }
 
