@@ -220,6 +220,7 @@ private:
 				flowUI::FlowWindowHub::setTitle(utils::getAudioPlatformName());
 				flowUI::FlowWindowHub::setIcon(utils::getResourceFile("logo.png").getFullPathName());
 				flowUI::FlowWindowHub::setOpenGL(!((bool)(funcVar["cpu-painting"])));
+				flowUI::FlowWindowHub::setBufferedPainting((bool)(funcVar["buffered-painting"]));
 			}
 		);
 	};
@@ -236,6 +237,7 @@ private:
 
 				PluginEditorHub::getInstance()->setIcon(utils::getResourceFile("logo.png").getFullPathName());
 				PluginEditorHub::getInstance()->setOpenGL(!((bool)(funcVar["cpu-painting"])));
+				PluginEditorHub::getInstance()->setBufferedPainting((bool)(funcVar["buffered-painting"]));
 			}
 		);
 	};

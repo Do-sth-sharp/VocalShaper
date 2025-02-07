@@ -10,6 +10,7 @@ countries: us
 "anonymous-mode" = "Anonymous Mode"
 "simd-speed-up" = "SIMD Speed Up"
 "cpu-painting" = "CPU Painting"
+"buffered-painting" = "Buffered Painting"
 "proj-reg" = "Register Project Format"
 "proj-unreg" = "Unregister Project Format"
 

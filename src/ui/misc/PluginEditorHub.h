@@ -17,6 +17,7 @@ public:
 	bool checkEffect(int type, int track, int index) const;
 
 	void setOpenGL(bool openGLOn);
+	void setBufferedPainting(bool bufferedPainting);
 	void setIcon(const juce::String& path);
 
 	void closeAll();
@@ -26,6 +27,7 @@ private:
 	std::unordered_map<RefType, std::shared_ptr<PluginEditor>> instrEditors;
 	std::unordered_map<RefType, std::shared_ptr<PluginEditor>> effectEditors;
 	bool openGLOn = true;
+	bool bufferedPainting = true;
 	juce::Image iconTemp;
 
 	void closeEditor(PluginEditor* ptr);

@@ -31,6 +31,11 @@ AboutWindow::AboutWindow()
 		this->renderer->attachTo(*this);
 	}
 
+	/** Buffered Painting */
+	if ((bool)(funcVar["cpu-painting"])) {
+		this->setBufferedToImage((bool)(funcVar["buffered-painting"]));
+	}
+
 	/** Icon */
 	juce::File iconFile = utils::getResourceFile("logo.png");
 	this->iconTemp = RCManager::getInstance()->loadImage(iconFile);

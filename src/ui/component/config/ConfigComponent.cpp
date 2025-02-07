@@ -307,11 +307,18 @@ void ConfigComponent::createFunctionPage() {
 		PluginEditorHub::getInstance()->setOpenGL(!((bool)data));
 		return true;
 		};
+	auto bufferedPaintingUpdateCallback = [](const juce::var& data) {
+		flowUI::FlowWindowHub::setBufferedPainting((bool)data);
+		PluginEditorHub::getInstance()->setBufferedPainting((bool)data);
+		return true;
+		};
 
 	juce::Array<juce::PropertyComponent*> performProps;
 	performProps.add(new ConfigLabelProp{ "The effect of some settings will be delayed." });
 	performProps.add(new ConfigBooleanProp{ "function", "cpu-painting",
 		"Disabled", "Enabled", cpuPaintingUpdateCallback , ConfigPropHelper::GetValueCallback{} });
+	performProps.add(new ConfigBooleanProp{ "function", "buffered-painting",
+		"Disabled", "Enabled", bufferedPaintingUpdateCallback , ConfigPropHelper::GetValueCallback{} });
 	performProps.add(new ConfigWhiteSpaceProp{});
 	panel->addSection(TRANS("Performance"), performProps);
 

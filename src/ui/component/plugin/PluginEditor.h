@@ -75,6 +75,7 @@ public:
 	void sizeChanged();
 
 	void setOpenGL(bool openGLOn);
+	void setBufferedPainting(bool bufferedPainting);
 	void setWindowIcon(const juce::Image& icon);
 
 	void setPinned(bool pin);
@@ -85,6 +86,7 @@ private:
 
 private:
 	std::unique_ptr<juce::OpenGLContext> renderer = nullptr;
+	bool bufferedPainting = false;
 
 	void limitBounds();
 

@@ -2,5 +2,6 @@
   "return-on-stop": true,
   "anonymous-mode": false,
   "simd-speed-up": 3,
-  "cpu-painting": false
+  "cpu-painting": false,
+  "buffered-painting": true
 }

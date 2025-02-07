@@ -21,6 +21,7 @@ countries: cn
 "simd-speed-up" = "SIMD加速"
 "Performance" = "性能"
 "cpu-painting" = "CPU绘图"
+"buffered-painting" = "缓冲绘图"
 "System" = "系统"
 "proj-reg" = "注册项目文件"
 "proj-unreg" = "取消注册项目文件"

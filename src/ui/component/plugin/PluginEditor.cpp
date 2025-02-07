@@ -237,11 +237,30 @@ void PluginEditor::sizeChanged() {
 
 void PluginEditor::setOpenGL(bool openGLOn) {
 	if (openGLOn) {
+		/** Remove Buffer */
+		if (this->bufferedPainting) {
+			this->setCachedComponentImage(nullptr);
+			this->setBufferedPainting(false);
+		}
+
 		this->renderer = std::make_unique<juce::OpenGLContext>();
 		this->renderer->attachTo(*this);
 	}
 	else {
 		this->renderer = nullptr;
+
+		/** Add Buffer */
+		if (this->bufferedPainting) {
+			this->setBufferedPainting(true);
+		}
+	}
+}
+
+void PluginEditor::setBufferedPainting(bool bufferedPainting) {
+	this->bufferedPainting = bufferedPainting;
+
+	if (!this->renderer) {
+		this->setBufferedToImage(bufferedPainting);
 	}
 }
 

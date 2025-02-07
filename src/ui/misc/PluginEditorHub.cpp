@@ -35,6 +35,7 @@ void PluginEditorHub::openInstr(int index) {
 			quickAPI::getInstrName(index),
 			PluginType::Instr, editor);
 		container->setOpenGL(this->openGLOn);
+		container->setBufferedPainting(this->bufferedPainting);
 		container->setWindowIcon(this->iconTemp);
 
 		container->update(0, index, 0);
@@ -86,6 +87,7 @@ void PluginEditorHub::openEffect(int type, int track, int index) {
 			quickAPI::getEffectName({ (quickAPI::TrackType)type, track }, index),
 			PluginType::Effect, editor);
 		container->setOpenGL(this->openGLOn);
+		container->setBufferedPainting(this->bufferedPainting);
 		container->setWindowIcon(this->iconTemp);
 
 		container->update(type, track, index);
@@ -137,6 +139,16 @@ void PluginEditorHub::setOpenGL(bool openGLOn) {
 	}
 	for (auto i : this->effectEditors) {
 		i.second->setOpenGL(openGLOn);
+	}
+}
+
+void PluginEditorHub::setBufferedPainting(bool bufferedPainting) {
+	this->bufferedPainting = bufferedPainting;
+	for (auto& i : this->instrEditors) {
+		i.second->setBufferedPainting(bufferedPainting);
+	}
+	for (auto i : this->effectEditors) {
+		i.second->setBufferedPainting(bufferedPainting);
 	}
 }
 
