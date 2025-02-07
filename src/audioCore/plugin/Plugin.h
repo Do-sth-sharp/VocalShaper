@@ -9,6 +9,7 @@ public:
 
 	const juce::StringArray getPluginTypeList() const;
 	const std::tuple<bool, juce::KnownPluginList&> getPluginList() const;
+	void searchNow();
 	void clearPluginList();
 	void clearPluginTemporary();
 	bool pluginSearchThreadIsRunning() const;

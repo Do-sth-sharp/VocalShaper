@@ -20,6 +20,10 @@ const std::tuple<bool, juce::KnownPluginList&> Plugin::getPluginList() const {
 	return this->audioPluginSearchThread->getPluginList();
 }
 
+void Plugin::searchNow() {
+	this->audioPluginSearchThread->searchNow();
+}
+
 void Plugin::clearPluginList() {
 	this->audioPluginSearchThread->clearList();
 }

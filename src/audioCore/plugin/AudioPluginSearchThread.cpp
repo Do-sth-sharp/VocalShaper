@@ -53,10 +53,16 @@ std::tuple<bool, juce::KnownPluginList&> AudioPluginSearchThread::getPluginList(
 			}
 		}
 
-		this->startThread();
 		return std::tuple<bool, juce::KnownPluginList&>(false, this->pluginList);
 	}
+
 	return std::tuple<bool, juce::KnownPluginList&>(true, this->pluginList);
+}
+
+void AudioPluginSearchThread::searchNow() {
+	if (this->isThreadRunning()) { return; }
+
+	this->startThread();
 }
 
 void AudioPluginSearchThread::clearList() {
@@ -209,7 +215,7 @@ void AudioPluginSearchThread::run() {
 			}
 
 			/** Thread Sleep */
-			juce::Thread::sleep(10);
+			juce::Thread::sleep(100);
 		}
 	}
 

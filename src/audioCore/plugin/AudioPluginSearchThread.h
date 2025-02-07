@@ -9,6 +9,7 @@ public:
 	const juce::Array<juce::AudioPluginFormat*> getFormats() const;
 
 	std::tuple<bool, juce::KnownPluginList&> getPluginList();
+	void searchNow();
 	void clearList();
 	void clearTemporary();
 

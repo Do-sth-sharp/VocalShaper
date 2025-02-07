@@ -16,8 +16,12 @@ public:
 	bool isInterestedInFileDrag(const juce::StringArray&) override;
 	bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails&) override;
 
+	void itemClicked(const juce::MouseEvent& event) override;
+
 	void changeAllOpenness(bool open);
 
 private:
+	const std::function<void(const juce::String&)> groupMenuCallback;
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginTreeModel)
 };

@@ -17,6 +17,7 @@ public:
 
 	void update();
 	void searchUpdate();
+	void refresh();
 	void rescan();
 	void expandAll();
 	void foldAll();

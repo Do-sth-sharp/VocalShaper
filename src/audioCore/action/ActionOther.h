@@ -37,6 +37,23 @@ private:
 	JUCE_LEAK_DETECTOR(ActionSearchPlugin)
 };
 
+class ActionRefreshPlugin final : public ActionBase {
+public:
+	ActionRefreshPlugin();
+
+	bool doAction() override;
+	const juce::String getName() const override {
+		return "Refresh Plugin";
+	};
+	int getShieldMask() const override {
+		return ShieldPluginLoad | ShieldPluginScan;
+	};
+	const juce::String getStatusStr() const override;
+
+private:
+	JUCE_LEAK_DETECTOR(ActionRefreshPlugin)
+};
+
 class ActionPlay final : public ActionBase {
 public:
 	ActionPlay();

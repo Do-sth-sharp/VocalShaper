@@ -13,6 +13,7 @@ public:
 	static void saveProject(const juce::String& fileName);
 
 	static void rescanPlugins();
+	static void refreshPlugins();
 	static bool addPluginBlackList(const juce::String& filePath);
 	static bool removePluginBlackList(const juce::String& filePath);
 	static bool addPluginSearchPath(const juce::String& path);

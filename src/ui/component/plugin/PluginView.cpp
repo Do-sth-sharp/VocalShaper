@@ -6,6 +6,8 @@
 #include "../../../audioCore/AC_API.h"
 #include <IconManager.h>
 
+#define SCAN_MES_MAX_LENGTH 500
+
 PluginView::PluginView()
 	: FlowComponent(TRANS("Plugin")) {
 	/** Look And Feel */
@@ -143,24 +145,32 @@ void PluginView::update() {
 
 	/** Get Plugin List */
 	auto [valid, list] = quickAPI::getPluginList();
-	if (valid) {
-		/** Group Plugins */
-		auto searchText = this->searchBox->getText();
-		bool search = searchText.isNotEmpty();
-		auto groupList = utils::groupPlugin(
-			list, this->groupType, search, searchText);
 
-		/** Create Plugin Tree Model */
-		this->pluginModel = std::make_unique<PluginTreeModel>(groupList,
-			[this](const juce::String& name) { this->showGroupMenu(name); },
-			[this](const juce::PluginDescription& plugin) { this->showPluginMenu(plugin); });
-		this->pluginTree->setRootItem(this->pluginModel.get());
-		this->pluginTree->setDefaultOpenness(search);
+	/** Clear Invalid Plugin List */
+	if (!valid) {
+		list.clear();
 	}
+
+	/** Group Plugins */
+	auto searchText = this->searchBox->getText();
+	bool search = searchText.isNotEmpty();
+	auto groupList = utils::groupPlugin(
+		list, this->groupType, search, searchText);
+
+	/** Create Plugin Tree Model */
+	this->pluginModel = std::make_unique<PluginTreeModel>(groupList,
+		[this](const juce::String& name) { this->showGroupMenu(name); },
+		[this](const juce::PluginDescription& plugin) { this->showPluginMenu(plugin); });
+	this->pluginTree->setRootItem(this->pluginModel.get());
+	this->pluginTree->setDefaultOpenness(search);
 }
 
 void PluginView::searchUpdate() {
 	this->update();
+}
+
+void PluginView::refresh() {
+	CoreActions::refreshPlugins();
 }
 
 void PluginView::rescan() {
@@ -205,6 +215,9 @@ void PluginView::showGroupMenu(const juce::String& name) {
 	case 6:
 		this->rescan();
 		break;
+	case 7:
+		this->refresh();
+		break;
 	}
 }
 
@@ -231,6 +244,9 @@ void PluginView::showPluginMenu(const juce::PluginDescription& plugin) {
 		break;
 	case 5:
 		this->rescan();
+		break;
+	case 6:
+		this->refresh();
 		break;
 	}
 }
@@ -267,7 +283,15 @@ void PluginView::searchMessage(const juce::String& mes) {
 }
 
 void PluginView::updateSearchTextTemp() {
-	this->searchTextTemp = this->searchingMes + "\n" + this->searchingOutput;
+	/** Limit Length */
+	int length = this->searchingOutput.length();
+	if (length > SCAN_MES_MAX_LENGTH) {
+		this->searchTextTemp = this->searchingMes + "\n..." + this->searchingOutput.substring(
+			length - SCAN_MES_MAX_LENGTH, length);
+	}
+	else {
+		this->searchTextTemp = this->searchingMes + "\n" + this->searchingOutput;
+	}
 }
 
 juce::PopupMenu PluginView::createGroupMenu() const {
@@ -281,6 +305,7 @@ juce::PopupMenu PluginView::createGroupMenu() const {
 	menu.addItem(5, TRANS("Group by Category"), true, this->groupType == utils::PluginGroupType::Category);
 	menu.addSeparator();
 	menu.addItem(6, TRANS("Rescan Plugins"), true);
+	menu.addItem(7, TRANS("Refresh Plugins"), true);
 
 	return menu;
 }
@@ -295,6 +320,7 @@ juce::PopupMenu PluginView::createPluginMenu() const {
 	menu.addItem(4, TRANS("Add to Blacklist"), true);
 	menu.addSeparator();
 	menu.addItem(5, TRANS("Rescan Plugins"), true);
+	menu.addItem(6, TRANS("Refresh Plugins"), true);
 
 	return menu;
 }

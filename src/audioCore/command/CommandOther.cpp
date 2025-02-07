@@ -12,6 +12,12 @@ AUDIOCORE_FUNC(searchPlugin) {
 	return CommandFuncResult{ true, "" };
 }
 
+AUDIOCORE_FUNC(refreshPlugin) {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRefreshPlugin);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+	return CommandFuncResult{ true, "" };
+}
+
 AUDIOCORE_FUNC(play) {
 	auto action = std::unique_ptr<ActionUndoableBase>(new ActionPlay);
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
@@ -170,6 +176,7 @@ AUDIOCORE_FUNC(splitSequencerBlock) {
 void regCommandOther(lua_State* L) {
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, clearPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, searchPlugin);
+	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, refreshPlugin);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, play);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, pause);
 	LUA_ADD_AUDIOCORE_FUNC_DEFAULT_NAME(L, stop);

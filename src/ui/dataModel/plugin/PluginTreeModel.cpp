@@ -284,7 +284,8 @@ private:
 PluginTreeModel::PluginTreeModel(
 	const juce::Array<PluginClass>& plugins,
 	const std::function<void(const juce::String&)>& groupMenuCallback,
-	const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback) {
+	const std::function<void(const juce::PluginDescription&)>& pluginMenuCallback)
+	: groupMenuCallback(groupMenuCallback) {
 	for (auto& [name, list] : plugins) {
 		this->addSubItem(new PluginClassModel{ name, list, groupMenuCallback, pluginMenuCallback });
 	}
@@ -299,6 +300,12 @@ bool PluginTreeModel::isInterestedInFileDrag(
 
 bool PluginTreeModel::isInterestedInDragSource(
 	const juce::DragAndDropTarget::SourceDetails&) { return false; };
+
+void PluginTreeModel::itemClicked(const juce::MouseEvent& event) {
+	if (event.mods.isRightButtonDown()) {
+		this->groupMenuCallback("");
+	}
+}
 
 void PluginTreeModel::changeAllOpenness(bool open) {
 	int subNum = this->getNumSubItems();

@@ -23,15 +23,29 @@ const juce::String ActionClearPlugin::getStatusStr() const {
 ActionSearchPlugin::ActionSearchPlugin() {}
 
 bool ActionSearchPlugin::doAction() {
-	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return true; }
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
 
 	Plugin::getInstance()->clearPluginList();
-	Plugin::getInstance()->getPluginList();
+	Plugin::getInstance()->searchNow();
 
 	return true;
 }
 
 const juce::String ActionSearchPlugin::getStatusStr() const {
+	return "";
+}
+
+ActionRefreshPlugin::ActionRefreshPlugin() {}
+
+bool ActionRefreshPlugin::doAction() {
+	if (Plugin::getInstance()->pluginSearchThreadIsRunning()) { return false; }
+
+	Plugin::getInstance()->clearPluginList();
+
+	return true;
+}
+
+const juce::String ActionRefreshPlugin::getStatusStr() const {
 	return "";
 }
 

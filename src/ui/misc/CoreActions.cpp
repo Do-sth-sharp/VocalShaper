@@ -28,6 +28,11 @@ void CoreActions::rescanPlugins() {
 	ActionDispatcher::getInstance()->dispatch(std::move(searchAction));
 }
 
+void CoreActions::refreshPlugins() {
+	auto action = std::unique_ptr<ActionUndoableBase>(new ActionRefreshPlugin);
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 bool CoreActions::addPluginBlackList(const juce::String& filePath) {
 	return quickAPI::addToPluginBlackList(filePath);
 }
