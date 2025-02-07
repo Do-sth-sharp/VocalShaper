@@ -257,7 +257,7 @@ void PluginEditorHub::closeInstr(PluginEditor* ptr) {
 			this->instrEditors.erase(it);
 
 			/** Callback */
-			CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, index);
+			CoreCallbackAPI<int>::invoke(CoreCallbacks::CallbackType::TrackInstrChanged, track);
 
 			break;
 		}
