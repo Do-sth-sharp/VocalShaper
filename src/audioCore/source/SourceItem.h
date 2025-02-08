@@ -81,6 +81,16 @@ public:
 	const SourceMIDITemp::Controller getMIDIController(int track, uint8_t number, int index) const;
 	const SourceMIDITemp::Misc getMIDIMisc(int track, int index) const;
 
+public:
+	int addNote(int track, double startTime, double endTime,
+		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "");
+	int setNoteTime(int track, int index,
+		double startTime, double endTime);
+	bool setNotePitch(int track, int index, uint8_t pitch);
+	bool setNoteVelocity(int track, int index, uint8_t vel);
+	bool setNoteLyrics(int track, int index, const juce::String& lyrics);
+	bool removeNote(int track, int index);
+
 private:
 	const SourceType type;
 	std::shared_ptr<SourceInternalContainer> container = nullptr;

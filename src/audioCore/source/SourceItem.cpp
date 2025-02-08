@@ -446,6 +446,81 @@ const SourceMIDITemp::Misc SourceItem::getMIDIMisc(int track, int index) const {
 	return this->container->getMIDIMisc(track, index);
 }
 
+int SourceItem::addNote(int track, double startTime, double endTime,
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	if (!this->container) { return -1; }
+
+	int result = this->container->addNote(
+		track, startTime, endTime,
+		pitch, vel, lyrics);
+
+	if (result >= 0) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
+int SourceItem::setNoteTime(int track, int index,
+	double startTime, double endTime) {
+	if (!this->container) { return -1; }
+
+	int result = this->container->setNoteTime(
+		track, index, startTime, endTime);
+
+	if (result >= 0) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
+bool SourceItem::setNotePitch(int track, int index, uint8_t pitch) {
+	if (!this->container) { return -1; }
+
+	bool result = this->container->setNotePitch(
+		track, index, pitch);
+
+	if (result) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
+bool SourceItem::setNoteVelocity(int track, int index, uint8_t vel) {
+	if (!this->container) { return -1; }
+
+	bool result = this->container->setNoteVelocity(
+		track, index, vel);
+
+	if (result) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
+bool SourceItem::setNoteLyrics(int track, int index, const juce::String& lyrics) {
+	if (!this->container) { return -1; }
+
+	bool result = this->container->setNoteLyrics(
+		track, index, lyrics);
+
+	if (result) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
+bool SourceItem::removeNote(int track, int index) {
+	if (!this->container) { return -1; }
+
+	bool result = this->container->removeNote(
+		track, index);
+
+	if (result) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
 void SourceItem::updateAudioResampler() {
 	/** Check Audio Data */
 	if (!this->audioValid()) { return; }

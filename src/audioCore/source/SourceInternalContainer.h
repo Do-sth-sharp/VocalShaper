@@ -51,6 +51,16 @@ public:
 	bool isForked() const;
 
 public:
+	int addNote(int track, double startTime, double endTime,
+		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "");
+	int setNoteTime(int track, int index,
+		double startTime, double endTime);
+	bool setNotePitch(int track, int index, uint8_t pitch);
+	bool setNoteVelocity(int track, int index, uint8_t vel);
+	bool setNoteLyrics(int track, int index, const juce::String& lyrics);
+	bool removeNote(int track, int index);
+
+public:
 	int getMIDITrackNum() const;
 	bool isMIDITrackEmpty(int track) const;
 

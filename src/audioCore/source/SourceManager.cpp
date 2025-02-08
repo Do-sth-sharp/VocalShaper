@@ -464,6 +464,61 @@ const juce::Array<SourceMIDITemp::Misc> SourceManager::getMIDIMiscList(uint64_t 
 	return {};
 }
 
+int SourceManager::addNote(uint64_t ref, int track, double startTime, double endTime,
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->addNote(
+			track, startTime, endTime, pitch, vel, lyrics);
+	}
+	return -1;
+}
+
+int SourceManager::setNoteTime(uint64_t ref, int track, int index,
+	double startTime, double endTime) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->setNoteTime(
+			track, index, startTime, endTime);
+	}
+	return -1;
+}
+
+bool SourceManager::setNotePitch(uint64_t ref, int track, int index, uint8_t pitch) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->setNotePitch(
+			track, index, pitch);
+	}
+	return false;
+}
+
+bool SourceManager::setNoteVelocity(uint64_t ref, int track, int index, uint8_t vel) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->setNoteVelocity(
+			track, index, vel);
+	}
+	return false;
+}
+
+bool SourceManager::setNoteLyrics(uint64_t ref, int track, int index, const juce::String& lyrics) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->setNoteLyrics(
+			track, index, lyrics);
+	}
+	return false;
+}
+
+bool SourceManager::removeNote(uint64_t ref, int track, int index) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->removeNote(track, index);
+	}
+	return false;
+}
+
 void SourceManager::sampleRateChanged(double sampleRate, int blockSize) {
 	juce::ScopedWriteLock locker(audioLock::getSourceLock());
 	

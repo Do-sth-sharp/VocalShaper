@@ -237,6 +237,141 @@ bool SourceInternalContainer::isForked() const {
 	return this->forked;
 }
 
+int SourceInternalContainer::addNote(
+	int track, double startTime, double endTime,
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return -1; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Add Note */
+	int result = this->midiData->addNote(
+		track, startTime, endTime,
+		pitch, vel, lyrics);
+
+	/** Set Flag */
+	if (result >= 0) {
+		this->changed();
+	}
+
+	return result;
+}
+
+int SourceInternalContainer::setNoteTime(
+	int track, int index,
+	double startTime, double endTime) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return -1; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Set Note Time */
+	int result = this->midiData->setNoteTime(
+		track, index, startTime, endTime);
+
+	/** Set Flag */
+	if (result >= 0) {
+		this->changed();
+	}
+
+	return result;
+}
+
+bool SourceInternalContainer::setNotePitch(
+	int track, int index, uint8_t pitch) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return -1; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Set Note Pitch */
+	bool result = this->midiData->setNotePitch(
+		track, index, pitch);
+
+	/** Set Flag */
+	if (result) {
+		this->changed();
+	}
+
+	return result;
+}
+
+bool SourceInternalContainer::setNoteVelocity(
+	int track, int index, uint8_t vel) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return -1; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Set Note Velocity */
+	bool result = this->midiData->setNoteVelocity(
+		track, index, vel);
+
+	/** Set Flag */
+	if (result) {
+		this->changed();
+	}
+
+	return result;
+}
+
+bool SourceInternalContainer::setNoteLyrics(
+	int track, int index, const juce::String& lyrics) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return -1; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Set Note Lyrics */
+	bool result = this->midiData->setNoteLyrics(
+		track, index, lyrics);
+
+	/** Set Flag */
+	if (result) {
+		this->changed();
+	}
+
+	return result;
+}
+
+bool SourceInternalContainer::removeNote(
+	int track, int index) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return -1; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Remove Note */
+	bool result = this->midiData->removeNote(
+		track, index);
+
+	/** Set Flag */
+	if (result) {
+		this->changed();
+	}
+
+	return result;
+}
+
 int SourceInternalContainer::getMIDITrackNum() const {
 	if (!this->midiData) { return 0; }
 	return this->midiData->getTrackNum();

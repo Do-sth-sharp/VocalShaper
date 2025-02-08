@@ -547,6 +547,38 @@ void SourceMIDITemp::addMIDIMessages(
 	this->updateIndexs(track);
 }
 
+int SourceMIDITemp::addNote(int track, double startTime, double endTime,
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	/** TODO */
+	return -1;
+}
+
+int SourceMIDITemp::setNoteTime(int track, int index,
+	double startTime, double endTime) {
+	/** TODO */
+	return -1;
+}
+
+bool SourceMIDITemp::setNotePitch(int track, int index, uint8_t pitch) {
+	/** TODO */
+	return false;
+}
+
+bool SourceMIDITemp::setNoteVelocity(int track, int index, uint8_t vel) {
+	/** TODO */
+	return false;
+}
+
+bool SourceMIDITemp::setNoteLyrics(int track, int index, const juce::String& lyrics) {
+	/** TODO */
+	return false;
+}
+
+bool SourceMIDITemp::removeNote(int track, int index) {
+	/** TODO */
+	return false;
+}
+
 int SourceMIDITemp::binarySearchStart(
 	const juce::OwnedArray<MIDIStruct>& eventsList, int low, int high, double time) {
 
