@@ -446,12 +446,12 @@ const SourceMIDITemp::Misc SourceItem::getMIDIMisc(int track, int index) const {
 	return this->container->getMIDIMisc(track, index);
 }
 
-int SourceItem::addNote(int track, double startTime, double endTime,
+int SourceItem::addNote(int track, double startTime, double endTime, uint8_t channel,
 	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
 	if (!this->container) { return -1; }
 
 	int result = this->container->addNote(
-		track, startTime, endTime,
+		track, startTime, endTime, channel,
 		pitch, vel, lyrics);
 
 	if (result >= 0) {
@@ -473,8 +473,20 @@ int SourceItem::setNoteTime(int track, int index,
 	return result;
 }
 
+bool SourceItem::setNoteChannel(int track, int index, uint8_t channel) {
+	if (!this->container) { return false; }
+
+	bool result = this->container->setNoteChannel(
+		track, index, channel);
+
+	if (result) {
+		this->invokeCallback();
+	}
+	return result;
+}
+
 bool SourceItem::setNotePitch(int track, int index, uint8_t pitch) {
-	if (!this->container) { return -1; }
+	if (!this->container) { return false; }
 
 	bool result = this->container->setNotePitch(
 		track, index, pitch);
@@ -486,7 +498,7 @@ bool SourceItem::setNotePitch(int track, int index, uint8_t pitch) {
 }
 
 bool SourceItem::setNoteVelocity(int track, int index, uint8_t vel) {
-	if (!this->container) { return -1; }
+	if (!this->container) { return false; }
 
 	bool result = this->container->setNoteVelocity(
 		track, index, vel);
@@ -498,7 +510,7 @@ bool SourceItem::setNoteVelocity(int track, int index, uint8_t vel) {
 }
 
 bool SourceItem::setNoteLyrics(int track, int index, const juce::String& lyrics) {
-	if (!this->container) { return -1; }
+	if (!this->container) { return false; }
 
 	bool result = this->container->setNoteLyrics(
 		track, index, lyrics);
@@ -510,7 +522,7 @@ bool SourceItem::setNoteLyrics(int track, int index, const juce::String& lyrics)
 }
 
 bool SourceItem::removeNote(int track, int index) {
-	if (!this->container) { return -1; }
+	if (!this->container) { return false; }
 
 	bool result = this->container->removeNote(
 		track, index);

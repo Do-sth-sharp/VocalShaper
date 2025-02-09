@@ -238,7 +238,7 @@ bool SourceInternalContainer::isForked() const {
 }
 
 int SourceInternalContainer::addNote(
-	int track, double startTime, double endTime,
+	int track, double startTime, double endTime, uint8_t channel,
 	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
 	/** Check Type */
 	if (this->type != SourceType::MIDI) { return -1; }
@@ -250,7 +250,7 @@ int SourceInternalContainer::addNote(
 
 	/** Add Note */
 	int result = this->midiData->addNote(
-		track, startTime, endTime,
+		track, startTime, endTime, channel,
 		pitch, vel, lyrics);
 
 	/** Set Flag */
@@ -284,10 +284,32 @@ int SourceInternalContainer::setNoteTime(
 	return result;
 }
 
+bool SourceInternalContainer::setNoteChannel(
+	int track, int index, uint8_t channel) {
+	/** Check Type */
+	if (this->type != SourceType::MIDI) { return false; }
+
+	/** Init MIDI */
+	if (!this->midiData) {
+		this->initMidiData();
+	}
+
+	/** Set Note Pitch */
+	bool result = this->midiData->setNoteChannel(
+		track, index, channel);
+
+	/** Set Flag */
+	if (result) {
+		this->changed();
+	}
+
+	return result;
+}
+
 bool SourceInternalContainer::setNotePitch(
 	int track, int index, uint8_t pitch) {
 	/** Check Type */
-	if (this->type != SourceType::MIDI) { return -1; }
+	if (this->type != SourceType::MIDI) { return false; }
 
 	/** Init MIDI */
 	if (!this->midiData) {
@@ -309,7 +331,7 @@ bool SourceInternalContainer::setNotePitch(
 bool SourceInternalContainer::setNoteVelocity(
 	int track, int index, uint8_t vel) {
 	/** Check Type */
-	if (this->type != SourceType::MIDI) { return -1; }
+	if (this->type != SourceType::MIDI) { return false; }
 
 	/** Init MIDI */
 	if (!this->midiData) {
@@ -331,7 +353,7 @@ bool SourceInternalContainer::setNoteVelocity(
 bool SourceInternalContainer::setNoteLyrics(
 	int track, int index, const juce::String& lyrics) {
 	/** Check Type */
-	if (this->type != SourceType::MIDI) { return -1; }
+	if (this->type != SourceType::MIDI) { return false; }
 
 	/** Init MIDI */
 	if (!this->midiData) {
@@ -353,7 +375,7 @@ bool SourceInternalContainer::setNoteLyrics(
 bool SourceInternalContainer::removeNote(
 	int track, int index) {
 	/** Check Type */
-	if (this->type != SourceType::MIDI) { return -1; }
+	if (this->type != SourceType::MIDI) { return false; }
 
 	/** Init MIDI */
 	if (!this->midiData) {

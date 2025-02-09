@@ -81,10 +81,11 @@ public:
 		NoteOnTemp& noteOnTemp, int& indexTemp, LyricsItem& lyricsTemp);
 
 public:
-	int addNote(int track, double startTime, double endTime,
+	int addNote(int track, double startTime, double endTime, uint8_t channel,
 		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "");
 	int setNoteTime(int track, int index,
 		double startTime, double endTime);
+	bool setNoteChannel(int track, int index, uint8_t channel);
 	bool setNotePitch(int track, int index, uint8_t pitch);
 	bool setNoteVelocity(int track, int index, uint8_t vel);
 	bool setNoteLyrics(int track, int index, const juce::String& lyrics);

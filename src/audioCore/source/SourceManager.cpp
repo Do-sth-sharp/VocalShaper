@@ -464,12 +464,13 @@ const juce::Array<SourceMIDITemp::Misc> SourceManager::getMIDIMiscList(uint64_t 
 	return {};
 }
 
-int SourceManager::addNote(uint64_t ref, int track, double startTime, double endTime,
+int SourceManager::addNote(uint64_t ref,
+	int track, double startTime, double endTime, uint8_t channel,
 	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
 		return ptr->addNote(
-			track, startTime, endTime, pitch, vel, lyrics);
+			track, startTime, endTime, channel, pitch, vel, lyrics);
 	}
 	return -1;
 }
@@ -482,6 +483,15 @@ int SourceManager::setNoteTime(uint64_t ref, int track, int index,
 			track, index, startTime, endTime);
 	}
 	return -1;
+}
+
+bool SourceManager::setNoteChannel(uint64_t ref, int track, int index, uint8_t channel) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->setNoteChannel(
+			track, index, channel);
+	}
+	return false;
 }
 
 bool SourceManager::setNotePitch(uint64_t ref, int track, int index, uint8_t pitch) {

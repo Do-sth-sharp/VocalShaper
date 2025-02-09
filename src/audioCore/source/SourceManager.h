@@ -80,10 +80,11 @@ public:
 	const juce::Array<SourceMIDITemp::Misc> getMIDIMiscList(uint64_t ref, int track) const;
 
 public:
-	int addNote(uint64_t ref, int track, double startTime, double endTime,
+	int addNote(uint64_t ref, int track, double startTime, double endTime, uint8_t channel,
 		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "");
 	int setNoteTime(uint64_t ref, int track, int index,
 		double startTime, double endTime);
+	bool setNoteChannel(uint64_t ref, int track, int index, uint8_t channel);
 	bool setNotePitch(uint64_t ref, int track, int index, uint8_t pitch);
 	bool setNoteVelocity(uint64_t ref, int track, int index, uint8_t vel);
 	bool setNoteLyrics(uint64_t ref, int track, int index, const juce::String& lyrics);

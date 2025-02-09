@@ -81,33 +81,34 @@ void SourceMIDITemp::removeEvents(int track, double startTime, double timeLength
 
 		/** For Each Note */
 		for (int i = 0; i < eventList.size(); i++) {
-			auto ptr = eventList.getUnchecked(i);
+			if (auto ptr = eventList.getUnchecked(i)) {
+				/** Note On Item */
+				if (auto ptrNote = dynamic_cast<Note*>(ptr)) {
+					noteOnObjectTemp.push({ ptrNote->endSec, i });
+				}
 
-			/** Note On Item */
-			if (auto ptrNote = dynamic_cast<Note*>(ptr)) {
-				noteOnObjectTemp.push({ ptrNote->endSec, i });
-			}
+				/** Insert Note Off Marker */
+				if (i < eventList.size() - 1) {
+					if (auto ptrNext = eventList.getUnchecked(i + 1)) {
+						if (!noteOnObjectTemp.empty()) {
+							auto& [firstNoteEndTime, firstNoteIndex] = noteOnObjectTemp.top();
+							if (ptr->timeSec <= firstNoteEndTime && ptrNext->timeSec > firstNoteEndTime) {
+								if (auto ptrNote = dynamic_cast<Note*>(eventList.getUnchecked(firstNoteIndex))) {
+									auto noteOff = std::make_unique<NoteOffMarker>();
+									noteOff->channel = ptrNote->channel;
+									noteOff->timeSec = firstNoteEndTime;
 
-			/** Insert Note Off Marker */
-			if (i < eventList.size() - 1) {
-				auto ptrNext = eventList.getUnchecked(i + 1);
-				if (!noteOnObjectTemp.empty()) {
-					auto& [firstNoteEndTime, firstNoteIndex] = noteOnObjectTemp.top();
-					if (ptr->timeSec <= firstNoteEndTime && ptrNext->timeSec > firstNoteEndTime) {
-						if (auto ptrNote = dynamic_cast<Note*>(eventList.getUnchecked(firstNoteIndex))) {
-							auto noteOff = std::make_unique<NoteOffMarker>();
-							noteOff->channel = ptrNote->channel;
-							noteOff->timeSec = firstNoteEndTime;
+									noteOff->eventOnIndex = firstNoteIndex;
+									ptrNote->eventOffIndex = i + 1;
 
-							noteOff->eventOnIndex = firstNoteIndex;
-							ptrNote->eventOffIndex = i + 1;
+									noteOff->eventIndex = ptrNote->eventOffIndex;
+									noteOff->eventInListIndex = -1;
 
-							noteOff->eventIndex = ptrNote->eventOffIndex;
-							noteOff->eventInListIndex = -1;
-
-							eventList.insert(ptrNote->eventOffIndex, std::move(noteOff));
+									eventList.insert(ptrNote->eventOffIndex, std::move(noteOff));
+								}
+								noteOnObjectTemp.pop();
+							}
 						}
-						noteOnObjectTemp.pop();
 					}
 				}
 			}
@@ -547,14 +548,112 @@ void SourceMIDITemp::addMIDIMessages(
 	this->updateIndexs(track);
 }
 
-int SourceMIDITemp::addNote(int track, double startTime, double endTime,
+int SourceMIDITemp::addNote(int track, double startTime, double endTime, uint8_t channel,
 	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
-	/** TODO */
+	/** Limit Track Index */
+	if (track < 0 || track >= this->eventList.size()) { return -1; }
+	
+	/** Limit Time */
+	if (endTime <= startTime) { return -1; }
+
+	/** Get Insert Index */
+	auto& list = this->eventList.getReference(track);
+	int startIndex = SourceMIDITemp::linearSearchInsert(list, 0, startTime);
+
+	/** Create Note Start Event */
+	auto note = std::make_unique<Note>();
+	note->channel = channel;
+	note->timeSec = startTime;
+	note->endSec = endTime;
+	note->pitch = pitch;
+	note->vel = vel;
+	note->lyrics = lyrics;
+
+	/** Insert Into Event List */
+	note->eventIndex = startIndex;
+	list.insert(startIndex, std::move(note));
+
+	/** Update Event Index In Event List */
+	for (int i = 0; i < list.size(); i++) {
+		if (i != startIndex) {
+			auto ptr = list.getUnchecked(i);
+			if (ptr->eventIndex >= startIndex) {
+				ptr->eventIndex++;
+			}
+
+			if (auto pNote = dynamic_cast<Note*>(ptr)) {
+				if (pNote->eventOffIndex >= startIndex) {
+					pNote->eventOffIndex++;
+				}
+			}
+
+			else if (auto pNoteOff = dynamic_cast<NoteOffMarker*>(ptr)) {
+				if (pNoteOff->eventOnIndex >= startIndex) {
+					pNoteOff->eventOnIndex++;
+				}
+			}
+		}
+	}
+
+	/** Get Note Off Insert Index */
+	int endIndex = SourceMIDITemp::linearSearchInsert(
+		list, startIndex, endTime);
+
+	/** Create Note End Event */
+	auto noteOff = std::make_unique<NoteOffMarker>();
+	noteOff->channel = channel;
+	noteOff->timeSec = endTime;
+	noteOff->eventOnIndex = startIndex;
+
+	/** Insert Note End Into Event List */
+	noteOff->eventIndex = endIndex;
+	list.insert(endIndex, std::move(noteOff));
+
+	/** Update Note On */
+	if (auto pNote = dynamic_cast<Note*>(list[startIndex])) {
+		pNote->eventOffIndex = endIndex;
+	}
+
+	/** Update Event Index In Event List */
+	for (int i = 0; i < list.size(); i++) {
+		if (i != endIndex) {
+			auto ptr = list.getUnchecked(i);
+			if (ptr->eventIndex >= endIndex) {
+				ptr->eventIndex++;
+			}
+
+			if (auto pNote = dynamic_cast<Note*>(ptr)) {
+				if (pNote->eventIndex != startIndex &&
+					pNote->eventOffIndex >= endIndex) {
+					pNote->eventOffIndex++;
+				}
+			}
+
+			else if (auto pNoteOff = dynamic_cast<NoteOffMarker*>(ptr)) {
+				if (pNoteOff->eventOnIndex >= endIndex) {
+					pNoteOff->eventOnIndex++;
+				}
+			}
+		}
+	}
+
+	/** Rebuild Index Temp */
+	this->updateIndexs(track);
+
+	/** Return Note Index */
+	if (auto pNote = dynamic_cast<Note*>(list[startIndex])) {
+		return pNote->eventInListIndex;
+	}
 	return -1;
 }
 
 int SourceMIDITemp::setNoteTime(int track, int index,
 	double startTime, double endTime) {
+	/** TODO */
+	return -1;
+}
+
+bool SourceMIDITemp::setNoteChannel(int track, int index, uint8_t channel) {
 	/** TODO */
 	return -1;
 }
