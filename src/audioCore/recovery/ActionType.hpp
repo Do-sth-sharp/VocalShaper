@@ -64,5 +64,13 @@ enum class ActionType : unsigned int {
 	ActionSetTrackInputMonitoring,
 	ActionSetEffect,
 	ActionSetCurrentMIDITrack,
-	ActionSetSequencerBlockTime
+	ActionSetSequencerBlockTime,
+
+	ActionMIDIAddNote = 0x0401,
+	ActionMIDISetNoteTime,
+	ActionMIDISetNoteChannel,
+	ActionMIDISetNotePitch,
+	ActionMIDISetNoteVelocity,
+	ActionMIDISetNoteLyrics,
+	ActionMIDIRemoveNote
 };
