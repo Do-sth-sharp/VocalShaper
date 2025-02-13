@@ -263,7 +263,7 @@ int SourceInternalContainer::addNote(
 
 int SourceInternalContainer::setNoteTime(
 	int track, int index,
-	double startTime, double endTime) {
+	double startTime, double endTime, int oldIndex, int oldNoteOffIndex) {
 	/** Check Type */
 	if (this->type != SourceType::MIDI) { return -1; }
 
@@ -274,7 +274,7 @@ int SourceInternalContainer::setNoteTime(
 
 	/** Set Note Time */
 	int result = this->midiData->setNoteTime(
-		track, index, startTime, endTime);
+		track, index, startTime, endTime, oldIndex, oldNoteOffIndex);
 
 	/** Set Flag */
 	if (result >= 0) {

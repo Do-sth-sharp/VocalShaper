@@ -461,11 +461,11 @@ int SourceItem::addNote(int track, double startTime, double endTime, uint8_t cha
 }
 
 int SourceItem::setNoteTime(int track, int index,
-	double startTime, double endTime) {
+	double startTime, double endTime, int oldIndex, int oldNoteOffIndex) {
 	if (!this->container) { return -1; }
 
 	int result = this->container->setNoteTime(
-		track, index, startTime, endTime);
+		track, index, startTime, endTime, oldIndex, oldNoteOffIndex);
 
 	if (result >= 0) {
 		this->invokeCallback();

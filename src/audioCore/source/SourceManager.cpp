@@ -476,11 +476,11 @@ int SourceManager::addNote(uint64_t ref,
 }
 
 int SourceManager::setNoteTime(uint64_t ref, int track, int index,
-	double startTime, double endTime) {
+	double startTime, double endTime, int oldIndex, int oldNoteOffIndex) {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
 		return ptr->setNoteTime(
-			track, index, startTime, endTime);
+			track, index, startTime, endTime, oldIndex, oldNoteOffIndex);
 	}
 	return -1;
 }

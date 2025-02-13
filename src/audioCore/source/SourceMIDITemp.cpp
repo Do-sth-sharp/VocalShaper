@@ -549,7 +549,7 @@ void SourceMIDITemp::addMIDIMessages(
 }
 
 int SourceMIDITemp::addNote(int track, double startTime, double endTime, uint8_t channel,
-	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics, int oldIndex, int oldNoteOffIndex) {
 	/** Limit Track Index */
 	if (track < 0 || track >= this->eventList.size()) { return -1; }
 	
@@ -559,6 +559,28 @@ int SourceMIDITemp::addNote(int track, double startTime, double endTime, uint8_t
 	/** Get Insert Index */
 	auto& list = this->eventList.getReference(track);
 	int startIndex = SourceMIDITemp::linearSearchInsert(list, 0, startTime);
+
+	if (oldIndex >= 0 && oldNoteOffIndex >= 0) {
+		/** Restore Index */
+		if (oldIndex <= list.size()) {
+			bool validFlag = true;
+
+			if (oldIndex > 0) {
+				if (list[oldIndex - 1]->timeSec > startTime) {
+					validFlag = false;
+				}
+			}
+			if (oldIndex < list.size() - 1) {
+				if (list[oldIndex + 1]->timeSec < startTime) {
+					validFlag = false;
+				}
+			}
+
+			if (validFlag) {
+				startIndex = oldIndex;
+			}
+		}
+	}
 
 	/** Create Note Start Event */
 	auto note = std::make_unique<Note>();
@@ -598,6 +620,28 @@ int SourceMIDITemp::addNote(int track, double startTime, double endTime, uint8_t
 	/** Get Note Off Insert Index */
 	int endIndex = SourceMIDITemp::linearSearchInsert(
 		list, startIndex, endTime);
+
+	if (oldIndex >= 0 && oldNoteOffIndex >= 0) {
+		/** Restore Index */
+		if (oldNoteOffIndex <= list.size()) {
+			bool validFlag = true;
+
+			if (oldNoteOffIndex > 0) {
+				if (list[oldNoteOffIndex - 1]->timeSec > endTime) {
+					validFlag = false;
+				}
+			}
+			if (oldNoteOffIndex < list.size() - 1) {
+				if (list[oldNoteOffIndex + 1]->timeSec < endTime) {
+					validFlag = false;
+				}
+			}
+
+			if (validFlag) {
+				endIndex = oldNoteOffIndex;
+			}
+		}
+	}
 
 	/** Create Note End Event */
 	auto noteOff = std::make_unique<NoteOffMarker>();
@@ -648,7 +692,7 @@ int SourceMIDITemp::addNote(int track, double startTime, double endTime, uint8_t
 }
 
 int SourceMIDITemp::setNoteTime(int track, int index,
-	double startTime, double endTime) {
+	double startTime, double endTime, int oldIndex, int oldNoteOffIndex) {
 	/** Limit Track Index */
 	if (track < 0 || track >= this->eventList.size()) { return -1; }
 
@@ -670,7 +714,8 @@ int SourceMIDITemp::setNoteTime(int track, int index,
 	if (this->removeNote(track, index)) {
 		return this->addNote(
 			track, startTime, endTime,
-			channel, pitch, vel, lyrics);
+			channel, pitch, vel, lyrics,
+			oldIndex, oldNoteOffIndex);
 	}
 	return -1;
 }
