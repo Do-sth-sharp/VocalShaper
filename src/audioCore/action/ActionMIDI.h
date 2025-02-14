@@ -62,3 +62,107 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionMIDISetNoteTime)
 };
+
+class ActionMIDISetNoteChannel final : public ActionUndoableBase {
+public:
+	ActionMIDISetNoteChannel() = delete;
+	ActionMIDISetNoteChannel(
+		uint64_t ref, int track, int index,
+		uint8_t channel);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "MIDI Set Note Channel";
+	};
+	ActionType getActionType() const override { return ActionType::ActionMIDISetNoteChannel; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const uint64_t ref;
+	const int track, index;
+	const uint8_t channel;
+
+	uint8_t oldChannel = 0;
+
+	JUCE_LEAK_DETECTOR(ActionMIDISetNoteChannel)
+};
+
+class ActionMIDISetNotePitch final : public ActionUndoableBase {
+public:
+	ActionMIDISetNotePitch() = delete;
+	ActionMIDISetNotePitch(
+		uint64_t ref, int track, int index,
+		uint8_t pitch);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "MIDI Set Note Pitch";
+	};
+	ActionType getActionType() const override { return ActionType::ActionMIDISetNotePitch; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const uint64_t ref;
+	const int track, index;
+	const uint8_t pitch;
+
+	uint8_t oldPitch = 0;
+
+	JUCE_LEAK_DETECTOR(ActionMIDISetNotePitch)
+};
+
+class ActionMIDISetNoteVelocity final : public ActionUndoableBase {
+public:
+	ActionMIDISetNoteVelocity() = delete;
+	ActionMIDISetNoteVelocity(
+		uint64_t ref, int track, int index,
+		uint8_t velocity);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "MIDI Set Note Velocity";
+	};
+	ActionType getActionType() const override { return ActionType::ActionMIDISetNoteVelocity; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const uint64_t ref;
+	const int track, index;
+	const uint8_t velocity;
+
+	uint8_t oldVelocity = 0;
+
+	JUCE_LEAK_DETECTOR(ActionMIDISetNoteVelocity)
+};
+
+class ActionMIDISetNoteLyrics final : public ActionUndoableBase {
+public:
+	ActionMIDISetNoteLyrics() = delete;
+	ActionMIDISetNoteLyrics(
+		uint64_t ref, int track, int index,
+		const juce::String& lyrics);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "MIDI Set Note Lyrics";
+	};
+	ActionType getActionType() const override { return ActionType::ActionMIDISetNoteLyrics; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const uint64_t ref;
+	const int track, index;
+	const juce::String lyrics;
+
+	juce::String oldLyrics;
+
+	JUCE_LEAK_DETECTOR(ActionMIDISetNoteLyrics)
+};
