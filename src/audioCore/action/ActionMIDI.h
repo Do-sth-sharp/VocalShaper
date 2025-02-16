@@ -166,3 +166,34 @@ private:
 
 	JUCE_LEAK_DETECTOR(ActionMIDISetNoteLyrics)
 };
+
+class ActionMIDIRemoveNote final : public ActionUndoableBase {
+public:
+	ActionMIDIRemoveNote() = delete;
+	ActionMIDIRemoveNote(
+		uint64_t ref, int track, int index);
+
+	bool doAction() override;
+	bool undoAction() override;
+	const juce::String getName() const override {
+		return "MIDI Remove Note";
+	};
+	ActionType getActionType() const override { return ActionType::ActionMIDIRemoveNote; };
+	const juce::String getStatusStr() const override;
+	void getRecoveryData(juce::MemoryOutputStream& stream) override;
+
+private:
+	const uint64_t ref;
+	const int track;
+	const int index;
+
+	double startTime = 0, endTime = 0;
+	uint8_t channel = 0;
+	uint8_t pitch = 0;
+	uint8_t vel = 0;
+	juce::String lyrics;
+
+	int oldEndIndex = -1;
+
+	JUCE_LEAK_DETECTOR(ActionMIDIAddNote)
+};

@@ -248,3 +248,61 @@ void ActionMIDISetNoteLyrics::getRecoveryData(juce::MemoryOutputStream& stream) 
 	stream.writeString(this->lyrics);
 	stream.writeString(this->oldLyrics);
 }
+
+ActionMIDIRemoveNote::ActionMIDIRemoveNote(
+	uint64_t ref, int track, int index)
+	: ref(ref), track(track), index(index) {}
+
+bool ActionMIDIRemoveNote::doAction() {
+	/** Get Note Data */
+	auto note = SourceManager::getInstance()->getMIDINote(
+		this->ref, this->track, this->index);
+	if (note.eventOffIndex < 0) { return false; }
+
+	this->startTime = note.timeSec;
+	this->endTime = note.endSec;
+	this->channel = note.channel;
+	this->pitch = note.pitch;
+	this->vel = note.vel;
+	this->lyrics = note.lyrics;
+
+	this->oldEndIndex = note.eventOffIndex;
+
+	/** Remove Note */
+	return SourceManager::getInstance()->removeNote(
+		this->ref, this->track, this->index);
+}
+
+bool ActionMIDIRemoveNote::undoAction() {
+	/** Restore Note */
+	int index = SourceManager::getInstance()->addNote(
+		this->ref, this->track, this->startTime, this->endTime,
+		this->channel, this->pitch, this->vel, this->lyrics,
+		this->index, this->oldEndIndex);
+	return (index == this->index);
+}
+
+const juce::String ActionMIDIRemoveNote::getStatusStr() const {
+	return "Source: " + juce::String{ this->ref } + "\n" +
+		"Track: " + juce::String{ this->track } + "\n" +
+		"Index: " + juce::String{ this->index } + "\n" +
+		"Time: " + juce::String{ this->startTime, 2 } + " - " + juce::String{ this->endTime, 2 } + "\n" +
+		"Channel: " + juce::String{ this->channel } + "\n" +
+		"Pitch: " + juce::String{ this->pitch } + "\n" +
+		"Velocity: " + juce::String{ this->vel } + "\n" +
+		"Lyrics: " + this->lyrics + "\n";
+}
+
+void ActionMIDIRemoveNote::getRecoveryData(juce::MemoryOutputStream& stream) {
+	stream.writeInt64((int64_t)this->ref);
+	stream.writeInt(this->track);
+	stream.writeInt(this->index);
+	stream.writeDouble(this->startTime);
+	stream.writeDouble(this->endTime);
+	stream.writeByte((char)this->channel);
+	stream.writeByte((char)this->pitch);
+	stream.writeByte((char)this->vel);
+	stream.writeString(this->lyrics);
+
+	stream.writeInt(this->oldEndIndex);
+}
