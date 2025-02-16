@@ -239,7 +239,8 @@ bool SourceInternalContainer::isForked() const {
 
 int SourceInternalContainer::addNote(
 	int track, double startTime, double endTime, uint8_t channel,
-	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics,
+	int oldIndex, int oldNoteOffIndex) {
 	/** Check Type */
 	if (this->type != SourceType::MIDI) { return -1; }
 
@@ -251,7 +252,7 @@ int SourceInternalContainer::addNote(
 	/** Add Note */
 	int result = this->midiData->addNote(
 		track, startTime, endTime, channel,
-		pitch, vel, lyrics);
+		pitch, vel, lyrics, oldIndex, oldNoteOffIndex);
 
 	/** Set Flag */
 	if (result >= 0) {

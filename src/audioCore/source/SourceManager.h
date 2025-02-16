@@ -81,7 +81,8 @@ public:
 
 public:
 	int addNote(uint64_t ref, int track, double startTime, double endTime, uint8_t channel,
-		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "");
+		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "",
+		int oldIndex = -1, int oldNoteOffIndex = -1);
 	int setNoteTime(uint64_t ref, int track, int index,
 		double startTime, double endTime,
 		int oldIndex = -1, int oldNoteOffIndex = -1);

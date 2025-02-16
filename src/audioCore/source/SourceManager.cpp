@@ -466,11 +466,14 @@ const juce::Array<SourceMIDITemp::Misc> SourceManager::getMIDIMiscList(uint64_t 
 
 int SourceManager::addNote(uint64_t ref,
 	int track, double startTime, double endTime, uint8_t channel,
-	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics,
+	int oldIndex, int oldNoteOffIndex) {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
 		return ptr->addNote(
-			track, startTime, endTime, channel, pitch, vel, lyrics);
+			track, startTime, endTime,
+			channel, pitch, vel, lyrics,
+			oldIndex, oldNoteOffIndex);
 	}
 	return -1;
 }

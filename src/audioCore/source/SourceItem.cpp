@@ -446,13 +446,15 @@ const SourceMIDITemp::Misc SourceItem::getMIDIMisc(int track, int index) const {
 	return this->container->getMIDIMisc(track, index);
 }
 
-int SourceItem::addNote(int track, double startTime, double endTime, uint8_t channel,
-	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+int SourceItem::addNote(
+	int track, double startTime, double endTime, uint8_t channel,
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics,
+	int oldIndex, int oldNoteOffIndex) {
 	if (!this->container) { return -1; }
 
 	int result = this->container->addNote(
 		track, startTime, endTime, channel,
-		pitch, vel, lyrics);
+		pitch, vel, lyrics, oldIndex, oldNoteOffIndex);
 
 	if (result >= 0) {
 		this->invokeCallback();
