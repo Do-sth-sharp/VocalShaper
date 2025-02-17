@@ -14,6 +14,7 @@ AudioCommand::AudioCommand() {
 	regCommandOther(this->cState.get());
 	regCommandRemove(this->cState.get());
 	regCommandSet(this->cState.get());
+	regCommandMIDI(this->cState.get());
 
 	lua_setglobal(this->cState.get(), "AC");
 }

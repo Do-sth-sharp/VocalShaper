@@ -91,3 +91,4 @@ void regCommandAdd(lua_State* L);
 void regCommandOther(lua_State* L);
 void regCommandRemove(lua_State* L);
 void regCommandSet(lua_State* L);
+void regCommandMIDI(lua_State* L);
