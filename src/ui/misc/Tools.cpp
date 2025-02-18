@@ -62,6 +62,14 @@ void Tools::addEditingTrackChangedListener(juce::ChangeListener* listener) {
 	this->editingTrackBroadcaster.addChangeListener(listener);
 }
 
+void Tools::setLastNoteLength(double sec) {
+	this->lastNoteLength = sec;
+}
+
+double Tools::getLastNoteLength() const {
+	return this->lastNoteLength;
+}
+
 Tools* Tools::getInstance() {
 	return Tools::instance ? Tools::instance
 		: (Tools::instance = new Tools{});

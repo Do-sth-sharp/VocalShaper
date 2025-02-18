@@ -26,12 +26,16 @@ public:
 	std::pair<int, int> getEditingTrack() const;
 	void addEditingTrackChangedListener(juce::ChangeListener* listener);
 
+	void setLastNoteLength(double sec);
+	double getLastNoteLength() const;
+
 private:
 	Type type = Type::Arrow;
 	double adsorbLevel = 1;
 	bool editorFollow = false;
 	uint8_t midiChannel = 1;
 	int editingTrackType = -1, editingTrackIndex = -1;
+	double lastNoteLength = 0;
 
 	juce::ChangeBroadcaster midiChannelBroadcaster;
 	juce::ChangeBroadcaster editingTrackBroadcaster;
