@@ -102,6 +102,9 @@ private:
 	juce::Array<Note> midiDataTemp;
 	uint8_t midiMinNote = 0, midiMaxNote = 0;
 
+	double noteInsertTime = -1, noteInsertLength = -1;
+	uint8_t noteInsertPitch = 0, noteInsertChannel = 0;
+
 	std::unique_ptr<juce::Image> rulerTemp = nullptr;
 	std::unique_ptr<juce::Image> keyTemp = nullptr;
 	std::unique_ptr<juce::Image> blockTemp = nullptr;
