@@ -361,11 +361,48 @@ void MIDIContentViewer::paintOverChildren(juce::Graphics& g) {
 }
 
 void MIDIContentViewer::mouseDown(const juce::MouseEvent& event) {
-	if (event.mods.isLeftButtonDown() && event.mods.isAltDown()) {
+	if (event.mods.isLeftButtonDown()) {
 		/** Move View Area */
-		this->viewMoving = true;
-		this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
-		this->dragStartFunc();
+		if (event.mods.isAltDown()) {
+			this->viewMoving = true;
+			this->setMouseCursor(juce::MouseCursor::DraggingHandCursor);
+			this->dragStartFunc();
+		}
+		
+		/** Edit Note */
+		else if (Tools::getInstance()->getType() == Tools::Type::Pencil) {
+			auto& pos = event.position;
+
+			auto [type, index] = this->getNoteController(pos);
+			
+			/** Add Note */
+			if (type == NoteControllerType::None) {
+				/** Get Time */
+				double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
+				time = quickAPI::limitTimeSec(time, Tools::getInstance()->getAdsorb());
+
+				/** Get Pitch */
+				uint8_t pitch = (uint8_t)std::floor(this->keyTop - (pos.y / this->getHeight()) * (this->keyTop - this->keyBottom));
+
+				/** Get Length */
+				double length = Tools::getInstance()->getLastNoteLength();
+				if (length <= 0) {
+					/** Init Length */
+					int tempoIndex = quickAPI::getTempoTempIndexBySec(time);
+					auto tempo = quickAPI::getTempoData(tempoIndex);
+					length = std::get<3>(tempo);
+
+					Tools::getInstance()->setLastNoteLength(length);
+				}
+
+				/** Set Temp */
+				this->noteInsertTime = time;
+				this->noteInsertLength = length;
+				this->noteInsertPitch = pitch;
+				this->noteInsertChannel = Tools::getInstance()->getMIDIChannel();
+				this->repaint();
+			}
+		}
 	}
 }
 
@@ -376,6 +413,21 @@ void MIDIContentViewer::mouseUp(const juce::MouseEvent& event) {
 			this->viewMoving = false;
 			this->setMouseCursor(juce::MouseCursor::NormalCursor);
 			this->dragEndFunc();
+		}
+
+		/** Add Note */
+		if (this->noteInsertTime >= 0) {
+			/** Insert Note */
+			this->insertNote(
+				this->noteInsertTime, this->noteInsertLength,
+				this->noteInsertPitch, this->noteInsertChannel);
+
+			/** Reset Temp */
+			this->noteInsertTime = -1;
+			this->noteInsertLength = -1;
+			this->noteInsertPitch = 0;
+			this->noteInsertChannel = 0;
+			this->repaint();
 		}
 	}
 }
@@ -415,6 +467,22 @@ void MIDIContentViewer::mouseDrag(const juce::MouseEvent& event) {
 			int distanceY = event.getDistanceFromDragStartY();
 			this->dragProcessFunc(distanceX, distanceY, true, true);
 		}
+
+		/** Add Note */
+		auto& pos = event.position;
+		if (this->noteInsertTime >= 0) {
+			/** Get Time */
+			double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
+			time = quickAPI::limitTimeSec(time, Tools::getInstance()->getAdsorb());
+
+			/** Get Pitch */
+			uint8_t pitch = (uint8_t)std::floor(this->keyTop - (pos.y / this->getHeight()) * (this->keyTop - this->keyBottom));
+
+			/** Set Temp */
+			this->noteInsertTime = time;
+			this->noteInsertPitch = pitch;
+			this->repaint();
+		}
 	}
 }
 
@@ -427,6 +495,16 @@ void MIDIContentViewer::mouseExit(const juce::MouseEvent& event) {
 		this->viewMoving = false;
 		this->setMouseCursor(juce::MouseCursor::NormalCursor);
 		this->dragEndFunc();
+	}
+
+	/** Add Note */
+	if (this->noteInsertTime >= 0) {
+		/** Reset Temp */
+		this->noteInsertTime = -1;
+		this->noteInsertLength = -1;
+		this->noteInsertPitch = 0;
+		this->noteInsertChannel = 0;
+		this->repaint();
 	}
 }
 
@@ -448,6 +526,12 @@ void MIDIContentViewer::midiChannelChanged() {
 	/** Update Note Image */
 	this->updateNoteImageTemp();
 	this->repaint();
+}
+
+void MIDIContentViewer::insertNote(
+	double startTime, double length,
+	uint8_t pitch, uint8_t channel) {
+	/** TODO */
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {

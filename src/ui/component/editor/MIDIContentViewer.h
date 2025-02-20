@@ -121,6 +121,8 @@ private:
 
 	std::unique_ptr<juce::ChangeListener> midiChannelListener = nullptr;
 
+	void insertNote(double startTime, double length, uint8_t pitch, uint8_t channel);
+
 	void updateKeyImageTemp();
 	void updateRulerImageTemp();
 	void updateBlockImageTemp();
