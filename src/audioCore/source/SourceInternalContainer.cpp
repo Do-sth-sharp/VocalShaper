@@ -98,7 +98,10 @@ void SourceInternalContainer::initMidiData() {
 			this->midiData = std::make_unique<SourceMIDITemp>();
 		}
 
-		//this->midiData->addTrack(juce::MidiMessageSequence{});
+		/** Add First Track */
+		if (this->midiData->getTrackNum() <= 0) {
+			this->midiData->addTrack(juce::MidiMessageSequence{});
+		}
 
 		this->changed();
 	}

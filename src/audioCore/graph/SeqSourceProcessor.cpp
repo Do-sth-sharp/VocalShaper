@@ -334,6 +334,16 @@ void SeqSourceProcessor::applyMIDI() {
 	/** Callback */
 	auto callback = [ptr = SafePointer{ this }] {
 		if (ptr) {
+			/** Current MIDI Track Change */
+			if (ptr->getTotalMIDITrackNum() > 0
+				&& ptr->getCurrentMIDITrack() < 0) {
+				ptr->setCurrentMIDITrack(0);
+			}
+			if (ptr->getTotalMIDITrackNum() <= 0
+				&& ptr->getCurrentMIDITrack() >= 0) {
+				ptr->setCurrentMIDITrack(-1);
+			}
+
 			/** ARA Change */
 			if (auto plugin = ptr->getInstrProcessor()) {
 				plugin->invokeARADocumentContextChange();
