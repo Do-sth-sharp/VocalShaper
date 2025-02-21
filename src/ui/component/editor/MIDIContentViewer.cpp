@@ -1,8 +1,11 @@
 #include "MIDIContentViewer.h"
 #include "../../misc/Tools.h"
+#include "../../misc/CoreActions.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../Utils.h"
 #include "../../../audioCore/AC_API.h"
+
+#define NOTE_VELOCITY_INIT 127
 
 class MIDIChannelListener final : public juce::ChangeListener {
 public:
@@ -531,7 +534,8 @@ void MIDIContentViewer::midiChannelChanged() {
 void MIDIContentViewer::insertNote(
 	double startTime, double length,
 	uint8_t pitch, uint8_t channel) {
-	/** TODO */
+	CoreActions::midiAddNote(this->ref, this->currentMIDITrack,
+		startTime, startTime + length, channel, pitch, NOTE_VELOCITY_INIT);
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {

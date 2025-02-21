@@ -502,6 +502,63 @@ void CoreActions::removeSeqBlock(int track, int index) {
 	ActionDispatcher::getInstance()->dispatch(std::move(action));
 }
 
+void CoreActions::midiAddNote(
+	uint64_t ref, int track, double startTime, double endTime, uint8_t channel,
+	uint8_t pitch, uint8_t vel, const juce::String& lyrics) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDIAddNote{ ref, track, startTime, endTime,
+		channel, pitch, vel, lyrics });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::midiSetNoteTime(
+	uint64_t ref, int track, int index,
+	double startTime, double endTime) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDISetNoteTime{
+			ref, track, index, startTime, endTime });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::midiSetNoteChannel(
+	uint64_t ref, int track, int index,
+	uint8_t channel) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDISetNoteChannel{ ref, track, index, channel });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::midiSetNotePitch(
+	uint64_t ref, int track, int index,
+	uint8_t pitch) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDISetNotePitch{ ref, track, index, pitch });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::midiSetNoteVelocity(
+	uint64_t ref, int track, int index,
+	uint8_t velocity) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDISetNoteVelocity{ ref, track, index, velocity });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::midiSetNoteLyrics(
+	uint64_t ref, int track, int index,
+	const juce::String& lyrics) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDISetNoteLyrics{ ref, track, index, lyrics });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
+void CoreActions::midiRemoveNote(
+	uint64_t ref, int track, int index) {
+	auto action = std::unique_ptr<ActionUndoableBase>(
+		new ActionMIDIRemoveNote{ ref, track, index });
+	ActionDispatcher::getInstance()->dispatch(std::move(action));
+}
+
 void CoreActions::loadProjectGUI(const juce::String& filePath) {
 	if (!CoreActions::askForSaveGUI()) { return; }
 

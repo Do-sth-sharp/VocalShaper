@@ -123,6 +123,27 @@ public:
 	static void setSeqBlock(int track, int index, double startTime, double endTime, double offset);
 	static void removeSeqBlock(int track, int index);
 
+	static void midiAddNote(
+		uint64_t ref, int track, double startTime, double endTime, uint8_t channel,
+		uint8_t pitch, uint8_t vel, const juce::String& lyrics = "");
+	static void midiSetNoteTime(
+		uint64_t ref, int track, int index,
+		double startTime, double endTime);
+	static void midiSetNoteChannel(
+		uint64_t ref, int track, int index,
+		uint8_t channel);
+	static void midiSetNotePitch(
+		uint64_t ref, int track, int index,
+		uint8_t pitch);
+	static void midiSetNoteVelocity(
+		uint64_t ref, int track, int index,
+		uint8_t velocity);
+	static void midiSetNoteLyrics(
+		uint64_t ref, int track, int index,
+		const juce::String& lyrics);
+	static void midiRemoveNote(
+		uint64_t ref, int track, int index);
+
 	using CreateAudioSourceCancelCallback = std::function<void(int)>;
 	using CreateMIDISourceCancelCallback = CreateAudioSourceCancelCallback;
 
