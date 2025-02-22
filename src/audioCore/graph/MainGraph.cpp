@@ -831,6 +831,11 @@ bool MainGraph::parse(
 			if (!trackNode->parse(&masterTrack, config)) { return false; }
 		}
 
+		uint32_t additionalBusNum = masterTrack.additionalbuses();
+		for (int i = 0; i < additionalBusNum; i++) {
+			this->addTrackAdditionalAudioBus(TrackType::MasterTrack, 0);
+		}
+
 		if (masterTrack.midiinput()) {
 			this->connectTrackMIDIInput(TrackType::MasterTrack, 0);
 		}
@@ -868,6 +873,11 @@ bool MainGraph::parse(
 	for (int i = 0; i < auxTracks.size(); i++) {
 		auto& auxTrack = auxTracks.at(i);
 
+		uint32_t additionalBusNum = auxTrack.additionalbuses();
+		for (int i = 0; i < additionalBusNum; i++) {
+			this->addTrackAdditionalAudioBus(TrackType::AuxTrack, i);
+		}
+
 		if (auxTrack.midiinput()) {
 			this->connectTrackMIDIInput(TrackType::AuxTrack, i);
 		}
@@ -903,6 +913,11 @@ bool MainGraph::parse(
 	for (int i = 0; i < tracks.size(); i++) {
 		auto& track = tracks.at(i);
 
+		uint32_t additionalBusNum = track.additionalbuses();
+		for (int i = 0; i < additionalBusNum; i++) {
+			this->addTrackAdditionalAudioBus(TrackType::Track, i);
+		}
+
 		if (track.midiinput()) {
 			this->connectTrackMIDIInput(TrackType::Track, i);
 		}
@@ -937,6 +952,8 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 		auto tmes = std::unique_ptr<vsp4::Track>{ 
 			dynamic_cast<vsp4::Track*>(masterTrack->serialize(config).release()) };
 		if (!tmes) { return nullptr; }
+
+		tmes->set_additionalbuses(this->getTrackAdditionalAudioBusNum(TrackType::MasterTrack, 0));
 
 		tmes->set_midiinput(this->isTrackMIDIInputConnected(TrackType::MasterTrack, 0));
 		auto audioInput = this->getTrackAudioInputChannels(TrackType::MasterTrack, 0);
@@ -982,6 +999,8 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 				dynamic_cast<vsp4::Track*>(auxTrack->serialize(config).release()) };
 			if (!tmes) { return nullptr; }
 
+			tmes->set_additionalbuses(this->getTrackAdditionalAudioBusNum(TrackType::AuxTrack, i));
+
 			tmes->set_midiinput(this->isTrackMIDIInputConnected(TrackType::AuxTrack, i));
 			auto audioInput = this->getTrackAudioInputChannels(TrackType::AuxTrack, i);
 			for (auto& i : audioInput) {
@@ -1026,6 +1045,8 @@ std::unique_ptr<google::protobuf::Message> MainGraph::serialize(
 			auto tmes = std::unique_ptr<vsp4::Track>{
 				dynamic_cast<vsp4::Track*>(track->serialize(config).release()) };
 			if (!tmes) { return nullptr; }
+
+			tmes->set_additionalbuses(this->getTrackAdditionalAudioBusNum(TrackType::Track, i));
 
 			tmes->set_midiinput(this->isTrackMIDIInputConnected(TrackType::Track, i));
 			auto audioInput = this->getTrackAudioInputChannels(TrackType::Track, i);

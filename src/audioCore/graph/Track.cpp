@@ -367,10 +367,10 @@ bool Track::parse(
 	this->setTrackName(info.name());
 	this->setTrackColor(juce::Colour{ info.color() });
 
-	uint32_t additionalBusNum = mes->additionalbuses();
+	/*uint32_t additionalBusNum = mes->additionalbuses();
 	for (int i = 0; i < additionalBusNum; i++) {
 		this->addAdditionalAudioBus();
-	}
+	}*/
 
 	this->setMute(mes->mute());
 	this->setSolo(mes->solo());
@@ -387,7 +387,7 @@ std::unique_ptr<google::protobuf::Message> Track::serialize(
 	auto info = mes->mutable_info();
 	info->set_name(this->getTrackName().toStdString());
 	info->set_color(this->getTrackColor().getARGB());
-	mes->set_additionalbuses(this->getAdditionalAudioBusNum());
+	//mes->set_additionalbuses(this->getAdditionalAudioBusNum());
 
 	mes->set_mute(this->getMute());
 	mes->set_solo(this->getSolo());
