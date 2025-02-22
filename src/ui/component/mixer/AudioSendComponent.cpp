@@ -212,8 +212,10 @@ void AudioSendComponent::addSend(int type, int index) {
 void AudioSendComponent::editSend() {
 	auto dst = quickAPI::getTrackAudioSendDst(
 		{ (quickAPI::TrackType)this->type, this->track }, this->slot);
-	CoreActions::setTrackAudioSendGUI(
-		(quickAPI::TrackType)this->type, this->track, this->slot, dst);
+	if (dst.second >= 0) {
+		CoreActions::setTrackAudioSendGUI(
+			(quickAPI::TrackType)this->type, this->track, this->slot, dst);
+	}
 }
 
 void AudioSendComponent::removeSend() {

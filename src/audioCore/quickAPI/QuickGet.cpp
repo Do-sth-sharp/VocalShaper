@@ -668,7 +668,7 @@ namespace quickAPI {
 		if (auto graph = getGraphProcessor()) {
 			return graph->getTrackMIDISendDst(index.first, index.second, slot);
 		}
-		return {};
+		return { SendDstType::ToDevice, -1 };
 	}
 
 	bool isTrackAudioSendConnected(TrackIndex index, int slot) {
@@ -682,7 +682,7 @@ namespace quickAPI {
 		if (auto graph = getGraphProcessor()) {
 			return graph->getTrackAudioSendDst(index.first, index.second, slot);
 		}
-		return {};
+		return { SendDstType::ToDevice, -1 };
 	}
 
 	const AudioChannelLinkList getTrackAudioSendChannels(TrackIndex index, int slot) {

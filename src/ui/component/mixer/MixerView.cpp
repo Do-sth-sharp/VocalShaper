@@ -280,6 +280,11 @@ void MixerView::updateSideChain(int type, int index) {
 
 	/** Update Track */
 	this->trackList[viewIndex]->updateSideChain();
+
+	/** Update Send */
+	for (int i = 0; i < this->trackList.size(); i++) {
+		this->trackList[i]->updateSend();
+	}
 }
 
 void MixerView::updateInput(int type, int index) {
