@@ -482,7 +482,7 @@ void MIDISourceEditor::updateBlockTemp() {
 	auto list = quickAPI::getBlockList(
 		{ quickAPI::TrackType::Track, this->index });
 	for (auto [startTime, endTime, offset] : list) {
-		this->blockItemTemp.add({ startTime, endTime, startTime - offset });
+		this->blockItemTemp.add({ startTime, endTime, startTime + offset });
 	}
 
 	/** Sort by Source Start Time to Optimize Note Drawing Time */
@@ -551,7 +551,7 @@ void MIDISourceEditor::updateMIDIScrollerImageTemp() {
 
 	/** Actual Total Length */
 	double totalLength = ScrollerBase::limitItemNum(
-		this->hScroller->getItemNum(), this->getViewWidth(),
+		this->getTimeLength(), this->getViewWidth(),
 		std::get<0>(this->getTimeWidthLimit()));
 	juce::Rectangle<float> paintableArea = this->midiScrollerTemp->getBounds()
 		.toFloat().withTrimmedTop(paddingHeight).withTrimmedBottom(paddingHeight);
@@ -569,24 +569,19 @@ void MIDISourceEditor::updateMIDIScrollerImageTemp() {
 
 	/** Paint Each Block */
 	g.setColour(noteColor);
-	int startNoteIndexTemp = 0;
 	for (int i = 0; i < this->blockItemTemp.size(); i++) {
 		auto [blockStart, blockEnd, sourceStart] = this->blockItemTemp.getUnchecked(i);
-
-		/** Skip Notes Before Block */
-		for (; startNoteIndexTemp < this->midiDataTemp.size(); startNoteIndexTemp++) {
-			auto [start, end, num] = this->midiDataTemp.getUnchecked(startNoteIndexTemp);
-			if (start >= blockStart) { break; }
-		}
+		double sourceEnd = sourceStart + (blockEnd - blockStart);
 
 		/** Paint Each Note */
-		for (int j = startNoteIndexTemp; j < this->midiDataTemp.size(); j++) {
+		for (int j = 0; j < this->midiDataTemp.size(); j++) {
 			auto [start, end, num] = this->midiDataTemp.getUnchecked(j);
-			if (start >= blockEnd) { break; }
+			if (end < sourceStart) { continue; }
+			if (start > sourceEnd) { break; }
 
 			/** Get Time */
 			double startInSeq = blockStart + (start - sourceStart);
-			double endInSeq = std::min(blockStart + (end - sourceStart), blockEnd);
+			double endInSeq = blockStart + (end - sourceStart);
 
 			/** Note Rect */
 			float startPosX = startInSeq / totalLength * paintableArea.getWidth();

@@ -100,7 +100,7 @@ void MIDIContentViewer::updateBlocks() {
 	auto list = quickAPI::getBlockList(
 		{ quickAPI::TrackType::Track, this->index });
 	for (auto [startTime, endTime, offset] : list) {
-		this->blockItemTemp.add({ startTime, endTime, startTime - offset });
+		this->blockItemTemp.add({ startTime, endTime, startTime + offset });
 	}
 
 	/** Sort by Source Start Time to Optimize Note Drawing Time */
@@ -117,6 +117,7 @@ void MIDIContentViewer::updateBlocks() {
 
 	/** Update UI */
 	this->updateBlockImageTemp();
+	this->updateNoteImageTemp();
 	this->repaint();
 }
 
@@ -534,8 +535,18 @@ void MIDIContentViewer::midiChannelChanged() {
 void MIDIContentViewer::insertNote(
 	double startTime, double length,
 	uint8_t pitch, uint8_t channel) {
-	CoreActions::midiAddNote(this->ref, this->currentMIDITrack,
-		startTime, startTime + length, channel, pitch, NOTE_VELOCITY_INIT);
+	/** Match Block */
+	double endTime = startTime + length;
+	for (int i = 0; i < this->blockItemTemp.size(); i++) {
+		auto [blockStartTime, blockEndTime, sourceStartTime] = this->blockItemTemp.getUnchecked(i);
+		if (blockStartTime <= startTime &&
+			blockEndTime >= endTime) {
+			double noteMappedStartTime = sourceStartTime + (startTime - blockStartTime);
+			CoreActions::midiAddNote(this->ref, this->currentMIDITrack,
+				noteMappedStartTime, noteMappedStartTime + length, channel, pitch, NOTE_VELOCITY_INIT);
+			break;
+		}
+	}
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {
@@ -723,57 +734,71 @@ void MIDIContentViewer::updateNoteImageTemp() {
 	this->noteRectTempList.clear();
 	uint8_t midiChannel = Tools::getInstance()->getMIDIChannel();
 
-	/** Notes */
+	/** Blocks */
 	int minNoteNum = std::floor(this->keyBottom), maxNoteNum = std::floor(this->keyTop);
-	for (int i = 0; i < this->midiDataTemp.size(); i++) {
-		auto& note = this->midiDataTemp.getReference(i);
-		if (note.startSec <= this->secEnd &&
-			this->secStart <= note.endSec) {
-			if (note.num >= (minNoteNum - 1) &&
-				note.num <= maxNoteNum) {
-				/** Opaque */
-				float opaque = (note.channel == midiChannel) ? 1.0f : 0.4f;
+	for (int i = 0; i < this->blockItemTemp.size(); i++) {
+		auto [blockStartTime, blockEndTime, sourceStartTime] = this->blockItemTemp.getUnchecked(i);
+		if ((blockStartTime <= this->secEnd)
+			&& (blockEndTime >= this->secStart)) {
+			double sourceEndTime = sourceStartTime + (blockEndTime - blockStartTime);
+			
+			/** For Each Notes */
+			for (int j = 0; j < this->midiDataTemp.size(); j++) {
+				auto& note = this->midiDataTemp.getReference(j);
+				if (note.startSec <= sourceEndTime &&
+					sourceStartTime <= note.endSec) {
+					double noteMappedStartSec = blockStartTime + (note.startSec - sourceStartTime);
+					double noteMappedEndSec = blockStartTime + (note.endSec - sourceStartTime);
+					if (noteMappedStartSec <= this->secEnd &&
+						this->secStart <= noteMappedEndSec) {
+						if (note.num >= (minNoteNum - 1) &&
+							note.num <= maxNoteNum) {
+							/** Opaque */
+							float opaque = (note.channel == midiChannel) ? 1.0f : 0.4f;
 
-				/** Note Rect */
-				float startXPos = (note.startSec - this->secStart) / (this->secEnd - this->secStart) * width;
-				float endXPos = (note.endSec - this->secStart) / (this->secEnd - this->secStart) * width;
-				float noteYPos = ((note.num + 1) - this->keyTop) / (this->keyBottom - this->keyTop) * height;
-				juce::Rectangle<float> noteRect(
-					startXPos, noteYPos,
-					endXPos - startXPos, (float)this->vItemSize);
-				g.setColour(noteBaseColor);
-				g.fillRoundedRectangle(noteRect, noteCornerSize);
-				g.setColour(this->noteColorGradient[note.channel - 1].withAlpha(opaque));
-				g.fillRoundedRectangle(noteRect,noteCornerSize);
-				g.setColour(noteOutlineColor.withAlpha(opaque));
-				g.drawRoundedRectangle(noteRect, noteCornerSize, noteOutlineThickness);
+							/** Note Rect */
+							float startXPos = (noteMappedStartSec - this->secStart) / (this->secEnd - this->secStart) * width;
+							float endXPos = (noteMappedEndSec - this->secStart) / (this->secEnd - this->secStart) * width;
+							float noteYPos = ((note.num + 1) - this->keyTop) / (this->keyBottom - this->keyTop) * height;
+							juce::Rectangle<float> noteRect(
+								startXPos, noteYPos,
+								endXPos - startXPos, (float)this->vItemSize);
+							g.setColour(noteBaseColor);
+							g.fillRoundedRectangle(noteRect, noteCornerSize);
+							g.setColour(this->noteColorGradient[note.channel - 1].withAlpha(opaque));
+							g.fillRoundedRectangle(noteRect, noteCornerSize);
+							g.setColour(noteOutlineColor.withAlpha(opaque));
+							g.drawRoundedRectangle(noteRect, noteCornerSize, noteOutlineThickness);
 
-				/** Note Name */
-				juce::String noteName = this->keyNames[note.num % this->keyMasks.size()] + juce::String{ note.num / this->keyMasks.size() };
-				float noteNameWidth = juce::TextLayout::getStringWidth(noteLabelFont, noteName);
-				if ((noteNameWidth + notePaddingWidth * 2) <= noteRect.getWidth()
-					&& (noteFontHeight + notePaddingHeight * 2) <= noteRect.getHeight()) {
-					juce::Rectangle<float> noteLabelRect = noteRect.withWidth(noteNameWidth + notePaddingWidth * 2);
-					g.setFont(noteLabelFont);
-					g.setColour(this->noteLabelColorGradient[note.channel - 1].withAlpha(opaque));
-					g.drawFittedText(noteName, noteLabelRect.toNearestInt(),
-						juce::Justification::centred, 1, 0.75f);
+							/** Note Name */
+							juce::String noteName = this->keyNames[note.num % this->keyMasks.size()] + juce::String{ note.num / this->keyMasks.size() };
+							float noteNameWidth = juce::TextLayout::getStringWidth(noteLabelFont, noteName);
+							if ((noteNameWidth + notePaddingWidth * 2) <= noteRect.getWidth()
+								&& (noteFontHeight + notePaddingHeight * 2) <= noteRect.getHeight()) {
+								juce::Rectangle<float> noteLabelRect = noteRect.withWidth(noteNameWidth + notePaddingWidth * 2);
+								g.setFont(noteLabelFont);
+								g.setColour(this->noteLabelColorGradient[note.channel - 1].withAlpha(opaque));
+								g.drawFittedText(noteName, noteLabelRect.toNearestInt(),
+									juce::Justification::centred, 1, 0.75f);
+							}
+
+							/** Lyrics */
+							float noteLyricsWidth = juce::TextLayout::getStringWidth(noteLyricsFont, note.lyrics);
+							if (notePaddingWidth * 2 <= noteRect.getWidth()) {
+								juce::Rectangle<float> noteLyricsRect(
+									noteRect.getX() + notePaddingWidth, noteRect.getY() - (float)this->vItemSize,
+									noteRect.getWidth() - notePaddingWidth * 2, (float)this->vItemSize);
+								g.setFont(noteLyricsFont);
+								g.setColour(noteLyricsColor.withAlpha(opaque));
+								g.drawFittedText(note.lyrics, noteLyricsRect.toNearestInt(),
+									juce::Justification::left, 1, 1.0f);
+							}
+
+							/** Add Temp */
+							this->noteRectTempList.add({ j, noteRect, note.channel });
+						}
+					}
 				}
-
-				/** Lyrics */
-				float noteLyricsWidth = juce::TextLayout::getStringWidth(noteLyricsFont, note.lyrics);
-				if (notePaddingWidth * 2 <= noteRect.getWidth()) {
-					juce::Rectangle<float> noteLyricsRect(
-						noteRect.getX() + notePaddingWidth, noteRect.getY() - (float)this->vItemSize,
-						noteRect.getWidth() - notePaddingWidth * 2, (float)this->vItemSize);
-					g.setFont(noteLyricsFont);
-					g.setColour(noteLyricsColor.withAlpha(opaque));
-					g.drawFittedText(note.lyrics, noteLyricsRect.toNearestInt(),
-						juce::Justification::left, 1, 1.0f);
-				}
-
-				/** Add Temp */
-				this->noteRectTempList.add({ i, noteRect, note.channel });
 			}
 		}
 	}
@@ -820,9 +845,9 @@ MIDIContentViewer::getNoteController(const juce::Point<float>& pos) const {
 	/** Check Pos Inside Note */
 	auto [type, index] = this->getNoteControllerWithoutEdge(pos);
 	if (index >= 0) {
-		auto& note = this->midiDataTemp.getReference(index);
-		float startXPos = (note.startSec - this->secStart) / (this->secEnd - this->secStart) * width;
-		float endXPos = (note.endSec - this->secStart) / (this->secEnd - this->secStart) * width;
+		auto& note = this->noteRectTempList.getReference(index);
+		float startXPos = std::get<1>(note).getX();
+		float endXPos = std::get<1>(note).getRight();
 
 		/** Judge Area */
 		float judgeSSX = startXPos - noteJudgeWidth, judgeSEX = startXPos + noteJudgeWidth;
@@ -844,8 +869,9 @@ MIDIContentViewer::getNoteController(const juce::Point<float>& pos) const {
 		}
 	}
 
-	/** Get Each Block */
-	for (auto& [index, rect, channel] : this->noteRectTempList) {
+	/** Get Each Note */
+	for (int i = 0; i < this->noteRectTempList.size(); i++) {
+		auto& [index, rect, channel] = this->noteRectTempList.getReference(i);
 		if (channel == midiChannel) {
 			if (pos.getY() >= rect.getY() && pos.getY() < rect.getBottom()) {
 				/** Judge Area */
@@ -858,13 +884,13 @@ MIDIContentViewer::getNoteController(const juce::Point<float>& pos) const {
 
 				/** Get Controller */
 				if (pos.getX() >= judgeSSX && pos.getX() < judgeSEX) {
-					return { NoteControllerType::Left, index };
+					return { NoteControllerType::Left, i };
 				}
 				else if (pos.getX() >= judgeESX && pos.getX() < judgeEEX) {
-					return { NoteControllerType::Right, index };
+					return { NoteControllerType::Right, i };
 				}
 				else if (pos.getX() >= judgeSEX && pos.getX() < judgeESX) {
-					return { NoteControllerType::Inside, index };
+					return { NoteControllerType::Inside, i };
 				}
 			}
 		}
@@ -880,12 +906,13 @@ MIDIContentViewer::getNoteControllerWithoutEdge(const juce::Point<float>& pos) c
 	uint8_t midiChannel = Tools::getInstance()->getMIDIChannel();
 
 	/** Get Each Note */
-	for (auto& [index, rect, channel] : this->noteRectTempList) {
+	for (int i = 0; i < this->noteRectTempList.size(); i++) {
+		auto& [index, rect, channel] = this->noteRectTempList.getReference(i);
 		/** Inside Note */
 		if (channel == midiChannel) {
 			if (pos.getX() >= rect.getX() && pos.getX() < rect.getRight()
 				&& pos.getY() >= rect.getY() && pos.getY() < rect.getBottom()) {
-				return { NoteControllerType::Inside, index };
+				return { NoteControllerType::Inside, i };
 			}
 		}
 	}
