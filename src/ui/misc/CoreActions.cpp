@@ -608,7 +608,7 @@ void CoreActions::saveProjectGUI() {
 				projectFormats[0].trimCharactersAtStart("*."));
 		}
 
-		if (projFile.getParentDirectory() != defaultPath) {
+		if (projFile.getParentDirectory().getLinkedTarget() != defaultPath.getLinkedTarget()) {
 			juce::AlertWindow::showMessageBox(
 				juce::MessageBoxIconType::WarningIcon, TRANS("Save Project"),
 				TRANS("The project file must be in the root of working directory!"));
