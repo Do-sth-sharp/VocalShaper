@@ -622,7 +622,7 @@ void SeqSourceProcessor::processBlock(
 			int sourceOffsetInSample = std::floor(sourceOffset * sampleRate);
 
 			/** Caculate Time */
-			int sourceStartTimeInSample = sourceOffsetInSample;
+			int sourceStartTimeInSample = -sourceOffsetInSample;
 			int sourceEndTimeInSample = sourceStartTimeInSample + sourceLengthInSample;
 			int dataStartTimeInSample = std::max(blockStartTimeInSample, sourceStartTimeInSample);
 			int dataEndTimeInSample = std::min(blockEndTimeInSample, sourceEndTimeInSample);
@@ -634,13 +634,12 @@ void SeqSourceProcessor::processBlock(
 
 				if (hotLengthInSample > 0) {
 					int bufferOffsetInSample = hotStartTimeInSample - startTimeInSample;
-					int sourceOffsetInSample = hotStartTimeInSample - sourceStartTimeInSample;
 
 					/** Read Data */
 					this->readAudioData(buffer, bufferOffsetInSample,
-						sourceOffsetInSample, hotLengthInSample);
-					this->readMIDIData(midiMessages, sourceOffsetInSample,
-						hotStartTimeInSample, hotEndTimeInSample);
+						hotStartTimeInSample + sourceOffsetInSample, hotLengthInSample);
+					this->readMIDIData(midiMessages, startTimeInSample + sourceOffsetInSample,
+						hotStartTimeInSample + sourceOffsetInSample, hotEndTimeInSample + sourceOffsetInSample);
 				}
 			}
 		}
