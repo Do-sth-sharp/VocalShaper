@@ -406,6 +406,35 @@ void MIDIContentViewer::mouseDown(const juce::MouseEvent& event) {
 				this->noteInsertChannel = Tools::getInstance()->getMIDIChannel();
 				this->repaint();
 			}
+			/** Edit Note */
+			else if (type == NoteControllerType::Left || type == NoteControllerType::Right) {
+				/** Get Time */
+				double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
+				time = quickAPI::limitTimeSec(time, Tools::getInstance()->getAdsorb());
+
+				/** Limit Note Length */
+				int tempoIndex = quickAPI::getTempoTempIndexBySec(time);
+				auto tempo = quickAPI::getTempoData(tempoIndex);
+				double minLength = std::get<3>(tempo) / 64;
+
+				auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(index);
+				auto& note = this->midiDataTemp.getReference(noteIndex);
+				double noteStartTime = note.startSec;
+				double noteEndTime = note.endSec;
+				if (type == NoteControllerType::Right && time < noteStartTime + minLength) {
+					time = noteStartTime + minLength;
+				}
+				else if (type == NoteControllerType::Left && time > noteEndTime - minLength) {
+					time = noteEndTime - minLength;
+				}
+
+				/** Set Temp */
+				this->noteEditStatus = type;
+				this->noteEditIndex = index;
+				this->noteEditTime = time;
+				this->noteEditMinLength = minLength;
+				this->repaint();
+			}
 		}
 	}
 }
@@ -431,6 +460,24 @@ void MIDIContentViewer::mouseUp(const juce::MouseEvent& event) {
 			this->noteInsertLength = -1;
 			this->noteInsertPitch = 0;
 			this->noteInsertChannel = 0;
+			this->repaint();
+		}
+
+		/** Edit Time */
+		if (this->noteEditStatus == NoteControllerType::Left || this->noteEditStatus == NoteControllerType::Right) {
+			/** Set Note Time */
+			if (this->noteEditStatus == NoteControllerType::Left) {
+				this->setNoteStartTime(this->noteEditIndex, this->noteEditTime);
+			}
+			else if (this->noteEditStatus == NoteControllerType::Right) {
+				this->setNoteEndTime(this->noteEditIndex, this->noteEditTime);
+			}
+
+			/** Reset Temp */
+			this->noteEditStatus = NoteControllerType::None;
+			this->noteEditIndex = -1;
+			this->noteEditTime = -1;
+			this->noteEditMinLength = -1;
 			this->repaint();
 		}
 	}
@@ -487,6 +534,29 @@ void MIDIContentViewer::mouseDrag(const juce::MouseEvent& event) {
 			this->noteInsertPitch = pitch;
 			this->repaint();
 		}
+
+		/** Edit Time */
+		if (this->noteEditStatus == NoteControllerType::Left || this->noteEditStatus == NoteControllerType::Right) {
+			/** Get Time */
+			double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
+			time = quickAPI::limitTimeSec(time, Tools::getInstance()->getAdsorb());
+
+			/** Limit Note Length */
+			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
+			auto& note = this->midiDataTemp.getReference(noteIndex);
+			double noteStartTime = note.startSec;
+			double noteEndTime = note.endSec;
+			if (this->noteEditStatus == NoteControllerType::Right && time < noteStartTime + this->noteEditMinLength) {
+				time = noteStartTime + this->noteEditMinLength;
+			}
+			else if (this->noteEditStatus == NoteControllerType::Left && time > noteEndTime - this->noteEditMinLength) {
+				time = noteEndTime - this->noteEditMinLength;
+			}
+
+			/** Set Temp */
+			this->noteEditTime = time;
+			this->repaint();
+		}
 	}
 }
 
@@ -508,6 +578,16 @@ void MIDIContentViewer::mouseExit(const juce::MouseEvent& event) {
 		this->noteInsertLength = -1;
 		this->noteInsertPitch = 0;
 		this->noteInsertChannel = 0;
+		this->repaint();
+	}
+
+	/** Edit Time */
+	if (this->noteEditStatus == NoteControllerType::Left || this->noteEditStatus == NoteControllerType::Right) {
+		/** Reset Temp */
+		this->noteEditStatus = NoteControllerType::None;
+		this->noteEditIndex = -1;
+		this->noteEditTime = -1;
+		this->noteEditMinLength = -1;
 		this->repaint();
 	}
 }
@@ -547,6 +627,14 @@ void MIDIContentViewer::insertNote(
 			break;
 		}
 	}
+}
+
+void MIDIContentViewer::setNoteStartTime(int tempIndex, double time) {
+	/** TODO */
+}
+
+void MIDIContentViewer::setNoteEndTime(int tempIndex, double time) {
+	/** TODO */
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {

@@ -105,6 +105,14 @@ private:
 	double noteInsertTime = -1, noteInsertLength = -1;
 	uint8_t noteInsertPitch = 0, noteInsertChannel = 0;
 
+	enum class NoteControllerType {
+		None, Left, Right, Inside
+	};
+	NoteControllerType noteEditStatus = NoteControllerType::None;
+	int noteEditIndex = -1;
+	double noteEditTime = -1;
+	double noteEditMinLength = -1;
+
 	std::unique_ptr<juce::Image> rulerTemp = nullptr;
 	std::unique_ptr<juce::Image> keyTemp = nullptr;
 	std::unique_ptr<juce::Image> blockTemp = nullptr;
@@ -122,6 +130,8 @@ private:
 	std::unique_ptr<juce::ChangeListener> midiChannelListener = nullptr;
 
 	void insertNote(double startTime, double length, uint8_t pitch, uint8_t channel);
+	void setNoteStartTime(int tempIndex, double time);
+	void setNoteEndTime(int tempIndex, double time);
 
 	void updateKeyImageTemp();
 	void updateRulerImageTemp();
@@ -130,9 +140,6 @@ private:
 
 	void updateMouseCursor(const juce::Point<float>& pos);
 
-	enum class NoteControllerType {
-		None, Left, Right, Inside
-	};
 	std::tuple<NoteControllerType, int> getNoteController(const juce::Point<float>& pos) const;
 	std::tuple<NoteControllerType, int> getNoteControllerWithoutEdge(const juce::Point<float>& pos) const;
 
