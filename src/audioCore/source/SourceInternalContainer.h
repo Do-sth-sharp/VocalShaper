@@ -14,6 +14,7 @@ public:
 
 	SourceType getType() const;
 	const juce::String getPath() const;
+	void setLastSavePath(const juce::String& path);
 
 	const juce::MidiFile makeMIDIFile() const;
 	const juce::MidiMessageSequence makeMIDITrack(int index) const;
@@ -90,6 +91,7 @@ public:
 private:
 	const SourceType type;
 	const juce::String path;
+	juce::String lastSavePath;
 
 	const bool forked = false;
 

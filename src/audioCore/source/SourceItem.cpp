@@ -261,6 +261,11 @@ const juce::String SourceItem::getFilePath() const {
 	return this->container->getPath();
 }
 
+void SourceItem::setLastSavePath(const juce::String& path) {
+	if (!this->container) { return; }
+	return this->container->setLastSavePath(path);
+}
+
 bool SourceItem::midiValid() const {
 	return !(this->type != SourceType::MIDI || !this->container);
 }

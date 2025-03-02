@@ -71,6 +71,8 @@ void SourceIO::run() {
 									SourceIO::getBestQualityForFormat(extension) });
 								SourceManager::getInstance()->saved(
 									ref, SourceManager::SourceType::Audio);
+								SourceManager::getInstance()->setLastSavePath(
+									ref, SourceManager::SourceType::Audio, path);
 
 								if (callback) { callback(ref); }
 							}
@@ -110,9 +112,11 @@ void SourceIO::run() {
 
 					/** Save Audio Data */
 					if (SourceIO::saveAudio(file, sampleRate, buffer, metaData, bitDepth, quality)) {
-						juce::ScopedReadLock locker(audioLock::getSourceLock());
+						juce::ScopedWriteLock locker(audioLock::getSourceLock());
 						SourceManager::getInstance()->saved(
 							ref, SourceManager::SourceType::Audio);
+						SourceManager::getInstance()->setLastSavePath(
+							ref, SourceManager::SourceType::Audio, path);
 					}
 
 					/** Callback */
@@ -150,6 +154,8 @@ void SourceIO::run() {
 									ref, buffer, path);
 								SourceManager::getInstance()->saved(
 									ref, SourceManager::SourceType::MIDI);
+								SourceManager::getInstance()->setLastSavePath(
+									ref, SourceManager::SourceType::MIDI, path);
 
 								if (callback) { callback(ref); }
 							}
@@ -180,9 +186,11 @@ void SourceIO::run() {
 
 					/** Save MIDI Data */
 					if (SourceIO::saveMIDI(file, data)) {
-						juce::ScopedReadLock locker(audioLock::getSourceLock());
+						juce::ScopedWriteLock locker(audioLock::getSourceLock());
 						SourceManager::getInstance()->saved(
 							ref, SourceManager::SourceType::MIDI);
+						SourceManager::getInstance()->setLastSavePath(
+							ref, SourceManager::SourceType::MIDI, path);
 					}
 
 					/** Callback */

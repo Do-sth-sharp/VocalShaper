@@ -32,7 +32,12 @@ SourceInternalContainer::SourceType SourceInternalContainer::getType() const {
 }
 
 const juce::String SourceInternalContainer::getPath() const {
-	return this->path;
+	return this->lastSavePath.isNotEmpty()
+		? this->lastSavePath : this->path;
+}
+
+void SourceInternalContainer::setLastSavePath(const juce::String& path) {
+	this->lastSavePath = path;
 }
 
 const juce::MidiFile SourceInternalContainer::makeMIDIFile() const {

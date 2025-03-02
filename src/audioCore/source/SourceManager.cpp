@@ -32,6 +32,15 @@ const juce::String SourceManager::getFilePath(uint64_t ref, SourceType type) con
 	return "";
 }
 
+void SourceManager::setLastSavePath(
+	uint64_t ref, SourceType type, const juce::String& path) {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+
+	if (auto ptr = this->getSource(ref, type)) {
+		ptr->setLastSavePath(path);
+	}
+}
+
 void SourceManager::changed(uint64_t ref, SourceType type) {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 

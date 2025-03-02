@@ -12,6 +12,7 @@ public:
 	void releaseSource(uint64_t ref);
 
 	const juce::String getFilePath(uint64_t ref, SourceType type) const;
+	void setLastSavePath(uint64_t ref, SourceType type, const juce::String& path);
 	void changed(uint64_t ref, SourceType type);
 	void saved(uint64_t ref, SourceType type);
 	bool isSaved(uint64_t ref, SourceType type) const;

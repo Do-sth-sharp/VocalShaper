@@ -41,6 +41,7 @@ public:
 
 	SourceType getType() const;
 	const juce::String getFilePath() const;
+	void setLastSavePath(const juce::String& path);
 	bool midiValid() const;
 	bool audioValid() const;
 	int getMIDITrackNum() const;
