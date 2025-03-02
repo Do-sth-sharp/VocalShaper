@@ -576,7 +576,8 @@ void AudioCore::saveSource(const google::protobuf::Message* data,
 							savedSet.insert(path);
 
 							if (!SourceManager::getInstance()->isSaved(
-								ref, SourceManager::SourceType::MIDI)) {
+								ref, SourceManager::SourceType::MIDI)
+								|| !juce::File::isAbsolutePath(path)) {
 								juce::String fullPath = juce::File{ baseDir }
 								.getChildFile(path).getFullPathName();
 								SourceIO::getInstance()->addTask(
@@ -593,7 +594,8 @@ void AudioCore::saveSource(const google::protobuf::Message* data,
 							savedSet.insert(path);
 
 							if (!SourceManager::getInstance()->isSaved(
-								ref, SourceManager::SourceType::Audio)) {
+								ref, SourceManager::SourceType::Audio)
+								|| !juce::File::isAbsolutePath(path)) {
 								juce::String fullPath = juce::File{ baseDir }
 								.getChildFile(path).getFullPathName();
 								SourceIO::getInstance()->addTask(

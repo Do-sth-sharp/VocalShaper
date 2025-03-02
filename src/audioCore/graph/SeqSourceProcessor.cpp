@@ -761,7 +761,8 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
 	mes->set_offline(this->getInstrOffline());
 
 	if (this->isAudioValid()) {
-		juce::String path = this->getAudioFilePath();
+		juce::String path = utils::getRelativePath(
+			this->getAudioFilePath(), config.projectDir);
 		mes->set_audiosrc(path.toStdString());
 
 		auto sourceInfo = mes->mutable_sourceinfo();
@@ -769,7 +770,8 @@ std::unique_ptr<google::protobuf::Message> SeqSourceProcessor::serialize(
 		sourceInfo->set_audiolength(this->getAudioLength());
 	}
 	if (this->isMIDIValid()) {
-		juce::String path = this->getMIDIFilePath();
+		juce::String path = utils::getRelativePath(
+			this->getMIDIFilePath(), config.projectDir);
 		mes->set_midisrc(path.toStdString());
 	}
 	mes->set_miditrack(this->getCurrentMIDITrack());

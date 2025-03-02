@@ -1,4 +1,4 @@
-﻿#include "Utils.h"
+#include "Utils.h"
 #include "misc/VMath.h"
 
 /** LAME Path */
@@ -1132,5 +1132,22 @@ namespace utils {
 		};
 
 		return typeNames[(int)type];
+	}
+
+	const juce::String getRelativePath(
+		const juce::String& path, const juce::String& base) {
+		auto pathFile = juce::File::createFileWithoutCheckingPath(path);
+		auto baseFile = juce::File{ base };
+
+		/** Path Should Absolute */
+		if (!juce::File::isAbsolutePath(path)) {
+			pathFile = baseFile.getChildFile(path);
+		}
+
+		/** Get Relative Path */
+		if (pathFile.isAChildOf(baseFile)) {
+			return pathFile.getRelativePathFrom(baseFile);
+		}
+		return pathFile.getFullPathName();
 	}
 }

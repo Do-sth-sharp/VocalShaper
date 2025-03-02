@@ -183,6 +183,9 @@ namespace utils {
 
 	using AudioChannelLink = std::pair<int, int>;
 	using AudioChannelLinkList = std::set<AudioChannelLink>;
+
+	const juce::String getRelativePath(
+		const juce::String& path, const juce::String& base);
 }
 
 #define UNUSED(var) (void)var
