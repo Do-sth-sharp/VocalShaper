@@ -1,6 +1,7 @@
 #include "SourceIO.h"
 #include "SourceManager.h"
 #include "SourceInternalPool.h"
+#include "../uiCallback/UICallback.h"
 #include "../misc/PlayPosition.h"
 #include "../misc/AudioLock.h"
 #include "../Utils.h"
@@ -59,7 +60,17 @@ void SourceIO::run() {
 					if (!SourceInternalPool::getInstance()->find(path)) {
 						/** Load Audio Data */
 						auto [sampleRate, buffer, metaData, bitDepth] = SourceIO::loadAudio(file);
-						if (sampleRate <= 0) { continue; }
+						if (sampleRate <= 0) {
+							/** Failed */
+							juce::MessageManager::callAsync(
+								[path] {
+									UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+										UICallbackType::ErrorAlert, "Read Audio",
+										"Can't read audio file: " + path);
+								}
+							);
+							continue;
+						}
 
 						/** Set Data */
 						juce::MessageManager::callAsync(
@@ -133,7 +144,17 @@ void SourceIO::run() {
 					if (!SourceInternalPool::getInstance()->find(path)) {
 						/** Load MIDI Data */
 						auto [valid, data] = SourceIO::loadMIDI(file);
-						if (!valid) { continue; }
+						if (!valid) {
+							/** Failed */
+							juce::MessageManager::callAsync(
+								[path] {
+									UICallbackAPI<const juce::String&, const juce::String&>::invoke(
+										UICallbackType::ErrorAlert, "Read MIDI",
+										"Can't read MIDI file: " + path);
+								}
+							);
+							continue;
+						}
 
 						/** Split Data */
 						auto [tempo, buffer] = SourceIO::splitMIDI(data);
