@@ -1,4 +1,4 @@
-﻿#include "SourceMIDITemp.h"
+#include "SourceMIDITemp.h"
 #include "../Utils.h"
 
 #define MIDI_LYRICS_TYPE 0x05
@@ -212,6 +212,15 @@ bool SourceMIDITemp::isTrackEmpty(int track) const {
 
 	auto& trackRef = this->eventList.getReference(track);
 	return trackRef.isEmpty();
+}
+
+int SourceMIDITemp::getEventNum(int track) const {
+	if (track < 0 || track >= this->eventList.size()) {
+		return 0;
+	}
+
+	auto& trackRef = this->eventList.getReference(track);
+	return trackRef.size();
 }
 
 int SourceMIDITemp::getNoteNum(int track) const {

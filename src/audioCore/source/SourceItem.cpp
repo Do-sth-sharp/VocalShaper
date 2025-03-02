@@ -386,6 +386,11 @@ void SourceItem::readMIDIData(
 	}
 }
 
+int SourceItem::getMIDIEventNum(int track) const {
+	if (!this->container) { return 0; }
+	return this->container->getMIDIEventNum(track);
+}
+
 int SourceItem::getMIDINoteNum(int track) const {
 	if (!this->container) { return 0; }
 	return this->container->getMIDINoteNum(track);

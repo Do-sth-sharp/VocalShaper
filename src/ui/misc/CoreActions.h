@@ -264,7 +264,7 @@ public:
 		bool switchable = true, const CancelCallback& cancelCallback = {});
 	static void askForMIDITrackAsync(
 		const std::function<void(int)>& callback,
-		int totalNum, int defaltTrack = 0,
+		int totalNum, const juce::Array<int>& eventNum, int defaltTrack = 0,
 		const CancelCallback& cancelCallback = {});
 	static void askForAudioSaveFormatsAsync(
 		const std::function<void(bool, int, int)>& callback,

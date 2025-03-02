@@ -196,6 +196,7 @@ namespace quickAPI {
 	bool isMIDISourceValid(uint64_t ref);
 	int getMIDISourceTrackNum(uint64_t ref);
 	bool isMIDISourceTrackEmpty(uint64_t ref, int track);
+	int getMIDISourceEventNum(uint64_t ref, int track);
 	const NoteList getMIDISourceNotes(uint64_t ref, int track);
 	const std::tuple<double, juce::AudioSampleBuffer> getAudioSourceData(uint64_t ref);
 }

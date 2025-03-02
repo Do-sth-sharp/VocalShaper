@@ -413,6 +413,11 @@ bool SourceInternalContainer::isMIDITrackEmpty(int track) const {
 	return this->midiData->isTrackEmpty(track);
 }
 
+int SourceInternalContainer::getMIDIEventNum(int track) const {
+	if (!this->midiData) { return 0; }
+	return this->midiData->getEventNum(track);
+}
+
 int SourceInternalContainer::getMIDINoteNum(int track) const {
 	if (!this->midiData) { return 0; }
 	return this->midiData->getNoteNum(track);

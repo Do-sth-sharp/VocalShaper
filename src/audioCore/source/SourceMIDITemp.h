@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
 
@@ -53,6 +53,8 @@ public:
 	int getTrackNum() const;
 	double getLength() const;
 	bool isTrackEmpty(int track) const;
+
+	int getEventNum(int track) const;
 
 	int getNoteNum(int track) const;
 	int getPitchWheelNum(int track) const;

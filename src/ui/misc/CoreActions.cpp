@@ -995,11 +995,18 @@ void CoreActions::setTrackMIDITrackGUI(int index) {
 		};
 
 	/** Get Total Track */
-	int totalMIDITrack = quickAPI::getMIDISourceTrackNum(quickAPI::getTrackMIDIRef({ quickAPI::TrackType::Track, index }));
+	auto ref = quickAPI::getTrackMIDIRef({ quickAPI::TrackType::Track, index });
+	int totalMIDITrack = quickAPI::getMIDISourceTrackNum(ref);
 	int currentMIDITrack = quickAPI::getTrackCurrentMIDITrack({ quickAPI::TrackType::Track, index });
 
+	/** Get Events Num */
+	juce::Array<int> eventsNum;
+	for (int i = 0; i < totalMIDITrack; i++) {
+		eventsNum.add(quickAPI::getMIDISourceEventNum(ref, i));
+	}
+
 	/** Ask For MIDI Track */
-	CoreActions::askForMIDITrackAsync(callback, totalMIDITrack, currentMIDITrack);
+	CoreActions::askForMIDITrackAsync(callback, totalMIDITrack, eventsNum, currentMIDITrack);
 }
 
 void CoreActions::setTrackAudioRefGUIThenAddBlock(int index, const juce::String& path) {
@@ -1807,11 +1814,13 @@ void CoreActions::askForTempoGUIAsync(
 
 void CoreActions::askForMIDITrackAsync(
 	const std::function<void(int)>& callback,
-	int totalNum, int defaltTrack, const CancelCallback& cancelCallback) {
+	int totalNum, const juce::Array<int>& eventNum,
+	int defaltTrack, const CancelCallback& cancelCallback) {
 	/** Get Index List */
 	juce::StringArray indexItemList;
 	for (int i = 0; i < totalNum; i++) {
-		indexItemList.add(juce::String{ i });
+		int num = i < eventNum.size() ? eventNum[i] : 0;
+		indexItemList.add(juce::String{ i } + " - " + juce::String{ num } + " Events");
 	}
 
 	/** Create Selector */

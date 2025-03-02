@@ -273,6 +273,14 @@ void SourceManager::readMIDIData(uint64_t ref, juce::MidiBuffer& buffer, double 
 	}
 }
 
+int SourceManager::getMIDIEventNum(uint64_t ref, int track) const {
+	juce::ScopedReadLock locker(audioLock::getSourceLock());
+	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {
+		return ptr->getMIDIEventNum(track);
+	}
+	return 0;
+}
+
 int SourceManager::getMIDINoteNum(uint64_t ref, int track) const {
 	juce::ScopedReadLock locker(audioLock::getSourceLock());
 	if (auto ptr = this->getSourceFast(ref, SourceType::MIDI)) {

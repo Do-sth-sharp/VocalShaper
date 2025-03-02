@@ -58,6 +58,8 @@ public:
 		double startTime, double endTime, int trackIndex) const;
 
 public:
+	int getMIDIEventNum(uint64_t ref, int track) const;
+
 	int getMIDINoteNum(uint64_t ref, int track) const;
 	int getMIDIPitchWheelNum(uint64_t ref, int track) const;
 	int getMIDIAfterTouchNum(uint64_t ref, int track) const;
