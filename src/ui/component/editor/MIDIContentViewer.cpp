@@ -630,11 +630,31 @@ void MIDIContentViewer::insertNote(
 }
 
 void MIDIContentViewer::setNoteStartTime(int tempIndex, double time) {
-	/** TODO */
+	/** Get Note */
+	if (tempIndex < 0 || tempIndex >= this->noteRectTempList.size()) { return; }
+	auto [index, rect, channel] = this->noteRectTempList[tempIndex];
+
+	if (index < 0 || index >= this->midiDataTemp.size()) { return; }
+	auto note = this->midiDataTemp[index];
+
+	/** Set Time */
+	CoreActions::midiSetNoteTime(
+		this->ref, this->currentMIDITrack,
+		index, time, note.endSec);
 }
 
 void MIDIContentViewer::setNoteEndTime(int tempIndex, double time) {
-	/** TODO */
+	/** Get Note */
+	if (tempIndex < 0 || tempIndex >= this->noteRectTempList.size()) { return; }
+	auto [index, rect, channel] = this->noteRectTempList[tempIndex];
+
+	if (index < 0 || index >= this->midiDataTemp.size()) { return; }
+	auto note = this->midiDataTemp[index];
+
+	/** Set Time */
+	CoreActions::midiSetNoteTime(
+		this->ref, this->currentMIDITrack,
+		index, note.startSec, time);
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {
