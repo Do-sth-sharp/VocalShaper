@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
 #include <FlowUI.h>
@@ -23,6 +23,7 @@ public:
 	void updateInfo(int index);
 	void updateBlock(int track, int index);
 	void updateTempo();
+	void updateInput(int index);
 	void updateMuteSolo(int index);
 	void updateInputMonitoring(int index);
 	void updateRec(int index);
@@ -65,6 +66,7 @@ private:
 		void updateIndex(int index);
 		void updateInfo(int index);
 		void updateBlock(int track, int index);
+		void updateInput(int index);
 		void updateMuteSolo(int index);
 		void updateInputMonitoring(int index);
 		void updateRec(int index);

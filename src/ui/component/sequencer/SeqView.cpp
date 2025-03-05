@@ -1,4 +1,4 @@
-﻿#include "SeqView.h"
+#include "SeqView.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreActions.h"
 #include "../../misc/CoreCallbacks.h"
@@ -59,6 +59,12 @@ void SeqView::TrackList::updateInfo(int index) {
 void SeqView::TrackList::updateBlock(int track, int index) {
 	if (track >= 0 && track < this->list.size()) {
 		this->list[track]->updateBlock(index);
+	}
+}
+
+void SeqView::TrackList::updateInput(int index) {
+	if (index >= 0 && index < this->list.size()) {
+		this->list[index]->updateInput();
 	}
 }
 
@@ -468,6 +474,13 @@ SeqView::SeqView()
 			}
 		}
 	);
+	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackInputConnectionChanged,
+		[comp = SeqView::SafePointer(this)](int type, int index) {
+			if ((type == (int)quickAPI::TrackType::Track) && comp) {
+				comp->updateInput(index);
+			}
+		}
+	);
 	CoreCallbackAPI<int, int>::add(CoreCallbacks::CallbackType::TrackMuteSoloChanged,
 		[comp = SeqView::SafePointer(this)](int type, int index) {
 			if ((type == (int)quickAPI::TrackType::Track) && comp) {
@@ -799,6 +812,10 @@ void SeqView::updateTempo() {
 	/** Update Line Temp */
 	this->lineTemp = this->ruler->getLineTemp();
 	this->updateGridTemp();
+}
+
+void SeqView::updateInput(int index) {
+	this->trackList->updateInput(index);
 }
 
 void SeqView::updateMuteSolo(int index) {

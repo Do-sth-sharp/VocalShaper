@@ -1,4 +1,4 @@
-﻿#include "SeqTrackComponent.h"
+#include "SeqTrackComponent.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreActions.h"
 #include "../../misc/PluginEditorHub.h"
@@ -168,6 +168,10 @@ void SeqTrackComponent::updateInfo() {
 
 void SeqTrackComponent::updateBlock(int blockIndex) {
 	this->content->updateBlock(blockIndex);
+}
+
+void SeqTrackComponent::updateInput() {
+	this->inputMonitoringButton->update();
 }
 
 void SeqTrackComponent::updateMuteSolo() {

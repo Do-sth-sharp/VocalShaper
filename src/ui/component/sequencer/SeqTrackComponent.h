@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
 #include "SeqTrackMuteComponent.h"
@@ -35,6 +35,7 @@ public:
 	void updateIndex(int index);
 	void updateInfo();
 	void updateBlock(int blockIndex);
+	void updateInput();
 	void updateMuteSolo();
 	void updateInputMonitoring();
 	void updateRec();
