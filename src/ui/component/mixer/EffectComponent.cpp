@@ -1,4 +1,4 @@
-﻿#include "EffectComponent.h"
+#include "EffectComponent.h"
 #include "../../lookAndFeel/LookAndFeelFactory.h"
 #include "../../misc/CoreActions.h"
 #include "../../misc/PluginEditorHub.h"
@@ -273,11 +273,6 @@ enum EffectMenuActionType {
 
 void EffectComponent::showMenu() {
 	/** Callback */
-	auto addCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
-		if (comp) {
-			comp->addEffect(pluginDes);
-		}
-		};
 	auto editCallback = [comp = juce::Component::SafePointer{ this }](const juce::PluginDescription& pluginDes) {
 		if (comp) {
 			comp->replaceEffect(pluginDes);
@@ -285,7 +280,7 @@ void EffectComponent::showMenu() {
 		};
 
 	/** Create Menu */
-	auto menu = this->createMenu(addCallback, editCallback);
+	auto menu = this->createMenu(editCallback);
 	int result = menu.show();
 
 	switch (result) {
@@ -324,7 +319,7 @@ void EffectComponent::startDrag() {
 void EffectComponent::addEffect(
 	const juce::PluginDescription& pluginDes) {
 	CoreActions::insertEffect(
-		(quickAPI::TrackType)this->type, this->track, this->index + 1,
+		(quickAPI::TrackType)this->type, this->track, this->index,
 		pluginDes.createIdentifierString());
 }
 
@@ -370,11 +365,9 @@ juce::String EffectComponent::createToolTip() const {
 }
 
 juce::PopupMenu EffectComponent::createMenu(
-	const std::function<void(const juce::PluginDescription&)>& addCallback,
 	const std::function<void(const juce::PluginDescription&)>& editCallback) const {
 	juce::PopupMenu menu;
 
-	menu.addSubMenu(TRANS("Add"), this->createAddMenu(addCallback));
 	menu.addSubMenu(TRANS("Replace"), this->createAddMenu(editCallback));
 	menu.addItem(EffectMenuActionType::Bypass, TRANS("Bypass"), true, !(this->bypassButton->getToggleState()));
 	menu.addItem(EffectMenuActionType::Remove, TRANS("Remove"));
