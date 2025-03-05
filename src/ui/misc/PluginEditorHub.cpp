@@ -1,4 +1,4 @@
-﻿#include "PluginEditorHub.h"
+#include "PluginEditorHub.h"
 #include "CoreCallbacks.h"
 #include "RCManager.h"
 #include "../../audioCore/AC_API.h"
@@ -20,6 +20,16 @@ PluginEditorHub::PluginEditorHub() {
 			PluginEditorHub::getInstance()->effectIndexChanged(type, track, oldIndex, newIndex);
 		}
 	);
+	CoreCallbackAPI<int>::add(CoreCallbacks::CallbackType::TrackInstrChanged,
+		[](int index) {
+			PluginEditorHub::getInstance()->instrChanged(index);
+		}
+	);
+	CoreCallbackAPI<int, int, int>::add(CoreCallbacks::CallbackType::TrackEffectChanged,
+		[](int type, int track, int index) {
+			PluginEditorHub::getInstance()->effectChanged(type, track, index);
+		}
+	);
 }
 
 PluginEditorHub::~PluginEditorHub() {
@@ -38,7 +48,7 @@ void PluginEditorHub::openInstr(int index) {
 		container->setBufferedPainting(this->bufferedPainting);
 		container->setWindowIcon(this->iconTemp);
 
-		container->update(0, index, 0);
+		container->update((int)quickAPI::TrackType::Track, index, 0);
 
 		/** Show */
 		this->openEditor(container.get());
@@ -233,6 +243,22 @@ void PluginEditorHub::effectIndexChanged(int type, int track, int oldIndex, int 
 		if (currentType == type && currentTrack == track && currentIndex == oldIndex) {
 			it->second->update(type, track, newIndex);
 		}
+	}
+}
+
+void PluginEditorHub::instrChanged(int track) {
+	auto it = this->instrEditors.find(this->getInstrRef(track));
+	if (it != this->instrEditors.end()) {
+		/** Update */
+		it->second->update((int)quickAPI::TrackType::Track, track, 0);
+	}
+}
+
+void PluginEditorHub::effectChanged(int type, int track, int index) {
+	auto it = this->effectEditors.find(this->getEffectRef(type, track, index));
+	if (it != this->effectEditors.end()) {
+		/** Update */
+		it->second->update(type, track, index);
 	}
 }
 

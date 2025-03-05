@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <JuceHeader.h>
 #include "../component/plugin/PluginEditor.h"
@@ -36,6 +36,8 @@ private:
 	void trackAdded(int type, int track);
 	void trackRemoved(int type, int track);
 	void effectIndexChanged(int type, int track, int oldIndex, int newIndex);
+	void instrChanged(int track);
+	void effectChanged(int type, int track, int index);
 
 	RefType getInstrRef(int index) const;
 	RefType getEffectRef(int type, int track, int index) const;
