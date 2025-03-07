@@ -569,24 +569,28 @@ int SourceMIDITemp::addNote(int track, double startTime, double endTime, uint8_t
 	auto& list = this->eventList.getReference(track);
 	int startIndex = SourceMIDITemp::linearSearchInsert(list, 0, startTime);
 
+	auto& noteList = this->noteList.getReference(track);
 	if (oldIndex >= 0 && oldNoteOffIndex >= 0) {
 		/** Restore Index */
-		if (oldIndex <= list.size()) {
-			bool validFlag = true;
+		if (oldIndex <= noteList.size()) {
+			int eventIndex = noteList[oldIndex];
+			if (eventIndex < list.size()) {
+				bool validFlag = true;
 
-			if (oldIndex > 0) {
-				if (list[oldIndex - 1]->timeSec > startTime) {
-					validFlag = false;
+				if (eventIndex > 0) {
+					if (list[eventIndex - 1]->timeSec > startTime) {
+						validFlag = false;
+					}
 				}
-			}
-			if (oldIndex < list.size() - 1) {
-				if (list[oldIndex + 1]->timeSec < startTime) {
-					validFlag = false;
+				if (eventIndex < list.size() - 1) {
+					if (list[eventIndex + 1]->timeSec < startTime) {
+						validFlag = false;
+					}
 				}
-			}
 
-			if (validFlag) {
-				startIndex = oldIndex;
+				if (validFlag) {
+					startIndex = eventIndex;
+				}
 			}
 		}
 	}
@@ -709,9 +713,12 @@ int SourceMIDITemp::setNoteTime(int track, int index,
 	if (endTime <= startTime) { return -1; }
 
 	/** Get Note Data */
-	auto& list = this->eventList.getReference(track);
+	auto& list = this->noteList.getReference(track);
+	auto& eventList = this->eventList.getReference(track);
 	if (index < 0 || index >= list.size()) { return -1; }
-	auto pNote = dynamic_cast<Note*>(list[index]);
+	int eventIndex = list[index];
+	if (eventIndex < 0 || eventIndex >= eventList.size()) { return -1; }
+	auto pNote = dynamic_cast<Note*>(eventList[eventIndex]);
 	if (!pNote) { return -1; }
 
 	uint8_t channel = pNote->channel;
@@ -734,15 +741,18 @@ bool SourceMIDITemp::setNoteChannel(int track, int index, uint8_t channel) {
 	if (track < 0 || track >= this->eventList.size()) { return false; }
 
 	/** Get Note Pointer */
-	auto& list = this->eventList.getReference(track);
+	auto& list = this->noteList.getReference(track);
+	auto& eventList = this->eventList.getReference(track);
 	if (index < 0 || index >= list.size()) { return false; }
-	auto pNote = dynamic_cast<Note*>(list[index]);
+	int eventIndex = list[index];
+	if (eventIndex < 0 || eventIndex >= eventList.size()) { return false; }
+	auto pNote = dynamic_cast<Note*>(eventList[eventIndex]);
 	if (!pNote) { return false; }
 
 	/** Get Note Off */
 	int offIndex = pNote->eventOffIndex;
 	if (offIndex < 0 || offIndex >= list.size()) { return false; }
-	auto pNoteOff = dynamic_cast<NoteOffMarker*>(list[offIndex]);
+	auto pNoteOff = dynamic_cast<NoteOffMarker*>(eventList[offIndex]);
 	if (!pNoteOff) { return false; }
 
 	/** Set Channel */
@@ -757,9 +767,12 @@ bool SourceMIDITemp::setNotePitch(int track, int index, uint8_t pitch) {
 	if (track < 0 || track >= this->eventList.size()) { return false; }
 
 	/** Get Note Pointer */
-	auto& list = this->eventList.getReference(track);
+	auto& list = this->noteList.getReference(track);
+	auto& eventList = this->eventList.getReference(track);
 	if (index < 0 || index >= list.size()) { return false; }
-	auto pNote = dynamic_cast<Note*>(list[index]);
+	int eventIndex = list[index];
+	if (eventIndex < 0 || eventIndex >= eventList.size()) { return false; }
+	auto pNote = dynamic_cast<Note*>(eventList[eventIndex]);
 	if (!pNote) { return false; }
 
 	/** Set Pitch */
@@ -773,9 +786,12 @@ bool SourceMIDITemp::setNoteVelocity(int track, int index, uint8_t vel) {
 	if (track < 0 || track >= this->eventList.size()) { return false; }
 
 	/** Get Note Pointer */
-	auto& list = this->eventList.getReference(track);
+	auto& list = this->noteList.getReference(track);
+	auto& eventList = this->eventList.getReference(track);
 	if (index < 0 || index >= list.size()) { return false; }
-	auto pNote = dynamic_cast<Note*>(list[index]);
+	int eventIndex = list[index];
+	if (eventIndex < 0 || eventIndex >= eventList.size()) { return false; }
+	auto pNote = dynamic_cast<Note*>(eventList[eventIndex]);
 	if (!pNote) { return false; }
 
 	/** Set Velocity */
@@ -789,9 +805,12 @@ bool SourceMIDITemp::setNoteLyrics(int track, int index, const juce::String& lyr
 	if (track < 0 || track >= this->eventList.size()) { return false; }
 
 	/** Get Note Pointer */
-	auto& list = this->eventList.getReference(track);
+	auto& list = this->noteList.getReference(track);
+	auto& eventList = this->eventList.getReference(track);
 	if (index < 0 || index >= list.size()) { return false; }
-	auto pNote = dynamic_cast<Note*>(list[index]);
+	int eventIndex = list[index];
+	if (eventIndex < 0 || eventIndex >= eventList.size()) { return false; }
+	auto pNote = dynamic_cast<Note*>(eventList[eventIndex]);
 	if (!pNote) { return false; }
 
 	/** Set Lyrics */
@@ -805,62 +824,61 @@ bool SourceMIDITemp::removeNote(int track, int index) {
 	if (track < 0 || track >= this->eventList.size()) { return false; }
 
 	/** Get End Index */
-	auto& list = this->eventList.getReference(track);
+	auto& list = this->noteList.getReference(track);
+	auto& eventList = this->eventList.getReference(track);
 	if (index < 0 || index >= list.size()) { return false; }
+	int eventIndex = list[index];
+	if (eventIndex < 0 || eventIndex >= eventList.size()) { return false; }
 	int offIndex = -1;
-	if (auto pNote = dynamic_cast<Note*>(list[index])) {
+	if (auto pNote = dynamic_cast<Note*>(eventList[eventIndex])) {
 		offIndex = pNote->eventOffIndex;
 	}
-	if (offIndex < 0 || offIndex >= list.size()) { return false; }
-	if (offIndex <= index) { return false; }
+	if (offIndex < 0 || offIndex >= eventList.size()) { return false; }
+	if (offIndex <= eventIndex) { return false; }
 
 	/** Remove Note Off */
-	list.remove(offIndex);
+	eventList.remove(offIndex);
 
 	/** Update Index */
-	for (int i = 0; i < list.size(); i++) {
-		if (i != offIndex) {
-			auto ptr = list.getUnchecked(i);
-			if (ptr->eventIndex > offIndex) {
-				ptr->eventIndex--;
-			}
+	for (int i = 0; i < eventList.size(); i++) {
+		auto ptr = eventList.getUnchecked(i);
+		if (ptr->eventIndex > offIndex) {
+			ptr->eventIndex--;
+		}
 
-			if (auto pNote = dynamic_cast<Note*>(ptr)) {
-				if (pNote->eventIndex != index &&
-					pNote->eventOffIndex > offIndex) {
-					pNote->eventOffIndex--;
-				}
+		if (auto pNote = dynamic_cast<Note*>(ptr)) {
+			if (pNote->eventIndex != eventIndex &&
+				pNote->eventOffIndex > offIndex) {
+				pNote->eventOffIndex--;
 			}
+		}
 
-			else if (auto pNoteOff = dynamic_cast<NoteOffMarker*>(ptr)) {
-				if (pNoteOff->eventOnIndex > offIndex) {
-					pNoteOff->eventOnIndex--;
-				}
+		else if (auto pNoteOff = dynamic_cast<NoteOffMarker*>(ptr)) {
+			if (pNoteOff->eventOnIndex > offIndex) {
+				pNoteOff->eventOnIndex--;
 			}
 		}
 	}
 
 	/** Remove Note */
-	list.remove(index);
+	eventList.remove(eventIndex);
 
 	/** Update Index */
-	for (int i = 0; i < list.size(); i++) {
-		if (i != index) {
-			auto ptr = list.getUnchecked(i);
-			if (ptr->eventIndex > index) {
-				ptr->eventIndex--;
-			}
+	for (int i = 0; i < eventList.size(); i++) {
+		auto ptr = eventList.getUnchecked(i);
+		if (ptr->eventIndex > eventIndex) {
+			ptr->eventIndex--;
+		}
 
-			if (auto pNote = dynamic_cast<Note*>(ptr)) {
-				if (pNote->eventOffIndex > index) {
-					pNote->eventOffIndex--;
-				}
+		if (auto pNote = dynamic_cast<Note*>(ptr)) {
+			if (pNote->eventOffIndex > eventIndex) {
+				pNote->eventOffIndex--;
 			}
+		}
 
-			else if (auto pNoteOff = dynamic_cast<NoteOffMarker*>(ptr)) {
-				if (pNoteOff->eventOnIndex > index) {
-					pNoteOff->eventOnIndex--;
-				}
+		else if (auto pNoteOff = dynamic_cast<NoteOffMarker*>(ptr)) {
+			if (pNoteOff->eventOnIndex > eventIndex) {
+				pNoteOff->eventOnIndex--;
 			}
 		}
 	}
