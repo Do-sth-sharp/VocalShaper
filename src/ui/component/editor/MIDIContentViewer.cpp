@@ -435,6 +435,23 @@ void MIDIContentViewer::mouseDown(const juce::MouseEvent& event) {
 				this->noteEditMinLength = minLength;
 				this->repaint();
 			}
+			/** Move Note */
+			else if (type == NoteControllerType::Inside) {
+				/** Get Start Time */
+				double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
+
+				/** Get Note Index */
+				auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(index);
+				auto& note = this->midiDataTemp.getReference(noteIndex);
+				double noteStartTime = note.startSec;
+
+				/** Set Temp */
+				this->noteEditStatus = type;
+				this->noteEditIndex = index;
+				this->noteEditTime = noteStartTime;
+				this->noteDownTime = time;
+				this->repaint();
+			}
 		}
 	}
 }
@@ -478,6 +495,26 @@ void MIDIContentViewer::mouseUp(const juce::MouseEvent& event) {
 			this->noteEditIndex = -1;
 			this->noteEditTime = -1;
 			this->noteEditMinLength = -1;
+			this->repaint();
+		}
+
+		/** Move Note */
+		if (this->noteEditStatus == NoteControllerType::Inside) {
+			/** Get Note Index */
+			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
+			auto& note = this->midiDataTemp.getReference(noteIndex);
+			double noteStartTime = note.startSec;
+			double noteEndTime = note.endSec;
+
+			/** Set Note Time */
+			this->setNoteTime(this->noteEditIndex, this->noteEditTime,
+				this->noteEditTime + (noteEndTime - noteStartTime));
+
+			/** Reset Temp */
+			this->noteEditStatus = NoteControllerType::None;
+			this->noteEditIndex = -1;
+			this->noteEditTime = -1;
+			this->noteDownTime = -1;
 			this->repaint();
 		}
 	}
@@ -557,6 +594,24 @@ void MIDIContentViewer::mouseDrag(const juce::MouseEvent& event) {
 			this->noteEditTime = time;
 			this->repaint();
 		}
+
+		/** Move Note */
+		if (this->noteEditStatus == NoteControllerType::Inside) {
+			/** Get Time */
+			double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
+			double delta = time - this->noteDownTime;
+
+			/** Get Note Index */
+			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
+			auto& note = this->midiDataTemp.getReference(noteIndex);
+			double noteStartTime = note.startSec;
+			double noteEndTime = note.endSec;
+			double newTime = quickAPI::limitTimeSec(noteStartTime + delta, Tools::getInstance()->getAdsorb());
+
+			/** Set Temp */
+			this->noteEditTime = newTime;
+			this->repaint();
+		}
 	}
 }
 
@@ -588,6 +643,16 @@ void MIDIContentViewer::mouseExit(const juce::MouseEvent& event) {
 		this->noteEditIndex = -1;
 		this->noteEditTime = -1;
 		this->noteEditMinLength = -1;
+		this->repaint();
+	}
+
+	/** Move Note */
+	if (this->noteEditStatus == NoteControllerType::Inside) {
+		/** Reset Temp */
+		this->noteEditStatus = NoteControllerType::None;
+		this->noteEditIndex = -1;
+		this->noteEditTime = -1;
+		this->noteDownTime = -1;
 		this->repaint();
 	}
 }
@@ -655,6 +720,19 @@ void MIDIContentViewer::setNoteEndTime(int tempIndex, double time) {
 	CoreActions::midiSetNoteTime(
 		this->ref, this->currentMIDITrack,
 		index, note.startSec, time);
+}
+
+void MIDIContentViewer::setNoteTime(int tempIndex, double startTime, double endTime) {
+	/** Get Note */
+	if (tempIndex < 0 || tempIndex >= this->noteRectTempList.size()) { return; }
+	auto [index, rect, channel] = this->noteRectTempList[tempIndex];
+
+	if (index < 0 || index >= this->midiDataTemp.size()) { return; }
+
+	/** Set Time */
+	CoreActions::midiSetNoteTime(
+		this->ref, this->currentMIDITrack,
+		index, startTime, endTime);
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {
