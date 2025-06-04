@@ -113,6 +113,7 @@ private:
 	double noteEditTime = -1;
 	double noteDownTime = -1;
 	double noteEditMinLength = -1;
+	uint8_t noteEditPitch = 0;
 
 	std::unique_ptr<juce::Image> rulerTemp = nullptr;
 	std::unique_ptr<juce::Image> keyTemp = nullptr;
@@ -133,7 +134,7 @@ private:
 	void insertNote(double startTime, double length, uint8_t pitch, uint8_t channel);
 	void setNoteStartTime(int tempIndex, double time);
 	void setNoteEndTime(int tempIndex, double time);
-	void setNoteTime(int tempIndex, double startTime, double endTime);
+	void setNoteTimeAndPitch(int tempIndex, double startTime, double endTime, uint8_t pitch);
 
 	void updateKeyImageTemp();
 	void updateRulerImageTemp();

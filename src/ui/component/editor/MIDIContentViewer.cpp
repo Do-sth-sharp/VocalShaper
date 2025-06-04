@@ -450,6 +450,7 @@ void MIDIContentViewer::mouseDown(const juce::MouseEvent& event) {
 				this->noteEditIndex = index;
 				this->noteEditTime = noteStartTime;
 				this->noteDownTime = time;
+				this->noteEditPitch = note.num;
 				this->repaint();
 			}
 		}
@@ -507,14 +508,15 @@ void MIDIContentViewer::mouseUp(const juce::MouseEvent& event) {
 			double noteEndTime = note.endSec;
 
 			/** Set Note Time */
-			this->setNoteTime(this->noteEditIndex, this->noteEditTime,
-				this->noteEditTime + (noteEndTime - noteStartTime));
+			this->setNoteTimeAndPitch(this->noteEditIndex, this->noteEditTime,
+				this->noteEditTime + (noteEndTime - noteStartTime), this->noteEditPitch);
 
 			/** Reset Temp */
 			this->noteEditStatus = NoteControllerType::None;
 			this->noteEditIndex = -1;
 			this->noteEditTime = -1;
 			this->noteDownTime = -1;
+			this->noteEditPitch = 0;
 			this->repaint();
 		}
 	}
@@ -601,6 +603,9 @@ void MIDIContentViewer::mouseDrag(const juce::MouseEvent& event) {
 			double time = this->secStart + (pos.x / this->getWidth()) * (this->secEnd - this->secStart);
 			double delta = time - this->noteDownTime;
 
+			/** Get Pitch */
+			uint8_t pitch = this->keyTop - (pos.y / this->getHeight()) * (this->keyTop - this->keyBottom);
+
 			/** Get Note Index */
 			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
 			auto& note = this->midiDataTemp.getReference(noteIndex);
@@ -610,6 +615,7 @@ void MIDIContentViewer::mouseDrag(const juce::MouseEvent& event) {
 
 			/** Set Temp */
 			this->noteEditTime = newTime;
+			this->noteEditPitch = pitch;
 			this->repaint();
 		}
 	}
@@ -653,6 +659,7 @@ void MIDIContentViewer::mouseExit(const juce::MouseEvent& event) {
 		this->noteEditIndex = -1;
 		this->noteEditTime = -1;
 		this->noteDownTime = -1;
+		this->noteEditPitch = 0;
 		this->repaint();
 	}
 }
@@ -722,12 +729,18 @@ void MIDIContentViewer::setNoteEndTime(int tempIndex, double time) {
 		index, note.startSec, time);
 }
 
-void MIDIContentViewer::setNoteTime(int tempIndex, double startTime, double endTime) {
+void MIDIContentViewer::setNoteTimeAndPitch(int tempIndex,
+	double startTime, double endTime, uint8_t pitch) {
 	/** Get Note */
 	if (tempIndex < 0 || tempIndex >= this->noteRectTempList.size()) { return; }
 	auto [index, rect, channel] = this->noteRectTempList[tempIndex];
 
 	if (index < 0 || index >= this->midiDataTemp.size()) { return; }
+
+	/** Set Pitch */
+	CoreActions::midiSetNotePitch(
+		this->ref, this->currentMIDITrack,
+		index, pitch);
 
 	/** Set Time */
 	CoreActions::midiSetNoteTime(
