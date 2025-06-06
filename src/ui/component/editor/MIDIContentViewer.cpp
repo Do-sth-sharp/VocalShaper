@@ -253,6 +253,7 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 		juce::MidiKeyboardComponent::ColourIds::textLabelColourId + 3);
 	juce::Colour noteBaseColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
+	juce::Colour noteEditColor = juce::Colours::white.withAlpha(0.6f);
 
 	/** Font */
 	juce::Font noteLabelFont(juce::FontOptions{ noteFontHeight });
@@ -277,7 +278,7 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 		g.drawImageAt(*(this->noteTemp.get()), 0, 0);
 	}
 
-	/** Editing Note */
+	/** Add Note */
 	constexpr float editingNoteOpaque = 0.5f;
 	if (this->noteInsertTime >= 0 && this->noteInsertLength > 0) {
 		int minNoteNum = std::floor(this->keyBottom), maxNoteNum = std::floor(this->keyTop);
@@ -312,6 +313,62 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 					g.drawFittedText(noteName, noteLabelRect.toNearestInt(),
 						juce::Justification::centred, 1, 0.75f);
 				}
+			}
+		}
+	}
+
+	/** Edit Note Time */
+	else if (this->noteEditStatus == NoteControllerType::Left
+		|| this->noteEditStatus == NoteControllerType::Right) {
+		if (this->noteEditIndex > -1) {
+			/** Get Note */
+			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
+			auto& note = this->midiDataTemp.getReference(noteIndex);
+			double noteStartTime = note.startSec;
+			double noteEndTime = note.endSec;
+			uint8_t notePitch = note.num;
+
+			/** Note Rect */
+			float startXPos = (noteStartTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			float endXPos = (noteEndTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			float noteYPos = ((notePitch + 1) - this->keyTop) / (this->keyBottom - this->keyTop) * height;
+			juce::Rectangle<float> noteRect(
+				startXPos, noteYPos,
+				endXPos - startXPos, (float)this->vItemSize);
+
+			/** Cover Note */
+			g.setColour(noteEditColor);
+			g.fillRoundedRectangle(noteRect, noteCornerSize);
+
+			/** New Note Rect */
+			float newStartXPos = (this->noteEditStatus == NoteControllerType::Left)
+				? (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width
+				: startXPos;
+			float newEndXPos = (this->noteEditStatus == NoteControllerType::Right)
+				? (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width
+				: endXPos;
+			juce::Rectangle<float> newNoteRect(
+				newStartXPos, noteYPos,
+				newEndXPos - newStartXPos, (float)this->vItemSize);
+
+			/** Draw New Note */
+			g.setColour(noteBaseColor);
+			g.fillRoundedRectangle(newNoteRect, noteCornerSize);
+			g.setColour(this->noteColorGradient[channel - 1].withAlpha(editingNoteOpaque));
+			g.fillRoundedRectangle(newNoteRect, noteCornerSize);
+			g.setColour(noteOutlineColor.withAlpha(editingNoteOpaque));
+			g.drawRoundedRectangle(newNoteRect, noteCornerSize, noteOutlineThickness);
+
+			/** Note Name */
+			juce::String noteName = this->keyNames[notePitch % this->keyMasks.size()] + juce::String{ notePitch / this->keyMasks.size() };
+			float noteNameWidth = juce::TextLayout::getStringWidth(noteLabelFont, noteName);
+			if ((noteNameWidth + notePaddingWidth * 2) <= newNoteRect.getWidth()
+				&& (noteFontHeight + notePaddingHeight * 2) <= newNoteRect.getHeight()) {
+				juce::Rectangle<float> noteLabelRect = newNoteRect.withWidth(noteNameWidth + notePaddingWidth * 2);
+				g.setFont(noteLabelFont);
+				g.setColour(this->noteLabelColorGradient[channel - 1].withAlpha(editingNoteOpaque));
+				g.drawFittedText(noteName, noteLabelRect.toNearestInt(),
+					juce::Justification::centred, 1, 0.75f);
 			}
 		}
 	}
