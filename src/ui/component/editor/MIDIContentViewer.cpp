@@ -319,7 +319,8 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 
 	/** Edit Note Time */
 	else if (this->noteEditStatus == NoteControllerType::Left
-		|| this->noteEditStatus == NoteControllerType::Right) {
+		|| this->noteEditStatus == NoteControllerType::Right
+		|| this->noteEditStatus == NoteControllerType::Inside) {
 		if (this->noteEditIndex > -1) {
 			/** Get Note */
 			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
@@ -341,14 +342,28 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 			g.fillRoundedRectangle(noteRect, noteCornerSize);
 
 			/** New Note Rect */
-			float newStartXPos = (this->noteEditStatus == NoteControllerType::Left)
-				? (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width
-				: startXPos;
-			float newEndXPos = (this->noteEditStatus == NoteControllerType::Right)
-				? (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width
-				: endXPos;
+			float newStartXPos = startXPos;
+			if (this->noteEditStatus == NoteControllerType::Left) {
+				newStartXPos = (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			}
+			else if (this->noteEditStatus == NoteControllerType::Inside) {
+				newStartXPos = (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			}
+			float newEndXPos = endXPos;
+			if (this->noteEditStatus == NoteControllerType::Right) {
+				newEndXPos = (this->noteEditTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			}
+			else if (this->noteEditStatus == NoteControllerType::Inside) {
+				newEndXPos = ((this->noteEditTime + (noteEndTime - noteStartTime)) - this->secStart) / (this->secEnd - this->secStart) * width;
+			}
+			uint8_t newNotePitch = notePitch;
+			if (this->noteEditStatus == NoteControllerType::Inside) {
+				newNotePitch = this->noteEditPitch;
+			}
+			float newNoteYPos = ((newNotePitch + 1) - this->keyTop) / (this->keyBottom - this->keyTop) * height;
+			
 			juce::Rectangle<float> newNoteRect(
-				newStartXPos, noteYPos,
+				newStartXPos, newNoteYPos,
 				newEndXPos - newStartXPos, (float)this->vItemSize);
 
 			/** Draw New Note */
@@ -360,7 +375,7 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 			g.drawRoundedRectangle(newNoteRect, noteCornerSize, noteOutlineThickness);
 
 			/** Note Name */
-			juce::String noteName = this->keyNames[notePitch % this->keyMasks.size()] + juce::String{ notePitch / this->keyMasks.size() };
+			juce::String noteName = this->keyNames[newNotePitch % this->keyMasks.size()] + juce::String{ newNotePitch / this->keyMasks.size() };
 			float noteNameWidth = juce::TextLayout::getStringWidth(noteLabelFont, noteName);
 			if ((noteNameWidth + notePaddingWidth * 2) <= newNoteRect.getWidth()
 				&& (noteFontHeight + notePaddingHeight * 2) <= newNoteRect.getHeight()) {
