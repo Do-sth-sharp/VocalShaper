@@ -1,4 +1,4 @@
-﻿name: Build Artifacts
+name: Build Artifacts
 
 on:
   push:
@@ -17,6 +17,10 @@ env:
   sha-length: 7
   apt-source: 'echo -e "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: jammy\nComponents: main restricted universe multiverse\nArchitectures: amd64" | sudo tee /etc/apt/sources.list.d/jammy.sources'
   linux-requirements: 'sudo apt install libasound2-dev libfreetype-dev libcurl4-openssl-dev libwebkit2gtk-4.0-dev libgtk-3-dev libtinfo5 patchelf'
+  USERNAME: Do-sth-sharp
+  VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
+  FEED_URL: https://nuget.pkg.github.com/Do-sth-sharp/index.json
+  VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/Do-sth-sharp/index.json,readwrite"
 
 jobs:
   prepare-package:
@@ -94,18 +98,39 @@ jobs:
       shell: bash
       run: ${{env.linux-requirements}}
 
-    - name: Export GitHub Actions Cache Environment Variables
-      uses: actions/github-script@v7
-      with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+    - name: Add NuGet Sources Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        .$(${{ env.VCPKG_EXE }} fetch nuget) `
+          sources add `
+          -Source "${{ env.FEED_URL }}" `
+          -StorePasswordInClearText `
+          -Name GitHubPackages `
+          -UserName "${{ env.USERNAME }}" `
+          -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+        .$(${{ env.VCPKG_EXE }} fetch nuget) `
+          setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
+          -Source "${{ env.FEED_URL }}"');
+
+    - name: Add NuGet Sources Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
+          sources add \
+          -Source "${{ env.FEED_URL }}" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "${{ env.USERNAME }}" \
+          -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+        mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
+          setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" \
+          -Source "${{ env.FEED_URL }}"
 
     - name: Install Packages
       working-directory: ${{github.workspace}}/vcpkg
       shell: pwsh
-      env:
-        VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
       run: ./vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=${{matrix.vcpkg_triplet}}
 
     - name: Get Short SHA
@@ -240,12 +265,35 @@ jobs:
       shell: bash
       run: ${{env.linux-requirements}}
 
-    - name: Export GitHub Actions Cache Environment Variables
-      uses: actions/github-script@v7
-      with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+    - name: Add NuGet Sources Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        .$(${{ env.VCPKG_EXE }} fetch nuget) `
+          sources add `
+          -Source "${{ env.FEED_URL }}" `
+          -StorePasswordInClearText `
+          -Name GitHubPackages `
+          -UserName "${{ env.USERNAME }}" `
+          -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+        .$(${{ env.VCPKG_EXE }} fetch nuget) `
+          setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
+          -Source "${{ env.FEED_URL }}"');
+
+    - name: Add NuGet Sources Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
+          sources add \
+          -Source "${{ env.FEED_URL }}" \
+          -StorePasswordInClearText \
+          -Name GitHubPackages \
+          -UserName "${{ env.USERNAME }}" \
+          -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+        mono `${{ env.VCPKG_EXE }} fetch nuget | tail -n 1` \
+          setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" \
+          -Source "${{ env.FEED_URL }}"
 
     - name: Install Packages
       working-directory: ${{github.workspace}}/vcpkg
