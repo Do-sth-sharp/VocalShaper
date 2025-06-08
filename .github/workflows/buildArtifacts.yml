@@ -302,8 +302,6 @@ jobs:
     - name: Install Packages
       working-directory: ${{github.workspace}}/vcpkg
       shell: pwsh
-      env:
-        VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
       run: ./vcpkg install --x-manifest-root=../scripts/vcpkg-manifest --x-install-root=./installed --triplet=${{matrix.vcpkg_triplet}}
 
     - name: Configure CMake
