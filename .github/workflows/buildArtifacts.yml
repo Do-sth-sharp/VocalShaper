@@ -15,7 +15,11 @@ env:
   ninja-version: '1.11.1'
   clang-version: '18.1.8'
   sha-length: 7
-  apt-source: 'echo -e "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: jammy\nComponents: main restricted universe multiverse\nArchitectures: amd64" | sudo tee /etc/apt/sources.list.d/jammy.sources'
+  apt-source: |
+    echo -e "Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: jammy\nComponents: main restricted universe multiverse\nArchitectures: amd64" | sudo tee /etc/apt/sources.list.d/jammy.sources
+    sudo apt install ca-certificates gnupg
+    sudo gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/mono-official-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+    echo "deb [signed-by=/usr/share/keyrings/mono-official-archive-keyring.gpg] https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
   linux-requirements: 'sudo apt install libasound2-dev libfreetype-dev libcurl4-openssl-dev libwebkit2gtk-4.0-dev libgtk-3-dev libtinfo5 patchelf'
   USERNAME: Do-sth-sharp
   VCPKG_EXE: ${{ github.workspace }}/vcpkg/vcpkg
@@ -111,7 +115,7 @@ jobs:
           -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
         .$(${{ env.VCPKG_EXE }} fetch nuget) `
           setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
-          -Source "${{ env.FEED_URL }}"');
+          -Source "${{ env.FEED_URL }}"
 
     - name: Add NuGet Sources Linux
       if: runner.os == 'Linux'
@@ -278,7 +282,7 @@ jobs:
           -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
         .$(${{ env.VCPKG_EXE }} fetch nuget) `
           setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
-          -Source "${{ env.FEED_URL }}"');
+          -Source "${{ env.FEED_URL }}"
 
     - name: Add NuGet Sources Linux
       if: runner.os == 'Linux'
