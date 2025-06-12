@@ -534,6 +534,17 @@ SeqView::SeqView()
 	this->gridTemp = std::make_unique<juce::Image>(
 		juce::Image::ARGB, 1, 1, true);
 
+	/** Set Default V Scale */
+	juce::MessageManager::callAsync([scroller = Scroller::SafePointer{ this->vScroller.get() }] {
+		if (scroller) {
+			double minSize = scroller->getItemMinSize();
+			double maxSize = scroller->getItemMaxSize();
+
+			scroller->setItemSize(
+				minSize + (maxSize - minSize) / 2);
+		}
+		});
+
 	/** Update All */
 	this->updateAll();
 }
