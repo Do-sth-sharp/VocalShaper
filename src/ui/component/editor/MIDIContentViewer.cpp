@@ -254,6 +254,7 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 	juce::Colour noteBaseColor = laf.findColour(
 		juce::Label::ColourIds::backgroundColourId);
 	juce::Colour noteEditColor = juce::Colours::white.withAlpha(0.6f);
+	juce::Colour noteRemoveColor = juce::Colours::black.withAlpha(0.6f);
 
 	/** Font */
 	juce::Font noteLabelFont(juce::FontOptions{ noteFontHeight });
@@ -317,10 +318,11 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 		}
 	}
 
-	/** Edit Note Time */
+	/** Edit Note */
 	else if (this->noteEditStatus == NoteControllerType::Left
 		|| this->noteEditStatus == NoteControllerType::Right
 		|| this->noteEditStatus == NoteControllerType::Inside) {
+		/** Edit Note Time */
 		if (this->noteEditIndex > -1) {
 			/** Get Note */
 			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteEditIndex);
@@ -385,6 +387,27 @@ void MIDIContentViewer::paint(juce::Graphics& g) {
 				g.drawFittedText(noteName, noteLabelRect.toNearestInt(),
 					juce::Justification::centred, 1, 0.75f);
 			}
+		}
+		/** Remove Note */
+		else if (this->noteRemoveIndex > -1) {
+			/** Get Note */
+			auto& [noteIndex, rect, channel] = this->noteRectTempList.getReference(this->noteRemoveIndex);
+			auto& note = this->midiDataTemp.getReference(noteIndex);
+			double noteStartTime = note.startSec;
+			double noteEndTime = note.endSec;
+			uint8_t notePitch = note.num;
+
+			/** Note Rect */
+			float startXPos = (noteStartTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			float endXPos = (noteEndTime - this->secStart) / (this->secEnd - this->secStart) * width;
+			float noteYPos = ((notePitch + 1) - this->keyTop) / (this->keyBottom - this->keyTop) * height;
+			juce::Rectangle<float> noteRect(
+				startXPos, noteYPos,
+				endXPos - startXPos, (float)this->vItemSize);
+
+			/** Cover Note */
+			g.setColour(noteRemoveColor);
+			g.fillRoundedRectangle(noteRect, noteCornerSize);
 		}
 	}
 }
@@ -527,6 +550,21 @@ void MIDIContentViewer::mouseDown(const juce::MouseEvent& event) {
 			}
 		}
 	}
+	else if (event.mods.isRightButtonDown()) {
+		/** Remove Note */
+		if (Tools::getInstance()->getType() == Tools::Type::Pencil) {
+			auto& pos = event.position;
+
+			auto [type, index] = this->getNoteControllerWithoutEdge(pos);
+
+			if (type == NoteControllerType::Inside) {
+				/** Set Temp */
+				this->noteEditStatus = type;
+				this->noteRemoveIndex = index;
+				this->repaint();
+			}
+		}
+	}
 }
 
 void MIDIContentViewer::mouseUp(const juce::MouseEvent& event) {
@@ -589,6 +627,19 @@ void MIDIContentViewer::mouseUp(const juce::MouseEvent& event) {
 			this->noteEditTime = -1;
 			this->noteDownTime = -1;
 			this->noteEditPitch = 0;
+			this->repaint();
+		}
+	}
+	else if (event.mods.isRightButtonDown()) {
+		if (this->noteEditStatus == NoteControllerType::Inside) {
+			/** Remove Note */
+			if (this->noteRemoveIndex > -1) {
+				this->removeNote(this->noteRemoveIndex);
+			}
+
+			/** Reset Temp */
+			this->noteEditStatus = NoteControllerType::None;
+			this->noteRemoveIndex = -1;
 			this->repaint();
 		}
 	}
@@ -691,6 +742,19 @@ void MIDIContentViewer::mouseDrag(const juce::MouseEvent& event) {
 			this->repaint();
 		}
 	}
+	else if (event.mods.isRightButtonDown()) {
+		/** Remove Note */
+		if (this->noteEditStatus == NoteControllerType::Inside) {
+			auto& pos = event.position;
+
+			auto [type, index] = this->getNoteControllerWithoutEdge(pos);
+
+			/** Set Temp */
+			this->noteRemoveIndex = (type == NoteControllerType::Inside)
+				? index : -1;
+			this->repaint();
+		}
+	}
 }
 
 void MIDIContentViewer::mouseExit(const juce::MouseEvent& event) {
@@ -732,6 +796,7 @@ void MIDIContentViewer::mouseExit(const juce::MouseEvent& event) {
 		this->noteEditTime = -1;
 		this->noteDownTime = -1;
 		this->noteEditPitch = 0;
+		this->noteRemoveIndex = -1;
 		this->repaint();
 	}
 }
@@ -818,6 +883,18 @@ void MIDIContentViewer::setNoteTimeAndPitch(int tempIndex,
 	CoreActions::midiSetNoteTime(
 		this->ref, this->currentMIDITrack,
 		index, startTime, endTime);
+}
+
+void MIDIContentViewer::removeNote(int tempIndex) {
+	/** Get Note */
+	if (tempIndex < 0 || tempIndex >= this->noteRectTempList.size()) { return; }
+	auto [index, rect, channel] = this->noteRectTempList[tempIndex];
+
+	if (index < 0 || index >= this->midiDataTemp.size()) { return; }
+
+	/** Remove Note */
+	CoreActions::midiRemoveNote(
+		this->ref, this->currentMIDITrack, index);
 }
 
 void MIDIContentViewer::updateKeyImageTemp() {
