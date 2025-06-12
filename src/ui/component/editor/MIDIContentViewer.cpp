@@ -850,6 +850,9 @@ void MIDIContentViewer::setNoteStartTime(int tempIndex, double time) {
 	CoreActions::midiSetNoteTime(
 		this->ref, this->currentMIDITrack,
 		index, time, note.endSec);
+
+	/** Update Length Temp */
+	Tools::getInstance()->setLastNoteLength(note.endSec - time);
 }
 
 void MIDIContentViewer::setNoteEndTime(int tempIndex, double time) {
@@ -864,6 +867,9 @@ void MIDIContentViewer::setNoteEndTime(int tempIndex, double time) {
 	CoreActions::midiSetNoteTime(
 		this->ref, this->currentMIDITrack,
 		index, note.startSec, time);
+
+	/** Update Length Temp */
+	Tools::getInstance()->setLastNoteLength(time - note.startSec);
 }
 
 void MIDIContentViewer::setNoteTimeAndPitch(int tempIndex,
